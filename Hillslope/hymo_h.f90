@@ -1,0 +1,515 @@
+module hymo_h
+save
+! WATERSHED / Sub-basin PARAMETERS
+
+!Till: outcommented unnecessary variable
+!2008-06-24
+ 
+! 2007-10-29 Till:
+! added variables for time-variant kfkorr and debug-output
+
+! 2007-08-20 Till:
+! added variable frac_direct_gw
+
+! 2005-07-11 Till:
+! replaced misleading variable names
+
+! Code converted using TO_F90 by Alan Miller
+! Date: 2005-06-30  Time: 13:59:19
+
+! IDs of cells in watershed (changed to model internal number)
+!Allocatable      integer id_subbas_intern(subasin)
+! area of sub-basin (square kilometer)
+!      real area(subasin)
+
+real, allocatable :: area(:)
+
+! GRID CELL PARAMETERS
+! IDs of subbasins (external and internal IDs)
+!Allocatable integer id_subbas_extern(subasin)
+integer, allocatable ::  id_subbas_extern(:),id_subbas_intern(:)
+! number of landscape units within each subbasin
+!Allocatable     integer nbr_lu(subasin)
+integer, allocatable ::  nbr_lu(:)
+! IDs of landscape units in cell
+!Allocatable       integer id_lu_intern(maxsoter,subasin)
+integer, allocatable ::  id_lu_intern(:,:)
+! fraction of LU in subbasin
+!Allocatable       real frac_lu(maxsoter,subasin)
+real, allocatable :: frac_lu(:,:)
+! scaling factor for hydraulic conductivity in infiltration routine
+!Allocatable       real kfkorrc(subasin)
+real, allocatable :: kfkorrc(:)
+! scaled interception capacity (at the scale of cells for interpolated daily rainfall)
+!Allocatable       real intcfc(subasin)
+real, allocatable :: intcfc(:)
+
+
+! Landscape UNIT PARAMETERS
+! IDs of LUs
+!Allocatable      integer id_lu_extern(nsoter)
+integer, allocatable :: id_lu_extern(:)
+! number of terrain components in landscape unit
+!Allocatable      integer nbrterrain(nsoter)
+integer, allocatable ::  nbrterrain(:)
+! IDs of terrain component in landscape unit
+!Allocatable      integer id_terrain_intern(maxterrain,nsoter)
+integer, allocatable ::   id_terrain_intern(:,:)
+! position of landscape unit in landscape
+
+!!Allocatable      integer possoter(nsoter)					!Till: is this used at all?
+!integer, allocatable ::   possoter(:)
+
+! hydr. conductivity of bedrock in landscape unit
+!Allocatable      real kfsu(nsoter)
+real, allocatable :: kfsu(:)
+! mean slope length in landscape unit
+!Allocatable      real slength(nsoter)
+real, allocatable ::  slength(:)
+! mean maximum depth of soil zone in SU
+!Allocatable      real meandep(nsoter)
+real, allocatable ::   meandep(:)
+! maximum depth of alluvial soil zone
+!Allocatable      real maxdep(nsoter)
+real, allocatable ::    maxdep(:)
+! depth of river bed below terrain surface (mm)
+!Allocatable      real riverbed(nsoter)
+real, allocatable ::    riverbed(:)
+! flag for landscape unit with groundwater table
+!Allocatable      integer gw_flag(nsoter)
+integer, allocatable ::   gw_flag(:)
+! initial depth of groundwater below surface (mm)
+!Allocatable      real gw_dist(nsoter)
+real, allocatable ::     gw_dist(:)
+! storage coefficient for groundwater outflow (days)
+!Allocatable      real gw_delay(nsoter)
+real, allocatable ::      gw_delay(:)
+! ordered positon of terrain component in landscape unit
+! (highest first)
+!Allocatable      integer orderterrain(maxterrain,nsoter)
+integer, allocatable :: orderterrain(:,:)
+
+! TERRAIN COMPONENT PARAMETERS
+! IDs of terrain components
+!Allocatable      integer id_terrain_extern(nterrain)
+integer, allocatable :: id_terrain_extern(:)
+! slope of terrain component (%)
+!Allocatable     real slope(nterrain)
+real, allocatable :: slope(:)
+! fraction of terrain component in landscape unit
+!Allocatable      real fracterrain(nterrain)
+real, allocatable ::  fracterrain(:)
+! positon of terrain component in landscape unit
+!Allocatable      real posterrain(nterrain)
+real, allocatable ::  posterrain(:)
+! number of Soil-Vegetation components (SVCs) in each TC of each Sub-basin and landscape Unit
+!Allocatable      integer nbr_svc(nmunsutc)
+integer, allocatable :: nbr_svc(:)
+! IDs of soils of each SVC in each TC of each Sub-basin and landscape Unit
+!Allocatable      integer id_soil_intern(maxsoil,nmunsutc)
+integer, allocatable :: id_soil_intern(:,:)
+! IDs of landuse units of each SVC in each TC of each Sub-basin and landscape Unit
+!Allocatable      integer id_veg_intern(maxsoil,nmunsutc)
+integer, allocatable ::  id_veg_intern(:,:)
+! fractions of SVCs in each TC
+!Allocatable      real frac_scv(maxsoil,nmunsutc)
+real, allocatable :: frac_svc(:,:)
+! fraction of impermeable (rock) area in each TC
+!Allocatable      real rocky(nmunsutc)
+real, allocatable :: rocky(:)
+! IDs of all Subbasin-LU-TC-combinations
+!Allocatable      real tcallid(subasin,maxsoter,maxterrain)
+integer, allocatable :: tcallid(:,:,:)
+
+! SOIL-VEGETATION COMPONENT PARAMETERS
+! Till thickness of horizons (lowest horizon may be different from that of profiles)
+!Allocatable      real horiz_thickness(nmunsutc,maxsoil,maxhori)
+real, allocatable :: horiz_thickness(:,:,:)
+! lowest horizon to which roots go down
+!Allocatable      integer svcrooth(nmunsutc,maxsoil)
+integer, allocatable ::  svcrooth(:,:)
+! flag indicating bedrock or no bedrock (1/0)
+!Allocatable      integer svcbedr(nmunsutc,maxsoil)
+integer, allocatable ::   svcbedr(:,:)
+! water content at permanent wilting point (VOL%) (variable depending on
+! plant characteristics, for each Soil-Vegetation unit)
+!Allocatable      real pwpsc(nmunsutc,maxsoil,maxhori)
+real, allocatable ::  pwpsc(:,:,:)
+! distribution of saturated soil water among horizons
+!Allocatable      real horiths(nmunsutc,maxsoil,maxhori)
+real, allocatable ::  horiths(:,:,:)
+! saturated water content integrated for profile (mm)
+!Allocatable      real thsprof(nmunsutc,maxsoil)
+real, allocatable ::   thsprof(:,:)
+! saturated soil water content distribution (mm)
+!Allocatable      real tctheta_s(5,2,nmunsutc,maxsoil)
+real, allocatable ::   tctheta_s(:,:,:,:)
+
+! SOIL PARAMETERS
+! IDs of soil components
+!Allocatable      integer id_soil_extern(nsoil)
+integer, allocatable :: id_soil_extern(:)
+! number of horizons in soil
+!Allocatable      integer nbrhori(nsoil)
+integer, allocatable ::nbrhori(:)
+! residual soil water content (VOL%)
+!Allocatable      real thetar(nsoil,maxhori)
+real, allocatable :: thetar(:,:)
+! water content at permanent wilting point (VOL fraction) (standard 15000 cm suction)
+!Allocatable      real soilpwp(nsoil,maxhori)
+real, allocatable :: soilpwp(:,:)
+! saturated soil water content (VOL%)
+!Allocatable      real thetas(nsoil,maxhori)
+real, allocatable ::  thetas(:,:)
+! usable field capacity (nFK) (VOL%)
+!Allocatable      real soilnfk(nsoil,maxhori)
+real, allocatable ::   soilnfk(:,:)
+! 
+! field capacity (FK) (VOL%)
+!two FC values Saugspannung 63 hPa (also pF=1.8, FK1.8), and 316hPa (pF=2.6, FK2.5)
+! within the WAVES-Project, it was not clear which value would be more appropriate,
+! so both were tested.
+!Allocatable      real soilfc(nsoil,maxhori)
+real, allocatable :: soilfc(:,:)
+! field capacity (FK63) (VOL%)
+!Allocatable      real soilfc63(nsoil,maxhori)
+real, allocatable ::  soilfc63(:,:)
+
+! does bedrock occur below deepest horizon of profile ? (0/1)
+!Allocatable      integer bedrock(nsoil)
+integer, allocatable :: bedrock(:)
+! is this an alluvial soil ? (0/1)
+integer, allocatable :: alluvial_flag(:)
+! saturated hydraulic conductivity (mm/day)
+!Allocatable      real k_sat(nsoil,maxhori)
+real, allocatable :: k_sat(:,:)
+! suction at the wetting front
+!Allocatable      real saug(nsoil,maxhori)
+real, allocatable ::  saug(:,:)
+! Brooks-Corey pore-size index (-) (transformed into Van-Genuchten m-parameter)
+!Allocatable      real poresz(nsoil,maxhori)
+real, allocatable ::   poresz(:,:)
+! Van-Genuchten n-parameter ( = pore-size index +1.) (-)
+!Allocatable      real porem(nsoil,maxhori)
+real, allocatable ::porem(:,:)
+! Bubbling pressure (cm)
+!Allocatable      real bubble(nsoil,maxhori)
+real, allocatable ::bubble(:,:)
+! Fraction of coarse fragments (-)
+!Allocatable      real coarse(nsoil,maxhori)
+real, allocatable :: coarse(:,:)
+! Flag for soil structure (-)
+!Allocatable      real shrink(nsoil,maxhori)
+real, allocatable ::  shrink(:,:)
+
+
+!-------------------------------------------------------
+! VEGETATION PARAMETER
+! ID of vegetation unit
+!Allocatable      integer id_veg_extern(nveg)
+integer, allocatable :: id_veg_extern(:)
+! height (m) (monthly)
+!Allocatable       real height(nveg,4)
+real, allocatable ::height(:,:)
+! root depth (mm) (monthly)
+!Allocatable       real rootdep(nveg,4)
+real, allocatable :: rootdep(:,:)
+! leaf area index (-) (monthly)
+!Allocatable       real lai(nveg,4)
+real, allocatable :: lai(:,:)
+! albedo (-) (monthly)
+!Allocatable       real alb(nveg,4)
+real, allocatable ::  alb(:,:)
+! stomata resistance without water stress (s/m)
+!Allocatable       real resist(nveg)
+real, allocatable ::   resist(:)
+! suction threshold for water stress effect on resistance
+! (begin of stomata closure)
+!Allocatable       real wstressmin(nveg)
+real, allocatable ::    wstressmin(:)
+! suction threshold for water stress effect on resistance
+! (total closure of stomata - wilting point)
+!Allocatable       real wstressmax(nveg)
+real, allocatable ::    wstressmax(:)
+! four key points in time for temporal distribution of vegetation
+! characteristics within year
+! (begin/end of rainy period)
+! specific for each Sub-basin and year
+!      integer period(4,subasin,200)
+integer, pointer :: period(:,:)	! four key nodes in time for temporal vegetastion dynamics within year (index: subbasin,(1:4)*simulation_year,)
+
+
+! daily mean LAI (m²/m²)
+!Allocatable      real laimun(366,subasin)
+real, allocatable :: laimun (:,:)
+!Allocatable      real lai_c(366,subasin)
+REAL, allocatable :: laisu(:)
+!Allocatable      real laitc(nmunsutc)
+real, allocatable ::    laitc(:)
+
+!-------------------------------------------------------
+! WATER BALANCE VARIABLES
+
+! WATER BALANCE VARIABLES      MUNICIP/WATERSHED SCALE
+! soil moisture (mm)
+!Allocatable      real soilm(366,subasin)
+real, allocatable ::  soilm(:,:)
+! soil moisture first meter (mm)
+!Allocatable       real soilmroot(366,subasin)
+real, allocatable ::  soilmroot(:,:)
+! daily actual evapotranspiration (mm/day)
+!Allocatable       real aet(366,subasin)
+real, allocatable ::  aet(:,:)
+! daily soil evaporation (mm/day)
+!Allocatable       real soilet(366,subasin)
+real, allocatable :: soilet(:,:)
+! daily interception storage evapotranspiration (mm/day)
+!Allocatable       real intc(366,subasin)
+real, allocatable ::  intc(:,:)
+! total surface runoff (m³/d)
+!Allocatable       real ovflow(366,subasin)
+real, allocatable ::  ovflow(:,:)
+! horton overland flow (m³/d)
+!Allocatable      real hortflow(366,subasin)
+real, allocatable :: hortflow(:,:)
+! total subsurface runoff (m³/d)
+!Allocatable       real subflow(366,subasin)
+real, allocatable ::  subflow(:,:)
+
+real, allocatable ::   deep_gw_discharge(:,:)	!groundwater discharge into river (366,subasin)
+real, allocatable ::   gw_loss(:,:)				!ground water loss (deep percolation in LUs with no ground water flag)(366,subasin)
+
+
+! groundwater recharge (percolation below root zone)
+!Allocatable       real gw_recharge(366,subasin)
+real, allocatable ::   gw_recharge(:,:)
+!! deep groundwater recharge (loss from model / into lin. GW storage)
+!!Allocatable       real deepgw_r(366,subasin)
+!real, allocatable ::    deepgw_r(:,:)
+! river flow before acudes (m3)
+!Allocatable       real qgen(366,subasin)
+real, allocatable :: qgen(:,:)
+!Till: contribution of each subbasin to the river in m3/s for each day (366,subasin)
+real, allocatable ::  water_subbasin(:,:)
+!Till: contribution of each subbasin to the river in m3/s for each day and timestep(366,nt,subasin)
+real, allocatable ::  water_subbasin_t(:,:,:)
+
+! losses in river network by evaporation
+!Allocatable       real qloss(366,subasin)
+real, allocatable ::   qloss(:,:)
+! fraction of saturated area (-)
+!Allocatable       real sofarea(366,subasin)
+real, allocatable ::  sofarea(:,:)
+
+!REAL :: seaflow(366)	! river discharge to ocean (m3)	!Till: never used
+! water availability
+!Allocatable       real avail_all(366,subasin),avail_ac(366,subasin)
+real, allocatable :: avail_all(:,:), avail_ac(:,:)
+!Till: pre-specified outflow of subbasins (optionally read from file) [m³/s]
+real, allocatable ::  pre_subbas_outflow(:,:,:)
+!Till: holds corresponding columns of input files to be related to internal numbering of subbasins 
+integer, pointer :: corr_column_pre_subbas_outflow(:)	
+
+
+
+! WATER BALANCE VARIABLES      LANDSCAPE UNIT SCALE
+! soil moisture (mm)
+REAL, allocatable  :: soilmsu(:)
+! soil moisture first meter (mm)
+REAL, allocatable  :: soilmrootsu(:)
+! daily actual evapotranspiration (mm/day)
+REAL, allocatable  :: aetsu(:)
+! daily soil evaporation (mm/day)
+REAL, allocatable  :: soiletsu(:)
+! daily interception storage evaporation (mm/day)
+REAL, allocatable  :: intcsu(:)
+! total surface runoff (m³/d) for all LUs of current subbasin
+REAL, allocatable  :: qsurf_lu(:)
+! total subsurface runoff (m³/d) for all LUs of current subbasin
+REAL, allocatable  :: qsub_lu(:)
+! groundwater recharge (percolation from root zone)
+REAL, allocatable  :: gwrsu(:)
+! deep groundwater recharge (loss from model / into lin. GW storage)
+REAL, allocatable  :: deepgwrsu(:)
+! horton overland flow
+REAL, allocatable  :: hortsu(:)
+! actual deep groundwater storage
+!Allocatable       real deepgw(subasin,:)
+real, allocatable ::    deepgw(:,:)
+
+
+! WATER BALANCE VARIABLES      TERRAIN COMPONENT SCALE
+! average soil moisture of every terrain component (mm)
+!Allocatable      real soilwater(366,nmunsutc)
+real, allocatable :: soilwater(:,:)
+! soil moisture in every horizon of each SVC in each TC in each LU in each subbasin (mm)
+!Allocatable      real horithact(nmunsutc,maxsoil,maxhori)
+real, allocatable ::  horithact(:,:,:)
+! lateral subsurface runoff to be redistributed between SVCs (m**3)
+!Allocatable      real latred(nmunsutc,maxhori*3)
+real, allocatable ::   latred(:,:)
+! interception storage of each SVC in each TC (mm)
+!Allocatable      real intercept(nmunsutc,maxsoil)
+real, allocatable ::   intercept(:,:)
+! interception evaporation daily, proportionally distributed among hours (mm)
+!AllocatableREAL :: intcept_mem(maxterrain,maxsoil,24)
+real, allocatable :: intcept_mem (:,:,:)
+! reduction of evaporation due to interception evaporation for hourly version (-)
+!Allocatalbe REAL :: aet_red_mem(maxterrain,maxsoil)
+real, allocatable :: aet_red_mem(:,:)
+
+! saturated fraction of each SVC in each TC (-)
+!Allocatable      real frac_sat(nmunsutc,maxsoil)
+real, allocatable ::   frac_sat(:,:)
+! average soil moisture of each terrain component (mm)
+!Allocatable      real soilwtc(nmunsutc)
+real, allocatable :: soilwtc(:)
+! average real evapotranspiration of every terrain component (mm)
+!Allocatable      real aettc(nmunsutc)
+real, allocatable :: aettc(:)
+! average soil evaporation of each terrain component (mm)
+!Allocatable      real soilettc(nmunsutc)
+real, allocatable :: soilettc(:)
+! average interception evaporation of every terrain component (mm)
+!Allocatable      real intctc(nmunsutc)
+real, allocatable :: intctc(:)
+! horton overland flow
+!Allocatable      real horttc(nmunsutc)
+real, allocatable :: horttc(:)
+! groundwater recharge (percolation)
+!Allocatable      real gwrtc(nmunsutc)
+real, allocatable ::  gwrtc(:)
+! deep groundwater recharge
+!Allocatable      real deepgwrtc(nmunsutc)
+real, allocatable ::   deepgwrtc(:)
+! actual transpiration of each SVC (only plants)
+REAL , allocatable :: aet1sc(:,:)
+! soil evaporation of each SVC
+REAL , allocatable :: soilet1sc(:,:)
+
+
+!Conrad/Till: TC-wise output of soil moisture
+real, allocatable :: meandepth_tc(:,:,:)!mean soil depths of TC instances
+real, allocatable :: theta_tc(:,:)		!theta of tcs [%]	
+real, allocatable :: surfflow_tc(:,:,:)		!surface runoff of TCs [mm]
+real, allocatable :: sedout_tc(:,:,:)		!sediment output of TCs [t/km2]
+
+
+!Till: these are all output variables that are currently not used
+!! horton overland flow of each SVC
+!REAL , allocatable :: hortsc(:,:)
+!! saturated area of each SVC, relative to total TC area
+!REAL, allocatable  :: sat_area_of_sc(:,:)
+!! saturation excess overland flow of each SVC
+!REAL , allocatable :: sat_xs_overland_flow_sc(:,:)
+!! horton overland flow 2 of each SVC
+!REAL , allocatable :: hort2sc(:,:)
+!! groundwater recharge in each SVC
+!REAL , allocatable :: gwrsc(:,:)
+!! groundwater recharge in each SVC
+!REAL , allocatable :: deepgwrsc(:,:)
+!! soil moisture each SVC
+!REAL, allocatable  :: thsc(:,:,:)
+!! canopy resistance of each SVC
+!REAL, allocatable :: resistsc(:,:)
+!! actual transpiration of each SVC (only plants)
+!REAL , allocatable :: aetsc(:,:)
+!! total evapotranspiration of each SVC
+!REAL , allocatable :: aettotsc(:,:)
+!! interception evaporation of each SVC
+!REAL , allocatable :: intetsc(:,:)
+!! soil evaporation of each SVC
+!REAL , allocatable :: soiletsc(:,:)
+!! actual available field capacity of each SVC
+!REAL , allocatable :: nfksc(:,:)
+
+
+
+! AGGREGATED VALUES IN TIME
+! monthly average dummy array
+!      real mondummy(12,subasin)
+! monthly average soil water content (mm)
+!      real monsoilw(12,subasin)
+! annual average soil water content (mm)
+!      real annsoilw(subasin)
+! monthly average soil water content (mm)
+!      real monsoilwroot(12,subasin)
+! annual average soil water content (mm)
+!      real annsoilwroot(subasin)
+! monthly average real evapotranspiration (mm)
+!      real monatp(12,subasin)
+! annual average real evapotranspiration (mm)
+!      real annatp(subasin)
+! annual average soil evaporation (mm)
+!      real annsoilet(subasin)
+! monthly average soil evaporation (mm)
+!      real monsoilet(12,subasin)
+! annual average LAI
+!      real annlai(subasin)
+! monthly average LAI
+!      real monlai(12,subasin)
+! monthly average interception (mm)
+!      real monintc(12,subasin)
+! annual average interception (mm)
+!      real annintc(subasin)
+! monthly average groundwater recharge (mm)
+!      real mongwr(12,subasin)
+! annual average groundwater recharge (mm)
+!      real anngwr(subasin)
+! monthly average deep groundwater recharge (mm)
+!      real mondeepgwr(12,subasin)
+! annual average deep groundwater recharge (mm)
+!      real anndeepgwr(subasin)
+! monthly average river runoff (m3/s) (before acudes)
+!      real monqgen(12,subasin)
+! annual average river runoff (m3/s) (before acudes)
+!      real annqgen(subasin)
+! monthly accumulated retention in reservoirs (m3)
+!      real monret(12,subasin)
+! annualy accumulated retention in reservoirs (m3)
+!      real annret(subasin)
+! annual horton overland flow (mm)
+!      real annhort(subasin)
+! annual subsurface runoff (mm)
+!      real annsublat(subasin)
+
+!      real aveatp(subasin),aveintc(subasin),avesoilw(subasin)
+!      real avesoilwroot(subasin)
+!      real avegwr(subasin),aveqgen(subasin),avesoilet(subasin)
+!      real avelai(subasin),avehort(subasin),avesublat(subasin)
+!      real avedeepgwr(subasin)
+
+
+! AGGREGATED VALUES IN SPACE
+! data at mesoregion and state level
+!      real mesosoilw(2)  ,statesoilw(2)
+!      real mesosoilwroot(2)  ,statesoilwroot(2)
+!      real mesoatp(2)    ,stateatp(2)
+!      real mesolai(2)    ,statelai(2)
+!      real mesosoilet(2) ,statesoilet(2)
+!      real mesointc(2)   ,stateintc(2)
+!      real mesogwr(2)    ,stategwr(2)
+!      real mesodeepgwr(2),statedeepgwr(2)
+!      real mesoqgen(2) ,stateqgen(2)
+
+
+
+! CALIBRATION PARAMETER
+! calibration factor of hydraulic conductivity on daily basis
+REAL :: kfkorr
+REAL :: kfkorr_a,kfkorr_b	!coefficients for time-variant kfkorr (kfkorr=kfkorr*(kfkorr_a*1/daily_precip+kfkorr_b)
+REAL :: kfkorr_day			!kfkorr for current subbasin and day
+
+! interception capacity per unit LAI (mm)
+REAL :: intcf
+! type of interception routine (simple or modified bucket approach)
+INTEGER :: dointc
+
+! fraction of ground water discharge routed directly into river (instead of subsurface flow into lowermost TC)
+REAL 	:: frac_direct_gw		
+
+
+real, allocatable :: debug_out(:)		!for debugging purposes !remove
+real, allocatable :: debug_out2(:,:)		!for debugging purposes !remove
+
+end module hymo_h
