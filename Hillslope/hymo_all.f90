@@ -241,7 +241,7 @@ IF (STATUS == 0) THEN	!Till: initialisation before first run
 	call init_model_state		!load initital conditions from file
   else
 	!** Initialise soil moisture of each horizon (horithact)
-	!   and soil moisture of each terrain component (soilwater) with fixed values
+	!   and soil moisture of each terrain component (soilwater) with fixed values ii: put this into init_soil_conds
 	DO sb_counter=1,subasin
 		DO lu_counter=1,nbr_lu(sb_counter)
 		  i_lu=id_lu_intern(lu_counter,sb_counter)

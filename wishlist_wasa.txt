@@ -3,6 +3,7 @@ Wishlist WASA-SED - proposed features and improvements
 Please add the proposer's name in brackets - in case clarification is needed. 
 
 responsibility all:
+- improve performance indicated with "ii" in the source code
 - abschaltbare Ausgabedateien (siehe outfiles.dat)(optimierte Geschwindigkeit) (Till)
 - Tab separated output in all output files (see output of hillslope routines)(Till)
 - flexible input-files: Reihenfolge variierbar  und durch Schlüsselworte gekennzeichnet(Till)

@@ -1,6 +1,9 @@
 module model_state_io
 !contains subroutines for saving and laoding model state (soil water, ground water, interception)
 
+!Till: save summary on storage contents on start of model in storage.stats_start
+!2009-03-27
+
 !Till: fixed more init problems with dummy basins (prespecified outflow)
 !2008-10-09
 
@@ -34,16 +37,16 @@ subroutine init_model_state		!load initial conditions
 		call init_soil_conds('',default_rel_sat)	!Till: load initial status of soil moisture
 		call init_gw_conds('',default_gw_storage)	!Till: load initial status of gw storage
 	end if
-
+	CALL save_all_conds('','','',trim(pfadn)//'storage.stats_start')		!Till: save only summary on initial storage
 end subroutine init_model_state
 
 subroutine save_model_state		!save model state variables
-	call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat')	!Till: save status 
+	call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',trim(pfadn)//'storage.stats')	!Till: save status 
 end subroutine save_model_state
 
 		  
 
-subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file)
+subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, summary_file)
 !store current conditions of soil moisture, ground water and interception in the specified files
 	use hymo_h
 	use params_h
@@ -52,7 +55,8 @@ subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file)
 
 	implicit none
 
-	character(len=*),intent(in):: soil_conds_file, gw_conds_file, ic_conds_file		!files to save to
+	character(len=*),intent(in):: soil_conds_file, gw_conds_file, ic_conds_file,summary_file		!files to save to
+	
 	INTEGER :: i,j,sb_counter,lu_counter,tc_counter,svc_counter,h	! counters
 	INTEGER :: i_subbas,i_lu,id_tc_type,i_svc,i_soil,i_veg		! ids of components in work
 	INTEGER :: tcid_instance	!(internal) id of TC-instance (unique subbas-LU-TC-combination)
@@ -101,8 +105,8 @@ subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file)
 			if (gw_file/=0) then
 				WRITE(gw_file,'(2(I0,A1),F8.2,A1,F12.1)') id_subbas_extern(sb_counter), char(9),id_lu_extern(i_lu), char(9),&
 					deepgw(sb_counter,lu_counter)/lu_area*1e3, char(9),area(sb_counter)*frac_lu(lu_counter,sb_counter)*1e6	!tab separated output
-				total_storage_gw=total_storage_gw+deepgw(sb_counter,lu_counter) !sum up total storage
 			end if
+			total_storage_gw=total_storage_gw+deepgw(sb_counter,lu_counter) !sum up total storage
 
 			DO tc_counter=1,nbrterrain(i_lu)
 				tcid_instance=tcallid(sb_counter,lu_counter,tc_counter)	!id of TC instance
@@ -121,18 +125,19 @@ subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file)
 							WRITE(intercept_file,'(4(I0,A1),F8.2,A1,F12.1)') id_subbas_extern(sb_counter), char(9),id_lu_extern(i_lu),char(9),&
 								id_terrain_extern(id_tc_type), char(9),id_svc_extern(i_svc), char(9),intercept(tcid_instance,svc_counter),&
 								char(9),	svc_area	!tab separated output
-							total_storage_intercept=total_storage_intercept+intercept(tcid_instance,svc_counter)*1e-3*svc_area !sum up total storage
 					end if
+					total_storage_intercept=total_storage_intercept+intercept(tcid_instance,svc_counter)*1e-3*svc_area !sum up total storage
 					
-					if (soil_file/=0) then
-						DO h=1,nbrhori(i_soil)
+
+					DO h=1,nbrhori(i_soil)
+						if (soil_file/=0) then
 							WRITE(soil_file,'(5(I0,A1),F8.2,A1,F12.1)') id_subbas_extern(sb_counter),&
 								char(9),id_lu_extern(i_lu), char(9),id_terrain_extern(id_tc_type),&
 								char(9),id_svc_extern(i_svc), char(9),h, char(9),horithact(tcid_instance,svc_counter,h), &
 								char(9),	svc_area	!tab separated output
-							total_storage_soil=total_storage_soil+horithact(tcid_instance,svc_counter,h)*1e-3*svc_area !sum up total storage
-						END DO	!loop horizons
-					end if
+						end if
+						total_storage_soil=total_storage_soil+horithact(tcid_instance,svc_counter,h)*1e-3*svc_area !sum up total storage
+					END DO	!loop horizons
 				END DO	!loop SVC
 			END DO	!loop TCs
 		END DO	!loop LUs
@@ -140,7 +145,8 @@ subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file)
 	CLOSE(soil_file, iostat=i_lu)	!close output files
 	CLOSE(gw_file, iostat=i_lu)
 
-	OPEN(11,FILE=trim(pfadn)//'storage.stats', STATUS='replace')		!write to summary file
+	
+	OPEN(11,FILE=summary_file, STATUS='replace')		!write to summary file
 		WRITE(11,*)'total water storage in catchment after model run [m3]'
 		WRITE(11,*)'soil_storage', char(9),total_storage_soil
 		WRITE(11,*)'gw_storage', char(9),total_storage_gw

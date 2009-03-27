@@ -4,6 +4,9 @@ SUBROUTINE soilwat(hh,day,month,i_subbas2,i_ce,i_lu,oc2,tcid_instance2,id_tc_typ
         tcsoilet,tcintc,prec,precday,prechall2,petday,  &
         tcarea2,bal, rootd_act,height_act,lai_act,alb_act,sed_in_tc,sed_out_tc)
 
+!Till: fixed bug in iterations of infiltration that probably was introduce in the changes of 2008-07-28 (produced waterbalance mismatch in certain cases) 
+!2009-03-27
+
 !Till: use projected slope length for USLE (was real slope length)
 !2008-10-14
 
@@ -1002,7 +1005,7 @@ aetred(:)=0.
 etpmax(:)=0.
 
 !  initial interception storage volume
-tempx=sum(intercept(tcid_instance2,1:nbr_svc(tcid_instance2))*frac_svc(1:nbr_svc(tcid_instance2),tcid_instance2))	!Till: sum up amount of intercepted water in the entire TC
+tempx=sum(intercept(tcid_instance2,1:nbr_svc(tcid_instance2))*frac_svc(1:nbr_svc(tcid_instance2),tcid_instance2))	!Till: sum up amount of intercepted water in the entire TC [mm]
 
 
 ! only rock surface
@@ -1130,10 +1133,10 @@ END IF	!Till: end (if whole TC consists not of rock)
 
 !  final interception storage volume
 
-temp3=sum(intercept(tcid_instance2,1:nbr_svc(tcid_instance2))*frac_svc(1:nbr_svc(tcid_instance2),tcid_instance2)) !Till: sum up how much water is in the interception storage of the TC
+temp3=sum(intercept(tcid_instance2,1:nbr_svc(tcid_instance2))*frac_svc(1:nbr_svc(tcid_instance2),tcid_instance2)) !Till: sum up how much water is in the interception storage of the TC [mm]
 
 
-watbal=watbal-(temp3-tempx)							!Till: modify the water balance by the difference between storage before and after calculation
+watbal=watbal-(temp3-tempx)							!Till: modify the water balance by the difference between storage before and after calculation [mm]
 
 
 
@@ -1157,8 +1160,8 @@ watbal=watbal-(temp3-tempx)							!Till: modify the water balance by the differe
 !		- 
 
 
-INPUT=prec+q_surf_in/(tcarea2*1.e3)		!Till: precipitation and overland flow from higher TCs
-watbal=watbal+INPUT
+INPUT=prec+q_surf_in/(tcarea2*1.e3)		!Till: precipitation and overland flow from higher TCs [mm]
+watbal=watbal+INPUT	![mm]
 
 
 !** .....................................................................
@@ -1362,7 +1365,7 @@ DO n_iter=1,2
     IF (n_iter/=1) THEN !Till: second iteration
 		inputrem(i)=inputrem(i)+qmerk(i)
     END IF
-    INPUT=inputrem(i)/(tcarea2*1.e3*frac_svc(i,tcid_instance2))	!Till: converting remaining water input to water height
+    INPUT=inputrem(i)/(tcarea2*1.e3*frac_svc(i,tcid_instance2))	!Till: converting remaining water input to water height [mm]
 
 
 	!for debugging - remove
@@ -1417,10 +1420,10 @@ DO n_iter=1,2
         
 !   soil component is partly or not saturated
       ELSE
-        zfrac(i)=frac_svc(i,tcid_instance2)-frac_sat(tcid_instance2,i)
+        zfrac(i)=frac_svc(i,tcid_instance2)-frac_sat(tcid_instance2,i) !Till: fraction of non-saturation of current SVC 
         h=1
         DO WHILE (h <= nbrhori(soilid))	!ii use DO loop instead
-          na(i,h)=thetas(soilid,h)- horithact(tcid_instance2,i,h)/horiz_thickness(tcid_instance2,i,h)
+          na(i,h)=thetas(soilid,h)- horithact(tcid_instance2,i,h)/horiz_thickness(tcid_instance2,i,h) !Till: compute refillable porosity for all horizons [-]
 !   horizon is saturated
           IF (na(i,h) <= 0.0001) THEN
             na(i,h)=0.0
@@ -1462,7 +1465,7 @@ DO n_iter=1,2
 !   repeat tests for all horizons until one with inf excess occurs
         h=1
         kftemp=k_sat(soilid,1)/dt_per_day*(1.-coarse(soilid,1))/  &
-            (kfkorrc(i_ce)*kfkorr_day)					!Till: compute kf in topmost horizon of current SVC
+            (kfkorrc(i_ce)*kfkorr_day)					!Till: compute kf in topmost horizon of current SVC ii: constant, compute only once for all soils
         DO WHILE (horton == 0 .AND. h <= nbrhori(soilid)  &		!Till: do test for all unsaturated horizons
               .AND. h /= hsat(i))
           
@@ -1472,16 +1475,16 @@ DO n_iter=1,2
 !   refillable porosity of higher horizons
           
           IF (h > 1) THEN
-            fillup=fillup+na(i,h-1)*horiz_thickness(tcid_instance2,i,h-1)
-            tshup=tshup+(na(i,h-1)*horiz_thickness(tcid_instance2,i,h-1))/INPUT
+            fillup=fillup+na(i,h-1)*horiz_thickness(tcid_instance2,i,h-1)		!Till: reduction of input due to refilling of the horizon above [mm]
+            tshup=tshup+(na(i,h-1)*horiz_thickness(tcid_instance2,i,h-1))/INPUT !Till: relative reduction of input ? [-]
           END IF
           
 
           IF (INPUT > fillup .AND. tshup < 1.) THEN
             
             kftemp=MIN(kftemp,k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))/  &
-                (kfkorrc(i_ce)*kfkorr_day))					!Till: compute kf in current horizon of current SVC
-            IF (INPUT > kftemp) THEN
+                (kfkorrc(i_ce)*kfkorr_day))					!Till: compute kf in current horizon of current SVC ii: constant, compute only once for all soils
+            IF (INPUT > kftemp) THEN						!Till: why compared to INPUT, not INPUT-fillup?
               
 !   effective refillable porosity in micropores is smaller then na
 !   calculated above when taking into account shrinkages and makropores
@@ -1523,7 +1526,7 @@ DO n_iter=1,2
                   ERR=1.0
                   infalt=infsatt+temp3*INPUT/2.0
                   DO WHILE ((it < 12) .AND. (ERR > 0.05))
-                    infh=kftemp*temp3 + temp4* LOG((infalt+temp4)/  &
+                    infh=kftemp*temp3 + temp4* LOG((infalt+temp4)/  &	
                         (infsatt+temp4))+infsatt
                     ERR=ABS(infh-infalt)
                     infalt=infh
@@ -1539,8 +1542,8 @@ DO n_iter=1,2
 !             infh=infall-fillup
                   
                   infh=MIN(infh,INPUT)
-                  tempx=fillup+namic*horiz_thickness(tcid_instance2,i,h)
-                  IF (infh > tempx) THEN
+                  tempx=fillup+namic*horiz_thickness(tcid_instance2,i,h)	!Till: maximum refillable porosity until current horizon [mm]
+                  IF (infh > tempx) THEN	!Till: maximum refillable porosity should not be exceeded ii use max()
                     infh=tempx
                   END IF
                   
@@ -1606,53 +1609,49 @@ DO n_iter=1,2
 !  micro- and macropores -> surface runoff
                   IF (remain > 0.) THEN
 					IF (n_iter==1) THEN !Till first iteration
-								DO j=1,nbr_svc(tcid_instance2)
-								  IF (j /= i) THEN
-									temp3=remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)*frac_svc(j,tcid_instance2)
-									qmerk(j)=qmerk(j)+temp3
-									qmerk2(i)=qmerk2(i)+temp3
-								  END IF
-								END DO
-
+						DO j=1,nbr_svc(tcid_instance2)
+						  IF (j /= i) THEN
+							temp3=remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)*frac_svc(j,tcid_instance2)
+							qmerk(j)=qmerk(j)+temp3	!Till: assign this part of the excess runoff to other SVCs for the next iteration [m³]
+							qmerk2(i)=qmerk2(i)+temp3 !Till: sum up the redistributed amount [m³]
+						  END IF
+						END DO
 					ELSE !Till: second iteration
 						IF (dolatsc) THEN
-										q_surf_out=q_surf_out+remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i)
-										hortf=hortf+(remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i))
-					!only for output
-					!                    hortsc(day,i)=hortsc(day,i)+(remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i))/(tcarea2*1.e3*frac_svc(i,tcid_instance2))
-              
-									  ELSE
-										q_surf_out=q_surf_out+remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)
-										hortf=hortf+remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)
-										!only for output
-										!hortsc(day,i)=hortsc(day,i)+remain
-									  END IF
-									END IF
-                
-					!   updating soil moisture distribution among horizons
-					!   within soil class
-                
-					!   horizons above inf.excess horizon
-									DO j=1,h
-									  tempx=MIN(na(i,j)*horiz_thickness(tcid_instance2,i,j),infh)
-									  horithact(tcid_instance2,i,j)=horithact(tcid_instance2,i,j)+tempx
+							q_surf_out=q_surf_out+remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i)
+							hortf=hortf+(remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i))
+							!only for output
+							!hortsc(day,i)=hortsc(day,i)+(remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i))/(tcarea2*1.e3*frac_svc(i,tcid_instance2))
+						ELSE
+							q_surf_out=q_surf_out+remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)
+							hortf=hortf+remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)
+							!only for output
+							!hortsc(day,i)=hortsc(day,i)+remain
+						END IF
+						
+            
+						!   updating soil moisture distribution among horizons
+						!   within soil class
+            
+						!   horizons above inf.excess horizon
+						DO j=1,h
+						  tempx=MIN(na(i,j)*horiz_thickness(tcid_instance2,i,j),infh)
+						  horithact(tcid_instance2,i,j)=horithact(tcid_instance2,i,j)+tempx
 
-									  infh=infh-tempx
-									END DO
-									IF (infh > 0.001) THEN
-									  WRITE(*,*) 'infall zu gross,tcod2,i',tcid_instance2,i,infh
-									  call pause1
-									END IF
-                
-					!   all horizons if macropore infiltration occured
-									IF (sum(infmac(:)) > 0.) THEN
-									  DO j=1,nbrhori(soilid)
-										horithact(tcid_instance2,i,j)= horithact(tcid_instance2,i,j)+infmac(j)
-									
-									  END DO
+						  infh=infh-tempx
+						END DO
+						IF (infh > 0.001) THEN
+						  WRITE(*,*) 'infall zu gross,tcod2,i',tcid_instance2,i,infh
+						  call pause1
+						END IF
+
+						!   all horizons if macropore infiltration occured
+						IF (sum(infmac(:)) > 0.) THEN
+						  DO j=1,nbrhori(soilid)
+							horithact(tcid_instance2,i,j)= horithact(tcid_instance2,i,j)+infmac(j)
+						  END DO
+						END IF
 					END IF !Till: branching between iterations
-
-
                   END IF
                   
 !**  ts is larger than time step -> no saturation excess in this horizon
@@ -2415,7 +2414,7 @@ DO i=1,nbr_svc(tcid_instance2)
   
   DO h=1,nbrhori(soilid)
     
-    thfree(i,h)=horithact(tcid_instance2,i,h)- soilfc(soilid,h)*  &
+    thfree(i,h)=horithact(tcid_instance2,i,h)- soilfc(soilid,h)*  &		!Till: compute amount of water above field capacity [mm]
         horiz_thickness(tcid_instance2,i,h)
     
     IF (thfree(i,h) > 0.0) THEN
@@ -2425,9 +2424,9 @@ DO i=1,nbr_svc(tcid_instance2)
       
       vangen(h)=(horithact(tcid_instance2,i,h)/ horiz_thickness(tcid_instance2,i,h)-  &
           thetar(soilid,h))/ (thetas(soilid,h)-  &
-          thetar(soilid,h))
+          thetar(soilid,h))				!Till: compute relative saturation
       vangen(h)=MAX(vangen(h),0.)
-      vangen(h)=MIN(vangen(h),1.)
+      vangen(h)=MIN(vangen(h),1.)		
       conduns(h)=(k_sat(soilid,h)/dt_per_day*(vangen(h)**0.5)*  &
           (1.-(1.-(vangen(h)** (1./porem(soilid,h)))  &
           )**porem(soilid,h))**2)* (1.-coarse(soilid,h))
@@ -2435,7 +2434,7 @@ DO i=1,nbr_svc(tcid_instance2)
       
       IF (h < nbrhori(soilid)) THEN
 !          percol(h)=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))
-        percol(h)=thfree(i,h)*(1.-EXP(-1./(thfree(i,h)/conduns(h))))
+        percol(h)=thfree(i,h)*(1.-EXP(-1./(thfree(i,h)/conduns(h))))	!Till: compute percolation [mm]
         
 !  if thact is greater than field capacity and lower horizons
 !  have skrinkages or macropores, than rapid percolation
@@ -2476,7 +2475,7 @@ DO i=1,nbr_svc(tcid_instance2)
         
       ELSE IF (h == nbrhori(soilid)) THEN				!Till: deepest horizon 
         IF (gw_flag(i_lu) == 0 .OR. gw_flag(i_lu) == 1) THEN
-          percol(h)=thfree(i,h)*(1.-EXP(-1./(thfree(i,h)/conduns(h))))
+          percol(h)=thfree(i,h)*(1.-EXP(-1./(thfree(i,h)/conduns(h))))	!Till: compute percolation [mm], ii: same as above, relocate to outside branch
 		  IF (svcbedr(tcid_instance2,i) == 1) THEN		!Till: if there is bedrock...
             percol(h)=MIN(percol(h),kfsu(i_lu)/dt_per_day) !Till: ...percolation is limited by bedrock conductivity
           END IF
@@ -2535,7 +2534,7 @@ DO i=1,nbr_svc(tcid_instance2)
 			l2(h)=(k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))*  &
 				temp3*temp2*slope(id_tc_type2)/100)* &
 				area(i_subbas2)*frac_lu(oc2,i_subbas2) * frac_svc(i,tcid_instance2) /&
-				slength(i_lu)		!subsurface outflow from horizon admitted due to conductivity
+				slength(i_lu)		!potential subsurface outflow from horizon admitted due to conductivity 
 		  ELSE
 !			l2(h)=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))*  &	!ii obsolete, since thfree is 0 anyway in this case, just set l2(h)=0
 !				thfree(i,h)/(thetas(soilid,h)-soilfc(soilid,h))  &
@@ -2549,8 +2548,8 @@ DO i=1,nbr_svc(tcid_instance2)
       
 ! maximum possible outflow of horizon is defined by its
 ! available moisture content above FC
-      test=thfree(i,h)
-      tempx=percol(h)+l2(h)
+      test=thfree(i,h)			!Till: this is available
+      tempx=percol(h)+l2(h)		!Till: this can potentially drain
       IF (tempx > test) THEN	!Till: percolation and lateral outflow are rescaled to be (in sum) thfree at maximum
         percol(h)=test*percol(h)/tempx
         l2(h)=test*l2(h)/tempx
@@ -2594,7 +2593,7 @@ DO i=1,nbr_svc(tcid_instance2)
       
 !  update soil moisture of deeper horizons by macroporeflow
       DO j=1,nbrhori(soilid)
-        horithact(tcid_instance2,i,j)= horithact(tcid_instance2,i,j)+percolmac(j)
+        horithact(tcid_instance2,i,j)= horithact(tcid_instance2,i,j)+percolmac(j)	!ii vectorize
 			
 
       END DO
@@ -2602,12 +2601,12 @@ DO i=1,nbr_svc(tcid_instance2)
 !  update soil moisture of deeper horizon
 !  check if refillable porosity is larger than percolation
       IF (h < nbrhori(soilid)) THEN
-        tempna=thetas(soilid,h+1)*horiz_thickness(tcid_instance2,i,h+1)- horithact(tcid_instance2,i,h+1)
-        horithact(tcid_instance2,i,h+1)=horithact(tcid_instance2,i,h+1)+ MIN(percol(h),tempna)
+        tempna=thetas(soilid,h+1)*horiz_thickness(tcid_instance2,i,h+1)- horithact(tcid_instance2,i,h+1)	!Till: compute refillable porosity
+        horithact(tcid_instance2,i,h+1)=horithact(tcid_instance2,i,h+1)+ MIN(percol(h),tempna)				!Till: increase moisture of lower horizon
 !  update soil moisture of current horizon due to percolation and
 !  lateral flow
         horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)-  &
-            (MIN(percol(h),tempna)+l2(h)+sum(percolmac(:)))			!?Till: why is l2 (instead of l2eff) used here? 
+            (MIN(percol(h),tempna)+l2(h)+sum(percolmac(:)))			!Till: decrease moisture of current horizon due to percolation an lateral flow. why is l2 (instead of l2eff) used here? 
 
         
 !  check if current horizon is lowest of root zone
@@ -2624,9 +2623,9 @@ DO i=1,nbr_svc(tcid_instance2)
 !  if landscape unit with groundwater body, percolation gets river runoff,
 !  independent of position of current terrain component
       ELSE IF (h == nbrhori(soilid)) THEN
-        deepqgw=deepqgw+percol(h)*frac_svc(i,tcid_instance2)
+        deepqgw=deepqgw+percol(h)*frac_svc(i,tcid_instance2)	!Till: increase groundwater recharge [mm]
         watbal=watbal-percol(h)*frac_svc(i,tcid_instance2)
-        horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)-percol(h)-l2(h)
+        horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)-percol(h)-l2(h) !Till: decrease moisture of current horizon due to percolation an lateral flow
 
 
         !only for output
@@ -2814,26 +2813,26 @@ END DO
 
 !   plant avail. soil moisture in actual rooted soil zone
 
-DO i=1,nbr_svc(tcid_instance2)
-  soilid=id_soil_intern(i,tcid_instance2)
-  temp2=0.
-  temp3=0.
-  temptest=rootd_act(id_veg_intern(i,tcid_instance2))
-  h=1
-  DO WHILE (temp2 <= temptest .AND. h <= nbrhori(soilid))
-    temp2=temp2+horiz_thickness(tcid_instance2,i,h)
-    temp4=horithact(tcid_instance2,i,h)-pwpsc(tcid_instance2,i,h)* horiz_thickness(tcid_instance2,i,h)
-    temp4=MAX(temp4,0.)
-    IF (temp2 <= temptest) THEN
-      temp3=temp3+temp4
-    ELSE
-      temp3=temp3+temp4*(temp2-temptest)/horiz_thickness(tcid_instance2,i,h)
-    END IF
-    h=h+1
-  END DO
-!only for output
-!  thsc(tc_counter2,day,i)=temp3
-END DO
+!DO i=1,nbr_svc(tcid_instance2)
+!  soilid=id_soil_intern(i,tcid_instance2)
+!  temp2=0.
+!  temp3=0.
+!  temptest=rootd_act(id_veg_intern(i,tcid_instance2))
+!  h=1
+!  DO WHILE (temp2 <= temptest .AND. h <= nbrhori(soilid))
+!    temp2=temp2+horiz_thickness(tcid_instance2,i,h)
+!    temp4=horithact(tcid_instance2,i,h)-pwpsc(tcid_instance2,i,h)* horiz_thickness(tcid_instance2,i,h)
+!    temp4=MAX(temp4,0.)
+!    IF (temp2 <= temptest) THEN
+!      temp3=temp3+temp4
+!    ELSE
+!      temp3=temp3+temp4*(temp2-temptest)/horiz_thickness(tcid_instance2,i,h)
+!    END IF
+!    h=h+1
+!  END DO
+!!only for output
+!!  thsc(tc_counter2,day,i)=temp3
+!END DO
 
 
 !    check water balance of timestep
@@ -2846,7 +2845,7 @@ watbal=watbal+(thact1-thact)
 !         write(*,*) 'fracsat',frac_sat(tcid_instance2,:)
 !         !call pause1
 !END IF
-IF (q_surf_out/(tcarea2*1.e3) < -0.001) THEN
+!IF (q_surf_out/(tcarea2*1.e3) < -0.001) THEN
 !         write(*,*) 'WATBAL +- delta_theta',watbal,(thact1-thact)
 !         write(*,*) i_subbas2,i_lu,oc2,tcid_instance2,tc_counter2,nbr_svc(tcid_instance2)
 !         write(*,*) 'tcid_instance2,frac_svc',tcid_instance2,frac_svc(:,tcid_instance2)
@@ -2854,7 +2853,7 @@ IF (q_surf_out/(tcarea2*1.e3) < -0.001) THEN
 !         write(*,*) 'q_surf_out (m**3)',q_surf_out
 !         write(*,*) 'q_surf_out (mm), endI',q_surf_out/(tcarea2*1.e3)
 !         !call pause1
-END IF
+!END IF
 ! write(*,*)watbal
 ! errstring= GetCalcError()
 ! write(*,*)trim(errstring)

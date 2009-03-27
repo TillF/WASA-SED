@@ -8,5 +8,11 @@ WASA-SED-model with documentation, sample data set and source code.
 WASA-SED is a large and complex hydrological and sediment transport model. Extensive knowledge of its design, purpose, and limitations is required in order to apply it properly. See license.txt for terms of use.
 ******************************  
 
-Desirable features can be added to wishlist.txt.
-Before modifying the code, please consult coding_guidelines.txt.
+Contents
+
+coding_guidelines.txt	guidelines for modifying the code
+license.txt				terms of use
+variables.ods			list of variables used (incomplete)
+Wasa_Documentation.doc	model documentation
+wishlist_wasa.txt		desirable features, future ideas
+
