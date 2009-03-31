@@ -1,4 +1,7 @@
 SUBROUTINE hymo_all(STATUS)
+!Till: computationally irrelevant, reformatted *water_subbasin.out (and others) with tab-separated output
+!2009-03-31
+
 !Till: unified output files, used tab as separators
 !2009-03-17
 
@@ -306,9 +309,8 @@ if (doacud)  CALL lake(0,dummy)
   OPEN(11,FILE=pfadn(1:pfadi)// 'daily_water_subbasin.out', STATUS='replace')
   IF (f_daily_water_subbasin) THEN	
 	WRITE(11,'(a)') 'daily river flow [m3/s] for all sub-basins (MAP-IDs)'
-	write(fmtstr,'(a,i0,a)')'(1a6,1a11,',subasin,'i14)'		!generate format string
-	WRITE(11,fmtstr)' Year ', 'Julian_Day ',(id_subbas_extern(i),i=1,subasin)
-	!WRITE(11,'(1a6,1a11,<subasin>i14)')' Year ', 'Julian_Day ',(id_subbas_extern(i),i=1,subasin)
+	write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'		!generate format string
+	WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
 	CLOSE(11,status='delete')
@@ -318,9 +320,8 @@ if (doacud)  CALL lake(0,dummy)
   OPEN(11,FILE=pfadn(1:pfadi)// 'daily_water_subbasin2.out', STATUS='replace')
   IF (f_daily_water_subbasin) THEN	
 	WRITE(11,'(a)') 'daily river flow [m3] for all sub-basins (MAP-IDs)'
-	write(fmtstr,'(a,i0,a)')'(1a6,1a11,',subasin,'i14)'		!generate format string
-	WRITE(11,fmtstr)' Year ', 'Julian_Day ',(id_subbas_extern(i),i=1,subasin)
-	!WRITE(11,'(1a6,1a11,<subasin>i14)')' Year ', 'Julian_Day ',(id_subbas_extern(i),i=1,subasin)
+	write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'		!generate format string
+	WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
 	CLOSE(11,status='delete')
@@ -332,9 +333,8 @@ if (doacud)  CALL lake(0,dummy)
   IF (f_daily_actetranspiration) THEN	
     WRITE(11,'(a)') 'daily actual evapotranspiration [mm/d]  &
       for all sub-basins (MAP-IDs)'
-    write(fmtstr,'(a,i0,a)')'(2a4,',subasin,'i14)'		!generate format string
-	WRITE(11,fmtstr)'Year',' Day', (id_subbas_extern(i),i=1,subasin)
-	!WRITE(11,'(2a4,<subasin>i14)')'Year',' Day', (id_subbas_extern(i),i=1,subasin)
+	write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'		!generate format string
+	WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
 	CLOSE(11,status='delete')
@@ -346,9 +346,8 @@ if (doacud)  CALL lake(0,dummy)
   IF (f_daily_potetranspiration) THEN	
 	WRITE(11,'(a)') 'daily potential evapotranspiration [mm/d]  &
       for all sub-basins (MAP-IDs)'
-	write(fmtstr,'(a,i0,a)')'(2a4,',subasin,'i14)'		!generate format string
-	WRITE(11,fmtstr)'Year',' Day', (id_subbas_extern(i),i=1,subasin)
-	!WRITE(11,'(2a4,<subasin>i14)')'Year',' Day', (id_subbas_extern(i),i=1,subasin)
+	write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'		!generate format string
+	WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
 	CLOSE(11,status='delete')
@@ -358,9 +357,8 @@ if (doacud)  CALL lake(0,dummy)
   OPEN(11,FILE=pfadn(1:pfadi)//'daily_theta.out', STATUS='replace')
   IF (f_daily_theta) THEN	
 	WRITE(11,'(a)') 'soil moisture in profile [mm] for all sub-basins (MAP-IDs)'
-	write(fmtstr,'(a,i0,a)')'(2a4,',subasin,'i14)'		!generate format string
-	WRITE(11,fmtstr)'Year',' Day', (id_subbas_extern(i),i=1,subasin)
-	!WRITE(11,'(2a4,<subasin>i14)')'Year',' Day', (id_subbas_extern(i),i=1,subasin)
+	write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'		!generate format string
+	WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
 	CLOSE(11,status='delete')
@@ -370,9 +368,8 @@ if (doacud)  CALL lake(0,dummy)
   OPEN(11,FILE=pfadn(1:pfadi)//'daily_qhorton.out', STATUS='replace')
   IF (f_daily_qhorton) THEN	
 	WRITE(11,'(a)') 'horton overland flow [m**3] for all sub-basins (MAP-IDs)'
-	write(fmtstr,'(a,i0,a)')'(2a4,',subasin,'i14)'		!generate format string
-	WRITE(11,fmtstr)'Year',' Day', (id_subbas_extern(i),i=1,subasin)
-	!WRITE(11,'(2a4,<subasin>i14)')'Year',' Day', (id_subbas_extern(i),i=1,subasin)
+	write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'		!generate format string
+	WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
 	CLOSE(11,status='delete')
@@ -383,9 +380,8 @@ if (doacud)  CALL lake(0,dummy)
       STATUS='replace')
   IF (f_daily_total_overlandflow) THEN	
 	WRITE(11,'(a)') 'total overland flow [m**3] for all sub-basins (MAP-IDs)'
-	write(fmtstr,'(a,i0,a)')'(2a4,',subasin,'i14)'		!generate format string
-	WRITE(11,fmtstr)'Year',' Day', (id_subbas_extern(i),i=1,subasin)
-	!WRITE(11,'(2a4,<subasin>i14)')'Year',' Day', (id_subbas_extern(i),i=1,subasin)
+	write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'		!generate format string
+	WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
 	CLOSE(11,status='delete')
@@ -397,7 +393,7 @@ if (doacud)  CALL lake(0,dummy)
       STATUS='replace')
   IF (f_deep_gw_recharge) THEN	
 	WRITE(11,'(a)') 'total deep ground water recharge [m3] for all sub-basins (MAP-IDs)'
-	write(fmtstr,'(a,i0,a)')'(a4,a,a4,',subasin,'(a,i14))'		!generate format string
+	write(fmtstr,'(a,i0,a)')'(a4,a,a4,',subasin,'(a,i0))'		!generate format string
 	WRITE(11,fmtstr)'Year', char(9),' Day', (char(9),id_subbas_extern(i),i=1,subasin)		!tab separated output
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
@@ -410,7 +406,7 @@ if (doacud)  CALL lake(0,dummy)
   IF (f_deep_gw_discharge) THEN	
 	allocate (deep_gw_discharge(366,subasin))
 	WRITE(11,'(a)') 'total deep ground water discharge [m3] for all sub-basins (MAP-IDs)'
-	write(fmtstr,'(a,i0,a)')'(a4,a,a4,',subasin,'(a,i14))'		!generate format string
+	write(fmtstr,'(a,i0,a)')'(a4,a,a4,',subasin,'(a,i0))'		!generate format string
 	WRITE(11,fmtstr)'Year', char(9),' Day', (char(9),id_subbas_extern(i),i=1,subasin)		!tab separated output
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
@@ -423,7 +419,7 @@ if (doacud)  CALL lake(0,dummy)
   IF (f_gw_loss) THEN	
 	allocate (gw_loss(366,subasin))
 	WRITE(11,'(a)') 'ground water loss from model domain [m3] for all sub-basins (MAP-IDs)'
-	write(fmtstr,'(a,i0,a)')'(a4,a,a4,',subasin,'(a,i14))'		!generate format string
+	write(fmtstr,'(a,i0,a)')'(a4,a,a4,',subasin,'(a,i0))'		!generate format string
 	WRITE(11,fmtstr)'Year', char(9),' Day', (char(9),id_subbas_extern(i),i=1,subasin)		!tab separated output
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
@@ -437,9 +433,8 @@ if (doacud)  CALL lake(0,dummy)
   IF (f_daily_subsurface_runoff) THEN	
 	WRITE(11,'(a)') 'total subsurface runoff [m**3/d]  &
       for all sub-basins (MAP-IDs)'
-	write(fmtstr,'(a,i0,a)')'(2a4,',subasin,'i14)'		!generate format string
-	WRITE(11,fmtstr)'Year',' Day', (id_subbas_extern(i),i=1,subasin)
-	!WRITE(11,'(2a4,<subasin>i14)')'Year',' Day', (id_subbas_extern(i),i=1,subasin)
+	write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'		!generate format string
+	WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
 	CLOSE(11,status='delete')
@@ -447,12 +442,11 @@ if (doacud)  CALL lake(0,dummy)
 
   ! Output sub-daily water flux
   OPEN(11,FILE=pfadn(1:pfadi)//'water_subbasin.out', STATUS='replace')
-  IF (f_water_subbasin .AND. dt<24) THEN	!Till: if sub-daily resolution is required
+  IF (f_water_subbasin) THEN	!Till: if sub-daily resolution is required
 	WRITE(11,'(a)') 'river flow [m3/s] for all sub-basins (MAP-IDs)'
 	
-	write(fmtstr,'(a,i0,a)')'(a,',subasin,'i14)'		!generate format string
-	WRITE(11,fmtstr)'Year	Day	Timestep', (id_subbas_extern(i),i=1,subasin)
-	!WRITE(11,'(a,<subasin>i14)')'Year	Day	Timestep', (id_subbas_extern(i),i=1,subasin)
+	write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'		!generate format string
+	WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep', (char(9),id_subbas_extern(i),i=1,subasin)
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
 	CLOSE(11,status='delete')
@@ -1256,17 +1250,17 @@ IF (STATUS == 3) THEN
   IF (f_daily_water_subbasin) THEN	!if output file is enabled
 	  OPEN(11,FILE=pfadn(1:pfadi)//  &
 		  'daily_water_subbasin.out', STATUS='old',POSITION='append')
-	  write(fmtstr,'(a,i0,a)') '(2i6,',subasin,'f11.6)'		!generate format string 
+	  write(fmtstr,'(a,i0,a)') '(i0,a,i0,',subasin,'(a,f11.6))'		!generate format string 
 	  DO d=1,dayyear
-		WRITE (11,fmtstr)t, d, (water_subbasin(d,i),i=1,subasin)
+		WRITE (11,fmtstr)t, char(9), d, (char(9),water_subbasin(d,i),i=1,subasin)	!in m**3/s
 	  END DO
 	  CLOSE(11)
   	  
 	  OPEN(11,FILE=pfadn(1:pfadi)//  &
 		  'daily_water_subbasin2.out', STATUS='old',POSITION='append')
-	  write(fmtstr,'(a,i0,a)') '(2i6,',subasin,'f14.1)'		!generate format string 
+	  write(fmtstr,'(a,i0,a)') '(i0,a,i0,',subasin,'(a,f11.6))'		!generate format string 
 	  DO d=1,dayyear
-		WRITE (11,fmtstr)t, d, (water_subbasin(d,i)*3600*24,i=1,subasin)
+		WRITE (11,fmtstr)t, char(9), d, (char(9),water_subbasin(d,i)*3600*24,i=1,subasin) !in m**3
 	  END DO
 	  CLOSE(11)
   END IF
@@ -1285,12 +1279,12 @@ IF (STATUS == 3) THEN
 
 
 ! Output sub-daily water flux   
-  IF (f_water_subbasin .AND. dt<24) THEN	!Till: if sub-daily resolution is required
+  IF (f_water_subbasin) THEN	!Till: if sub-daily resolution is required
 	OPEN(11,FILE=pfadn(1:pfadi)//'water_subbasin.out', STATUS='old',POSITION='append')
-	write(fmtstr,'(a,i0,a)') '(3i6,',subasin,'f14.3)'		!generate format string
+	write(fmtstr,'(a,i0,a)') '(i0,a,i0,a,i0,',subasin,'(a,f11.6))'		!generate format string
 	DO d=1,dayyear
 		DO j=1,nt
-			WRITE (11,fmtstr)t, d, j, (water_subbasin_t(d,j,i),i=1,subasin)
+			WRITE (11,fmtstr)t, char(9), d, char(9), j, (char(9),water_subbasin_t(d,j,i),i=1,subasin) !in m**3/s
 		END DO
 	END DO
 	CLOSE(11)

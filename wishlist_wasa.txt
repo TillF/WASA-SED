@@ -18,6 +18,7 @@ responsibility all:
 - vectorize array assignments, use implicit loops for file output (speed!)(Till)
 - also use hourly humidity,temperature,radiation; not only rainfall(Till)
 - allow output in hourly resolution for also for other variables than water_subbasin(Till)
+- graceful termination if input files are not found
 
 responsibility Till:
 - create output directory, if non-existent(Till)
