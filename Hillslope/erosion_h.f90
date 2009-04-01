@@ -65,7 +65,7 @@ integer, allocatable :: id_svc_extern(:)	!external ids of soil vegetation compon
 integer, allocatable :: svc_soil_veg(:,:)	!contains internal IDs of soils and vegetation units belonging to each SVC
 type (t_svc_pointer_array), allocatable :: tc_contains_svc2(:)			!contains which SVCs are contained in each TC (indexed by TC-type)
 
-! sediment flow [t]
+! sediment flux for each landscape unit and particle size class [t] in the current subbasin
 REAL, allocatable  :: sedsu(:,:)
 
 

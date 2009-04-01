@@ -53,7 +53,6 @@
 	 latred(sv_comb,maxhori*3), &
 	 intercept(sv_comb,maxsoil), &
 	 frac_sat(sv_comb,maxsoil), &
-	 soilwtc(sv_comb), &
 	 aettc(sv_comb), &
 	 soilettc(sv_comb), &
 	 intctc(sv_comb), &

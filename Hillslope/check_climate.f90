@@ -69,26 +69,11 @@ DO jj=1,min(dayyear,size(rad,DIM=1))
 	end do
 END DO
 
-!check precip data
-DO jj=1,min(dayyear,size(precip,DIM=1))
-	DO ii=1,size(precip,DIM=2)
-		if ((precip(jj,ii)>400) .OR. (precip(jj,ii)<0)) then
-			if (jj/=366) then	!leap year values might be missing, don't alert
-				write(*,'(A,i0,a,i0,a,i0,a,f5.1,a)')'Precipitation data of subbasin ',id_subbas_extern(ii),', day ', jj,', year '&
-					,t,' is implausible(',precip(jj,ii),'). using previous day.'
-			end if
-			precip(jj,ii)=store	!implausible value, use the previous day
-		else
-			store=precip(jj,ii)
-		end if
-	end do
-END DO
-
 !check hourly precip data
 if (dohour) then
 	DO jj=1,min(dayyear,size(preciph,DIM=1))
 		DO ii=1,size(preciph,DIM=2)
-			if ((precip(jj,ii)>400/24) .OR. (precip(jj,ii)<0)) then
+			if ((precip(jj,ii)>50) .OR. (precip(jj,ii)<0)) then
 				if (jj>=365*nt) then	!leap year values might be missing, don't alert
 					write(*,'(A,i0,a,i0,a,i0,a,f5.1,a)')'Hourly precipitation data of subbasin ',id_subbas_extern(ii),', day ', jj/24+1,', year '&
 						,t,' is implausible(',precip(jj,ii),'). using previous time step.'
@@ -100,6 +85,23 @@ if (dohour) then
 		end do
 	END DO
 end if
+
+
+!check precip data
+DO jj=1,min(dayyear,size(precip,DIM=1))
+	DO ii=1,size(precip,DIM=2)
+		if ((precip(jj,ii)>50*24) .OR. (precip(jj,ii)<0)) then
+			if (jj/=366) then	!leap year values might be missing, don't alert
+				write(*,'(A,i0,a,i0,a,i0,a,f5.1,a)')'Precipitation data of subbasin ',id_subbas_extern(ii),', day ', jj,', year '&
+					,t,' is implausible(',precip(jj,ii),'). using previous day.'
+			end if
+			precip(jj,ii)=store	!implausible value, use the previous day
+		else
+			store=precip(jj,ii)
+		end if
+	end do
+END DO
+
 
 
 RETURN

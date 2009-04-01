@@ -155,7 +155,7 @@ REAL, INTENT(OUT)                        :: tcaet
 REAL, INTENT(OUT)                        :: tclai
 REAL, INTENT(OUT)                        :: tcsoilet
 REAL, INTENT(OUT)                        :: tcintc
-REAL, INTENT(IN out)                         :: prec
+REAL, INTENT(IN)                         :: prec
 REAL, INTENT(IN)                         :: precday
 REAL, INTENT(IN)                     :: prechall2(24)
 REAL, INTENT(IN)                         :: petday
@@ -372,7 +372,7 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
 !  maximum inflow may be limited by hydraulic conductivity
               IF (temp2 > 0.) THEN
 				!Till: compute maximum inflow according to "exchange surface"
-				temp3=(k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))*  &
+				temp3=(k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))*  &	
 					horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100)* &
 					area(i_subbas2)*frac_lu(oc2,i_subbas2) * frac_svc(i,tcid_instance2) /&
 					slength(i_lu)		!subsurface inflow into horizon(s) admitted due to conductivity

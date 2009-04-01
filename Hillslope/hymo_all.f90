@@ -1,4 +1,9 @@
 SUBROUTINE hymo_all(STATUS)
+!Till: computationally relevant in hourly version: fixed bug that led to excess runoff;
+! fixed faulty summation of hortonian runoff in hourly version
+! minor optimizations and code beautifying
+!2009-04-01
+
 !Till: computationally irrelevant, reformatted *water_subbasin.out (and others) with tab-separated output
 !2009-03-31
 
@@ -185,8 +190,7 @@ REAL :: frac_satsu
 REAL :: gwr,deepgwr
 
 ! hourly variables
-REAL :: aeth,laih,soileth,inth !horth
-REAL :: gwrh,deepgwrh
+REAL :: aeth,laih,soileth,inth,horth
 INTEGER :: timestep_counter
 
 character(len=1000) :: fmtstr	!string for formatting file output
@@ -770,17 +774,6 @@ tc_counter_all=1		!reset TC counter
 
 	deepgwrsu=0.
 
-      qsurf_lu(:)=0.		
-      qsub_lu(:)=0.
-      gwrsu(:)=0.
-      hortsu(:)=0.
-      aetsu(:)=0.
-      laisu(:)=0.
-      soiletsu(:)=0.
-      intcsu(:)=0.
-      soilmsu(:)=0.
-      sedsu(:,:)=0.
-
 
 ! LOOPs through all Landscape Units of specific sub-basin
     DO lu_counter=1,nbr_lu(i_subbas)
@@ -810,17 +803,40 @@ tc_counter_all=1		!reset TC counter
 !		  soiletsc(d,:)=0.
 !		  nfksc(d,:)=0.
 !	  END IF
-        
+
+
+
 ! LOOPs through required number of timesteps (for current day)
       DO timestep_counter=1,nt
-        surfflow_in(:)=0.
+
+        qsurf_lu(lu_counter)=0.		!Till: reset variables for summing up at the LU-scale
+		qsub_lu(lu_counter)=0.
+		gwrsu(lu_counter)=0.
+		hortsu(lu_counter)=0.
+		aetsu(lu_counter)=0.
+		laisu(lu_counter)=0.
+		soiletsu(lu_counter)=0.
+		intcsu(lu_counter)=0.
+		soilmsu(lu_counter)=0.
+		sedsu(lu_counter,:)=0.
+		
+		surfflow_in(:)=0.			!Till: reset TC-related variables
         surfflow_out(:)=0.
         sublat_in(:)=0
         sublat_out(:)=0.
 		sed_in(:,:)=0.
 		sed_out(:,:)=0.
+
+!		!Till: reset TC-instance-related variables
+!		horttc  (:)=0.
+!		aettc   (:)=0.
+!		laitc   (:)=0.
+!		soilettc(:)=0.
+!		intctc  (:)=0.
+
+
 		
-		soilmrootsu(lu_counter)=0.		!warum nur für Tagesversion Null gesetzt?
+		soilmrootsu(lu_counter)=0.		
 		
 ! LOOPs through all Terrain Components of specific Landscape Unit (of specific sub-basin)
 
@@ -831,6 +847,19 @@ tc_counter_all=1		!reset TC counter
           
 		  id_tc_type=id_terrain_intern(tc_counter,i_lu)
 		  tcarea=area(i_subbas)*frac_lu(lu_counter,i_subbas)* fracterrain(id_tc_type)
+
+		  IF (timestep_counter == 1) THEN
+			horttc   (tcid_instance)=0.				!Till: reset TC-instance-related variables - these are used to compute daily output values
+			aettc    (tcid_instance)=0.
+			laitc    (tcid_instance)=0.
+			soilettc (tcid_instance)=0.
+			intctc   (tcid_instance)=0.
+			thact=soilwater(dprev,tcid_instance)
+
+			gwrtc    (tcid_instance)=0.				!ii zero these entries at start of each timestep for entire domain 
+			deepgwrtc(tcid_instance)=0.
+		  END IF
+
 		  
 !!Print hydrologic variable on TC scale. If not used, DISABLE
 !!**************************************************************************************************
@@ -838,18 +867,11 @@ tc_counter_all=1		!reset TC counter
 !	      IF (precip(d,i_subbas) /= 0.) deposition_TC(i_subbas,id_tc_type)=1.
 !!**************************************************************************************************
 
-
-		  IF (.NOT. dohour) THEN	!ii: zusammenfassen
-			thact=soilwater(dprev,tcid_instance)
-			gwr=0.
-			deepgwr=0.
-			horttc(tcid_instance)=0.
-			aettc(tcid_instance)=0.
-			laitc(tcid_instance)=0.
-			soilettc(tcid_instance)=0.
-			intctc(tcid_instance)=0.
+		  gwr=0.
+		  deepgwr=0.
+		  
+		  IF (.NOT. dohour) THEN	!ii: join daily and hourly branch
 			prec=precip(d,i_subbas)
-			
 			hh=0
 
 	        CALL soilwat(hh,d,m,i_subbas,i_subbas,i_lu,lu_counter,tcid_instance,id_tc_type,tc_counter,thact,  &
@@ -875,22 +897,6 @@ tc_counter_all=1		!reset TC counter
 
 
 		  ELSE
-			IF (timestep_counter == 1) THEN
-				gwrtc(tcid_instance)=0.				!ii zero these entries at start of each timestep for entire domain 
-				deepgwrtc(tcid_instance)=0.
-
-				horttc(tcid_instance)=0.
-				aettc(tcid_instance)=0.
-				laitc(tcid_instance)=0.
-				soilettc(tcid_instance)=0.
-				intctc(tcid_instance)=0.
-				soilwtc(tcid_instance)=soilwater(dprev,tcid_instance)
-			END IF
-
-			thact=soilwtc(tcid_instance)
-			gwrh=0.
-			deepgwrh=0.
-			horttc(tcid_instance)=0
 			aeth=0.
 			laih=0.
 			soileth=0.
@@ -902,19 +908,18 @@ tc_counter_all=1		!reset TC counter
 			CALL soilwat(timestep_counter,d,m,i_subbas,i_subbas,i_lu,lu_counter,tcid_instance,id_tc_type,tc_counter,  &
 			thact,thactroot,surfflow_in(tc_counter),  &
 			surfflow_out(tc_counter),sublat_in(tc_counter),sublat_out(tc_counter),  &
-			gwrh,deepgwrh,horttc(tcid_instance),aeth,laih,soileth,inth,  &
+			gwr,deepgwr,horttc(tcid_instance),aeth,laih,soileth,inth,  &
 			prec,precday,prechall(1:24), pet(d,i_subbas),  &
 			tcarea,balance_tc, rootd_act,height_act,lai_act,alb_act,sed_in(tc_counter,:),sed_out(tc_counter,:))
 			balance=balance+balance_tc*fracterrain(id_tc_type)	!Till: compute water balance for LU [mm]
 			
-			soilwtc(tcid_instance)=thact
-			gwrtc(tcid_instance)=gwrtc(tcid_instance)+gwrh
-			deepgwrtc(tcid_instance)=deepgwrtc(tcid_instance)+deepgwrh	 
-			aettc(tcid_instance)=aettc(tcid_instance)+aeth
-			laitc(tcid_instance)=laitc(tcid_instance)+laih/24.
-			soilettc(tcid_instance)=soilettc(tcid_instance)+soileth
-			intctc(tcid_instance)=intctc(tcid_instance)+inth
-			
+			gwrtc    (tcid_instance)=gwrtc    (tcid_instance)+gwr
+			deepgwrtc(tcid_instance)=deepgwrtc(tcid_instance)+deepgwr	 
+			aettc    (tcid_instance)=aettc    (tcid_instance)+aeth
+			laitc    (tcid_instance)=laitc    (tcid_instance)+laih/24.
+			soilettc (tcid_instance)=soilettc (tcid_instance)+soileth
+			intctc   (tcid_instance)=intctc   (tcid_instance)+inth
+
 			IF (timestep_counter == 24) THEN
 				soilwater(d,tcid_instance)=thact
 				soilmrootsu(lu_counter)=soilmrootsu(lu_counter)+ thactroot*fracterrain(id_tc_type)
@@ -965,34 +970,34 @@ tc_counter_all=1		!reset TC counter
 				  sed_in(tc_counter+1,:)=sed_out(tc_counter,:)	!Till: all sediment leaving the upper TC enters the next downslope TC
 													! prepare sed_in this for the next downslope TC
 				ELSE
-				  temp2=sum(fractemp(tc_counter:nbrterrain(i_lu))) !fraction of all remaining TCs in this LU
+				  temp2=sum(fractemp(tc_counter:nbrterrain(i_lu))) !fraction of all remaining TCs in this LU 
 				  DO i=tc_counter+1,nbrterrain(i_lu)				!Till: overland flow is distributed among lower TCs proportional to area
-					surfflow_in(i)=surfflow_in(i)+surfflow_out(tc_counter)*fractemp(i)/temp2
-					sed_in(i,:)=sed_in(i,:)+sed_out(tc_counter,:)* fractemp(i)/temp2		
+					surfflow_in(i)=surfflow_in(i)  +surfflow_out(tc_counter  )* fractemp(i)/temp2
+					sed_in(i,:)   =sed_in     (i,:)+sed_out     (tc_counter,:)* fractemp(i)/temp2		
 																			!Till: sediment goes directly to river and into next downslope TC (no redistribution among all more-downslope TCs as with water)
 				  END DO
 	!  Remaining outflow of each terrain component, which is not routed to lower TCs
 	!  is surface runoff of entire landscape unit (direct dunoff to river)
-				  qsurf_lu(lu_counter)=qsurf_lu(lu_counter)+surfflow_out(tc_counter)* fractemp(tc_counter)/temp2
-				  hortsu(lu_counter)=hortsu(lu_counter)+horttc(tcid_instance)* fractemp(tc_counter)/temp2
-				  
-				  sedsu(lu_counter,:)=sedsu(lu_counter,:)+sed_out(tc_counter,:)* fractemp(tc_counter)/temp2
-							!Till: remaining sediment not routed to the lower TC reaches the river directly
+				  qsurf_lu(lu_counter  )=qsurf_lu(lu_counter  )+surfflow_out(tc_counter)   * fractemp(tc_counter)/temp2
+				  hortsu  (lu_counter  )=hortsu  (lu_counter  )+horttc      (tcid_instance)* fractemp(tc_counter)/temp2
+				  sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:) * fractemp(tc_counter)/temp2
+							!Till: remaining sediment that is not routed to the lower TC reaches the river directly
 				END IF
 			  ELSE IF (.NOT. dolattc) THEN		!Till: no flow between TCs, all flows leave the LU directly
-				qsurf_lu(lu_counter)=qsurf_lu(lu_counter)+surfflow_out(tc_counter)
-				qsub_lu(lu_counter)=qsub_lu(lu_counter)+sublat_out(tc_counter)
-				hortsu(lu_counter)=hortsu(lu_counter)+horttc(tcid_instance)
-				sedsu(lu_counter,:)=sedsu(lu_counter,:)+sed_out(tc_counter,:)
+				qsub_lu   (lu_counter)=qsub_lu(lu_counter)+sublat_out(tc_counter)
+
+				qsurf_lu(lu_counter  )=qsurf_lu(lu_counter)  +surfflow_out(tc_counter)
+				hortsu  (lu_counter  )=hortsu  (lu_counter)  +horttc      (tcid_instance)
+				sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:)
 			  END IF
 
 	!  Outflow of lowest terrain component is added to runoff generated
 	!  in landscape unit of this subbasin
-			ELSE IF (tc_counter == nbrterrain(i_lu)) THEN	!lowest TC is reached, all flows leave the LU
-			  qsurf_lu(lu_counter)=qsurf_lu(lu_counter)+surfflow_out(tc_counter)
-			  qsub_lu(lu_counter)=qsub_lu(lu_counter)+sublat_out(tc_counter)
-			  sedsu(lu_counter,:)=sedsu(lu_counter,:)+sed_out(tc_counter,:)
-			  hortsu(lu_counter)=hortsu(lu_counter)+horttc(tcid_instance)
+			ELSE IF (tc_counter == nbrterrain(i_lu)) THEN	!lowest TC is reached, all flows leave the LU ii: join this with previous branch
+			  qsurf_lu(lu_counter  )=qsurf_lu(lu_counter  )+surfflow_out(tc_counter)
+			  qsub_lu (lu_counter  )=qsub_lu (lu_counter  )+sublat_out  (tc_counter)
+			  sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:)
+			  hortsu  (lu_counter  )=hortsu  (lu_counter  )+horttc      (tcid_instance)
 			END IF
 			
 		
