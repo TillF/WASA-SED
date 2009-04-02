@@ -1,4 +1,6 @@
 SUBROUTINE routing_new(STATUS)
+!Till: computationally irrelevant: quick-fix of severe performance loss when using output of river_flow.dat in hourly version
+!2009-04-02
 
 !Till: added output for River_Sediment_Storage.out
 !2008-11-13
@@ -120,22 +122,21 @@ END DO
  
 
 ! INITIALISATION OF OUTPUT FILES
-  OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
+  OPEN(111,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
   if (f_river_flow) then
-    WRITE (11,*) 'Output files for river discharge q_out (m3/s) (with MAP IDs as in hymo.dat)'
+    WRITE (111,*) 'Output files for river discharge q_out (m3/s) (with MAP IDs as in hymo.dat)'
 	    
 	if (dohour) then
 		write(fmtstr,'(a,i0,a)')'(3a6,',subasin,'i14)'		!generate format string
-		WRITE (11,fmtstr)' Year ', ' Day  ','  dt  ', (id_subbas_extern(i), i=1,subasin)
-		!WRITE (11,'(3a6,<subasin>i14)')' Year ', ' Day  ','  dt  ', (id_subbas_extern(i), i=1,subasin)
+		WRITE (111,fmtstr)' Year ', ' Day  ','  dt  ', (id_subbas_extern(i), i=1,subasin)
 	else
    		write(fmtstr,'(a,i0,a)')'(2a6,',subasin,'i14)'		!generate format string
-		WRITE (11,fmtstr)' Year ', ' Day  ', (id_subbas_extern(i), i=1,subasin)
-		!WRITE (11,'(2a6,<subasin>i14)')' Year ', ' Day  ', (id_subbas_extern(i), i=1,subasin)
+		WRITE (111,fmtstr)' Year ', ' Day  ', (id_subbas_extern(i), i=1,subasin)
+		Close (111)		!Till: hourly version leaves the file open to save time
 	endif
-	Close (11)
+	
   else
-    close(11, status='delete') !delete any existing file, if no output is desired
+    close(111, status='delete') !delete any existing file, if no output is desired
   endif
 
 
@@ -503,10 +504,10 @@ endif
  
  if (dohour) then
 	if (f_river_flow) then	!daily output in routing_new(3) to decrease simulation time
-		OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='old' ,POSITION='append'  )
+!		OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='old' ,POSITION='append'  )
 		write(fmtstr,'(a,i0,a)')'(3i6,',subasin,'f14.3)'		!generate format string
-		WRITE (11,fmtstr)t,d,h, (r_qout(2,i),i=1,subasin)
-		CLOSE (11)
+		WRITE (111,fmtstr)t,d,h, (r_qout(2,i),i=1,subasin)
+!		CLOSE (11)
 	endif
  endif
 
