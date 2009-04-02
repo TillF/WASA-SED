@@ -1,5 +1,8 @@
 SUBROUTINE readhymo
 
+!Till: introduced calibration.dat that contains calibration factors for Ksat of specified soils
+!2008-04-02
+
 !Till: include optional specification for LU-based correction of beta/m (exponent for L-factor calculation)
 !2008-10-22
 
@@ -624,7 +627,7 @@ period=>seasonality_array('rainy_season.dat')
 
 
 
-! ** read cell-based scaling factor, see Guentner (2002), p. 67 !Till: the scaling factor described there refers to Kfkorr, but this here seems to be merely a calibration thing
+! ** read cell-based scaling factor, see Guentner (2002), p. 67 !Till: the scaling factor described there refers to Kfkorr, but this here seems to be merely a calibration thing?
 IF (doscale) THEN
   OPEN(11,FILE=pfadp(1:pfadj)// 'Others/scaling_factor.dat',STATUS='old')
   READ(11,*)
@@ -641,6 +644,30 @@ IF (doscale) THEN
 ELSE IF (.NOT.doscale) THEN
   kfkorrc(:)=1.
   intcfc(:)=intcf
+END IF
+
+!Till: read calibration factors
+OPEN(11,FILE=pfadp(1:pfadj)// 'Others/calibration.dat', IOSTAT=istate,STATUS='old')
+IF (istate==0) THEN					!calibration.dat found
+	READ(11,*)
+	DO WHILE (.TRUE.)  
+		READ(11,'(a)',IOSTAT=istate)cdummy	!try to read next line		
+		if (istate/=0) exit
+
+		READ(cdummy,*)dummy1,temp1
+		if (dummy1==-1) then
+			k_sat(:,:)=k_sat(:,:)*temp1	 !universal calibration factor for all soils and horizons
+			cycle						 !go to next line
+		end if
+		i=id_ext2int(dummy1,id_soil_extern)	!convert external to internal ID
+		if (i==-1) then 
+			write(*,'(a,i0,a)')'Unknown soil-ID ',dummy1,' in calibration.dat'
+			stop 
+		end if
+		k_sat(i,:)=k_sat(i,:)*temp1				!modify Ksat of specified soil
+		
+	END DO
+	CLOSE(11)
 END IF
 
 

@@ -72,7 +72,7 @@ INTEGER FUNCTION id_ext2int(ext_id, id_array)
 		end if
 	END DO
 
-	id_ext2int=-1					!no matchin external ID found
+	id_ext2int=-1					!no matching external ID found
 	return
 
 END FUNCTION id_ext2int
