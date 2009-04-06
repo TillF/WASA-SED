@@ -229,7 +229,7 @@ IF (STATUS == 1) THEN
 		 
 	!loop over all days of year and sum up daily precip
 	DO i=1,dayyear		
-	precip(i,:)=sum(preciph((i-1)*nt+1:i*nt,:),dim=1) 
+		precip(i,:)=sum(preciph((i-1)*nt+1:i*nt,:),dim=1) 
 	END DO
 
   END IF

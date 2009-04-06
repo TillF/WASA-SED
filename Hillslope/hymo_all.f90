@@ -1,7 +1,10 @@
 SUBROUTINE hymo_all(STATUS)
+!Till: fixed bug in output of sediment_production.out, hourly version
+!2009-04-06
+
 !Till: computationally relevant in hourly version: fixed bug that led to excess runoff;
-! fixed faulty summation of hortonian runoff in hourly version
-! minor optimizations and code beautifying
+!fixed faulty summation of hortonian runoff in hourly version
+!minor optimizations and code beautifying
 !2009-04-01
 
 !Till: computationally irrelevant, reformatted *water_subbasin.out (and others) with tab-separated output
@@ -477,13 +480,11 @@ if (doacud)  CALL lake(0,dummy)
   IF (f_sediment_production .AND. dosediment .AND. dt<24) THEN	!only do output if file is desired, sediment modelling is enabled and model runs in sub-daily resolution
 	WRITE(11,'(a,i2,a1)') 'total sediment production [t] for all sub-basins (MAP-IDs) and particle classes{',n_sed_class,'}'
 	IF (n_sed_class==1) then
-		write(fmtstr,'(a,i0,a)')'(A,',subasin,'i6)'		!generate format string
-		WRITE(11,fmtstr)'Year	Day	Timestep',(id_subbas_extern(i),i=1,subasin) 
-		!WRITE(11,'(A,<subasin>(i6))')'Year	Day	Timestep',(id_subbas_extern(i),i=1,subasin) 
+		write(fmtstr,'(a,i0,a)')'(A,',subasin,'a,i0)'		!generate format string
+		WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep',(char(9),id_subbas_extern(i),i=1,subasin) 
 	ELSE
-		write(fmtstr,'(a,i0,a,i0,a)')'(A,',subasin,'(i6,a1,i1,',n_sed_class-1,'i3))'		!generate format string
-		WRITE(11,fmtstr)'Year	Day	Timestep', (id_subbas_extern(i),':',(j,j=1,n_sed_class),i=1,subasin) 
-		!WRITE(11,'(A,<subasin>(i6,a1,i1,<n_sed_class-1>i3))')'Year	Day	Timestep', (id_subbas_extern(i),':',(j,j=1,n_sed_class),i=1,subasin) 
+		write(fmtstr,'(a,i0,a,i0,a)')   '(A,', subasin,'(',n_sed_class,'(a,i0,a,i0)))'		!generate format string
+		WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep', ((char(9),id_subbas_extern(i),':',j,j=1,n_sed_class),i=1,subasin) 
 	END IF
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
@@ -1311,11 +1312,11 @@ IF (STATUS == 3) THEN
 !     Output sub-daily sediment production (t)
   IF (f_sediment_production .AND. dosediment .AND. dt<24) THEN	!only do output if file is desired, sediment modelling is enabled and model runs in sub-daily resolution
 	OPEN(11,FILE=pfadn(1:pfadi)//'sediment_production.out', STATUS='old',POSITION='append')
-   	WRITE(fmtstr,'(a,i0,a,i0)')'(3i6,',n_sed_class,'(',subasin,'f13.4))'	!generate format string
+   	WRITE(fmtstr,'(a,i0,a,i0,a)')'(i0,a,i0,a,i0,',n_sed_class,'(',subasin,'(a,f13.4)))'	!generate format string
 	
 	DO d=1,dayyear
 	    DO count=1,nt
-			WRITE (11,fmtstr)t, d, count, ((sediment_subbasin_t(d,count,i,j),j=1,n_sed_class),i=1,subasin)
+			WRITE (11,fmtstr)t, char(9), d,  char(9), count, ((char(9),sediment_subbasin_t(d,count,i,j),j=1,n_sed_class),i=1,subasin)
 		END DO
 	END DO
 	CLOSE(11)

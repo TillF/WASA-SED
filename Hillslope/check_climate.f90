@@ -1,6 +1,9 @@
 SUBROUTINE check_climate
 !check read climate data for implausible data
 
+!Till: fixed faulty check of hourly rainfall
+!2009-04-06
+ 
 !Till: added check of hourly rainfall
 !2009-03-11
  
@@ -71,16 +74,16 @@ END DO
 
 !check hourly precip data
 if (dohour) then
-	DO jj=1,min(dayyear,size(preciph,DIM=1))
+	DO jj=1,min(dayyear*nt,size(preciph,DIM=1))
 		DO ii=1,size(preciph,DIM=2)
-			if ((precip(jj,ii)>50) .OR. (precip(jj,ii)<0)) then
+			if ((preciph(jj,ii)>50) .OR. (preciph(jj,ii)<0)) then
 				if (jj>=365*nt) then	!leap year values might be missing, don't alert
-					write(*,'(A,i0,a,i0,a,i0,a,f5.1,a)')'Hourly precipitation data of subbasin ',id_subbas_extern(ii),', day ', jj/24+1,', year '&
-						,t,' is implausible(',precip(jj,ii),'). using previous time step.'
+					write(*,'(A,i0,a,i0,a,i0,a,i0,a,f5.1,a)')'Hourly precipitation data of subbasin ',id_subbas_extern(ii),', timestep ', mod(jj,nt),', day ', jj/nt+1,', year '&
+						,t,' is implausible(',preciph(jj,ii),'). using previous time step.'
 				end if
-				precip(jj,ii)=store	!implausible value, use the previous time step
+				preciph(jj,ii)=store	!implausible value, use the previous time step
 			else
-				store=precip(jj,ii)	!last plausible value encountered
+				store=preciph(jj,ii)	!last plausible value encountered
 			end if
 		end do
 	END DO
