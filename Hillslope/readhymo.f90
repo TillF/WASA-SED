@@ -1,5 +1,8 @@
 SUBROUTINE readhymo
 
+!Till: removed assignment to unallocated vars that led to crash in linux
+!2008-04-09
+
 !Till: introduced calibration.dat that contains calibration factors for Ksat of specified soils
 !2008-04-02
 
@@ -1172,10 +1175,10 @@ CALL soildistr(thsprof,tctheta_s)
 
 ! reminder: reservoir related parameters
 
-IF (.NOT. doacud) THEN
-  storcap(:)=0.
-  damflow(:)=0.
-END IF
+!IF (.NOT. doacud) THEN	!Till: outcommented, have not been allocated yet anyway
+!  storcap(:)=0.
+!  damflow(:)=0.
+!END IF
 
 
 ! ..........................................................................

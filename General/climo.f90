@@ -1,4 +1,8 @@
 SUBROUTINE climo(STATUS)
+
+!Till: removed reference to unallocated vars that led to crash in linux
+!2008-04-09
+
 !Till: positioning of file pointer within rain_hourly.dat may have been faulty
 !rain_daily.dat is no longer needed in hourly version
 !2008-10-1
@@ -358,7 +362,12 @@ contains
 					exit
 				END IF
 
-				k=which1(corr_column_pre_subbas_outflow==id_subbas_extern(i))
+				if (associated(corr_column_pre_subbas_outflow)) then
+					k=which1(corr_column_pre_subbas_outflow==id_subbas_extern(i))
+				else
+					k=0
+				end if
+
 				if  (j==size(input_header) .AND. (k==0)) then
 					WRITE(*,'(a,i0,a,a,a)') 'ERROR: Sub-basin-ID ',id_subbas_extern(i),' not found in ',inputfile_name,', quitting.'
 					stop

@@ -1,4 +1,7 @@
 SUBROUTINE hymo_all(STATUS)
+!Till: removed references to unallocated vars that led to crash in linux
+!2008-04-09
+
 !Till: fixed bug in output of sediment_production.out, hourly version
 !2009-04-06
 
@@ -698,8 +701,8 @@ IF (STATUS == 1) THEN
 
 	soilmroot=0.0		!soil moisture first meter
 
-	deep_gw_discharge=0.0	!ground water discharge
-	gw_loss=0.0	!ground water loss from domain
+	if (allocated(deep_gw_discharge)) deep_gw_discharge=0.0	!ground water discharge
+	if (allocated(gw_loss))           gw_loss=0.0	!ground water loss from domain
 
 	if (do_pre_outflow) then		!if water outflow from upstream subbasins is given
 		call read_pre_subbas_outflow		!read

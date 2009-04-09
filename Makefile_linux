@@ -16,8 +16,8 @@ SOURCES=./General/general_h.f90 \
 ./Hillslope/etp_max.f90 \
 ./Hillslope/etp_soil.f90 \
 ./Hillslope/etp_soil_hour.f90 \
-./Hillslope/hymo_all.f90 \
 ./Hillslope/model_state_io.f90 \
+./Hillslope/hymo_all.f90 \
 ./Hillslope/readhymo.f90 \
 ./Hillslope/sedi_yield.f90 \
 ./Hillslope/sedi_yield_subbas.f90 \
