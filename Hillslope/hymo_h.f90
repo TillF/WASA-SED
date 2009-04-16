@@ -1,9 +1,11 @@
 module hymo_h
 save
-! WATERSHED / Sub-basin PARAMETERS
 
-!Till: outcommented unnecessary variable
-!2008-06-24
+! Till: optional subdaily output of actetranspiration.out,qhorton.out,subsurface_runoff.out,total_overlandflow.out,gw_discharge.out,potetranspiration.out,gw_loss.out,gw_recharge.out
+! 2009-04-16
+
+! Till: outcommented unnecessary variable
+! 2008-06-24
  
 ! 2007-10-29 Till:
 ! added variables for time-variant kfkorr and debug-output
@@ -16,6 +18,8 @@ save
 
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-06-30  Time: 13:59:19
+
+! WATERSHED / Sub-basin PARAMETERS
 
 ! IDs of cells in watershed (changed to model internal number)
 !Allocatable      integer id_subbas_intern(subasin)
@@ -260,6 +264,16 @@ real, allocatable ::  soilmroot(:,:)
 ! daily actual evapotranspiration (mm/day)
 !Allocatable       real aet(366,subasin)
 real, allocatable ::  aet(:,:)
+
+real, pointer ::  aet_t(:,:,:)				!actual evapotrans for each day and timestep(366,nt,subasin)
+real, pointer ::  hortflow_t(:,:,:)			!horton flow for each day and timestep(366,nt,subasin)
+real, pointer ::  subflow_t(:,:,:)	!subsurface runoff for each day and timestep(366,nt,subasin)
+real, pointer ::  ovflow_t(:,:,:) !total overland flow for each day and timestep(366,nt,subasin)
+real, pointer ::  deep_gw_discharge_t(:,:,:)		!groundwater discharge for each day and timestep(366,nt,subasin)
+real, pointer ::  pet_t(:,:,:)				!potential evapotrans for each day and timestep(366,nt,subasin)
+real, pointer ::  deep_gw_recharge_t(:,:,:)		!groundwater rescharge for each day and timestep(366,nt,subasin)
+real, pointer ::  gw_loss_t(:,:,:)				!ground water loss (deep percolation in LUs with no ground water flag) for each day and timestep(366,nt,subasin)
+
 ! daily soil evaporation (mm/day)
 !Allocatable       real soilet(366,subasin)
 real, allocatable :: soilet(:,:)
@@ -508,5 +522,31 @@ REAL 	:: frac_direct_gw
 
 real, allocatable :: debug_out(:)		!for debugging purposes !remove
 real, allocatable :: debug_out2(:,:)		!for debugging purposes !remove
+
+
+contains
+
+FUNCTION allocate_hourly_array(f_flag)
+	!allocate array for hourly output
+	use params_h
+	use common_h
+
+	implicit none
+	REAL, pointer :: allocate_hourly_array(:,:,:)
+	LOGICAL, INTENT(IN)                  :: f_flag
+	!CHARACTER(len=*), INTENT(IN)         :: name
+	integer :: istate
+	
+	if (f_flag) then
+		allocate(allocate_hourly_array(366,nt,subasin),STAT = istate)
+		if (istate/=0) then
+			write(*,'(A,i0,a)')'Memory allocation error (',istate,') in hymo-module. Try disabling some hourly output.' 
+			stop
+		end if
+	else
+		nullify(allocate_hourly_array)
+	end if  
+END FUNCTION allocate_hourly_array
+
 
 end module hymo_h

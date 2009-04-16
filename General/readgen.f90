@@ -172,7 +172,7 @@ f_water_subbasin=.FALSE.
 f_deep_gw_recharge=.FALSE.
 f_deep_gw_discharge=.FALSE.
 f_tc_theta=.FALSE.
-f_gw_loss=.FALSE.
+f_daily_gw_loss=.FALSE.
 f_river_degradation=.FALSE.
 f_river_deposition=.FALSE.
 f_river_flow=.FALSE. 
@@ -188,6 +188,14 @@ f_river_bedload=.FALSE.
 f_tc_surfflow=.FALSE.
 f_tc_sedout=.FALSE.
 
+f_actetranspiration=.FALSE.
+f_qhorton=.FALSE.
+f_subsurface_runoff=.FALSE.
+f_total_overlandflow=.FALSE.
+f_gw_discharge=.FALSE.
+f_potetranspiration=.FALSE.
+f_gw_loss=.FALSE.
+f_gw_recharge=.FALSE.
 
 OPEN(11,FILE=pfadp(1:pfadj)// 'outfiles.dat',IOSTAT=istate,STATUS='old')	
 IF (istate==0) THEN
@@ -230,8 +238,8 @@ IF (istate==0) THEN
 			  f_deep_gw_recharge=.TRUE.
 			CASE ('deep_gw_discharge')
 			  f_deep_gw_discharge=.TRUE.
-			CASE ('gw_loss')
-			  f_gw_loss=.TRUE.
+			CASE ('f_daily_gw_loss')
+			  f_daily_gw_loss=.TRUE.
 			CASE ('tc_theta')
 			  f_tc_theta=.TRUE.
 			CASE ('river_degradation')
@@ -262,6 +270,25 @@ IF (istate==0) THEN
 				f_tc_surfflow=.TRUE.
 			CASE ('tc_sedout')
 				f_tc_sedout=.TRUE.
+
+			CASE ('actetranspiration')
+				f_actetranspiration=.TRUE.
+			CASE ('qhorton')
+				f_qhorton=.TRUE.
+			CASE ('subsurface_runoff')
+				f_subsurface_runoff=.TRUE.
+			CASE ('total_overlandflow')
+				f_total_overlandflow=.TRUE.
+			CASE ('gw_discharge')
+				f_gw_discharge=.TRUE.
+			CASE ('potetranspiration')
+				f_potetranspiration=.TRUE.
+			CASE ('gw_loss')
+				f_gw_loss=.TRUE.
+			CASE ('gw_recharge')
+				f_gw_recharge=.TRUE.
+
+
  	END SELECT
 		READ(11,*,IOSTAT=istate)dummy	!try to read next line
 	END DO

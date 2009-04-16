@@ -1,6 +1,9 @@
 SUBROUTINE hymo_all(STATUS)
+!Till: optional subdaily output of actetranspiration.out,qhorton.out,subsurface_runoff.out,total_overlandflow.out,gw_discharge.out,potetranspiration.out,gw_loss.out,gw_recharge.out
+!2009-04-16
+
 !Till: removed references to unallocated vars that led to crash in linux
-!2008-04-09
+!2009-04-09
 
 !Till: fixed bug in output of sediment_production.out, hourly version
 !2009-04-06
@@ -424,9 +427,9 @@ if (doacud)  CALL lake(0,dummy)
   END IF
 
 ! Output ground water loss (deep percolation in LUs with no ground water flag)
-  OPEN(11,FILE=pfadn(1:pfadi)//'gw_loss.out',  &
+  OPEN(11,FILE=pfadn(1:pfadi)//'f_daily_gw_loss.out',  &
       STATUS='replace')
-  IF (f_gw_loss) THEN	
+  IF (f_daily_gw_loss) THEN	
 	allocate (gw_loss(366,subasin))
 	WRITE(11,'(a)') 'ground water loss from model domain [m3] for all sub-basins (MAP-IDs)'
 	write(fmtstr,'(a,i0,a)')'(a4,a,a4,',subasin,'(a,i0))'		!generate format string
@@ -664,6 +667,15 @@ end if
 !!*******************************************************************************
 
 
+	CALL open_subdaily_output(f_actetranspiration, 'actetranspiration.out', 'actual evapotranspiration [mm] for all sub-basins (MAP-IDs)')
+	CALL open_subdaily_output(f_qhorton,           'qhorton.out',           'hortonian overland flow [m**3/timestep] for all sub-basins (MAP-IDs)')
+	CALL open_subdaily_output(f_subsurface_runoff, 'subsurface_runoff.out', 'total subsurface runoff (groundwater+interflow) [m**3/timestep] for all sub-basins (MAP-IDs)')
+	CALL open_subdaily_output(f_total_overlandflow,'total_overlandflow.out','total surface runoff [m**3/timestep] for all sub-basins (MAP-IDs)')
+	CALL open_subdaily_output(f_gw_discharge,      'gw_discharge.out',      'groundwater discharge [m**3/timestep] for all sub-basins (MAP-IDs)')
+	CALL open_subdaily_output(f_potetranspiration, 'potetranspiration.out', 'potential evaporation [mm] for all sub-basins (MAP-IDs)')
+	CALL open_subdaily_output(f_gw_loss,           'gw_loss.out',           'model loss (deep seepage) [m**3/timestep] for all sub-basins (MAP-IDs)')
+	CALL open_subdaily_output(f_gw_recharge,       'gw_recharge.out',       'groundwater recharge [m**3/timestep] for all sub-basins (MAP-IDs)')
+
 END IF
 
 
@@ -702,7 +714,16 @@ IF (STATUS == 1) THEN
 	soilmroot=0.0		!soil moisture first meter
 
 	if (allocated(deep_gw_discharge)) deep_gw_discharge=0.0	!ground water discharge
-	if (allocated(gw_loss))           gw_loss=0.0	!ground water loss from domain
+	if (allocated(gw_loss))           gw_loss          =0.0	!ground water loss from domain
+
+	if (associated(aet_t))				aet_t               =0.0 !evaporation
+	if (associated(hortflow_t))			hortflow_t          =0.0 !hortonian flow
+	if (associated(subflow_t))			subflow_t           =0.0 !subsurface flow (interflow+groundwater)
+	if (associated(ovflow_t))			ovflow_t            =0.0 !overland flow
+	if (associated(deep_gw_discharge_t))	deep_gw_discharge_t =0.0 !groundwater discharge
+	if (associated(pet_t))               pet_t               =0.0 !potential evaporation
+	if (associated(deep_gw_recharge_t))	deep_gw_recharge_t  =0.0 !groundwater rescharge
+	if (associated(gw_loss_t))           gw_loss_t           =0.0 !deep seepage, loss from model domain
 
 	if (do_pre_outflow) then		!if water outflow from upstream subbasins is given
 		call read_pre_subbas_outflow		!read
@@ -1010,6 +1031,8 @@ tc_counter_all=1		!reset TC counter
 			END IF
 
 		
+			if (f_actetranspiration)  aet_t(d,timestep_counter,i_subbas) = aet_t(d,timestep_counter,i_subbas) + aeth*fracterrain(id_tc_type) !Till: store subdaily values, if enabled
+
 		END DO !end of calculations for each terrain component in the landscape unit
 
 		!Till: store sub-daily values in extra array
@@ -1021,7 +1044,12 @@ tc_counter_all=1		!reset TC counter
 		!water_subbasin_t(d,timestep_counter,i_subbas)  = water_subbasin_t(d,timestep_counter,i_subbas) + (qsurf_lu(lu_counter))
 		!old: water_subbasin_t(d,timestep_counter,i_subbas)  = water_subbasin_t(d,timestep_counter,i_subbas) + (1.-intercepted)*(qsurf_lu(lu_counter))
 		
+		!Till: store subdaily values, if enabled
+		if (f_qhorton)            hortflow_t         (d,timestep_counter,i_subbas) = hortflow_t         (d,timestep_counter,i_subbas) + hortsu  (lu_counter  ) 
+		if (f_subsurface_runoff)  subflow_t          (d,timestep_counter,i_subbas) = subflow_t          (d,timestep_counter,i_subbas) + qsub_lu(lu_counter) 
+		if (f_total_overlandflow) ovflow_t           (d,timestep_counter,i_subbas) = ovflow_t           (d,timestep_counter,i_subbas) + qsurf_lu(lu_counter)
 		
+
 		IF (dosediment .AND. allocated(sdr) ) THEN	!apply prespecified SDR, if present
 			sedsu(lu_counter,:)=sdr(i_lu)*sedsu(lu_counter,:)
 			!sedsu(lu_counter,:)=0.*sedsu(lu_counter,:) !test option
@@ -1031,20 +1059,21 @@ tc_counter_all=1		!reset TC counter
 	  END DO
 	  !  END of hourly calculations
       
-      
-	  !  calculate (daily) water balance variables at landscape unit scale
+	  
+	  if (f_potetranspiration) pet_t(d,:,i_subbas) = pet(d,i_subbas)/nt !Till: store subdaily values, if enabled (simple equal distribution over day)      
 
+	  !  calculate (daily) water balance variables at landscape unit scale
 	  DO tc_counter=1,nbrterrain(i_lu)
 		tcid_instance=tcallid(i_subbas,lu_counter,tc_counter)
 		id_tc_type=id_terrain_intern(tc_counter,i_lu)
 		
-		aetsu(lu_counter)=aetsu(lu_counter)+ aettc(tcid_instance)*fracterrain(id_tc_type)
-		laisu(lu_counter)=laisu(lu_counter)+ laitc(tcid_instance)*fracterrain(id_tc_type)
-		soiletsu(lu_counter)=soiletsu(lu_counter)+ soilettc(tcid_instance)*fracterrain(id_tc_type)
-		intcsu(lu_counter)=intcsu(lu_counter)+ intctc(tcid_instance)*fracterrain(id_tc_type)
+		aetsu    (lu_counter)=aetsu    (lu_counter)+ aettc    (tcid_instance)*fracterrain(id_tc_type)
+		laisu    (lu_counter)=laisu    (lu_counter)+ laitc    (tcid_instance)*fracterrain(id_tc_type)
+		soiletsu (lu_counter)=soiletsu (lu_counter)+ soilettc (tcid_instance)*fracterrain(id_tc_type)
+		intcsu   (lu_counter)=intcsu   (lu_counter)+ intctc   (tcid_instance)*fracterrain(id_tc_type)
 	
-		deepgwrsu(lu_counter)=deepgwrsu(lu_counter) +deepgwrtc(tcid_instance)*fracterrain(id_tc_type) !new
-		gwrsu(lu_counter)=gwrsu(lu_counter)+gwrtc(tcid_instance)*fracterrain(id_tc_type)
+		deepgwrsu(lu_counter)=deepgwrsu(lu_counter)+ deepgwrtc(tcid_instance)*fracterrain(id_tc_type) !new
+		gwrsu    (lu_counter)=gwrsu    (lu_counter)+ gwrtc    (tcid_instance)*fracterrain(id_tc_type)
 		
 		IF (dohour) THEN
 			!gwrsu(lu_counter)=gwrsu(lu_counter)+gwrtc(tcid_instance)*fracterrain(id_tc_type)
@@ -1070,7 +1099,7 @@ tc_counter_all=1		!reset TC counter
 		deepgw(i_subbas,lu_counter)=deepgw(i_subbas,lu_counter)+rtemp		!Till: add gw recharge to gw storage [m3]		
 
 		gw_recharge(d,i_subbas)= gw_recharge(d,i_subbas)+rtemp							!Till: for output of gw-recharge
-
+		if (f_gw_recharge)       deep_gw_recharge_t(d,:,i_subbas) = rtemp/nt			!Till: simply distributed for entire day
 
 		!rtemp=0. !George: disable groundwater contribution: enable this line, outcomment next line
 		rtemp=min(deepgw(i_subbas,lu_counter),deepgw(i_subbas,lu_counter)/gw_delay(i_lu))		!Till: compute gw-discharge [m3], at maximum this equals the entire stored volume
@@ -1084,7 +1113,10 @@ tc_counter_all=1		!reset TC counter
 
 		qsub_lu(lu_counter)=qsub_lu(lu_counter)+rtemp2		!Till: add gw-discharge to total subsurface runoff
 		!old water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas)+(1.-intercepted)*rtemp2/nt	!Till: deep gw discharge is distributed equally among all timesteps of day
+		
 		water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas)+rtemp2/nt	!Till: deep gw discharge is distributed equally among all timesteps of day
+		if (f_gw_discharge)       deep_gw_discharge_t(d,:,i_subbas) = rtemp2/nt 
+		
 		deepgwrsu(lu_counter)=deepgwrsu(lu_counter)-deepgwrsu(lu_counter)*(1.-gw_dist(i_lu))	!Till: must be zeroed, everything still in there leaves the model domain
 		deepgw(i_subbas,lu_counter)=deepgw(i_subbas,lu_counter)- rtemp				  			!Till: gw storage is reduced according to outflow (direct outflow to river and outflow to lowest TC)
 		
@@ -1201,10 +1233,13 @@ END IF
 	water_subbasin (d,i_subbas) = water_subbasin (d,i_subbas) / (24*3600)	!convert m**3/d into m**3/s   
 	water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas) / (dt*3600)	!convert m**3 into m**3/s   
 
-  
-	if (f_gw_loss) THEN
-		gw_loss(d,i_subbas)=sum(deepgwrsu(1:(nbr_lu(i_subbas)))*frac_lu(1:(nbr_lu(i_subbas)),i_subbas) )*area(i_subbas)*1.e3		!Till: all deep seepage that has not been transferred to groundwater is lost from model domain, convert to m^3
+	if (f_daily_gw_loss .OR. f_gw_loss) rtemp2=sum(deepgwrsu(1:(nbr_lu(i_subbas)))*frac_lu(1:(nbr_lu(i_subbas)),i_subbas) )*area(i_subbas)*1.e3		!Till: all deep seepage that has not been transferred to groundwater is lost from model domain, convert to m^3
+
+	if (f_daily_gw_loss) THEN
+		gw_loss(d,i_subbas)=rtemp2
 	end if
+
+	if (f_gw_loss) gw_loss_t(d,:,i_subbas) = rtemp2/nt 
 	    
 !!Print hydrologic variable on TC scale. If not used, DISABLE
 !!************************************************************************
@@ -1282,10 +1317,18 @@ IF (STATUS == 3) THEN
 	CALL write_output(f_daily_total_overlandflow,'daily_total_overlandflow.out',ovflow)			! Output daily total overland flow
 	CALL write_output(f_deep_gw_recharge,'deep_gw_recharge.out',gw_recharge)			!   deep groundwater recharge (loss from modell domain / into linear storage)
 	CALL write_output(f_deep_gw_discharge,'deep_gw_discharge.out',deep_gw_discharge)  !   deep groundwater discharge (component of water_subbasin)
-	CALL write_output(f_gw_loss,'gw_loss.out',gw_loss)			!   groundwater losses (leaving model domain)
+	CALL write_output(f_daily_gw_loss,'daily_gw_loss.out',gw_loss)			!   groundwater losses (leaving model domain)
 	CALL write_output(f_daily_subsurface_runoff,'daily_subsurface_runoff.out',subflow)		!     Output total subsurface runoff (m³/d)
 
-
+	CALL write_subdaily_output(f_actetranspiration, 'actetranspiration.out',  aet_t)		!     subdaily evapotranspiration [mm]
+	CALL write_subdaily_output(f_qhorton,           'qhorton.out'          ,  hortflow_t)
+	CALL write_subdaily_output(f_subsurface_runoff, 'subsurface_runoff.out',  subflow_t)
+	CALL write_subdaily_output(f_total_overlandflow,'total_overlandflow.out', ovflow_t)
+	CALL write_subdaily_output(f_gw_discharge,      'gw_discharge.out',       deep_gw_discharge_t)
+	CALL write_subdaily_output(f_gw_recharge,       'gw_recharge.out',        deep_gw_recharge_t)
+	CALL write_subdaily_output(f_potetranspiration, 'potetranspiration.out',  pet_t)
+	CALL write_subdaily_output(f_gw_loss,           'gw_loss.out',            gw_loss_t)
+	
 
 ! Output sub-daily water flux   
   IF (f_water_subbasin) THEN	!Till: if sub-daily resolution is required
@@ -1448,28 +1491,67 @@ contains
 	END FUNCTION calc_seasonality
 
 
+  
+
+	SUBROUTINE open_subdaily_output(f_flag,file_name,headerline)
+	! open file Output for subdaily values or delete any existing files 
+		IMPLICIT NONE
+		LOGICAL, INTENT(IN)                  :: f_flag
+		CHARACTER(len=*), INTENT(IN)         :: file_name,headerline
+
+		OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='replace')
+		IF (f_flag) THEN	!if output file is enabled
+			WRITE(11,'(a)') headerline
+			write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'		!generate format string
+			WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep', (char(9),id_subbas_extern(i),i=1,subasin)
+			CLOSE(11)
+		ELSE				!delete any existing file, if no output is desired
+			CLOSE(11,status='delete')
+		END IF
+	END SUBROUTINE open_subdaily_output
+
+
 	
 	SUBROUTINE write_output(f_flag,file_name,value_array)
 	! Output daily values of given array
-	IMPLICIT NONE
-	LOGICAL, INTENT(IN)                  :: f_flag
-	CHARACTER(len=*), INTENT(IN)         :: file_name
-	REAL, INTENT(IN)                  :: value_array(:,:)
+		IMPLICIT NONE
+		LOGICAL, INTENT(IN)                  :: f_flag
+		CHARACTER(len=*), INTENT(IN)         :: file_name
+		REAL, INTENT(IN)                  :: value_array(:,:)
 
-	
-	  IF (f_flag) THEN	!if output file is enabled
-		  OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old',POSITION='append')
-		  
-		write(fmtstr,'(a,i0,a)') '(i0,a,i0,',subasin,'(a,f14.3))'		!generate format string (daily format)
-		DO d=1,dayyear
-			write(11,trim(fmtstr))t,char(9),d,(char(9),value_array(d,i),i=1,subasin)
-		END DO
+		IF (f_flag) THEN	!if output file is enabled
+			OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old',POSITION='append')
 
+			write(fmtstr,'(a,i0,a)') '(i0,a,i0,',subasin,'(a,f14.3))'		!generate format string (daily format)
+			DO d=1,dayyear
+				write(11,trim(fmtstr))t,char(9),d,(char(9),value_array(d,i),i=1,subasin)
+			END DO
 
-
-		  CLOSE(11)
-	  END IF
+			CLOSE(11)
+		END IF
 	END SUBROUTINE write_output
+
+	SUBROUTINE write_subdaily_output(f_flag,file_name,value_array)
+	! Output subdaily values of given array
+		IMPLICIT NONE
+		LOGICAL, INTENT(IN)                  :: f_flag
+		CHARACTER(len=*), INTENT(IN)         :: file_name
+		REAL, POINTER             :: value_array(:,:,:)
+
+		IF (f_flag) THEN	!if output file is enabled
+			OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old',POSITION='append')
+
+			write(fmtstr,'(a,i0,a)') '(i0,a,i0,a,i0,',subasin,'(a,f11.6))'		!generate format string (subdaily format)
+			DO d=1,dayyear
+				DO j=1,nt
+					WRITE (11,fmtstr)t, char(9), d, char(9), j, (char(9),value_array(d,j,i),i=1,subasin) 
+				END DO
+			END DO
+			CLOSE(11)
+		END IF
+	END SUBROUTINE write_subdaily_output
+
+
 
 END SUBROUTINE hymo_all
 

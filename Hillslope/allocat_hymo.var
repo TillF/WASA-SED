@@ -1,3 +1,6 @@
+!Till: optional subdaily output of actetranspiration.out,qhorton.out,subsurface_runoff.out,total_overlandflow.out,gw_discharge.out,potetranspiration.out,gw_loss.out,gw_recharge.out
+!2009-04-16
+
 !Till: throw error message if allocation fails
 !2008-08-12
 
@@ -63,7 +66,6 @@
 	 id_lu_extern(nsoter), &
 	 nbrterrain(nsoter), &
 	 id_terrain_intern(maxterrain,nsoter), &
-!Till: is this used at all?	 possoter(nsoter), &
 	 gw_flag(nsoter), &
 	 kfsu(nsoter), &
 	 slength(nsoter), &
@@ -147,4 +149,31 @@
 	
 	if (istate/=0) then
 		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in hymo-module: ' 
+		stop
 	end if
+
+	aet_t              => allocate_hourly_array(f_actetranspiration)
+	hortflow_t         => allocate_hourly_array(f_qhorton)
+	subflow_t          => allocate_hourly_array(f_subsurface_runoff)
+	ovflow_t           => allocate_hourly_array(f_total_overlandflow)
+	deep_gw_discharge_t=> allocate_hourly_array(f_gw_discharge)
+	pet_t              => allocate_hourly_array(f_potetranspiration)
+	deep_gw_recharge_t => allocate_hourly_array(f_gw_recharge)
+	gw_loss_t          => allocate_hourly_array(f_gw_loss)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

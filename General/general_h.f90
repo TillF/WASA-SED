@@ -84,10 +84,10 @@ real, allocatable :: particle_classes(:)	!upper limits of particle size classes 
 
 !flags for selection which output files will be created
 LOGICAL :: f_daily_actetranspiration,f_daily_potetranspiration, f_daily_qhorton,f_daily_qin_m3s,f_daily_qout_m3s,f_daily_rain,f_daily_runoff
-LOGICAL :: f_daily_sediment_production,f_daily_subsurface_runoff,f_daily_theta,f_daily_total_overlandflow,f_daily_water_subbasin,f_routing_response,f_sediment_production,f_water_subbasin,f_deep_gw_recharge,f_deep_gw_discharge,f_gw_loss,f_tc_theta
+LOGICAL :: f_daily_sediment_production,f_daily_subsurface_runoff,f_daily_theta,f_daily_total_overlandflow,f_daily_water_subbasin,f_routing_response,f_sediment_production,f_water_subbasin,f_deep_gw_recharge,f_deep_gw_discharge,f_daily_gw_loss,f_tc_theta
 LOGICAL :: f_tc_surfflow, f_tc_sedout
 LOGICAL :: f_river_degradation, f_river_deposition, f_river_flow, f_river_flow_dailyaverage, f_river_flowdepth, f_river_sediment_concentration, f_river_sediment_total, f_river_sediment_total_dailyaverage, f_river_storage, f_river_sediment_storage, f_river_velocity, f_river_bedload		 
-
+LOGICAL :: f_actetranspiration,f_qhorton,f_subsurface_runoff,f_total_overlandflow,f_gw_discharge,f_potetranspiration,f_gw_loss,f_gw_recharge
 
 
 LOGICAL :: doloadstate=.TRUE.			!load initial values before model run
