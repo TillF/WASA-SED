@@ -1,4 +1,9 @@
 SUBROUTINE hymo_all(STATUS)
+
+!Till: fixed errors of aggragation of hourly values into daily output in 
+!daily_actetranspiration, daily_qhorton, daily_subsurface_runoff, daily_total_overlandflow, daily_water_subbasin, gw_discharge, gw_recharge
+!2009-04-17
+
 !Till: optional subdaily output of actetranspiration.out,qhorton.out,subsurface_runoff.out,total_overlandflow.out,gw_discharge.out,potetranspiration.out,gw_loss.out,gw_recharge.out
 !2009-04-16
 
@@ -734,7 +739,7 @@ END IF
 
 !-------------------------------------------------------------------
 IF (STATUS == 2) THEN
-  !** Calculation for one timestep
+  !** Calculation for one timestep (i.e. 1 day)
 
 
 tc_counter_all=1		!reset TC counter
@@ -834,16 +839,16 @@ tc_counter_all=1		!reset TC counter
 ! LOOPs through required number of timesteps (for current day)
       DO timestep_counter=1,nt
 
-        qsurf_lu(lu_counter)=0.		!Till: reset variables for summing up at the LU-scale
-		qsub_lu(lu_counter)=0.
-		gwrsu(lu_counter)=0.
-		hortsu(lu_counter)=0.
-		aetsu(lu_counter)=0.
-		laisu(lu_counter)=0.
-		soiletsu(lu_counter)=0.
-		intcsu(lu_counter)=0.
-		soilmsu(lu_counter)=0.
-		sedsu(lu_counter,:)=0.
+        qsurf_lu (lu_counter)=0.		!Till: reset variables for summing up at the LU-scale
+		qsub_lu  (lu_counter)=0.
+		gwrsu    (lu_counter)=0.
+		hortsu   (lu_counter)=0.
+		aetsu    (lu_counter)=0.
+		laisu    (lu_counter)=0.
+		soiletsu (lu_counter)=0.
+		intcsu   (lu_counter)=0.
+		soilmsu  (lu_counter)=0.
+		sedsu    (lu_counter,:)=0.
 		
 		surfflow_in(:)=0.			!Till: reset TC-related variables
         surfflow_out(:)=0.
@@ -901,8 +906,8 @@ tc_counter_all=1		!reset TC counter
 
 	        CALL soilwat(hh,d,m,i_subbas,i_subbas,i_lu,lu_counter,tcid_instance,id_tc_type,tc_counter,thact,  &
             thactroot,surfflow_in(tc_counter),surfflow_out(tc_counter),  &
-            sublat_in(tc_counter),sublat_out(tc_counter),gwr,deepgwr, horttc(tcid_instance),  &
-            aettc(tcid_instance), laitc(tcid_instance),  &
+            sublat_in(tc_counter),sublat_out(tc_counter),gwr,deepgwr, horth,  &
+            aeth, laitc(tcid_instance),  &
             soilettc(tcid_instance), intctc(tcid_instance),  &
             prec,precday,prechall, pet(d,i_subbas),  &
             tcarea,balance_tc, rootd_act,height_act,lai_act,alb_act,sed_in(tc_counter,:),sed_out(tc_counter,:))
@@ -933,17 +938,17 @@ tc_counter_all=1		!reset TC counter
 			CALL soilwat(timestep_counter,d,m,i_subbas,i_subbas,i_lu,lu_counter,tcid_instance,id_tc_type,tc_counter,  &
 			thact,thactroot,surfflow_in(tc_counter),  &
 			surfflow_out(tc_counter),sublat_in(tc_counter),sublat_out(tc_counter),  &
-			gwr,deepgwr,horttc(tcid_instance),aeth,laih,soileth,inth,  &
+			gwr,deepgwr,horth,aeth,laih,soileth,inth,  &
 			prec,precday,prechall(1:24), pet(d,i_subbas),  &
 			tcarea,balance_tc, rootd_act,height_act,lai_act,alb_act,sed_in(tc_counter,:),sed_out(tc_counter,:))
 			balance=balance+balance_tc*fracterrain(id_tc_type)	!Till: compute water balance for LU [mm]
 			
-			gwrtc    (tcid_instance)=gwrtc    (tcid_instance)+gwr
+			gwrtc    (tcid_instance)=gwrtc    (tcid_instance)+gwr		!ii make these assignements optional
 			deepgwrtc(tcid_instance)=deepgwrtc(tcid_instance)+deepgwr	 
-			aettc    (tcid_instance)=aettc    (tcid_instance)+aeth
 			laitc    (tcid_instance)=laitc    (tcid_instance)+laih/24.
 			soilettc (tcid_instance)=soilettc (tcid_instance)+soileth
 			intctc   (tcid_instance)=intctc   (tcid_instance)+inth
+			
 
 			IF (timestep_counter == 24) THEN
 				soilwater(d,tcid_instance)=thact
@@ -951,8 +956,9 @@ tc_counter_all=1		!reset TC counter
 			END IF
 
 		  END IF	!dohour
-
-
+		  horttc   (tcid_instance)=horttc   (tcid_instance)+horth			!ii: possibly obsolete, since not used any further
+		  aettc    (tcid_instance)=aettc    (tcid_instance)+aeth
+		  
 		  !conrad: convert thact (in mm) into percent of soil volume using mean soil depth in tc
 		  if (f_tc_theta) then
 			!theta_tc(d,tc_counter_all)=thact/meandepth_tc(i_subbas,lu_counter,tc_counter) !original version, using mean theta for entire profile (instead of topmost horizon only, see below)
@@ -991,7 +997,7 @@ tc_counter_all=1		!reset TC counter
 				sublat_in(tc_counter+1)  =sublat_in(tc_counter+1)+sublat_out(tc_counter)
 				IF (doalllattc) THEN
 				  surfflow_in(tc_counter+1)=surfflow_in(tc_counter+1)+surfflow_out(tc_counter)
-				  hortsu(lu_counter)=hortsu(lu_counter)
+				  !hortsu(lu_counter)=hortsu(lu_counter)
 				  sed_in(tc_counter+1,:)=sed_out(tc_counter,:)	!Till: all sediment leaving the upper TC enters the next downslope TC
 													! prepare sed_in this for the next downslope TC
 				ELSE
@@ -1004,7 +1010,7 @@ tc_counter_all=1		!reset TC counter
 	!  Remaining outflow of each terrain component, which is not routed to lower TCs
 	!  is surface runoff of entire landscape unit (direct dunoff to river)
 				  qsurf_lu(lu_counter  )=qsurf_lu(lu_counter  )+surfflow_out(tc_counter)   * fractemp(tc_counter)/temp2
-				  hortsu  (lu_counter  )=hortsu  (lu_counter  )+horttc      (tcid_instance)* fractemp(tc_counter)/temp2
+				  hortsu  (lu_counter  )=hortsu  (lu_counter  )+horth                      * fractemp(tc_counter)/temp2
 				  sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:) * fractemp(tc_counter)/temp2
 							!Till: remaining sediment that is not routed to the lower TC reaches the river directly
 				END IF
@@ -1012,7 +1018,7 @@ tc_counter_all=1		!reset TC counter
 				qsub_lu   (lu_counter)=qsub_lu(lu_counter)+sublat_out(tc_counter)
 
 				qsurf_lu(lu_counter  )=qsurf_lu(lu_counter)  +surfflow_out(tc_counter)
-				hortsu  (lu_counter  )=hortsu  (lu_counter)  +horttc      (tcid_instance)
+				hortsu  (lu_counter  )=hortsu  (lu_counter)  +horth
 				sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:)
 			  END IF
 
@@ -1022,7 +1028,7 @@ tc_counter_all=1		!reset TC counter
 			  qsurf_lu(lu_counter  )=qsurf_lu(lu_counter  )+surfflow_out(tc_counter)
 			  qsub_lu (lu_counter  )=qsub_lu (lu_counter  )+sublat_out  (tc_counter)
 			  sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:)
-			  hortsu  (lu_counter  )=hortsu  (lu_counter  )+horttc      (tcid_instance)
+			  hortsu  (lu_counter  )=hortsu  (lu_counter  )+horth
 			END IF
 			
 		
@@ -1031,7 +1037,7 @@ tc_counter_all=1		!reset TC counter
 			END IF
 
 		
-			if (f_actetranspiration)  aet_t(d,timestep_counter,i_subbas) = aet_t(d,timestep_counter,i_subbas) + aeth*fracterrain(id_tc_type) !Till: store subdaily values, if enabled
+			if (f_actetranspiration)  aet_t(d,timestep_counter,i_subbas) = aet_t(d,timestep_counter,i_subbas) + aeth*fracterrain(id_tc_type)*frac_lu(lu_counter,i_subbas) !Till: store subdaily values, if enabled
 
 		END DO !end of calculations for each terrain component in the landscape unit
 
@@ -1045,9 +1051,11 @@ tc_counter_all=1		!reset TC counter
 		!old: water_subbasin_t(d,timestep_counter,i_subbas)  = water_subbasin_t(d,timestep_counter,i_subbas) + (1.-intercepted)*(qsurf_lu(lu_counter))
 		
 		!Till: store subdaily values, if enabled
-		if (f_qhorton)            hortflow_t         (d,timestep_counter,i_subbas) = hortflow_t         (d,timestep_counter,i_subbas) + hortsu  (lu_counter  ) 
-		if (f_subsurface_runoff)  subflow_t          (d,timestep_counter,i_subbas) = subflow_t          (d,timestep_counter,i_subbas) + qsub_lu(lu_counter) 
-		if (f_total_overlandflow) ovflow_t           (d,timestep_counter,i_subbas) = ovflow_t           (d,timestep_counter,i_subbas) + qsurf_lu(lu_counter)
+		if (f_qhorton)  then
+		          hortflow_t(d,timestep_counter,i_subbas) = hortflow_t(d,timestep_counter,i_subbas)  + hortsu  (lu_counter) 
+		end if
+		if (associated(subflow_t)) subflow_t (d,timestep_counter,i_subbas) = subflow_t  (d,timestep_counter,i_subbas) + qsub_lu (lu_counter) 
+		if (associated(ovflow_t )) ovflow_t  (d,timestep_counter,i_subbas) = ovflow_t   (d,timestep_counter,i_subbas) + qsurf_lu(lu_counter)
 		
 
 		IF (dosediment .AND. allocated(sdr) ) THEN	!apply prespecified SDR, if present
@@ -1057,7 +1065,7 @@ tc_counter_all=1		!reset TC counter
 		
 		sediment_subbasin_t(d,timestep_counter,i_subbas,:)=sediment_subbasin_t(d,timestep_counter,i_subbas,:)+sedsu(lu_counter,:) 
 	  END DO
-	  !  END of hourly calculations
+	  !  END of loop over subdaily timesteps
       
 	  
 	  if (f_potetranspiration) pet_t(d,:,i_subbas) = pet(d,i_subbas)/nt !Till: store subdaily values, if enabled (simple equal distribution over day)      
@@ -1076,13 +1084,9 @@ tc_counter_all=1		!reset TC counter
 		gwrsu    (lu_counter)=gwrsu    (lu_counter)+ gwrtc    (tcid_instance)*fracterrain(id_tc_type)
 		
 		IF (dohour) THEN
-			!gwrsu(lu_counter)=gwrsu(lu_counter)+gwrtc(tcid_instance)*fracterrain(id_tc_type)
-			!deepgwrsu(lu_counter)=deepgwrsu(lu_counter) +deepgwrtc(tcid_instance)*fracterrain(id_tc_type)
 			soilmsu(lu_counter)=soilmsu(lu_counter)+ thact*fracterrain(id_tc_type)	!Till: use last value of day to compute mean soil moisture in LU 
 																					!thact ist nur von letzter TC in LU. Müsste das nicht irgendwie in die TC-Schleife mit rein?
 		ELSE
-			!gwrsu(lu_counter)=gwrsu(lu_counter)+gwr*fracterrain(id_tc_type)	!falsch: gwr und deepgwr müssen zwischengespeichert werden (wie in Stundenversion)
-			!deepgwrsu(lu_counter)=deepgwrsu(lu_counter)+deepgwr*fracterrain(id_tc_type)
 			soilmrootsu(lu_counter)=soilmrootsu(lu_counter)+ thactroot*fracterrain(id_tc_type)	!ii this is most likely wrong because thactroot is from last TC only
 			frac_satsu=frac_satsu+sum(frac_sat(tcid_instance,:))* fracterrain(id_tc_type)
 		END IF
@@ -1099,7 +1103,7 @@ tc_counter_all=1		!reset TC counter
 		deepgw(i_subbas,lu_counter)=deepgw(i_subbas,lu_counter)+rtemp		!Till: add gw recharge to gw storage [m3]		
 
 		gw_recharge(d,i_subbas)= gw_recharge(d,i_subbas)+rtemp							!Till: for output of gw-recharge
-		if (f_gw_recharge)       deep_gw_recharge_t(d,:,i_subbas) = rtemp/nt			!Till: simply distributed for entire day
+		if (f_gw_recharge)       deep_gw_recharge_t(d,:,i_subbas) = deep_gw_recharge_t(d,:,i_subbas) + rtemp/nt			!Till: simply distributed for entire day
 
 		!rtemp=0. !George: disable groundwater contribution: enable this line, outcomment next line
 		rtemp=min(deepgw(i_subbas,lu_counter),deepgw(i_subbas,lu_counter)/gw_delay(i_lu))		!Till: compute gw-discharge [m3], at maximum this equals the entire stored volume
@@ -1115,7 +1119,8 @@ tc_counter_all=1		!reset TC counter
 		!old water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas)+(1.-intercepted)*rtemp2/nt	!Till: deep gw discharge is distributed equally among all timesteps of day
 		
 		water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas)+rtemp2/nt	!Till: deep gw discharge is distributed equally among all timesteps of day
-		if (f_gw_discharge)       deep_gw_discharge_t(d,:,i_subbas) = rtemp2/nt 
+		if (f_gw_discharge)       deep_gw_discharge_t(d,:,i_subbas) = deep_gw_discharge_t(d,:,i_subbas) + rtemp2/nt 
+		if (f_subsurface_runoff)  subflow_t          (d,:,i_subbas) = subflow_t          (d,:,i_subbas) + rtemp2/nt !Till: groundwater is (traditionally) included in subsurface fluxes
 		
 		deepgwrsu(lu_counter)=deepgwrsu(lu_counter)-deepgwrsu(lu_counter)*(1.-gw_dist(i_lu))	!Till: must be zeroed, everything still in there leaves the model domain
 		deepgw(i_subbas,lu_counter)=deepgw(i_subbas,lu_counter)- rtemp				  			!Till: gw storage is reduced according to outflow (direct outflow to river and outflow to lowest TC)
@@ -1139,16 +1144,17 @@ tc_counter_all=1		!reset TC counter
 !  runoff generated in landscape units is simply summed to give runoff of
 !  entire subbasin
 !  ETP, horton flow. gwr and soil moisture is area-weighted mean (mm)
-      soilm(d,i_subbas)=   soilm(d,i_subbas)+ soilmsu(lu_counter)*frac_lu(lu_counter,i_subbas)		!ii compute values for each LU, do final summing up outside loop using 'sum'
-      soilmroot(d,i_subbas)=soilmroot(d,i_subbas)+  soilmrootsu(lu_counter)*frac_lu(lu_counter,i_subbas)
-      aet(d,i_subbas)=     aet(d,i_subbas)+aetsu(lu_counter)* frac_lu(lu_counter,i_subbas)
-      laimun(d,i_subbas)=     laimun(d,i_subbas)+laisu(lu_counter)* frac_lu(lu_counter,i_subbas)
-      soilet(d,i_subbas)=  soilet(d,i_subbas)+soiletsu(lu_counter)* frac_lu(lu_counter,i_subbas)
-      intc(d,i_subbas)=    intc(d,i_subbas)+intcsu(lu_counter)* frac_lu(lu_counter,i_subbas)
-      hortflow(d,i_subbas)=hortflow(d,i_subbas)+hortsu(lu_counter)
-      ovflow(d,i_subbas)=  ovflow(d,i_subbas)+qsurf_lu(lu_counter)
-	  rtemp=ovflow(d,i_subbas)
-	  subflow(d,i_subbas)= subflow(d,i_subbas)+qsub_lu(lu_counter)
+      soilm    (d,i_subbas)= soilm    (d,i_subbas)+ soilmsu   (lu_counter)*frac_lu(lu_counter,i_subbas)		!ii compute values for each LU, do final summing up outside loop using 'sum'
+      soilmroot(d,i_subbas)= soilmroot(d,i_subbas)+soilmrootsu(lu_counter)*frac_lu(lu_counter,i_subbas)
+      aet      (d,i_subbas)= aet      (d,i_subbas)+aetsu      (lu_counter)*frac_lu(lu_counter,i_subbas)
+      laimun   (d,i_subbas)= laimun   (d,i_subbas)+laisu      (lu_counter)*frac_lu(lu_counter,i_subbas)
+      soilet   (d,i_subbas)= soilet   (d,i_subbas)+soiletsu   (lu_counter)*frac_lu(lu_counter,i_subbas)
+      intc     (d,i_subbas)= intc     (d,i_subbas)+intcsu     (lu_counter)*frac_lu(lu_counter,i_subbas)
+
+!      hortflow (d,i_subbas)= hortflow (d,i_subbas)+hortsu     (lu_counter)
+!      ovflow   (d,i_subbas)= ovflow   (d,i_subbas)+qsurf_lu   (lu_counter)
+!	   subflow  (d,i_subbas)= subflow  (d,i_subbas)+qsub_lu    (lu_counter)
+
       !gw_recharge(d,i_subbas)= gw_recharge(d,i_subbas)+gwrsu(lu_counter)*  frac_lu(lu_counter,i_subbas)
       !deepgw_r(d,i_subbas)=    deepgw_r(d,i_subbas)+deepgwrsu(lu_counter)* frac_lu(lu_counter,i_subbas)*area(i_subbas)*1.e3 !Till: sum up ground water recharge, convert to m3
       sofarea(d,i_subbas)= sofarea(d,i_subbas)+ frac_satsu*frac_lu(lu_counter,i_subbas)
@@ -1156,6 +1162,12 @@ tc_counter_all=1		!reset TC counter
 	  sediment_subbasin(d,i_subbas,:)= sediment_subbasin(d,i_subbas,:)+sedsu(lu_counter,:)
     END DO
 !  this is the end of calculation for each landscape unit in current cell/subbasin
+
+	!Till: aggregation for daily output
+	hortflow (d,i_subbas)= hortflow (d,i_subbas)+sum(hortflow_t(d,:,i_subbas))
+	
+	ovflow   (d,i_subbas)= ovflow   (d,i_subbas)+sum(ovflow_t  (d,:,i_subbas))
+	subflow  (d,i_subbas)= subflow  (d,i_subbas)+sum(subflow_t (d,:,i_subbas))
     
 !  runoff generated in cells units is simply summed to give runoff of
 !  entire watershed
@@ -1329,11 +1341,12 @@ IF (STATUS == 3) THEN
 	CALL write_subdaily_output(f_potetranspiration, 'potetranspiration.out',  pet_t)
 	CALL write_subdaily_output(f_gw_loss,           'gw_loss.out',            gw_loss_t)
 	
+!	CALL write_subdaily_output(f_water_subbasin,    'water_subbasin.out',     water_subbasin_t)	!ii use this output routine instead of the lower one
 
 ! Output sub-daily water flux   
   IF (f_water_subbasin) THEN	!Till: if sub-daily resolution is required
 	OPEN(11,FILE=pfadn(1:pfadi)//'water_subbasin.out', STATUS='old',POSITION='append')
-	write(fmtstr,'(a,i0,a)') '(i0,a,i0,a,i0,',subasin,'(a,f11.6))'		!generate format string
+	write(fmtstr,'(a,i0,a)') '(i0,a,i0,a,i0,',subasin,'(a,f11.5))'		!generate format string
 	DO d=1,dayyear
 		DO j=1,nt
 			WRITE (11,fmtstr)t, char(9), d, char(9), j, (char(9),water_subbasin_t(d,j,i),i=1,subasin) !in m**3/s
@@ -1537,11 +1550,13 @@ contains
 		LOGICAL, INTENT(IN)                  :: f_flag
 		CHARACTER(len=*), INTENT(IN)         :: file_name
 		REAL, POINTER             :: value_array(:,:,:)
+		INTEGER :: digits
 
 		IF (f_flag) THEN	!if output file is enabled
 			OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old',POSITION='append')
 
-			write(fmtstr,'(a,i0,a)') '(i0,a,i0,a,i0,',subasin,'(a,f11.6))'		!generate format string (subdaily format)
+			digits=floor(log10(max(1.0,maxval(value_array))))+1	!Till: number of pre-decimal digits required
+			write(fmtstr,'(a,i0,a,i0,a,i0,a)') '(i0,a,i0,a,i0,',subasin,'(a,f',max(11,digits),'.',max(0,11-digits-1),'))'		!generate format string (subdaily format)
 			DO d=1,dayyear
 				DO j=1,nt
 					WRITE (11,fmtstr)t, char(9), d, char(9), j, (char(9),value_array(d,j,i),i=1,subasin) 

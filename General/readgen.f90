@@ -293,6 +293,8 @@ IF (istate==0) THEN
 		READ(11,*,IOSTAT=istate)dummy	!try to read next line
 	END DO
 	CLOSE(11)
+	
+	f_qhorton= f_qhorton .OR. f_daily_qhorton
 
 ELSE
 	WRITE(*,*)pfadp(1:pfadj)// 'outfiles.dat could not be opened. Using default output files.'
