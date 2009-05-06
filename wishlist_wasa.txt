@@ -6,7 +6,7 @@ responsibility all:
 - improve performance indicated with "ii" in the source code
 - abschaltbare Ausgabedateien (siehe outfiles.dat)(optimierte Geschwindigkeit) (Till)
 - Tab separated output in all output files (see output of hillslope routines)(Till)
-- flexible input-files: Reihenfolge variierbar  und durch Schlüsselworte gekennzeichnet(Till)
+- flexible input-files: Reihenfolge variierbar und durch Schlüsselworte gekennzeichnet(Till)
 	und/oder(Till)
 - control-files getrennt nach Aufgabenfeld (Hill,river, reservoir;hydro, ero)(Till)
 - dynamischer/wählbarer Zeitraum, in dem Ergebniss gespeichert werden bis zu Ausgabe in Dateien(Till)
@@ -19,10 +19,11 @@ responsibility all:
 - also use hourly humidity,temperature,radiation; not only rainfall(Till)
 - allow output in hourly resolution for also for other variables than water_subbasin(Till)
 - graceful termination if input files are not found
+- delete output files of prior runs if they are disabled to avoid confusion (see hymo_all.f90) (Till)
 
 responsibility Till:
 - create output directory, if non-existent(Till)
-- open input files with read-only (allows access to opened files, done for climo-files)(Till)
+- open input files with read-only (allows access to already opened files, done for climo-files)(Till)
 - read maxsoter, maxterrain, maxsoil, maxhori, ntrans from structure of inputfile rather than from maxdim, nveg, nsoil(Till)
 - multiple Subbasins could use the same climate series(Till)
 - Tolerante Reihenfolge der Ids in den unterschiedlichen Eingabedateien (realisiert für soil_particles.dat, rainy_seasons.dat,climo-files (except rain_hourly))(Till)

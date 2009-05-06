@@ -1,4 +1,6 @@
 SUBROUTINE hymo_all(STATUS)
+!Till: fixed assignment to hortflow that led to crash when its output was disabled
+!2009-05-06
 
 !Till: fixed errors of aggragation of hourly values into daily output in 
 !daily_actetranspiration, daily_qhorton, daily_subsurface_runoff, daily_total_overlandflow, daily_water_subbasin, gw_discharge, gw_recharge
@@ -1164,8 +1166,7 @@ tc_counter_all=1		!reset TC counter
 !  this is the end of calculation for each landscape unit in current cell/subbasin
 
 	!Till: aggregation for daily output
-	hortflow (d,i_subbas)= hortflow (d,i_subbas)+sum(hortflow_t(d,:,i_subbas))
-	
+	if (f_qhorton)  hortflow(d,i_subbas)= hortflow (d,i_subbas)+sum(hortflow_t(d,:,i_subbas))
 	ovflow   (d,i_subbas)= ovflow   (d,i_subbas)+sum(ovflow_t  (d,:,i_subbas))
 	subflow  (d,i_subbas)= subflow  (d,i_subbas)+sum(subflow_t (d,:,i_subbas))
     
