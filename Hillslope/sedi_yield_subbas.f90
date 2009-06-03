@@ -1,5 +1,8 @@
 SUBROUTINE sedi_yield_subbas(subbas_id, q_out, sed_yield_subbas)
 
+! Pedro: computationally relevant correction on q_ov by kfkorrday (overland flow with duration according to rainfall, and not during 24 h)
+! 2009-06-03
+
 ! Till: cleanup of storage structure for SVCs
 ! 2008-09-11
 
@@ -170,7 +173,7 @@ manning_n=manning_n_subbas
 LS_fac=LS_subbas
 L_slp=L_slp_subbas
 
-q_ov=q_out/(dt*3600)/(area(subbas_id)*1e6/L_slp_subbas)				!compute average overland flow rate [m**3/s] on a 1-m-strip
+q_ov=q_out/(dt*3600/kfkorr_day)/(area(subbas_id)*1e6/L_slp_subbas)				!compute average overland flow rate [m**3/s] on a 1-m-strip
 v_ov=(q_ov**0.4)*((slope_subbas/100)**0.3)/manning_n_subbas**0.6	!overland flow velocity [m/s] (6.3.4)
 t_conc=L_slp_subbas/(3600*v_ov)										!compute time of concentration [h] (6.3.3)
 

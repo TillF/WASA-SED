@@ -1310,7 +1310,13 @@ END IF
 allocate (sedsu(maxsoter,n_sed_class))
 allocate (sediment_subbasin(366,subasin,n_sed_class))	
 allocate (sediment_subbasin_t(366,nt,subasin,n_sed_class))	
+allocate (runoff_TC(subasin,nterrain))
+allocate (sed_yield_TC(subasin,nterrain))
 allocate (deposition_TC(subasin,nterrain))
+allocate (area_TC(subasin,nterrain))
+allocate (cum_erosion_TC(subasin,nterrain))
+allocate (cum_deposition_TC(subasin,nterrain))
+
 
 
 contains

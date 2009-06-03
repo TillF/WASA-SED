@@ -4,6 +4,9 @@ SUBROUTINE soilwat(hh,day,month,i_subbas2,i_ce,i_lu,oc2,tcid_instance2,id_tc_typ
         tcsoilet,tcintc,prec,precday,prechall2,petday,  &
         tcarea2,bal, rootd_act,height_act,lai_act,alb_act,sed_in_tc,sed_out_tc)
 
+! Pedro: computationally relevant correction on q_ov by kfkorrday (overland flow with duration according to rainfall, and not during 24 h)
+! 2009-06-03
+
 !Till: fixed bug in iterations of infiltration that probably was introduce in the changes of 2008-07-28 (produced waterbalance mismatch in certain cases) 
 !2009-03-27
 
@@ -2887,7 +2890,7 @@ if (dosediment .AND. (q_surf_out > 0)) then !if hillslope erosion is to be compu
 	r=atan(slope(id_tc_type2)/100)				!convert slope [%] to radiant, avoid multiple computation
 	L_slp=slength(i_lu)*fracterrain(id_tc_type2)	 !absolute slope length of TC [m] (projected length, Haan 1994, p.261) (was:.../ cos(r))
 
-	q_ov=(q_surf_out+q_surf_in)/2/(dt*3600)/(tcarea2*1e6/L_slp)		!compute average overland flow rate [m**3/s] on a  1-m-strip
+	q_ov=(q_surf_in+q_surf_out)/2/(dt*3600/kfkorr_day)/(tcarea2*1e6/L_slp)		!compute average overland flow rate [m**3/s] on a  1-m-strip
 
 	!v_ov=q_ov**0.4*slope(id_tc_type2)**0.3/manning_n**0.6				!overland flow velocity [m/s]
 	v_ov=(q_ov**0.4)*((slope(id_tc_type2)/100)**0.3)/manning_n**0.6				!overland flow velocity [m/s] (6.3.4)

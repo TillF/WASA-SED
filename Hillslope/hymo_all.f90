@@ -1,4 +1,8 @@
 SUBROUTINE hymo_all(STATUS)
+
+!Pedro: added variables to the TC_wise output file
+!2009-06-03
+
 !Till: fixed assignment to hortflow that led to crash when its output was disabled
 !2009-05-06
 
@@ -220,16 +224,19 @@ CHARACTER(LEN=30),allocatable :: tc_idx(:)	!TC-IDs used for TC-wise output
 !!Print hydrologic variable on TC scale. If not used, DISABLE
 !!***********************************************************
 !CHARACTER(20) :: year_name,day_name
-!INTEGER :: k,c,dummy1,dummy2,year_print(6),day_print(6)
+!INTEGER :: k,c,dummy1,dummy2,year_print(10),day_print(10)
 !!CHARACTER(LEN=12),allocatable :: print_timelabel(:)	!labels to be used for printing TC output
 !
-! year_print(1)=2005;day_print(1)=258!;timestep_print(1)=1	!Till: specify dates for which TC-wise output is desired
-! year_print(2)=2005;day_print(2)=266!;timestep_print(2)=1
-! year_print(3)=2005;day_print(3)=267!;timestep_print(3)=1
-! year_print(4)=2005;day_print(4)=268!;timestep_print(4)=1
-! year_print(5)=2005;day_print(5)=269!;timestep_print(5)=1
-!
-!
+! year_print(1)=2001;day_print(1)=365!;timestep_print(1)=1	!Till: specify dates for which TC-wise output is desired
+! year_print(2)=2002;day_print(2)=365!;timestep_print(2)=1
+! year_print(3)=2003;day_print(3)=365!;timestep_print(3)=1
+! year_print(4)=2004;day_print(4)=21!;timestep_print(4)=1
+! year_print(5)=2004;day_print(5)=28!;timestep_print(5)=1
+! year_print(6)=2004;day_print(6)=366!;timestep_print(6)=1
+! year_print(7)=2005;day_print(7)=365!;timestep_print(7)=1
+! year_print(8)=2006;day_print(8)=365!;timestep_print(8)=1
+! year_print(9)=2007;day_print(9)=365!;timestep_print(9)=1
+! year_print(10)=2008;day_print(10)=366!;timestep_print(10)=1
 !
 !!***********************************************************
 
@@ -259,6 +266,9 @@ IF (STATUS == 0) THEN	!Till: initialisation before first run
   latred=0.				!set lateral subsurface runof between SVCs to zero
   horithact(:,:,:)=0.	!set soil moisture of each horizon to 0
   intercept(:,:)=0.		!set interception storage to 0
+
+  cum_erosion_TC(:,:)=0
+  cum_deposition_TC(:,:)=0
   
   if (doloadstate) then
 	call init_model_state		!load initital conditions from file
@@ -668,7 +678,7 @@ end if
 !  END DO
 !  OPEN(11,FILE=pfadn(1:pfadi)//'TC_'//year_name(dummy1:12)//'_'//day_name(dummy2:12)// &
 !	'.out',STATUS='replace')
-!   WRITE(11,*)'Subasin-ID, LU-ID, TC-ID, deposition'	
+!   WRITE(11,*)'Subasin-ID, LU-ID, TC-ID, Area_(km2), Rainfall_(mm), Runoff_(mm), Sed yield_(t/km2), Deposition_rate, Cumulative_erosion_(t), Cumulative_deposition_(t)'
 !  CLOSE(11)
 !ENDDO
 !!*******************************************************************************
@@ -893,11 +903,14 @@ tc_counter_all=1		!reset TC counter
 		  END IF
 
 		  
-!!Print hydrologic variable on TC scale. If not used, DISABLE
-!!**************************************************************************************************
-!	      IF (precip(d,i_subbas) == 0.) deposition_TC(i_subbas,id_tc_type)=0.
-!	      IF (precip(d,i_subbas) /= 0.) deposition_TC(i_subbas,id_tc_type)=1.
-!!**************************************************************************************************
+!Print hydrologic variable on TC scale. If not used, DISABLE
+!**************************************************************************************************
+	      IF (precip(d,i_subbas) == 0.) deposition_TC(i_subbas,id_tc_type)=0.
+	      IF (precip(d,i_subbas) /= 0.) deposition_TC(i_subbas,id_tc_type)=1.
+
+		  runoff_TC(i_subbas,id_tc_type)=0.
+		  sed_yield_TC(i_subbas,id_tc_type)=0.
+!**************************************************************************************************
 
 		  gwr=0.
 		  deepgwr=0.
@@ -1261,7 +1274,7 @@ END IF
 !      DO tc_counter=1,nbrterrain(i_lu)
 !		id_tc_type=id_terrain_intern(tc_counter,i_lu)
 !
-!	    DO k=1,6
+!	    DO k=1,10
 !	      if (t==year_print(k) .and. d+dayoutsim ==day_print(k)) then
 !            WRITE(year_name,*)year_print(k)						!Till: assemble file name
 !            WRITE(day_name,*)day_print(k)
@@ -1279,8 +1292,10 @@ END IF
 !            END DO
 !	        OPEN(11,FILE=pfadn(1:pfadi)//'TC_'//year_name(dummy1:12)//'_'//day_name(dummy2:12)// &
 !				'.out',STATUS='old',POSITION='append')
-!				write(11,'(3I10,F12.3)')id_subbas_extern(i_subbas),id_lu_extern(i_lu),id_terrain_extern(id_tc_type),&
-!					deposition_TC(i_subbas,id_tc_type)
+!				write(11,'(I5,I10,I5,F9.4,F7.1,2F8.2,F7.3,2F9.1)')id_subbas_extern(i_subbas),id_lu_extern(i_lu),&
+!					id_terrain_extern(id_tc_type),area_TC(i_subbas,id_tc_type),precip(d,i_subbas),runoff_TC(i_subbas,id_tc_type),&
+!					sed_yield_TC(i_subbas,id_tc_type),deposition_TC(i_subbas,id_tc_type),&
+!					cum_erosion_TC(i_subbas,id_tc_type),cum_deposition_TC(i_subbas,id_tc_type)
 !			CLOSE(11)
 !		  END IF
 !	    ENDDO

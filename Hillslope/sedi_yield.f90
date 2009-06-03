@@ -3,6 +3,12 @@ SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v
 ! hillslope erosion module for WASA
 ! to be called by soilwat.f90, Till Francke (till@comets.de)
 
+! Pedro: added variables for TC_wise output
+! 2009-06-03
+
+! Pedro: fixed stream power calculation - computationally relevant for sediment estimations
+! 2009-06-03
+
 ! Till: include optional specification for LU-based correction of beta/m (exponent for L-factor calculation)
 ! 2008-10-22
 
@@ -157,6 +163,7 @@ LS_fac=L_fac*S_fac
 earea=tc_area*1e6	!area of erosive unit [m2]
 q_peak=q_peak_in
 v_ov=v_ov_in
+q_ov=(q_out)/(dt*3600/kfkorr_day)/(earea/L_slp)		!compute average overland flow rate [m**3/s] on a  1-m-strip
 
 
 !compute maximum half-hour rain: fraction of daily precipitation that falls within 30 min (needed for estimation of peak flow and rainfall erosivity)
@@ -286,7 +293,7 @@ SELECT CASE (transport_limit_mode)		!different modes how/if transport capacity o
 		END IF
 
 		!transport capacity
-		ef_str_pwr=((2650*1e3*9.81*q_ov*slope(tc_type_id)/100)**1.5)/((q*100)**(2/3))
+		ef_str_pwr=((1000*1e3*9.81*q_ov*slope(tc_type_id)/100)**1.5)/((q*100)**(2/3))
 
 		IF (d50>0.15) THEN
 			tcap_everaert=(4.6*1.e-7*ef_str_pwr**1.75*(d50*1000)**(-0.56))*(earea/L_slp*100)/1.e6*86400 !(ton)
@@ -306,8 +313,7 @@ END SELECT
 dummy4=sum(sed_yield)		!for comparing to yield after the application of transport capacity limits
 
 
-
-deposition_TC(subbas_id,tc_type_id)=sum(sed_yield)		!Till: temporary: TC-wise output of sediment yield 
+!deposition_TC(subbas_id,tc_type_id)=sum(sed_yield)		!Till: temporary: TC-wise output of sediment yield 
 
 !limitation of sediment yield by transport capacity
 
@@ -315,6 +321,15 @@ IF (transport_limit_mode/=1) THEN		!current sediment load is limited by transpor
 	sed_yield=min(sed_yield,trans_cap)
 END IF
 
+
+!Pedro: TC-wise outputs
+runoff_TC(subbas_id,tc_type_id)=q*1000
+sed_yield_TC(subbas_id,tc_type_id)=sum(sed_yield)/tc_area
+deposition_TC(subbas_id,tc_type_id)=1-(sum(sed_yield)/(r+sum(sed_in)))
+
+area_TC(subbas_id,tc_type_id)=tc_area
+cum_erosion_TC(subbas_id,tc_type_id)=cum_erosion_TC(subbas_id,tc_type_id)+r
+cum_deposition_TC(subbas_id,tc_type_id)=cum_deposition_TC(subbas_id,tc_type_id)+(r+sum(sed_in)-sum(sed_yield))
 
 
 !!deposition_TC(subbas_id,tc_type_id)=q_out/tc_area
@@ -325,7 +340,6 @@ END IF
 !	deposition_TC(subbas_id,tc_type_id)=0.
 !ENDIF
 !
-
 
 return
 end SUBROUTINE sedi_yield

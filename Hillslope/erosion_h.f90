@@ -1,3 +1,6 @@
+! Pedro: added variables for TC_wise output
+! 2009-06-03
+
 ! Till: include optional specification for LU-based correction of beta/m (exponent for L-factor calculation)
 ! 2008-10-22
 
@@ -99,9 +102,12 @@ real ::	q_peak_mm_h	!peak runoff as before in [mm/h]
 real :: ei			!USLE energy factor ["proper units" (Williams, 1995]
 real :: earea		!area of erosive unit [m2]
 
+real, allocatable :: runoff_TC(:,:)
+real, allocatable :: sed_yield_TC(:,:)
 real, allocatable :: deposition_TC(:,:)
-
-
+real, allocatable :: area_TC(:,:)
+real, allocatable :: cum_erosion_TC(:,:)
+real, allocatable :: cum_deposition_TC(:,:)
 
 
 
