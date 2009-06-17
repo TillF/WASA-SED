@@ -1,5 +1,8 @@
 SUBROUTINE hymo_all(STATUS)
 
+!Till: fixed wrong computation of subsurface flow (introduced in rev. 14) that lead to its underestimation
+!2009-06-17
+
 !Pedro: added variables to the TC_wise output file
 !2009-06-03
 
@@ -1135,7 +1138,7 @@ tc_counter_all=1		!reset TC counter
 		
 		water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas)+rtemp2/nt	!Till: deep gw discharge is distributed equally among all timesteps of day
 		if (f_gw_discharge)       deep_gw_discharge_t(d,:,i_subbas) = deep_gw_discharge_t(d,:,i_subbas) + rtemp2/nt 
-		if (f_subsurface_runoff)  subflow_t          (d,:,i_subbas) = subflow_t          (d,:,i_subbas) + rtemp2/nt !Till: groundwater is (traditionally) included in subsurface fluxes
+		if (associated(subflow_t))  subflow_t          (d,:,i_subbas) = subflow_t          (d,:,i_subbas) + rtemp2/nt !Till: groundwater is (traditionally) included in subsurface fluxes
 		
 		deepgwrsu(lu_counter)=deepgwrsu(lu_counter)-deepgwrsu(lu_counter)*(1.-gw_dist(i_lu))	!Till: must be zeroed, everything still in there leaves the model domain
 		deepgw(i_subbas,lu_counter)=deepgw(i_subbas,lu_counter)- rtemp				  			!Till: gw storage is reduced according to outflow (direct outflow to river and outflow to lowest TC)

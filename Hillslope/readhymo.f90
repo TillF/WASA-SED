@@ -1,5 +1,8 @@
 SUBROUTINE readhymo
 
+!Till: skip reading of erosion control files if erosion is disabled
+!2009-06-17
+
 !Till: removed assignment to unallocated vars that led to crash in linux
 !2008-04-09
 
@@ -260,6 +263,7 @@ else
   allocate(beta_fac_tc(nterrain))
   beta_fac_tc=1.		!default value, no beta correction
   READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),i=1,nterrain)	!5 columns, containing beta correction factor
+  if (.NOT. dosediment) deallocate(beta_fac_tc)
 end if
 
 !slope=slope*sensfactor
@@ -1234,86 +1238,87 @@ ELSE
 	frac_direct_gw=1
 END IF
 
-
-OPEN(11,FILE=pfadp(1:pfadj)// 'erosion.ctl',IOSTAT=istate,STATUS='old')	
-IF (istate==0) THEN
-	READ(11,'(a)',IOSTAT=istate)cdummy
-	do while (istate==0)
-		READ(cdummy,*,IOSTAT=istate)cdummy2
-		SELECT CASE (trim(cdummy2))		
-			CASE ('application_scale')
-				READ(cdummy,*,IOSTAT=istate)cdummy2,do_musle_subbasin
-			CASE ('erosion_equation')
-				READ(cdummy,*,IOSTAT=istate)cdummy2,erosion_equation
-			CASE ('ri_05_coeffs')
-				READ(cdummy,*,IOSTAT=istate)cdummy2,a_i30,b_i30
-			CASE ('transport_limit_mode')
-				READ(cdummy,*,IOSTAT=istate)cdummy2,transport_limit_mode
-	 	END SELECT
+if (dosediment) THEN
+	OPEN(11,FILE=pfadp(1:pfadj)// 'erosion.ctl',IOSTAT=istate,STATUS='old')	
+	IF (istate==0) THEN
 		READ(11,'(a)',IOSTAT=istate)cdummy
-	end do
-	CLOSE(11)
-	IF ((erosion_equation>4).OR.(frac_direct_gw<0)) THEN
-		write(*,*)'WARNING: erosion_equation was outside [0..4], assumed to be 3 (MUSLE).'
+		do while (istate==0)
+			READ(cdummy,*,IOSTAT=istate)cdummy2
+			SELECT CASE (trim(cdummy2))		
+				CASE ('application_scale')
+					READ(cdummy,*,IOSTAT=istate)cdummy2,do_musle_subbasin
+				CASE ('erosion_equation')
+					READ(cdummy,*,IOSTAT=istate)cdummy2,erosion_equation
+				CASE ('ri_05_coeffs')
+					READ(cdummy,*,IOSTAT=istate)cdummy2,a_i30,b_i30
+				CASE ('transport_limit_mode')
+					READ(cdummy,*,IOSTAT=istate)cdummy2,transport_limit_mode
+	 		END SELECT
+			READ(11,'(a)',IOSTAT=istate)cdummy
+		end do
+		CLOSE(11)
+		IF ((erosion_equation>4).OR.(frac_direct_gw<0)) THEN
+			write(*,*)'WARNING: erosion_equation was outside [0..4], assumed to be 3 (MUSLE).'
+			erosion_equation=3			!default erosion equation to be used: MUSLE
+		END IF
+	ELSE		!no such file found
 		erosion_equation=3			!default erosion equation to be used: MUSLE
+		do_musle_subbasin=.FALSE.			!default 0: compute erosion on TC-scale
 	END IF
-ELSE		!no such file found
-	erosion_equation=3			!default erosion equation to be used: MUSLE
-	do_musle_subbasin=.FALSE.			!default 0: compute erosion on TC-scale
+	!end insert Till
+
+
+	!Till: eg for scenanario with badland remediation
+	OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/sdr.dat',IOSTAT=istate,STATUS='old')	
+	IF (istate==0) THEN
+		allocate(sdr(nsoter))
+		sdr=1.	!default value: all sediment is delivered
+		READ(11,*,IOSTAT=istate) !skip header
+		READ(11,*,IOSTAT=istate)
+		do while (istate==0)
+			READ(11,*,IOSTAT=istate)id_lu_ext,temp1
+			i_lu=id_ext2int(id_lu_ext,id_lu_extern)	!convert to internal lu id
+			if (i_lu==-1) then
+				write(*,'(a,i0,a)')'Unknown LU-ID ',id_lu_ext,' in sdr.dat, ignored.'
+				cycle	!proceed with next line
+			end if
+			sdr(i_lu)=temp1
+		end do
+		CLOSE(11)
+	END IF
+
+	!Till: eg implementing highly erodible surface such as badlands
+	OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/beta_fac.dat',IOSTAT=istate,STATUS='old')	
+	IF (istate==0) THEN
+		allocate(beta_fac(nsoter))
+		beta_fac=1.	!default value: no correction of beta
+		READ(11,*,IOSTAT=istate) !skip header
+		READ(11,*,IOSTAT=istate)
+		do while (istate==0)
+			READ(11,*,IOSTAT=istate)id_lu_ext,temp1
+			i_lu=id_ext2int(id_lu_ext,id_lu_extern)	!convert to internal lu id
+			if (i_lu==-1) then
+				write(*,'(a,i0,a)')'Unknown LU-ID ',id_lu_ext,' in beta_fac.dat, ignored.'
+				cycle	!proceed with next line
+			end if
+			beta_fac(i_lu)=temp1
+		end do
+		CLOSE(11)
+	END IF
 END IF
-!end insert Till
-
-
-!Till: eg for scenanario with badland remediation
-OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/sdr.dat',IOSTAT=istate,STATUS='old')	
-IF (istate==0) THEN
-	allocate(sdr(nsoter))
-	sdr=1.	!default value: all sediment is delivered
-	READ(11,*,IOSTAT=istate) !skip header
-	READ(11,*,IOSTAT=istate)
-	do while (istate==0)
-		READ(11,*,IOSTAT=istate)id_lu_ext,temp1
-		i_lu=id_ext2int(id_lu_ext,id_lu_extern)	!convert to internal lu id
-		if (i_lu==-1) then
-			write(*,'(a,i0,a)')'Unknown LU-ID ',id_lu_ext,' in sdr.dat, ignored.'
-			cycle	!proceed with next line
-		end if
-		sdr(i_lu)=temp1
-	end do
-	CLOSE(11)
-END IF
-
-!Till: eg implementing highly erodible surface such as badlands
-OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/beta_fac.dat',IOSTAT=istate,STATUS='old')	
-IF (istate==0) THEN
-	allocate(beta_fac(nsoter))
-	beta_fac=1.	!default value: no correction of beta
-	READ(11,*,IOSTAT=istate) !skip header
-	READ(11,*,IOSTAT=istate)
-	do while (istate==0)
-		READ(11,*,IOSTAT=istate)id_lu_ext,temp1
-		i_lu=id_ext2int(id_lu_ext,id_lu_extern)	!convert to internal lu id
-		if (i_lu==-1) then
-			write(*,'(a,i0,a)')'Unknown LU-ID ',id_lu_ext,' in beta_fac.dat, ignored.'
-			cycle	!proceed with next line
-		end if
-		beta_fac(i_lu)=temp1
-	end do
-	CLOSE(11)
-END IF
-
 
 
 
 !Till: allocation part - these variable are allocated here, because their dimension is not known before
+allocate (runoff_TC(subasin,nterrain))
+allocate (area_TC(subasin,nterrain))
 
+!Till: ii: these shouldn't be allocated if dosediment=FALSE
 allocate (sedsu(maxsoter,n_sed_class))
 allocate (sediment_subbasin(366,subasin,n_sed_class))	
 allocate (sediment_subbasin_t(366,nt,subasin,n_sed_class))	
-allocate (runoff_TC(subasin,nterrain))
 allocate (sed_yield_TC(subasin,nterrain))
 allocate (deposition_TC(subasin,nterrain))
-allocate (area_TC(subasin,nterrain))
 allocate (cum_erosion_TC(subasin,nterrain))
 allocate (cum_deposition_TC(subasin,nterrain))
 
