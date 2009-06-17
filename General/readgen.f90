@@ -1,5 +1,8 @@
 SUBROUTINE readgen(path2do_dat)
 
+!Till: computationally irrelevant: added program version information to parameter.out
+!2009-06-17
+
 !Till: added output for River_Sediment_Storage.out
 !sediment-related output-files are all disabled, if dosediment=FALSE
 !2008-11-13
@@ -350,7 +353,7 @@ if (dosediment) then
 	WRITE(11,*) 'spatial scale for application of erosion eq : ',do_musle_subbasin
 	WRITE(11,*) 'erosion eq : ',erosion_equation
 end if
-
+WRITE(11,*) 'WASA model, ',trim(rev_string1),'; ',trim(rev_string2)
 CLOSE(11)
 
 nt = int(24/dt)	!Till: number of simulation steps per day		

@@ -1,3 +1,6 @@
+!Till: computationally irrelevant: added program version information to parameter.out
+!2009-06-17
+
 !Till: optionally read location of do.dat from command line argument
 ! 2008-04-24
 
@@ -22,7 +25,11 @@ integer:: r
 
 CALL GETARG(1, pfadn)		!Till: try to read path to central control file (do.dat)
 
-WRITE(*,*) 'Start WASA model: Initialization'
+include 'svn_rev.var' !Till: import revision information string
+
+WRITE(*,'(A,A,/,A)') 'WASA model, ',trim(rev_string1),' '//trim(rev_string2)
+
+WRITE(*,*) ':Initialization'
 CALL readgen(pfadn)
 t = tstart
 CALL calcyear

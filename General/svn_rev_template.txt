@@ -1,0 +1,3 @@
+!this file is updated on calling update_revision_no.bat to create svn_rev.txt which is linked to the source code
+rev_string1='rev$WCREV$ ($WCMODS?mixed revisions:$ $WCMODS?, local modifications:$)'
+rev_string2='updated from repository $WCDATE$, built $WCNOW$'

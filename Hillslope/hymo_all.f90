@@ -1,6 +1,6 @@
 SUBROUTINE hymo_all(STATUS)
 
-!Till: fixed wrong computation of subsurface flow (introduced in rev. 14) that lead to its underestimation
+!Till: computationally relevant: fixed wrong computation of subsurface flow (introduced in rev. 14) that lead to its underestimation
 !2009-06-17
 
 !Pedro: added variables to the TC_wise output file

@@ -1,5 +1,8 @@
-!Till: added output for River_Sediment_Storage.out
-!2008-11-13
+! Till: computationally irrelevant: added program version information to parameter.out
+! 2009-06-17
+
+! Till: added output for River_Sediment_Storage.out
+! 2008-11-13
 
 ! 2008-07-11
 ! Till: implemented optional pre-specified sediment outflow of selected subbasins
@@ -38,6 +41,7 @@ module common_h
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 save
 ! logicals for inclusion of modules in calculation
+CHARACTER (LEN=80) ::rev_string1,rev_string2	!Till: revision information string
 LOGICAL :: doacud
 LOGICAL :: doreservoir
 LOGICAL :: dolattc
