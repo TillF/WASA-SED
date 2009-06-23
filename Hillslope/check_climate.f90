@@ -1,6 +1,9 @@
 SUBROUTINE check_climate
 !check read climate data for implausible data
 
+!Till: computationally irrelevant: improved error reporting in faulty climate data
+!2009-06-22
+
 !Till: fixed faulty check of hourly rainfall
 !2009-04-06
  
@@ -31,7 +34,7 @@ DO jj=1,min(dayyear,size(temp,DIM=1))
 	DO ii=1,size(temp,DIM=2)
 		if ((temp(jj,ii)>50) .OR. (temp(jj,ii)<-50)) then
 			if (jj/=366) then	!leap year values might be missing, don't alert
-				write(*,'(A,i0,a,i0,a,i0,a,f5.1,a)')'Temperature of subbasin ',id_subbas_extern(ii),', day ', jj,', year ',t,' is implausible (',temp(jj,ii),'). using previous day.'
+				write(*,'(A,i0,a,i0,a,i0,a,f7.1,a)')'Temperature of subbasin ',id_subbas_extern(ii),', day ', jj+dayoutsim,', year ',t,' is implausible (',temp(jj,ii),'). using previous day.'
 			end if
 			temp(jj,ii)=store	!implausible value, use the previous day
 		else
@@ -46,7 +49,7 @@ DO jj=1,min(dayyear,size(rhum,DIM=1))
 	DO ii=1,size(rhum,DIM=2)
 		if ((rhum(jj,ii)>100) .OR. (rhum(jj,ii)<0)) then
 			if (jj/=366) then	!leap year values might be missing, don't alert
-				write(*,'(A,i0,a,i0,a,i0,a,f5.1,a)')'Humidity of subbasin ',id_subbas_extern(ii),', day ', jj,', year '&
+				write(*,'(A,i0,a,i0,a,i0,a,f7.1,a)')'Humidity of subbasin ',id_subbas_extern(ii),', day ', jj+dayoutsim,', year '&
 					,t,' is implausible (',rhum(jj,ii),'). using previous day.'
 			end if
 			rhum(jj,ii)=store	!implausible value, use the previous day
@@ -62,7 +65,7 @@ DO jj=1,min(dayyear,size(rad,DIM=1))
 	DO ii=1,size(rad,DIM=2)
 		if ((rad(jj,ii)>700) .OR. (rad(jj,ii)<1)) then
 			if (jj/=366) then	!leap year values might be missing, don't alert
-				write(*,'(A,i0,a,i0,a,i0,a,f5.1,a)')'Radiation of subbasin ',id_subbas_extern(ii),', day ', jj,', year '&
+				write(*,'(A,i0,a,i0,a,i0,a,f7.1,a)')'Radiation of subbasin ',id_subbas_extern(ii),', day ', jj+dayoutsim,', year '&
 					,t,' is implausible (',rad(jj,ii),'). using previous day.'
 			end if
 			rad(jj,ii)=store	!implausible value, use the previous day
@@ -78,7 +81,7 @@ if (dohour) then
 		DO ii=1,size(preciph,DIM=2)
 			if ((preciph(jj,ii)>50) .OR. (preciph(jj,ii)<0)) then
 				if (jj>=365*nt) then	!leap year values might be missing, don't alert
-					write(*,'(A,i0,a,i0,a,i0,a,i0,a,f5.1,a)')'Hourly precipitation data of subbasin ',id_subbas_extern(ii),', timestep ', mod(jj,nt),', day ', jj/nt+1,', year '&
+					write(*,'(A,i0,a,i0,a,i0,a,i0,a,f7.1,a)')'Hourly precipitation data of subbasin ',id_subbas_extern(ii),', timestep ', mod(jj,nt),', day ', jj/nt+1,', year '&
 						,t,' is implausible(',preciph(jj,ii),'). using previous time step.'
 				end if
 				preciph(jj,ii)=store	!implausible value, use the previous time step
@@ -95,7 +98,7 @@ DO jj=1,min(dayyear,size(precip,DIM=1))
 	DO ii=1,size(precip,DIM=2)
 		if ((precip(jj,ii)>50*24) .OR. (precip(jj,ii)<0)) then
 			if (jj/=366) then	!leap year values might be missing, don't alert
-				write(*,'(A,i0,a,i0,a,i0,a,f5.1,a)')'Precipitation data of subbasin ',id_subbas_extern(ii),', day ', jj,', year '&
+				write(*,'(A,i0,a,i0,a,i0,a,f7.1,a)')'Precipitation data of subbasin ',id_subbas_extern(ii),', day ', jj,', year '&
 					,t,' is implausible(',precip(jj,ii),'). using previous day.'
 			end if
 			precip(jj,ii)=store	!implausible value, use the previous day

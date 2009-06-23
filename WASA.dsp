@@ -99,6 +99,10 @@ LINK32=link.exe
 
 SOURCE=.\General\general_h.f90
 # End Source File
+# Begin Source File
+
+SOURCE=.\General\svn_rev.var
+# End Source File
 # End Group
 # Begin Source File
 
@@ -169,6 +173,7 @@ DEP_F90_WASA_=\
 	".\Debug\params_h.mod"\
 	".\Debug\routing_h.mod"\
 	".\Debug\time_h.mod"\
+	".\General\svn_rev.var"\
 	
 # End Source File
 # End Group
@@ -193,6 +198,10 @@ SOURCE=.\Hillslope\erosion_h.f90
 # Begin Source File
 
 SOURCE=.\Hillslope\hymo_h.f90
+DEP_F90_HYMO_=\
+	".\Debug\common_h.mod"\
+	".\Debug\params_h.mod"\
+	
 # End Source File
 # End Group
 # Begin Source File
@@ -200,6 +209,7 @@ SOURCE=.\Hillslope\hymo_h.f90
 SOURCE=.\Hillslope\check_climate.f90
 DEP_F90_CHECK=\
 	".\Debug\climo_h.mod"\
+	".\Debug\common_h.mod"\
 	".\Debug\hymo_h.mod"\
 	".\Debug\time_h.mod"\
 	
@@ -240,7 +250,7 @@ DEP_F90_ETP_SO=\
 # Begin Source File
 
 SOURCE=.\Hillslope\hymo_all.f90
-DEP_F90_HYMO_=\
+DEP_F90_HYMO_A=\
 	".\Debug\climo_h.mod"\
 	".\Debug\common_h.mod"\
 	".\Debug\erosion_h.mod"\

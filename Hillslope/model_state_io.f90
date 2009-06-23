@@ -1,6 +1,9 @@
 module model_state_io
 !contains subroutines for saving and laoding model state (soil water, ground water, interception)
 
+!Till: computationally irrelevant: added missing CLOSE for ic_conds_file (caused error in linux); variable renaming
+!2009-06-22
+
 !Till: save summary on storage contents on start of model in storage.stats_start
 !2009-03-27
 
@@ -62,37 +65,37 @@ subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, summary
 	INTEGER :: tcid_instance	!(internal) id of TC-instance (unique subbas-LU-TC-combination)
 	REAL	:: total_storage_soil, total_storage_gw, total_storage_intercept 	!total amount of water stored  [m3]
 	REAL	:: lu_area, svc_area	!area of current lu/svc [m3]
-	INTEGER	::	soil_file, gw_file, intercept_file	!file handles to output files
+	INTEGER	::	soil_file_hdle, gw_file_hdle, intercept_file_hdle	!file handles to output files
 
 	total_storage_soil=0
 	total_storage_gw=0
 	total_storage_intercept=0 
 	
 	if (trim(soil_conds_file)=='') then		!don't do anything if an empty filename is specified
-		soil_file=0
+		soil_file_hdle=0
 	else 
-		soil_file=11
-		OPEN(soil_file,FILE=soil_conds_file, STATUS='replace')
-		WRITE(soil_file,'(a)') 'soil moisture status (for analysis or model re-start)'
-		WRITE(soil_file,*)'Subbasin', char(9),'LU', char(9),'TC' , char(9),'SVC' , char(9),'horizon', char(9),'watercontent_[mm]', char(9),'area_[m²]'		!tab separated output
+		soil_file_hdle=11
+		OPEN(soil_file_hdle,FILE=soil_conds_file, STATUS='replace')
+		WRITE(soil_file_hdle,'(a)') 'soil moisture status (for analysis or model re-start)'
+		WRITE(soil_file_hdle,*)'Subbasin', char(9),'LU', char(9),'TC' , char(9),'SVC' , char(9),'horizon', char(9),'watercontent_[mm]', char(9),'area_[m²]'		!tab separated output
 	end if
 
 	if (trim(gw_conds_file)=='') then		!don't do anything if an empty filename is specified
-		gw_file=0
+		gw_file_hdle=0
 	else
-		gw_file=12
-		OPEN(gw_file,FILE=gw_conds_file, STATUS='replace')
-		WRITE(gw_file,'(a)') 'ground water storage (for analysis or model re-start)'
-		WRITE(gw_file,*)'Subbasin', char(9),'LU', char(9),'volume_[mm]', char(9),'area_[m²]'		!tab separated output
+		gw_file_hdle=12
+		OPEN(gw_file_hdle,FILE=gw_conds_file, STATUS='replace')
+		WRITE(gw_file_hdle,'(a)') 'ground water storage (for analysis or model re-start)'
+		WRITE(gw_file_hdle,*)'Subbasin', char(9),'LU', char(9),'volume_[mm]', char(9),'area_[m²]'		!tab separated output
 	end if
 
 	if (trim(ic_conds_file)=='') then		!don't do anything if an empty filename is specified
-		intercept_file=0
+		intercept_file_hdle=0
 	else
-		intercept_file=13
-		OPEN(intercept_file,FILE=ic_conds_file, STATUS='replace')
-		WRITE(intercept_file,'(a)') 'interception storage (for analysis or model re-start)'
-		WRITE(intercept_file,*)'Subbasin', char(9),'LU', char(9),'TC' , char(9),'SVC' , char(9),'storage_[mm]', char(9),'area_[m²]'		!tab separated output
+		intercept_file_hdle=13
+		OPEN(intercept_file_hdle,FILE=ic_conds_file, STATUS='replace')
+		WRITE(intercept_file_hdle,'(a)') 'interception storage (for analysis or model re-start)'
+		WRITE(intercept_file_hdle,*)'Subbasin', char(9),'LU', char(9),'TC' , char(9),'SVC' , char(9),'storage_[mm]', char(9),'area_[m²]'		!tab separated output
 	end if
 
 	
@@ -102,8 +105,8 @@ subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, summary
 		DO lu_counter=1,nbr_lu(sb_counter)
 			i_lu=id_lu_intern(lu_counter,sb_counter)
 			lu_area=area(sb_counter)*frac_lu(lu_counter,sb_counter)*1e6
-			if (gw_file/=0) then
-				WRITE(gw_file,'(2(I0,A1),F8.2,A1,F12.1)') id_subbas_extern(sb_counter), char(9),id_lu_extern(i_lu), char(9),&
+			if (gw_file_hdle/=0) then
+				WRITE(gw_file_hdle,'(2(I0,A1),F8.2,A1,F12.1)') id_subbas_extern(sb_counter), char(9),id_lu_extern(i_lu), char(9),&
 					deepgw(sb_counter,lu_counter)/lu_area*1e3, char(9),area(sb_counter)*frac_lu(lu_counter,sb_counter)*1e6	!tab separated output
 			end if
 			total_storage_gw=total_storage_gw+deepgw(sb_counter,lu_counter) !sum up total storage
@@ -120,9 +123,9 @@ subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, summary
 
 					svc_area=lu_area*fracterrain(id_terrain_intern(tc_counter,i_lu))*frac_svc(svc_counter,tcid_instance)
 						
-					if (intercept_file/=0) then
+					if (intercept_file_hdle/=0) then
 							! ##
-							WRITE(intercept_file,'(4(I0,A1),F8.2,A1,F12.1)') id_subbas_extern(sb_counter), char(9),id_lu_extern(i_lu),char(9),&
+							WRITE(intercept_file_hdle,'(4(I0,A1),F8.2,A1,F12.1)') id_subbas_extern(sb_counter), char(9),id_lu_extern(i_lu),char(9),&
 								id_terrain_extern(id_tc_type), char(9),id_svc_extern(i_svc), char(9),intercept(tcid_instance,svc_counter),&
 								char(9),	svc_area	!tab separated output
 					end if
@@ -130,8 +133,8 @@ subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, summary
 					
 
 					DO h=1,nbrhori(i_soil)
-						if (soil_file/=0) then
-							WRITE(soil_file,'(5(I0,A1),F8.2,A1,F12.1)') id_subbas_extern(sb_counter),&
+						if (soil_file_hdle/=0) then
+							WRITE(soil_file_hdle,'(5(I0,A1),F8.2,A1,F12.1)') id_subbas_extern(sb_counter),&
 								char(9),id_lu_extern(i_lu), char(9),id_terrain_extern(id_tc_type),&
 								char(9),id_svc_extern(i_svc), char(9),h, char(9),horithact(tcid_instance,svc_counter,h), &
 								char(9),	svc_area	!tab separated output
@@ -142,8 +145,9 @@ subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, summary
 			END DO	!loop TCs
 		END DO	!loop LUs
 	END DO	!loop subbasins
-	CLOSE(soil_file, iostat=i_lu)	!close output files
-	CLOSE(gw_file, iostat=i_lu)
+	CLOSE(soil_file_hdle, iostat=i_lu)	!close output files
+	CLOSE(gw_file_hdle, iostat=i_lu)
+	CLOSE(intercept_file_hdle, iostat=i_lu)
 
 	
 	OPEN(11,FILE=summary_file, STATUS='replace')		!write to summary file
