@@ -36,9 +36,9 @@ subroutine init_model_state		!load initial conditions
 	if (.TRUE.) then
 		call init_soil_conds(trim(pfadn)//'soil_moisture.stat',default_rel_sat)	!Till: load initial status of soil moisture
 		call init_gw_conds(trim(pfadn)//'gw_storage.stat',default_gw_storage)	!Till: load initial status of gw storage
-	else
-		call init_soil_conds('',default_rel_sat)	!Till: load initial status of soil moisture
-		call init_gw_conds('',default_gw_storage)	!Till: load initial status of gw storage
+	else			!ii: default init is currently still done in hymo_all.f90, needs to be changed
+		call init_soil_conds('',default_rel_sat)	!Till: set default initial status of soil moisture
+		call init_gw_conds('',default_gw_storage)	!Till: set default status of gw storage
 	end if
 	CALL save_all_conds('','','',trim(pfadn)//'storage.stats_start')		!Till: save only summary on initial storage
 end subroutine init_model_state
@@ -60,8 +60,8 @@ subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, summary
 
 	character(len=*),intent(in):: soil_conds_file, gw_conds_file, ic_conds_file,summary_file		!files to save to
 	
-	INTEGER :: i,j,sb_counter,lu_counter,tc_counter,svc_counter,h	! counters
-	INTEGER :: i_subbas,i_lu,id_tc_type,i_svc,i_soil,i_veg		! ids of components in work
+	INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter,h	! counters
+	INTEGER :: i_lu,id_tc_type,i_svc,i_soil,i_veg		! ids of components in work
 	INTEGER :: tcid_instance	!(internal) id of TC-instance (unique subbas-LU-TC-combination)
 	REAL	:: total_storage_soil, total_storage_gw, total_storage_intercept 	!total amount of water stored  [m3]
 	REAL	:: lu_area, svc_area	!area of current lu/svc [m3]

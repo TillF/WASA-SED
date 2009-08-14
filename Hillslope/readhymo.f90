@@ -129,7 +129,7 @@ IMPLICIT NONE
 !                          upstream than municipios with larger irout
 !                          (order as in routend.dat)
 
-INTEGER :: imun,idummy,i,j,c,k,i_min,n,h,ii
+INTEGER :: idummy,i,j,c,k,i_min,n,h,ii
 INTEGER :: dummy1, dummy2, loop
 INTEGER :: id_lu_int,id_lu_ext,id_tc_ext,id_tc_int,id_soil_int,test !,id_soil_ext
 INTEGER :: idummy2(20),tausch,istate
@@ -141,7 +141,7 @@ CHARACTER (LEN=100) :: cdummy2
 INTEGER :: tcid_instance	!(internal) id of TC-instance (unique subbas-LU-TC-combination)
 INTEGER :: soilid			!internal id of current soil
 INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter	! counters
-INTEGER :: i_lu,id_tc_type, svc_id !,i_subbas,i_svc,i_soil,i_veg		! ids of components in work
+INTEGER :: i_lu,id_tc_type !, svc_id,i_subbas,i_svc,i_soil,i_veg		! ids of components in work
 
 INTEGER :: lu_temp(maxsoter)		!auxiliary arrays for reading
 REAL	:: frac_lu_temp(maxsoter)

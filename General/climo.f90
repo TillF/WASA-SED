@@ -1,5 +1,8 @@
 SUBROUTINE climo(STATUS)
 
+!Till: corrrected error messaging and loading in loading rain_hourly.dat when obsolete subbasins were present
+!2008-08-11
+
 !Till: removed reference to unallocated vars that led to crash in linux
 !2008-04-09
 
@@ -52,26 +55,23 @@ INTEGER, INTENT(IN OUT)                  :: STATUS
 !                 2=daily step,     3=end of year)
 
 ! counters
-INTEGER :: i,j,k,imun,imeso,istate,id,z,mm,n,bat
-INTEGER :: make,testi
-INTEGER :: dall ,idummy
-REAL :: dummy,dif,difc
+INTEGER :: i,j,k,id,n !,imun,imeso,istate,z,mm,bat,make,testi,dall ,idummy 
+REAL :: dummy !,dif,difc
 
 
 ! grids of monthly mean shortwave radiation (W/m^2)
-REAL :: radigrid(14,18,12)
-REAL :: radi1,radi2
-REAL :: xdum(48)
-INTEGER :: idum(2)
-REAL :: in(4)
-REAL :: inp,test,calibdtemp
-INTEGER :: inpd(3)
-REAL :: dummr
-INTEGER :: dummi,ncelltem,doone, loop
-CHARACTER :: dummc
+!REAL :: radigrid(14,18,12)
+!REAL :: radi1,radi2
+!REAL :: xdum(48)
+!INTEGER :: idum(2)
+!REAL :: inp,test,calibdtemp
+!INTEGER :: inpd(3)
+!REAL :: dummr
+INTEGER :: dummi !,ncelltem,doone, loop
+!CHARACTER :: dummc
 CHARACTER (len=50) :: dumstr
 INTEGER   :: columnheader(1000)	!Till: for storing column headings of input files
-INTEGER :: nbrezgmun(subasin),idezgmun(50,subasin)
+!INTEGER :: nbrezgmun(subasin),idezgmun(50,subasin)
 CHARACTER (LEN=8000) :: linedummy	!Till: dummy for reading input header	!ii: allocate dynamically
 integer, pointer, save :: corr_column_temp(:),corr_column_rhum(:),corr_column_rad(:),corr_column_precip(:) !Till: hold corresponding columns of input files to be related to internal numbering of subbasins 
 INTEGER,save  :: no_columns(5)=0		!number of columns of input files for the 5 climate input files
@@ -129,7 +129,7 @@ IF (STATUS == 0) THEN
   columnheader=0
   no_columns(4)=GetNumberOfSubstrings(linedummy)-2	!Till: count number of columns
   READ (linedummy,*) dummy, dummy, (columnheader(i), i=1,no_columns(4))	!Till: extract column headers
-  corr_column_precip=>set_corr_column(columnheader,'rain_daily.dat')
+  corr_column_precip=>set_corr_column(columnheader,dumstr)
 	
 	
   do i=1,subasin
@@ -155,7 +155,7 @@ IF (STATUS == 0) THEN
   call date_seek(81,tstart,mstart,'temperature.dat')
   call date_seek(82,tstart,mstart,'humidity.dat')
   call date_seek(83,tstart,mstart,'radiation.dat')
-  	call date_seek(84,tstart,mstart,dumstr)	
+  call date_seek(84,tstart,mstart,dumstr)	
   
   
 END IF
@@ -192,51 +192,35 @@ IF (STATUS == 1) THEN
 		READ(84,*) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(4)),id=1,dayyear)		!Till: faster than using loop
 		precip(:,1:subasin)= inputbuffer (:,corr_column_precip)	!Till: rearrange column order to match order of hymo.dat	 
 	else 
-	!reads in hourly rainfall data
-	!for hourly version - program still needs the daily data as well, which computed internally
+		!read hourly rainfall data
+		!for hourly version - program still needs the daily data as well, but this is computed internally below
 
-		preciph(:,:)=-1	!hourly precip
-	
-! 
-!
-!IF (dohour) THEN
-!	OPEN(11,FILE=pfadp(1:pfadj)//'Time_series/rain_hourly.dat',STATUS='old',action='read')
-!!  OPEN(11,FILE=pfadp(1:pfadj)//'Time_series/rain_hourly.dat',STATUS='old',action='read',readonly,shared)
-!  
-!  READ(11,*); READ (11,*)
-!  READ (11,*) dummy, dummy, (columnheader(i), i=1,subasin)
-!  DO i=1,subasin
-!    IF (columnheader(i) /= id_subbas_extern(i) )THEN
-!      WRITE(*,*) 'Sub-basin-IDs in time series (rainfall_hourly.dat)  &
-!          must have the same ordering scheme as in hymo.dat'
-!      STOP
-!    END IF
-!  END DO
-!
-!  loop=dtot-dayyear		!Till: skip unmodelled days of start year
-!  DO id=1,loop*24
-!    READ(11,*) dummy
-!  END DO
+			preciph(:,:)=-1	!hourly precip
 
-  READ (84,*) ((n,k,(preciph((i-1)*24+j,id),id=1,subasin),j=1,nt),i=1,dayyear)
-	
-	if (t/=tstop) then	!Till: lookup the day of month that should have been read last
-		j=daymon(12)
-	else
-		j=daymon(mstop) 
-		IF (mstop==2 .AND. MOD(t,4) == 0) j=29	!leap year
-	end if
-	if (n/1000000/=j) then
-		write(*,'(a,i0)')'Error in date numbering/formatting of rain_hourly.dat, year ',t
-		stop
-	end if
-		 
-	!loop over all days of year and sum up daily precip
-	DO i=1,dayyear		
-		precip(i,:)=sum(preciph((i-1)*nt+1:i*nt,:),dim=1) 
-	END DO
+		deallocate(inputbuffer)		
+		allocate(inputbuffer(366*nt,no_columns(4)))		!Till: prepare input buffer to fit the hourly data
 
-  END IF
+		READ (84,*) ((n,k,(inputbuffer((i-1)*24+j,id),id=1,no_columns(4)),j=1,nt),i=1,dayyear)
+		preciph(:,1:subasin)= inputbuffer (:,corr_column_precip)	!Till: rearrange column order to match order of hymo.dat	 
+
+
+		if (t/=tstop) then	!Till: lookup the day of month that should have been read last
+			j=daymon(12)
+		else
+			j=daymon(mstop) 
+			IF (mstop==2 .AND. MOD(t,4) == 0) j=29	!leap year
+		end if
+		if (n/1000000/=j) then
+			write(*,'(a,i0)')'Error in date numbering/formatting of rain_hourly.dat, year ',t
+			stop
+		end if
+			 
+		!loop over all days of year and sum up daily precip
+		DO i=1,dayyear		
+			precip(i,:)=sum(preciph((i-1)*nt+1:i*nt,:),dim=1) 
+		END DO
+
+	END IF
 
 wind=1	!Till: currently not read from input file (assumed constant)
 
@@ -426,7 +410,7 @@ implicit none
 	INTEGER, INTENT(IN)                  :: tstart, mstart	!start year, start month of simulation
 	CHARACTER(LEN=*),  INTENT(IN)                  :: filename	!name of file to produce meaningful error message
 
-	INTEGER                  :: date_num, dum,i,iostat	!dummy values
+	INTEGER                  :: date_num, dum,iostat	!dummy values
 	CHARACTER                  :: temp2	!dummy 
 
 	READ(fid,*,IOSTAT=iostat) date_num,dum,temp2

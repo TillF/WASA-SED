@@ -200,8 +200,8 @@ REAL :: thact1,watbal
 REAL :: evapveg,evaps,evapt
 REAL :: rockintc,scaet, satdep
 REAL :: etpmax(maxsoil)
-REAL :: evapsfrac,evapvegfrac,rsfinday
-REAL :: ERR,inf,infalt,infsatt,infall,test,INPUT,def,facw,infh,dt_per_day
+REAL :: evapsfrac,rsfinday !,evapvegfrac
+REAL :: ERR,inf,infalt,infsatt,test,INPUT,def,facw,infh,dt_per_day !,infall
 REAL :: tempx,temp2,temp3,temp4, temp5,tempna,tempalt,templat,kftemp
 REAL :: remainlat(maxhori*3)
 REAL :: na(maxsoil,maxhori)
@@ -221,11 +221,11 @@ REAL :: frac_old,tempth,percolmac(maxhori)
 REAL :: intc_evap(maxsoil),intcred(maxsoil),maxintc,aetred(maxsoil)
 REAL :: hfrac(maxsoil),merkalluv(maxsoil)
 
-REAL :: temptest,allalluv
+REAL :: allalluv
 
 
 INTEGER :: nbrrooth(maxsoil)
-INTEGER :: i,it,j,h,soilid,n_iter,k
+INTEGER :: i,it,j,h,soilid,n_iter
 INTEGER :: horton,hsat(maxsoil),testi,hmerk,testi2,lath
 
 REAL :: q_surf								!surface runoff [mm H2O]			
@@ -2742,8 +2742,7 @@ DO i=1,nbr_svc(tcid_instance2)
     IF (thfree(i,h) < 0) THEN
       IF (thfree(i,h+1) > 0) THEN
         
-  
-	    percol(h)=-1.*thfree(i,h+1)*  &
+ 		percol(h)=-1.*thfree(i,h+1)*  &
             (1.-EXP(-1./(thfree(i,h+1)/conduns(h+1))))
         
 !   maximum inflow rate is defined by remaining deficit until FC
@@ -2752,9 +2751,7 @@ DO i=1,nbr_svc(tcid_instance2)
 !  update soil moisture of both horizons (percol is negative !)
         horithact(tcid_instance2,i,h+1)=horithact(tcid_instance2,i,h+1)+percol(h)
 
-
         horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)-percol(h)
-
 
       END IF
     END IF

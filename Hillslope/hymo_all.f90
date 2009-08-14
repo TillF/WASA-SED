@@ -1,6 +1,13 @@
 SUBROUTINE hymo_all(STATUS)
 
+!Till: extented TC-wise output (theta_tc) to hourly resolution, removed unused vars
+! saving of initial conditions also when loading is disabled
+! computationally relevant for hourly version:  fixed error in daily_water_subbasin2.out
+! dynamic formatting of daily output files
+!2009-08-14
+
 !Till: computationally relevant: fixed wrong computation of subsurface flow (introduced in rev. 14) that lead to its underestimation
+! eliminated "tc_counter_all" by using tcid_instance (may change the order of columns in TC-wise output files)
 !2009-06-17
 
 !Pedro: added variables to the TC_wise output file
@@ -180,7 +187,7 @@ INTEGER :: i_subbas,i_lu,id_tc_type,isoil
 ! julian day
 INTEGER :: julian_day
 ! actual soil water content of terrain component
-REAL :: thact, thactroot, temp2, temp3, diff, prec, temparea
+REAL :: thact, thactroot, temp2, temp3, prec
 REAL :: precday, prechall(24)
 
 ! area of terrain component (km²)
@@ -219,9 +226,7 @@ INTEGER :: timestep_counter
 character(len=1000) :: fmtstr	!string for formatting file output
 
 !conrad: theta output
-INTEGER :: tc_counter_all						!counter for theta_tc Till: counts instances of TCs
 INTEGER :: dig_sub,dig_lu,dig_tc				!digits necessary to print external IDs
-!INTEGER*8, allocatable :: tc_idx(:)	!TC-IDs used for TC-wise output
 CHARACTER(LEN=30),allocatable :: tc_idx(:)	!TC-IDs used for TC-wise output
 
 !!Print hydrologic variable on TC scale. If not used, DISABLE
@@ -310,7 +315,7 @@ IF (STATUS == 0) THEN	!Till: initialisation before first run
 				!      thetas(isoil,h)*horiz_thickness(tcid_instance,sc,h)
 				!END IF
 				  ELSE IF (temp2 >= gw_dist(i_lu)) THEN				!Till: if gw is above deepest horizon...
-					horithact(tcid_instance,sc,h)= thetas(isoil,h)*horiz_thickness(tcid_instance,sc,h)	!Till: lowest horizon is saturated completely ii warum sind die darüberliegenden nicht ggf. auch gesättigt?
+					horithact(tcid_instance,sc,h)= thetas(isoil,h)*horiz_thickness(tcid_instance,sc,h)	!Till: lowest horizon is saturated completely (ii why are those above not saturated, too?)
 				  ELSE IF (temp2 < gw_dist(i_lu) .AND.  &
 						temp3 > gw_dist(i_lu)) THEN					!Till: gw is within lowest horizon...
 					horithact(tcid_instance,sc,h)=  &
@@ -326,6 +331,7 @@ IF (STATUS == 0) THEN	!Till: initialisation before first run
 		END DO
 	END DO
 
+	if (dosavestate) CALL save_all_conds('','','',trim(pfadn)//'storage.stats_start')		!Till: save summary on initial storage
   
   end if
 
@@ -542,24 +548,31 @@ if (f_tc_theta .OR. f_tc_surfflow .OR. f_tc_sedout) then
 	dig_lu=max(1,ceiling(log10(1.*maxval(id_lu_extern))))
 	dig_tc=max(1,ceiling(log10(1.*maxval(id_terrain_extern))))
 
+	
 	allocate(tc_idx(sv_comb))
 	tc_idx=""
 
 	write(fmtstr,'(a,i0,a,i0,a,i0,a,i0,a,i0,a,i0,a)'),'(I',dig_sub,'.',dig_sub,',I',dig_lu,'.',dig_lu,',I',dig_tc,'.',dig_tc,')'
-	!formatstr for writing into tc_idx
-	 tc_counter_all=1
-	 DO i_subbas=1,subasin 
-	  DO lu_counter=1,nbr_lu(i_subbas)
-      i_lu=id_lu_intern(lu_counter,i_subbas)
-		DO tc_counter=1,nbrterrain(i_lu)
-		   !tc_idx(tc_counter_all)=(tc_counter)+(id_lu_extern(i_lu)*10**dig_tc)+(10**(dig_tc+dig_lu)*id_subbas_extern(i_subbas))
-		   !write(tc_idx(tc_counter_all),fmtstr),id_subbas_extern(i_subbas),id_lu_extern(i_lu),tc_counter	!old scheme using TC-position
-		   write(tc_idx(tc_counter_all),fmtstr),id_subbas_extern(i_subbas),id_lu_extern(i_lu),id_terrain_extern(id_terrain_intern(tc_counter,i_lu))	!new scheme using TC-id
-		   tc_counter_all=tc_counter_all+1
+
+	DO tcid_instance=1,sv_comb
+		i=0						!flag for indicating this TC still has to be treated
+		DO i_subbas=1,subasin 
+			DO lu_counter=1,nbr_lu(i_subbas)
+				i_lu=id_lu_intern(lu_counter,i_subbas)
+				DO tc_counter=1,nbrterrain(i_lu)
+					if (tcid_instance == tcallid(i_subbas,lu_counter,tc_counter)) THEN
+						write(tc_idx(tcid_instance),fmtstr),id_subbas_extern(i_subbas),id_lu_extern(i_lu),id_terrain_extern(id_terrain_intern(tc_counter,i_lu))	!new scheme using TC-id
+						exit 
+					end if
+				END DO
+				if (i==1) exit
+			END DO
+			if (i==1) exit
 		END DO
-	  END DO
-	 END DO
-	 tc_counter_all=tc_counter_all-1
+	END DO
+
+i=1
+
 	
 !	m=0		!sum up storage required
 !	do i=1,length(year_print)	!compute number of timesteps that need to be saved
@@ -590,7 +603,7 @@ end if
   IF (f_tc_theta) THEN	
   	 
 	 !Till: allocate memory for TC-wise output
-	 allocate(theta_tc(366,sv_comb)) 
+	 allocate(theta_tc(366,nt,sv_comb)) 
 	 theta_tc=-1 !debugging help
 
 	!conrad: store average soil thickness for each TC (for each instance of a TC)
@@ -616,7 +629,7 @@ end if
 	
 	
 	WRITE(fmtstr,'(a,i0,a,i0,a)') '(i0,a,i0,a,i0,',sv_comb,'(a,a',dig_sub+dig_lu+dig_tc,'))'
-	WRITE(11,fmtstr)0,char(9),0,char(9),0,(char(9),tc_idx(i),i=1,tc_counter_all)		!tab separated output (TC indices as strings)
+	WRITE(11,fmtstr)0,char(9),0,char(9),0,(char(9),tc_idx(i),i=1,sv_comb)		!tab separated output (TC indices as strings)
 
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
@@ -632,7 +645,7 @@ OPEN(11,FILE=pfadn(1:pfadi)// 'tc_surfflow.out', STATUS='replace')
 	!don't change headerline, needed by matlab- /R-script
 	
 	WRITE(fmtstr,'(a,i0,a,i0,a)') '(i0,a,i0,a,i0,',sv_comb,'(a,a',dig_sub+dig_lu+dig_tc,'))'
-	WRITE(11,fmtstr)0,char(9),0,char(9),0,(char(9),tc_idx(i),i=1,tc_counter_all)		!tab separated output (TC indices as strings)
+	WRITE(11,fmtstr)0,char(9),0,char(9),0,(char(9),tc_idx(i),i=1,sv_comb)		!tab separated output (TC indices as strings)
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
 	CLOSE(11,status='delete')
@@ -646,7 +659,7 @@ OPEN(11,FILE=pfadn(1:pfadi)// 'tc_sedout.out', STATUS='replace')
 	!don't change headerline, needed by matlab- /R-script
 	
 	WRITE(fmtstr,'(a,i0,a,i0,a)') '(i0,a,i0,a,i0,',sv_comb,'(a,a',dig_sub+dig_lu+dig_tc,'))'
-	WRITE(11,fmtstr)0,char(9),0,char(9),0,(char(9),tc_idx(i),i=1,tc_counter_all)		!tab separated output (TC indices as strings)
+	WRITE(11,fmtstr)0,char(9),0,char(9),0,(char(9),tc_idx(i),i=1,sv_comb)		!tab separated output (TC indices as strings)
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
 	CLOSE(11,status='delete')
@@ -757,7 +770,6 @@ IF (STATUS == 2) THEN
   !** Calculation for one timestep (i.e. 1 day)
 
 
-tc_counter_all=1		!reset TC counter
   DO i_subbas=1,subasin
 	
 	j=0	!Till: temporary indicator if this subbasin can be skipped because of prespecified values
@@ -979,24 +991,22 @@ tc_counter_all=1		!reset TC counter
 		  
 		  !conrad: convert thact (in mm) into percent of soil volume using mean soil depth in tc
 		  if (f_tc_theta) then
-			!theta_tc(d,tc_counter_all)=thact/meandepth_tc(i_subbas,lu_counter,tc_counter) !original version, using mean theta for entire profile (instead of topmost horizon only, see below)
-			
-			theta_tc(d,tc_counter_all)=0
+			!theta_tc(d,nt,tcid_instance)=thact/meandepth_tc(i_subbas,lu_counter,tc_counter) !original version, using mean theta for entire profile (instead of topmost horizon only, see below)
+			theta_tc(d,timestep_counter,tcid_instance)=0
 			DO i=1,nbr_svc(tcid_instance)
 				rtemp=horithact(tcid_instance,i,1) / (thetas(id_soil_intern(i,tcid_instance),1)* horiz_thickness(tcid_instance,i,1))!Till: compute relative saturation of topmost horizon
-				theta_tc(d,tc_counter_all)=theta_tc(d,tc_counter_all)+rtemp*frac_svc(i,tcid_instance)	!Till: compute weighted average according to fraction of SVC
+				theta_tc(d,timestep_counter,tcid_instance)=theta_tc(d,timestep_counter,tcid_instance)+rtemp*frac_svc(i,tcid_instance)	!Till: compute weighted average according to fraction of SVC
 			END DO	
 		  end if
 
 		  if (f_tc_surfflow) then	!Till: safe TC-wise surface runoff
-			surfflow_tc(d,timestep_counter,tc_counter_all)=surfflow_out(tc_counter)/(tcarea*1e3)	
+			surfflow_tc(d,timestep_counter,tcid_instance)=surfflow_out(tc_counter)/(tcarea*1e3)	
 		  end if
 		  
 		  if (dosediment .AND. f_tc_sedout .and. .NOT. do_musle_subbasin) then	!Till: safe TC-wise sediment output
-			sedout_tc(d,timestep_counter,tc_counter_all)=sum(sed_out(tc_counter,:))/tcarea	
+			sedout_tc(d,timestep_counter,tcid_instance)=sum(sed_out(tc_counter,:))/tcarea	
 		  end if
 		  
-		  tc_counter_all=tc_counter_all+1	!Till: for TC-wise output
 
 !  lateral flow between terrain components (TCs)
 !  lateral outflow is lateral inflow to deeper terrain compent
@@ -1075,13 +1085,11 @@ tc_counter_all=1		!reset TC counter
 		if (associated(subflow_t)) subflow_t (d,timestep_counter,i_subbas) = subflow_t  (d,timestep_counter,i_subbas) + qsub_lu (lu_counter) 
 		if (associated(ovflow_t )) ovflow_t  (d,timestep_counter,i_subbas) = ovflow_t   (d,timestep_counter,i_subbas) + qsurf_lu(lu_counter)
 		
-
 		IF (dosediment .AND. allocated(sdr) ) THEN	!apply prespecified SDR, if present
-			sedsu(lu_counter,:)=sdr(i_lu)*sedsu(lu_counter,:)
-			!sedsu(lu_counter,:)=0.*sedsu(lu_counter,:) !test option
+			sediment_subbasin_t(d,timestep_counter,i_subbas,:)=sediment_subbasin_t(d,timestep_counter,i_subbas,:)+sedsu(lu_counter,:)	!ii: only perform if sediment is enabled
+			IF (allocated(sdr) ) sedsu(lu_counter,:)=sdr(i_lu)*sedsu(lu_counter,:) !apply prespecified SDR, if present
 		END IF
 		
-		sediment_subbasin_t(d,timestep_counter,i_subbas,:)=sediment_subbasin_t(d,timestep_counter,i_subbas,:)+sedsu(lu_counter,:) 
 	  END DO
 	  !  END of loop over subdaily timesteps
       
@@ -1105,7 +1113,7 @@ tc_counter_all=1		!reset TC counter
 			soilmsu(lu_counter)=soilmsu(lu_counter)+ thact*fracterrain(id_tc_type)	!Till: use last value of day to compute mean soil moisture in LU 
 																					!thact ist nur von letzter TC in LU. Müsste das nicht irgendwie in die TC-Schleife mit rein?
 		ELSE
-			soilmrootsu(lu_counter)=soilmrootsu(lu_counter)+ thactroot*fracterrain(id_tc_type)	!ii this is most likely wrong because thactroot is from last TC only
+			soilmrootsu(lu_counter)=soilmrootsu(lu_counter)+ thactroot*fracterrain(id_tc_type)	!ii this is most likely wrong because thactroot is from last TC only, anyway used for special output only
 			frac_satsu=frac_satsu+sum(frac_sat(tcid_instance,:))* fracterrain(id_tc_type)
 		END IF
 	  END DO	!thru all TCs of current LU
@@ -1321,28 +1329,11 @@ END IF
 !----------------------------------------------------------------------
 IF (STATUS == 3) THEN
   
-! Output daily water contribution into river (m**3/s and m**3)
-  IF (f_daily_water_subbasin) THEN	!if output file is enabled
-	  OPEN(11,FILE=pfadn(1:pfadi)//  &
-		  'daily_water_subbasin.out', STATUS='old',POSITION='append')
-	  write(fmtstr,'(a,i0,a)') '(i0,a,i0,',subasin,'(a,f11.6))'		!generate format string 
-	  DO d=1,dayyear
-		WRITE (11,fmtstr)t, char(9), d, (char(9),water_subbasin(d,i),i=1,subasin)	!in m**3/s
-	  END DO
-	  CLOSE(11)
-  	  
-	  OPEN(11,FILE=pfadn(1:pfadi)//  &
-		  'daily_water_subbasin2.out', STATUS='old',POSITION='append')
-	  write(fmtstr,'(a,i0,a)') '(i0,a,i0,',subasin,'(a,f11.6))'		!generate format string 
-	  DO d=1,dayyear
-		WRITE (11,fmtstr)t, char(9), d, (char(9),water_subbasin(d,i)*3600*24,i=1,subasin) !in m**3
-	  END DO
-	  CLOSE(11)
-  END IF
-
-
-	CALL write_output(f_daily_actetranspiration,'daily_actetranspiration.out',aet)	! Output daily actual evapotranspiration
-	CALL write_output(f_daily_potetranspiration,'daily_potetranspiration.out',pet)	! Output daily potential evapotranspiration
+	CALL write_output(f_daily_water_subbasin,'daily_water_subbasin.out',water_subbasin)	! Output daily water contribution into river (m**3/s)
+	CALL write_output(f_daily_water_subbasin,'daily_water_subbasin2.out',sum(water_subbasin_t,dim=2)*3600*dt)	! Output daily water contribution into river (m**3/s)
+	
+	CALL write_output(f_daily_actetranspiration,'daily_actetranspiration.out',aet,3)	! Output daily actual evapotranspiration
+	CALL write_output(f_daily_potetranspiration,'daily_potetranspiration.out',pet,3)	! Output daily potential evapotranspiration
 	CALL write_output(f_daily_theta,'daily_theta.out',soilm)		! Output daily soil moisture
 	CALL write_output(f_daily_qhorton,'daily_qhorton.out',hortflow)		! Output daily Hortonian overland flow
 	CALL write_output(f_daily_total_overlandflow,'daily_total_overlandflow.out',ovflow)			! Output daily total overland flow
@@ -1420,7 +1411,9 @@ IF (STATUS == 3) THEN
 		OPEN(11,FILE=pfadn(1:pfadi)//'tc_theta.out', STATUS='old',POSITION='append')
 		WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,',sv_comb,'(a,f5.3))'	!generate format string
 		DO d=1,dayyear
-				WRITE (11,fmtstr)(t,char(9),d,char(9),count,(char(9),theta_tc(d,i),i=1,tc_counter_all-1),count=1,nt)	!tab separated output		
+			DO count=1,nt
+				WRITE (11,fmtstr)t,char(9),d,char(9),count,(char(9),theta_tc(d,count,i),i=1,sv_comb)	!tab separated output		
+			END DO
 		END DO
 		CLOSE(11)
 	END IF
@@ -1432,7 +1425,9 @@ IF (STATUS == 3) THEN
 		WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,',sv_comb,'(a,f6.1))'	!generate format string
 		
 		DO d=1,dayyear
-				WRITE (11,fmtstr)(t,char(9),d,char(9),count,(char(9),surfflow_tc(d,count,i),i=1,tc_counter_all-1),count=1,nt)	!tab separated output
+			DO count=1,nt
+				WRITE (11,fmtstr)t,char(9),d,char(9),count,(char(9),surfflow_tc(d,count,i),i=1,sv_comb)	!tab separated output
+			END DO
 		END DO
 		
 		CLOSE(11)
@@ -1444,7 +1439,9 @@ IF (STATUS == 3) THEN
 		WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,',sv_comb,'(a,f8.1))'	!generate format string
 		
 		DO d=1,dayyear
-				WRITE (11,fmtstr)(t,char(9),d,char(9),count,(char(9),sedout_tc(d,count,i),i=1,tc_counter_all-1),count=1,nt)	!tab separated output
+			DO count=1,nt
+				WRITE (11,fmtstr)t,char(9),d,char(9),count,(char(9),sedout_tc(d,count,i),i=1,sv_comb)	!tab separated output
+			END DO
 		END DO
 		
 		CLOSE(11)
@@ -1480,7 +1477,7 @@ contains
 
 
 		
-		integer	:: i,j,k
+		integer	:: i,k
 		integer :: d		!distance between start node and current day (in days)
 		integer :: d_nodes		!distance between start node and end_node (in days)
 		real :: node1_value,node2_value		!parameter values at nodepoints (start and end-point of interpolation)
@@ -1544,17 +1541,29 @@ contains
 
 
 	
-	SUBROUTINE write_output(f_flag,file_name,value_array)
+	SUBROUTINE write_output(f_flag,file_name,value_array,spec_decimals)
 	! Output daily values of given array
 		IMPLICIT NONE
 		LOGICAL, INTENT(IN)                  :: f_flag
 		CHARACTER(len=*), INTENT(IN)         :: file_name
 		REAL, INTENT(IN)                  :: value_array(:,:)
+		INTEGER, optional ::  spec_decimals
+		INTEGER :: digits, decimals 
 
 		IF (f_flag) THEN	!if output file is enabled
 			OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old',POSITION='append')
 
-			write(fmtstr,'(a,i0,a)') '(i0,a,i0,',subasin,'(a,f14.3))'		!generate format string (daily format)
+			digits=floor(log10(max(1.0,maxval(value_array))))+1	!Till: number of pre-decimal digits required
+
+			if (present(spec_decimals)) then 
+				decimals=spec_decimals 	
+			else
+			   decimals=max(0,10-digits)	 !default: use 11 digits in total in output
+			end if
+			
+			write(fmtstr,'(a,i0,a,i0,a,i0,a)') '(i0,a,i0,',subasin,'(a,f',digits+decimals+1,'.',decimals,'))'		!generate format string (subdaily format)
+			
+			!write(fmtstr,'(a,i0,a)') '(i0,a,i0,',subasin,'(a,f14.3))'		!generate format string (daily format)
 			DO d=1,dayyear
 				write(11,trim(fmtstr))t,char(9),d,(char(9),value_array(d,i),i=1,subasin)
 			END DO

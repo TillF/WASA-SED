@@ -81,12 +81,12 @@ INTEGER :: n_sed_class			!number of particles classes
 INTEGER :: hill_transport		!type of hillslope sediment transport
 INTEGER :: river_transport		!type of river sediment transport
 INTEGER :: reservoir_transport	!type of reservoir sediment transport
-INTEGER :: nt					!number of timesteps per day (computed from dt)
+INTEGER :: nt					!number of timesteps per day (computed as 24/dt)
 
 real, allocatable :: upper_limit(:)			!upper limits of particle size class intervalls (mm)
 real, allocatable :: particle_classes(:)	!upper limits of particle size classes [mm]
 
-!flags for selection which output files will be created
+!flags for selecting which output files will be created
 LOGICAL :: f_daily_actetranspiration,f_daily_potetranspiration, f_daily_qhorton,f_daily_qin_m3s,f_daily_qout_m3s,f_daily_rain,f_daily_runoff
 LOGICAL :: f_daily_sediment_production,f_daily_subsurface_runoff,f_daily_theta,f_daily_total_overlandflow,f_daily_water_subbasin,f_routing_response,f_sediment_production,f_water_subbasin,f_deep_gw_recharge,f_deep_gw_discharge,f_daily_gw_loss,f_tc_theta
 LOGICAL :: f_tc_surfflow, f_tc_sedout

@@ -55,9 +55,8 @@ use erosion_h
 IMPLICIT NONE
 CHARACTER (LEN=160) :: path2do_dat		!Till: path to central control file (do.dat)
 
-INTEGER :: imun,imicro,imeso,istate,i
+INTEGER :: i,istate !,imun,imicro,imeso
 CHARACTER (LEN=150) :: custompath
-CHARACTER (LEN=1) :: cdum
 CHARACTER (30) :: dummy
 
 if (trim(path2do_dat)=='') then
