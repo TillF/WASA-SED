@@ -200,8 +200,6 @@ REAL :: sublat_in(maxterrain),sublat_out(maxterrain)
 
 ! sediment flow between terrain components
 REAL,allocatable,save :: sed_in(:,:),sed_out(:,:)
-!REAL,allocatable,save :: sed_in(:,:)
-!REAL,pointer,save :: sed_out(:,:)
 
 ! water balance of landscape unit
 REAL :: balance,balance_tc
@@ -525,16 +523,16 @@ if (doacud)  CALL lake(0,dummy)
   
 
 
-!     debug Output for checking purposes !remove
-  OPEN(11,FILE=pfadn(1:pfadi)//'debug.out', STATUS='replace')
-	WRITE(11,*) 'current c-factor of lowermost TC, LU 22312.'
-	debug_out=0
-	CLOSE(11)
-!     debug Output for checking purposes !remove
-  OPEN(11,FILE=pfadn(1:pfadi)//'debug2.out', STATUS='replace')
-	WRITE(11,*) 'current q	q_peak	ei	K_fac	C_fac	P_fac	LS_fac	CFRG_fac of lowermost TC, LU 31221.'
- 	debug_out2=0
-	CLOSE(11)
+!!     debug Output for checking purposes !remove
+!  OPEN(11,FILE=pfadn(1:pfadi)//'debug.out', STATUS='replace')
+!	WRITE(11,*) 'current c-factor of lowermost TC, LU 22312.'
+!	debug_out=0
+!	CLOSE(11)
+!!     debug Output for checking purposes !remove
+!  OPEN(11,FILE=pfadn(1:pfadi)//'debug2.out', STATUS='replace')
+!	WRITE(11,*) 'current q	q_peak	ei	K_fac	C_fac	P_fac	LS_fac	CFRG_fac of lowermost TC, LU 31221.'
+! 	debug_out2=0
+!	CLOSE(11)
 
   
 
@@ -947,12 +945,12 @@ IF (STATUS == 2) THEN
 			gwrtc(tcid_instance)=gwr			
 			deepgwrtc(tcid_instance)=deepgwr	 
 			
-			if ( (tc_counter==nbrterrain(i_lu)) .AND. (i_lu==1)) then		!debugging output !remove
+			!if ( (tc_counter==nbrterrain(i_lu)) .AND. (i_lu==1)) then		!debugging output !remove
 			 !debug_out(d)=aettc(tcid_instance)
 			 !debug_out(d)=svc_k_fac_day(6)
 			 !debug_out(d)=lai_act(1)
-			 debug_out(d)=svc_c_fac_day(1)
-			end if
+			 !debug_out(d)=svc_c_fac_day(1)
+			!end if
 
 
 
@@ -1393,17 +1391,17 @@ IF (STATUS == 3) THEN
 
 
 !  debug output !remove
-  OPEN(11,FILE=pfadn(1:pfadi)//'debug.out', STATUS='old',POSITION='append')
-		WRITE (11,'(3(i6,a1),f14.3)')(t,char(9), d,char(9), -1,char(9), debug_out(d),&
-																				d=1,dayyear)
-	CLOSE(11)
+ ! OPEN(11,FILE=pfadn(1:pfadi)//'debug.out', STATUS='old',POSITION='append')
+!		WRITE (11,'(3(i6,a1),f14.3)')(t,char(9), d,char(9), -1,char(9), debug_out(d),&
+!																				d=1,dayyear)
+!	CLOSE(11)
 
 !  debug output !remove
-  OPEN(11,FILE=pfadn(1:pfadi)//'debug2.out', STATUS='old',POSITION='append')
-		DO d=1,dayyear
-		WRITE (11,'(3(i6,a1),8(f14.3,a1))')t,char(9), d,char(9), -1,char(9), (debug_out2(d,i),char(9),i=1,8)
-		END DO
-	CLOSE(11)
+ ! OPEN(11,FILE=pfadn(1:pfadi)//'debug2.out', STATUS='old',POSITION='append')
+!		DO d=1,dayyear
+!		WRITE (11,'(3(i6,a1),8(f14.3,a1))')t,char(9), d,char(9), -1,char(9), (debug_out2(d,i),char(9),i=1,8)
+!		END DO
+!	CLOSE(11)
 
 
 	!conrad: output of theta [%] for each tc from theta_tc
@@ -1451,7 +1449,6 @@ IF (STATUS == 3) THEN
 
 if (doacud) CALL lake(3,dummy)
 if (dosavestate) call save_model_state !Till: saves model state (soil moisture, ground water, etc.) to file, if specified)
-
 
 
 END IF

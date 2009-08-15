@@ -1,5 +1,8 @@
 SUBROUTINE climo(STATUS)
 
+!Till: modified allocation of input buffer that led to problem under linux
+!2008-08-15
+
 !Till: corrrected error messaging and loading in loading rain_hourly.dat when obsolete subbasins were present
 !2008-08-11
 
@@ -76,6 +79,7 @@ CHARACTER (LEN=8000) :: linedummy	!Till: dummy for reading input header	!ii: all
 integer, pointer, save :: corr_column_temp(:),corr_column_rhum(:),corr_column_rad(:),corr_column_precip(:) !Till: hold corresponding columns of input files to be related to internal numbering of subbasins 
 INTEGER,save  :: no_columns(5)=0		!number of columns of input files for the 5 climate input files
 REAL,allocatable,save :: inputbuffer(:,:)				!Till: for buffering input data 
+!REAL,allocatable,save :: inputbuffer2(:,:)				!Till: for buffering input data 
 
 
 !CCCCCCCCCCCCCCCCCCCC MODULE CODE CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -148,8 +152,7 @@ IF (STATUS == 0) THEN
   end do
 
 
-  allocate(inputbuffer(366,maxval(no_columns)))		!Till: prepare input buffer, to fit the largest of the datasets
-
+  allocate(inputbuffer(366*nt,no_columns(4)))		!Till: prepare input buffer to fit the hourly data
   
  !set internal filepointers to correct line (simulation start)
   call date_seek(81,tstart,mstart,'temperature.dat')
@@ -163,7 +166,6 @@ END IF
 ! -------------------------------------------------------------
 IF (STATUS == 1) THEN
 
-
 !Reads in daily time series for temperature, humidity, radiation, rainfall
 !
  !loop=dtot-dayyear
@@ -173,20 +175,20 @@ IF (STATUS == 1) THEN
  ! READ(83,*) dummy
  ! READ(84,*) dummy
  !END DO
- 
- temp(:,:)=0
- rhum(:,:)=5
- rad(:,:)=30
- precip(:,:)=50
 
+ temp=0
+ rhum=5
+ rad=30
+ precip=50
+ 
  READ(81,*) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(1)),id=1,dayyear)		!Till: faster than using loop
- temp(:,1:subasin)= inputbuffer(:,corr_column_temp)	!Till: rearrange column order to match order of hymo.dat
+ temp(1:dayyear,1:subasin)= inputbuffer(1:dayyear,corr_column_temp)	!Till: rearrange column order to match order of hymo.dat
 
  READ(82,*) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(2)),id=1,dayyear)		!Till: faster than using loop
- rhum(:,1:subasin)= inputbuffer (:,corr_column_rhum)	!Till: rearrange column order to match order of hymo.dat
+ rhum(1:dayyear,1:subasin)= inputbuffer (1:dayyear,corr_column_rhum)	!Till: rearrange column order to match order of hymo.dat
 
  READ(83,*) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(3)),id=1,dayyear)		!Till: faster than using loop
- rad(:,1:subasin)= inputbuffer (:,corr_column_rad)	!Till: rearrange column order to match order of hymo.dat 
+ rad(1:dayyear,1:subasin)= inputbuffer (1:dayyear,corr_column_rad)	!Till: rearrange column order to match order of hymo.dat 
  
 	IF (.NOT. dohour) THEN
 		READ(84,*) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(4)),id=1,dayyear)		!Till: faster than using loop
@@ -196,9 +198,6 @@ IF (STATUS == 1) THEN
 		!for hourly version - program still needs the daily data as well, but this is computed internally below
 
 			preciph(:,:)=-1	!hourly precip
-
-		deallocate(inputbuffer)		
-		allocate(inputbuffer(366*nt,no_columns(4)))		!Till: prepare input buffer to fit the hourly data
 
 		READ (84,*) ((n,k,(inputbuffer((i-1)*24+j,id),id=1,no_columns(4)),j=1,nt),i=1,dayyear)
 		preciph(:,1:subasin)= inputbuffer (:,corr_column_precip)	!Till: rearrange column order to match order of hymo.dat	 
