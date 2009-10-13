@@ -163,7 +163,13 @@ INTEGER :: luse_subbas(sv_comb),luse_lu(sv_comb),luse_tc(sv_comb)
 
 
 !Till: Read routing.dat, which determines which of the given subbasins are to be modelled 
-OPEN(11,FILE=pfadp(1:pfadj)// 'River/routing.dat',STATUS='old')! upbasin: MAP ID of upstream sub-basin (MAP IDs);! downbasin: MAP ID of downstream sub-basin (MAP IDs)
+OPEN(11,FILE=pfadp(1:pfadj)// 'River/routing.dat',STATUS='old',IOSTAT=istate)	! upbasin: MAP ID of upstream sub-basin (MAP IDs);! downbasin: MAP ID of downstream sub-basin (MAP IDs)
+IF (istate/=0) THEN
+	write(*,*)'Error: Input file ',pfadp(1:pfadj)// 'River/routing.dat',' not found, aborting.'
+	stop
+END IF
+
+
 READ (11,*); READ(11,*)
 istate=0
 upbasin=0

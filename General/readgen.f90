@@ -313,47 +313,53 @@ END IF
 
 
 ! save settings of this run to output directory
-OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='unknown')
-WRITE(11,*)
-WRITE(11,'(a)') pfadp
-WRITE(11,'(a)') pfadn
-WRITE(11,*) 'start year of simulation: ', tstart
-WRITE(11,*) 'end year of simulation: ', tstop
-WRITE(11,*) 'start month of simulation: ',mstart
-WRITE(11,*) 'end month of simulation: ',mstop
-WRITE(11,*) 'no. of sub-basin: ',subasin
-WRITE(11,*) 'no. of combinations: ',sv_comb
-WRITE(11,*) 'total no. of SOTER units: ',nsoter
-WRITE(11,*) 'total no. of terrain components: ',nterrain
-WRITE(11,*) 'total no. of soil components: ',nsoil
-WRITE(11,*) 'total no. of vegetation units: ',nveg
-WRITE(11,*) 'do reservoir calculations: ',doacud
-WRITE(11,*) dolattc
-WRITE(11,*) doalllattc
-WRITE(11,*) dolatsc
-WRITE(11,*) dolatscsub
-WRITE(11,*) dotrans
-WRITE(11,*) dohour
-WRITE(11,*) scenario
-WRITE(11,*) krig
-WRITE(11,*) kfkorr,kfkorr_a,kfkorr_b
-WRITE(11,*) intcf
-WRITE(11,*) dointc
-WRITE(11,*) doscale
-WRITE(11,*) domuncell
-WRITE(11,*) sensfactor
-write(11,*) dosediment
-write(11,*) n_sed_class
-write(11,*) hill_transport
-write(11,*) river_transport
-write(11,*) reservoir_transport
-if (dosediment) then
-	WRITE(11,*) 
-	WRITE(11,*) 'spatial scale for application of erosion eq : ',do_musle_subbasin
-	WRITE(11,*) 'erosion eq : ',erosion_equation
-end if
-WRITE(11,*) 'WASA model, ',trim(rev_string1),'; ',trim(rev_string2)
-CLOSE(11)
+OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='unknown',IOSTAT=istate)	
+IF (istate==0) THEN
+	WRITE(11,*)
+	WRITE(11,'(a)') pfadp
+	WRITE(11,'(a)') pfadn
+	WRITE(11,*) 'start year of simulation: ', tstart
+	WRITE(11,*) 'end year of simulation: ', tstop
+	WRITE(11,*) 'start month of simulation: ',mstart
+	WRITE(11,*) 'end month of simulation: ',mstop
+	WRITE(11,*) 'no. of sub-basin: ',subasin
+	WRITE(11,*) 'no. of combinations: ',sv_comb
+	WRITE(11,*) 'total no. of SOTER units: ',nsoter
+	WRITE(11,*) 'total no. of terrain components: ',nterrain
+	WRITE(11,*) 'total no. of soil components: ',nsoil
+	WRITE(11,*) 'total no. of vegetation units: ',nveg
+	WRITE(11,*) 'do reservoir calculations: ',doacud
+	WRITE(11,*) dolattc
+	WRITE(11,*) doalllattc
+	WRITE(11,*) dolatsc
+	WRITE(11,*) dolatscsub
+	WRITE(11,*) dotrans
+	WRITE(11,*) dohour
+	WRITE(11,*) scenario
+	WRITE(11,*) krig
+	WRITE(11,*) kfkorr,kfkorr_a,kfkorr_b
+	WRITE(11,*) intcf
+	WRITE(11,*) dointc
+	WRITE(11,*) doscale
+	WRITE(11,*) domuncell
+	WRITE(11,*) sensfactor
+	write(11,*) dosediment
+	write(11,*) n_sed_class
+	write(11,*) hill_transport
+	write(11,*) river_transport
+	write(11,*) reservoir_transport
+	if (dosediment) then
+		WRITE(11,*) 
+		WRITE(11,*) 'spatial scale for application of erosion eq : ',do_musle_subbasin
+		WRITE(11,*) 'erosion eq : ',erosion_equation
+	end if
+	WRITE(11,*) 'WASA model, ',trim(rev_string1),'; ',trim(rev_string2)
+	CLOSE(11)
+else
+	write(*,*)'Error: Output file ',pfadn(1:pfadi)//'parameter.out',' could not be created, aborting.'
+	stop
+END IF
+
 
 nt = int(24/dt)	!Till: number of simulation steps per day		
 
