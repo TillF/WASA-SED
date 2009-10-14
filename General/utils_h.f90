@@ -131,4 +131,20 @@ subroutine pause1
 end subroutine
 
 
+function locase(string) result(lower)	!convert to lower case
+character(len=*), intent(in) :: string
+character(len=len(string)) :: lower
+integer :: j
+do j = 1,len(string)
+  if(string(j:j) >= "A" .and. string(j:j) <= "Z") then
+       lower(j:j) = achar(iachar(string(j:j)) + 32)
+  else
+       lower(j:j) = string(j:j)
+  end if
+end do
+end function locase
+
+
+
+
 END MODULE utils_h

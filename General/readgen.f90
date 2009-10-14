@@ -1,5 +1,8 @@
 SUBROUTINE readgen(path2do_dat)
 
+!Till: computationally irrelevant: made "command-strings" in outfile.dat case-insensitive
+!2009-10-14
+
 !Till: computationally irrelevant: added program version information to parameter.out
 !2009-06-17
 
@@ -51,6 +54,7 @@ use lake_h
 use routing_h
 use reservoir_h
 use erosion_h
+use utils_h
 
 IMPLICIT NONE
 CHARACTER (LEN=160) :: path2do_dat		!Till: path to central control file (do.dat)
@@ -204,8 +208,9 @@ IF (istate==0) THEN
 	READ(11,*,IOSTAT=istate)dummy  
 	READ(11,*,IOSTAT=istate)dummy  
 	READ(11,*,IOSTAT=istate)dummy  
+
 	DO WHILE (istate==0)
-		SELECT CASE (trim(dummy))		!enable/disable file output of desired results
+		SELECT CASE (trim(locase(dummy)))		!enable/disable file output of desired results
 			CASE ('daily_actetranspiration')
 			  f_daily_actetranspiration=.TRUE.
 			CASE ('daily_potetranspiration')
