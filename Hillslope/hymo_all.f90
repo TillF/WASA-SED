@@ -813,16 +813,16 @@ IF (STATUS == 2) THEN
 
 !  determine actual vegetation characteristics
 !  (height, root depth, LAI, albedo) for all vegetation units
-	rootd_act =calc_seasonality(i_subbas,t,julian_day,period(i_subbas,:),rootdep)	!compute root depths of current day
-	height_act=calc_seasonality(i_subbas,t,julian_day,period(i_subbas,:),height)	!compute heights of current day
-	lai_act   =calc_seasonality(i_subbas,t,julian_day,period(i_subbas,:),lai)	!compute LAIs of current day
-	alb_act   =calc_seasonality(i_subbas,t,julian_day,period(i_subbas,:),alb)	!compute albedos of current day
+	rootd_act =calc_seasonality(t,julian_day,period(i_subbas,:),rootdep)	!compute root depths of current day
+	height_act=calc_seasonality(t,julian_day,period(i_subbas,:),height)	!compute heights of current day
+	lai_act   =calc_seasonality(t,julian_day,period(i_subbas,:),lai)	!compute LAIs of current day
+	alb_act   =calc_seasonality(t,julian_day,period(i_subbas,:),alb)	!compute albedos of current day
 
-	svc_k_fac_day     =calc_seasonality(i_subbas,t,julian_day,seasonality_k     (i_subbas,:),svc_k_fac)	        !compute K-factors of current day
-	svc_c_fac_day     =calc_seasonality(i_subbas,t,julian_day,seasonality_c     (i_subbas,:),svc_c_fac)	        !compute c-factors of current day
-	svc_p_fac_day     =calc_seasonality(i_subbas,t,julian_day,seasonality_p     (i_subbas,:),svc_p_fac)	        !compute p-factors of current day
-	svc_coarse_fac_day=calc_seasonality(i_subbas,t,julian_day,seasonality_coarse(i_subbas,:),svc_coarse_fac)	!compute coarse-factors of current day
-	svc_n_day         =calc_seasonality(i_subbas,t,julian_day,seasonality_n     (i_subbas,:),svc_n)	            !compute n of current day
+	svc_k_fac_day     =calc_seasonality(t,julian_day,seasonality_k     (i_subbas,:),svc_k_fac)	        !compute K-factors of current day
+	svc_c_fac_day     =calc_seasonality(t,julian_day,seasonality_c     (i_subbas,:),svc_c_fac)	        !compute c-factors of current day
+	svc_p_fac_day     =calc_seasonality(t,julian_day,seasonality_p     (i_subbas,:),svc_p_fac)	        !compute p-factors of current day
+	svc_coarse_fac_day=calc_seasonality(t,julian_day,seasonality_coarse(i_subbas,:),svc_coarse_fac)	!compute coarse-factors of current day
+	svc_n_day         =calc_seasonality(t,julian_day,seasonality_n     (i_subbas,:),svc_n)	            !compute n of current day
 
 	kfkorr_day=kfkorr*(kfkorr_a*1/precip(d,i_subbas)+kfkorr_b)	!compute kfkorr as a function of daily precipitation
 	
@@ -1461,14 +1461,13 @@ RETURN
 998   FORMAT(3(1X,f5.3))
 
 contains
-	FUNCTION calc_seasonality(subbasin,year,julian_day,node_days,param_node_array)
+	FUNCTION calc_seasonality(year,julian_day,node_days,param_node_array)
 	!compute seasonality (value of current parameter for current timestep and subbasin) by interpolation between node1 and node2
 
 	use utils_h
 	implicit none
 		real :: param_node_array(:,:)
 		real :: calc_seasonality(size(param_node_array,dim=1))	!return value
-		INTEGER, INTENT(IN)                  :: subbasin	!subbasin-id
 		INTEGER, INTENT(IN)                  :: year,julian_day	
 		integer, INTENT(IN) :: node_days(:)
 
