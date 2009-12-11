@@ -1,4 +1,8 @@
 SUBROUTINE routing_coefficients(i, STATUS, flow, r_area, p)
+!Till: computationally irrelevant: increased iteration counter for determination of river cross section
+!2009-12-11
+
+
 !!    this subroutine computes travel time coefficients for the Muskingum Routing
 !!    along the main channel
 
@@ -110,7 +114,7 @@ elseif (r_qin(2,i).lt.q_bankful100) then
     percent = percent + 0.01
 	t=t+1
     if (t.gt.99.or.q_it.lt.0) then
-     write(*,*) 'Problems in routing_coefficients.f: Bankful flow is used for initial river storage'
+     write(*,*) 'Problems in routing_coefficients.f90: Bankful flow is used for initial river storage'
 	 a=a_100
      exit
     endif
@@ -120,21 +124,21 @@ elseif (r_qin(2,i).gt.q_bankful100) then
  error=-1
  percent=0.01
    do while (error.lt.0)
-    d_it = (1 + percent) * r_depth(i) - r_depth(i)
-    p = b + 2. * r_depth(i) * SQRT(1. + s1 * s1) + (r_width_fp(i)-r_width(i)) &
+    d_it = percent * r_depth(i)    !=(1. + percent) * r_depth(i) - r_depth(i)	!iterative estimation of depth
+    p = b + 2. * r_depth(i) * SQRT(1. + s1 * s1) + (r_width_fp(i)-r_width(i)) &	!Till: perimeter
     + 2. * d_it * SQRT(1 + s2 * s2)
 ! Calculation of composite Manning factor taking into account the roughness values of the floodplains (for derivation of composite Manning: siehe Wasserbauskriptum)
 	p_bed = b + 2. * r_depth(i) * SQRT(1. + s1 * s1)
 	p_fp = (r_width_fp(i)-r_width(i)) + 2. * d_it * SQRT(1 + s2 * s2)
-	manning_composite = ((p_bed * manning(i)**1.5 + p_fp * manning_fp(i)**1.5)/p)**(0.666)
-  	a = a_100 + r_width_fp(i) * d_it + s2 * d_it * d_it
-    rh = a / p
-    q_it = a * rh ** 0.6666 * Sqrt(r_slope(i))/manning_composite
+	manning_composite = ((p_bed * manning(i)**1.5 + p_fp * manning_fp(i)**1.5)/p)**(0.666)	
+  	a = a_100 + r_width_fp(i) * d_it + s2 * d_it * d_it							!Till: cross-section area
+    rh = a / p																	!Till: hydraulic radius
+    q_it = a * rh ** 0.6666 * SQRT(r_slope(i))/manning_composite				!Till: discharge according to Manning's equation
     error = q_it - r_qin(2,i)
     percent = percent + 0.01
     t=t+1
-    if (t.gt.1000) then
-     write(*,*) 'Problems in routing_coefficients.f: floodplain calculations'
+    if (t.gt.10000) then
+     write(*,*) 'Problems in routing_coefficients.f90: floodplain calculations'
      stop
     endif
    enddo
@@ -262,9 +266,9 @@ elseif (r_qin(2,i).lt.q_bankful100) then
 	t=t+1
     if (t.eq.19.or.q_it.lt.0) then
 	 if (r_qin(2,i).lt.q_it.or.error.lt.0) then
-!       write(*,*) 'Problems in routing_coefficients.f: Very small flow is used for beginning of ephermeal flow', i
+!       write(*,*) 'Problems in routing_coefficients.f90: Very small flow is used for beginning of ephermeal flow', i
 	 else
-!       write(*,*) 'Problems in routing_coefficients.f: Bankful flow is used for beginning of ephermeal flow', i
+!       write(*,*) 'Problems in routing_coefficients.f90: Bankful flow is used for beginning of ephermeal flow', i
 	   a=a_100
      endif
      exit
@@ -275,7 +279,7 @@ elseif (r_qin(2,i).gt.q_bankful100) then
  error=-1.
  percent=5.e-2
    do while (error.lt.0)
-    d_it = (1. + percent) * r_depth(i) - r_depth(i)
+    d_it = percent * r_depth(i)    !=(1. + percent) * r_depth(i) - r_depth(i)
     p = b + 2. * r_depth(i) * SQRT(1. + s1 * s1) + (r_width_fp(i)-r_width(i)) &
     + 2. * d_it * SQRT(1 + s2 * s2)
 	! Calculation of composite Manning factor taking into account the roughness values of the floodplains 
@@ -290,7 +294,7 @@ elseif (r_qin(2,i).gt.q_bankful100) then
     t=t+1
 
     if (t.gt.1000) then
-     write(*,*) 'Problems in routing_coefficients.f: Bankful flow is used for beginning of ephermeal flow', i
+     write(*,*) 'Problems in routing_coefficients.f90: Bankful flow is used for beginning of ephermeal flow', i
      stop
     endif
    enddo

@@ -1,3 +1,3 @@
 !this file is updated on calling update_revision_no.bat to create svn_rev.txt which is linked to the source code
-rev_string1='rev25 '
-rev_string2='updated from repository 2009/10/21'
+rev_string1='rev26 ( )'
+rev_string2='updated from repository 2009/12/11 '
