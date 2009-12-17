@@ -21,7 +21,7 @@ responsibility all:
 - graceful termination if input files are not found
 - delete output files of prior runs if they are disabled to avoid confusion (see hymo_all.f90) (Till)
 
-responsibility Till:
+section hillslope:
 - create output directory, if non-existent(Till)
 - open input files with read-only (allows access to already opened files, done for climo-files)(Till)
 - read maxsoter, maxterrain, maxsoil, maxhori, ntrans from structure of inputfile rather than from maxdim, nveg, nsoil(Till)
@@ -35,4 +35,12 @@ responsibility Till:
 - Unterschied gwsu / deepgwrsu klären --> ggf redundanz deepgw_r, gw_recharge aufheben(Till)
 - revise system of input files: eliminate redundancies, strict relational database scheme(Till)
 
+section river
+- consider channel-floodplain interaction of discharge, probably treat differently for assessing sedimentation dynamics
+	- literature: 
+		- Project "Hydraulic Characteristic and Discharge Estimation for Flooding River" http://redac.eng.usm.my/html/projects/ESG/ESG.html
+		- M.F. Lambert, R.H.J. Sellin: DISCHARGE PREDICTION IN STRAIGHT COMPOUND CHANNELS USING THE MIXING LENGTH CONCEPT
+		- Christodolou G.C. and W.R.C. Myers.  (1999).  Apparent Friction Factor on the Flood Plain-Main Channel Interface of Compound Channel Sections, Proceedings of 28th Congress of the International Association for Hydraulic Research, Craz, Austria, SE3, A379.
+		- Fredrik Huthoff et al 2008 (http://scitation.aip.org/getabs/servlet/GetabsServlet?prog=normal&id=JHEND8000134000008001158000001&idtype=cvips&gifs=yes&ref=no)
+		
 

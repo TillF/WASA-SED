@@ -1,4 +1,7 @@
 SUBROUTINE routing_coefficients(i, STATUS, flow, r_area, p)
+!Till: computationally relevant: major changes, bugfixes and optimzation
+!2009-12-17
+
 !Till: computationally irrelevant: increased iteration counter for determination of river cross section
 !2009-12-11
 
@@ -39,7 +42,7 @@ SUBROUTINE routing_coefficients(i, STATUS, flow, r_area, p)
 !!    aa          |none          |area/area=1 (used to calculate velocity with
 !!                               |Manning's equation)
 !!    a           |m^2           |cross-sectional area of channel
-!!    b           |m             |bottom width of channel
+!!    bottom_width(i)           |m             |bottom width of channel
 !!    d           |m             |depth of flow
 !!    fps         |none          |change in horizontal distance per unit
 !!                               |change in vertical distance on floodplain side
@@ -57,264 +60,252 @@ SUBROUTINE routing_coefficients(i, STATUS, flow, r_area, p)
 !!    SWAT: Qman
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
+
 use routing_h
 use common_h
 use hymo_h
 
-INTEGER, INTENT(IN OUT) :: i, STATUS
-INTEGER :: jj, k
-REAL :: fps, d, b, a, qq1, rh, tt1, tt2, aa, phi8, phi9, phi11, phi12, sed_con
-REAL :: q_bankful100, a_100
-REAL:: percent, q_it, error, d_it, t
-REAL :: vol, s1, s2, r_area, p, flow, p_bed, p_fp, manning_composite
+implicit none
+INTEGER, INTENT(IN) :: i, STATUS
+REAL, INTENT(OUT) :: r_area, p, flow
+
+!REAL :: fps, qq1, tt1, tt2, aa, phi8, phi9, phi11, phi12, sed_con
+REAL :: q_bankful100, d
+REAL::  d_it !, q_it, percent, error,
+REAL :: vol, s1, s2 
+
+
+s1 = r_sideratio(i)	
+s2 = r_sideratio_fp(i)
+
+
+flow=-1000
+r_area=-100
+p=-1000
+r_depth_cur(i)=-1000
 
 
 ! -----------------------------------------------------------------------
 IF (STATUS == 1) THEN
 
-! Calculation of bottom width
-s1 = r_sideratio(i)	
-s2 = r_sideratio_fp(i)
-d = r_depth(i)
-bottom_width(i) = r_width(i) - 2. * d * r_sideratio(i)
-b = r_width(i) - 2. * d * r_sideratio(i)
+	! Calculation of bottom width
+	d = r_depth(i)
+	bottom_width(i) = r_width(i) - 2. * d * r_sideratio(i)
 
-!! check if bottom width (b) is < 0
-IF (b <= 0.) THEN
-  b = 0.
-  r_sideratio(i) = 0.
-  b = .5 * r_width(i)
-  r_sideratio(i) = (r_width(i) - b) / (2. * d)
-END IF
+	!! check if bottom width (bottom_width(i)) is < 0
+	IF (bottom_width(i) <= 0.) THEN
+	  write(*,*)"WARNING: to low river width for depth / side slopes combination at ",i,"th stretch, side slopes adjusted."
+	  bottom_width(i) = .5 * r_width(i)
+	  r_sideratio(i) = (r_width(i) - bottom_width(i)) / (2. * d)
+	END IF
 
 !! compute flow and travel time at bankfull depth
-p = b + 2. * d * SQRT(r_sideratio(i) * r_sideratio(i) + 1.)
-a_100 = b * d + r_sideratio(i) * d * d
-rh = a_100 / p
-area_bankful(i) = a_100
-q_bankful100 = a_100 * rh ** 0.6666 * Sqrt(r_slope(i))/manning(i)
+	CALL calc_q_a_p(r_depth(i), q_bankful100, area_bankful(i), p)
 
+	!!determine the correct flow area a for the given input discharge r_qin
+	! for flow in the main channel
+	if (r_qin(2,i) > 0)  then
+		d_it =calc_d(r_qin(2,i))
+		CALL calc_q_a_p(d_it, flow, r_area, p)
+	else
+		r_area=0
+	endif
 
-!!Iteration to determine the correct flow area a for the given input discharge r_qin
-t=0
-! for flow in the main channel
-if (r_qin(2,i).eq.0) then
+	if (flow < 0) r_area=0
 
-elseif (r_qin(2,i).lt.q_bankful100) then
- error=1
- percent=0.01
-!loop until change between given and iterated discharge becomes reasonably small
-   do while (error.gt.0)
-    d_it = (1 - percent) * r_depth(i)
-    p = b + 2. * d_it * SQRT(r_sideratio(i) * r_sideratio(i) + 1.)
-    a = b * d_it + r_sideratio(i) * d_it * d_it
-    rh = a / p
-    q_it = a * rh ** 0.6666 * Sqrt(r_slope(i))/manning(i)
-    error = q_it - r_qin(2,i)
-    percent = percent + 0.01
-	t=t+1
-    if (t.gt.99.or.q_it.lt.0) then
-     write(*,*) 'Problems in routing_coefficients.f90: Bankful flow is used for initial river storage'
-	 a=a_100
-     exit
-    endif
-   enddo
-!for flow in the main channel and the floodplains
-elseif (r_qin(2,i).gt.q_bankful100) then
- error=-1
- percent=0.01
-   do while (error.lt.0)
-    d_it = percent * r_depth(i)    !=(1. + percent) * r_depth(i) - r_depth(i)	!iterative estimation of depth
-    p = b + 2. * r_depth(i) * SQRT(1. + s1 * s1) + (r_width_fp(i)-r_width(i)) &	!Till: perimeter
-    + 2. * d_it * SQRT(1 + s2 * s2)
-! Calculation of composite Manning factor taking into account the roughness values of the floodplains (for derivation of composite Manning: siehe Wasserbauskriptum)
-	p_bed = b + 2. * r_depth(i) * SQRT(1. + s1 * s1)
-	p_fp = (r_width_fp(i)-r_width(i)) + 2. * d_it * SQRT(1 + s2 * s2)
-	manning_composite = ((p_bed * manning(i)**1.5 + p_fp * manning_fp(i)**1.5)/p)**(0.666)	
-  	a = a_100 + r_width_fp(i) * d_it + s2 * d_it * d_it							!Till: cross-section area
-    rh = a / p																	!Till: hydraulic radius
-    q_it = a * rh ** 0.6666 * SQRT(r_slope(i))/manning_composite				!Till: discharge according to Manning's equation
-    error = q_it - r_qin(2,i)
-    percent = percent + 0.01
-    t=t+1
-    if (t.gt.10000) then
-     write(*,*) 'Problems in routing_coefficients.f90: floodplain calculations'
-     stop
-    endif
-   enddo
-endif
-
-if (q_it.lt.0) a=0
-
-!Calculation of initial water volume for each river stretch [m3]
-if (r_qin(2,i).eq.0) then
-  r_storage(i) = 0. 
-else
-  r_storage(i) =   a * r_length(i) * 1000
-  sed_storage(i,1) = 0.
-endif
-
-!! Calculation of flow velocity [m/s]
-if (a.eq.0) then
-	velocity(i)=0.
-else
-  velocity(i)= q_it/a
-endif
+	!Calculation of initial water volume for each river stretch [m3]
+	if (r_qin(2,i) == 0) then
+	  r_storage(i) = 0. 
+	else
+	  r_storage(i) =   r_area * r_length(i) * 1000
+	  sed_storage(i,1) = 0.
+	endif
 
 ENDIF
-! -----------------------------------------------------------------------
-IF (STATUS == 2) THEN
-!CALCULATION OF FLOW PARAMETERS FOR CONTINUOUS, PERENNIAL FLOW
 
-!! calculate volume of water in reach
-vol = r_storage(i)
-
-!! calculate cross-sectional area of flow, Equation 23.2.3
-r_area = vol / (r_length(i) * 1000.)
-
-!! calculate depth of flow, Equation 23.2.4 or 23.2.5
-s1 = r_sideratio(i)	
-s2 = r_sideratio_fp(i)
-if (vol.lt.0.or.vol.eq.0) then
-	r_depth_cur(i) = 0.
-elseif (r_area <= area_bankful(i)) THEN
-  r_depth_cur(i) = SQRT(r_area / s1 + bottom_width(i) * bottom_width(i) / (4. * s1 * s1)) - bottom_width(i) / (2. * s1)
-  IF (r_depth_cur(i) < 0.) r_depth_cur(i) = 0.
-ELSE
-  r_depth_cur(i) = SQRT((r_area - area_bankful(i)) / s2 + (r_width_fp(i)*r_width_fp(i)) / (4*s2*s2)) - r_width_fp(i) / (2*s2)
-  IF (r_depth_cur(i) < 0.) r_depth_cur(i) = 0.
-  r_depth_cur(i) = r_depth_cur(i) + r_depth(i)
-END IF
-
-!! calculate wetted perimeter
-p = 0.
-if (vol.lt.0.or.vol.eq.0) then
-  p = 0.
-elseIF (r_depth_cur(i) <= r_depth(i)) THEN
-  p = bottom_width(i) + 2. * r_depth_cur(i) * SQRT(1. + s1 * s1)
-ELSE
-  p = bottom_width(i) + 2. * r_depth(i) * SQRT(1. + s1 * s1) + (r_width_fp(i)-r_width(i)) &
-      + 2. * (r_depth_cur(i) - r_depth(i)) * SQRT(1+s2*s2)
-END IF
-
-!! calculate hydraulic radius
-rh = 0.
-if (vol.lt.0.or.vol.eq.0) then
-  rh = 0.
-elseIF (p > 0.01) THEN
-  rh = r_area / p
-ELSE
-  rh = 0.
-END IF
-
-!! Calculation of flow in reach with Manning Equation (m^3/s)
-if (r_depth_cur(i).lt.r_depth(i).or.r_depth_cur(i).eq.r_depth(i)) then
-  flow = r_area * rh ** 0.6666 * Sqrt(r_slope(i))/manning(i)
-elseif (r_depth_cur(i).gt.r_depth(i)) then
-! Calculation of composite Manning factor taking into account the roughness values of the floodplains 
-  p_bed = b + 2. * r_depth(i) * SQRT(1. + s1 * s1)
-  p_fp = (r_width_fp(i)-r_width(i)) + 2. * d_it * SQRT(1 + s2 * s2)
-  manning_composite = ((p_bed * manning(i)**1.5 + p_fp * manning_fp(i)**1.5)/p)**(0.666)
-  flow = r_area * rh ** 0.6666 * Sqrt(r_slope(i))/manning_composite
-endif
-
-
-ENDIF
-! -----------------------------------------------------------------------
 IF (STATUS == 3) THEN
-
-!CALCULATION OF FLOW PARAMETERS FOR DISCONTINUOUS, EPHEMERAL FLOW
-
-! Calculation of bottom width
-s1 = r_sideratio(i)	
-s2 = r_sideratio_fp(i)
-d = r_depth(i)
-b = r_width(i) - 2. * d * r_sideratio(i)
-
-!! check if bottom width (b) is < 0
-IF (b <= 0.) THEN
-  b = 0.
-  r_sideratio(i) = 0.
-  b = .5 * r_width(i)
-  r_sideratio(i) = (r_width(i) - b) / (2. * d)
+	vol = r_qin(2,i) * dt * 3600 !Till: fill up storage with inflow - just to allow computations when storage was empty
+ELSE
+	vol = r_storage(i)
 END IF
 
-!! compute flow and travel time at bankfull depth
-p = b + 2. * d * SQRT(r_sideratio(i) * r_sideratio(i) + 1.)
-a_100 = b * d + r_sideratio(i) * d * d
-rh = a_100 / p
-area_bankful(i) = a_100
-q_bankful100 = a_100 * rh ** 0.6666 * Sqrt(r_slope(i))/manning(i)
+IF (STATUS == 1  .OR.STATUS == 2 .OR. STATUS == 3) THEN
+! adjust water depth to current volume in reach
+	!! calculate volume of water in reach
 
-!!Iteration to determine the correct flow area a for the given input discharge r_qin
-t=0
-! for flow in the main channel
-if (r_qin(2,i).eq.0) then
+	!! calculate cross-sectional area of flow, Equation 23.2.3
+	r_area = vol / (r_length(i) * 1000.)
 
-elseif (r_qin(2,i).lt.q_bankful100) then
- error=1.
- percent=5.e-2
-!loop until change between given and iterated discharge becomes reasonably small
-   do while (error.gt.0)
-    d_it = (1. - percent) * r_depth(i)
-    p = b + 2. * d_it * SQRT(r_sideratio(i) * r_sideratio(i) + 1.)
-    a = b * d_it + r_sideratio(i) * d_it * d_it
-    rh = a / p
-    q_it = a * rh ** 0.6666 * Sqrt(r_slope(i))/manning(i)
-    error = q_it - r_qin(2,i)
-    percent = percent + 5.e-2
-	t=t+1
-    if (t.eq.19.or.q_it.lt.0) then
-	 if (r_qin(2,i).lt.q_it.or.error.lt.0) then
-!       write(*,*) 'Problems in routing_coefficients.f90: Very small flow is used for beginning of ephermeal flow', i
-	 else
-!       write(*,*) 'Problems in routing_coefficients.f90: Bankful flow is used for beginning of ephermeal flow', i
-	   a=a_100
-     endif
-     exit
-    endif
-   enddo
-!for flow in the main channel and the floodplains
-elseif (r_qin(2,i).gt.q_bankful100) then
- error=-1.
- percent=5.e-2
-   do while (error.lt.0)
-    d_it = percent * r_depth(i)    !=(1. + percent) * r_depth(i) - r_depth(i)
-    p = b + 2. * r_depth(i) * SQRT(1. + s1 * s1) + (r_width_fp(i)-r_width(i)) &
-    + 2. * d_it * SQRT(1 + s2 * s2)
-	! Calculation of composite Manning factor taking into account the roughness values of the floodplains 
-	p_bed = b + 2. * r_depth(i) * SQRT(1. + s1 * s1)
-	p_fp = (r_width_fp(i)-r_width(i)) + 2. * d_it * SQRT(1 + s2 * s2)
-	manning_composite = ((p_bed * manning(i)**1.5 + p_fp * manning_fp(i)**1.5)/p)**(0.666)
-    a = a_100 + r_width_fp(i) * d_it + s2 * d_it * d_it
-    rh = a / p
-    q_it = a * rh ** 0.6666 * Sqrt(r_slope(i))/manning_composite
-    error = q_it - r_qin(2,i)
-    percent = percent + 5.e-2
-    t=t+1
+	!! calculate depth of flow, Equation 23.2.4 or 23.2.5
+	if (vol <= 0) then
+		r_depth_cur(i) = 0.
+	elseif (r_area <= area_bankful(i)) THEN
+	  r_depth_cur(i) = SQRT( r_area                    / s1 + bottom_width(i) * bottom_width(i) / (4. * s1 * s1)) - bottom_width(i) / (2. * s1) !Till: chose only positve solution of quadratic equation
+	  IF (r_depth_cur(i) < 0.) r_depth_cur(i) = 0.	!Till: this should never occur
+	ELSE
+	  r_depth_cur(i) = SQRT((r_area - area_bankful(i)) / s2 + (r_width_fp(i)*r_width_fp(i))     / (4. * s2 * s2)) - r_width_fp(i)   / (2. * s2) !Till: chose only positve solution of quadratic equation
+	  IF (r_depth_cur(i) < 0.) r_depth_cur(i) = 0.	!Till: this should never occur
+	  r_depth_cur(i) = r_depth_cur(i) + r_depth(i)	
+	END IF
+END IF
 
-    if (t.gt.1000) then
-     write(*,*) 'Problems in routing_coefficients.f90: Bankful flow is used for beginning of ephermeal flow', i
-     stop
-    endif
-   enddo
-endif
+! -----------------------------------------------------------------------
+IF (STATUS >= 2) THEN
+	!CALCULATION OF FLOW PARAMETERS FOR CONTINUOUS, PERENNIAL FLOW
+	call calc_q_a_p(r_depth_cur(i), flow, r_area, p)
+ENDIF
 
 
-if (q_it.lt.0) a=0
+! -----------------------------------------------------------------------
+IF (STATUS == 33) THEN	!obsolete
 
-!! Calculation of flow velocity [m/s]
-if (a.eq.0) then
-	velocity(i)=0.
-else
-  velocity(i)= q_it/a
-endif
+	!CALCULATION OF FLOW PARAMETERS FOR DISCONTINUOUS, EPHEMERAL FLOW
 
-flow = r_qin(2,i)
-r_area = a
+   !determine the flow area a for the given input discharge r_qin
+	if (r_qin(2,i) /= 0) then
+		d_it =calc_d(r_qin(2,i))
+		call calc_q_a_p(r_depth_cur(i), flow, r_area, p)
+	else
+  			r_area=0
+			p=0
+			flow=0
+			d_it=0
+	endif
+
+
+	r_depth_cur(i)=d_it			!Till: set current depth if river			!!why was r_depth_cur not set for STATUS=3?
+
+
+	flow = r_qin(2,i)			!Till: then why is q_it computed above?
+	
 
 ENDIF
 
 
-RETURN
+!! Calculation of flow velocity [m/s]
+if (r_area == 0) then
+	velocity(i)=0.
+else
+  velocity(i)= flow/r_area
+endif
+
+
+
+contains    
+REAL FUNCTION calc_q(d)
+!compute discharge for a given depth d in the current subreach indexed with i
+!i:reach_index
+!d: reach_index
+! Calculation of composite Manning factor taking into account the roughness values of the floodplains (for derivation of composite Manning: siehe Wasserbauskriptum)
+implicit none
+
+real, intent(in) :: d	!water depth, for which the discharge is to be calculated
+real :: d_fp = 0.	!depth of water in flood-plain
+real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch 
+
+	if (d<0) then
+		write(*,*)"ERROR: negative river depth in routing_coefficients.f90"
+		stop
+	end if
+	p_ch = bottom_width(i) + 2. * min(d,r_depth(i)) * SQRT(1. + s1 * s1)	!wetted perimeter in channel
+	a_ch = (bottom_width(i) + r_sideratio(i) * d) * d						!cross-section area
+	q_ch = a_ch * (a_ch/p_ch) ** 0.6666 * SQRT(r_slope(i))/manning(i)				!Till: discharge according to Manning's equation
+
+	if (d <= r_depth(i)) then			
+		a_fp = 0.	!no flow in floodplain
+		p_fp = 0.
+		q_fp = 0.
+	else
+		d_fp = d - r_depth(i)
+		a_fp = ((r_width_fp(i)-r_width(i)) + s2 * d_fp) * d_fp
+		p_fp =  (r_width_fp(i)-r_width(i)) + 2. * d_fp * SQRT(1 + s2 * s2)		!flow on floodplains
+		q_fp = a_fp * (a_fp/p_fp) ** 0.6666 * SQRT(r_slope(i))/manning_fp(i)				!Till: discharge according to Manning's equation (flood plain)
+	end if
+		
+	calc_q  = q_ch + q_fp
+	
+END FUNCTION calc_q
+
+SUBROUTINE calc_q_a_p(d, q, a, p)
+!compute discharge q. cross-section-area a and wetted perimeter p for a given depth d in the current subreach indexed with i
+!i:reach_index
+!d: reach_index
+! Calculation of composite Manning factor taking into account the roughness values of the floodplains (for derivation of composite Manning: siehe Wasserbauskriptum)
+implicit none
+real, intent(in) :: d	!water depth, for which the discharge is to be calculated
+real, intent(out) :: q, a, p
+real :: d_fp = 0.	!depth of water in flood-plain
+real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch
+
+	if (d<0) then
+		write(*,*)"ERROR: negative river depth in routing_coefficients.f90"
+		stop
+	end if
+	
+	if (d == 0) then
+		a = 0.
+		p = 0.
+		q = 0.
+		return
+	end if
+
+	p_ch = bottom_width(i) + 2. * min(d,r_depth(i)) * SQRT(1. + s1 * s1)	!wetted perimeter in channel
+	a_ch = (bottom_width(i) + r_sideratio(i) * d) * d						!cross-section area
+	q_ch = a_ch * (a_ch/p_ch) ** 0.6666 * SQRT(r_slope(i))/manning(i)				!Till: discharge according to Manning's equation
+
+	if (d <= r_depth(i)) then			
+		a_fp = 0.	!no flow in floodplain
+		p_fp = 0.
+		q_fp = 0.
+	else
+		d_fp = d - r_depth(i)
+		a_fp = ((r_width_fp(i)-r_width(i)) + s2 * d_fp) * d_fp
+		p_fp =  (r_width_fp(i)-r_width(i)) + 2. * d_fp * SQRT(1 + s2 * s2)		!flow on floodplains
+		q_fp = a_fp * (a_fp/p_fp) ** 0.6666 * SQRT(r_slope(i))/manning_fp(i)				!Till: discharge according to Manning's equation (flood plain)
+	end if
+		
+	a = a_ch + a_fp		!simple summation of components
+	p = p_ch + p_fp
+	q = q_ch + q_fp
+END SUBROUTINE calc_q_a_p
+
+REAL FUNCTION calc_d(q)
+!compute depth d for a given discharge q in the current subreach indexed with i
+!see http://nptel.iitm.ac.in/courses/IIT-MADRAS/Hydraulics/pdfs/Unit12/12_1b.pdf
+!i:reach_index
+!q: discharge
+implicit none
+real, intent(in) :: q	!discharge, for which the water depth is to be calculated
+real :: dd, df	!differentials
+real :: d_est, q_est, f, error_tolerance=0.01	!Till: max. relative error indicating convergence
+integer :: j, max_iter=50			!Till: max number of iterations
+
+	q_bankful100 = calc_q(r_depth(i))		!compute bankful discharge	!ii: compute only once and store in array
+	if (q < q_bankful100) then
+		d_est=r_depth(i)/2	!Till: initial estimate	for small discharge
+	else
+		d_est=r_depth(i)*1.5	!Till: initial estimate	for high discharge
+	end if
+
+	q_est=calc_q(d_est)
+	f = q_est-q
+	df= f - (calc_q(d_est*0.9)-q)
+	dd= 0.1*d_est  ! = d_est - d_est*0.9
+
+	do j=1,max_iter
+		d_est=d_est- f / (df/dd)
+		q_est=calc_q(d_est)
+		f = q_est-q
+		df= f - (calc_q(d_est*0.9)-q)
+		if (abs(q-q_est)/q<=error_tolerance) exit	!Till: converged
+	end do
+
+    if (j>max_iter) write(*,*)"WARNING: iteration limit reached in  routing_coefficients.f90"
+	calc_d = d_est
+END FUNCTION calc_d
+
+
 END SUBROUTINE routing_coefficients
+
+
+   

@@ -29,9 +29,9 @@ real, allocatable :: prout (:,:)
 real, allocatable :: hrout(:,:)
 
 ! RIVER CHARACTERISTICS
-! river width (m)
+! river channel width (bankful width) (m)
 real, allocatable ::	r_width(:)
-! river depth (m)
+! river channel depth (m)
 real, allocatable :: r_depth(:)
 ! current river depth at calculation step (m)
 real, allocatable :: r_depth_cur(:)
