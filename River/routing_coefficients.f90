@@ -1,4 +1,7 @@
 SUBROUTINE routing_coefficients(i, STATUS, flow, r_area, p)
+!Till: computationally relevant for very initial phase of simulation: fixed bug in iterative estimation of depth from discharge
+!2009-12-18
+
 !Till: computationally relevant: major changes, bugfixes and optimzation
 !2009-12-17
 
@@ -277,31 +280,38 @@ REAL FUNCTION calc_d(q)
 implicit none
 real, intent(in) :: q	!discharge, for which the water depth is to be calculated
 real :: dd, df	!differentials
-real :: d_est, q_est, f, error_tolerance=0.01	!Till: max. relative error indicating convergence
+real :: d_est0, d_est1, q_est0, q_est1, f0, f1, error_tolerance=0.01	!Till: max. relative error indicating convergence
 integer :: j, max_iter=50			!Till: max number of iterations
 
 	q_bankful100 = calc_q(r_depth(i))		!compute bankful discharge	!ii: compute only once and store in array
-	if (q < q_bankful100) then
-		d_est=r_depth(i)/2	!Till: initial estimate	for small discharge
-	else
-		d_est=r_depth(i)*1.5	!Till: initial estimate	for high discharge
-	end if
+	q_est0       = q_bankful100
+	d_est0       = r_depth(i)
+	f0 = q_est0 - q
 
-	q_est=calc_q(d_est)
-	f = q_est-q
-	df= f - (calc_q(d_est*0.9)-q)
-	dd= 0.1*d_est  ! = d_est - d_est*0.9
+	if (q < q_bankful100) then
+		d_est1=r_depth(i)/2	!Till: initial estimate	for small discharge
+	else
+		d_est1=r_depth(i)*1.5	!Till: initial estimate	for high discharge
+	end if
+	q_est1 = calc_q(d_est1)
+	!f1 = q_est1 - q
 
 	do j=1,max_iter
-		d_est=d_est- f / (df/dd)
-		q_est=calc_q(d_est)
-		f = q_est-q
-		df= f - (calc_q(d_est*0.9)-q)
-		if (abs(q-q_est)/q<=error_tolerance) exit	!Till: converged
+		f1 = q_est1-q
+		df= f1     - f0
+		dd= d_est1 - d_est0  
+
+		d_est0 = d_est1		!prepare next iteration step
+		q_est0 = q_est1
+		f0	   = f1
+
+		d_est1 = max(0.,d_est1 - f1 / (df/dd))
+		q_est1 = calc_q(d_est1)
+		if (abs(q-q_est1)/q <= error_tolerance) exit	!Till: converged
 	end do
 
     if (j>max_iter) write(*,*)"WARNING: iteration limit reached in  routing_coefficients.f90"
-	calc_d = d_est
+	calc_d = d_est1
 END FUNCTION calc_d
 
 

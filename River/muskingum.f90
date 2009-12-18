@@ -40,8 +40,8 @@ use climo_h
 IMPLICIT NONE
 INTEGER, INTENT(IN OUT) :: i, h
 integer :: dummy
-real :: vol, r_area, c,  p, rh, rttime, tbase, topw, flow, s1, s2, r_evp,r_infil
-real :: c0, c1, c2, c3, yy, Fr
+real ::  r_area,  p, rttime, topw, flow, r_evp,r_infil !,vol, c, rh, tbase, s1, s2
+real :: c0, c1, c2, c3, yy !, Fr
 
 !! Initialise water and sediment storage in each reach   
 if (t == tstart.and.d == 1.and.h == 1) then
