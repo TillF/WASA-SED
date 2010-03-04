@@ -32,7 +32,7 @@ use time_h
 
 IMPLICIT NONE
 
-INTEGER i,j
+INTEGER i !,j
 INTEGER :: R_Sed=2650, R_Water=1000
 REAL :: g=9.81
 real q_crit, q_unit, shear, shear_crit, Fr, width

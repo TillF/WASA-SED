@@ -1024,28 +1024,27 @@ IF (STATUS == 2) THEN
 				IF (doalllattc) THEN
 				  surfflow_in(tc_counter+1)=surfflow_in(tc_counter+1)+surfflow_out(tc_counter)
 				  !hortsu(lu_counter)=hortsu(lu_counter)
-				  sed_in(tc_counter+1,:)=sed_out(tc_counter,:)	!Till: all sediment leaving the upper TC enters the next downslope TC
+				  IF (dosediment) sed_in(tc_counter+1,:)=sed_out(tc_counter,:)	!Till: all sediment leaving the upper TC enters the next downslope TC
 													! prepare sed_in this for the next downslope TC
 				ELSE
 				  temp2=sum(fractemp(tc_counter:nbrterrain(i_lu))) !fraction of all remaining TCs in this LU 
 				  DO i=tc_counter+1,nbrterrain(i_lu)				!Till: overland flow is distributed among lower TCs proportional to area
 					surfflow_in(i)=surfflow_in(i)  +surfflow_out(tc_counter  )* fractemp(i)/temp2
-					sed_in(i,:)   =sed_in     (i,:)+sed_out     (tc_counter,:)* fractemp(i)/temp2		
+					IF (dosediment) sed_in(i,:)   =sed_in     (i,:)+sed_out     (tc_counter,:)* fractemp(i)/temp2		
 																			!Till: sediment goes directly to river and into next downslope TC (no redistribution among all more-downslope TCs as with water)
 				  END DO
 	!  Remaining outflow of each terrain component, which is not routed to lower TCs
 	!  is surface runoff of entire landscape unit (direct dunoff to river)
 				  qsurf_lu(lu_counter  )=qsurf_lu(lu_counter  )+surfflow_out(tc_counter)   * fractemp(tc_counter)/temp2
 				  hortsu  (lu_counter  )=hortsu  (lu_counter  )+horth                      * fractemp(tc_counter)/temp2
-				  sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:) * fractemp(tc_counter)/temp2
+				  IF (dosediment) sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:) * fractemp(tc_counter)/temp2
 							!Till: remaining sediment that is not routed to the lower TC reaches the river directly
 				END IF
 			  ELSE IF (.NOT. dolattc) THEN		!Till: no flow between TCs, all flows leave the LU directly
 				qsub_lu   (lu_counter)=qsub_lu(lu_counter)+sublat_out(tc_counter)
-
 				qsurf_lu(lu_counter  )=qsurf_lu(lu_counter)  +surfflow_out(tc_counter)
 				hortsu  (lu_counter  )=hortsu  (lu_counter)  +horth
-				sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:)
+				IF (dosediment) sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:)
 			  END IF
 
 	!  Outflow of lowest terrain component is added to runoff generated
@@ -1053,8 +1052,8 @@ IF (STATUS == 2) THEN
 			ELSE IF (tc_counter == nbrterrain(i_lu)) THEN	!lowest TC is reached, all flows leave the LU ii: join this with previous branch
 			  qsurf_lu(lu_counter  )=qsurf_lu(lu_counter  )+surfflow_out(tc_counter)
 			  qsub_lu (lu_counter  )=qsub_lu (lu_counter  )+sublat_out  (tc_counter)
-			  sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:)
 			  hortsu  (lu_counter  )=hortsu  (lu_counter  )+horth
+			  IF (dosediment) sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:)
 			END IF
 			
 		
@@ -1083,8 +1082,8 @@ IF (STATUS == 2) THEN
 		if (associated(subflow_t)) subflow_t (d,timestep_counter,i_subbas) = subflow_t  (d,timestep_counter,i_subbas) + qsub_lu (lu_counter) 
 		if (associated(ovflow_t )) ovflow_t  (d,timestep_counter,i_subbas) = ovflow_t   (d,timestep_counter,i_subbas) + qsurf_lu(lu_counter)
 		
-		IF (dosediment .AND. allocated(sdr) ) THEN	!apply prespecified SDR, if present
-			sediment_subbasin_t(d,timestep_counter,i_subbas,:)=sediment_subbasin_t(d,timestep_counter,i_subbas,:)+sedsu(lu_counter,:)	!ii: only perform if sediment is enabled
+		IF (dosediment)  THEN	
+			sediment_subbasin_t(d,timestep_counter,i_subbas,:)=sediment_subbasin_t(d,timestep_counter,i_subbas,:)+sedsu(lu_counter,:)	
 			IF (allocated(sdr) ) sedsu(lu_counter,:)=sdr(i_lu)*sedsu(lu_counter,:) !apply prespecified SDR, if present
 		END IF
 		
@@ -1199,7 +1198,7 @@ IF (STATUS == 2) THEN
 IF (dosediment .AND. do_musle_subbasin .AND. (ovflow(d,i_subbas)>0.) ) THEN	!calculate sediment yield on subbasin scale (in contrast to on TC-scale)
 	!sediment_subbasin(d,i_subbas,:)=sedi_yield_subbas(subbas_id, ovflow(d,i_subbas), sed_yield_subbas)
 	CALL sedi_yield_subbas(i_subbas, ovflow(d,i_subbas), sediment_subbasin(d,i_subbas,:))
-	IF (nt==1)sediment_subbasin_t(d,1,i_subbas,:)=sediment_subbasin(d,i_subbas,:) !George
+	sediment_subbasin_t(d,1,i_subbas,:)=sediment_subbasin(d,i_subbas,:) / nt !distribute daily yield equally among timesteps (needs to be improved)
 END IF
 
  
@@ -1339,6 +1338,8 @@ IF (STATUS == 3) THEN
 	CALL write_output(f_deep_gw_discharge,'deep_gw_discharge.out',deep_gw_discharge)  !   deep groundwater discharge (component of water_subbasin)
 	CALL write_output(f_daily_gw_loss,'daily_gw_loss.out',gw_loss)			!   groundwater losses (leaving model domain)
 	CALL write_output(f_daily_subsurface_runoff,'daily_subsurface_runoff.out',subflow)		!     Output total subsurface runoff (m³/d)
+
+	CALL write_output(f_river_sediment_total,'River_Sediment_total.out',qsediment)		!     Output total sediment flux (t/d)
 
 	CALL write_subdaily_output(f_actetranspiration, 'actetranspiration.out',  aet_t)		!     subdaily evapotranspiration [mm]
 	CALL write_subdaily_output(f_qhorton,           'qhorton.out'          ,  hortflow_t)

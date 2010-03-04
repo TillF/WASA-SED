@@ -71,9 +71,9 @@ use time_h
 IMPLICIT NONE
 INTEGER, INTENT(IN OUT) :: i
 INTEGER :: det, k
-REAL :: peakr, vel_peak, peakflow, conc_in, conc_max, depnet
+REAL ::  vel_peak,  conc_in, conc_max, depnet !peakr,peakflow,
 REAL :: volume, sed_mass, flow, r_area
-REAL :: depdeg, dot, r_storage_previous
+REAL ::   r_storage_previous !depdeg,dot,
 
 
 !if no or only very little water flow in reach, no sediment calculation is performed

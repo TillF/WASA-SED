@@ -17,12 +17,12 @@ INTEGER, INTENT(IN OUT)                  :: STATUS
 ! status of call (0=initialization run, 1=initialization year,
 !                 2=calculation day,    3=finalization year)
 
-INTEGER :: bat
+!INTEGER :: bat
 !    id           : additional loop variable of days (total 7 days)
-INTEGER :: imun,imunx,irout,irout2,irout_d,id,idummy,imeso,istate
+INTEGER :: irout,idummy,id !,imun,imunx,irout2,irout_d,imeso,istate
 INTEGER :: upstream, downstream
-INTEGER :: itl, itr, ih, mm, imunout, iout, i, j, make
-REAL :: xdum(48),check,temp2,qtemp, storcapact
+INTEGER :: itl, itr, ih, i, j !, mm, imunout, iout, make
+REAL :: check,temp2,qtemp  !,xdum(48),storcapact
 character(len=1000) :: fmtstr	!string for formatting file output
 
 

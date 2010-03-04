@@ -42,32 +42,32 @@ character(len=1000) :: fmtstr	!string for formatting file output
 !** -------------------------------------------------------------------
 IF (STATUS == 0) THEN
   
-write(*,*)doacudyear
+!write(*,*)doacudyear
 ! Read of small reservoir characteristics
 ! Read number of reservoir per classes
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lake.dat',STATUS='old')
-  READ (11,*)
+  READ (11,*);READ (11,*)
   DO k=1,5
-!    READ(11,*) dummy1,maxlake0(k),maxlake_factor(k),lake_vol0_factor(k),lake_increase(k),alpha_Molle(k),damk_Molle(k),damc_hrr(k),damd_hrr(k)
-    READ(11,*) dummy1,maxlake0(k),lake_vol0_factor(k),lake_increase(k),alpha_Molle(k),damk_Molle(k),damc_hrr(k),damd_hrr(k)
+    READ(11,*) dummy1,maxlake0(k),lake_vol0_factor(k),lake_change(k),alpha_Molle(k),damk_Molle(k),damc_hrr(k),damd_hrr(k)
   END DO
   CLOSE(11)
 
 ! Read maximum fraction of volume of each hypothetical representative reservoir of class k (m3)
-  OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lake_maxfrvol.dat',IOSTAT=istate,STATUS='old')
-	IF (istate/=0) THEN					!lake_frarea.dat not found
-	  write(*,*)pfadp(1:pfadj)// 'Reservoir/lake_maxfrvol.dat was not found. Run the model anyway.'
+  OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lake_maxvol.dat',IOSTAT=istate,STATUS='old')
+	IF (istate/=0) THEN					!lake_maxvol.dat not found
+	  write(*,*)pfadp(1:pfadj)// 'Reservoir/lake_maxvol.dat was not found. Run the model anyway.'
       DO imun=1,subasin
-	    DO k=1,5
-		  maxlake_factor(imun,k)=.5
+	    maxlake(imun,1)=.5*maxlake0(1)
+	    DO k=2,5
+		  maxlake(imun,k)=sqrt(maxlake0(k)*maxlake0(k-1))
 	    ENDDO
 	    dummy5(imun)=id_subbas_extern(imun)
 	  ENDDO
 	ELSE
-      READ(11,*)
+      READ(11,*);READ (11,*)
       DO imun=1,subasin
 	    DO k=1,5
-		  maxlake_factor(imun,k)=0
+		  maxlake(imun,k)=0
 	    ENDDO
 	    dummy5(imun)=id_subbas_extern(imun)
 	  ENDDO
@@ -75,7 +75,7 @@ write(*,*)doacudyear
       DO imun=1,subasin
         IF (dummy1==id_subbas_extern(imun)) THEN
 	      DO k=1,5
-		    maxlake_factor(imun,k)=dummy6(k)
+		    maxlake(imun,k)=dummy6(k)
 		  ENDDO
 		  dummy5(imun)=dummy1
 	    ENDIF
@@ -86,7 +86,7 @@ write(*,*)doacudyear
         DO imun=1,subasin
 	      IF (dummy1==id_subbas_extern(imun)) THEN
 	        DO k=1,5
-		      maxlake_factor(imun,k)=dummy6(k)
+		      maxlake(imun,k)=dummy6(k)
 		    ENDDO
 		    dummy5(imun)=dummy1
 		  ENDIF
@@ -96,20 +96,22 @@ write(*,*)doacudyear
     DO imun=1,subasin
 !write(*,'(2I4,10F10.4)')id_subbas_extern(imun),dummy5(imun),(maxlake_factor(imun,k),k=1,5)
       IF (dummy5(imun) /= id_subbas_extern(imun)) THEN
-        WRITE(*,*) 'Sub-basin-IDs in file lake_frarea.dat must  &
+        WRITE(*,*) 'Sub-basin-IDs in file lake_maxvol.dat must  &
 				have the same ordering scheme as in hymo.dat'
         STOP
       END IF
     END DO
   CLOSE(11)
-!stop
+  DO imun=1,subasin
+    maxlakesub0(imun,1:5)=maxlake(imun,1:5)
+  ENDDO
 
 !   Andreas block begin
 !** read number of small reservoirs for each year and subbasin
 !   if data are in the file (index in line 3 (doacudyear) is .true.) then
 !   the exact values will be used instead of the function 
-!   of temporal variation of acudes number (which is used if only small_reservoirs.dat is read)
-  acudfloatyear(:,:,:)=-99
+!   of temporal variation of acudes number
+  acudfloatyear(:,:,:)=-999
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lake_year.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!lake_year.dat not found
 	  write(*,*)pfadp(1:pfadj)// 'Reservoir/lake_year.dat was not found. Run the model anyway.'
@@ -123,8 +125,7 @@ write(*,*)doacudyear
 	    ENDDO
 	   ENDDO
 	  ENDDO
-	  READ(11,*)
-	  READ(11,*)
+	  READ(11,*);READ(11,*)
 	  DO t=tstart,tstop
        DO imun=1,subasin
         READ(11,*) dummy, dummy1,(acudfloatyear(imun,k,t-tstart+1),k=1,5) 
@@ -142,9 +143,9 @@ write(*,*)doacudyear
 !stop
 
 ! Read number of reservoir per classes at the beginning of the simulation period
-  IF (.NOT. doacudyear) THEN					!lake_year.dat not found
+  IF (.NOT. doacudyear) THEN					!lake_number.dat not found
    OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lake_number.dat',STATUS='old')
-    READ(11,*)
+    READ(11,*);READ(11,*)
     DO imun=1,subasin
 	  DO k=1,5
 		acud(imun,k)=0
@@ -181,6 +182,8 @@ write(*,*)doacudyear
       END IF
     END DO
    CLOSE(11)
+  ELSE
+    write(*,*)pfadp(1:pfadj)// 'Reservoir/lake_number.dat was disregard (file lake_year.dat was used instead)'
   ENDIF
 
 ! Read ratio between the runoff contributing area of the reservoir class and the total runoff contributing area of the sub-basin (-)
@@ -194,7 +197,7 @@ write(*,*)doacudyear
 	    dummy5(imun)=id_subbas_extern(imun)
 	  ENDDO
 	ELSE
-      READ(11,*)
+      READ(11,*);READ(11,*)
       DO imun=1,subasin
 	    DO k=1,5
 		  lakefrarea(imun,k)=0
@@ -281,13 +284,13 @@ write(*,*)doacudyear
 	  
 
 !George Initialization of the maximum storage capacity of each reservoir class (m**3)
-  DO imun=1,subasin
-    maxlake(imun,1:5)=maxlake0(1:5)*maxlake_factor(imun,1:5)
+!  DO imun=1,subasin
+!    maxlake(imun,1:5)=maxlake0(1:5)*maxlake_factor(imun,1:5)
 !write(*,*)imun,(maxlake0(k),k=1,5)
 !write(*,*)imun,(maxlake_factor(imun,k),k=1,5)
 !write(*,*)imun,(maxlake(imun,k),k=1,5)
-    maxlakesub0(imun,1:5)=maxlake0(1:5)*maxlake_factor(imun,1:5)
-  ENDDO
+!    maxlakesub0(imun,1:5)=maxlake0(1:5)*maxlake_factor(imun,1:5)
+!  ENDDO
 
 !  dummy7=0.
 !  DO imun=1,subasin
@@ -357,107 +360,178 @@ write(*,*)doacudyear
 
 !Ge initialization of output files
   OPEN(11,FILE=pfadn(1:pfadi)//'lake_inflow_r.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, inflow_r(m**3)'
-  CLOSE(11)
+  IF (f_lake_inflow_r) then
+	WRITE(11,*)'Year, day, hour, inflow_r(m**3/timestep)'
+    CLOSE(11)
+  ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+  ENDIF
 
   OPEN(11,FILE=pfadn(1:pfadi)//'lake_outflow_r.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, outflow_r(m**3)'
-  CLOSE(11)
+  IF (f_lake_outflow_r) then
+	WRITE(11,*)'Year, day, hour, outflow_r(m**3/timestep)'
+    CLOSE(11)
+  ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+  ENDIF
 
   OPEN(11,FILE=pfadn(1:pfadi)//'lake_retention_r.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, retention_r(m**3)'
-  CLOSE(11)
+  IF (f_lake_retention_r) then
+	WRITE(11,*)'Year, day, hour, retention_r(m**3/timestep)'
+    CLOSE(11)
+  ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+  ENDIF
 
   OPEN(11,FILE=pfadn(1:pfadi)//'lake_volume_r.out',STATUS='replace')
+  IF (f_lake_volume_r) then
 	WRITE(11,*)'Year, day, hour, volume_r(m**3)'
-  CLOSE(11)
+    CLOSE(11)
+  ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+  ENDIF
 
   IF (dosediment) then
    OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedinflow_r.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, sedinflow_r(m**3)'
-   CLOSE(11)
+   IF (f_lake_sedinflow_r) then
+	WRITE(11,*)'Year, day, hour, sedinflow_r(ton/timestep)'
+    CLOSE(11)
+   ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+   ENDIF
 
    OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedoutflow_r.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, sedoutflow_r(m**3)'
-   CLOSE(11)
+   IF (f_lake_sedoutflow_r) then
+	WRITE(11,*)'Year, day, hour, sedoutflow_r(ton/timestep)'
+    CLOSE(11)
+   ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+   ENDIF
 
    OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedretention_r.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, sedretention_r(m**3)'
-   CLOSE(11)
+   IF (f_lake_sedretention_r) then
+	WRITE(11,*)'Year, day, hour, sedretention_r(ton/timestep)'
+    CLOSE(11)
+   ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+   ENDIF
 
    OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedimentation_r.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, sedretention_r(m**3)'
-   CLOSE(11)
+   IF (f_lake_sedimentation_r) then
+	WRITE(11,*)'Year, day, hour, lakesedimentation_r(ton)'
+    CLOSE(11)
+   ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+   ENDIF
   ENDIF
 
   OPEN(11,FILE=pfadn(1:pfadi)//'lake_watbal.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, totallakeinflow(m**3), totallakeoutflow(m**3), &
-				totallakeprecip(m**3), totallakeevap(m**3), lakevol(m**3)'
-  CLOSE(11)
+  IF (f_lake_watbal) then
+	WRITE(11,*)'Year, day, hour, totallakeinflow(m**3/timestep), totallakeoutflow(m**3/timestep), &
+				totallakeprecip(m**3/timestep), totallakeevap(m**3/timestep), lakevol(m**3)'
+    CLOSE(11)
+  ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+  ENDIF
 
   IF (dosediment) then
    OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedbal.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, totalsedinflow(ton), totalsedoutflow(ton), &
-				totalsedimentation(ton), cumsedimentation(ton)'
-   CLOSE(11)
+   IF (f_lake_sedbal) then
+	WRITE(11,*)'Year, day, hour, totalsedinflow(ton/timestep), totalsedoutflow(ton/timestep), &
+				totalsedimentation(ton/timestep), cumsedimentation(ton)'
+    CLOSE(11)
+   ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+   ENDIF
   ENDIF
 
   OPEN(11,FILE=pfadn(1:pfadi)//'lake_inflow.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, reservoir_class, lakeinflow(m**3)'
+  IF (f_lake_inflow) then
+	WRITE(11,*)'Year, day, hour, reservoir_class, lakeinflow(m**3/timestep)'
     write(fmtstr,'(a,i0,a)')'(A24,',subasin,'I15)'		!generate format string	    
 	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
 	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
-  CLOSE(11)
+    CLOSE(11)
+  ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+  ENDIF
 
   OPEN(11,FILE=pfadn(1:pfadi)//'lake_outflow.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, reservoir_class, lakeoutflow(m**3)'
+  IF (f_lake_outflow) then
+	WRITE(11,*)'Year, day, hour, reservoir_class, lakeoutflow(m**3/timestep)'
 	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
 	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
-  CLOSE(11)
+    CLOSE(11)
+  ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+  ENDIF
 
   OPEN(11,FILE=pfadn(1:pfadi)//'lake_volume.out',STATUS='replace')
+  IF (f_lake_volume) then
 	WRITE(11,*)'Year, day, hour, reservoir_class, lakevolume(m**3)'
 	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
 	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
-  CLOSE(11)
+    CLOSE(11)
+  ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+  ENDIF
 
   OPEN(11,FILE=pfadn(1:pfadi)//'lake_retention.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, reservoir_class, lakeretention(m**3)'
+  IF (f_lake_retention) then
+	WRITE(11,*)'Year, day, hour, reservoir_class, lakeretention(m**3/timestep)'
 	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
 	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
-  CLOSE(11)
+    CLOSE(11)
+  ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+  ENDIF
 
   OPEN(11,FILE=pfadn(1:pfadi)//'lake_vollost.out',STATUS='replace')
+  IF (f_lake_vollost) then
 	WRITE(11,*)'Year, day, hour, reservoir_class, lakevollost(m**3)'
 	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
 	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
-  CLOSE(11)
+    CLOSE(11)
+  ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+  ENDIF
 
   IF (dosediment) then
    OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedinflow.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, reservoir_class, lakesedinflow(ton)'
+   IF (f_lake_sedinflow) then
+	WRITE(11,*)'Year, day, hour, reservoir_class, lakesedinflow(ton/timestep)'
 	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
 	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
-   CLOSE(11)
+    CLOSE(11)
+   ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+   ENDIF
 
    OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedoutflow.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, reservoir_class, lakesedoutflow(ton)'
+   IF (f_lake_sedoutflow) then
+	WRITE(11,*)'Year, day, hour, reservoir_class, lakesedoutflow(ton/timestep)'
 	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
 	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
-   CLOSE(11)
+    CLOSE(11)
+   ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+   ENDIF
 
    OPEN(11,FILE=pfadn(1:pfadi)//'lake_sizedistoutflow.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, sediment size class, lakesizedistoutflow(m**3)'
+   IF (f_lake_sizedistoutflow) then
+	WRITE(11,*)'Year, day, hour, sediment size class, lakesizedistoutflow(-)'
 	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
 	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
-   CLOSE(11)
+    CLOSE(11)
+   ELSE
+    CLOSE(11, status='delete') !delete any existing file, if no output is desired
+   ENDIF
   ENDIF
 
-  OPEN(11,FILE=pfadn(1:pfadi)//'lake_checkwatbal.out',STATUS='replace')
-	WRITE(11,*)'Year, day, hour, totalrunoff(m**3), directrunoff(m**3), totallakeinflow(m**3), totallakeoutflow(m**3), &
-				wateryield(m**3)'
-  CLOSE(11)
-
+!  OPEN(11,FILE=pfadn(1:pfadi)//'lake_checkwatbal.out',STATUS='replace')
+!	WRITE(11,*)'Year, day, hour, totalrunoff(m**3), directrunoff(m**3), totallakeinflow(m**3), totallakeoutflow(m**3), &
+!				wateryield(m**3)'
+!  CLOSE(11)
  
 END IF
 
@@ -479,7 +553,7 @@ IF (STATUS == 1) THEN
   IF (.NOT. doacudyear) THEN !Andreas
     IF (t /= tstart) THEN
       DO imun=1,subasin
-        acudfloat(imun,:)=acudfloat(imun,:)+acudfloat(imun,:)*lake_increase(:)
+        acudfloat(imun,:)=max(0.,acudfloat(imun,:)+acudfloat(imun,:)*lake_change(:))
         acud(imun,:)=nint(acudfloat(imun,:))*1.
 	  ENDDO
     END IF
@@ -669,7 +743,6 @@ endif
       END DO
     ENDDO 
   ENDIF
-
 
 !George calculation of actual water volume and outflow discharges 
   DO ih=1,nt
@@ -1164,28 +1237,29 @@ IF (STATUS == 3) THEN
   
 !Eva output files deleted
 
-    OPEN(11,FILE=pfadn(1:pfadi)//'lake_checkwatbal.out',STATUS='old',  &
-		 POSITION='append')
-	  DO d=1,dayyear
-	    DO ih=1,nt
-		  hour=ih
-          step=(d-1)*nt+hour
-		  totalrunoff=0.
-		  totallakeinflow=0.
-		  totallakeoutflow=0.
-		  directrunoff=0.
-		  DO imun=1,subasin
-		    totalrunoff=totalrunoff+lakerunoff(step,imun)
-			directrunoff=directrunoff+lakerunoff(step,imun)*subfrarea(imun)
-		    totallakeinflow=totallakeinflow+lakeinflow(step,imun)
-		    totallakeoutflow=totallakeoutflow+lakeoutflow(step,imun)
-		  ENDDO
-		  wateryield=totallakeoutflow+directrunoff
-	      WRITE(11,'(3I6,6f15.3)')t,d,hour,totalrunoff,directrunoff,totallakeinflow,totallakeoutflow,wateryield
-		ENDDO
-	  ENDDO
-    CLOSE(11)
+!    OPEN(11,FILE=pfadn(1:pfadi)//'lake_checkwatbal.out',STATUS='old',  &
+!		 POSITION='append')
+!	  DO d=1,dayyear
+!	    DO ih=1,nt
+!		  hour=ih
+!          step=(d-1)*nt+hour
+!		  totalrunoff=0.
+!		  totallakeinflow=0.
+!		  totallakeoutflow=0.
+!		  directrunoff=0.
+!		  DO imun=1,subasin
+!		    totalrunoff=totalrunoff+lakerunoff(step,imun)
+!			directrunoff=directrunoff+lakerunoff(step,imun)*subfrarea(imun)
+!		    totallakeinflow=totallakeinflow+lakeinflow(step,imun)
+!		    totallakeoutflow=totallakeoutflow+lakeoutflow(step,imun)
+!		  ENDDO
+!		  wateryield=totallakeoutflow+directrunoff
+!	      WRITE(11,'(3I6,6f15.3)')t,d,hour,totalrunoff,directrunoff,totallakeinflow,totallakeoutflow,wateryield
+!		ENDDO
+!	  ENDDO
+!    CLOSE(11)
 
+    IF (f_lake_inflow_r) then
     OPEN(11,FILE=pfadn(1:pfadi)//'lake_inflow_r.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1196,13 +1270,16 @@ IF (STATUS == 3) THEN
 		    lakeinflow_r(k)=0.
 		    DO imun=1,subasin
               lakeinflow_r(k)=lakeinflow_r(k)+(lakeinflow_hrr(step,imun,k)*acud(imun,k))
+!write(*,*)imun,k,acud(imun,k),lakeinflow_hrr(step,imun,k),lakeinflow_r(k)
 			ENDDO
+!stop
 		  ENDDO
 	      WRITE(11,'(3I6,5f15.3)')t,d,hour,(lakeinflow_r(k),k=1,5)
 		ENDDO
 	  ENDDO
     CLOSE(11)
-
+	ENDIF
+    IF (f_lake_outflow_r) then
     OPEN(11,FILE=pfadn(1:pfadi)//'lake_outflow_r.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1219,7 +1296,9 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
     CLOSE(11)
+	ENDIF
 
+    IF (f_lake_retention_r) then
     OPEN(11,FILE=pfadn(1:pfadi)//'lake_retention_r.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1237,7 +1316,9 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
     CLOSE(11)
+	ENDIF
 
+    IF (f_lake_volume_r) then
     OPEN(11,FILE=pfadn(1:pfadi)//'lake_volume_r.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1254,8 +1335,10 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
     CLOSE(11)
+	ENDIF
 
     IF (dosediment) then
+     IF (f_lake_sedinflow_r) then
      OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedinflow_r.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1272,7 +1355,9 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
      CLOSE(11)
+	 ENDIF
 
+     IF (f_lake_sedoutflow_r) then
      OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedoutflow_r.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1289,7 +1374,9 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
      CLOSE(11)
+	 ENDIF
 
+     IF (f_lake_sedretention_r) then
      OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedretention_r.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1307,7 +1394,9 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
      CLOSE(11)
+	 ENDIF
 
+     IF (f_lake_sedimentation_r) then
      OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedimentation_r.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1324,8 +1413,10 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
      CLOSE(11)
+	 ENDIF
 	ENDIF
 
+    IF (f_lake_watbal) then
     OPEN(11,FILE=pfadn(1:pfadi)//'lake_watbal.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1351,8 +1442,10 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
     CLOSE(11)
+	ENDIF
 
     IF (dosediment) then
+     IF (f_lake_sedbal) then
      OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedbal.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1374,8 +1467,10 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
      CLOSE(11)
+	 ENDIF
 	ENDIF
 
+    IF (f_lake_inflow) then
     OPEN(11,FILE=pfadn(1:pfadi)//'lake_inflow.out',STATUS='old',  &
 		 POSITION='append')
       write(fmtstr,'(a,i0,a)')'(4I6,',subasin,'F15.3)'		!generate format string	    
@@ -1391,7 +1486,9 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
     CLOSE(11)
+	ENDIF
 
+    IF (f_lake_outflow) then
     OPEN(11,FILE=pfadn(1:pfadi)//'lake_outflow.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1405,7 +1502,9 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
     CLOSE(11)
+	ENDIF
 
+    IF (f_lake_volume) then
     OPEN(11,FILE=pfadn(1:pfadi)//'lake_volume.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1419,7 +1518,9 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
     CLOSE(11)
+	ENDIF
 
+    IF (f_lake_retention) then
     OPEN(11,FILE=pfadn(1:pfadi)//'lake_retention.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1433,7 +1534,9 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
     CLOSE(11)
+	ENDIF
 
+    IF (f_lake_vollost) then
     OPEN(11,FILE=pfadn(1:pfadi)//'lake_vollost.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1447,8 +1550,10 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
     CLOSE(11)
+	ENDIF
 
     IF (dosediment) then
+     IF (f_lake_sedinflow) then
      OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedinflow.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1462,7 +1567,9 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
      CLOSE(11)
+	 ENDIF
 
+     IF (f_lake_sedoutflow) then
      OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedoutflow.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1476,7 +1583,9 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
      CLOSE(11)
+	 ENDIF
     
+     IF (f_lake_sizedistoutflow) then
      OPEN(11,FILE=pfadn(1:pfadi)//'lake_sizedistoutflow.out',STATUS='old',  &
 		 POSITION='append')
 	  DO d=1,dayyear
@@ -1490,6 +1599,7 @@ IF (STATUS == 3) THEN
 		ENDDO
 	  ENDDO
      CLOSE(11)
+	 ENDIF
 	ENDIF
     
     

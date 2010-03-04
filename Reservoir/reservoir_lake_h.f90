@@ -15,8 +15,11 @@ INTEGER :: reservoir_print		!option to print the output files within the timeste
 integer :: step
 !hour (on day)
 integer :: hour
-!flag to simulate reservoir routing during spillway overflow of the sub-basin's reservoir [0: without time delay; 1:with time delay]
-real, allocatable :: fvol_over(:)
+
+!flag to calculate the ratio between the reservoir volumes given in the file cav.dat and that derived from the cross sections  [0 = initial value; 1 = after first calculation]
+integer, allocatable :: fcav(:)
+!flag to simulate reservoir routing during spillway overflow of the sub-basin's reservoir [0 = without time delay; 1 = with time delay]
+integer, allocatable :: fvol_over(:)
 !flag to identify the ocurrence of lateral inflow into the dowstream reservoir (0 = no and 1 = yes)
 integer, allocatable :: latflow_res(:)
 !arrays used for the routing of lateral inflow into the dowstream reservoir
@@ -74,7 +77,7 @@ real, allocatable :: damareaact(:)
 !volume=k*Hv**alpha (Volume/heigth) relationship parameters
 real, allocatable :: alpha_over(:)
 real, allocatable :: k_over(:)
-!area=a*Vol**b (Volume/area) relationship parameters,where Hv is the water height above the spillway
+!area=a*Vol**b (Volume/area) relationship parameters
 real, allocatable :: dama(:)
 real, allocatable :: damb(:)
 !Qout=c*Hv**d rating curve of the spillway, where Hv is the water height above the spillway
@@ -212,8 +215,12 @@ real, allocatable :: frsediment_in(:,:)
 real, allocatable :: frsediment_out(:,:)
 !dry bulk density of the sediment deposited in the subbasin's reservoir [ton/m**3]
 real, allocatable :: dry_dens(:)
-!parameter for the determination of the active layer thickness
+!calibration parameter for the determination of the active layer thickness [-]
 real, allocatable :: factor_actlay(:)
+!flag to control changes on sideslope at cross sections in the sub-basin's reservoir  [0 = changes on sideslope is not controlled; 1 = changes on sideslope is controlled avoiding steeper slopes by erosion processes]
+integer, allocatable :: sed_flag(:)
+!flag to simulate sediment routing by using of flushing technique in the sub-basin's reservoir  [0 = without flushing scenario; 1 = with flushing scenario]
+integer, allocatable :: sed_routing_flag(:)
 !amount of correlations between water inflow discharge and incoming sediment into the subbasin's reservoir [-]
 integer, allocatable :: numbeqs(:)
 !water discharge that represents the upper limit of applicability of each correlation 
@@ -240,7 +247,7 @@ real, allocatable :: damelev_mean(:,:)
 real, allocatable :: x_minelev(:,:)
 !minimum elevation of each cross section in the sub-basin's reservoir [m]
 real, allocatable :: minelev_sec(:,:)
-!bed slope of each cross section in the sub-basin's reservoir [-]
+!bed slope of each cross section in the sub-basin's reservoir [m/m]
 real, allocatable :: bedslope_sec(:,:)
 !wetted area of each cross section in the sub-basin's reservoir [m**2]
 real, allocatable :: area_sec(:,:)
@@ -424,14 +431,23 @@ real, allocatable :: weightfac_toplay(:,:,:)
 real, allocatable :: y_laststep(:,:,:)
 !water level used to attenuate elevation changes caused by erosion [m] 
 real, allocatable :: erosion_level(:,:)
+!Point of the cross section in the sub-basin's reservoir that identifies the beginning of main channel (from left to right, view from upstream side) [-]
 integer, allocatable :: pt1(:,:)
+!Point of the cross section in the sub-basin's reservoir that identifies the end of main channel (from left to right, view from upstream side) [-]
 integer, allocatable :: pt2(:,:)
+!Point located before pt1 that defines the minimum reach available to be eroded (from left to right, view from upstream side) [-] (used to minimize sediment erosion concentrated on the main channel)
 integer, allocatable :: pt3(:,:)
+!Point located after pt2 that defines the minimum reach available to be eroded  (from left to right, view from upstream side) [-] (used to minimize sediment erosion concentrated on the main channel)
 integer, allocatable :: pt4(:,:)
+!Initial location of the delta plunge point along the reservoir cross sections [-] (location varies acording to sedimento erosion/deposition in the reservoi)
 integer, allocatable :: pt_long0(:)
+!Location of the delta plunge point along the reservoir cross sections [-] 
 integer, allocatable :: pt_long(:)
+!Side slope at the beginning of main channel defined by pt1 [m/m]
 real, allocatable :: sideslope_pt1(:,:)
+!Side slope at the end of main channel defined by pt2 [m/m]
 real, allocatable :: sideslope_pt2(:,:)
+!Bed slope at the end of the delta plunge point in the sub-basin's reservoir [m/m]
 real, allocatable :: slope_long(:)
 
 !printable variables
@@ -451,7 +467,7 @@ real, allocatable :: dayhydrad_sec(:,:,:)		!described above as hydrad_sec
 real, allocatable :: daymeanvel_sec(:,:,:)		!described above as meanvel_sec
 real, allocatable :: daydischarge_sec(:,:,:)	!described above as discharge_sec
 real, allocatable :: dayminelev_sec(:,:,:)		!described above as minelev_sec
-!real, allocatable :: dayy_sec(:,:,:,:)			!described above as y_sec
+real, allocatable :: dayy_sec(:,:,:,:)			!described above as y_sec
 real, allocatable :: daycumsed(:,:)				!described above as cum_sedimentation
 real, allocatable :: dayfrsediment_out(:,:,:)	!described above as frsediment_out
 
@@ -528,8 +544,8 @@ real, allocatable :: lakearea(:,:)
 real, allocatable :: maxlake_factor(:,:)
 ! Percentage  of maximum volume per reservoir size class (-)
 real :: lake_vol0_factor(5)
-! Increase in the number of reservoir per size class (-)
-real :: lake_increase(5)
+! Change on the number of reservoir per size class (-)
+real :: lake_change(5)
 ! river inflow (m3)
 !Allocatable       real lakeinflow(366*nt,subasin)
 real, allocatable :: lakeinflow(:,:)

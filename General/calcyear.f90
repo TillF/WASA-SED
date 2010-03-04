@@ -4,7 +4,7 @@ SUBROUTINE calcyear
 ! Date: 2005-06-30  Time: 13:50:58
 use time_h
 
-INTEGER :: i,z
+INTEGER :: i
 
 
 daymon( 1) = 31

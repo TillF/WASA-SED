@@ -70,7 +70,7 @@ REAL :: dummy !,dif,difc
 !REAL :: inp,test,calibdtemp
 !INTEGER :: inpd(3)
 !REAL :: dummr
-INTEGER :: dummi !,ncelltem,doone, loop
+!INTEGER :: dummi !,ncelltem,doone, loop
 !CHARACTER :: dummc
 CHARACTER (len=50) :: dumstr
 INTEGER   :: columnheader(1000)	!Till: for storing column headings of input files

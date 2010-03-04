@@ -53,6 +53,7 @@ allocate( &
 	  cumseddep(subasin), &
 	  lake_cumseddep(366*nt,subasin,5), &
 
+	  fcav(subasin), &
 	  fvol_over(subasin), &
       latflow_res(subasin), &
       reservoir_down(subasin), &
@@ -152,6 +153,8 @@ allocate( &
 	  frsediment_out(subasin,n_sed_class), &
 	  dry_dens(subasin), &
 	  factor_actlay(subasin), &
+	  sed_flag(subasin), &
+	  sed_routing_flag(subasin), &
 	  numbeqs(subasin), &
 	  Q_max(10,subasin), &
 	  param_a(10,subasin), &
@@ -268,19 +271,20 @@ allocate( &
 
 	  daydamelevact(366*nt,subasin), &
 	  daydamareaact(366*nt,subasin), &
-	  dayelev_bat(366*nt,100,subasin), &
-	  dayarea_bat(366*nt,100,subasin), &
-	  dayvol_bat(366*nt,100,subasin), &
+	  dayelev_bat(366*nt,200,subasin), &
+	  dayarea_bat(366*nt,200,subasin), &
+	  dayvol_bat(366*nt,200,subasin), &
 
-	  daydepth_sec(366*nt,100,subasin), &
-	  daywatelev_sec(366*nt,100,subasin), &
-	  dayarea_sec(366*nt,100,subasin), &
-	  daytopwidth_sec(366*nt,100,subasin), &
-	  dayenergslope_sec(366*nt,100,subasin), &
-	  dayhydrad_sec(366*nt,100,subasin), &
-	  daymeanvel_sec(366*nt,100,subasin), &
-	  daydischarge_sec(366*nt,100,subasin), &
-	  dayminelev_sec(366*nt,100,subasin), &
+	  daydepth_sec(366*nt,200,subasin), &
+	  daywatelev_sec(366*nt,200,subasin), &
+	  dayarea_sec(366*nt,200,subasin), &
+	  daytopwidth_sec(366*nt,200,subasin), &
+	  dayenergslope_sec(366*nt,200,subasin), &
+	  dayhydrad_sec(366*nt,200,subasin), &
+	  daymeanvel_sec(366*nt,200,subasin), &
+	  daydischarge_sec(366*nt,200,subasin), &
+	  dayminelev_sec(366*nt,200,subasin), &
+	  dayy_sec(366*nt,200,200,subasin), &
 	  daycumsed(366*nt,subasin), &
 	  dayfrsediment_out(366*nt,subasin,n_sed_class), &
 	 STAT = istate)

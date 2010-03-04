@@ -174,9 +174,9 @@ subroutine init_soil_conds(soil_conds_file,default_rel_sat)
 	character(len=*),intent(in):: soil_conds_file		!file to load from
 	real :: default_rel_sat								!default relative saturation (to be assumed for all non-specified horizons) [0: theta_r; 1:theta_s]
 	INTEGER :: i,line,errors,sb_counter,lu_counter,tc_counter,svc_counter,h	! counters
-	INTEGER :: i_subbasx,i_lux,i_tcx,i_svcx, i_soilx		! external ids of components in work
+	INTEGER :: i_subbasx,i_lux,i_tcx,i_svcx !, i_soilx		! external ids of components in work
 	INTEGER :: i_subbas,i_lu,i_tc,i_svc, i_soil, i_veg,id_tc_type		! internal ids of components in work
-	INTEGER :: lu_instance,tcid_instance,soil_instance	!(internal) id of LU,TC,soil-instance (unique subbas-LU-TC-soil-combination)
+	INTEGER :: tcid_instance !,lu_instance, !,soil_instance	!(internal) id of LU,TC,soil-instance (unique subbas-LU-TC-soil-combination)
 	REAL	:: horithact_temp, x
 	INTEGER	:: file_read=0
 	character(len=160) :: error_msg=''
@@ -358,7 +358,7 @@ subroutine init_gw_conds(gw_conds_file,default_gw_storage)
 	INTEGER :: i,line,errors,lu_counter	! counters
 	INTEGER :: i_subbasx,i_lux		! external ids of components in work
 	INTEGER :: i_subbas,i_lu		! internal ids of components in work
-	INTEGER :: lu_instance	!(internal) id of LU
+!	INTEGER :: lu_instance	!(internal) id of LU
 	REAL	:: gwvol_temp, x
 	INTEGER	:: file_read=0
 	character(len=160) :: error_msg=''

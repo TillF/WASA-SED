@@ -34,13 +34,13 @@ use erosion_h
 IMPLICIT NONE
 
 INTEGER, INTENT(IN OUT) :: STATUS
-INTEGER :: bat
-INTEGER :: imun,imunx,irout,irout2,irout_d,id,idummy,imeso,istate ! id: additional loop variable of days (total 7 days)
+!INTEGER :: bat
+INTEGER :: idummy !,imun,imunx,irout,irout2,irout_d,id,imeso,istate ! id: additional loop variable of days (total 7 days)
 INTEGER :: upstream, downstream
-INTEGER :: itl, itr, ih, mm, imunout, iout, i, j, make,k,h
-REAL :: xdum(48),check,temp2,qtemp, storcapact, con_sed
-REAL :: flow, r_area, sediment_temp(24)
-Real :: temp_water(17), temp_sediment(17), temp_rain(366), dummy
+INTEGER :: i, j, h,k !itl, itr, ih, mm, imunout, iout,  make
+!REAL :: xdum(48),check,temp2,qtemp, storcapact, con_sed
+REAL :: flow, r_area !, sediment_temp(24), temp_rain(366), dummy
+Real :: temp_water(17), temp_sediment(17)
 character(len=1000) :: fmtstr	!string for formatting file output
 Real :: r_sediment_storage(subasin)		!sediment storage in reach [t]
 
@@ -643,14 +643,14 @@ IF (STATUS == 3) THEN
 			CLOSE (11)
 		endif
 
-		if (river_transport.eq.2) then 
-			if(f_river_sediment_total) then
-				OPEN(11,FILE=pfadn(1:pfadi)//'River_Sediment_total.out',STATUS='old' ,POSITION='append'  )
-				write(fmtstr,'(a,i0,a,i0,a)')'(',dayyear,'/,(2(i0,a),',subasin,'(f14.3,a)))'		!generate format string
-				WRITE (11,fmtstr)(t,char(9),j,char(9),(qsediment(j,i),char(9),i=1,subasin),j=1, dayyear)
-				CLOSE (11) 
-			endif
-		endif
+!		if (river_transport.eq.2) then 
+!			if(f_river_sediment_total) then
+!				OPEN(11,FILE=pfadn(1:pfadi)//'River_Sediment_total.out',STATUS='old' ,POSITION='append'  )
+!				write(fmtstr,'(a,i0,a,i0,a)')'(',dayyear,'(2(i0,a),',subasin,'(f14.3,a)))'		!generate format string
+!				WRITE (11,fmtstr)(t,char(9),j,char(9),(qsediment(j,i),char(9),i=1,subasin),j=1, dayyear)
+!				CLOSE (11) 
+!			endif
+!		endif
 	endif
 
 END IF

@@ -1,5 +1,8 @@
 SUBROUTINE readgen(path2do_dat)
 
+!George & Till: computationally irrelevant: added flags for reservoir output files; error message for missing do.dat
+!2010-03-03
+
 !Till: computationally irrelevant: made "command-strings" in outfile.dat case-insensitive
 !2009-10-14
 
@@ -78,9 +81,14 @@ else
 	custompath=path2do_dat(1:i)	!extract path to do.dat (without filename)
 end if
 
-! read data for simulation period from file
-!OPEN(11,FILE='./Input/do.dat' ,STATUS='old')
-OPEN(11,FILE=trim(path2do_dat) ,STATUS='old')
+! read run-time parameters
+OPEN(11,FILE=trim(path2do_dat) ,IOSTAT=istate,STATUS='old')	
+IF (istate/=0) THEN
+	write(*,*)'Error: Control file ',trim(path2do_dat),' could not be opened.'
+	stop
+END IF
+	
+
 READ(11,*)
 READ(11,'(a)') pfadp
 READ(11,'(a)') pfadn
@@ -203,6 +211,33 @@ f_potetranspiration=.FALSE.
 f_gw_loss=.FALSE.
 f_gw_recharge=.FALSE.
 
+f_res_watbal=.FALSE.
+f_res_vollost=.FALSE.
+f_res_cav=.FALSE.
+f_res_hydraul=.FALSE.
+f_res_bedchange=.FALSE.
+f_res_sedbal=.FALSE.
+f_res_longitudunal=.FALSE.
+f_res_sedcomposition=.FALSE.
+f_lake_inflow_r=.FALSE.
+f_lake_outflow_r=.FALSE.
+f_lake_retention_r=.FALSE.
+f_lake_volume_r=.FALSE.
+f_lake_sedinflow_r=.FALSE.
+f_lake_sedoutflow_r=.FALSE.
+f_lake_sedretention_r=.FALSE.
+f_lake_sedimentation_r=.FALSE.
+f_lake_watbal=.FALSE.
+f_lake_sedbal=.FALSE.
+f_lake_inflow=.FALSE.
+f_lake_outflow=.FALSE.
+f_lake_volume=.FALSE.
+f_lake_retention=.FALSE.
+f_lake_vollost=.FALSE.
+f_lake_sedinflow=.FALSE.
+f_lake_sedoutflow=.FALSE.
+f_lake_sizedistoutflow=.FALSE.
+
 OPEN(11,FILE=pfadp(1:pfadj)// 'outfiles.dat',IOSTAT=istate,STATUS='old')	
 IF (istate==0) THEN
 	READ(11,*,IOSTAT=istate)dummy  
@@ -294,6 +329,59 @@ IF (istate==0) THEN
 				f_gw_loss=.TRUE.
 			CASE ('gw_recharge')
 				f_gw_recharge=.TRUE.
+
+			CASE ('res_watbal')
+				f_res_watbal=.TRUE.
+			CASE ('res_vollost')
+				f_res_vollost=.TRUE.
+			CASE ('res_cav')
+				f_res_cav=.TRUE.
+			CASE ('res_hydraul')
+				f_res_hydraul=.TRUE.
+			CASE ('res_bedchange')
+				f_res_bedchange=.TRUE.
+			CASE ('res_sedbal')
+				f_res_sedbal=.TRUE.
+			CASE ('res_longitudunal')
+				f_res_longitudunal=.TRUE.
+			CASE ('res_sedcomposition')
+				f_res_sedcomposition=.TRUE.
+			CASE ('lake_inflow_r')
+				f_lake_inflow_r=.TRUE.
+			CASE ('lake_outflow_r')
+				f_lake_outflow_r=.TRUE.
+			CASE ('lake_retention_r')
+				f_lake_retention_r=.TRUE.
+			CASE ('lake_volume_r')
+				f_lake_volume_r=.TRUE.
+			CASE ('lake_sedinflow_r')
+				f_lake_sedinflow_r=.TRUE.
+			CASE ('lake_sedoutflow_r')
+				f_lake_sedoutflow_r=.TRUE.
+			CASE ('lake_sedretention_r')
+				f_lake_sedretention_r=.TRUE.
+			CASE ('lake_sedimentation_r')
+				f_lake_sedimentation_r=.TRUE.
+			CASE ('lake_watbal')
+				f_lake_watbal=.TRUE.
+			CASE ('lake_sedbal')
+				f_lake_sedbal=.TRUE.
+			CASE ('lake_inflow')
+				f_lake_inflow=.TRUE.
+			CASE ('lake_outflow')
+				f_lake_outflow=.TRUE.
+			CASE ('lake_volume')
+				f_lake_volume=.TRUE.
+			CASE ('lake_retention')
+				f_lake_retention=.TRUE.
+			CASE ('lake_vollost')
+				f_lake_vollost=.TRUE.
+			CASE ('lake_sedinflow')
+				f_lake_sedinflow=.TRUE.
+			CASE ('lake_sedoutflow')
+				f_lake_sedoutflow=.TRUE.
+			CASE ('lake_sizedistoutflow')
+				f_lake_sizedistoutflow=.TRUE.
 
 
  	END SELECT
