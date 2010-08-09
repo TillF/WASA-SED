@@ -2121,11 +2121,12 @@ IF (STATUS == 3) THEN
           IF (f_res_bedchange) THEN
   		  OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_sec'//section(dummy2:12)// &
 			'_bedchange.out',STATUS='old',POSITION='append')
+		  write(fmtstr,'(a,i0,a)')'(6I6,',npt,'F15.6)'		!generate format string	    
 		  DO d=1,dayyear
 	        DO ih=1,nt
 		      hour=ih
               step=(d-1)*nt+hour
-			  WRITE(11,'(6I6,<npt>F15.6)')id_subbas_extern(i),id_sec_extern(j,i),t,d,hour,npt,  &
+			  WRITE(11,fmtstr)id_subbas_extern(i),id_sec_extern(j,i),t,d,hour,npt,  &
 				(dayy_sec(step,m,j,i),m=1,npoints(j,i))
 		    ENDDO
 		  ENDDO

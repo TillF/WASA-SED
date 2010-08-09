@@ -1,5 +1,8 @@
 SUBROUTINE climo(STATUS)
 
+!Till: modified allocation of input buffer that led to problem when input files contained different number of columns
+!2010-04-26
+
 !Till: modified allocation of input buffer that led to problem under linux
 !2008-08-15
 
@@ -58,7 +61,7 @@ INTEGER, INTENT(IN OUT)                  :: STATUS
 !                 2=daily step,     3=end of year)
 
 ! counters
-INTEGER :: i,j,k,id,n !,imun,imeso,istate,z,mm,bat,make,testi,dall ,idummy 
+INTEGER :: i,j,k,id,n,iostat !,imun,imeso,istate,z,mm,bat,make,testi,dall ,idummy 
 REAL :: dummy !,dif,difc
 
 
@@ -91,8 +94,6 @@ IF (STATUS == 0) THEN
 	dumstr='rain_daily.dat'	!Till: load daily rainfall
  END IF
   
-
-
 
 !reads in daily temperature, humiditiy, short wave radiation and precipitation for simulation period
 !  OPEN(81,FILE=pfadp(1:pfadj)// '/Time_series/temperature.dat',STATUS='old',action='read',readonly,shared)
@@ -152,7 +153,7 @@ IF (STATUS == 0) THEN
   end do
 
 
-  allocate(inputbuffer(366*nt,no_columns(4)))		!Till: prepare input buffer to fit the hourly data
+  allocate(inputbuffer(366*nt,maxval(no_columns)))		!Till: prepare input buffer to fit the data
   
  !set internal filepointers to correct line (simulation start)
   call date_seek(81,tstart,mstart,'temperature.dat')
@@ -181,17 +182,30 @@ IF (STATUS == 1) THEN
  rad=30
  precip=50
  
- READ(81,*) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(1)),id=1,dayyear)		!Till: faster than using loop
+ READ(81,*,IOSTAT=iostat) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(1)),id=1,dayyear)		!Till: faster than using loop
  temp(1:dayyear,1:subasin)= inputbuffer(1:dayyear,corr_column_temp)	!Till: rearrange column order to match order of hymo.dat
+ if (iostat/=0) then	!
+		write(*,'(A,i3,a,i0)')'ERROR: input file format error in temperature.dat'
+		stop
+ end if
 
- READ(82,*) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(2)),id=1,dayyear)		!Till: faster than using loop
+ READ(82,*,IOSTAT=iostat) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(2)),id=1,dayyear)		!Till: faster than using loop
  rhum(1:dayyear,1:subasin)= inputbuffer (1:dayyear,corr_column_rhum)	!Till: rearrange column order to match order of hymo.dat
+ if (iostat/=0) then	!
+		write(*,'(A,i3,a,i0)')'ERROR: input file format error in humidity.dat'
+		stop
+ end if
 
- READ(83,*) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(3)),id=1,dayyear)		!Till: faster than using loop
+ READ(83,*,IOSTAT=iostat) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(3)),id=1,dayyear)		!Till: faster than using loop
  rad(1:dayyear,1:subasin)= inputbuffer (1:dayyear,corr_column_rad)	!Till: rearrange column order to match order of hymo.dat 
- 
+ if (iostat/=0) then	!
+		write(*,'(A,i3,a,i0)')'ERROR: input file format error in radiation.dat'
+		stop
+ end if
+
+
 	IF (.NOT. dohour) THEN
-		READ(84,*) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(4)),id=1,dayyear)		!Till: faster than using loop
+		READ(84,*,IOSTAT=iostat) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(4)),id=1,dayyear)		!Till: faster than using loop
 		precip(:,1:subasin)= inputbuffer (:,corr_column_precip)	!Till: rearrange column order to match order of hymo.dat	 
 	else 
 		!read hourly rainfall data
@@ -199,7 +213,7 @@ IF (STATUS == 1) THEN
 
 			preciph(:,:)=-1	!hourly precip
 
-		READ (84,*) ((n,k,(inputbuffer((i-1)*24+j,id),id=1,no_columns(4)),j=1,nt),i=1,dayyear)
+		READ (84,*,IOSTAT=iostat) ((n,k,(inputbuffer((i-1)*24+j,id),id=1,no_columns(4)),j=1,nt),i=1,dayyear)
 		preciph(:,1:subasin)= inputbuffer (:,corr_column_precip)	!Till: rearrange column order to match order of hymo.dat	 
 
 
@@ -220,6 +234,11 @@ IF (STATUS == 1) THEN
 		END DO
 
 	END IF
+	if (iostat/=0) then	!
+		write(*,'(A,i3,a,i0)')'ERROR: input file format error in ',dumstr
+		stop
+    end if
+
 
 wind=1	!Till: currently not read from input file (assumed constant)
 
