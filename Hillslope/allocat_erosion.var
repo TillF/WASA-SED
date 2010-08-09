@@ -1,0 +1,3 @@
+! variables are allocated in the end of readhymo, when all dimensions are known
+
+
