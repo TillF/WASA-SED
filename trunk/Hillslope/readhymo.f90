@@ -367,6 +367,8 @@ DO j=1,nsoil
 	END DO
 
 END DO
+
+shrink = 0	!Till shrinkage currently disabled (buggy, "macro" can become huge and lead to crashes in soilwat 2.2a)
 CLOSE(11)
 
 
