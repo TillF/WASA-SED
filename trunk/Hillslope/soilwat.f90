@@ -4,6 +4,34 @@ SUBROUTINE soilwat(hh,day,month,i_subbas2,i_ce,i_lu,oc2,tcid_instance2,id_tc_typ
         tcsoilet,tcintc,prec,precday,prechall2,petday,  &
         tcarea2,bal, rootd_act,height_act,lai_act,alb_act,sed_in_tc,sed_out_tc)
 
+
+
+!Andreas: a similar problem with the units of lateral flow (see changes from 2010-08-15) has also been found at three places, where the maximum
+! possible lateral inflow to an SVC is calculated. 
+!2011-03-01
+
+!Andreas, Till: redistribution of lateral flow between SVCs of one TC has been corrected. Previously there was no redistribution
+! if there was groundwater. Additional code for specific tests in Brazil has been deleted. 
+!2011-03-01
+
+!Andreas, Doris: interflow is now calculated for all TCs. Previously the calculation of interflow from other TCs than lowermost TC was missing.
+!2011-03-01
+
+!Doris: added initialisation of macro in line 1344. Without this initialisation the refillable porosity is not calcultated correctly (na(i,h) and namic), 
+!This affects infiltration and now stops the error messages from the infiltration routine coming up. 
+!2010-12-10
+
+!Doris: some long lines have been splitted into two: max. length of lines in free format is 132 (comments too!)
+! and the pgi compiler is sensitive to this	
+! a function isNaN has been added as this is not a built-in function under the fortran compiler	
+!2010-08-24
+
+
+!Doris, Till, Andreas: the units in the equation for the calculation of interflow did not match, l2 should be in mm. The equation has been corrected to
+! 	l2(h)= k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))  &		  
+!	      * temp3*temp2 /  slength(i_lu) / fracterrain(id_tc_type2)/1000	* slope(id_tc_type2)/100
+!!2010-08-15
+
 ! Pedro: computationally relevant correction on q_ov by kfkorrday (overland flow with duration according to rainfall, and not during 24 h)
 ! 2009-06-03
 
@@ -171,7 +199,7 @@ REAL, INTENT(IN)                     :: alb_act(nveg)
 REAL, INTENT(IN)					:: sed_in_tc(n_sed_class)
 REAL, INTENT(OUT)					:: sed_out_tc(n_sed_class)
 
-
+logical :: isnan
 !** Soil water model for terrain component (TC)
 
 !** Main variables:
@@ -231,7 +259,7 @@ INTEGER :: horton,hsat(maxsoil),testi,hmerk,testi2,lath
 REAL :: q_surf								!surface runoff [mm H2O]			
 REAL :: r		
 						
-
+! REAL :: dsi, Aq, Q_li, l2_test1   !these variables are only needed for derivation of lateral subsurface flow equations
 
 
 INTEGER :: doshrink
@@ -375,10 +403,10 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
 !  maximum inflow may be limited by hydraulic conductivity
               IF (temp2 > 0.) THEN
 				!Till: compute maximum inflow according to "exchange surface"
-				temp3=(k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))*  &	
-					horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100)* &
-					area(i_subbas2)*frac_lu(oc2,i_subbas2) * frac_svc(i,tcid_instance2) /&
-					slength(i_lu)		!subsurface inflow into horizon(s) admitted due to conductivity
+				!Andreas: has to be in unit mm, correct calculation similar to lateral outflow calculation
+			    temp3=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))* &           ! Q_li 
+				    horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100  &
+					/  slength(i_lu) / fracterrain(id_tc_type2)/1000  
 
                 temp3=MIN(temp3,temp2)					!Till: actual amount of water going into current horizon
                 horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)+temp3
@@ -424,11 +452,13 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
 !  update soil moisture of this horizon
 !  maximum inflow may be limited by hydraulic conductivity
               IF (temp2 > 0.) THEN
+
 				!Till: compute maximum inflow according to "exchange surface"
-				temp3=(k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))*  &
-					horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100)* &
-					area(i_subbas2)*frac_lu(oc2,i_subbas2) * frac_svc(i,tcid_instance2) /&
-					slength(i_lu)		!subsurface inflow into horizon(s) admitted due to conductivity
+				!Andreas: has to be in unit mm, correct calculation similar to lateral outflow calculation
+			    temp3=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))* &           ! Q_li 
+				    horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100  &
+					/  slength(i_lu) / fracterrain(id_tc_type2)/1000  
+
 
 				temp3=MIN(temp3,temp2)
                 horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)+temp3
@@ -677,12 +707,11 @@ ELSE	! endif lowest terrain component - if not lowest TC, do upslope now
 !  update soil moisture of this horizon
 !  maximum inflow may be limited by hydraulic conductivity
           IF (temp2 > 0.) THEN
-			!Till: compute maximum inflow according to "exchange surface"
-			temp3=(k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))*  &
-				horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100)* &
-				area(i_subbas2)*frac_lu(oc2,i_subbas2) * frac_svc(i,tcid_instance2) /&
-				slength(i_lu)		!subsurface inflow into horizon(s) admitted due to conductivity
-
+		!Till: compute maximum inflow according to "exchange surface"
+		!Andreas: has to be in unit mm, correct calculation similar to lateral outflow calculation
+                temp3=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))* &           ! Q_li 
+                  horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100  &
+                  /  slength(i_lu) / fracterrain(id_tc_type2)/1000  
             temp3=MIN(temp3,temp2)
             horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)+temp3
 
@@ -1302,6 +1331,8 @@ END IF
 qmerk(:)=0. !Till: for remembering infiltration excess between iterations
 qmerk2(:)=0.
 hortf=0.
+macro=0.	!Doris: inserted 10.12.2010 macro has to be initialised, otherwise namic is not calculated and 
+			!		the refillable porosity is not calcultated correctly (na(i,h) and namic)
 
 DO n_iter=1,2
 
@@ -2502,50 +2533,106 @@ DO i=1,nbr_svc(tcid_instance2)
 !  (calibration parameter, given in soter.dat)
       
 ! (transmission losses only if lateral subsurface inflow ?)
-     
-     IF (tc_counter2 == nbrterrain(i_lu)) THEN		!Till: if this TC is the most downslope of the entire LU
-        
-		IF (thfree(i,h) > 0.) THEN !Till: if free water is available, try draining to riverbed
 
-	!  depth of lower limit of horizon below ground
-			tempx=sum(horiz_thickness(tcid_instance2,i,1:h))
-	!  depth (thickness) of saturated zone in this horizon
-			temp3=thfree(i,h)/(thetas(soilid,h)-soilfc(soilid,h))
-	!  depth of water table below ground surface
-			temp4=tempx-temp3
+
+				
+			IF (thfree(i,h) > 0.) THEN !Till: if free water is available, try draining to riverbed
+				
+				! Calculate temp3 (mm) which is the water content above field capacity
+
+				!depth (thickness) of saturated zone in this horizon
+				temp3=thfree(i,h)/(thetas(soilid,h)-soilfc(soilid,h))
+	
         
-	!  horizon is completely above river bed -> all goes to river
-			IF (tempx <= riverbed(i_lu)) THEN
-			  temp2=1.
-	!  saturated zone is completely below river bed -> no runoff
-			ELSE IF (temp4 >= riverbed(i_lu)) THEN
-			  temp2=0.
-	!  horizon limit is below, saturated zone above river bed
-			ELSE IF (tempx > riverbed(i_lu) .AND. temp4 < riverbed(i_lu)) THEN
-				temp2=(riverbed(i_lu)-temp4)/temp3		!Till: drain saturated fraction of horizon that is above riverbed
+				!Calculate temp2 (-), which is the saturated fraction of the horizon above the riverbed
+				!for the lowermost TC and otherwise 1
+				!- For the lowest terrain component lateral flow out of the TC is subsurface runoff to
+				!  the river. This lateral outflow to the river only occurs for the saturated part above 
+				!  the river bed.
+				!- For all other TCs lateral flow is lateral inflow to the next lower TC and calculated over
+				!  the entire horizon.	
+				!
+				IF (tc_counter2 == nbrterrain(i_lu)) THEN		!Till: if this TC is the most downslope of the entire LU    
+				  !depth of lower limit of horizon below ground
+				        tempx=sum(horiz_thickness(tcid_instance2,i,1:h))	  
+				  !  depth of water table below ground surface
+					temp4=tempx-temp3
+					       
+				  !  horizon is completely above river bed -> all goes to river
+					IF (tempx <= riverbed(i_lu)) THEN
+							temp2=1.
+				  
+					!  saturated zone is completely below river bed -> no runoff
+					ELSE IF (temp4 >= riverbed(i_lu)) THEN
+							temp2=0.
+				  
+					!  horizon limit is below, saturated zone above river bed
+					ELSE IF (tempx > riverbed(i_lu) .AND. temp4 < riverbed(i_lu)) THEN
+							temp2=(riverbed(i_lu)-temp4)/temp3		!Till: drain saturated fraction of horizon that is above riverbed
+					ELSE
+						WRITE(*,*) 'groundwater level not valid'
+						WRITE(*,*) i,tcid_instance2,soilid
+						STOP
+					END IF
+
+		               ELSE IF (tc_counter2 < nbrterrain(i_lu)) THEN	!Doris, Andreas: if this TC is not the most downslope of the entire LU
+                                     temp2=1.
+		               END IF   
+
+			
+			        !Till: compute maximum inflow according to "exchange surface" (revised)
+			        !Doris, Till, Andreas: calculation results in wrong unit, l2 should result in mm
+			
+				!!Eq 4.46 saturated depth in m
+				!dsi = temp3*temp2 /1000 
+				!
+				!!Eq 4.45 cross section of lateral flow in m2
+				!Aq  = frac_svc(i,tcid_instance2)*area(i_subbas2)*frac_lu(oc2,i_subbas2)*1000000  &
+				!	  /slength(i_lu)  &
+				!	  *dsi			  											
+				!
+				!!Eq 4.44 lateral flow in m3/day
+				!Q_li= Aq * (k_sat(soilid,h)/1000)/dt_per_day*(1.-coarse(soilid,h))  &
+				!	   * slope(id_tc_type2)/100
+				!
+				!
+				!!lateral flow in mm (convert area from km2 to m2, then convert flow from m to mm)
+				!l2_test1=Q_li/(area(i_subbas2)*frac_lu(oc2,i_subbas2) * frac_svc(i,tcid_instance2) * fracterrain(id_tc_type2)*1000000)*1000
+
+
+				!! above lines in one step:
+				!l2(h)=frac_svc(i,tcid_instance2)*area(i_subbas2)*frac_lu(oc2,i_subbas2)*1000000  /  slength(i_lu)  &    ! Aq
+				!	  * temp3*temp2 /1000	&											   ! dsi
+				!	  * (k_sat(soilid,h)/1000)/dt_per_day*(1.-coarse(soilid,h)) * slope(id_tc_type2)/100  &		   ! Q_li
+				!	  / (area(i_subbas2)*frac_lu(oc2,i_subbas2) * frac_svc(i,tcid_instance2) * fracterrain(id_tc_type2)*1000000)  *  1000  !/area
+
+				
+				! above lines in one step and shorter
+				l2(h)= k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))  &		   ! Q_li
+							* temp3*temp2* slope(id_tc_type2)/100 	&
+							/  slength(i_lu) / fracterrain(id_tc_type2)/1000 
+			
+	
+				!Original equation from Andreas: equal to new corrected equation with extra factor /2.			
+				!l2_test2=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))*  &
+				!		 thfree(i,h)/(thetas(soilid,h)-soilfc(soilid,h)) *temp2  &
+				!		/(slength(i_lu)*fracterrain(id_tc_type2)*1000.) *(slope(id_tc_type2)/100./2.)
+			
 			ELSE
-			  WRITE(*,*) 'groundwater level not valid'
-			  WRITE(*,*) i,tcid_instance2,soilid
-			  STOP
-			END IF
-!			l2(h)=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))*  &
-!				thfree(i,h)/(thetas(soilid,h)-soilfc(soilid,h)) *temp2  &
-!				/(slength(i_lu)*fracterrain(id_tc_type2)*1000.) *(slope(id_tc_type2)/100./2.)
-!			
 
-			!Till: compute maximum inflow according to "exchange surface" (revised)
-			l2(h)=(k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))*  &
-				temp3*temp2*slope(id_tc_type2)/100)* &
-				area(i_subbas2)*frac_lu(oc2,i_subbas2) * frac_svc(i,tcid_instance2) /&
-				slength(i_lu)		!potential subsurface outflow from horizon admitted due to conductivity 
-		  ELSE
-!			l2(h)=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))*  &	!ii obsolete, since thfree is 0 anyway in this case, just set l2(h)=0
-!				thfree(i,h)/(thetas(soilid,h)-soilfc(soilid,h))  &
-!				/(slength(i_lu)*fracterrain(id_tc_type2)*1000.) *(slope(id_tc_type2)/100./2.)
-!				!temp2=temp2
-			l2(h)=0 !Till: no free draining water
-		END IF	! if (thfree(i,h) > 0.)
-	  END IF	!lowest TC in LU
+				!l2(h)=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))*  &	!ii obsolete, since thfree is 0 anyway in this case, just set l2(h)=0
+
+
+
+
+
+				!	thfree(i,h)/(thetas(soilid,h)-soilfc(soilid,h))  &
+				!	/(slength(i_lu)*fracterrain(id_tc_type2)*1000.) *(slope(id_tc_type2)/100./2.)
+				!	!temp2=temp2
+
+				l2(h)=0 !Till: no free draining water
+
+			END IF	! if (thfree(i,h) > 0.)
 
 
       
@@ -2562,31 +2649,15 @@ DO i=1,nbr_svc(tcid_instance2)
 ! subsurface flow is function of areal fraction of this SVC in TC;
 ! for the most downslope TC, lateral outflow of TC only after complete
 ! redistribution among SVCs
-! (only if no groundwater. In the groundwater case no lateral redistribution is assumed)
-      IF (gw_flag(i_lu) == 0) THEN
-        IF (tc_counter2 == nbrterrain(i_lu)) THEN	! most downslope terrain component	!ii: dissolve if clause more clearly
-          IF (dolatscsub) THEN
+
+!     Andreas/Till 2011-03-01: This part of the code has changed, previously redistribution was only performed 
+!               in the case of no groundwater. In the previous version there was additional code for specific 
+!               tests in Brazil.
+      IF (dolatscsub) THEN
             lath=INT(sum(horiz_thickness(tcid_instance2,i,1:h))/500.)+1							!Till: compute number of "exchange" horizon
 			latred(tcid_instance2,lath)=latred(tcid_instance2,lath)+&							!Till: compute amount of water to go into exchange horizon [m3]
-				l2(h)*tcarea2*frac_svc(i,tcid_instance2)*1.e3
-            l2eff(h)=0.																			!Till: assign subsurface flow to river 
-
-!			tempx=l2(h)*tcarea2*(1-frac_svc(i,tcid_instance2))*1.e3								!Till: ensure that balance is alright
-!			deepqgw=deepqgw+tempx
-!			watbal=watbal  -tempx
-          ELSE
-            l2eff(1:maxhori)=l2(1:maxhori)
-          END IF
-        ELSE	! not most downslope terrain component
-          IF (dolatscsub) THEN
-            lath=INT(sum(horiz_thickness(tcid_instance2,i,1:h))/500.)+1							!Till: compute number of "exchange" horizons
-            latred(tcid_instance2,lath)=latred(tcid_instance2,lath)+&
                 l2(h)*(1.-frac_svc(i,tcid_instance2))* tcarea2*frac_svc(i,tcid_instance2)*1.e3
-            l2eff(h)=l2(h)*frac_svc(i,tcid_instance2)
-          ELSE
-            l2eff(1:maxhori)=l2(1:maxhori)
-          END IF
-        END IF
+            l2eff(h)=l2(h)*frac_svc(i,tcid_instance2)											!Till: assign subsurface flow to river or lower TC
       ELSE
         l2eff(1:maxhori)=l2(1:maxhori)
       END IF
@@ -2905,7 +2976,9 @@ if (dosediment .AND. (q_surf_out > 0)) then !if hillslope erosion is to be compu
 		if (kfkorr_a==0) then		
 			alpha_05=0.5*kfkorr/24	!time invariant kfkorr
 		else
-			alpha_05=min(1.0,0.5*(kfkorr_day/kfkorr)/24)	!based on kfcorr: time variant kfkorr: only the the precipitation-dependent part of the term is used (the kfkorr factor is considered a calibration factor for Ksat and not responsible for sub-daily rainfall dynamics)
+		!based on kfcorr: time variant kfkorr: only the the precipitation-dependent part of the term is used (the kfkorr factor is considered 
+		!a calibration factor for Ksat and not responsible for sub-daily rainfall dynamics)
+				alpha_05=min(1.0,0.5*(kfkorr_day/kfkorr)/24)	
 			!alpha_05=0.5*a_i30*(precday**(b_i30-1))		!based on USLE Ri50-coefficients  - doubles sediment yield in Isábena
 		end if	
 		alpha_05=min(alpha_05,1.0)	!at maximum, all daily rainfall fell within 30 min
@@ -2934,3 +3007,18 @@ end if !end (do sediment)
 
 RETURN
 END SUBROUTINE soilwat
+
+
+
+
+logical function isnan(a)
+real :: a
+
+if (a.ne.a) then
+	isnan = .true.
+else
+	isnan = .false.
+end if
+
+return
+end 
