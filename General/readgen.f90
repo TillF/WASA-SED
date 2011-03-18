@@ -73,7 +73,7 @@ else
 	write(*,*)'reading runtime parameters from ',path2do_dat
 	i=sizeof(trim(path2do_dat))
 	do while (i>0)
-		if ((path2do_dat(i:i)=='/') .OR. (path2do_dat(i:i)=='\')) then	!find last slash in path
+		if ((path2do_dat(i:i)=='/') .OR. (path2do_dat(i:i)==achar(92))) then	!find last slash or backslash in path
 			exit
 		end if 
 		i=i-1
