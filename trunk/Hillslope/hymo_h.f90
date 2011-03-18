@@ -1,4 +1,5 @@
 module hymo_h
+use common_h
 save
 
 ! Till: optional subdaily output of actetranspiration.out,qhorton.out,subsurface_runoff.out,total_overlandflow.out,gw_discharge.out,potetranspiration.out,gw_loss.out,gw_recharge.out

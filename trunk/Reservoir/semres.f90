@@ -1002,7 +1002,8 @@ IF (STATUS == 2) THEN
 	    pt_long(upstream)=max(pt_long(upstream)-1,42)		!the section 42 of the Barasona reservoir was assumed to be the upstream limit (variable pt_long_min(upstream) should be read in the file sed.dat
         length_plunge(upstream)=cumlength_sec(max(pt_long(upstream),1),upstream)
 	  ENDIF
-!write(*,'(2I6,F10.2,2F10.6,4F10.2)')pt_long0(upstream),pt_long(upstream),length_plunge(upstream),dummy3,slope_long(upstream),minelev_sec(pt_long0(upstream),upstream),minelev_sec(pt_long0(upstream)+1,upstream),cumlength_sec(pt_long(upstream),upstream)-cumlength_sec(pt_long0(upstream)+1,upstream)
+!write(*,'(2I6,F10.2,2F10.6,4F10.2)')pt_long0(upstream),pt_long(upstream),length_plunge(upstream),dummy3,slope_long(upstream),minelev_sec(pt_long0(upstream),upstream),minelev_sec(pt_long0(upstream)+1,upstream),cumlength_sec(pt_long(upstream)&
+!,upstream)-cumlength_sec(pt_long0(upstream)+1,upstream)
 	 ENDIF
 	ENDIF
 !    length_plunge(upstream)=.4*cumlength_sec(1,upstream)
