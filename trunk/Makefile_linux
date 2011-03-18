@@ -1,4 +1,4 @@
-CC=gfortran-4.3
+CC=gfortran
 CFLAGS=-c
 SOURCES=./General/general_h.f90 \
 ./Hillslope/erosion_h.f90 \
@@ -48,8 +48,8 @@ SOURCES=./General/general_h.f90 \
 EXECUTABLE=wasa.lin
 
 all: $(SOURCES) $(EXECUTABLE)
-
 $(EXECUTABLE): $(SOURCES)
+	./update_revision_no.sh
 	$(CC) $(SOURCES) -o $(EXECUTABLE) -ffree-line-length-none
 
 .o:
