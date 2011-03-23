@@ -1,5 +1,8 @@
 module model_state_io
-!contains subroutines for saving and laoding model state (soil water, ground water, interception)
+!contains subroutines for saving and loading model state (soil water, ground water, interception)
+
+!Till: computationally irrelevant: removed subroutine arguments for init_soil_conds and init_gw_conds that were global anyway (created confusion with gfortran 4.4)
+!2011-03-23
 
 !Till: computationally irrelevant: added missing CLOSE for ic_conds_file (caused error in linux); variable renaming
 !2009-06-22
@@ -34,11 +37,11 @@ use common_h
 contains
 subroutine init_model_state		!load initial conditions
 	if (.TRUE.) then
-		call init_soil_conds(trim(pfadn)//'soil_moisture.stat',default_rel_sat)	!Till: load initial status of soil moisture
-		call init_gw_conds(trim(pfadn)//'gw_storage.stat',default_gw_storage)	!Till: load initial status of gw storage
+		call init_soil_conds(trim(pfadn)//'soil_moisture.stat')	!Till: load initial status of soil moisture
+		call init_gw_conds(trim(pfadn)//'gw_storage.stat')	!Till: load initial status of gw storage
 	else			!ii: default init is currently still done in hymo_all.f90, needs to be changed
-		call init_soil_conds('',default_rel_sat)	!Till: set default initial status of soil moisture
-		call init_gw_conds('',default_gw_storage)	!Till: set default status of gw storage
+		call init_soil_conds('')	!Till: set default initial status of soil moisture
+		call init_gw_conds('')	!Till: set default status of gw storage
 	end if
 	CALL save_all_conds('','','',trim(pfadn)//'storage.stats_start')		!Till: save only summary on initial storage
 end subroutine init_model_state
@@ -162,7 +165,7 @@ end subroutine save_all_conds
 
 
 
-subroutine init_soil_conds(soil_conds_file,default_rel_sat)
+subroutine init_soil_conds(soil_conds_file)
 
 !load soil moistures information from file soil_conds_file
 	use hymo_h
@@ -172,7 +175,6 @@ subroutine init_soil_conds(soil_conds_file,default_rel_sat)
 	implicit none
 
 	character(len=*),intent(in):: soil_conds_file		!file to load from
-	real :: default_rel_sat								!default relative saturation (to be assumed for all non-specified horizons) [0: theta_r; 1:theta_s]
 	INTEGER :: i,line,errors,sb_counter,lu_counter,tc_counter,svc_counter,h	! counters
 	INTEGER :: i_subbasx,i_lux,i_tcx,i_svcx !, i_soilx		! external ids of components in work
 	INTEGER :: i_subbas,i_lu,i_tc,i_svc, i_soil, i_veg,id_tc_type		! internal ids of components in work
@@ -344,7 +346,7 @@ end subroutine init_soil_conds
 
 
 
-subroutine init_gw_conds(gw_conds_file,default_gw_storage)
+subroutine init_gw_conds(gw_conds_file)
 
 !load gw conditions from file gw_conds_file
 	use hymo_h
@@ -354,7 +356,7 @@ subroutine init_gw_conds(gw_conds_file,default_gw_storage)
 	implicit none
 
 	character(len=*),intent(in):: gw_conds_file		!file to load from
-	real :: default_gw_storage								!default ground water storage (to be assumed for all non-specified LUs) [mm]
+	
 	INTEGER :: i,line,errors,lu_counter	! counters
 	INTEGER :: i_subbasx,i_lux		! external ids of components in work
 	INTEGER :: i_subbas,i_lu		! internal ids of components in work
