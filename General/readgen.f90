@@ -71,7 +71,8 @@ if (trim(path2do_dat)=='') then
 	custompath=''
 else
 	write(*,*)'reading runtime parameters from ',path2do_dat
-	i=sizeof(trim(path2do_dat))
+	i=len_trim(path2do_dat)
+
 	do while (i>0)
 		if ((path2do_dat(i:i)=='/') .OR. (path2do_dat(i:i)==achar(92))) then	!find last slash or backslash in path
 			exit
@@ -142,9 +143,9 @@ if (trim(custompath)/='') then		!if a custom path was specified, all paths are r
 end if
 
 
-pfadi=sizeof(trim(pfadn))	! determine length of path name for output files
-pfadj=sizeof(trim(pfadp))	! determine length of basic model path name
-ncaset=sizeof(trim(caset))	! determine length of case study path name
+pfadi=len_trim(pfadn)	! determine length of path name for output files
+pfadj=len_trim(pfadp)	! determine length of basic model path name
+ncaset=len_trim(caset)	! determine length of case study path name
 
 
 !Till: read maximum dimensions of arrays

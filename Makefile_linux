@@ -1,5 +1,6 @@
-#CC=gfortran
-#CFLAGS=-c -ffree-line-length-none 
+#CC=/usr/bin/gfortran44
+#CFLAGS=-c
+#FLAGS= -ffree-line-length-none 
 
 CC=pgfortran
 CFLAGS=-c -Mfree
@@ -54,7 +55,7 @@ EXECUTABLE=wasa.lin
 all: $(SOURCES) $(EXECUTABLE)
 $(EXECUTABLE): $(SOURCES)
 	./update_revision_no.sh
-	$(CC) $(SOURCES) -o $(EXECUTABLE)
+	$(CC) $(FLAGS) $(SOURCES) -o $(EXECUTABLE)
 
 .o:
 	$(CC) $(CFLAGS) $< -o $@

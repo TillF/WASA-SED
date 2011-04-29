@@ -79,7 +79,7 @@ END FUNCTION id_ext2int
 
 
 function which1(boolarray) result(indexarray1)
-!returns index of the first element that is TRUE in the input array
+!returns index of the FIRST element that is TRUE in the input array
 !if there are more, stop
 implicit none
 logical,dimension(:),intent(in):: boolarray
@@ -101,22 +101,18 @@ integer:: i
 end function which1
 
 function whichn(boolarray,return0) result(indexarray)
-!returns indices of the all elements that are TRUE in the input array
+!returns indices of the ALL elements that are TRUE in the input array
 !return0: determine, if empty array or 0 is returned when entire array is false
 implicit none
 logical,dimension(:),intent(in):: boolarray
-logical,optional,intent(in):: return0
-integer,allocatable:: indexarray(:)
+integer,intent(in):: return0
+integer,dimension(max(count(boolarray), return0)) :: indexarray
 integer:: i
 
-	i=0		!default: return empty array when entire boolarray is false
-	if (present(return0)) then
-		if (return0) i=1	 !return 0 when entire boolarray is false
-	end if
-
-	allocate(indexarray(max(i,count(boolarray))))
-	if (count(boolarray) .eq. 0) then
-	  indexarray(:)= 0
+	if (count(boolarray) == 0) then
+		if (return0 == 1) then
+			indexarray= 0	 !return 0 when entire boolarray is false
+		end if
 	else
 	  indexarray(:)= pack((/(i,i=1,size(boolarray))/),boolarray)
 	end if

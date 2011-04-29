@@ -18,7 +18,7 @@ These suggestions concern general recommendations for future enhancements. They 
 	•	Dynamic allocation of all larger arrays
 	•	Avoid using power, exp and log
 •	Preserve downward compatibility
-	•	Accept old input file formats, if possible. If not, provide detailed information or script to convert old input to new format
+	•	Accept old model input file formats, if possible. If not, provide detailed information or a script to convert old input to new format
 	•	Make new features optional, if possible
 	•	Any modifications should be tested on the tutorial datasets for side effects: They should be able to reproduce the output. If not, document why your version behaves differently. 
 •	Documentation

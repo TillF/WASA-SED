@@ -6,7 +6,9 @@ WASA-SED-model with documentation, sample data set and source code.
 
 ******************************
 WASA-SED is a large and complex hydrological and sediment transport model. Extensive knowledge of its design, purpose, and limitations is required in order to apply it properly. See license.txt for terms of use.
-******************************  
+******************************
+The source-code (rev. 39) has successfully been compiled with Compaq Visual Fortran 6.6, gfortran 4.4 and pgfortran 10.9-0.
+Please see Makefile* for necessary flags.
 
 Contents
 
