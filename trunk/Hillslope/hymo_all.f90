@@ -1,5 +1,10 @@
 SUBROUTINE hymo_all(STATUS)
 
+! Till: activated outcommented initialisation of frac_sat that could have lead to negative surface flow/crashes at startup
+! use a minimum value of 0.001 for precip to avoid division by zero in calculation of kfcorr_day
+! potentially computationally relevant only during startup phase
+!2011-04-29
+
 !Till: extented TC-wise output (theta_tc) to hourly resolution, removed unused vars
 ! saving of initial conditions also when loading is disabled
 ! computationally relevant for hourly version:  fixed error in daily_water_subbasin2.out
@@ -336,7 +341,7 @@ IF (STATUS == 0) THEN	!Till: initialisation before first run
   
   
 !   initialize saturated fraction of TC
-!  frac_sat(:,:)=0.5		!Till: added for quick response in runoff while using short time series
+  frac_sat(:,:)=0.0		
   
 if (doacud)  CALL lake(0,dummy)
 
@@ -824,7 +829,7 @@ IF (STATUS == 2) THEN
 	svc_coarse_fac_day=calc_seasonality(t,julian_day,seasonality_coarse(i_subbas,:),svc_coarse_fac)	!compute coarse-factors of current day
 	svc_n_day         =calc_seasonality(t,julian_day,seasonality_n     (i_subbas,:),svc_n)	            !compute n of current day
 
-	kfkorr_day=kfkorr*(kfkorr_a*1/precip(d,i_subbas)+kfkorr_b)	!compute kfkorr as a function of daily precipitation
+	kfkorr_day=kfkorr*(kfkorr_a*1/max(precip(d,i_subbas),0.001)+kfkorr_b)	!compute kfkorr as a function of daily precipitation (use a minimum value of 0.001 for precip to avoid division by zero)
 	
 
 	deepgwrsu=0.
@@ -1495,8 +1500,8 @@ contains
 			ENDIF
 		end do
 		
-		i_node1=maxval(whichn(node_days<=julian_day+k,.TRUE.))	!find index to node 1
-		i_node2=minval(whichn(node_days> julian_day+k,.TRUE.))	!find index to node 2
+		i_node1=maxval(whichn(node_days<=julian_day+k,1))	!find index to node 1
+		i_node2=minval(whichn(node_days> julian_day+k,1))	!find index to node 2
 		
 		if ((i_node1==0) .OR. (i_node2==0)) then  !special cases: simulation day is before or after last specified node 
 			i_node1=max(i_node1,i_node2)		!set to first or last node, whichever is non-zero

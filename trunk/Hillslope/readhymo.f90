@@ -232,9 +232,9 @@ DO WHILE ((istate==0) .AND. (i<=subasin))
 END DO
 CLOSE(11)
 	
-if (sizeof(whichn(id_subbas_intern(1:subasin)==0))>0) then	!check if there are subbasins read from routing.dat that were not found in hymo.dat
+if (size(whichn(id_subbas_intern(1:subasin)==0,0))>0) then	!check if there are subbasins read from routing.dat that were not found in hymo.dat
 	write(*,*)'ERROR: The following subbasins have been listed in routing.dat, but are missing in hymo.dat:'
-	write(*,*)id_subbas_extern(whichn(id_subbas_intern(1:subasin)==0))
+	write(*,*)id_subbas_extern(whichn(id_subbas_intern(1:subasin)==0,0))
 	stop
 end if
 
@@ -331,8 +331,10 @@ READ(11,*)
 alluvial_flag=0
 
 
+shrink = 0
 DO j=1,nsoil
 
+  
   READ(11,'(a)',IOSTAT=istate) cdummy
   if ((istate/=0).OR. (trim(cdummy)=='')) then
 	write(*,*)'ERROR: in soil.dat: Expected ',nsoil,', found ',j-1,' soil types.'
@@ -1373,7 +1375,7 @@ contains
 
 			DO i=1,years !check completeness
 				DO j=1,subasin
-					IF (size(whichn(node_days(j,(i-1)*4+1:i*4)==-1000))>0) then		!found seasonality_array_old/subbasin for which no seasonality data has been read 
+					IF (size(whichn(node_days(j,(i-1)*4+1:i*4)==-1000,0))>0) then		!found seasonality_array_old/subbasin for which no seasonality data has been read 
 						WRITE(*,'(a, I0, a, I0)') inputfile_name//': Sub-basin ', id_subbas_extern(j),&
 							' lacks seasonality data for simulation year ', i+tstart-1
 						STOP
