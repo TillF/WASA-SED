@@ -1,4 +1,7 @@
-SUBROUTINE route_sediments(i, flow, r_area)
+SUBROUTINE route_sediments(i)
+
+! Till: computationally irrelevant: removed unused parameters flow, rarea
+! 2011-05-05
 
 ! Till: computationally irrelevant: minor changes to improve compiler compatibility
 ! 2011-04-29
@@ -74,7 +77,7 @@ IMPLICIT NONE
 INTEGER, INTENT(IN OUT) :: i
 INTEGER :: det, k
 REAL ::  vel_peak,  conc_in, conc_max, depnet !peakr,peakflow,
-REAL :: volume, sed_mass, flow, r_area
+REAL :: volume, sed_mass !flow, r_area
 REAL ::   r_storage_previous !depdeg,dot,
 
 

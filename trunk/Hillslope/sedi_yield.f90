@@ -1,7 +1,10 @@
-SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v_ov_in, h, sed_in, timestep, tc_area, sed_yield)
+SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v_ov_in, sed_in, timestep, tc_area, sed_yield)
 
 ! hillslope erosion module for WASA
 ! to be called by soilwat.f90, Till Francke (till@comets.de)
+
+! Till: computationally irrelevant: removed unused parameter h
+! 2011-05-05
 
 ! Till: computationally relevant: fixed overestimation of transport capacity according to Everaert due to integer division
 ! minor changes to improve compiler compatibility
@@ -76,7 +79,6 @@ REAL, INTENT(IN):: sed_in(1:n_sed_class)		!sediment entering the TC from uplope 
 REAL, INTENT(IN):: timestep		!timestep which the given flows are related to [h]
 REAL, INTENT(IN) :: tc_area		!area of TC [km**2]
 REAL, INTENT(IN) :: v_ov_in		!overland flow velocity [m/s]
-REAL, INTENT(IN) :: h			!depth of overland flow [mm]	!ii remove, not needed here anymore
 REAL, INTENT(OUT) :: sed_yield(1:n_sed_class)				!sediment yield [tons/timestep] (usually applied daily) for each particle size class
 
 REAL :: q						!mean overland flow during timestep [m H2O]
@@ -100,6 +102,7 @@ IF (q_out==0.) then		!no surface flow leaving this TC...
 	return
 END IF
 
+q  =q_in					!q_in is not used (yet), this dummy assigment prevents compiler warnings 
 !q = (q_in+q_out)/2/(tc_area*1e6)	!mean overland flow during timestep [m H2O]
 q = q_out/(tc_area*1e6)		!overland flow during timestep [m H2O]
 
