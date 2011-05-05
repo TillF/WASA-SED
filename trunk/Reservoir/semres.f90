@@ -1,4 +1,7 @@
 SUBROUTINE semres (STATUS,upstream)
+
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
  
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:56:59
@@ -91,7 +94,7 @@ IF (STATUS == 0) THEN
 		write(*,*)pfadp(1:pfadj)// 'part_class.dat was not found. Run the model anyway. Sediment treated as one size class.'
 		n_sed_class=1				!treat one particle size class only
 		allocate(upper_limit(n_sed_class))	
-		upper_limit(1)=2		!set upper limit of sediment that is considered to 2 mm
+		upper_limit(1)=2.		!set upper limit of sediment that is considered to 2 mm
 	else							!part_class.dat sucessfully opened
 		READ(11,*)
 		READ(11,*)
@@ -174,8 +177,7 @@ IF (STATUS == 0) THEN
           dummy1=id_subbas_extern(i)
         END IF
         IF (dummy1 /= id_subbas_extern(i)) THEN
-          WRITE(*,*) 'Sub-basin-IDs in file hydraul_param.dat  &
-			must have the same ordering scheme as in hymo.dat'
+          WRITE(*,*) 'Sub-basin-IDs in file hydraul_param.dat must have the same ordering scheme as in hymo.dat'
           STOP
         END IF   
       END DO
@@ -223,8 +225,7 @@ IF (STATUS == 0) THEN
 	ENDIF
     IF (storcap(i) == 0.) dummy1=id_subbas_extern(i)
     IF (dummy1 /= id_subbas_extern(i)) THEN
-      WRITE(*,*) 'Sub-basin-IDs in file sed.dat  &
-         must have the same ordering scheme as in hymo.dat'
+      WRITE(*,*) 'Sub-basin-IDs in file sed.dat must have the same ordering scheme as in hymo.dat'
       STOP
     END IF
 !write(*,*) dummy1,dry_dens(i),factor_actlay(i)
@@ -474,8 +475,7 @@ IF (STATUS == 0) THEN
           dummy1=id_subbas_extern(i)
         END IF
         IF (dummy1 /= id_subbas_extern(i)) THEN
-          WRITE(*,*) 'Sub-basin-IDs in file main_channel.dat  &
-			must have the same ordering scheme as in hymo.dat'
+          WRITE(*,*) 'Sub-basin-IDs in file main_channel.dat must have the same ordering scheme as in hymo.dat'
           STOP
         END IF   
       END DO
@@ -545,7 +545,7 @@ IF (STATUS == 0) THEN
 		  ELSE IF (elevhelp < y_sec(m-1,j,i)  &
 			.AND.elevhelp >= y_sec(m,j,i)) THEN
 			areasec2(j)=areasec2(j)+(((elevhelp-y_sec(m,j,i))**2.)/ &
-				(2*ABS(y_sec(m,j,i)-y_sec(m-1,j,i))/  &
+				(2.*ABS(y_sec(m,j,i)-y_sec(m-1,j,i))/  &
 				(x_sec(m,j,i)-x_sec(m-1,j,i))))
 			widthsec2(j)=widthsec2(j)+  &
 				((x_sec(m,j,i)-x_sec(m-1,j,i))*  &
@@ -608,8 +608,7 @@ IF (STATUS == 0) THEN
       END DO
 	  OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_hydraul.out',STATUS='replace')
       IF (f_res_hydraul) then
-	    WRITE(11,*)'Subasin-ID, year, day, hour, section-ID, depth_sec(m), watelev_sec(m), area_sec(m**2), topwidth_sec(m),&
-		  energslope_sec(-), hydrad_sec(m), meanvel_sec(m/s), discharge_sec(m**3/s)'	
+	    WRITE(11,*)'Subasin-ID, year, day, hour, section-ID, depth_sec(m), watelev_sec(m), area_sec(m**2), topwidth_sec(m), energslope_sec(-), hydrad_sec(m), meanvel_sec(m/s), discharge_sec(m**3/s)'	
         CLOSE(11)
 	  ELSE
         CLOSE(11, status='delete') !delete any existing file, if no output is desired
@@ -648,7 +647,7 @@ IF (STATUS == 0) THEN
   ENDDO
 
   DO i=1,subasin
-   IF (storcap(i) /= 0) THEN   
+   IF (storcap(i) /= 0.) THEN   
     WRITE(subarea,*)id_subbas_extern(i)
     DO c=1,12
       IF (subarea(c:c) /= ' ') THEN
@@ -667,7 +666,7 @@ IF (STATUS == 0) THEN
   ENDDO
 
   DO i=1,subasin
-   IF (storcap(i) /= 0) THEN   
+   IF (storcap(i) /= 0.) THEN   
     IF (nbrsec(i) /= 0) THEN   
       WRITE(subarea,*)id_subbas_extern(i)
 	  DO c=1,12
@@ -687,7 +686,7 @@ IF (STATUS == 0) THEN
   ENDDO
 
   DO i=1,subasin
-   IF (storcap(i) /= 0) THEN   
+   IF (storcap(i) /= 0.) THEN   
     WRITE(subarea,*)id_subbas_extern(i)
 	DO c=1,12
       IF (subarea(c:c) /= ' ') THEN
@@ -948,12 +947,12 @@ IF (STATUS == 2) THEN
 		  endif
 		ENDDO
         IF (dummy14 > 1) then
-          dummy15=10**(log10(upper_limit(dummy14-1))+((log10(upper_limit(dummy14))-log10(upper_limit(dummy14-1)))*(gsize(c)-accum1)/(accum2-accum1)))
+          dummy15=10.**(log10(upper_limit(dummy14-1))+((log10(upper_limit(dummy14))-log10(upper_limit(dummy14-1)))*(gsize(c)-accum1)/(accum2-accum1)))
           dummy15=dummy15/1000.
 	    ELSE
 	      IF (c == 1) dummy15=diam(1)
 	      IF (c == 2) then
-		    dummy15=10**(log10(upper_limit(dummy14)/2.)+((log10(upper_limit(dummy14))-log10(upper_limit(dummy14)/2.))*(gsize(c)-accum1)/(accum2-accum1)))
+		    dummy15=10.**(log10(upper_limit(dummy14)/2.)+((log10(upper_limit(dummy14))-log10(upper_limit(dummy14)/2.))*(gsize(c)-accum1)/(accum2-accum1)))
 		    dummy15=dummy15/1000.
 		  ENDIF
 		ENDIF
@@ -988,7 +987,7 @@ IF (STATUS == 2) THEN
 !	ENDDO
 
     IF (sed_routing_flag(upstream)==1) THEN
-	 if (p == 0.) then    
+	 if (p == 0) then    
 !	if (qbottom(step,upstream) /= 0.) then
       dummy4=0.
 	  DO j=pt_long(upstream),pt_long0(upstream)
@@ -1090,9 +1089,9 @@ IF (STATUS == 2) THEN
 
       DO m=1,npoints(j,upstream)
         IF (elev > y_sec(m,j,upstream)) THEN
-          geom(m,j)=1.
+          geom(m,j)=1
 		ELSE
-		  geom(m,j)=0.
+		  geom(m,j)=0
 		ENDIF
 	  ENDDO
       DO m=2,npoints(j,upstream)-1
@@ -1170,14 +1169,14 @@ IF (STATUS == 2) THEN
           partarea_actlay(m,j,upstream)=(y_sec(m,j,upstream)-y_actlay(m,j,upstream))* &
 		      (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))/2.
           partarea_toplay(m,j,upstream)=(((elev-y_sec(m,j,upstream))**2.)/ &
-		      (2*ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))))
+		      (2.*ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))))
 	      area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,upstream)
 	    ELSE IF (geom(m,j) == 2) THEN
           partarea_actlay(m,j,upstream)=((y_sec(m,j,upstream)-y_actlay(m,j,upstream))+ &
 			  (y_sec(m-1,j,upstream)-y_actlay(m-1,j,upstream)))*  &
               (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))/2.
           partarea_toplay(m,j,upstream)=(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))  &
-              *(2*elev-(y_sec(m,j,upstream)+y_sec(m-1,j,upstream)))/2.
+              *(2.*elev-(y_sec(m,j,upstream)+y_sec(m-1,j,upstream)))/2.
           area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,upstream)
 	    ELSE IF (geom(m,j) == 3) THEN
           partarea_actlay(m,j,upstream)=((y_sec(m,j,upstream)-y_actlay(m,j,upstream))+ &
@@ -1186,17 +1185,17 @@ IF (STATUS == 2) THEN
 			  (y_sec(m,j,upstream)-y_actlay(m,j,upstream))* &
 		      (x_sec(m+1,j,upstream)-x_sec(m,j,upstream))/2.
           partarea_toplay(m,j,upstream)=(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))  &
-              *(2*elev- (y_sec(m,j,upstream)+y_sec(m-1,j,upstream)))/2.+ &
+              *(2.*elev- (y_sec(m,j,upstream)+y_sec(m-1,j,upstream)))/2.+ &
 			  (((elev-y_sec(m,j,upstream))**2.)/ &
-			  (2*ABS(y_sec(m+1,j,upstream)-y_sec(m,j,upstream))/(x_sec(m+1,j,upstream)-x_sec(m,j,upstream))))
+			  (2.*ABS(y_sec(m+1,j,upstream)-y_sec(m,j,upstream))/(x_sec(m+1,j,upstream)-x_sec(m,j,upstream))))
           area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,upstream)
 	    ELSE IF (geom(m,j) == 4) THEN
           partarea_actlay(m,j,upstream)=(y_sec(m,j,upstream)-y_actlay(m,j,upstream))* &
 		      (x_sec(m+1,j,upstream)-x_sec(m-1,j,upstream))/2.
           partarea_toplay(m,j,upstream)=(((elev-y_sec(m,j,upstream))**2.)/ &
-			  (2*ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))))+ &
+			  (2.*ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))))+ &
               (((elev-y_sec(m,j,upstream))**2.)/ &
-			  (2*ABS(y_sec(m+1,j,upstream)-y_sec(m,j,upstream))/(x_sec(m+1,j,upstream)-x_sec(m,j,upstream))))
+			  (2.*ABS(y_sec(m+1,j,upstream)-y_sec(m,j,upstream))/(x_sec(m+1,j,upstream)-x_sec(m,j,upstream))))
           area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,upstream)
 		ENDIF
 	  ENDDO
@@ -1533,7 +1532,7 @@ IF (STATUS == 2) THEN
     weight=0.
     dummy5=0.
     DO j=1,nbrsec(upstream)
-      if (j > p .and. resreach_vol(upstream) /= 0) then
+      if (j > p .and. resreach_vol(upstream) /= 0.) then
 		if (j /= nbrsec(upstream)) then
           weight=vol_toplay(j,upstream)/resreach_vol(upstream)
 		else
@@ -1562,7 +1561,7 @@ IF (STATUS == 2) THEN
 !temp		else
 !temp	      conc(j,upstream)=(totalload(j,upstream)*1000)/(discharge(j)*(86400./nt))
 !temp		endif
-        conc(j,upstream)=(totalload(j,upstream)*1000)/(discharge(j)*(86400./nt))
+        conc(j,upstream)=(totalload(j,upstream)*1000.)/(discharge(j)*(86400./nt))
 	  else
 	    conc(j,upstream)=0.
 	  endif
@@ -1742,7 +1741,7 @@ IF (STATUS == 2) THEN
 		  ELSE IF (elevhelp < y_sec(m-1,j,upstream)  &
 			.AND.elevhelp >= y_sec(m,j,upstream)) THEN
 			areasec(j)=areasec(j)+(((elevhelp-y_sec(m,j,upstream))**2.)/ &
-				(2*ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/  &
+				(2.*ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/  &
 				(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))))
 			widthsec(j)=widthsec(j)+  &
 				((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
@@ -1750,7 +1749,7 @@ IF (STATUS == 2) THEN
 				(y_sec(m-1,j,upstream)-y_sec(m,j,upstream)))
 			IF (fcav(upstream)==0) THEN
 			 areasec2(j)=areasec2(j)+(((elevhelp-y_laststep(m,j,upstream))**2.)/ &
-				(2*ABS(y_laststep(m,j,upstream)-y_laststep(m-1,j,upstream))/  &
+				(2.*ABS(y_laststep(m,j,upstream)-y_laststep(m-1,j,upstream))/  &
 				(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))))
 			 widthsec2(j)=widthsec2(j)+  &
 				((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
@@ -2083,7 +2082,7 @@ IF (STATUS == 3) THEN
 ! Output files of Reservoir Modules
   IF (reservoir_print == 1) THEN
     DO i=1,subasin
-     IF (storcap(i) /= 0 .and. t >= damyear(i)) THEN   
+     IF (storcap(i) /= 0. .and. t >= damyear(i)) THEN   
       WRITE(subarea,*)id_subbas_extern(i)
 	  DO j=1,12
         IF (subarea(j:j) /= ' ') THEN

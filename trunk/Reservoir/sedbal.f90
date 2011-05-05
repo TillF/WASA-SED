@@ -1,4 +1,7 @@
 SUBROUTINE sedbal(upstream)
+
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
  
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:31
@@ -33,7 +36,7 @@ REAL :: tempres(step,upstream)
 if (res_qout(step,upstream)/=0.) then
 !Ge to include the DAILY mean temperature of the reservoir (celsius degree)
 !Ge tempres=20 C (temporarily)
-  tempres(step,upstream)=20
+  tempres(step,upstream)=20.
 
 ! density of water and density of natural sediments (kg/m3)
   wat_dens=1.*1000.
@@ -58,7 +61,7 @@ if (res_qout(step,upstream)/=0.) then
   par_b=-(overflow_rate**2)
   par_c=-27.9*overflow_rate*visc
 
-  diam_equiv=1000*(-par_b+sqrt(((par_b)**2)-4.*par_a*par_c))/(2*par_a)
+  diam_equiv=1000.*(-par_b+sqrt(((par_b)**2.)-4.*par_a*par_c))/(2.*par_a)
 !if (t==2004 .and. step<100) write(*,'(2I4,10F15.6)') step,id_subbas_extern(upstream),res_qout(step,upstream),damareaact(upstream),overflow_rate
 !if (t==2004 .and. step<100) write(*,'(2I4,10F15.6)') step,id_subbas_extern(upstream),par_a,par_b,par_c,diam_equiv
 !if (t==2004 .and. step<100) pause
@@ -116,12 +119,12 @@ if (res_qout(step,upstream)/=0.) then
     dummy=0.
     DO g=1,n_sed_class
       if (diam_equiv>=lower_limit(g)) then
-	    dummy=dummy+1 
+	    dummy=dummy+1. 
 	  else
 	    exit
 	  endif
 	enddo
-    nbrsteps=10*dummy
+    nbrsteps=10.*dummy
 	lower_diam(1)=lower_limit(1)
 !	interv=frac_finer/nbrsteps
     k=0
@@ -152,11 +155,11 @@ if (res_qout(step,upstream)/=0.) then
 !	  frfiner(k)=k*interv
       DO g=1,n_sed_class
         if (frfiner(k)<=cumfrsed_in(1)) then
-          upper_diam(k)=10**(log10(lower_limit(g))+((log10(upper_limit(g))-log10(lower_limit(g)))* &
+          upper_diam(k)=10.**(log10(lower_limit(g))+((log10(upper_limit(g))-log10(lower_limit(g)))* &
 			frfiner(k)/cumfrsed_in(g)))
 		  exit
 		else if (frfiner(k)<=cumfrsed_in(g)) then
-          upper_diam(k)=10**(log10(lower_limit(g))+((log10(upper_limit(g))-log10(lower_limit(g)))* &
+          upper_diam(k)=10.**(log10(lower_limit(g))+((log10(upper_limit(g))-log10(lower_limit(g)))* &
 			(frfiner(k)-cumfrsed_in(g-1))/(cumfrsed_in(g)-cumfrsed_in(g-1))))
 		  exit
 	    endif
@@ -176,7 +179,7 @@ if (res_qout(step,upstream)/=0.) then
       setveloc(k)=SQRT((13.95*visc/(mean_diam(k)/1000.))**2.+(1.09*  &
         (delta)*9.807*(mean_diam(k)/1000.)))-(13.95*visc/(mean_diam(k)/1000.))
 	  par_x(k)=(setveloc(k)/overflow_rate)*interv(k)
-	  par_y(k)=(1-(setveloc(k)/overflow_rate))*interv(k)
+	  par_y(k)=(1.-(setveloc(k)/overflow_rate))*interv(k)
 !	  par_x(k)=(setveloc(k)/overflow_rate)*interv
 !	  par_y(k)=(1-(setveloc(k)/overflow_rate))*interv
       frretent=frretent+par_x(k)
@@ -185,7 +188,7 @@ if (res_qout(step,upstream)/=0.) then
 !write(*,'(I3,6F12.8)')k,mean_diam(k),setveloc(k),par_x(k),par_y(k),frretent,frrelease
 	enddo
 
-	trap_eff=(1-frac_finer)+frretent
+	trap_eff=(1.-frac_finer)+frretent
 
 	dummy=0.
     DO k=1,nbrsteps
@@ -219,7 +222,7 @@ if (res_qout(step,upstream)/=0.) then
 !write(*,'(I3,2F12.8)')g,frsediment_out(upstream,g),cumfrsed_out(g)
 	enddo		    
   endif
-  sed_outflow(step,upstream)=sed_inflow(step,upstream)*(1-trap_eff)
+  sed_outflow(step,upstream)=sed_inflow(step,upstream)*(1.-trap_eff)
 else
   sed_outflow(step,upstream)=0.
 endif

@@ -1,5 +1,8 @@
 SUBROUTINE eq1_wu(upstream)
  
+!Till: computationally irrelevant: minor changes to improve compiler compatibility
+!2011-04-29
+
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:31
  
@@ -116,11 +119,11 @@ DO j=1,nbrsec(upstream)
     crshear(g)=(sed_dens-wat_dens)*9.807*diam(g)*shield*hidexp(g)
     
 ! dimensionless transport parameter for fractional bed load yields (-)
-    if ((((manning_sed/manning(j))**(3./2.))*shear_bed/crshear(g))-1 <= 0.) then
+    if ((((manning_sed/manning(j))**(3./2.))*shear_bed/crshear(g))-1. <= 0.) then
 	  transpfac_bed(g)=0.
 	else
       transpfac_bed(g)=0.0053*((((manning_sed/manning(j))  &
-        **(3./2.))*shear_bed/crshear(g))-1)**2.2
+        **(3./2.))*shear_bed/crshear(g))-1.)**2.2
     endif
 !    transpfac_bed(g)=MAX(0.,transpfac_bed(g))
 
@@ -129,7 +132,7 @@ DO j=1,nbrsec(upstream)
         SQRT((sed_dens-wat_dens)/wat_dens*9.807*(diam(g)**3.))
     
 ! fractional bed sediment transport (m3/day)
-    bed_frtransp(g,j)=86400*bed_frtransp(g,j)*topwidth(j)
+    bed_frtransp(g,j)=86400.*bed_frtransp(g,j)*topwidth(j)
     
 !write(*,'(3I4,6F10.6)')d,j,g,d50,manning_sed,hidexp(g),shear_bed,crshear(g),transpfac_bed(g)
   END DO
@@ -139,7 +142,7 @@ DO j=1,nbrsec(upstream)
   
 !Ge to include the DAILY mean temperature of the reservoir (celsius degree)
 !Ge tempres=20 C (temporarily)
-  tempres(step,upstream)=20
+  tempres(step,upstream)=20.
   
 ! kinematic viscosity (m2/s)
   visc=(1.14-0.031*(tempres(step,upstream)-15.)+  &
@@ -153,10 +156,10 @@ DO j=1,nbrsec(upstream)
         ((sed_dens-wat_dens)/wat_dens)*9.807*diam(g))-13.95*visc/diam(g)
     
 ! the fractional transport parameter for suspended sediment transport (-)
-    if ((shear_sec/crshear(g))-1 <= 0.) then
+    if ((shear_sec/crshear(g))-1. <= 0.) then
 	  transpfac_susp(g)=0.
 	else
-      transpfac_susp(g)=0.0000262*(((shear_sec/crshear(g))-1)*  &
+      transpfac_susp(g)=0.0000262*(((shear_sec/crshear(g))-1.)*  &
         meanvel(j)/setvel(g))**1.74
     endif
     
@@ -169,7 +172,7 @@ DO j=1,nbrsec(upstream)
     
 ! total suspended sediment transport (m3/day)
 !    susp_frtransp(g,j)=min(susp_frtransp(g,j),1000.)
-    susp_frtransp(g,j)=86400*susp_frtransp(g,j)*topwidth(j)
+    susp_frtransp(g,j)=86400.*susp_frtransp(g,j)*topwidth(j)
     
   END DO
 

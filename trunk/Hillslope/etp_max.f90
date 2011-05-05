@@ -1,5 +1,8 @@
 SUBROUTINE etp_max(isubbas,vegi,etpmax,  &
         height_act,lai_act,alb_act,day,hh)
+
+!Till: computationally irrelevant: minor changes to improve compiler compatibility
+!2011-04-29
  
 !Till: optimized speed by re-using already calculated values
 !2008-08-14
@@ -237,7 +240,7 @@ rsbs=rss
 
 ! mean daily vapor pressure emean
 es = 6.11*EXP(17.62*temp(d,isubbas)/(243.12+temp(d,isubbas)))
-emean  = rhum(d,isubbas)*es/100
+emean  = rhum(d,isubbas)*es/100.
 
 ! minimum canopy resistance
     rsp=0.
@@ -255,15 +258,15 @@ IF (domean .eqv. .FALSE.) THEN
   gfracd=0.2
   
 ! minimum surface resistance
-  rs=0
+  rs=0.
   
   grs =(s+gamma)*ras +gamma*rss
   grp =(s+gamma)*rap +gamma*rsp
   grbs=(s+gamma)*rabs+gamma*rsbs
   gra =(s+gamma)*raa
   
-  tempval=grs*grp*grbs+ (1.-fcov)*grs*grp*gra+  &
-      fcov*grbs*grs*gra+ fcov*grbs*grp*gra
+  tempval=grs*grp*grbs+ (1.-fcov)*grs*grp*gra+&
+	    fcov*grbs*grs*gra+ fcov*grbs*grp*gra
   cs =grbs*grp*(grs +gra)/tempval
   cp =grbs*grs*(grp +gra)/tempval
   cbs=grs *grp*(grbs+gra)/tempval
@@ -271,8 +274,8 @@ IF (domean .eqv. .FALSE.) THEN
 ! daytime time mean of short wave radiation = daily mean * 24/hours_of_daylight
 ! Rnetto=Rkurz+Rlang
   
-  rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(tempd+273.2)**4  &
-      +(1-alpha)*rad(d,isubbas)*24./hours_of_daylight
+  rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(tempd+273.2)**4&
+	+(1.-alpha)*rad(d,isubbas)*24./hours_of_daylight
   rnettos =rnetto*EXP(-1.*ext*lai_act(vegi))
 !      Gstream =gfracd*Rnettos
 !      Anetto  =Rnetto-Gstream
@@ -421,8 +424,8 @@ ELSE
 ! daytime time mean of short wave radiation = daily mean * 24/hours_of_daylight
 ! Rnetto=Rkurz+Rlang
   
-  rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(temp(d,isubbas)+273.2)**4  &
-      +(1-alpha)*rad(d,isubbas)*24./hours_of_daylight
+  rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(temp(d,isubbas)+273.2)**4 +&
+       (1.-alpha)*rad(d,isubbas)*24./hours_of_daylight
   rnettos =rnetto*EXP(-1.*ext*lai_act(vegi))
 !      Gstream  =gfracd*Rnettos
 !      Anetto   =Rnetto-Gstream

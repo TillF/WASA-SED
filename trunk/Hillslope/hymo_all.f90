@@ -1,7 +1,9 @@
 SUBROUTINE hymo_all(STATUS)
+!Till: computationally irrelevant: minor changes to improve compiler compatibility
+!2011-04-29
 
 ! Till: activated outcommented initialisation of frac_sat that could have lead to negative surface flow/crashes at startup
-! use a minimum value of 0.001 for precip to avoid division by zero in calculation of kfcorr_day
+! use a minimum value of 0.001 for precip to avoid division by zero in calcualtion of kfcorr_day
 ! potentially computationally relevant only during startup phase
 !2011-04-29
 
@@ -278,8 +280,8 @@ IF (STATUS == 0) THEN	!Till: initialisation before first run
   horithact(:,:,:)=0.	!set soil moisture of each horizon to 0
   intercept(:,:)=0.		!set interception storage to 0
 
-  cum_erosion_TC(:,:)=0
-  cum_deposition_TC(:,:)=0
+  cum_erosion_TC(:,:)=0.
+  cum_deposition_TC(:,:)=0.
   
   if (doloadstate) then
 	call init_model_state		!load initital conditions from file
@@ -373,8 +375,7 @@ if (doacud)  CALL lake(0,dummy)
   OPEN(11,FILE=pfadn(1:pfadi)//  &
       'daily_actetranspiration.out', STATUS='replace')
   IF (f_daily_actetranspiration) THEN	
-    WRITE(11,'(a)') 'daily actual evapotranspiration [mm/d]  &
-      for all sub-basins (MAP-IDs)'
+    WRITE(11,'(a)') 'daily actual evapotranspiration [mm/d] for all sub-basins (MAP-IDs)'
 	write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'		!generate format string
 	WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
 	CLOSE(11)
@@ -386,8 +387,7 @@ if (doacud)  CALL lake(0,dummy)
   OPEN(11,FILE=pfadn(1:pfadi)//'daily_potetranspiration.out',  &
       STATUS='replace')
   IF (f_daily_potetranspiration) THEN	
-	WRITE(11,'(a)') 'daily potential evapotranspiration [mm/d]  &
-      for all sub-basins (MAP-IDs)'
+	WRITE(11,'(a)') 'daily potential evapotranspiration [mm/d] for all sub-basins (MAP-IDs)'
 	write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'		!generate format string
 	WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
 	CLOSE(11)
@@ -473,8 +473,7 @@ if (doacud)  CALL lake(0,dummy)
   OPEN(11,FILE=pfadn(1:pfadi)//'daily_subsurface_runoff.out',  &
       STATUS='replace')
   IF (f_daily_subsurface_runoff) THEN	
-	WRITE(11,'(a)') 'total subsurface runoff [m**3/d]  &
-      for all sub-basins (MAP-IDs)'
+	WRITE(11,'(a)') 'total subsurface runoff [m**3/d] for all sub-basins (MAP-IDs)'
 	write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'		!generate format string
 	WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
 	CLOSE(11)
@@ -555,7 +554,7 @@ if (f_tc_theta .OR. f_tc_surfflow .OR. f_tc_sedout) then
 	allocate(tc_idx(sv_comb))
 	tc_idx=""
 
-	write(fmtstr,'(a,i0,a,i0,a,i0,a,i0,a,i0,a,i0,a)'),'(I',dig_sub,'.',dig_sub,',I',dig_lu,'.',dig_lu,',I',dig_tc,'.',dig_tc,')'
+	write(fmtstr,'(a,i0,a,i0,a,i0,a,i0,a,i0,a,i0,a)') '(I',dig_sub,'.',dig_sub,',I',dig_lu,'.',dig_lu,',I',dig_tc,'.',dig_tc,')'
 
 	DO tcid_instance=1,sv_comb
 		i=0						!flag for indicating this TC still has to be treated
@@ -564,7 +563,7 @@ if (f_tc_theta .OR. f_tc_surfflow .OR. f_tc_sedout) then
 				i_lu=id_lu_intern(lu_counter,i_subbas)
 				DO tc_counter=1,nbrterrain(i_lu)
 					if (tcid_instance == tcallid(i_subbas,lu_counter,tc_counter)) THEN
-						write(tc_idx(tcid_instance),fmtstr),id_subbas_extern(i_subbas),id_lu_extern(i_lu),id_terrain_extern(id_terrain_intern(tc_counter,i_lu))	!new scheme using TC-id
+						write(tc_idx(tcid_instance),fmtstr) id_subbas_extern(i_subbas),id_lu_extern(i_lu),id_terrain_extern(id_terrain_intern(tc_counter,i_lu))	!new scheme using TC-id
 						exit 
 					end if
 				END DO
@@ -607,11 +606,11 @@ end if
   	 
 	 !Till: allocate memory for TC-wise output
 	 allocate(theta_tc(366,nt,sv_comb)) 
-	 theta_tc=-1 !debugging help
+	 theta_tc=-1. !debugging help
 
 	!conrad: store average soil thickness for each TC (for each instance of a TC)
 	allocate(meandepth_tc(subasin,maxsoter,maxterrain))
-	meandepth_tc(:,:,:)=0
+	meandepth_tc(:,:,:)=0.
 
 	 DO i_subbas=1,subasin 
 	  DO lu_counter=1,nbr_lu(i_subbas)
@@ -626,7 +625,7 @@ end if
 	 END DO
 	
 	
-	WRITE(11,'(A)'),'daily theta [%] for tcs in lus in sub-basins (scheme: '//REPEAT('S',dig_sub)//&
+	WRITE(11,'(A)') 'daily theta [%] for tcs in lus in sub-basins (scheme: '//REPEAT('S',dig_sub)//&
 		REPEAT('L', dig_lu)//REPEAT('T', dig_tc)//') -> use with tc_plot.m in Matlab'
 	!don't change headerline, needed by matlab- /R-script
 	
@@ -643,7 +642,7 @@ end if
 OPEN(11,FILE=pfadn(1:pfadi)// 'tc_surfflow.out', STATUS='replace')
   IF (f_tc_surfflow) THEN	
 	allocate(surfflow_tc(366,nt,sv_comb)) !Till: allocate memory for TC-wise output of surface flow
-	WRITE(11,'(A)'),'surface runoff [mm] for tcs in lus in sub-basins (scheme: '//REPEAT('S',dig_sub)//&
+	WRITE(11,'(A)') 'surface runoff [mm] for tcs in lus in sub-basins (scheme: '//REPEAT('S',dig_sub)//&
 		REPEAT('L', dig_lu)//REPEAT('T', dig_tc)//') -> use with tc_plot.m in Matlab'
 	!don't change headerline, needed by matlab- /R-script
 	
@@ -657,7 +656,7 @@ OPEN(11,FILE=pfadn(1:pfadi)// 'tc_surfflow.out', STATUS='replace')
 OPEN(11,FILE=pfadn(1:pfadi)// 'tc_sedout.out', STATUS='replace')
   IF (dosediment .AND. f_tc_sedout .AND. .NOT. do_musle_subbasin) THEN	
 	allocate(sedout_tc(366,nt,sv_comb)) !Till: allocate memory for TC-wise output of sediment output
-	WRITE(11,'(A)'),'sediment output [t/km²] for tcs in lus in sub-basins (scheme: '//REPEAT('S',dig_sub)//&
+	WRITE(11,'(A)') 'sediment output [t/km²] for tcs in lus in sub-basins (scheme: '//REPEAT('S',dig_sub)//&
 		REPEAT('L', dig_lu)//REPEAT('T', dig_tc)//') -> use with tc_plot.m in Matlab'
 	!don't change headerline, needed by matlab- /R-script
 	
@@ -880,12 +879,12 @@ IF (STATUS == 2) THEN
 		soilmsu  (lu_counter)=0.
 		sedsu    (lu_counter,:)=0.
 		
-		surfflow_in(:)=0.			!Till: reset TC-related variables
+		surfflow_in(:) =0.			!Till: reset TC-related variables
         surfflow_out(:)=0.
-        sublat_in(:)=0
-        sublat_out(:)=0.
-		sed_in(:,:)=0.
-		sed_out(:,:)=0.
+        sublat_in(:)   =0.
+        sublat_out(:)  =0.
+		sed_in(:,:)    =0.
+		sed_out(:,:)   =0.
 
 !		!Till: reset TC-instance-related variables
 !		horttc  (:)=0.
@@ -900,7 +899,7 @@ IF (STATUS == 2) THEN
 		
 ! LOOPs through all Terrain Components of specific Landscape Unit (of specific sub-basin)
 
-		L_cum=0	!Pedro - zero the cumulated slope length for erosion calculations
+		L_cum=0.	!Pedro - zero the cumulated slope length for erosion calculations
   
         DO tc_counter=1,nbrterrain(i_lu)
           tcid_instance=tcallid(i_subbas,lu_counter,tc_counter)
@@ -995,7 +994,7 @@ IF (STATUS == 2) THEN
 		  !conrad: convert thact (in mm) into percent of soil volume using mean soil depth in tc
 		  if (f_tc_theta) then
 			!theta_tc(d,nt,tcid_instance)=thact/meandepth_tc(i_subbas,lu_counter,tc_counter) !original version, using mean theta for entire profile (instead of topmost horizon only, see below)
-			theta_tc(d,timestep_counter,tcid_instance)=0
+			theta_tc(d,timestep_counter,tcid_instance)=0.
 			DO i=1,nbr_svc(tcid_instance)
 				rtemp=horithact(tcid_instance,i,1) / (thetas(id_soil_intern(i,tcid_instance),1)* horiz_thickness(tcid_instance,i,1))!Till: compute relative saturation of topmost horizon
 				theta_tc(d,timestep_counter,tcid_instance)=theta_tc(d,timestep_counter,tcid_instance)+rtemp*frac_svc(i,tcid_instance)	!Till: compute weighted average according to fraction of SVC
@@ -1136,9 +1135,9 @@ IF (STATUS == 2) THEN
 		!rtemp=0. !George: disable groundwater contribution: enable this line, outcomment next line
 		rtemp=min(deepgw(i_subbas,lu_counter),deepgw(i_subbas,lu_counter)/gw_delay(i_lu))		!Till: compute gw-discharge [m3], at maximum this equals the entire stored volume
 		
-		if ((rtemp>0) .AND. (frac_direct_gw<1)) then !Till: ground water discharge is (partially) routed into interflow of lowermost tc
+		if ((rtemp>0.) .AND. (frac_direct_gw<1.)) then !Till: ground water discharge is (partially) routed into interflow of lowermost tc
 			dummy=min(INT(maxval(sum(horiz_thickness(tcid_instance,:,:),2))/500.)+1,size(latred, DIM = 2)  ) !Till: compute number of horizon layers needed for storing the subsurface flow
-			latred(tcid_instance,1:dummy)=latred(tcid_instance,1:dummy)+ rtemp*(1-frac_direct_gw)/dummy
+			latred(tcid_instance,1:dummy)=latred(tcid_instance,1:dummy)+ rtemp*(1.-frac_direct_gw)/dummy
 			!distribute gw-fraction routed to subsurface flow of lowest TC equally among soil horizons (to be redistributed in next timestep)
 		end if
 		rtemp2=rtemp*frac_direct_gw	!Till: fraction directly routed to the river 
@@ -1226,7 +1225,7 @@ END IF
 	
 !	!threshold value for eliminating minimum outflow
 !	rtemp=(1.-intercepted)*(ovflow(d,i_subbas)+ subflow(d,i_subbas))
-!	if ((rtemp>0) .AND. (rtemp <= 0.000*3600*24*area(i_subbas))) then				!Till: effective discharge only if more than 0.001 m3/s/km2 is exceeded (prevents very low flows)
+!	if ((rtemp>0.) .AND. (rtemp <= 0.000*3600*24*area(i_subbas))) then				!Till: effective discharge only if more than 0.001 m3/s/km2 is exceeded (prevents very low flows)
 !			deepgw(i_subbas,1:nbr_lu(i_subbas))=deepgw(i_subbas,1:nbr_lu(i_subbas))+ rtemp/nbr_lu(i_subbas)*frac_lu(1:nbr_lu(i_subbas),i_subbas) 
 !			!if water yield is very low, it goes into the linear storage (distributed among LUs according to areal fraction) instead of the river
 !					
@@ -1265,12 +1264,12 @@ END IF
       CALL lake(2,i_subbas)
 	ELSE 
 		IF (doreservoir) THEN
-			water_subbasin (d,i_subbas)=water_subbasin(d,i_subbas)*(1-((damareaact(i_subbas)/1.e6)/area(i_subbas)))	  
+			water_subbasin (d,i_subbas)=water_subbasin(d,i_subbas)*(1.-((damareaact(i_subbas)/1.e6)/area(i_subbas)))	  
 		END IF
 	END IF
 	
-	water_subbasin (d,i_subbas) = water_subbasin (d,i_subbas) / (24*3600)	!convert m**3/d into m**3/s   
-	water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas) / (dt*3600)	!convert m**3 into m**3/s   
+	water_subbasin (d,i_subbas) = water_subbasin (d,i_subbas) / (24.*3600.)	!convert m**3/d into m**3/s   
+	water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas) / (dt*3600.)	!convert m**3 into m**3/s   
 
 	if (f_daily_gw_loss .OR. f_gw_loss) rtemp2=sum(deepgwrsu(1:(nbr_lu(i_subbas)))*frac_lu(1:(nbr_lu(i_subbas)),i_subbas) )*area(i_subbas)*1.e3		!Till: all deep seepage that has not been transferred to groundwater is lost from model domain, convert to m^3
 
@@ -1332,7 +1331,7 @@ END IF
 IF (STATUS == 3) THEN
   
 	CALL write_output(f_daily_water_subbasin,'daily_water_subbasin.out',water_subbasin)	! Output daily water contribution into river (m**3/s)
-	CALL write_output(f_daily_water_subbasin,'daily_water_subbasin2.out',sum(water_subbasin_t,dim=2)*3600*dt)	! Output daily water contribution into river (m**3/s)
+	CALL write_output(f_daily_water_subbasin,'daily_water_subbasin2.out',sum(water_subbasin_t,dim=2)*3600.*dt)	! Output daily water contribution into river (m**3/s)
 	
 	CALL write_output(f_daily_actetranspiration,'daily_actetranspiration.out',aet,3)	! Output daily actual evapotranspiration
 	CALL write_output(f_daily_potetranspiration,'daily_potetranspiration.out',pet,3)	! Output daily potential evapotranspiration

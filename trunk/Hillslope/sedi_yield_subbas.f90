@@ -1,5 +1,8 @@
 SUBROUTINE sedi_yield_subbas(subbas_id, q_out, sed_yield_subbas)
 
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
+
 ! Pedro: computationally relevant correction on q_ov by kfkorrday (overland flow with duration according to rainfall, and not during 24 h)
 ! 2009-06-03
 
@@ -50,16 +53,16 @@ REAL :: q_surf					!surface runoff [mm H2O]
 q = q_out/(area(subbas_id)*1e6)	!mean overland flow during timestep [m H2O]
 
 !ii: ganze Schleife einmal berechnen für jedes subbasin am Anfang des Programms
-slope_subbas=0
-K_subbas=0
-C_subbas=0
-P_subbas=0
-CFRG_subbas=0
-mean_particle_subbas=0
-manning_n_subbas=0
-LS_subbas=0
-L_slp_subbas=0
-frac_lu_x_sum=0		!for summing up fractions (actually, these should sum up to 1, but we'll do so just in case)
+slope_subbas =0.
+K_subbas     =0.
+C_subbas     =0.
+P_subbas     =0.
+CFRG_subbas  =0.
+mean_particle_subbas =0.
+manning_n_subbas     =0.
+LS_subbas            =0.
+L_slp_subbas         =0.
+frac_lu_x_sum=0.		!for summing up fractions (actually, these should sum up to 1, but we'll do so just in case)
 
 
 DO lu_counter=1,nbr_lu(subbas_id)		!loop over all LUs
@@ -67,30 +70,30 @@ DO lu_counter=1,nbr_lu(subbas_id)		!loop over all LUs
 	frac_lu_x=frac_lu(lu_counter,subbas_id)		!get fraction of LU
 	frac_lu_x_sum=frac_lu_x_sum+frac_lu_x		!sum up fractions
 
-	slope_lu=0
-	K_lu=0
-	C_lu=0
-	P_lu=0
-	CFRG_lu=0
-	mean_particle_lu=0
-	manning_n_lu=0
-	LS_lu=0
+	slope_lu=0.
+	K_lu=0.
+	C_lu=0.
+	P_lu=0.
+	CFRG_lu=0.
+	mean_particle_lu=0.
+	manning_n_lu=0.
+	LS_lu=0.
 
-	frac_tc_sum=0		!for summing up fractions (actually, these should sum up to 1, but we'll do so just in case)
-	L_tc_cum=0			!acumulated L factor for erosion calculations
+	frac_tc_sum=0.		!for summing up fractions (actually, these should sum up to 1, but we'll do so just in case)
+	L_tc_cum=0.			!acumulated L factor for erosion calculations
 
 	DO tc_counter=1,nbrterrain(lu_id)		!loop over all TCs
 		id_tc_type=id_terrain_intern(tc_counter,lu_id)	!get ID of TC-type
 		frac_tc=fracterrain(id_tc_type)					!get fraction of TC
 		frac_tc_sum=frac_tc_sum+frac_tc					!sum up fractions
 
-		K_tc=0
-		C_tc=0
-		P_tc=0
-		CFRG_tc=0
-		mean_particle_tc=0
-		manning_n_tc=0
-		frac_svc_x_sum=0		!for summing up fractions (actually, these should sum up to 1, but we'll do so just in case)
+		K_tc=0.
+		C_tc=0.
+		P_tc=0.
+		CFRG_tc=0.
+		mean_particle_tc=0.
+		manning_n_tc=0.
+		frac_svc_x_sum=0.		!for summing up fractions (actually, these should sum up to 1, but we'll do so just in case)
 
 		
 
@@ -119,9 +122,9 @@ DO lu_counter=1,nbr_lu(subbas_id)		!loop over all LUs
 
 		!Pedro - LS factor computed in a cumulative way according to Haan et al., 1994 (p. 262)
 		L_tc_cum=L_tc_cum+slength(lu_id)*frac_tc
-		m_ls=0.3*(slope(id_tc_type)/100)/((slope(id_tc_type)/100)+exp(-1.47-(61.09*(slope(id_tc_type)/100))))+0.2	! according to Williams (1995)
-		S_tc=(slope(id_tc_type)/100)*(65.41*(slope(id_tc_type)/100)+4.56)+0.065
-		L_tc=((L_tc_cum**(m_ls+1))-(max((L_tc_cum-(slength(lu_id)*frac_tc)),0.)**(m_ls+1)))/(slength(lu_id)*frac_tc*(22.1**m_ls))
+		m_ls=0.3*(slope(id_tc_type)/100.)/((slope(id_tc_type)/100.)+exp(-1.47-(61.09*(slope(id_tc_type)/100.))))+0.2	! according to Williams (1995)
+		S_tc=(slope(id_tc_type)/100.)*(65.41*(slope(id_tc_type)/100.)+4.56)+0.065
+		L_tc=((L_tc_cum**(m_ls+1.))-(max((L_tc_cum-(slength(lu_id)*frac_tc)),0.)**(m_ls+1.)))/(slength(lu_id)*frac_tc*(22.1**m_ls))
 		LS_tc=L_tc*S_tc
 
 		slope_lu=slope_lu+slope(id_tc_type)*frac_tc
@@ -173,9 +176,9 @@ manning_n=manning_n_subbas
 LS_fac=LS_subbas
 L_slp=L_slp_subbas
 
-q_ov=q_out/(dt*3600/kfkorr_day)/(area(subbas_id)*1e6/L_slp_subbas)				!compute average overland flow rate [m**3/s] on a 1-m-strip
-v_ov=(q_ov**0.4)*((slope_subbas/100)**0.3)/manning_n_subbas**0.6	!overland flow velocity [m/s] (6.3.4)
-t_conc=L_slp_subbas/(3600*v_ov)										!compute time of concentration [h] (6.3.3)
+q_ov=q_out/(dt*3600./kfkorr_day)/(area(subbas_id)*1e6/L_slp_subbas)				!compute average overland flow rate [m**3/s] on a 1-m-strip
+v_ov=(q_ov**0.4)*((slope_subbas/100.)**0.3)/manning_n_subbas**0.6	!overland flow velocity [m/s] (6.3.4)
+t_conc=L_slp_subbas/(3600.*v_ov)										!compute time of concentration [h] (6.3.3)
 
 earea=area(subbas_id)*1e6	!area of erosive unit [m2]
 
@@ -195,8 +198,8 @@ earea=area(subbas_id)*1e6	!area of erosive unit [m2]
 IF ((erosion_equation==1) .OR. (erosion_equation==2))  THEN
 	!compute USLE-rainfall energy factor for USLE (1) and Onstad-Foster (2)
 	IF (dt<=1) THEN	!if high resolution precipitation is available
-		R_d=-1		!to do: add equation here for subdaily rainfall
-		r_p=-1
+		R_d=-1.		!to do: add equation here for subdaily rainfall
+		r_p=-1.
 	ELSE
 		R_d=precip(d,subbas_id)	!daily rainfall [mm]
 		!r_p=-2*R_d*log(1-min(alpha_05,0.99))	!peak rainfall rate [mm/h] Williams, 1995; eq. 25.132
@@ -205,13 +208,13 @@ IF ((erosion_equation==1) .OR. (erosion_equation==2))  THEN
 
 		!rainfall intensities based on kfkorr showed low values, resulting in low erosion as well
 		ri_05=a_i30*(R_d**b_i30)
-		r_p=-2*R_d*log(1-min((ri_05/2/R_d),0.99))
+		r_p=-2.*R_d*log(1-min((ri_05/2./R_d),0.99))
 
 	END IF
 
-	ei=R_d*(12.1+8.9*(log10(r_p)-0.434))*ri_05/1000	!USLE-energy factor in the "proper" units according to Williams, 1995 in Singh,1995, p.934,25.128
+	ei=R_d*(12.1+8.9*(log10(r_p)-0.434))*ri_05/1000.	!USLE-energy factor in the "proper" units according to Williams, 1995 in Singh,1995, p.934,25.128
 ELSE
-	ei=-1		!just for debugging
+	ei=-1.		!just for debugging
 END IF
 
 
@@ -219,21 +222,21 @@ IF ((erosion_equation==2) .OR. (erosion_equation==3) .OR. (erosion_equation==4))
 R_d=precip(d,subbas_id)	!daily rainfall [mm]
 ri_05=a_i30*(R_d**b_i30)
 !alpha_05=ri_05/2/R_d
-alpha_05=min(1.0,0.5*(kfkorr_day/kfkorr)/24)
+alpha_05=min(1.0,0.5*(kfkorr_day/kfkorr)/24.)
 
 	IF (alpha_05==1.0) THEN
 		alpha_t_conc=1.0
 	ELSE
-		alpha_t_conc=1-exp(2*t_conc*log(1-min(alpha_05,0.99)))		!(6.3.19) compute fraction of rain falling during the time of concentration
+		alpha_t_conc=1.-exp(2.*t_conc*log(1.-min(alpha_05,0.99)))		!(6.3.19) compute fraction of rain falling during the time of concentration
 	END IF
 
 	!compute surface runoff and peak flow for Onstad-Foster (2), MUSLE (3), MUST (4)
-	q_surf=(q_out/earea)*1000		!surface runoff [mm H2O]
+	q_surf=(q_out/earea)*1000.		!surface runoff [mm H2O]
 	q_peak=alpha_t_conc*q_surf*earea/1e6/(3.6*t_conc)	!(6.3.20) estimation of peak runoff rate [m**3/s]
 	q_peak_mm_h=q_peak*3.6/(earea/1e6)		!peak runoff as before in [mm/h]
 ELSE
-	q_peak=-1	!just for debugging
-	q_peak_mm_h=-1
+	q_peak=-1.	!just for debugging
+	q_peak_mm_h=-1.
 END IF
 
 

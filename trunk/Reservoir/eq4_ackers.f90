@@ -1,5 +1,8 @@
 SUBROUTINE eq4_ackers(upstream)
- 
+
+!Till: computationally irrelevant: minor changes to improve compiler compatibility
+!2011-04-29
+
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:31
  
@@ -78,7 +81,7 @@ DO j=1,nbrsec(upstream)
   
 !Ge to include the DAILY mean temperature of the reservoir (celsius degree)
 !Ge tempres=20 C (temporarily)
-  tempres(step,upstream)=20
+  tempres(step,upstream)=20.
   
 ! kinematic viscosity (m2/s)
   visc=(1.14-0.031*(tempres(step,upstream)-15.)+  &
@@ -100,10 +103,10 @@ DO j=1,nbrsec(upstream)
 !write(*,*)j,g,D_gs(g),diam(g),rel_dens,visc
 
 ! coefficients Ackers and White Formula
-    if (D_gs(g)>1. .and. D_gs(g)<60) then
+    if (D_gs(g)>1. .and. D_gs(g)<60.) then
 	  n_coef(g)=1.-(.56*log10(D_gs(g)))
 	  m_coef(g)=(9.66/D_gs(g))+1.34
-	  k_coef(g)=10**(-3.53+2.86*log10(D_gs(g))-(log10(D_gs(g))**2))
+	  k_coef(g)=10.**(-3.53+2.86*log10(D_gs(g))-(log10(D_gs(g))**2.))
 	  Fgr_cr(g)=.14+(.23/sqrt(D_gs(g)))
 	else if (D_gs(g)>=60.) then
 	  n_coef(g)=0.
@@ -119,7 +122,7 @@ DO j=1,nbrsec(upstream)
 
 ! sediment mobility number (-)
     Fgr(g)=(shear_vel**n_coef(g)/(sqrt(9.807*diam(g)*rel_dens)))* &
-	     (meanvel(j)/(sqrt(32.)*log10(10*depth(j)/diam(g))))**(1-n_coef(g))
+	     (meanvel(j)/(sqrt(32.)*log10(10.*depth(j)/diam(g))))**(1.-n_coef(g))
 
 !if(g==10)write(*,*)j,g,(shear_vel**n_coef(g)/(sqrt(9.807*diam(g)*rel_dens))),(meanvel(j)/(sqrt(32.)*log10(10*depth(j)/diam(g))))**(1-n_coef(g)),Fgr(g)
 !if(g==10)write(*,*)j,g,depth(j),energslope(j),shear_vel,diam(g)*1000,meanvel(j)
@@ -147,7 +150,7 @@ DO j=1,nbrsec(upstream)
       if (diam(g)/diam_u<=.075) then
         hidexp(g)=2.5
       else if (diam(g)/diam_u>.075 .and. diam(g)/diam_u<3.7) then
-	    hidexp(g)=1/((.53*log10(diam(g)/diam_u))+1)
+	    hidexp(g)=1./((.53*log10(diam(g)/diam_u))+1.)
 	  else if (diam(g)/diam_u>=3.7) then
         hidexp(g)=.769
 	  endif
@@ -161,7 +164,7 @@ DO j=1,nbrsec(upstream)
 	  fr_capacity(g,j)=0.
 	else
       fr_capacity(g,j)=k_coef(g)*meanvel(j)*diam(g)*((meanvel(j)/shear_vel)**n_coef(g))*  &
-        (((Fgr(g)/(Fgr_cr(g)*hidexp(g)))-1)**m_coef(g))
+        (((Fgr(g)/(Fgr_cr(g)*hidexp(g)))-1.)**m_coef(g))
     endif
 
 !if(g==10)write(*,*)j,g,k_coef(g)*meanvel(j)*diam(g),((meanvel(j)/shear_vel)**n_coef(g)),(((Fgr(g)/(Fgr_cr(g)*hidexp(g)))-1)**m_coef(g))
@@ -170,7 +173,7 @@ DO j=1,nbrsec(upstream)
     
 ! total suspended sediment transport (m3/day)
     fr_capacity(g,j)=min(1000.,fr_capacity(g,j))
-    fr_capacity(g,j)=86400*fr_capacity(g,j)*topwidth(j)
+    fr_capacity(g,j)=86400.*fr_capacity(g,j)*topwidth(j)
 
    ELSE
     fr_capacity(g,j)=1000.

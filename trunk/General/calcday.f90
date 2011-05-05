@@ -1,12 +1,15 @@
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
+
 SUBROUTINE calcday
 
 use time_h
 
 INTEGER :: temp
-! day in month given day in year (1=normal, 2=schaltjahr)
-INTEGER*1 daynr(367,2)
-! month given day in year (1=normal, 2=schaltjahr)
-INTEGER*1 monnr(367,2)
+! day in month given day in year (1=normal, 2=leap year)
+INTEGER(kind=1) :: daynr(367,2)
+! month given day in year (1=normal, 2=leap year)
+INTEGER(kind=1) :: monnr(367,2)
 
 DATA daynr / 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,  &
     17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,  &

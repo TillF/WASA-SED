@@ -1,3 +1,6 @@
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
+
 SUBROUTINE routing(STATUS)
  
 use lake_h
@@ -47,8 +50,7 @@ READ (11,*); READ(11,*)
 DO i=1,subasin
   READ (11,*)  idummy,prout(i,1),  prout(i,2)
   IF (idummy /= id_subbas_extern(i)) THEN
-    WRITE(*,*) 'Sub-basin-IDs in file response.dat  &
-        must have the same ordering scheme as in hymo.dat'
+    WRITE(*,*) 'Sub-basin-IDs in file response.dat must have the same ordering scheme as in hymo.dat'
     STOP
   END IF
 END DO
@@ -117,8 +119,7 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 ! (given partaneter lag-time tL and retention-time tR)
   OPEN(11,FILE=pfadn(1:pfadi)//'routing_response.out' ,STATUS='replace')
   WRITE(11,'(a)') 'Output of linear response function'
-  WRITE(11,'(a)')'Subasin-ID,translation [days],  &
-      retention [days], uh(1,7) [-]'
+  WRITE(11,'(a)')'Subasin-ID,translation [days], retention [days], uh(1,7) [-]'
   
   DO i=1,subasin
     itl = nint (prout(i,1))

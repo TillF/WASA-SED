@@ -1,5 +1,8 @@
 SUBROUTINE eq3_tsinghua(upstream)
- 
+
+!Till: computationally irrelevant: minor changes to improve compiler compatibility
+!2011-04-29
+
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:31
  
@@ -57,8 +60,8 @@ DO j=1,nbrsec(upstream)
     DO g=1,n_sed_class
       if(diam(g)*1000.<=0.01) factor_sed=1600
       if(diam(g)*1000.>0.01 .and. diam(g)*1000.<=0.1) factor_sed=650
-      if(diam(g)*1000.>0.1 .and. diam(g)*1000.<=2) factor_sed=300
-      if(diam(g)*1000.>2) factor_sed=180
+      if(diam(g)*1000.>0.1  .and. diam(g)*1000.<=2.)  factor_sed=300
+      if(diam(g)*1000.>2.) factor_sed=180
 	enddo  
 
 ! total suspended sediment transport (m3/day)
@@ -83,7 +86,7 @@ DO j=1,nbrsec(upstream)
 
 !Ge to include the DAILY mean temperature of the reservoir (celsius degree)
 !Ge tempres=20 C (temporarily)
-  tempres(step,upstream)=20
+  tempres(step,upstream)=20.
   
 ! kinematic viscosity (m2/s)
   visc=(1.14-0.031*(tempres(step,upstream)-15.)+  &

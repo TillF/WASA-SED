@@ -1,5 +1,8 @@
 SUBROUTINE muskingum (i, flow, r_area,h)
 
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
+
 !Till: re-modified transmission losses, various optimizations 
 !2009-12-17
  
@@ -56,7 +59,7 @@ if (r_storage(i) > 0.) then
 elseif (r_storage(i) == 0. .and. r_qin(2,i) > 1.e-3) then
   call routing_coefficients (i,3,flow,r_area,p)
 ! Calculation of flow time [h]
-  rttime = r_length(i)*1000/(velocity(i)*3600)
+  rttime = r_length(i)*1000./(velocity(i)*3600.)
   if (rttime > dt) then
       r_qout(2,i) = 0.
       r_storage(i)= r_qin(2,i)*3600.*dt
@@ -73,10 +76,10 @@ endif
 
 !! Compute coefficients
 yy = dt / msk_k(i)
-c0 = yy  + 2 * (1. - msk_x(i))
+c0 = yy  + 2. * (1. - msk_x(i))
 c1 = (yy + 2. * msk_x(i))  / c0
 c2 = (yy - 2. * msk_x(i))  / c0
-c3 = (2. * (1 - msk_x(i)) - yy) / c0 
+c3 = (2. * (1. - msk_x(i)) - yy) / c0 
 
 !! Compute new outflow r_qout2
 IF (t == tstart .AND. d == 1 .and. h == 1) THEN
@@ -117,7 +120,7 @@ IF (r_qout(2,i) > 1.e-3) THEN
     topw = r_width_fp(i) + 2. * (r_depth_cur(i) - r_depth(i)) * r_sideratio_fp(i)	! width of channel at water level [m]
   END IF
   r_evp = (pet(d,i)/24.)* 1e-3 * dt * (r_length(i)*1000.) * topw	!river evaporation [m³]
-  if (r_evp < 0) r_evp = 0.
+  if (r_evp < 0.) r_evp = 0.
 END IF
 
 !! Calculate amount of water in channel at end of the time step

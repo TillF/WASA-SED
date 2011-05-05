@@ -1,6 +1,9 @@
 SUBROUTINE etp_soil(i_subbas3,vegi,defi,facwi,act,actveg,acts,  &
         height_act,lai_act,alb_act,rsfinal)
  
+!Till: computationally irrelevant: minor changes to improve compiler compatibility
+!2011-04-29
+
 !Till: excluded domean, donight as logicals to module common_h
 ! excluded daily_delta_temp (daily temperature variation),hours_of_daylight
 ! 2008-02-05
@@ -169,9 +172,9 @@ fcov=1.
 k=0.41
 z0s=0.01
 zm=0.76*height_act(vegi)
-if (lai_act(vegi)==0) then !Till: without this problems occur with certain compiler settings
-	x=0
-	dp=0
+if (lai_act(vegi)==0.) then !Till: without this problems occur with certain compiler settings
+	x=0.
+	dp=0.
 else
 	x=0.07*lai_act(vegi)
 	dp=1.1*height_act(vegi)*LOG(1.+x**0.25)
@@ -214,7 +217,7 @@ ras=height_act(vegi)*EXP(n)/(n*kh)* (EXP(-1.*n*z0s/height_act(vegi))-  &
 raa=(1./(k*ustern))* LOG((zr-dp)/(height_act(vegi)-dp))+  &
     (height_act(vegi)/(n*kh))* (EXP(n*(1.-zm/height_act(vegi)))-1.)
 
-if (lai_act(vegi)==0) then	!Till: this is a clumsy workaround to prevent errors when the LAI is 0 ii
+if (lai_act(vegi)==0.) then	!Till: this is a clumsy workaround to prevent errors when the LAI is 0 ii
 	rap=1000000.0
 else
 	rap=25./(2.*lai_act(vegi))
@@ -233,7 +236,7 @@ rsbs=rss
 
 ! mean daily vapor pressure emean
 es = 6.11*EXP(17.62*temp(d,i_subbas3)/(243.12+temp(d,i_subbas3)))
-emean  = rhum(d,i_subbas3)*es/100
+emean  = rhum(d,i_subbas3)*es/100.
 
 
 ! if not daily mean values are used
@@ -290,8 +293,8 @@ IF (.NOT. domean) THEN
 ! daytime time mean of short wave radiation = daily mean * 24/hours_of_daylight
 ! Rnetto=Rkurz+Rlang
   
-  rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(tempd+273.2)**4  &
-      +(1-alpha)*rad(d,i_subbas3)*24./hours_of_daylight
+  rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(tempd+273.2)**4 +&
+	   (1.-alpha)*rad(d,i_subbas3)*24./hours_of_daylight
   rnettos =rnetto*EXP(-1.*ext*lai_act(vegi))
 !      Gstream =gfracd*Rnettos
 !      Anetto  =Rnetto-Gstream
@@ -468,8 +471,8 @@ ELSE
 ! daytime time mean of short wave radiation = daily mean * 24/hours_of_daylight
 ! Rnetto=Rkurz+Rlang
   
-  rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(temp(d,i_subbas3)+273.2)**4  &
-      +(1-alpha)*rad(d,i_subbas3)*24./hours_of_daylight
+  rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(temp(d,i_subbas3)+273.2)**4 +&  
+      (1.-alpha)*rad(d,i_subbas3)*24./hours_of_daylight
   rnettos =rnetto*EXP(-1.*ext*lai_act(vegi))
 !      Gstream  =gfracd*Rnettos
 !      Anetto   =Rnetto-Gstream

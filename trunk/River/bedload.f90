@@ -1,5 +1,8 @@
 SUBROUTINE bedload_formulae(i)
  
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
+
 !! Subroutine calculates the bedload using 5 different formulae for individual river stretches
 !! Formula after: Meyer_Peter, Schoklitsch, Smart&Jaeggi, Bagnold, Rickenmann
 !! For list of reference, see publication on bedload modelling Müller et al. 2006
@@ -17,7 +20,7 @@ SUBROUTINE bedload_formulae(i)
 !! bottom_width(i)  |m			  |bottom width of riverbed
 !! r_sideratio(:)   |none         |change in horizontal distance per unit change in vertical distance on channel side slopes
 
-!! LOCAL DEFINTIONS
+!! LOCAL DEFINITIONS
 !! q_unit           |m2/s         |unit discharge for m river width
 !! q_crit			|m2/s		  |critical discharge for initiation of motion
 !! shear			|kg/m*s2 or - |shear stress (real or dimensionless)
@@ -54,11 +57,11 @@ endif
 	if (shear_crit.gt.shear) then
 		bedload(i,1)  = 0.
 	else
-		bedload(i,1) = 8 * (shear-shear_crit)**1.5/(g * (R_Sed-R_Water) * R_Water**0.5)
+		bedload(i,1) = 8. * (shear-shear_crit)**1.5/(g * (R_Sed-R_Water) * R_Water**0.5)
 		bedload(i,1)  = bedload(i,1)  * R_Sed
 	endif
 
-	bedload(i,1) = bedload(i,1) * (2650-1000)/2650* width		!Unit: kg/sec over entire width
+	bedload(i,1) = bedload(i,1) * (2650-1000)/2650.* width		!Unit: kg/sec over entire width
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Schoklitsch 1950 formula:
@@ -68,11 +71,11 @@ endif
 	if (q_crit.gt.q_unit) then
 		bedload(i,2) = 0.
 	else
-		bedload(i,2) = 2500 * r_slope(i)**1.5 * (q_unit - q_crit)	
+		bedload(i,2) = 2500. * r_slope(i)**1.5 * (q_unit - q_crit)	
 	endif
 !NOTE: in der original formula D40 instead of D50 is used!
 
-	bedload(i,2) = bedload(i,2) * (2650-1000)/2650* width		!Unit: kg/sec over entire width
+	bedload(i,2) = bedload(i,2) * (2650-1000)/2650.* width		!Unit: kg/sec over entire width
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Smart and Jaeggi (1983)
@@ -84,11 +87,11 @@ endif
 	if (shear_crit.gt.shear) then
 		bedload(i,3) = 0.
 	else
-		bedload(i,3) = 4.2 * q_unit * r_slope(i)**1.6 * (1 - shear_crit/shear) / (R_Sed/R_Water-1)
+		bedload(i,3) = 4.2 * q_unit * r_slope(i)**1.6 * (1. - shear_crit/shear) / (R_Sed/R_Water-1)
 		bedload(i,3) = bedload(i,3) * R_Sed
 	endif
 
-	bedload(i,3) = bedload(i,3) * (2650-1000)/2650* width		!Unit: kg/sec over entire width
+	bedload(i,3) = bedload(i,3) * (2650-1000)/2650.* width		!Unit: kg/sec over entire width
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Bagnold (1956, Yalin 1977) 
@@ -104,7 +107,7 @@ endif
 	bedload(i,4) = bedload(i,4) * R_Sed * ((R_sed/R_Water-1) * g * D50(i)**3)**0.5
 	endif
 
-	bedload(i,4) = bedload(i,4) * (2650-1000)/2650* width		!Unit: kg/sec over entire width
+	bedload(i,4) = bedload(i,4) * (2650-1000)/2650.* width		!Unit: kg/sec over entire width
 
 !!!!!!!!!!!!!!!!!!!
 ! Rickenmann 1989, 1991
@@ -121,7 +124,7 @@ endif
 		bedload(i,5) = 	bedload(i,5) * R_Sed * ((R_Sed/R_Water-1) * g * D50(i)**3)**0.5
 	endif
 
-	bedload(i,5) = bedload(i,5) * (2650-1000)/2650* width		!Unit: kg/sec over entire width
+	bedload(i,5) = bedload(i,5) * (2650-1000)/2650.* width		!Unit: kg/sec over entire width
 
 
 RETURN

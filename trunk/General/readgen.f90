@@ -1,5 +1,8 @@
 SUBROUTINE readgen(path2do_dat)
 
+!Till: computationally irrelevant: minor changes to improve compiler compatibility
+!2011-04-29
+
 !George & Till: computationally irrelevant: added flags for reservoir output files; error message for missing do.dat
 !2010-03-03
 
@@ -117,10 +120,10 @@ READ(11,*) krig
 !READ(11,*) kfkorr
 READ(11,'(A)') dummy
 	READ(dummy,*,IOSTAT=i)kfkorr,kfkorr_a,kfkorr_b
-	IF (i/=0 .OR. kfkorr_a==0) THEN	!no parameters for variable kfcorr specified, use constant kfcorr (as in old version)
+	IF (i/=0 .OR. kfkorr_a==0.) THEN	!no parameters for variable kfcorr specified, use constant kfcorr (as in old version)
 		READ(dummy,*)kfkorr
-		kfkorr_a=0
-		kfkorr_b=1
+		kfkorr_a=0.
+		kfkorr_b=1.
 	END IF
 
 READ(11,*) intcf

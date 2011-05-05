@@ -1,5 +1,8 @@
 SUBROUTINE change_sec (j1,upstream)
  
+!Till: computationally irrelevant: minor changes to improve compiler compatibility
+!2011-04-29
+
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:15
  
@@ -57,7 +60,7 @@ IF (dvol_sed(j1,upstream) < 0.) THEN
     endif
   enddo
 
-  dummy3=0
+  dummy3=0.
   DO m=2,npoints(j1,upstream)-1
     IF (geom(m,j1) == 1)dummy3=dummy3+(((x_sec(m,j1,upstream)-x_sec(m-1,j1,upstream))*wfactor(m)*(1./2.))+ &
 							((x_sec(m+1,j1,upstream)-x_sec(m,j1,upstream))*wfactor(m)*(3./8.))+ &
@@ -98,7 +101,7 @@ ELSE IF (dvol_sed(j1,upstream) > 0.) THEN
 !if(j1<20)write(*,'(2I4,3I3,2F15.6)')t,d,j1,m,geom(m,j1),wfactor(m),dummy5
   enddo
     
-  dummy3=0
+  dummy3=0.
   DO m=2,npoints(j1,upstream)-1
     IF (geom(m,j1) == 1)dummy3=dummy3+(((x_sec(m,j1,upstream)-x_sec(m-1,j1,upstream))*wfactor(m)*(1./2.))+ &
 							((x_sec(m+1,j1,upstream)-x_sec(m,j1,upstream))*wfactor(m)*(3./8.))+ &

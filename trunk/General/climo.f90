@@ -1,4 +1,5 @@
-SUBROUTINE climo(STATUS)
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
 
 !Till: modified allocation of input buffer that led to problem when input files contained different number of columns
 !2010-04-26
@@ -46,6 +47,38 @@ SUBROUTINE climo(STATUS)
 
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-06-30  Time: 13:45:46
+
+SUBROUTINE date_seek(fid,tstart,mstart,filename)
+!move file pointer to position corresponding to start of simulation period
+
+use params_h
+
+implicit none
+	INTEGER, INTENT(IN)                  :: fid	!file handle
+	INTEGER, INTENT(IN)                  :: tstart, mstart	!start year, start month of simulation
+	CHARACTER(LEN=*),  INTENT(IN)                  :: filename	!name of file to produce meaningful error message
+
+	INTEGER                  :: date_num, dum,iostat	!dummy values
+	CHARACTER                  :: temp2	!dummy 
+
+	READ(fid,*,IOSTAT=iostat) date_num,dum,temp2
+	do while ((mod(date_num,1000000)/=mstart*10000+tstart) .AND. (iostat==0))
+		READ(fid,*,IOSTAT=iostat) date_num,dum,temp2		!advance until start month is reached
+	end do
+	
+	if ((iostat/=0) .OR. (floor(date_num/1000000.0)/=1)) then	!abort if start month does not start with its first day
+		write(*,'(A,i3,a,i0)')'ABORTED: input file '//filename//' does not contain first day of simulation start month',mstart,'/',tstart
+		stop
+	end if
+	
+	BACKSPACE (fid)		!rewind line just read
+
+
+END SUBROUTINE date_seek
+
+
+SUBROUTINE climo(STATUS)
+
 use climo_h
 use common_h
 use hymo_h
@@ -177,10 +210,10 @@ IF (STATUS == 1) THEN
  ! READ(84,*) dummy
  !END DO
 
- temp=0
- rhum=5
- rad=30
- precip=50
+ temp=0.0
+ rhum=5.0
+ rad=30.0
+ precip=50.0
  
  READ(81,*,IOSTAT=iostat) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(1)),id=1,dayyear)		!Till: faster than using loop
  temp(1:dayyear,1:subasin)= inputbuffer(1:dayyear,corr_column_temp)	!Till: rearrange column order to match order of hymo.dat
@@ -211,7 +244,7 @@ IF (STATUS == 1) THEN
 		!read hourly rainfall data
 		!for hourly version - program still needs the daily data as well, but this is computed internally below
 
-			preciph(:,:)=-1	!hourly precip
+			preciph(:,:)=-1.0	!hourly precip
 
 		READ (84,*,IOSTAT=iostat) ((n,k,(inputbuffer((i-1)*24+j,id),id=1,no_columns(4)),j=1,nt),i=1,dayyear)
 		preciph(:,1:subasin)= inputbuffer (:,corr_column_precip)	!Till: rearrange column order to match order of hymo.dat	 
@@ -240,7 +273,7 @@ IF (STATUS == 1) THEN
     end if
 
 
-wind=1	!Till: currently not read from input file (assumed constant)
+wind=1.0	!Till: currently not read from input file (assumed constant)
 
 
 CALL check_climate	!check validity of climate data
@@ -413,38 +446,6 @@ implicit none
 	END DO
 END SUBROUTINE set_corr_column2
 
-
-
-
-
-
-SUBROUTINE date_seek(fid,tstart,mstart,filename)
-!move file pointer to position corresponding to start of simulation period
-
-use params_h
-
-implicit none
-	INTEGER, INTENT(IN)                  :: fid	!file handle
-	INTEGER, INTENT(IN)                  :: tstart, mstart	!start year, start month of simulation
-	CHARACTER(LEN=*),  INTENT(IN)                  :: filename	!name of file to produce meaningful error message
-
-	INTEGER                  :: date_num, dum,iostat	!dummy values
-	CHARACTER                  :: temp2	!dummy 
-
-	READ(fid,*,IOSTAT=iostat) date_num,dum,temp2
-	do while ((mod(date_num,1000000)/=mstart*10000+tstart) .AND. (iostat==0))
-		READ(fid,*,IOSTAT=iostat) date_num,dum,temp2		!advance until start month is reached
-	end do
-	
-	if ((iostat/=0) .OR. (floor(date_num/1000000.0)/=1)) then	!abort if start month does not start with its first day
-		write(*,'(A,i3,a,i0)')'ABORTED: input file '//filename//' does not contain first day of simulation start month',mstart,'/',tstart
-		stop
-	end if
-	
-	BACKSPACE (fid)		!rewind line just read
-
-
-END SUBROUTINE date_seek
 
 
 
