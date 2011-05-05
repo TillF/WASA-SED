@@ -1,4 +1,7 @@
 SUBROUTINE routing_new(STATUS)
+!Till: computationally irrelevant: removed unused parameters flow, rarea
+!2011-05-05
+
 !Till: computationally irrelevant: quick-fix of severe performance loss when using output of river_flow.dat in hourly version
 !2009-04-02
 
@@ -349,7 +352,7 @@ DO h=1,nt
 	end do
    else																		!normal sediment routing
 	if (dosediment) then
-     if (river_transport.eq.2) call route_sediments(upstream, flow, r_area)
+     if (river_transport.eq.2) call route_sediments(upstream)
      if(river_transport.eq.3) call bedload_formulae(upstream)
 	endif
    end if !do outsed

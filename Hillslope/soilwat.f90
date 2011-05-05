@@ -4,6 +4,9 @@ SUBROUTINE soilwat(hh,day,month,i_subbas2,i_ce,i_lu,oc2,tcid_instance2,id_tc_typ
         tcsoilet,tcintc,prec,precday,prechall2,petday,  &
         tcarea2,bal, rootd_act,height_act,lai_act,alb_act,sed_in_tc,sed_out_tc)
 
+! Till: computationally irrelevant: removed unused parameter h
+! 2011-05-05
+
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29
 
@@ -2961,10 +2964,9 @@ if (dosediment .AND. (q_surf_out > 0.)) then !if hillslope erosion is to be comp
 
 	q_ov=(q_surf_in+q_surf_out)/2./(dt*3600./kfkorr_day)/(tcarea2*1e6/L_slp)		!compute average overland flow rate [m**3/s] on a  1-m-strip
 
-	!v_ov=q_ov**0.4*slope(id_tc_type2)**0.3/manning_n**0.6				!overland flow velocity [m/s]
 	v_ov=(q_ov**0.4)*((slope(id_tc_type2)/100.)**0.3)/manning_n**0.6				!overland flow velocity [m/s] (6.3.4)
 
-	!not needed h=q_ov/(v_ov*dt)													!depth of overland flow [mm]
+	
 
 	!ii: L_slp pass this to sedi_yield 
 	t_conc=L_slp/(3600.*v_ov)								!compute time of concentration [h] (6.3.3)
@@ -3000,7 +3002,7 @@ if (dosediment .AND. (q_surf_out > 0.)) then !if hillslope erosion is to be comp
 	!write(*,'(A,f8.4)') "sed_yield: ", r
 	!sed_out_tc(:)=r/n_sed_class	!currently, the particle classes are not treated seperately yet
 
-	CALL sedi_yield(day, i_subbas2, i_lu, id_tc_type2, q_surf_in, q_surf_out, q_peak, v_ov, h, sed_in_tc, dt, tcarea2,sed_out_tc)
+	CALL sedi_yield(day, i_subbas2, i_lu, id_tc_type2, q_surf_in, q_surf_out, q_peak, v_ov, sed_in_tc, dt, tcarea2,sed_out_tc)
 else
 	sed_out_tc(:)=0.
 end if !end (do sediment)
