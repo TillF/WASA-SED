@@ -1,5 +1,8 @@
 SUBROUTINE eq2_ashida(upstream)
- 
+
+!Till: computationally irrelevant: minor changes to improve compiler compatibility
+!2011-04-29
+
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:31
  
@@ -96,13 +99,13 @@ DO j=1,nbrsec(upstream)
 	shear(g)=(shear_vel**2)/(spec_gravit*9.807*diam(g))
 
 ! effective shear velocity
-    effshear_vel=meanvel(j)/(5.75*log10(hydrad(j)/D50)/(1+(2*shear(g)))+6.)
+    effshear_vel=meanvel(j)/(5.75*log10(hydrad(j)/D50)/(1.+(2.*shear(g)))+6.)
 
 ! critical shear velocity Uci (m/s)
     if (diam(g)/D50 < .4) then
 	  crshear_vel(g)=crshearvel_D50*sqrt(.85)
 	else
-	  crshear_vel(g)=crshearvel_D50*(log10(19.)/log10(19*diam(g)/D50))
+	  crshear_vel(g)=crshearvel_D50*(log10(19.)/log10(19.*diam(g)/D50))
 	endif
 
 ! nondimensional critical shear stress tci
@@ -113,23 +116,23 @@ DO j=1,nbrsec(upstream)
 
 
 ! dimensionless transport parameter for fractional bed load yields (-)
-    if ((1-(crshear(g)/shear(g))) <= 0.) then
+    if ((1.-(crshear(g)/shear(g))) <= 0.) then
 	  transpfac_bed(g)=0.
 	else
-      transpfac_bed(g)=1-(crshear(g)/shear(g))
+      transpfac_bed(g)=1.-(crshear(g)/shear(g))
     endif
 
 ! fractional bed sediment transport (m2/s)
-    if (shear(g)/=0) then
+    if (shear(g)/=0.) then
       bed_frtransp(g,j)=17.*effshear_vel*diam(g)*effshear(g)*(transpfac_bed(g))* &
-        (1-sqrt((crshear(g)/shear(g))))
+        (1.-sqrt((crshear(g)/shear(g))))
 	else
 	  bed_frtransp(g,j)=0.
 	endif
 	bed_frtransp(g,j)=max(0.,bed_frtransp(g,j))
 
 ! fractional bed sediment transport (m3/day)
-    bed_frtransp(g,j)=86400*bed_frtransp(g,j)* topwidth(j)
+    bed_frtransp(g,j)=86400.*bed_frtransp(g,j)* topwidth(j)
     
 !write(*,'(3I4,6F10.6)')d,j,g,d50,crshear(g),transpfac_bed(g)
   END DO
@@ -139,7 +142,7 @@ DO j=1,nbrsec(upstream)
   
 !Ge to include the DAILY mean temperature of the reservoir (celsius degree)
 !Ge tempres=20 C (temporarily)
-  tempres(step,upstream)=20
+  tempres(step,upstream)=20.
   
 ! kinematic viscosity (m2/s)
   visc=(1.14-0.031*(tempres(step,upstream)-15.)+  &
@@ -157,13 +160,13 @@ DO j=1,nbrsec(upstream)
         ((sed_dens-wat_dens)/wat_dens)*9.807*diam(g)) -13.95*visc/diam(g)
     
 ! C1 parameter
-    C1=6*setvel(g)/(karman*shear_vel*depth(j))
+    C1=6.*setvel(g)/(karman*shear_vel*depth(j))
 
 ! seta initial parameter
 	seta0=setvel(g)/(.75*shear_vel)
 
 ! f_seta function of the seta initial parameter
-    f_seta0=(1/sqrt(2*3.14))*exp(-.5*(seta0**2))
+    f_seta0=(1./sqrt(2.*3.14))*exp(-.5*(seta0**2.))
 
 ! f_seta function of the seta parameter
     dummy6=seta0
@@ -175,9 +178,9 @@ DO j=1,nbrsec(upstream)
 !    do while (dummy>.0001 .or. dummy==0 .or. dummy5<dummy)
     do while (dummy6<5.)
 !      if (h/=0) dummy5=dummy
-	  if (dummy6<.001) dummy3=dummy6*10
+	  if (dummy6<.001) dummy3=dummy6*10.
 	  if (dummy6>=.001) dummy3=dummy6+.05
-	  dummy4=(1/sqrt(2*3.14))*exp(-.5*(dummy3**2))
+	  dummy4=(1./sqrt(2.*3.14))*exp(-.5*(dummy3**2.))
 	  if(dummy4==0.) then
 	    f_seta=0.
 	    exit
@@ -229,7 +232,7 @@ DO j=1,nbrsec(upstream)
 
 
 ! total suspended sediment transport (m3/day)
-   susp_frtransp(g,j)=86400*susp_frtransp(g,j)* topwidth(j)
+   susp_frtransp(g,j)=86400.*susp_frtransp(g,j)* topwidth(j)
 
     
     

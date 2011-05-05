@@ -2,12 +2,14 @@ SUBROUTINE petcalc
 !read input file containing extra terrestrial radiation
 !compute potential evaporation from water surface (applied for each subbasin and day)
 
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
 
-!Till: adapted day-night-calculation scheme that is also used in etp_max to have consistent results
-!2008-02-07
+! Till: adapted day-night-calculation scheme that is also used in etp_max to have consistent results
+! 2008-02-07
 
-! 2006-02-20
 ! Till: prevent PET from getting negative
+! 2006-02-20
 
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-06-30  Time: 13:47:16
@@ -82,7 +84,7 @@ DO id=1,dayyear
 		if (donight) then		!Till: also include nighttime evaporation
 			tempn=temp(d,isubbas)-daily_delta_temp	!Till: temperature during night
 			pet(id,isubbas)=pet(id,isubbas) +&
-						et_pen_mon(ra,rs,tempd,alpha,rhum(id,isubbas),0.,radex(id))*(1-hours_of_daylight/24.)
+						et_pen_mon(ra,rs,tempd,alpha,rhum(id,isubbas),0.,radex(id))*(1.-hours_of_daylight/24.)
 		end if
 	end if
 	
@@ -108,13 +110,13 @@ REAL :: e,  es, s	! vapour pressure (hPa), saturation vapour pressure (hPa) and 
 REAL :: nn,f	! cloud factor, cover fraction
 REAL :: rnetto	! radiation (W/m^2)
 
-REAL,parameter :: cp= 1013	! specific (J/kg/K)
+REAL,parameter :: cp= 1013.	! specific (J/kg/K)
 REAL,parameter :: rho= 1.18		!air density (kg/m^3)
 REAL,parameter :: gamma=0.67	! psychrometric constant  (hPa/K)
 
     es = 6.11*EXP(17.62*tempr/(243.12+tempr))
-    e  = rhum*es/100
-    s  = es*4284/((243.12+tempr)**2)
+    e  = rhum*es/100.
+    s  = es*4284./((243.12+tempr)**2)
     nn = rad/radex/0.55-0.18/0.55
     nn=MAX(0.0,nn)
     nn=MIN(1.0,nn)

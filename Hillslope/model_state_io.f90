@@ -1,6 +1,9 @@
 module model_state_io
 !contains subroutines for saving and loading model state (soil water, ground water, interception)
 
+!Till: computationally irrelevant: minor changes to improve compiler compatibility
+!2011-04-29
+
 !Till: computationally irrelevant: removed subroutine arguments for init_soil_conds and init_gw_conds that were global anyway (created confusion with gfortran 4.4)
 !2011-03-23
 
@@ -70,9 +73,9 @@ subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, summary
 	REAL	:: lu_area, svc_area	!area of current lu/svc [m3]
 	INTEGER	::	soil_file_hdle, gw_file_hdle, intercept_file_hdle	!file handles to output files
 
-	total_storage_soil=0
-	total_storage_gw=0
-	total_storage_intercept=0 
+	total_storage_soil=0.
+	total_storage_gw=0.
+	total_storage_intercept=0.
 	
 	if (trim(soil_conds_file)=='') then		!don't do anything if an empty filename is specified
 		soil_file_hdle=0
@@ -300,7 +303,7 @@ subroutine init_soil_conds(soil_conds_file)
 
 
 					DO h=1,nbrhori(i_soil)
-						if (horithact(tcid_instance,svc_counter,h)==-9999) then			!not yet set?
+						if (horithact(tcid_instance,svc_counter,h)==-9999.) then			!not yet set?
 							if (file_read==1) then						!but this should have been done before
 								if (errors==0) then	!produce header before first warning only
 									write(*,'(A,f4.2,a,/,5a12)')' Following entities not initalised, using defaults (rel.saturation=',default_rel_sat,'):',&
@@ -316,7 +319,7 @@ subroutine init_soil_conds(soil_conds_file)
 							(thetas(i_soil,h)-thetar(i_soil,h))*default_rel_sat)*horiz_thickness(tcid_instance,svc_counter,h)		!set to default relative saturation
 						end if
 					END DO
-					horithact(tcid_instance,svc_counter,(nbrhori(i_soil)+1):maxhori)=0		!set water content of irrelevant horizons values to 0
+					horithact(tcid_instance,svc_counter,(nbrhori(i_soil)+1):maxhori)=0.		!set water content of irrelevant horizons values to 0
 				END DO
 			END DO
 		END DO
@@ -424,7 +427,7 @@ subroutine init_gw_conds(gw_conds_file)
 
 			lu_area=area(i_subbas)*frac_lu(lu_counter,i_subbas)*1e6
 			
-			deepgw(i_subbas,lu_counter)=gwvol_temp/1000*lu_area			!set gw water content [m3]
+			deepgw(i_subbas,lu_counter)=gwvol_temp/1000.*lu_area			!set gw water content [m3]
 		END DO
 		file_read=1
 		CLOSE(11)
@@ -439,7 +442,7 @@ subroutine init_gw_conds(gw_conds_file)
 			i_lu=id_lu_intern(lu_counter,i_subbas)
 			lu_area=area(i_subbas)*frac_lu(lu_counter,i_subbas)*1e6
 
-			if (deepgw(i_subbas,lu_counter)==-9999) then			!not yet set?
+			if (deepgw(i_subbas,lu_counter)==-9999.) then			!not yet set?
 				if (file_read==1) then						!but this should have been done before
 					if (errors==0) then	!produce header before first warning only
 						write(*,'(A,f5.1,a,/,2a12)')' Following entities not initalised, using defaults (storage[mm]=',&
@@ -448,11 +451,11 @@ subroutine init_gw_conds(gw_conds_file)
 					errors=errors+1
 					write(*,'(5i12)')id_subbas_extern(i_subbas), id_lu_extern(i_lu)			!issue warning
 				end if
-				deepgw(i_subbas,lu_counter)=default_gw_storage/1000*lu_area		!set to default gw storage
+				deepgw(i_subbas,lu_counter)=default_gw_storage/1000.*lu_area		!set to default gw storage
 			end if
 			
 		END DO
-		deepgw(i_subbas,(nbr_lu(i_subbas)+1):maxsoter)=0		!set water content of irrelevant storages to 0
+		deepgw(i_subbas,(nbr_lu(i_subbas)+1):maxsoter)=0.		!set water content of irrelevant storages to 0
 	END DO
 	if (errors>0) then
 		call pause1 

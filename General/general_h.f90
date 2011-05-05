@@ -1,3 +1,6 @@
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
+
 ! Till: computationally irrelevant: added program version information to parameter.out
 ! 2009-06-17
 
@@ -99,14 +102,14 @@ LOGICAL :: f_lake_watbal,f_lake_sedbal,f_lake_inflow,f_lake_outflow,f_lake_volum
 LOGICAL :: doloadstate=.TRUE.			!load initial values before model run
 LOGICAL :: dosavestate=.TRUE.			!save state of model after execution
 REAL	:: default_rel_sat=1.0		!default relative saturation (initial value for all horizons, if not specified otherwise)
-REAL	:: default_gw_storage=0	!default ground water storage (to be assumed for all non-specified LUs) [mm]
+REAL	:: default_gw_storage=0.0	!default ground water storage (to be assumed for all non-specified LUs) [mm]
 
 
 
 logical,parameter :: domean=.FALSE.	! calculate daily ETP from mean daily values (this flag is dominant over donight)
 logical,parameter :: donight=.TRUE.		!if (domean==0):calculate daily ETP as sum of ETP for day and night (donight=1) or only day
 real :: daily_delta_temp !daily temperature amplitude (Tmin=Tmean-daily_delta_temp; Tmax=Tmean+daily_delta_temp;)
-REAL,parameter :: hours_of_daylight=12 !number of hours with sunlight per day
+REAL,parameter :: hours_of_daylight=12.0 !number of hours with sunlight per day
 
 end module common_h
 
@@ -167,10 +170,10 @@ INTEGER :: dayyear, daylastyear, dayoutsim
 ! days in months
 INTEGER :: daymon(12)
 
-! number of normal years (no Schaltjahr) in calculation period
-INTEGER*1 nos
+! number of normal years (no leap year) in calculation period
+INTEGER :: nos
 ! number of years in calculation period
-INTEGER*1 years
+INTEGER :: years
 INTEGER :: idold,idmon,mnew
 INTEGER :: mon_day(12)
 !COMMON /maintime/ tstart, tstop, mstart, mstop, t, m, d,  &

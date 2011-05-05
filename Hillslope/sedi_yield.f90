@@ -3,6 +3,10 @@ SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v
 ! hillslope erosion module for WASA
 ! to be called by soilwat.f90, Till Francke (till@comets.de)
 
+! Till: computationally relevant: fixed overestimation of transport capacity according to Everaert due to integer division
+! minor changes to improve compiler compatibility
+! 2011-04-29
+
 ! Pedro: added variables for TC_wise output
 ! 2009-06-03
 
@@ -91,8 +95,8 @@ REAL :: ef_str_pwr,tcap_everaert		!variable for computing transport capacity, tr
 
 
 
-IF (q_out==0) then		!no surface flow leaving this TC...
-	sed_yield=0			!...no sediment export
+IF (q_out==0.) then		!no surface flow leaving this TC...
+	sed_yield=0.			!...no sediment export
 	return
 END IF
 
@@ -100,12 +104,12 @@ END IF
 q = q_out/(tc_area*1e6)		!overland flow during timestep [m H2O]
 
 !ii: ganze Schleife einmal berechnen für jede TC am Anfang des Programms
-K_fac=0
-C_fac=0
-P_fac=0
-CFRG_fac=0
-mean_particle=0
-r=0		!for summing up fractions (actually, these should sum up to 1, but we'll do so just in case)
+K_fac        =0.
+C_fac        =0.
+P_fac        =0.
+CFRG_fac     =0.
+mean_particle=0.
+r=            0.		!for summing up fractions (actually, these should sum up to 1, but we'll do so just in case)
 
 
 
@@ -139,23 +143,23 @@ P_fac=P_fac/r
 CFRG_fac=CFRG_fac/r
 mean_particle=mean_particle/r
 
-L_cum=0	!disable cumulated L
+L_cum=0.	!disable cumulated L
 !Pedro - LS factor computed in a cumulative way according to Haan et al., 1994 (p. 262)
 L_cum=L_cum+L_slp		!acumulated slope length for erosion calculations (L_cum set to zero in file hymo_all.f90)
 
-m_ls = 0.3*(slope(tc_type_id)/100)/((slope(tc_type_id)/100)+exp(-1.47-(61.09*(slope(tc_type_id)/100))))+0.2	!according to Williams (1995)
+m_ls = 0.3*(slope(tc_type_id)/100.)/((slope(tc_type_id)/100.)+exp(-1.47-(61.09*(slope(tc_type_id)/100.))))+0.2	!according to Williams (1995)
 
 r=1.
 IF (allocated(beta_fac)   ) r=beta_fac   (lu_id)				!use LU-prespecified correction factor for beta/m (rill/interill ratio)
 IF (allocated(beta_fac_tc)) r=beta_fac_tc(tc_type_id)		!use TC-prespecified correction factor for beta/m (rill/interill ratio), override LU value
 IF (r/=1.) THEN	!apply prespecified correction factor for beta/m (rill/interill ratio)
-	!m_ls = 2*m_ls/(m_ls+1)  !TEST option
-	m_ls = r*m_ls/(-m_ls+1+r*m_ls) !(Haan 1994, p. table 8.6; Renard et al. 1997)
+	!m_ls = 2*m_ls/(m_ls+1.)  !TEST option
+	m_ls = r*m_ls/(-m_ls+1.+r*m_ls) !(Haan 1994, p. table 8.6; Renard et al. 1997)
 END IF
 
 
-S_fac=(slope(tc_type_id)/100)*(65.41*(slope(tc_type_id)/100)+4.56)+0.065
-L_fac=(L_cum**(m_ls+1)-(L_cum-L_slp)**(m_ls+1))/(L_slp*22.1**m_ls)	
+S_fac=(slope(tc_type_id)/100.)*(65.41*(slope(tc_type_id)/100.)+4.56)+0.065
+L_fac=(L_cum**(m_ls+1.)-(L_cum-L_slp)**(m_ls+1.))/(L_slp*22.1**m_ls)	
 LS_fac=L_fac*S_fac
 
 
@@ -163,7 +167,7 @@ LS_fac=L_fac*S_fac
 earea=tc_area*1e6	!area of erosive unit [m2]
 q_peak=q_peak_in
 v_ov=v_ov_in
-q_ov=(q_out)/(dt*3600/kfkorr_day)/(earea/L_slp)		!compute average overland flow rate [m**3/s] on a  1-m-strip
+q_ov=(q_out)/(dt*3600./kfkorr_day)/(earea/L_slp)		!compute average overland flow rate [m**3/s] on a  1-m-strip
 
 
 !compute maximum half-hour rain: fraction of daily precipitation that falls within 30 min (needed for estimation of peak flow and rainfall erosivity)
@@ -181,8 +185,8 @@ q_ov=(q_out)/(dt*3600/kfkorr_day)/(earea/L_slp)		!compute average overland flow 
 IF ( (erosion_equation==1) .OR. (erosion_equation==2))  THEN
 	!compute USLE-rainfall energy factor for USLE (1) and Onstad-Foster (2)
 	IF (dt<=1) THEN	!if high resolution precipitation is available
-		R_d=-1		!to do: add equation here for subdaily rainfall
-		r_p=-1
+		R_d=-1.		!to do: add equation here for subdaily rainfall
+		r_p=-1.
 	ELSE
 		R_d=precip(d,subbas_id)	!daily rainfall [mm]
 		!r_p=-2*R_d*log(1-min(alpha_05,0.99))	!peak rainfall rate [mm/h] Williams, 1995; eq. 25.132
@@ -190,14 +194,14 @@ IF ( (erosion_equation==1) .OR. (erosion_equation==2))  THEN
 		!ri_05=R_05/0.5							!maximum 0.5-h rainfall intensity [mm/h]
 		!rainfall intensities based on kfkorr showed low values, resulting in low erosion as well
 		ri_05=a_i30*(R_d**b_i30)
-		ri_05=min(ri_05,2*R_d)					!maximum possible intensity
-		r_p=-2*R_d*log(1-min((ri_05/2/R_d),0.99))
+		ri_05=min(ri_05,2.*R_d)					!maximum possible intensity
+		r_p=-2.*R_d*log(1-min((ri_05/2./R_d),0.99))
 
 	END IF
 
-	ei=R_d*(12.1+8.9*(log10(r_p)-0.434))*ri_05/1000	!USLE-energy factor in the "proper" units according to Williams, 1995 in Singh,1995, p.934,25.128
+	ei=R_d*(12.1+8.9*(log10(r_p)-0.434))*ri_05/1000.	!USLE-energy factor in the "proper" units according to Williams, 1995 in Singh,1995, p.934,25.128
 ELSE
-	ei=-1		!just for debugging
+	ei=-1.		!just for debugging
 END IF
 
 
@@ -207,8 +211,8 @@ IF ((erosion_equation==2) .OR. (erosion_equation==3) .OR. (erosion_equation==4))
 	!given as parameter q_peak = alpha_t_conc*q_surf*earea/1e6 / (3.6*t_conc)		!(6.3.20) estimation of peak runoff rate [m**3/s]
 	q_peak_mm_h=q_peak*3.6/(earea/1e6)	!convert peak runoff from [m³/s] to [mm/h]
 ELSE
-	q_peak=-1		!just for debugging
-	q_peak_mm_h=-1
+	q_peak=-1.		!just for debugging
+	q_peak_mm_h=-1.
 END IF
 
 SELECT CASE (erosion_equation)
@@ -283,22 +287,22 @@ SELECT CASE (transport_limit_mode)		!different modes how/if transport capacity o
 				END IF
 			ENDDO
 			IF (dummy14 > 1) THEN
-				dummy15=10**(log10(upper_limit(dummy14-1))+((log10(upper_limit(dummy14))-&
+				dummy15=10.**(log10(upper_limit(dummy14-1))+((log10(upper_limit(dummy14))-&
 					log10(upper_limit(dummy14-1)))*(gsize-accum1)/(accum2-accum1)))
 			ELSE
-				dummy15=10**(log10(upper_limit(dummy14)/2.)+((log10(upper_limit(dummy14))-&
+				dummy15=10.**(log10(upper_limit(dummy14)/2.)+((log10(upper_limit(dummy14))-&
 					log10(upper_limit(dummy14)/2.))*(gsize-accum1)/(accum2-accum1)))
 			END IF
 			d50=dummy15	!d50 em mm
 		END IF
 
 		!transport capacity
-		ef_str_pwr=((1000*1e3*9.81*q_ov*slope(tc_type_id)/100)**1.5)/((q*100)**(2/3))
+		ef_str_pwr=((1000.*1e3*9.81*q_ov*slope(tc_type_id)/100.)**1.5)/((q*100.)**(2./3.))
 
 		IF (d50>0.15) THEN
-			tcap_everaert=(4.6*1.e-7*ef_str_pwr**1.75*(d50*1000)**(-0.56))*(earea/L_slp*100)/1.e6*86400 !(ton)
+			tcap_everaert=(4.6 *1.e-7*ef_str_pwr**1.75*(d50*1000.)**(-0.56))*(earea/L_slp*100)/1.e6*86400. !(ton)
 		ELSE
-			tcap_everaert=(1.74*1.e-6*ef_str_pwr**1.07*(d50*1000)**0.47)*(earea/L_slp*100)/1.e6*86400 !(ton)
+			tcap_everaert=(1.74*1.e-6*ef_str_pwr**1.07*(d50*1000.)**  0.47 )*(earea/L_slp*100)/1.e6*86400. !(ton)
 		END IF
 
 		trans_cap(:)=tcap_everaert*mean_particle(:)
@@ -323,9 +327,9 @@ END IF
 
 
 !Pedro: TC-wise outputs
-runoff_TC(subbas_id,tc_type_id)=q*1000
+runoff_TC(subbas_id,tc_type_id)=q*1000.
 sed_yield_TC(subbas_id,tc_type_id)=sum(sed_yield)/tc_area
-deposition_TC(subbas_id,tc_type_id)=1-(sum(sed_yield)/(r+sum(sed_in)))
+deposition_TC(subbas_id,tc_type_id)=1.-(sum(sed_yield)/(r+sum(sed_in)))
 
 area_TC(subbas_id,tc_type_id)=tc_area
 cum_erosion_TC(subbas_id,tc_type_id)=cum_erosion_TC(subbas_id,tc_type_id)+r

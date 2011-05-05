@@ -1,5 +1,8 @@
 SUBROUTINE vert_dist(g,j,upstream,fbottom,fintake,fover)
  
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
+
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:31
  
@@ -21,10 +24,10 @@ REAL:: retention_s,time_s,suspension_0
 
 !Ge to include the DAILY mean temperature of the reservoir (celsius degree)
 !Ge tempres=20 C (temporarily)
-tempres(d,upstream)=20
+tempres(d,upstream)=20.
 
 ! initialization
-a=2*diam(g)
+a=2.*diam(g)
 depth_bottom=a
 depth_intake=max(0.,elevdead(upstream)-dayminlevel(step,upstream))
 depth_over=max(0.,(1.-a)*(maxlevel(upstream)-dayminlevel(step,upstream)))

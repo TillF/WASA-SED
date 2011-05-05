@@ -1,4 +1,7 @@
 SUBROUTINE reservoir (STATUS,upstream,res_h)
+
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
  
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:56:42
@@ -180,8 +183,7 @@ if (reservoir_check==0) reservoir_balance=1
 	ENDIF
 
     IF (dummy1 /= id_subbas_extern(i)) THEN
-      WRITE(*,*) 'Sub-basin-IDs in file reservoir.dat  &
-          must have the same ordering scheme as in hymo.dat'
+      WRITE(*,*) 'Sub-basin-IDs in file reservoir.dat must have the same ordering scheme as in hymo.dat'
       STOP
     END IF   
   END DO
@@ -226,8 +228,7 @@ if (reservoir_check==0) reservoir_balance=1
           READ (11,*)dummy1,reservoir_down(i)
 
           IF (dummy1 /= id_subbas_extern(i)) THEN
-            WRITE(*,*) 'Sub-basin-IDs in file lateral_inflow.dat  &
-				must have the same ordering scheme as in hymo.dat'
+            WRITE(*,*) 'Sub-basin-IDs in file lateral_inflow.dat must have the same ordering scheme as in hymo.dat'
             STOP
           END IF   
 
@@ -246,8 +247,7 @@ if (reservoir_check==0) reservoir_balance=1
 		  dummy1=id_subbas_extern(i)
 		ENDIF
         IF (dummy1 /= id_subbas_extern(i)) THEN
-         WRITE(*,*) 'Sub-basin-IDs in file operat_rule.dat  &
-          must have the same ordering scheme as in hymo.dat'
+         WRITE(*,*) 'Sub-basin-IDs in file operat_rule.dat must have the same ordering scheme as in hymo.dat'
          STOP
         END IF   
      ENDDO
@@ -270,8 +270,7 @@ if (reservoir_check==0) reservoir_balance=1
 	  IF (damq_frac(i) == -999.) READ (11,*)dummy1,(dayexplot(i,s),s=1,4),(damq_frac_season(i,s),s=1,4)
 	  IF (damq_frac(i) /= -999.) dummy1=id_subbas_extern(i)
       IF (dummy1 /= id_subbas_extern(i)) THEN
-        WRITE(*,*) 'Sub-basin-IDs in file operat_rule.dat  &
-          must have the same ordering scheme as in hymo.dat'
+        WRITE(*,*) 'Sub-basin-IDs in file operat_rule.dat must have the same ordering scheme as in hymo.dat'
         STOP
       END IF   
 	ENDDO
@@ -293,8 +292,7 @@ if (reservoir_check==0) reservoir_balance=1
 	  IF (fvol_bottom(i) == -999.) READ (11,*)dummy1,operat_start(i),operat_stop(i),operat_elev(i)
 	  IF (fvol_bottom(i) /= -999.) dummy1=id_subbas_extern(i)
       IF (dummy1 /= id_subbas_extern(i)) THEN
-        WRITE(*,*) 'Sub-basin-IDs in file operat_bottom.dat  &
-          must have the same ordering scheme as in hymo.dat'
+        WRITE(*,*) 'Sub-basin-IDs in file operat_bottom.dat must have the same ordering scheme as in hymo.dat'
         STOP
       END IF   
 	ENDDO
@@ -343,21 +341,18 @@ if (reservoir_check==0) reservoir_balance=1
       READ(11,*) dummy1,dummy2,(vol_bat0(j,i),j=1,nbrbat1)
       IF (maxlevel(i) > elev_bat0(nbrbat1,i)) THEN
         WRITE(*,*)'ERROR subasin ',id_subbas_extern(i),  &
-            'MAXIMUM RESERVOIR LEVEL VALUE IS GREATER THAN THE MAXIMUM  &
-            ELEVATION AT THE STAGE-AREA-VOLUME CURVE (FILE: cav.dat)'
+            'MAXIMUM RESERVOIR LEVEL VALUE IS GREATER THAN THE MAXIMUM ELEVATION AT THE STAGE-AREA-VOLUME CURVE (FILE: cav.dat)'
         STOP
       ELSE IF (minlevel(i) < elev_bat0(1,i)) THEN
         WRITE(*,*)'ERROR subasin ',id_subbas_extern(i),  &
-            'MINIMUM RESERVOIR LEVEL VALUE IS LESS THAN THE MINIMUM  &
-            ELEVATION AT THE STAGE-AREA-VOLUME CURVE (FILE: cav.dat)'
+            'MINIMUM RESERVOIR LEVEL VALUE IS LESS THAN THE MINIMUM ELEVATION AT THE STAGE-AREA-VOLUME CURVE (FILE: cav.dat)'
         STOP
       END IF
 	ELSE
 	  dummy1=id_subbas_extern(i)
     END IF
     IF (dummy1 /= id_subbas_extern(i)) THEN
-      WRITE(*,*) 'Sub-basin-IDs in file cav.dat  &
-          must have the same ordering scheme as in hymo.dat'
+      WRITE(*,*) 'Sub-basin-IDs in file cav.dat must have the same ordering scheme as in hymo.dat'
       STOP
     END IF   
    END DO
@@ -452,7 +447,7 @@ if (reservoir_check==0) reservoir_balance=1
   endif
 
   DO i=1,subasin
-    IF (storcap(i) /= 0) THEN   
+    IF (storcap(i) /= 0.) THEN   
       WRITE(subarea,*)id_subbas_extern(i)
 	  DO j=1,12
         IF (subarea(j:j) /= ' ') THEN
@@ -462,8 +457,7 @@ if (reservoir_check==0) reservoir_balance=1
       END DO
 	  OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_watbal.out',STATUS='replace')
       IF (f_res_watbal) then
-	    WRITE(11,*)'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), intake(m**3/s), overflow(m**3/s),  &
-				qbottom(m**3/s), qout(m**3/s), elevation(m), area(m**2), volume(m**3)'		
+	    WRITE(11,*)'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), elevation(m), area(m**2), volume(m**3)'		
         CLOSE(11)
 	  ELSE
         CLOSE(11, status='delete') !delete any existing file, if no output is desired
@@ -473,7 +467,7 @@ if (reservoir_check==0) reservoir_balance=1
 
 !Ge initialization of output files
   DO i=1,subasin
-    IF (storcap(i) /= 0) THEN   
+    IF (storcap(i) /= 0.) THEN   
       WRITE(subarea,*)id_subbas_extern(i)
 	  DO j=1,12
         IF (subarea(j:j) /= ' ') THEN
@@ -494,7 +488,7 @@ if (reservoir_check==0) reservoir_balance=1
 !Ge initialization of output files
   DO i=1,subasin
    IF (nbrbat(i) /= 0) THEN
-    IF (storcap(i) /= 0) THEN   
+    IF (storcap(i) /= 0.) THEN   
       WRITE(subarea,*)id_subbas_extern(i)
 	  DO j=1,12
         IF (subarea(j:j) /= ' ') THEN
@@ -517,7 +511,7 @@ if (reservoir_check==0) reservoir_balance=1
 !Ge temporary output files to test the cascade routing scheme of the lake module
 !  IF (.not. doacud) THEN
 !   DO i=1,subasin
-!    IF (storcap(i) /= 0) THEN   
+!    IF (storcap(i) /= 0.) THEN   
 !	  OPEN(11,FILE=pfadn(1:pfadi)//'res_watbal_lake.out',STATUS='replace')
 !	    WRITE(11,*)'Subasin-ID, year, day, hour, inflow_classes(m**3), outflow_classes(m**3), retention_classes(m**3), volume_classes(m**3)'		
 !      CLOSE(11)
@@ -525,7 +519,7 @@ if (reservoir_check==0) reservoir_balance=1
 !   ENDDO
 !   DO i=1,subasin
 !    IF (dosediment) THEN
-!     IF (storcap(i) /= 0) THEN   
+!     IF (storcap(i) /= 0.) THEN   
 !	  OPEN(11,FILE=pfadn(1:pfadi)//'res_sedbal_lake.out',STATUS='replace')
 !	    WRITE(11,*)'Subasin-ID, year, day, hour, sedinflow_classes(ton), sedoutflow_classes(ton), sedretention_classes(ton), sedimentation_class'		
 !      CLOSE(11)
@@ -534,7 +528,7 @@ if (reservoir_check==0) reservoir_balance=1
 !   ENDDO
 !  ELSE
 !   DO i=1,subasin
-!    IF (storcap(i) /= 0) THEN   
+!    IF (storcap(i) /= 0.) THEN   
 !	  OPEN(11,FILE=pfadn(1:pfadi)//'res_watbal_lake.out',STATUS='replace')
 !	    WRITE(11,*)'Subasin-ID, year, day, hour, inflow_strateg(m**3), outflow_strateg(m**3), retention_strateg(m**3), volume_strateg(m**3)'		
 !      CLOSE(11)
@@ -542,7 +536,7 @@ if (reservoir_check==0) reservoir_balance=1
 !   ENDDO
 !   DO i=1,subasin
 !    IF (dosediment) THEN
-!     IF (storcap(i) /= 0) THEN   
+!     IF (storcap(i) /= 0.) THEN   
 !	  OPEN(11,FILE=pfadn(1:pfadi)//'res_sedbal_lake.out',STATUS='replace')
 !	    WRITE(11,*)'Subasin-ID, year, day, hour, sedinflow_strateg(ton), sedoutflow_strateg(ton), sedretention_strateg(ton), sedimentation_class'		
 !      CLOSE(11)
@@ -691,14 +685,12 @@ IF (STATUS == 1) THEN
 	      nbrbat1=nbrbat(i)
           DO id=1,dayyear
             IF (damelev0(id,i) > elev_bat0(nbrbat1,i) .or. damelev1(id,i) > elev_bat0(nbrbat1,i) ) THEN
-              WRITE(*,*)'ERROR subasin ',id_subbas_extern(i),' year ',t,' day ',id,  &
-					'GIVEN VALUE OF DAILY RESERVOIR LEVEL IS GREATER THAN THE MAXIMUM  &
-					RESERVOIR ELEVATION AT THE STAGE-AREA-VOLUME CURVE (FILE: cav.dat)'
+              WRITE(*,*)'ERROR subasin ',id_subbas_extern(i),' year ',t,' day ',id, &
+			     	'GIVEN VALUE OF DAILY RESERVOIR LEVEL IS GREATER THAN THE MAXIMUM RESERVOIR ELEVATION AT THE STAGE-AREA-VOLUME CURVE (FILE: cav.dat)'
 			  STOP
 			ELSE IF (damelev0(id,i) < elev_bat0(1,i) .or. damelev1(id,i) < elev_bat0(1,i)) THEN
 			  WRITE(*,*)'ERROR subasin ',id_subbas_extern(i),' year ',t,' day ',id,  &
-					'GIVEN VALUE OF DAILY RESERVOIR LEVEL IS LESS THAN THE MINIMUM  &
-					ELEVATION AT THE STAGE-AREA-VOLUME CURVE (FILE: cav.dat)'
+					'GIVEN VALUE OF DAILY RESERVOIR LEVEL IS LESS THAN THE MINIMUM ELEVATION AT THE STAGE-AREA-VOLUME CURVE (FILE: cav.dat)'
 			  STOP
 			END IF
 		  ENDDO
@@ -954,9 +946,9 @@ IF (STATUS == 2) THEN
 ! Calculation of evaporation and precipitation using the truncated cone volume (m3)
 ! (using the morphologic parameter alpha)
         evaphelp=(areahelp+SQRT(areahelp*damareaact(upstream))+  &
-            damareaact(upstream))*res_pet(step,upstream)/1000.*1/3
+            damareaact(upstream))*res_pet(step,upstream)/1000.*1./3.
         prechelp=(areahelp+SQRT(areahelp*damareaact(upstream))+  &
-            damareaact(upstream))*res_precip(step,upstream)/1000.*1/3
+            damareaact(upstream))*res_precip(step,upstream)/1000.*1./3.
         infhelp=0.
         volact(step,upstream)=volhelp
 
@@ -1510,7 +1502,7 @@ IF (STATUS == 3) THEN
 ! Output files of Reservoir Modules
   IF (reservoir_print == 1) THEN
     DO i=1,subasin
-      IF (storcap(i) /= 0 .and. t >= damyear(i)) THEN   
+      IF (storcap(i) /= 0. .and. t >= damyear(i)) THEN   
         WRITE(subarea,*)id_subbas_extern(i)
 	    DO j=1,12
           IF (subarea(j:j) /= ' ') THEN
@@ -1545,7 +1537,7 @@ IF (STATUS == 3) THEN
         CLOSE(11)
 		ENDIF
 	  ENDIF
-      IF (storcap(i) /= 0 .and. t >= damyear(i) .and. nbrbat(i) /= 0) THEN
+      IF (storcap(i) /= 0. .and. t >= damyear(i) .and. nbrbat(i) /= 0) THEN
         WRITE(subarea,*)id_subbas_extern(i)
 	    DO j=1,12
           IF (subarea(j:j) /= ' ') THEN

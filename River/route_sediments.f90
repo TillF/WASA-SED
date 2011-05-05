@@ -1,5 +1,7 @@
 SUBROUTINE route_sediments(i, flow, r_area)
- 
+
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
 
 !!    ~ ~ ~ PURPOSE ~ ~ ~
 !!    this subroutine routes sediment through the river system;
@@ -83,7 +85,7 @@ if (r_storage(i).eq.0.) then
  return
 endif
 
-IF (r_storage(i).eq.0.and.r_qin(2,i).lt.1.e-1) then
+IF (r_storage(i) .eq. 0. .and. r_qin(2,i) .lt. 1.e-1) then
  sediment_out(i,:) = 0.
  sed_storage(i,:) = 0.
  return
@@ -91,10 +93,10 @@ ENDIF
 
 !! initialize water in reach during time step [m3]
 r_storage_previous=r_storage(i)+(r_qout(2,i)-r_qin(2,i))*dt*3600.
-volume = r_storage_previous+r_qin(2,i)*3600*dt
+volume = r_storage_previous+r_qin(2,i)*3600.*dt
 
 !! check if it is an ephermeal river (as set in Muskingum.f90) that starts to flow
-if (r_qout(1,i).eq.0.and.r_storage(i).eq.(r_qin(2,i)+3600*dt)) then
+if (r_qout(1,i) .eq. 0. .and. r_storage(i) .eq. (r_qin(2,i)+3600.*dt)) then
   sediment_out(i,:) = 0.
   sed_storage(i,:) = 0.
   volume = r_storage(i)
@@ -144,7 +146,7 @@ do k=1, n_sed_class
 ! Extension to incorporate detachment limitations (e.g. rocky riverbeds, where nothing can be degradeded, r_rock: percentage cover of riverbed with rock)
 ! only allow degradation if discharge larger than 0.1 m3/s
 	if (r_qout(1,i).gt.0.1) then   
-	   river_degradation(i,k) = depnet * r_efactor(i) * r_cover(i) * (1 - r_rock(i))
+	   river_degradation(i,k) = depnet * r_efactor(i) * r_cover(i) * (1. - r_rock(i))
 	else
        river_degradation (i,k) = 0.
 	endif
@@ -165,7 +167,7 @@ do k=1, n_sed_class
 ! Calculation of sediment balance [tons] (assuming instaneous mixing)
   sed_storage(i,k) = sed_storage(i,k)+ sediment_in(i,k) + river_degradation(i,k) - river_deposition(i,k)
 !Calculation of sediment leaving the reach [tons]
-  sediment_out(i,k) = sed_storage(i,k)/ volume * (r_qout(2,i)*3600*dt)
+  sediment_out(i,k) = sed_storage(i,k)/ volume * (r_qout(2,i)*3600.*dt)
   IF (sediment_out(i,k) < 0.) sediment_out(i,k) = 0.
 
   sed_storage(i,k) = sed_storage(i,k) - sediment_out(i,k)

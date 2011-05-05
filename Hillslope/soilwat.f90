@@ -4,7 +4,8 @@ SUBROUTINE soilwat(hh,day,month,i_subbas2,i_ce,i_lu,oc2,tcid_instance2,id_tc_typ
         tcsoilet,tcintc,prec,precday,prechall2,petday,  &
         tcarea2,bal, rootd_act,height_act,lai_act,alb_act,sed_in_tc,sed_out_tc)
 
-
+!Till: computationally irrelevant: minor changes to improve compiler compatibility
+!2011-04-29
 
 !Andreas: a similar problem with the units of lateral flow (see changes from 2010-08-15) has also been found at three places, where the maximum
 ! possible lateral inflow to an SVC is calculated. 
@@ -405,8 +406,8 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
 				!Till: compute maximum inflow according to "exchange surface"
 				!Andreas: has to be in unit mm, correct calculation similar to lateral outflow calculation
 			    temp3=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))* &           ! Q_li 
-				    horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100  &
-					/  slength(i_lu) / fracterrain(id_tc_type2)/1000  
+				    horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100.  &
+					/  slength(i_lu) / fracterrain(id_tc_type2)/1000.  
 
                 temp3=MIN(temp3,temp2)					!Till: actual amount of water going into current horizon
                 horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)+temp3
@@ -419,7 +420,7 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
 !  lower horizon
                 temp5=horithact(tcid_instance2,i,h) - thetas(soilid,h)* horiz_thickness(tcid_instance2,i,h)	!Till: compute if watercontent exceeds saturation
 					  
-				IF (temp5 > 0 ) THEN	!Till: if water content exceeds saturation...
+				IF (temp5 > 0. ) THEN	!Till: if water content exceeds saturation...
 				  remainlat(lath)=remainlat(lath)+ temp5				!Till: excess cannot flow into this horizon
                   horithact(tcid_instance2,i,h)=thetas(soilid,h)* horiz_thickness(tcid_instance2,i,h)	!Till: horizon is saturated
                 END IF
@@ -456,8 +457,8 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
 				!Till: compute maximum inflow according to "exchange surface"
 				!Andreas: has to be in unit mm, correct calculation similar to lateral outflow calculation
 			    temp3=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))* &           ! Q_li 
-				    horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100  &
-					/  slength(i_lu) / fracterrain(id_tc_type2)/1000  
+				    horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100.  &
+					/  slength(i_lu) / fracterrain(id_tc_type2)/1000.  
 
 
 				temp3=MIN(temp3,temp2)
@@ -544,7 +545,7 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
 		watbal=templat/(tcarea2*1.e3)							!reset water balance
 		q_sub_out=0.											!Till: no surface runoff yet - may result later after treatment of non-alluvial SVCs
 	  else
-		latred(tcid_instance2,:)=0								!Till: nothin more to do
+		latred(tcid_instance2,:)=0.								!Till: nothin more to do
 	  end if
 
 	END IF ! endif alluvial soils occur in this most downslope TC
@@ -569,7 +570,7 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
      
 	!  maximum lateral inflow into this SVC
 			DO h=1,maxhori*3
-			  remainlat(h)=(latred(tcid_instance2,h)*frac_svc(i,tcid_instance2)/(1-allalluv)) / & !Till: distribute subsurface flow according to fraction among non-alluvial soils
+			  remainlat(h)=(latred(tcid_instance2,h)*frac_svc(i,tcid_instance2)/(1.-allalluv)) / & !Till: distribute subsurface flow according to fraction among non-alluvial soils
 				  (tcarea2*1.e3*frac_svc(i,tcid_instance2))
 			END DO
         
@@ -710,8 +711,8 @@ ELSE	! endif lowest terrain component - if not lowest TC, do upslope now
 		!Till: compute maximum inflow according to "exchange surface"
 		!Andreas: has to be in unit mm, correct calculation similar to lateral outflow calculation
                 temp3=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))* &           ! Q_li 
-                  horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100  &
-                  /  slength(i_lu) / fracterrain(id_tc_type2)/1000  
+                  horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100.  &
+                  /  slength(i_lu) / fracterrain(id_tc_type2)/1000.  
             temp3=MIN(temp3,temp2)
             horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)+temp3
 
@@ -1086,8 +1087,8 @@ ELSE
             tcintc=tcintc+intc_evap(j)*frac_svc(j,tcid_instance2)			!Till: sum up all interception losses for entire TC
             
 			! distribute among hourly timesteps								!ii das soll dann auch mal mit anderen Zeitschritten funktionieren
-            if (precday==0) then						!no precip this day - distribute evaporation of leftover interception equally
-				intcept_mem=intc_evap(j)/24
+            if (precday==0.) then						!no precip this day - distribute evaporation of leftover interception equally
+				intcept_mem=intc_evap(j)/24.
 			else
 				DO i=1,24								!normal case: rain this day !ii vectorize
 				  intcept_mem(tc_counter2,j,i)=intc_evap(j)* prechall2(i)/precday	!Till: distribute according to rainfall amount that fell
@@ -1415,7 +1416,7 @@ DO n_iter=1,2
 !
 
 
-    IF (INPUT > 0) THEN
+    IF (INPUT > 0.) THEN
       
 !   soil component is saturated
 !   if dolatsc (lateral redistribution) there might be input from other SVCs
@@ -1898,7 +1899,7 @@ DO n_iter=1,2
 				IF (INPUT-inf > 0.001) THEN
 				  IF (dolatsc) THEN
 					q_surf_out=q_surf_out+inputrem(i)-qmerk2(i)
-					if (q_surf_out<0) then
+					if (q_surf_out<0.) then
 						write(*,*) 'das ist mist'
 					end if
 					!only for output
@@ -2022,12 +2023,12 @@ DO i=1,nbr_svc(tcid_instance2)
   END DO
   
 !    ansonsten: mist:
-  IF (nbrrooth(i) == 0) THEN
+  IF (nbrrooth(i) == 0.) THEN
     WRITE(*,*) 'no roots ?, tcid_instance2,i',tcid_instance2,i
     !call pause1
   END IF
 
-  IF (hfrac(i)==0) THEN
+  IF (hfrac(i)==0.) THEN
     WRITE(*,*) 'calculted rooted fraction is 0, set to 0.001, tcid_instance2,i',tcid_instance2,i
 	hfrac(i)=0.01
   END IF
@@ -2054,8 +2055,8 @@ DO i=1,nbr_svc(tcid_instance2)
       vangen(h)=MAX(vangen(h),0.)
       vangen(h)=MIN(vangen(h),1.)									!Till: relative saturation must be within 0..1
       
-	  if (vangen(h)==1) then										!Till: complete saturation...
-		suction(h)=0												!Till: suction is 0 (this produces NaN otherwise)
+	  if (vangen(h)==1.) then										!Till: complete saturation...
+		suction(h)=0.												!Till: suction is 0 (this produces NaN otherwise)
 	  else
 		suction(h)=((1./(vangen(h)** (1./porem(soilid,h))) -1.)**(1./(poresz(soilid,h)+1.)))/ (1./bubble(soilid,h))
 	  end if
@@ -2072,7 +2073,7 @@ DO i=1,nbr_svc(tcid_instance2)
 
 	  
 	  IF (suction(h) > huge(suction(h))-1) THEN
-        suction(h)=huge(suction(h))-1		!Till: prevents infinite suction values
+        suction(h)=huge(suction(h))-1.		!Till: prevents infinite suction values
       END IF
       
 
@@ -2110,7 +2111,7 @@ DO i=1,nbr_svc(tcid_instance2)
 
 	if (isNaN(def)) then
 		write(*,*)'NAN value produced! (2)'
-		def=1				!this happens if a vegetation class with "no vegetation" is encountered
+		def=1.				!this happens if a vegetation class with "no vegetation" is encountered
 							!ii: fix this more elegantly
 	end if
   
@@ -2172,17 +2173,17 @@ if (isnan(evaps)) then
 ! sometimes there may be some net negative allday transpiration (dew deposit)
 ! if daytime transpiration is 0 due to no active vegetation
 ! allday transpiration is set to 0 then
-  IF (evapveg < 0) THEN
+  IF (evapveg < 0.) THEN
     evapveg=0.
   END IF
-  IF (evaps < 0) THEN
+  IF (evaps < 0.) THEN
     evaps=0.
   END IF
   !evaps=0
   evapt=evaps+evapveg
 
 if (isnan(evapt)) then
- evaps=1
+ evaps=1.
  write(*,*)'problems with evaps'
  stop
  end if  
@@ -2215,7 +2216,7 @@ if (isnan(evapt)) then
     evapveg=evapt-evaps
 
 if (isnan(evaps)) then
- evaps=1
+ evaps=1.
  write(*,*)'problems with evaps'
  stop
  end if
@@ -2318,7 +2319,7 @@ if (isnan(evaps)) then
   END IF
 
 if (isnan(evaps)) then
- evaps=1
+ evaps=1.
  end if
   
 !  update soil moisture of uppermost horizon by evaporation from soil surface
@@ -2480,7 +2481,7 @@ DO i=1,nbr_svc(tcid_instance2)
 !  macro is reduced if flow into macropores occured for one horizon
 !  (available macropores volume is smaller for higher horizons)
         percolmac(:)=0.
-        IF (macro(i,h+1) > 0) THEN
+        IF (macro(i,h+1) > 0.) THEN
           IF (thfree(i,h) > 0.) THEN
             hmerk=h
             testi2=1
@@ -2584,7 +2585,7 @@ DO i=1,nbr_svc(tcid_instance2)
 			        !Doris, Till, Andreas: calculation results in wrong unit, l2 should result in mm
 			
 				!!Eq 4.46 saturated depth in m
-				!dsi = temp3*temp2 /1000 
+				!dsi = temp3*temp2 /1000. 
 				!
 				!!Eq 4.45 cross section of lateral flow in m2
 				!Aq  = frac_svc(i,tcid_instance2)*area(i_subbas2)*frac_lu(oc2,i_subbas2)*1000000  &
@@ -2603,14 +2604,14 @@ DO i=1,nbr_svc(tcid_instance2)
 				!! above lines in one step:
 				!l2(h)=frac_svc(i,tcid_instance2)*area(i_subbas2)*frac_lu(oc2,i_subbas2)*1000000  /  slength(i_lu)  &    ! Aq
 				!	  * temp3*temp2 /1000	&											   ! dsi
-				!	  * (k_sat(soilid,h)/1000)/dt_per_day*(1.-coarse(soilid,h)) * slope(id_tc_type2)/100  &		   ! Q_li
+				!	  * (k_sat(soilid,h)/1000)/dt_per_day*(1.-coarse(soilid,h)) * slope(id_tc_type2)/100.  &		   ! Q_li
 				!	  / (area(i_subbas2)*frac_lu(oc2,i_subbas2) * frac_svc(i,tcid_instance2) * fracterrain(id_tc_type2)*1000000)  *  1000  !/area
 
 				
 				! above lines in one step and shorter
 				l2(h)= k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))  &		   ! Q_li
-							* temp3*temp2* slope(id_tc_type2)/100 	&
-							/  slength(i_lu) / fracterrain(id_tc_type2)/1000 
+							* temp3*temp2* slope(id_tc_type2)/100. 	&
+							/  slength(i_lu) / fracterrain(id_tc_type2)/1000. 
 			
 	
 				!Original equation from Andreas: equal to new corrected equation with extra factor /2.			
@@ -2630,7 +2631,7 @@ DO i=1,nbr_svc(tcid_instance2)
 				!	/(slength(i_lu)*fracterrain(id_tc_type2)*1000.) *(slope(id_tc_type2)/100./2.)
 				!	!temp2=temp2
 
-				l2(h)=0 !Till: no free draining water
+				l2(h)=0. !Till: no free draining water
 
 			END IF	! if (thfree(i,h) > 0.)
 
@@ -2810,8 +2811,8 @@ DO i=1,nbr_svc(tcid_instance2)
   
 !**   do for all soil horizons
   DO h=1,nbrhori(soilid)-1
-    IF (thfree(i,h) < 0) THEN
-      IF (thfree(i,h+1) > 0) THEN
+    IF (thfree(i,h) < 0.) THEN
+      IF (thfree(i,h+1) > 0.) THEN
         
  		percol(h)=-1.*thfree(i,h+1)*  &
             (1.-EXP(-1./(thfree(i,h+1)/conduns(h+1))))
@@ -2933,16 +2934,16 @@ watbal=watbal+(thact1-thact)
 
 bal=watbal
 
-if (dosediment .AND. (q_surf_out > 0)) then !if hillslope erosion is to be computed and there is runoff
+if (dosediment .AND. (q_surf_out > 0.)) then !if hillslope erosion is to be computed and there is runoff
 	!the following calculation in the peak runoff rate q_peak uses the equations given in the SWAT Theoretical Documentation, pp.105, 2002
 	
 	!run_cf=(q_surf_out-q_surf_in)/prec	!compute runoff coefficient for this timestep not needed
 
-	q_surf=q_surf_out/tcarea2/1000		!surface runoff [mm H2O]			
+	q_surf=q_surf_out/tcarea2/1000.		!surface runoff [mm H2O]			
 
 	!ii do this only once for all models at the beginning of model run
-	manning_n=0
-	r=0		!for summing up fractions (actually, these should sum up to 1, but we'll do so just in case)
+	manning_n=0.
+	r=0.		!for summing up fractions (actually, these should sum up to 1, but we'll do so just in case)
 
 	DO i=1,size(tc_contains_svc2(id_tc_type2)%p)
 		j=tc_contains_svc2(id_tc_type2)%p(i)%svc_id				!get id of current SVC to be treated
@@ -2955,30 +2956,30 @@ if (dosediment .AND. (q_surf_out > 0)) then !if hillslope erosion is to be compu
 	manning_n=manning_n/r
 
 
-	r=atan(slope(id_tc_type2)/100)				!convert slope [%] to radiant, avoid multiple computation
+	r=atan(slope(id_tc_type2)/100.)				!convert slope [%] to radiant, avoid multiple computation
 	L_slp=slength(i_lu)*fracterrain(id_tc_type2)	 !absolute slope length of TC [m] (projected length, Haan 1994, p.261) (was:.../ cos(r))
 
-	q_ov=(q_surf_in+q_surf_out)/2/(dt*3600/kfkorr_day)/(tcarea2*1e6/L_slp)		!compute average overland flow rate [m**3/s] on a  1-m-strip
+	q_ov=(q_surf_in+q_surf_out)/2./(dt*3600./kfkorr_day)/(tcarea2*1e6/L_slp)		!compute average overland flow rate [m**3/s] on a  1-m-strip
 
 	!v_ov=q_ov**0.4*slope(id_tc_type2)**0.3/manning_n**0.6				!overland flow velocity [m/s]
-	v_ov=(q_ov**0.4)*((slope(id_tc_type2)/100)**0.3)/manning_n**0.6				!overland flow velocity [m/s] (6.3.4)
+	v_ov=(q_ov**0.4)*((slope(id_tc_type2)/100.)**0.3)/manning_n**0.6				!overland flow velocity [m/s] (6.3.4)
 
 	!not needed h=q_ov/(v_ov*dt)													!depth of overland flow [mm]
 
 	!ii: L_slp pass this to sedi_yield 
-	t_conc=L_slp/(3600*v_ov)								!compute time of concentration [h] (6.3.3)
+	t_conc=L_slp/(3600.*v_ov)								!compute time of concentration [h] (6.3.3)
 
 	!compute maximum half_hour-rain: fraction of daily precipitation that falls within 30 min
 	if (dt<=1) then	!if high resolution precipitation is available
 		alpha_05=(maxval(prechall2)/precday)/(dt*2)	!estimate the maximum rainfall rate based on given precipitation data
 	!	alpha_05= 0.9
 	else
-		if (kfkorr_a==0) then		
-			alpha_05=0.5*kfkorr/24	!time invariant kfkorr
+		if (kfkorr_a==0.) then		
+			alpha_05=0.5*kfkorr/24.	!time invariant kfkorr
 		else
 		!based on kfcorr: time variant kfkorr: only the the precipitation-dependent part of the term is used (the kfkorr factor is considered 
 		!a calibration factor for Ksat and not responsible for sub-daily rainfall dynamics)
-				alpha_05=min(1.0,0.5*(kfkorr_day/kfkorr)/24)	
+				alpha_05=min(1.0,0.5*(kfkorr_day/kfkorr)/24.)	
 			!alpha_05=0.5*a_i30*(precday**(b_i30-1))		!based on USLE Ri50-coefficients  - doubles sediment yield in Isábena
 		end if	
 		alpha_05=min(alpha_05,1.0)	!at maximum, all daily rainfall fell within 30 min
@@ -2988,7 +2989,7 @@ if (dosediment .AND. (q_surf_out > 0)) then !if hillslope erosion is to be compu
 	if (alpha_05==1.0) then
 		alpha_t_conc=1.0
 	else
-		alpha_t_conc=1-exp(2*t_conc*log(1-alpha_05))				!(6.3.19) compute fraction of rain falling during the time of concentration
+		alpha_t_conc=1-exp(2.*t_conc*log(1.-alpha_05))				!(6.3.19) compute fraction of rain falling during the time of concentration
 	end if
 
 	q_peak = alpha_t_conc*q_surf*tcarea2 / (3.6*t_conc)			! (6.3.20) estimation of peak runoff rate [m**3/s]

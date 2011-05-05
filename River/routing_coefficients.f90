@@ -1,4 +1,7 @@
 SUBROUTINE routing_coefficients(i, STATUS, flow, r_area, p)
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
+
 !Till: computationally relevant for very initial phase of simulation: fixed bug in iterative estimation of depth from discharge
 !2009-12-18
 
@@ -82,10 +85,10 @@ s1 = r_sideratio(i)
 s2 = r_sideratio_fp(i)
 
 
-flow=-1000
-r_area=-100
-p=-1000
-r_depth_cur(i)=-1000
+flow =-1000.
+r_area=-100.
+p=-1000.
+r_depth_cur(i)=-1000.
 
 
 ! -----------------------------------------------------------------------
@@ -107,27 +110,27 @@ IF (STATUS == 1) THEN
 
 	!!determine the correct flow area a for the given input discharge r_qin
 	! for flow in the main channel
-	if (r_qin(2,i) > 0)  then
+	if (r_qin(2,i) > 0.)  then
 		d_it =calc_d(r_qin(2,i))
 		CALL calc_q_a_p(d_it, flow, r_area, p)
 	else
-		r_area=0
+		r_area=0.
 	endif
 
-	if (flow < 0) r_area=0
+	if (flow < 0.) r_area=0.
 
 	!Calculation of initial water volume for each river stretch [m3]
-	if (r_qin(2,i) == 0) then
+	if (r_qin(2,i) == 0.) then
 	  r_storage(i) = 0. 
 	else
-	  r_storage(i) =   r_area * r_length(i) * 1000
+	  r_storage(i) =   r_area * r_length(i) * 1000.
 	  sed_storage(i,1) = 0.
 	endif
 
 ENDIF
 
 IF (STATUS == 3) THEN
-	vol = r_qin(2,i) * dt * 3600 !Till: fill up storage with inflow - just to allow computations when storage was empty
+	vol = r_qin(2,i) * dt * 3600. !Till: fill up storage with inflow - just to allow computations when storage was empty
 ELSE
 	vol = r_storage(i)
 END IF
@@ -140,7 +143,7 @@ IF (STATUS == 1  .OR.STATUS == 2 .OR. STATUS == 3) THEN
 	r_area = vol / (r_length(i) * 1000.)
 
 	!! calculate depth of flow, Equation 23.2.4 or 23.2.5
-	if (vol <= 0) then
+	if (vol <= 0.) then
 		r_depth_cur(i) = 0.
 	elseif (r_area <= area_bankful(i)) THEN
 	  r_depth_cur(i) = SQRT( r_area                    / s1 + bottom_width(i) * bottom_width(i) / (4. * s1 * s1)) - bottom_width(i) / (2. * s1) !Till: chose only positve solution of quadratic equation
@@ -165,14 +168,14 @@ IF (STATUS == 33) THEN	!obsolete
 	!CALCULATION OF FLOW PARAMETERS FOR DISCONTINUOUS, EPHEMERAL FLOW
 
    !determine the flow area a for the given input discharge r_qin
-	if (r_qin(2,i) /= 0) then
+	if (r_qin(2,i) /= 0.) then
 		d_it =calc_d(r_qin(2,i))
 		call calc_q_a_p(r_depth_cur(i), flow, r_area, p)
 	else
-  			r_area=0
-			p=0
-			flow=0
-			d_it=0
+  			r_area=0.
+			p=0.
+			flow=0.
+			d_it=0.
 	endif
 
 
@@ -186,7 +189,7 @@ ENDIF
 
 
 !! Calculation of flow velocity [m/s]
-if (r_area == 0) then
+if (r_area == 0.) then
 	velocity(i)=0.
 else
   velocity(i)= flow/r_area
@@ -206,7 +209,7 @@ real, intent(in) :: d	!water depth, for which the discharge is to be calculated
 real :: d_fp = 0.	!depth of water in flood-plain
 real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch 
 
-	if (d<0) then
+	if (d<0.) then
 		write(*,*)"ERROR: negative river depth in routing_coefficients.f90"
 		stop
 	end if
@@ -221,7 +224,7 @@ real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch
 	else
 		d_fp = d - r_depth(i)
 		a_fp = ((r_width_fp(i)-r_width(i)) + s2 * d_fp) * d_fp
-		p_fp =  (r_width_fp(i)-r_width(i)) + 2. * d_fp * SQRT(1 + s2 * s2)		!flow on floodplains
+		p_fp =  (r_width_fp(i)-r_width(i)) + 2. * d_fp * SQRT(1. + s2 * s2)		!flow on floodplains
 		q_fp = a_fp * (a_fp/p_fp) ** 0.6666 * SQRT(r_slope(i))/manning_fp(i)				!Till: discharge according to Manning's equation (flood plain)
 	end if
 		
@@ -240,12 +243,12 @@ real, intent(out) :: q, a, p
 real :: d_fp = 0.	!depth of water in flood-plain
 real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch
 
-	if (d<0) then
+	if (d<0.) then
 		write(*,*)"ERROR: negative river depth in routing_coefficients.f90"
 		stop
 	end if
 	
-	if (d == 0) then
+	if (d == 0.) then
 		a = 0.
 		p = 0.
 		q = 0.
@@ -263,7 +266,7 @@ real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch
 	else
 		d_fp = d - r_depth(i)
 		a_fp = ((r_width_fp(i)-r_width(i)) + s2 * d_fp) * d_fp
-		p_fp =  (r_width_fp(i)-r_width(i)) + 2. * d_fp * SQRT(1 + s2 * s2)		!flow on floodplains
+		p_fp =  (r_width_fp(i)-r_width(i)) + 2. * d_fp * SQRT(1. + s2 * s2)		!flow on floodplains
 		q_fp = a_fp * (a_fp/p_fp) ** 0.6666 * SQRT(r_slope(i))/manning_fp(i)				!Till: discharge according to Manning's equation (flood plain)
 	end if
 		
@@ -289,7 +292,7 @@ integer :: j, max_iter=50			!Till: max number of iterations
 	f0 = q_est0 - q
 
 	if (q < q_bankful100) then
-		d_est1=r_depth(i)/2	!Till: initial estimate	for small discharge
+		d_est1=r_depth(i)/2.	!Till: initial estimate	for small discharge
 	else
 		d_est1=r_depth(i)*1.5	!Till: initial estimate	for high discharge
 	end if

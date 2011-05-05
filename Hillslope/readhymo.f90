@@ -1,4 +1,6 @@
 SUBROUTINE readhymo
+!Till: computationally irrelevant: minor changes to improve compiler compatibility
+!2011-04-29
 
 !Till: skip reading of erosion control files if erosion is disabled
 !2009-06-17
@@ -284,9 +286,9 @@ READ(11,*); READ(11,*);READ(11,*)
 luse_subbas=0	!initital values
 luse_lu=0
 luse_tc=0
-rocky=0
+rocky=0.
 nbr_svc=0
-frac_svc=0
+frac_svc=0.
 nbr_svc=0
 id_soil_intern=0
 
@@ -331,7 +333,7 @@ READ(11,*)
 alluvial_flag=0
 
 
-shrink = 0
+shrink = 0.
 DO j=1,nsoil
 
   
@@ -362,7 +364,7 @@ DO j=1,nsoil
 	end if
 
 	DO k=1,nbrhori(j)
-	  if (coarse(j,k)>1) then
+	  if (coarse(j,k)>1.) then
 		write(*,*)'coarse fraction cannot be larger than 1. Check soil.dat in line ', j+2
 		stop 
 	  end if
@@ -370,7 +372,7 @@ DO j=1,nsoil
 
 END DO
 
-shrink = 0	!Till shrinkage currently disabled (buggy, "macro" can become huge and lead to crashes in soilwat 2.2a)
+shrink = 0.	!Till shrinkage currently disabled (buggy, "macro" can become huge and lead to crashes in soilwat 2.2a)
 CLOSE(11)
 
 
@@ -498,8 +500,8 @@ if (dosediment)	then				!Till: if erosion is to be modelled, read these files
 		n_sed_class=1				!treat one particle size class only
 		allocate(upper_limit(n_sed_class))	!allocate memory for particle size classes to be read
 		allocate(particle_classes(n_sed_class))	!allocate memory for particle size classes to be read
-		upper_limit(1)=2		!set upper limit of sediment that is considered to 2 mm
-		particle_classes(1)=sqrt(2*0.064)		!set mean particle size to something in the fine sand range
+		upper_limit(1)=2.		!set upper limit of sediment that is considered to 2 mm
+		particle_classes(1)=sqrt(2.*0.064)		!set mean particle size to something in the fine sand range
 	else							!part_class.dat sucessfully opened
 		READ(11,*)
 		READ(11,*)
@@ -553,7 +555,7 @@ if (dosediment)	then				!Till: if erosion is to be modelled, read these files
 		READ(11,*)
 		
 		allocate(soil_particles(nsoil, n_sed_class))	!allocate memory for each soil and particle class
-		soil_particles(:,:)=-1							!to detect missing values later
+		soil_particles(:,:)=-1.							!to detect missing values later
 				
 		loop=3											!line counter
 		READ(11,*,  IOSTAT=istate) i, ii, temp1  
@@ -574,7 +576,7 @@ if (dosediment)	then				!Till: if erosion is to be modelled, read these files
 		CLOSE(11)
 		DO j=1,n_sed_class  !check completeness
 			DO i=1,nsoil
-				IF (soil_particles(i,j)==-1) then		!found soil/particle class for that no fraction has been read 
+				IF (soil_particles(i,j)==-1.) then		!found soil/particle class for that no fraction has been read 
 					WRITE(*,'(a, I3, a, I3)') 'soil_particles.dat: Soil ', id_soil_extern(i), ' is lacking particle-size data for class ', j
 					STOP
 				END IF
@@ -651,8 +653,7 @@ IF (doscale) THEN
   DO i=1,subasin
     READ(11,*) dummy1, kfkorrc(i)
     IF (dummy1 /= id_subbas_extern(i)) THEN
-      WRITE(*,*) 'Sub-basin-IDs in file scaling_factor.dat must  &
-          have the same ordering scheme as in hymo.dat'
+      WRITE(*,*) 'Sub-basin-IDs in file scaling_factor.dat must have the same ordering scheme as in hymo.dat'
       STOP
     END IF
     intcfc(i)=intcf/(0.340+0.647*kfkorrc(i))
@@ -884,11 +885,11 @@ if (sum(rocky)==0.0) then		!this will nly be done if rocky has not been specifie
 		svc_counter=1
 		do while (svc_counter<=nbr_svc(tcid_instance))	!check all SVCs of the current TC
 			soilid=id_soil_intern(svc_counter,tcid_instance)		!get soil-ID
-			if (coarse(soilid,1)==1) then					    !check if the topmost horizon consists of coarse fragments only
+			if (coarse(soilid,1)==1.) then					    !check if the topmost horizon consists of coarse fragments only
 				rocky(tcid_instance)=rocky(tcid_instance)+frac_svc(svc_counter,tcid_instance)	!increase rocky fraction of this TC by the fraction of this SVC
 				!remove SVC from this TC
 				frac_svc(svc_counter:nbr_svc(tcid_instance)-1,tcid_instance)=frac_svc(svc_counter+1:nbr_svc(tcid_instance),tcid_instance)
-				frac_svc(nbr_svc(tcid_instance),tcid_instance)=0	!just to make sure its one less
+				frac_svc(nbr_svc(tcid_instance),tcid_instance)=0.	!just to make sure its one less
 				id_soil_intern(svc_counter:nbr_svc(tcid_instance)-1,tcid_instance)=id_soil_intern(svc_counter+1:nbr_svc(tcid_instance),tcid_instance)
 				id_soil_intern(nbr_svc(tcid_instance),tcid_instance)=-1	!just to make sure its one less
 				id_veg_intern(svc_counter:nbr_svc(tcid_instance)-1,tcid_instance)=id_veg_intern(svc_counter+1:nbr_svc(tcid_instance),tcid_instance)
@@ -1104,7 +1105,7 @@ DO i=1,sv_comb
     DO h=1,nbrhori(idummy)
       temp1=poresz(idummy,h)+1.
       
-	  if (bubble(idummy,h)<=0) then
+	  if (bubble(idummy,h)<=0.) then
 		write(*,'(a,i0,a,i0)')'ERROR: Non-positive bubble pressure point for soil ',id_soil_extern(idummy), ', horizon ',h
 		stop
 	  end if
@@ -1240,12 +1241,12 @@ OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/frac_direct_gw.dat',IOSTAT=istate,STATU
 IF (istate==0) THEN
 	READ(11,*,IOSTAT=istate)frac_direct_gw  
 	CLOSE(11)
-	IF ((frac_direct_gw>1).OR.(frac_direct_gw<0)) THEN
+	IF ((frac_direct_gw>1.).OR.(frac_direct_gw<0.)) THEN
 		write(*,*)'WARNING: frac_direct_gw was outside [0..1], assumed to be 1.'
-		frac_direct_gw=1
+		frac_direct_gw=1.
 	END IF
 ELSE
-	frac_direct_gw=1
+	frac_direct_gw=1.
 END IF
 
 if (dosediment) THEN
@@ -1267,7 +1268,7 @@ if (dosediment) THEN
 			READ(11,'(a)',IOSTAT=istate)cdummy
 		end do
 		CLOSE(11)
-		IF ((erosion_equation>4).OR.(frac_direct_gw<0)) THEN
+		IF ((erosion_equation>4.).OR.(frac_direct_gw<0.)) THEN
 			write(*,*)'WARNING: erosion_equation was outside [0..4], assumed to be 3 (MUSLE).'
 			erosion_equation=3			!default erosion equation to be used: MUSLE
 		END IF
@@ -1523,25 +1524,25 @@ END IF
 
 
 ! -------------------------------------------------------------
-IF (do_pre_outflow .AND. (t/=tstart .OR. pre_subbas_outflow(1,1,1)==-2)) THEN	!this clumsy check ensures that we do not read further when this function is called twice before the actual simulation starts
+IF (do_pre_outflow .AND. (t/=tstart .OR. pre_subbas_outflow(1,1,1)==-2.)) THEN	!this clumsy check ensures that we do not read further when this function is called twice before the actual simulation starts
 	!read outflow
-	pre_subbas_outflow(:,:,:)=-1
+	pre_subbas_outflow(:,:,:)=-1.
 	READ(91,*) (dummy,dummy,((pre_subbas_outflow(dc,j,i),i=1,no_columns(1)),j=1,nt),dc=1,dayyear)		!Reads in daily time series for pre-specified outflow from upstream basins
-	WHERE(pre_subbas_outflow<0)
+	WHERE(pre_subbas_outflow < 0.)
 		pre_subbas_outflow=-1.		!Till: mask negative values
     ENDWHERE
 
 END IF
 
 
-IF (do_pre_outsed .AND. (t/=tstart .OR. pre_subbas_outsed(1,1,1)==-2)) THEN	!this clumsy check ensures that we do not read further when this function is called twice before the actual simulation starts
+IF (do_pre_outsed .AND. (t/=tstart .OR. pre_subbas_outsed(1,1,1)==-2.)) THEN	!this clumsy check ensures that we do not read further when this function is called twice before the actual simulation starts
 	!read sediment outflow
-	pre_subbas_outsed(:,:,:)=-1
+	pre_subbas_outsed(:,:,:)=-1.
 	if (do_pre_outsed) then
 		READ(92,*) (dummy,dummy,((pre_subbas_outsed(dc,j,i),i=1,no_columns(2)),j=1,nt),dc=1,dayyear)		!Reads in daily time series for pre-specified outflow from upstream basins
 
-		WHERE(pre_subbas_outsed<0)
-			pre_subbas_outsed=-1000		!Till: mask negative values
+		WHERE(pre_subbas_outsed < 0.)
+			pre_subbas_outsed=-1000.		!Till: mask negative values
 		ENDWHERE
 	end if
 END IF
@@ -1573,11 +1574,11 @@ contains
 					exit
 				END IF
 
-!				if  (j==size(input_header)) then
-!					WRITE(*,'(a,i0,a,a,a)') 'ERROR: Sub-basin-ID ',id_subbas_extern(i),' not found in ',inputfile_name,', quitting.'
-!					stop
-!				end if
-!				
+				if  (set_corr_column(i) ==0) then
+					WRITE(*,'(a,i0,a,a,a)') 'ERROR: Sub-basin-ID ',id_subbas_extern(i),' not found in ',inputfile_name,', quitting.'
+					stop
+				end if
+				
 			END DO
 
 		END DO

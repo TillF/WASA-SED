@@ -1,4 +1,7 @@
 SUBROUTINE lake(STATUS,muni)
+
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
  
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-06-30  Time: 13:47:13
@@ -67,7 +70,7 @@ IF (STATUS == 0) THEN
       READ(11,*);READ (11,*)
       DO imun=1,subasin
 	    DO k=1,5
-		  maxlake(imun,k)=0
+		  maxlake(imun,k)=0.
 	    ENDDO
 	    dummy5(imun)=id_subbas_extern(imun)
 	  ENDDO
@@ -96,8 +99,7 @@ IF (STATUS == 0) THEN
     DO imun=1,subasin
 !write(*,'(2I4,10F10.4)')id_subbas_extern(imun),dummy5(imun),(maxlake_factor(imun,k),k=1,5)
       IF (dummy5(imun) /= id_subbas_extern(imun)) THEN
-        WRITE(*,*) 'Sub-basin-IDs in file lake_maxvol.dat must  &
-				have the same ordering scheme as in hymo.dat'
+        WRITE(*,*) 'Sub-basin-IDs in file lake_maxvol.dat must have the same ordering scheme as in hymo.dat'
         STOP
       END IF
     END DO
@@ -111,7 +113,7 @@ IF (STATUS == 0) THEN
 !   if data are in the file (index in line 3 (doacudyear) is .true.) then
 !   the exact values will be used instead of the function 
 !   of temporal variation of acudes number
-  acudfloatyear(:,:,:)=-999
+  acudfloatyear(:,:,:)=-999.
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lake_year.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!lake_year.dat not found
 	  write(*,*)pfadp(1:pfadj)// 'Reservoir/lake_year.dat was not found. Run the model anyway.'
@@ -121,7 +123,7 @@ IF (STATUS == 0) THEN
 	  DO t=tstart,tstop
        DO imun=1,subasin
 	    DO k=1,5
-		  acudfloatyear(imun,k,t-tstart+1)=0
+		  acudfloatyear(imun,k,t-tstart+1)=0.
 	    ENDDO
 	   ENDDO
 	  ENDDO
@@ -148,7 +150,7 @@ IF (STATUS == 0) THEN
     READ(11,*);READ(11,*)
     DO imun=1,subasin
 	  DO k=1,5
-		acud(imun,k)=0
+		acud(imun,k)=0.
 	  ENDDO
 	  dummy5(imun)=id_subbas_extern(imun)
 	ENDDO
@@ -176,8 +178,7 @@ IF (STATUS == 0) THEN
     DO imun=1,subasin
 !write(*,'(2I4,10F7.2)')id_subbas_extern(imun),dummy5(imun),(acud(imun,k),k=1,5)
       IF (dummy5(imun) /= id_subbas_extern(imun)) THEN
-        WRITE(*,*) 'Sub-basin-IDs in file lake_number.dat must  &
-				have the same ordering scheme as in hymo.dat'
+        WRITE(*,*) 'Sub-basin-IDs in file lake_number.dat must have the same ordering scheme as in hymo.dat'
         STOP
       END IF
     END DO
@@ -200,7 +201,7 @@ IF (STATUS == 0) THEN
       READ(11,*);READ(11,*)
       DO imun=1,subasin
 	    DO k=1,5
-		  lakefrarea(imun,k)=0
+		  lakefrarea(imun,k)=0.
 	    ENDDO
 	    dummy5(imun)=id_subbas_extern(imun)
 	  ENDDO
@@ -229,8 +230,7 @@ IF (STATUS == 0) THEN
     DO imun=1,subasin
 !write(*,'(2I4,10F10.4)')id_subbas_extern(imun),dummy5(imun),(lakefrarea(imun,k),k=1,5)
       IF (dummy5(imun) /= id_subbas_extern(imun)) THEN
-        WRITE(*,*) 'Sub-basin-IDs in file lake_frarea.dat must  &
-				have the same ordering scheme as in hymo.dat'
+        WRITE(*,*) 'Sub-basin-IDs in file lake_frarea.dat must have the same ordering scheme as in hymo.dat'
         STOP
       END IF
     END DO
@@ -427,8 +427,7 @@ IF (STATUS == 0) THEN
 
   OPEN(11,FILE=pfadn(1:pfadi)//'lake_watbal.out',STATUS='replace')
   IF (f_lake_watbal) then
-	WRITE(11,*)'Year, day, hour, totallakeinflow(m**3/timestep), totallakeoutflow(m**3/timestep), &
-				totallakeprecip(m**3/timestep), totallakeevap(m**3/timestep), lakevol(m**3)'
+	WRITE(11,*)'Year, day, hour, totallakeinflow(m**3/timestep), totallakeoutflow(m**3/timestep), totallakeprecip(m**3/timestep), totallakeevap(m**3/timestep), lakevol(m**3)'
     CLOSE(11)
   ELSE
     CLOSE(11, status='delete') !delete any existing file, if no output is desired
@@ -437,8 +436,7 @@ IF (STATUS == 0) THEN
   IF (dosediment) then
    OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedbal.out',STATUS='replace')
    IF (f_lake_sedbal) then
-	WRITE(11,*)'Year, day, hour, totalsedinflow(ton/timestep), totalsedoutflow(ton/timestep), &
-				totalsedimentation(ton/timestep), cumsedimentation(ton)'
+	WRITE(11,*)'Year, day, hour, totalsedinflow(ton/timestep), totalsedoutflow(ton/timestep), totalsedimentation(ton/timestep), cumsedimentation(ton)'
     CLOSE(11)
    ELSE
     CLOSE(11, status='delete') !delete any existing file, if no output is desired
@@ -766,7 +764,7 @@ endif
 !  formula by Molle (1989) (for acudes < 2 Mio m**3)
 !  alpha,mean=2.7 ; K häufig = 1000.
     DO k=1,5
-      IF (acud(muni,k) > 0) THEN
+      IF (acud(muni,k) > 0.) THEN
         lakearea(muni,k)=(alpha_Molle(k)*damk_Molle(k)*((lakewater(d_laststep,muni,k)/acud(muni,k)  &
 			/damk_Molle(k))**((alpha_Molle(k)-1.)/alpha_Molle(k))))/1.e6
 	  ELSE
@@ -937,7 +935,7 @@ endif
 !  formula by Molle (1989) (for acudes < 2 Mio m**3)
 !  alpha,mean=2.7 ; K häufig = 1000.
     DO k=1,5
-      IF (acud(muni,k) > 0) THEN
+      IF (acud(muni,k) > 0.) THEN
         lakearea(muni,k)=(alpha_Molle(k)*damk_Molle(k)*((lakewater(step,muni,k)/acud(muni,k)  &
 			/damk_Molle(k))**((alpha_Molle(k)-1.)/alpha_Molle(k))))/1.e6
 	  ELSE

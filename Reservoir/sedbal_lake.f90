@@ -1,5 +1,8 @@
 SUBROUTINE sedbal_lake(muni,k)
  
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
+
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:31
  
@@ -33,7 +36,7 @@ REAL :: tempres(step,muni)
 if (lakesedin_hrr(step,muni,k)/=0. .and. lakearea(muni,k)/=0.) then
 !Ge to include the DAILY mean temperature of the reservoir (celsius degree)
 !Ge tempres=20 C (temporarily)
-  tempres(step,muni)=20
+  tempres(step,muni)=20.
 
 ! density of water and density of natural sediments (kg/m3)
   wat_dens=1.*1000.
@@ -58,7 +61,7 @@ if (lakesedin_hrr(step,muni,k)/=0. .and. lakearea(muni,k)/=0.) then
   par_b=-(overflow_rate**2)
   par_c=-27.9*overflow_rate*visc
 
-  diam_equiv=1000*(-par_b+sqrt(((par_b)**2)-4.*par_a*par_c))/(2*par_a)
+  diam_equiv=1000.*(-par_b+sqrt(((par_b)**2.)-4.*par_a*par_c))/(2.*par_a)
 
 ! affluent grain size distribution (-)
   dummy=0.
@@ -114,12 +117,12 @@ if (lakesedin_hrr(step,muni,k)/=0. .and. lakearea(muni,k)/=0.) then
     dummy=0.
     DO g=1,n_sed_class
       if (diam_equiv>=lower_limit(g)) then
-	    dummy=dummy+1 
+	    dummy=dummy+1. 
 	  else
 	    exit
 	  endif
 	enddo
-    nbrsteps=10*dummy
+    nbrsteps=10.*dummy
 	lower_diam(1)=lower_limit(1)
 !	interv=frac_finer/nbrsteps
     n=0
@@ -150,11 +153,11 @@ if (lakesedin_hrr(step,muni,k)/=0. .and. lakearea(muni,k)/=0.) then
 !	  frfiner(n)=n*interv
       DO g=1,n_sed_class
         if (frfiner(n)<=cumfrsed_in(1)) then
-          upper_diam(n)=10**(log10(lower_limit(g))+((log10(upper_limit(g))-log10(lower_limit(g)))* &
+          upper_diam(n)=10.**(log10(lower_limit(g))+((log10(upper_limit(g))-log10(lower_limit(g)))* &
 			frfiner(n)/cumfrsed_in(g)))
 		  exit
 		else if (frfiner(n)<=cumfrsed_in(g)) then
-          upper_diam(n)=10**(log10(lower_limit(g))+((log10(upper_limit(g))-log10(lower_limit(g)))* &
+          upper_diam(n)=10.**(log10(lower_limit(g))+((log10(upper_limit(g))-log10(lower_limit(g)))* &
 			(frfiner(n)-cumfrsed_in(g-1))/(cumfrsed_in(g)-cumfrsed_in(g-1))))
 		  exit
 	    endif
@@ -174,7 +177,7 @@ if (lakesedin_hrr(step,muni,k)/=0. .and. lakearea(muni,k)/=0.) then
       setveloc(n)=SQRT((13.95*visc/(mean_diam(n)/1000.))**2.+(1.09*  &
         (delta)*9.807*(mean_diam(n)/1000.)))-(13.95*visc/(mean_diam(n)/1000.))
 	  par_x(n)=(setveloc(n)/overflow_rate)*interv(n)
-	  par_y(n)=(1-(setveloc(n)/overflow_rate))*interv(n)
+	  par_y(n)=(1.-(setveloc(n)/overflow_rate))*interv(n)
 !	  par_x(n)=(setveloc(n)/overflow_rate)*interv
 !	  par_y(n)=(1-(setveloc(n)/overflow_rate))*interv
       frretent=frretent+par_x(n)
@@ -183,7 +186,7 @@ if (lakesedin_hrr(step,muni,k)/=0. .and. lakearea(muni,k)/=0.) then
 !write(*,'(I3,6F12.8)')n,mean_diam(n),setveloc(n),par_x(n),par_y(n),frretent,frrelease
 	enddo
 
-	trap_eff=(1-frac_finer)+frretent
+	trap_eff=(1.-frac_finer)+frretent
 
 	dummy=0.
     DO n=1,nbrsteps
@@ -219,7 +222,7 @@ if (lakesedin_hrr(step,muni,k)/=0. .and. lakearea(muni,k)/=0.) then
 !write(*,'(3I4,3F10.3)')muni,k,g,lakefracsedin_hrr(step,muni,k,g),lakefracsedout_hrr(step,muni,k,g)
 	enddo		    
   endif
-  lakesedout_hrr(step,muni,k)=lakesedin_hrr(step,muni,k)*(1-trap_eff)
+  lakesedout_hrr(step,muni,k)=lakesedin_hrr(step,muni,k)*(1.-trap_eff)
 else
   lakesedout_hrr(step,muni,k)=0.
 endif

@@ -1,5 +1,8 @@
 SUBROUTINE hydraul_res(upstream)
- 
+
+!Till: computationally irrelevant: minor changes to improve compiler compatibility
+!2011-04-29
+
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:41
  
@@ -95,7 +98,7 @@ END DO
 ! Bed slope of each cross section
 DO j=1,nbrsec(upstream)
   IF (j /= nbrsec(upstream)) THEN
-    IF (minelev_sec(j,upstream)-minelev_sec(j+1,upstream) <= 0) THEN
+    IF (minelev_sec(j,upstream)-minelev_sec(j+1,upstream) <= 0.) THEN
       bedslope_sec(j,upstream)=0.001
     ELSE
       bedslope_sec(j,upstream)=(minelev_sec(j,upstream)-  &
@@ -126,7 +129,7 @@ DO j=1,nbrsec(upstream)
     ELSE IF (maxelev_sec(j,upstream) < y_sec(m-1,j,upstream)  &
           .AND.maxelev_sec(j,upstream) >= y_sec(m,j,upstream)) THEN
       maxarea_sec(j,upstream)=maxarea_sec(j,upstream)+  &
-          (((maxelev_sec(j,upstream)-y_sec(m,j,upstream))**2.)/ (2*TAN))
+          (((maxelev_sec(j,upstream)-y_sec(m,j,upstream))**2.)/ (2.*TAN))
     ELSE IF (maxelev_sec(j,upstream) >= y_sec(m-1,j,upstream)  &
           .AND.maxelev_sec(j,upstream) < y_sec(m,j,upstream)) THEN
       maxarea_sec(j,upstream)=maxarea_sec(j,upstream)+  &
@@ -185,10 +188,10 @@ DO j=1,nbrsec(upstream)
 ! Reservoir's volume represented by two consecutive cross section
     IF (n == 1 .and. j /= 1) THEN
       dist0_sec=(damelev-minelev_sec(j,upstream))/ bedslope_sec(j-1,upstream)
-      resvol_sec(j,upstream)=resarea_sec(j,upstream)*dist0_sec/3
+      resvol_sec(j,upstream)=resarea_sec(j,upstream)*dist0_sec/3.
     ELSE IF (n == 1 .and. j == 1) THEN
       dist0_sec=(damelev-minelev_sec(j,upstream))/ bedslope_sec(j,upstream)
-      resvol_sec(j,upstream)=resarea_sec(j,upstream)*dist0_sec/3 
+      resvol_sec(j,upstream)=resarea_sec(j,upstream)*dist0_sec/3. 
     ELSE
       resvol_sec(j,upstream)=(dist_sec(j-1,upstream)/3.)*  &
           (resarea_sec(j,upstream)+resarea_sec(j-1,upstream)+  &
@@ -260,12 +263,12 @@ DO j=1,nbrsec(upstream)
   error1=0.
   toplim=0.
   lowlim=0.
-  interv=0.
+  interv=0
   dep=0.
 
   a=0
   dummy3=0
-  IF(discharge_sec(j,upstream) > 0) THEN
+  IF(discharge_sec(j,upstream) > 0.) THEN
     DO WHILE (ABS(error) > 0.01)
       a=a+1
 !dummy(j)=a
@@ -297,7 +300,7 @@ DO j=1,nbrsec(upstream)
         ELSE IF (watelev_sec(j,upstream) < y_sec(m-1,j,upstream)  &
               .AND.watelev_sec(j,upstream) >= y_sec(m,j,upstream)) THEN
           area_sec(j,upstream)=area_sec(j,upstream)+  &
-              (((watelev_sec(j,upstream)-y_sec(m,j,upstream))**2.)/ (2*TAN))
+              (((watelev_sec(j,upstream)-y_sec(m,j,upstream))**2.)/ (2.*TAN))
           topwidth_sec(j,upstream)=topwidth_sec(j,upstream)+  &
               ((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
               (watelev_sec(j,upstream)-y_sec(m,j,upstream))/  &
@@ -308,7 +311,7 @@ DO j=1,nbrsec(upstream)
         ELSE IF (watelev_sec(j,upstream) >= y_sec(m-1,j,upstream)  &
               .AND.watelev_sec(j,upstream) < y_sec(m,j,upstream)) THEN
           area_sec(j,upstream)=area_sec(j,upstream)+  &
-              (((watelev_sec(j,upstream)-y_sec(m-1,j,upstream))**2.)/ (2*TAN))
+              (((watelev_sec(j,upstream)-y_sec(m-1,j,upstream))**2.)/ (2.*TAN))
           topwidth_sec(j,upstream)=topwidth_sec(j,upstream)+  &
               ((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
               (watelev_sec(j,upstream)-y_sec(m-1,j,upstream))/  &
@@ -322,7 +325,7 @@ DO j=1,nbrsec(upstream)
       
 ! check if there is neither inflow nor outflow at the reservoir
       hydrad_sec(j,upstream)=area_sec(j,upstream)/ wetper_sec(j,upstream)  
-      discharge_calc=(1/(manning_sec(j,upstream)))*  &
+      discharge_calc=(1./(manning_sec(j,upstream)))*  &
           SQRT(bedslope_sec(j,upstream))*hydrad_sec(j,upstream)**(2./3.)  &
           *area_sec(j,upstream)
       
@@ -343,10 +346,10 @@ DO j=1,nbrsec(upstream)
 	  endif
       IF (ABS(error) > 0.01) THEN
         IF (interv == 0) THEN
-          IF (error1 >= 0.AND.error > 0) THEN
+          IF (error1 >= 0. .AND.error > 0.) THEN
             dep=depth_sec(j,upstream)
             depth_sec(j,upstream)=.80*depth_sec(j,upstream)
-          ELSE IF (error1 <= 0.AND.error < 0) THEN
+          ELSE IF (error1 <= 0. .AND. error < 0.) THEN
             dep=depth_sec(j,upstream)
             depth_sec(j,upstream)=1.20*depth_sec(j,upstream)
           ELSE
@@ -355,9 +358,9 @@ DO j=1,nbrsec(upstream)
         END IF
           
         IF (interv /= 0) THEN
-          IF (error1 < 0.AND.error < 0) THEN
+          IF (error1 < 0. .AND. error < 0.) THEN
             lowlim=MAX(depth_sec(j,upstream),dep)
-          ELSE IF (error1 > 0.AND.error > 0) THEN
+          ELSE IF (error1 > 0. .AND. error > 0.) THEN
             toplim=MIN(depth_sec(j,upstream),dep)
           ELSE
             lowlim=MIN(depth_sec(j,upstream),dep)
@@ -369,7 +372,7 @@ DO j=1,nbrsec(upstream)
           
         error1=error
 
-		IF (toplim-lowlim<1e-4.and.toplim/=0.and.lowlim/=0) then
+		IF (toplim-lowlim < 1e-4 .and. toplim/=0. .and. lowlim/=0.) then
 		  dep=depth_sec(j,upstream)
           depth_sec(j,upstream)=(lowlim+toplim)/2.
 		  dummy3=1
@@ -390,8 +393,8 @@ DO j=1,nbrsec(upstream)
 !     error,lowlim,toplim,interv
 
     END DO
-    IF (resarea_sec(j,upstream)==0) k=k+1
-    IF (resarea_sec(j,upstream)/=0) then
+    IF (resarea_sec(j,upstream)==0.) k=k+1
+    IF (resarea_sec(j,upstream)/=0.) then
       if (watelev_sec(j,upstream)>damelev) k=k+1
 	ENDIF
 	normaldepth(j)=depth_sec(j,upstream)
@@ -416,7 +419,7 @@ DO j=1,nbrsec(upstream)
   error1=0.
   toplim=0.
   lowlim=0.
-  interv=0.
+  interv=0
   dep=0.
   
 ! check if there is neither inflow nor outflow at the reservoir
@@ -454,7 +457,7 @@ DO j=1,nbrsec(upstream)
         ELSE IF (crwatelev_sec(j,upstream) < y_sec(m-1,j,upstream)  &
               .AND.crwatelev_sec(j,upstream) >= y_sec(m,j,upstream)) THEN
           crarea_sec(j,upstream)=crarea_sec(j,upstream)+  &
-              (((crwatelev_sec(j,upstream)-y_sec(m,j,upstream))**2.)/ (2*TAN))
+              (((crwatelev_sec(j,upstream)-y_sec(m,j,upstream))**2.)/ (2.*TAN))
           crtopwidth_sec(j,upstream)=crtopwidth_sec(j,upstream)+  &
               ((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
               (crwatelev_sec(j,upstream)-y_sec(m,j,upstream))/  &
@@ -465,7 +468,7 @@ DO j=1,nbrsec(upstream)
         ELSE IF (crwatelev_sec(j,upstream) >= y_sec(m-1,j,upstream)  &
               .AND.crwatelev_sec(j,upstream) < y_sec(m,j,upstream)) THEN
           crarea_sec(j,upstream)=crarea_sec(j,upstream)+  &
-              (((crwatelev_sec(j,upstream)-y_sec(m-1,j,upstream))**2.)/ (2*TAN))
+              (((crwatelev_sec(j,upstream)-y_sec(m-1,j,upstream))**2.)/ (2.*TAN))
           crtopwidth_sec(j,upstream)=crtopwidth_sec(j,upstream)+  &
               ((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
               (crwatelev_sec(j,upstream)-y_sec(m-1,j,upstream))/  &
@@ -503,10 +506,10 @@ DO j=1,nbrsec(upstream)
 
       IF (ABS(error) > 0.01) THEN
         IF (interv == 0) THEN
-          IF (error1 >= 0.AND.error > 0) THEN
+          IF (error1 >= 0. .AND. error > 0.) THEN
             dep=crdepth_sec(j,upstream)
             crdepth_sec(j,upstream)=.80*crdepth_sec(j,upstream)
-          ELSE IF (error1 <= 0.AND.error < 0) THEN
+          ELSE IF (error1 <= 0. .AND. error < 0.) THEN
             dep=crdepth_sec(j,upstream)
             crdepth_sec(j,upstream)=1.20*crdepth_sec(j,upstream)
           ELSE
@@ -515,9 +518,9 @@ DO j=1,nbrsec(upstream)
         END IF
           
         IF (interv /= 0) THEN
-          IF (error1 < 0.AND.error < 0) THEN
+          IF (error1 < 0. .AND. error < 0.) THEN
             lowlim=MAX(crdepth_sec(j,upstream),dep)
-          ELSE IF (error1 > 0.AND.error > 0) THEN
+          ELSE IF (error1 > 0. .AND. error > 0.) THEN
             toplim=MIN(crdepth_sec(j,upstream),dep)
           ELSE
             lowlim=MIN(crdepth_sec(j,upstream),dep)
@@ -529,7 +532,7 @@ DO j=1,nbrsec(upstream)
           
         error1=error
 
-		IF (toplim-lowlim<1e-4.and.toplim/=0.and.lowlim/=0) then
+		IF (toplim-lowlim<1e-4 .and. toplim/=0. .and. lowlim/=0.) then
 		  dep=crdepth_sec(j,upstream)
           crdepth_sec(j,upstream)=(lowlim+toplim)/2.
           dummy3=1
@@ -569,7 +572,7 @@ END DO
 DO j=1,nbrsec(upstream)
   
 ! 3.1) computation of hydraulic parameters if the cross section j belongs to the reservoir subreach
-  IF (resarea_sec(j,upstream) /= 0) THEN
+  IF (resarea_sec(j,upstream) /= 0.) THEN
 
     npt=npoints(j,upstream)
 
@@ -672,7 +675,7 @@ IF (k /= 0) THEN
     error1=0.
     toplim=0.
     lowlim=0.
-    interv=0.
+    interv=0
     dep=0.
     
     e=0
@@ -793,8 +796,8 @@ dummy1=22
         
         locloss_sec(k+1-p,upstream)=(loclosscoef/(2.*9.807))*  &
             (discharge_sec(k+1-p,upstream)**2.)*  &
-            ABS((1/(area_sec(k+1-p,upstream)**2.))  &
-            -(1/(area_sec(k+2-p,upstream)**2.)))
+            ABS((1./(area_sec(k+1-p,upstream)**2.))  &
+            -(1./(area_sec(k+2-p,upstream)**2.)))
         
         coef=1.
         
@@ -825,7 +828,7 @@ dummy1=22
         
         IF (ABS(error) > 0.001) THEN
           IF (interv == 0) THEN
-            IF (error1 >= 0.AND.error > 0) THEN
+            IF (error1 >= 0. .AND. error > 0.) THEN
               dep=depth_sec(k+1-p,upstream)
               depth_sec(k+1-p,upstream)=.80*depth_sec(k+1-p,upstream)
             ELSE IF (error1 <= 0.AND.error < 0) THEN
@@ -851,7 +854,7 @@ dummy1=22
         
           error1=error
 
-		  IF (toplim-lowlim<1e-5.and.toplim/=0.and.lowlim/=0) then
+		  IF (toplim-lowlim<1e-5 .and. toplim/=0. .and. lowlim/=0.) then
 		    dep=depth_sec(k+1-p,upstream)
             depth_sec(k+1-p,upstream)=(lowlim+toplim)/2.
             dummy3=1
@@ -931,7 +934,7 @@ dummy1=22
     error1=0.
     toplim=0.
     lowlim=0.
-    interv=0.
+    interv=0
     dep=0.
     
     f=0
@@ -1048,8 +1051,8 @@ dummy1=22
         
         locloss_sec(p,upstream)=(loclosscoef/(2.*9.807))*  &
             (discharge_sec(p,upstream)**2.)*  &
-            ABS((1/(area_sec(p,upstream)**2.))  &
-            -(1/(area_sec(p-1,upstream)**2.)))
+            ABS((1./(area_sec(p,upstream)**2.))  &
+            -(1./(area_sec(p-1,upstream)**2.)))
         
         coef=-1.
         
@@ -1081,7 +1084,7 @@ dummy1=22
 
         IF (ABS(error) > 0.001) THEN
           IF (interv == 0) THEN
-            IF (error1 >= 0.AND.error > 0) THEN
+            IF (error1 >= 0. .AND. error > 0.) THEN
               dep=depth_sec(p,upstream)
               depth_sec(p,upstream)=.80*depth_sec(p,upstream)
             ELSE IF (error1 <= 0.AND.error < 0) THEN
@@ -1107,7 +1110,7 @@ dummy1=22
         
           error1=error
 
-		  IF (toplim-lowlim<1e-5.and.toplim/=0.and.lowlim/=0) then
+		  IF (toplim-lowlim <1e-5 .and. toplim/=0. .and. lowlim/=0.) then
 		    dep=depth_sec(p,upstream)
             depth_sec(p,upstream)=(lowlim+toplim)/2.
             dummy3=1

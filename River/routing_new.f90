@@ -57,8 +57,7 @@ IF (STATUS == 0) THEN
    r_slope(i), r_length(i),manning(i), manning_fp(i),r_ksat(i),r_efactor(i),r_cover(i),r_rock(i),r_alpha(i), &
    msk_x(i), msk_k(i),Q_spring(i)
      IF (idummy /= id_subbas_extern(i)) THEN
-     WRITE(*,*) 'Sub-basin-IDs in file river.dat  &
-     must have the same ordering scheme as in hymo.dat'
+     WRITE(*,*) 'Sub-basin-IDs in file river.dat must have the same ordering scheme as in hymo.dat'
      STOP 
    END IF
   END DO
@@ -495,7 +494,7 @@ endif
 
 ! calculate total sediment concentration
    do i = 1, subasin
-     if (r_qout(2,i).eq.0) then
+     if (r_qout(2,i).eq. 0.) then
         r_sediment_concentration(i) = 0.
      else
         r_sediment_concentration(i) = sediment_total(i)/(r_qout(2,i)*3.6*dt)
@@ -585,14 +584,14 @@ endif
     if (f_river_flow_dailyaverage) then
 		OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow_dailyaverage.out',STATUS='old' ,POSITION='append')
 		write(fmtstr,'(a,i0,a)')'(3i6,',subasin,'f14.3)'		!generate format string
-		WRITE (11,fmtstr)t,d,h, ((temp_water(i)/24),i=1,subasin)
+		WRITE (11,fmtstr)t,d,h, ((temp_water(i)/24.),i=1,subasin)
 		Close (11)
 	endif
 
 	if (f_river_sediment_total_dailyaverage) then
 		OPEN(11,FILE=pfadn(1:pfadi)//'River_Sediment_total_dailyaverage.out',STATUS='old' ,POSITION='append')
 		write(fmtstr,'(a,i0,a)')'(3i6,',2*subasin,'f14.3)'		!generate format string
-		WRITE (11,fmtstr)t,d,h, (temp_sediment(i)/24,i=1,subasin)
+		WRITE (11,fmtstr)t,d,h, (temp_sediment(i)/24.,i=1,subasin)
 		Close (11)
 	endif
 

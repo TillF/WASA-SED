@@ -1,3 +1,5 @@
+! Till: computationally irrelevant: minor changes to improve compiler compatibility
+! 2011-04-29
 !
 !The module file contains two modules: reservoir_h and lake_h
 !
@@ -706,7 +708,7 @@ INTERFACE
   END FUNCTION func
 END INTERFACE
 INTEGER(4), PARAMETER :: JMAX=30
-REAL, PARAMETER :: EPS=1.0d-1
+REAL, PARAMETER :: EPS=1.0e-1
 !Returns the integral of the function func from a to b. The parameter EPS should be set to
 !the desired fractional accuracy and JMAX so that 2 to the power JMAX-1 is the maximum
 !allowed number of steps. Integration is performed by the trapezoidal rule.
