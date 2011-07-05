@@ -1,5 +1,8 @@
 SUBROUTINE reservoir (STATUS,upstream,res_h)
 
+! Till: computationally irrelevant: streamlined code and improved error message with routing.dat
+! 2011-07-05
+
 ! Till: computationally irrelevant: minor changes to improve compiler compatibility
 ! 2011-04-29
  
@@ -13,6 +16,8 @@ use climo_h
 use hymo_h
 use time_h
 use reservoir_h
+use utils_h
+
 ! water balance for a reservoir of a large river dam
 
 IMPLICIT NONE
@@ -99,31 +104,29 @@ if (reservoir_check==0) reservoir_balance=1
 
 !this relates the MAP IDs (id_subbas_extern(subasin)) to the sorted CODE IDs (id_subbas_intern(subasin)), i.e. upbasin and downbasin are now numbered according to internal ids
 !so that in routing.dat only the MAP IDs have to be read in, first for the ID of upstream subasin
-    DO i=1,subasin
-      j=1
-      DO WHILE (id_subbas_extern(j) /= upbasin(i))
-        j=j+1
-        IF (j > 500) THEN
-          WRITE (*,*) 'upbasin(i) loop in readhymo.f'
-          STOP
-        END IF
-      END DO
-      upbasin(i)=j
-    END DO
-! second for the ID of downstream subasin
-    DO i=1,subasin
-      IF (downbasin(i) /= 999.AND.downbasin(i) /= 9999) THEN
-        j=1
-        DO WHILE (id_subbas_extern(j) /= downbasin(i))
-          j=j+1
-          IF (j > 500) THEN
-            WRITE (*,*) 'downsbasin(i) loop in readhymo.f'
-            STOP
-          END IF
-        END DO
-        downbasin(i)=j
-      END IF
-    END DO
+	!replace external with internal IDs
+	DO i=1,subasin
+	  !upstream basin referencing
+	  ih=which1(id_subbas_extern == upbasin(i))
+  
+	  IF (ih==0) THEN
+		  WRITE (*,'(A,I0,A)') 'unknown upstream subbasin ID ', upbasin(i),' in routing.dat'
+		  STOP
+	  else
+		upbasin(i)=ih
+	  END IF
+  
+	  !downstream basin referencing
+	  IF (downbasin(i) == 999 .OR. downbasin(i) == 9999) cycle 	!999 and 9999 mark outlet
+	  ih=which1(id_subbas_extern == downbasin(i))
+  
+	  IF (ih==0) THEN
+		  WRITE (*,'(A,I0,A)') 'unknown downstream subbasin ID ', downbasin(i),' in routing.dat'
+		  STOP
+	  else
+		downbasin(i)=ih
+	  END IF
+	END DO
   ENDIF
 
 ! Read reservoir parameters
