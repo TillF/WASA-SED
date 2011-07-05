@@ -1,3 +1,6 @@
+! Till: computationally irrelevant: streamlined code and improved error message with routing.dat
+! 2011-07-05
+
 ! Till: computationally irrelevant: minor changes to improve compiler compatibility
 ! 2011-04-29
 
@@ -11,6 +14,7 @@ use params_h
 use routing_h
 use time_h
 use reservoir_h
+use utils_h
 
 IMPLICIT NONE
 
@@ -56,35 +60,34 @@ DO i=1,subasin
 END DO
 CLOSE (11)
 
-!this relates the MAP IDs (id_subbas_extern(subasin)) to the sorted CODE IDs (id_subbas_intern(subasin)),
+!this relates the external IDs (id_subbas_extern(subasin)) to the sorted CODE IDs (id_subbas_intern(subasin)),
 ! i.e. upbasin and downbasin are now numbered according to internal ids
 !     so that in routing.dat only the MAP IDs have to be read in,
-! first for the ID of upstream TEZG
+
+!replace external with internal IDs
 DO i=1,subasin
-  j=1
-  DO WHILE (id_subbas_extern(j) /= upbasin(i))
-    j=j+1
-    IF (j > 500) THEN
-      WRITE (*,*) 'upbasin(i) loop in readhymo.f'
+  !upstream basin referencing
+  ih=which1(id_subbas_extern == upbasin(i))
+  
+  IF (ih==0) THEN
+      WRITE (*,'(A,I0,A)') 'unknown upstream subbasin ID ', upbasin(i),' in routing.dat'
       STOP
-    END IF
-  END DO
-  upbasin(i)=j
-END DO
-! second for the ID of downstream TEZG
-DO i=1,subasin
-  IF (downbasin(i) /= 999.AND.downbasin(i) /= 9999) THEN
-    j=1
-    DO WHILE (id_subbas_extern(j) /= downbasin(i))
-      j=j+1
-      IF (j > 500) THEN
-        WRITE (*,*) 'downsbasin(i) loop in readhymo.f'
-        STOP
-      END IF
-    END DO
-    downbasin(i)=j
+  else
+	upbasin(i)=ih
+  END IF
+  
+  !downstream basin referencing
+  IF (downbasin(i) == 999 .OR. downbasin(i) == 9999) cycle 	!999 and 9999 mark outlet
+  ih=which1(id_subbas_extern == downbasin(i))
+  
+  IF (ih==0) THEN
+      WRITE (*,'(A,I0,A)') 'unknown downstream subbasin ID ', downbasin(i),' in routing.dat'
+      STOP
+  else
+	downbasin(i)=ih
   END IF
 END DO
+
 
 ! initialize
   DO i=1,subasin
