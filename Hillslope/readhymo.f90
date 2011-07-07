@@ -1,4 +1,7 @@
 SUBROUTINE readhymo
+!Till: latred is now allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
+!2011-07-07
+
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29
 
@@ -148,8 +151,7 @@ INTEGER :: i_lu,id_tc_type !, svc_id,i_subbas,i_svc,i_soil,i_veg		! ids of compo
 INTEGER :: lu_temp(maxsoter)		!auxiliary arrays for reading
 REAL	:: frac_lu_temp(maxsoter)
 
-!temporary var for reading thickness of soil horizons (mm)
-!Allocatable      real temp_hori_thick(nsoil,maxhori)
+!temporary var for reading thickness of soil horizons (mm) (nsoil,maxhori)
 real, allocatable ::   temp_hori_thick(:,:)
 
 INTEGER :: nbr_svc2(nterrain)	!number of SVCs for each TC-type
@@ -372,6 +374,9 @@ DO j=1,nsoil
 
 END DO
 
+temp1=maxval(sum(temp_hori_thick, 2),1)	!compute maximum total thickness among soil profiles
+allocate(latred(sv_comb,ceiling(temp1/500.))) !Till: latred is now allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
+ 
 shrink = 0.	!Till shrinkage currently disabled (buggy, "macro" can become huge and lead to crashes in soilwat 2.2a)
 CLOSE(11)
 
