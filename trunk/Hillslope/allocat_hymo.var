@@ -53,7 +53,7 @@
 	 laitc(sv_comb), &
 	 soilwater(366,sv_comb), &
 	 horithact(sv_comb,maxsoil,maxhori), &
-	 latred(sv_comb,maxhori*3), &
+!	 latred(sv_comb,maxhori*3), &		!Till: latred is allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
 	 intercept(sv_comb,maxsoil), &
 	 frac_sat(sv_comb,maxsoil), &
 	 aettc(sv_comb), &
