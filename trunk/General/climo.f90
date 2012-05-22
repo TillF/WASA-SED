@@ -1,5 +1,8 @@
-! Till: computationally irrelevant: minor changes to improve compiler compatibility
-! 2011-04-29
+!Till: computationally irrelevant: improved input file error handling
+!2012-05-14
+
+!Till: computationally irrelevant: minor changes to improve compiler compatibility
+!2011-04-29
 
 !Till: modified allocation of input buffer that led to problem when input files contained different number of columns
 !2010-04-26
@@ -58,14 +61,22 @@ implicit none
 	INTEGER, INTENT(IN)                  :: tstart, mstart	!start year, start month of simulation
 	CHARACTER(LEN=*),  INTENT(IN)                  :: filename	!name of file to produce meaningful error message
 
-	INTEGER                  :: date_num, dum,iostat	!dummy values
+	INTEGER                  :: date_num, dum,iostat, linecount	!dummy values. line counter
 	CHARACTER                  :: temp2	!dummy 
 
+	linecount=4
 	READ(fid,*,IOSTAT=iostat) date_num,dum,temp2
 	do while ((mod(date_num,1000000)/=mstart*10000+tstart) .AND. (iostat==0))
 		READ(fid,*,IOSTAT=iostat) date_num,dum,temp2		!advance until start month is reached
+		linecount = linecount+1
 	end do
 	
+	if (iostat/=0) then	!format error
+		write(*,'(A,i0)')'ABORTED: format error in '//trim(filename)//' in line ',linecount
+		stop
+	end if
+
+
 	if ((iostat/=0) .OR. (floor(date_num/1000000.0)/=1)) then	!abort if start month does not start with its first day
 		write(*,'(A,i3,a,i0)')'ABORTED: input file '//filename//' does not contain first day of simulation start month',mstart,'/',tstart
 		stop
@@ -148,25 +159,45 @@ IF (STATUS == 0) THEN
   READ(81,'(a)') linedummy
   columnheader=0
   no_columns(1)=GetNumberOfSubstrings(linedummy)-2	!Till: count number of columns
-  READ (linedummy,*) dummy, dummy, (columnheader(i), i=1,no_columns(1))	!Till: extract column headers
+  READ (linedummy,*, IOSTAT=iostat) dummy, dummy, (columnheader(i), i=1,no_columns(1))	!Till: extract column headers
+  if (iostat/=0) then	
+		write(*,*)'Format error in temperature.dat'
+		stop
+  end if
   corr_column_temp=>set_corr_column(columnheader, 'temperature.dat')
+  
   
   READ(82,'(a)') linedummy
   columnheader=0
   no_columns(2)=GetNumberOfSubstrings(linedummy)-2	!Till: count number of columns
-  READ (linedummy,*) dummy, dummy, (columnheader(i), i=1,no_columns(2))	!Till: extract column headers
+  READ (linedummy,*, IOSTAT=iostat) dummy, dummy, (columnheader(i), i=1,no_columns(2))	!Till: extract column headers
+  if (iostat/=0) then	
+		write(*,*)'Format error in humidity.dat'
+		stop
+  end if
   corr_column_rhum=>set_corr_column(columnheader,'humidity.dat')
+
 
   READ(83,'(a)') linedummy
   columnheader=0
   no_columns(3)=GetNumberOfSubstrings(linedummy)-2	!Till: count number of columns
-  READ (linedummy,*) dummy, dummy, (columnheader(i), i=1,no_columns(3))	!Till: extract column headers
+  READ (linedummy,*, IOSTAT=iostat) dummy, dummy, (columnheader(i), i=1,no_columns(3))	!Till: extract column headers
+  if (iostat/=0) then	
+		write(*,*)'Format error in radiation.dat'
+		stop
+  end if
   corr_column_rad=> set_corr_column(columnheader,'radiation.dat')
+
+ 
 
   READ(84,'(a)') linedummy
   columnheader=0
   no_columns(4)=GetNumberOfSubstrings(linedummy)-2	!Till: count number of columns
-  READ (linedummy,*) dummy, dummy, (columnheader(i), i=1,no_columns(4))	!Till: extract column headers
+  READ (linedummy,*, IOSTAT=iostat) dummy, dummy, (columnheader(i), i=1,no_columns(4))	!Till: extract column headers
+  if (iostat/=0) then	
+		write(*,*)'Format error in '//dumstr
+		stop
+  end if
   corr_column_precip=>set_corr_column(columnheader,dumstr)
 	
 	
@@ -216,29 +247,35 @@ IF (STATUS == 1) THEN
  precip=50.0
  
  READ(81,*,IOSTAT=iostat) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(1)),id=1,dayyear)		!Till: faster than using loop
+ if (iostat/=0) then	!
+		write(*,*)'ERROR: input file format error in temperature.dat'
+		stop
+ end if
  temp(1:dayyear,1:subasin)= inputbuffer(1:dayyear,corr_column_temp)	!Till: rearrange column order to match order of hymo.dat
- if (iostat/=0) then	!
-		write(*,'(A,i3,a,i0)')'ERROR: input file format error in temperature.dat'
-		stop
- end if
-
+ 
  READ(82,*,IOSTAT=iostat) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(2)),id=1,dayyear)		!Till: faster than using loop
+ if (iostat/=0) then	!
+		write(*,*)'ERROR: input file format error in humidity.dat'
+		stop
+ end if
  rhum(1:dayyear,1:subasin)= inputbuffer (1:dayyear,corr_column_rhum)	!Till: rearrange column order to match order of hymo.dat
- if (iostat/=0) then	!
-		write(*,'(A,i3,a,i0)')'ERROR: input file format error in humidity.dat'
-		stop
- end if
-
+ 
+ 
  READ(83,*,IOSTAT=iostat) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(3)),id=1,dayyear)		!Till: faster than using loop
- rad(1:dayyear,1:subasin)= inputbuffer (1:dayyear,corr_column_rad)	!Till: rearrange column order to match order of hymo.dat 
  if (iostat/=0) then	!
-		write(*,'(A,i3,a,i0)')'ERROR: input file format error in radiation.dat'
+		write(*,*)'ERROR: input file format error in radiation.dat'
 		stop
  end if
+ rad(1:dayyear,1:subasin)= inputbuffer (1:dayyear,corr_column_rad)	!Till: rearrange column order to match order of hymo.dat 
+ 
 
 
 	IF (.NOT. dohour) THEN
 		READ(84,*,IOSTAT=iostat) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(4)),id=1,dayyear)		!Till: faster than using loop
+		if (iostat/=0) then	!
+			write(*,*)'ERROR: input file format error in ',trim(dumstr)
+			stop
+		end if
 		precip(:,1:subasin)= inputbuffer (:,corr_column_precip)	!Till: rearrange column order to match order of hymo.dat	 
 	else 
 		!read hourly rainfall data
@@ -247,6 +284,11 @@ IF (STATUS == 1) THEN
 			preciph(:,:)=-1.0	!hourly precip
 
 		READ (84,*,IOSTAT=iostat) ((n,k,(inputbuffer((i-1)*24+j,id),id=1,no_columns(4)),j=1,nt),i=1,dayyear)
+		if (iostat/=0) then	!
+			write(*,*)'ERROR: input file format error in ',trim(dumstr)
+			stop
+		end if
+
 		preciph(:,1:subasin)= inputbuffer (:,corr_column_precip)	!Till: rearrange column order to match order of hymo.dat	 
 
 
@@ -267,11 +309,7 @@ IF (STATUS == 1) THEN
 		END DO
 
 	END IF
-	if (iostat/=0) then	!
-		write(*,'(A,i3,a,i0)')'ERROR: input file format error in ',dumstr
-		stop
-    end if
-
+	
 
 wind=1.0	!Till: currently not read from input file (assumed constant)
 

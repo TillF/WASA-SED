@@ -4,8 +4,12 @@ SUBROUTINE soilwat(hh,day,month,i_subbas2,i_ce,i_lu,oc2,tcid_instance2,id_tc_typ
         tcsoilet,tcintc,prec,precday,prechall2,petday,  &
         tcarea2,bal, rootd_act,height_act,lai_act,alb_act,sed_in_tc,sed_out_tc)
 
-! Till: computationally irrelevant: removed unused parameter h
-! 2011-05-05
+!Till: dimensions of remainlat are taken from latred - produced crashes with single-layered soils before
+!computationally irrelevant: modified summation of latred that lead to crash when only single sol horizons  were present
+!2012-05-15
+
+!Till: computationally irrelevant: removed unused parameter h
+!2011-05-05
 
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29
@@ -235,7 +239,7 @@ REAL :: etpmax(maxsoil)
 REAL :: evapsfrac,rsfinday !,evapvegfrac
 REAL :: ERR,inf,infalt,infsatt,test,INPUT,def,facw,infh,dt_per_day !,infall
 REAL :: tempx,temp2,temp3,temp4, temp5,tempna,tempalt,templat,kftemp
-REAL :: remainlat(maxhori*3)
+REAL :: remainlat(size(latred,2))
 REAL :: na(maxsoil,maxhori)
 REAL :: tsh(maxsoil)
 REAL :: zfrac(maxsoil)	!Till: fraction of empty pore space (saturation deficit) [Vol. fraction]
@@ -343,7 +347,7 @@ watbal=0.
 
 templat=0.
 IF (dolatscsub) THEN										!Till: if lateral subsurface runoff is to be computed...
-  templat=sum(latred(tcid_instance2,1:maxhori*3))					!lateral subsurface runoff to be redistributed between SVCs (m**3)
+  templat=sum(latred(tcid_instance2,:))					!lateral subsurface runoff to be redistributed between SVCs (m**3)
 END IF														
 
 !  inflow into SVCs by return flow of rocky areas
