@@ -1,4 +1,7 @@
 SUBROUTINE readhymo
+!Till: latred allocation did not consider soils that were extended downwards because of no bedrock - fixed
+!2012-05-15
+
 !Till: latred is now allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
 !2011-07-07
 
@@ -138,7 +141,7 @@ INTEGER :: idummy,i,j,c,k,i_min,n,h,ii
 INTEGER :: dummy1, dummy2, loop
 INTEGER :: id_lu_int,id_lu_ext,id_tc_ext,id_tc_int,id_soil_int,test !,id_soil_ext
 INTEGER :: idummy2(20),tausch,istate
-REAL :: temp1,temp2
+REAL :: temp1,temp2, maxthickness
 REAL :: sortier(maxterrain),tauschr
 CHARACTER (LEN=8000) :: cdummy
 CHARACTER (LEN=100) :: cdummy2
@@ -374,8 +377,8 @@ DO j=1,nsoil
 
 END DO
 
-temp1=maxval(sum(temp_hori_thick, 2),1)	!compute maximum total thickness among soil profiles
-allocate(latred(sv_comb,ceiling(temp1/500.))) !Till: latred is now allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
+!temp1=maxval(sum(temp_hori_thick, 2),1)	!compute maximum total thickness among soil profiles
+!allocate(latred(sv_comb,ceiling(temp1/500.))) !Till: latred is now allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
  
 shrink = 0.	!Till shrinkage currently disabled (buggy, "macro" can become huge and lead to crashes in soilwat 2.2a)
 CLOSE(11)
@@ -998,6 +1001,7 @@ END DO
 !   (1)  the depth of the lowest horizon
 !   (2)  flag indicating if bedrock occurs below deepest horizon or not (1/0)
 horiz_thickness(:,:,:)=0.
+maxthickness=0.	!determine maximum soil thickness
 DO n=1,sv_comb
   DO j=1,nbr_svc(n)
     test=luse_subbas(n)
@@ -1094,7 +1098,19 @@ DO n=1,sv_comb
       END IF
     END IF
   END DO
+
+  
+  maxthickness=max(maxthickness, maxval(sum(horiz_thickness(n,:,:),2) )  )
+
 END DO
+
+
+!maxthickness=maxval(sum(horiz_thickness, 3))	!Till: compute maximum total thickness among soil profiles - crashes with large arrays, so we use the loop above
+
+
+allocate(latred(sv_comb,ceiling(maxthickness/500.))) !Till: latred is now allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
+
+
 ! ..................................................................
 
 

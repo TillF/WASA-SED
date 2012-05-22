@@ -26,7 +26,7 @@ use time_h
 
 IMPLICIT NONE
 
-INTEGER :: isubbas,im,id,idmonstart
+INTEGER :: isubbas, im, id, idmonstart, istate
 
 
 REAL :: rex(12)	! radiation (W/m^2)
@@ -48,11 +48,18 @@ alpha=0.05	! free water surface
       
 
 ! Reads in radiation as monthly means (in contrast to rad(i,nmun) which are daily means)
-OPEN(11,FILE=pfadp(1:pfadj)//'Time_series/extraterrestrial_radiation.dat',STATUS='old')	!ii: load this file only once
-READ(11,*)
-DO im=1, 12
-  READ(11,*)rex(im)
-END DO
+OPEN(11,FILE=pfadp(1:pfadj)//'Time_series/extraterrestrial_radiation.dat',STATUS='old',action='read',IOSTAT=istate)	!ii: load this file only once
+IF (istate/=0) THEN
+	write(*,*)'Error: Input file ',trim(pfadp(1:pfadj)//'Time_series/extraterrestrial_radiation.dat'),' not found, aborting.'
+	stop
+END IF
+
+READ(11,*,IOSTAT=istate)
+  READ(11,*,IOSTAT=istate)(rex(im), im=1,12)
+  IF (istate/=0) THEN
+	write(*,*)'Error: Format error in ',trim(pfadp(1:pfadj)//'Time_series/extraterrestrial_radiation.dat')
+	stop
+  END IF
 CLOSE(11)
 
 im=1
