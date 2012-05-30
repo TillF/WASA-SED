@@ -3,6 +3,9 @@ SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v
 ! hillslope erosion module for WASA
 ! to be called by soilwat.f90, Till Francke (till@comets.de)
 
+! Till: runoff during no-rain days caused math error (log(0)) - fixed
+! 2012-05-30
+
 ! Till: computationally irrelevant: removed unused parameter h
 ! 2011-05-05
 
@@ -196,13 +199,18 @@ IF ( (erosion_equation==1) .OR. (erosion_equation==2))  THEN
 		!R_05=alpha_05*R_d						!maximum amount of rain in 30 min [mm]; Williams, 1995; 25.131
 		!ri_05=R_05/0.5							!maximum 0.5-h rainfall intensity [mm/h]
 		!rainfall intensities based on kfkorr showed low values, resulting in low erosion as well
-		ri_05=a_i30*(R_d**b_i30)
-		ri_05=min(ri_05,2.*R_d)					!maximum possible intensity
-		r_p=-2.*R_d*log(1-min((ri_05/2./R_d),0.99))
+		
+		if (R_d==0.) then
+			ei=0.	!do computations only when there is rainfall
+		else
+			ri_05=a_i30*(R_d**b_i30)
+			ri_05=min(ri_05,2.*R_d)					!maximum possible intensity
+			r_p=-2.*R_d*log(1-min((ri_05/2./R_d),0.99))
+		end if
 
 	END IF
 
-	ei=R_d*(12.1+8.9*(log10(r_p)-0.434))*ri_05/1000.	!USLE-energy factor in the "proper" units according to Williams, 1995 in Singh,1995, p.934,25.128
+    if (R_d /=0.) ei=R_d*(12.1+8.9*(log10(r_p)-0.434))*ri_05/1000.	!USLE-energy factor in the "proper" units according to Williams, 1995 in Singh,1995, p.934,25.128
 ELSE
 	ei=-1.		!just for debugging
 END IF

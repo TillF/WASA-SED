@@ -4,6 +4,9 @@ SUBROUTINE soilwat(hh,day,month,i_subbas2,i_ce,i_lu,oc2,tcid_instance2,id_tc_typ
         tcsoilet,tcintc,prec,precday,prechall2,petday,  &
         tcarea2,bal, rootd_act,height_act,lai_act,alb_act,sed_in_tc,sed_out_tc)
 
+!Till: computationally irrelevant: disabled TC-wise erosion when calcualtion on subbasin-scale was enabled
+!2012-05-30
+
 !Till: dimensions of remainlat are taken from latred - produced crashes with single-layered soils before
 !computationally irrelevant: modified summation of latred that lead to crash when only single sol horizons  were present
 !2012-05-15
@@ -2517,7 +2520,7 @@ DO i=1,nbr_svc(tcid_instance2)
         
       ELSE IF (h == nbrhori(soilid)) THEN				!Till: deepest horizon 
         IF (gw_flag(i_lu) == 0 .OR. gw_flag(i_lu) == 1) THEN
-          percol(h)=thfree(i,h)*(1.-EXP(-1./(thfree(i,h)/conduns(h))))	!Till: compute percolation [mm], ii: same as above, relocate to outside branch
+		  percol(h)=thfree(i,h)*(1.-EXP(-1./(thfree(i,h)/conduns(h))))	!Till: compute percolation [mm], ii: same as above, relocate to outside branch, prone to numeric underflow, catch this
 		  IF (svcbedr(tcid_instance2,i) == 1) THEN		!Till: if there is bedrock...
             percol(h)=MIN(percol(h),kfsu(i_lu)/dt_per_day) !Till: ...percolation is limited by bedrock conductivity
           END IF
@@ -2941,7 +2944,7 @@ watbal=watbal+(thact1-thact)
 
 bal=watbal
 
-if (dosediment .AND. (q_surf_out > 0.)) then !if hillslope erosion is to be computed and there is runoff
+if (dosediment .AND. (q_surf_out > 0.) .AND. .NOT. do_musle_subbasin) then !if hillslope erosion is to be computed and there is runoff
 	!the following calculation in the peak runoff rate q_peak uses the equations given in the SWAT Theoretical Documentation, pp.105, 2002
 	
 	!run_cf=(q_surf_out-q_surf_in)/prec	!compute runoff coefficient for this timestep not needed
