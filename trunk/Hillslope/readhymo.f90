@@ -377,9 +377,6 @@ DO j=1,nsoil
 
 END DO
 
-!temp1=maxval(sum(temp_hori_thick, 2),1)	!compute maximum total thickness among soil profiles
-!allocate(latred(sv_comb,ceiling(temp1/500.))) !Till: latred is now allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
- 
 shrink = 0.	!Till shrinkage currently disabled (buggy, "macro" can become huge and lead to crashes in soilwat 2.2a)
 CLOSE(11)
 
@@ -1099,17 +1096,16 @@ DO n=1,sv_comb
     END IF
   END DO
 
-  
-  maxthickness=max(maxthickness, maxval(sum(horiz_thickness(n,:,:),2) )  )
+maxthickness=max(maxthickness, maxval(sum(horiz_thickness(n,:,:),2) )  )
+
+
 
 END DO
-
-
+!allocate(latred(sv_comb,maxhori*4)) !Till: latred is now allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
 !maxthickness=maxval(sum(horiz_thickness, 3))	!Till: compute maximum total thickness among soil profiles - crashes with large arrays, so we use the loop above
 
 
-allocate(latred(sv_comb,ceiling(maxthickness/500.))) !Till: latred is now allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
-
+allocate(latred(sv_comb,ceiling(maxthickness/500.)+1)) !Till: latred is now allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
 
 ! ..................................................................
 
