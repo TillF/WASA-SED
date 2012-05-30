@@ -396,7 +396,7 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
           testi=0
           
 !  maximum lateral inflow into this SVC
-          DO h=1,maxhori*3
+          DO h=1,size(remainlat)
             remainlat(h)=(latred(tcid_instance2,h)* merkalluv(i)/allalluv)/ (tcarea2*1.e3*frac_svc(i,tcid_instance2))
 				!Till: all potential subsurface flow is distributed among alluvial SVCs [mm] (still "remains to be distributed")
           END DO
@@ -576,7 +576,7 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
         
      
 	!  maximum lateral inflow into this SVC
-			DO h=1,maxhori*3
+			DO h=1,size(remainlat)
 			  remainlat(h)=(latred(tcid_instance2,h)*frac_svc(i,tcid_instance2)/(1.-allalluv)) / & !Till: distribute subsurface flow according to fraction among non-alluvial soils
 				  (tcarea2*1.e3*frac_svc(i,tcid_instance2))
 			END DO
@@ -699,7 +699,7 @@ ELSE	! endif lowest terrain component - if not lowest TC, do upslope now
       testi=0
       
 !  maximum lateral inflow into this SVC
-      DO h=1,maxhori*3
+      DO h=1,size(remainlat)
         remainlat(h)=(latred(tcid_instance2,h)*frac_svc(i,tcid_instance2))/  &
             (tcarea2*1.e3*frac_svc(i,tcid_instance2))
       END DO
