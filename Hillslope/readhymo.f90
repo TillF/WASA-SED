@@ -207,7 +207,12 @@ end if
 
 
 !** read subbasin parameters
-OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/hymo.dat',STATUS='old')
+OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/hymo.dat',STATUS='old',IOSTAT=istate)	
+IF (istate/=0) THEN
+	write(*,*)'Error: Input file ',pfadp(1:pfadj)// 'Hillslope/hymo.dat',' not found, aborting.'
+	stop
+END IF
+
 
 READ(11,*)
 READ(11,*)
