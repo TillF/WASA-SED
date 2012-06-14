@@ -99,8 +99,8 @@ LOGICAL :: f_res_watbal,f_res_vollost,f_res_cav,f_res_hydraul,f_res_bedchange,f_
 LOGICAL :: f_lake_inflow_r,f_lake_outflow_r,f_lake_retention_r,f_lake_volume_r,f_lake_sedinflow_r,f_lake_sedoutflow_r,f_lake_sedretention_r,f_lake_sedimentation_r
 LOGICAL :: f_lake_watbal,f_lake_sedbal,f_lake_inflow,f_lake_outflow,f_lake_volume,f_lake_retention,f_lake_vollost,f_lake_sedinflow,f_lake_sedoutflow,f_lake_sizedistoutflow
 
-LOGICAL :: doloadstate=.TRUE.			!load initial values before model run
-LOGICAL :: dosavestate=.TRUE.			!save state of model after execution
+LOGICAL :: doloadstate=.FALSE.			!load initial values before model run
+LOGICAL :: dosavestate=.FALSE.			!save state of model after execution
 REAL	:: default_rel_sat=1.0		!default relative saturation (initial value for all horizons, if not specified otherwise)
 REAL	:: default_gw_storage=0.0	!default ground water storage (to be assumed for all non-specified LUs) [mm]
 

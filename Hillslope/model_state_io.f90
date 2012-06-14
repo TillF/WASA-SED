@@ -1,6 +1,9 @@
 module model_state_io
 !contains subroutines for saving and loading model state (soil water, ground water, interception)
 
+!Till: computationally irrelevant: minor changes in output details, improved error handling
+!2012-06-14 
+
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29
 
@@ -184,7 +187,7 @@ subroutine init_soil_conds(soil_conds_file)
 	INTEGER :: tcid_instance !,lu_instance, !,soil_instance	!(internal) id of LU,TC,soil-instance (unique subbas-LU-TC-soil-combination)
 	REAL	:: horithact_temp, x
 	INTEGER	:: file_read=0
-	character(len=160) :: error_msg=''
+	character(len=160) :: linestr='', error_msg=''
 
 
 	i=0
@@ -217,11 +220,19 @@ subroutine init_soil_conds(soil_conds_file)
 				errors=errors+1
 			END IF
 			
-			READ(11,*,  IOSTAT=i) i_subbasx,i_lux,i_tcx,i_svcx,h,horithact_temp, x
-			IF (i/=0) THEN	!no further line
+			READ(11,'(A)',  IOSTAT=i) linestr
+			
+			IF (i==24 .OR. i==-1) THEN	!end of file
 				exit		!exit loop
 			END IF
 			line=line+1
+			
+			READ(linestr,*,  IOSTAT=i) i_subbasx,i_lux,i_tcx,i_svcx,h,horithact_temp, x
+			IF (i/=0) THEN	!format error
+				write(error_msg,'(i12,1a12,a)')line,'-',trim(linestr)
+				cycle	!proceed with next line
+			END IF
+			
 			i_subbas=id_ext2int(i_subbasx,id_subbas_extern)	!convert to internal subbas id
 			if (i_subbas==-1) then
 				write(error_msg,'(2i12)')line,i_subbasx
@@ -306,7 +317,7 @@ subroutine init_soil_conds(soil_conds_file)
 						if (horithact(tcid_instance,svc_counter,h)==-9999.) then			!not yet set?
 							if (file_read==1) then						!but this should have been done before
 								if (errors==0) then	!produce header before first warning only
-									write(*,'(A,f4.2,a,/,5a12)')' Following entities not initalised, using defaults (rel.saturation=',default_rel_sat,'):',&
+									write(*,'(A,f4.2,a,/,5a12)')' Following entities not initialised, using defaults (rel.saturation=',default_rel_sat,'):',&
 									'subbasin','LU','TC','SVC','horizon'
 								end if
 								errors=errors+1
@@ -366,7 +377,7 @@ subroutine init_gw_conds(gw_conds_file)
 !	INTEGER :: lu_instance	!(internal) id of LU
 	REAL	:: gwvol_temp, x
 	INTEGER	:: file_read=0
-	character(len=160) :: error_msg=''
+	character(len=160) :: linestr='', error_msg=''
 	REAL	:: lu_area	!area of current lu [m3]
 
 	
@@ -401,12 +412,19 @@ subroutine init_gw_conds(gw_conds_file)
 				errors=errors+1
 			END IF
 			
-
-			READ(11,*,  IOSTAT=i) i_subbasx,i_lux,gwvol_temp, x
-			IF (i/=0) THEN	!no further line
+			READ(11,'(A)',  IOSTAT=i) linestr
+			
+			IF (i==24 .OR. i==-1) THEN	!end of file
 				exit		!exit loop
 			END IF
 			line=line+1
+			
+			READ(linestr,*,  IOSTAT=i) i_subbasx,i_lux,gwvol_temp, x
+			IF (i/=0) THEN	!format error
+				write(error_msg,'(i12,1a12,a)')line,'-',trim(linestr)
+				cycle	!proceed with next line
+			END IF
+			
 			i_subbas=id_ext2int(i_subbasx,id_subbas_extern)	!convert to internal subbas id
 			if (i_subbas==-1) then
 				write(error_msg,'(2i12)')line,i_subbasx
@@ -445,7 +463,7 @@ subroutine init_gw_conds(gw_conds_file)
 			if (deepgw(i_subbas,lu_counter)==-9999.) then			!not yet set?
 				if (file_read==1) then						!but this should have been done before
 					if (errors==0) then	!produce header before first warning only
-						write(*,'(A,f5.1,a,/,2a12)')' Following entities not initalised, using defaults (storage[mm]=',&
+						write(*,'(A,f5.1,a,/,2a12)')' Following entities not initialised, using defaults (gw_storage[mm]=',&
 						default_gw_storage,'):','subbasin','LU'
 					end if
 					errors=errors+1

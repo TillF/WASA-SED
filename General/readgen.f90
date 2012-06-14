@@ -1,5 +1,8 @@
 SUBROUTINE readgen(path2do_dat)
 
+!Till: computationally irrelevant: optionally load doloadstate and dosavestate from do.dat
+!2012-06-14 
+
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29
 
@@ -37,7 +40,6 @@ SUBROUTINE readgen(path2do_dat)
 ! 2007-01-10, Till
 ! renamed f_deep_gw to f_deep_gw_recharge, added f_deep_gw_discharge
  
-
 ! 2005-10-24, Till
 ! optional reading of outfiles.dat to configure, which output files are created
 
@@ -137,6 +139,8 @@ READ(11,*) n_sed_class
 READ(11,*) hill_transport
 READ(11,*) river_transport
 READ(11,*) reservoir_transport
+READ(11,*, IOSTAT=i) doloadstate
+READ(11,*, IOSTAT=i) dosavestate
 
 CLOSE(11)
 
