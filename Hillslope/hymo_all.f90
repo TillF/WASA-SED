@@ -484,7 +484,7 @@ if (doacud)  CALL lake(0,dummy)
   ! Output sub-daily water flux
   OPEN(11,FILE=pfadn(1:pfadi)//'water_subbasin.out', STATUS='replace')
   IF (f_water_subbasin) THEN	!Till: if sub-daily resolution is required
-	WRITE(11,'(a)') 'river flow [m3/s] for all sub-basins (MAP-IDs)'
+	WRITE(11,'(a)') 'sub-daily contribution to river [m3/s] for all sub-basins (MAP-IDs)'
 	
 	write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'		!generate format string
 	WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep', (char(9),id_subbas_extern(i),i=1,subasin)
