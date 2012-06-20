@@ -1,3 +1,6 @@
+! Till: computationally irrelevant: improved error checking of input files
+! 2012-06-20
+
 ! Till: computationally irrelevant: streamlined code and improved error message with routing.dat
 ! 2011-07-05
 
@@ -28,35 +31,61 @@ INTEGER, INTENT(IN OUT)                  :: STATUS
 !    id           : additional loop variable of days (total 7 days)
 INTEGER :: irout,idummy,id !,imun,imunx,irout2,irout_d,imeso,istate
 INTEGER :: upstream, downstream
-INTEGER :: itl, itr, ih, i, j !, mm, imunout, iout, make
-REAL :: check,temp2,qtemp  !,xdum(48),storcapact
+INTEGER :: itl, itr, ih, i, j, istate, h !, mm, imunout, iout, make
+REAL :: check,temp2,temp3,qtemp  !,xdum(48),storcapact
 character(len=1000) :: fmtstr	!string for formatting file output
 
 
 ! -----------------------------------------------------------------------
 IF (STATUS == 0) THEN
-!**  Read routing paramter
-OPEN(11,FILE=pfadp(1:pfadj)// 'River/routing.dat',STATUS='old')
-! upbasin: MAP ID of upstream sub-basin (MAP IDs)
-! downbasin: MAP ID of downstream sub-basin (MAP IDs)
-READ (11,*); READ(11,*)
-DO irout=1,subasin
-  READ (11,*)  idummy, upbasin(irout),downbasin(irout)
-END DO
-CLOSE (11)
+!Till: already read in readhymo.f90, removed
+!	!**  Read routing paramter
+!	OPEN(11,FILE=pfadp(1:pfadj)// 'River/routing.dat',STATUS='old')
+!	! upbasin: MAP ID of upstream sub-basin (MAP IDs)
+!	! downbasin: MAP ID of downstream sub-basin (MAP IDs)
+!	READ (11,*, IOSTAT=istate); READ(11,*, IOSTAT=istate)
+!	DO irout=1,subasin
+!	  READ (11,*, IOSTAT=istate)  idummy, upbasin(irout),downbasin(irout)
+!	  IF (istate/=0) THEN
+!		write(*,*)'Error (routing.dat): Format error'
+!		stop
+!	  END IF
+!
+!	END DO
+!	CLOSE (11)
 
 !**  Read hydrological response and reservoir paramter
-OPEN(11,FILE=pfadp(1:pfadj)// 'River/response.dat'  &
-    ,STATUS='old')
+OPEN(11,FILE=pfadp(1:pfadj)// 'River/response.dat', STATUS='old', IOSTAT=istate)
+IF (istate/=0) THEN
+		write(*,*)'Error (response.dat): File not found'
+		stop
+ END IF
+
 ! prout(i,1): lag time [d]
 ! prout(i,2): retention storage [d]
-READ (11,*); READ(11,*)
-DO i=1,subasin
-  READ (11,*)  idummy,prout(i,1),  prout(i,2)
-  IF (idummy /= id_subbas_extern(i)) THEN
-    WRITE(*,*) 'Sub-basin-IDs in file response.dat must have the same ordering scheme as in hymo.dat'
-    STOP
+prout=0.
+READ (11,*, IOSTAT=istate); READ(11,*, IOSTAT=istate)
+h=3
+i=0 !count treated subbasins
+
+DO WHILE (i<subasin)
+  READ (11,*, IOSTAT=istate)  idummy,temp2,  temp3
+  h=h+1
+  IF (istate/=0) THEN
+		write(*,'(a, i0)')'Error (routing.dat): Format error or unexpected end in line',h
+		stop
   END IF
+
+  j=which1(idummy == id_subbas_extern) !relate to external IDs from routing.dat
+  
+  if (j==0) then
+	write(*,'(a, i0)')'Warning (routing.dat): Unknown subbasin ',idummy,', skipped.'
+  else
+	prout(j,1)=temp2
+	prout(j,2)=temp3
+	i=i+1
+  end if
+  
 END DO
 CLOSE (11)
 

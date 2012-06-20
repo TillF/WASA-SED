@@ -264,14 +264,12 @@ IF (STATUS == 0) THEN	!Till: initialisation before first run
   end if
   
 !** Additional intializations
-  DO i_subbas=1,subasin
-!George    lakeoutflow(dprev,i_subbas)=0.
-    water_subbasin(dprev,i_subbas)=0.
-    soilwater(dprev,:)=0.
-  END DO
-  DO sb_counter=1,subasin
-    deepgw(sb_counter,:)=0.
-  END DO
+  
+!George    lakeoutflow(dprev,1:subasin)=0.
+  water_subbasin(dprev,1:subasin)=0.
+  soilwater(dprev,:)=0.
+  deepgw(1:subasin,:)=0.
+  
   
   allocate(sed_in(maxval(nbrterrain),n_sed_class),sed_out(maxval(nbrterrain),n_sed_class))
 

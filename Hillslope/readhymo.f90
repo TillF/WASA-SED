@@ -1,4 +1,8 @@
 SUBROUTINE readhymo
+
+!Till: multiple safety checks to detect faulty input files
+!2012-06-20
+
 !Till: latred allocation did not consider soils that were extended downwards because of no bedrock - fixed
 !2012-05-15
 
@@ -220,17 +224,30 @@ i=1
 istate=0
 id_subbas_extern=upbasin
 id_subbas_intern=0
-DO WHILE ((istate==0) .AND. (i<=subasin))
-	!READ(11,*,IOSTAT=istate) id_subbas_extern(i),area(i), nbr_lu(i),  &
-	!    (id_lu_intern(j,i),j=1,nbr_lu(i)), (frac_lu(j,i),j=1,nbr_lu(i))
-	!id_subbas_intern(i)=id_subbas_extern(i)
+c=0 !count successfully read subbasins
+h=3 !count lines
 
-	READ(11,*,IOSTAT=istate) n,temp1, k,  (lu_temp(j),j=1,k), (frac_lu_temp(j),j=1,k)
+DO WHILE ((istate==0) .AND. (c<subasin))
+	cdummy=''
+	READ(11,'(a)',IOSTAT=istate) cdummy
+	if (istate/=0 .AND. c<subasin-1) then	!(premature) end of file
+	  write(*,'(a,i0,a)')'ERROR (hymo.dat): At least ',subasin,' lines (#subbasins) expected'
+	  stop
+	end if
+	h=h+1 !count lines
 
-	if (istate/=0) then	!premature end of file
-	  exit
+	dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
+	if (dummy1-3 > 2*maxsoter) then	!too many fields in line
+	  write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (hymo.dat): line ',h,' contains more (',dummy1,') than the expected 3 + 2 * ',maxsoter,' fields (maxdim.dat).'
+	  stop
 	end if
 
+	READ(cdummy,*,IOSTAT=istate) n,temp1, k,  (lu_temp(j),j=1,k), (frac_lu_temp(j),j=1,k)
+	if (istate/=0) then	!format error
+	  write(*,'(a,i0)')'ERROR (hymo.dat): Format error in line ',h
+	  stop
+	end if
+	
 	i=which1(upbasin==n)
 	if (i==0) then	!Till: the current subbasin was not contained in routing.dat, skip it
 		WRITE(*,'(a, I0, a, I0, a)') 'Subbasin ',n,' not listed in routing.dat, ignored.'		
@@ -240,6 +257,7 @@ DO WHILE ((istate==0) .AND. (i<=subasin))
 		id_lu_intern(:,i)=lu_temp
 		frac_lu(:,i)=frac_lu_temp
 		id_subbas_intern(i)=id_subbas_extern(i)
+		c=c+1 !count successfully read subbasins
 	end if
 END DO
 CLOSE(11)
@@ -255,11 +273,44 @@ end if
 !** read Landscape units parameters
 OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/soter.dat',STATUS='old')
 READ(11,*); READ (11,*)
+h=2
+
 DO i=1,nsoter
-! IDs are read into id_terrain_intern - conversion to internal id is done later
-  READ(11,*) id_lu_extern(i),nbrterrain(i), (id_terrain_intern(j,i),j=1,nbrterrain(i)),  &
+
+	READ(11,'(a)',IOSTAT=istate) cdummy
+	if (istate/=0 .AND. i<nsoter) then	!premature end of file
+	  write(*,'(a,i0,a)')'ERROR (soter.dat): At least ',nsoter,' lines (#LUs) expected'
+	  stop
+	end if
+	h=h+1 !count lines
+
+	dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
+	if (dummy1 > 2+maxterrain+8) then	!too many fields in line
+	  write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (soter.dat): line ',h,' contains more (',dummy1,') than the max expected 2+',maxterrain,'+8 fields (maxdim.dat).'
+	  stop
+	end if
+
+
+	! IDs are read into id_terrain_intern - conversion to internal id is done later
+	READ(cdummy,*,IOSTAT=istate) id_lu_extern(i),nbrterrain(i), (id_terrain_intern(j,i),j=1,nbrterrain(i)),  &
       kfsu(i),slength(i), meandep(i),maxdep(i),riverbed(i),  &
       gw_flag(i),gw_dist(i),gw_delay(i)
+	if (istate/=0) then	!format error
+	  write(*,'(a,i0)')'ERROR (soter.dat): Format error in line ',h
+	  stop
+	end if
+
+	if (slength(i)<=0) then	!faulty specs
+	  write(*,'(a,i0,a)')'WARNING (soter.dat): Slope length cannot be <= 0 in line ',h,', corrected to 0.1'
+	  slength(i)=0.1
+	end if
+
+	if (riverbed(i)<=0) then	!faulty specs
+	  write(*,'(a,i0,a)')'WARNING (soter.dat): Riverbed depth cannot be <= 0 in line ',h,', corrected to 1000'
+	  riverbed(i)=1000
+	end if
+
+
 	if (gw_flag(i)/=99) then		!Till: gw_dist is only used if gw_flag is 99. To avoid side effects, gw_dist is et to 0
 		gw_dist(i)=0.
 	end if
@@ -293,6 +344,7 @@ CLOSE(11)
 OPEN(11,FILE=pfadp(1:pfadj)//  &
     'Hillslope/soil_vegetation.dat',STATUS='old')
 READ(11,*); READ(11,*);READ(11,*)
+h=4
 luse_subbas=0	!initital values
 luse_lu=0
 luse_tc=0
@@ -303,18 +355,37 @@ nbr_svc=0
 id_soil_intern=0
 
 DO i=1,sv_comb
-   READ(11,'(a)') cdummy
+   READ(11,'(a)',IOSTAT=istate) cdummy
+   if (istate/=0 .AND. i<sv_comb) then	!premature end of file
+	  write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',sv_comb,' lines (#SVC-LU-SUBBAS-combinations) expected'
+	  stop
+	end if
+	h=h+1 !count lines
+	
   dummy1=GetNumberOfSubstrings(cdummy)-5 !Till: count number of fields (ie SVCs) specified for this combination
   if (dummy1 > maxsoil) then
-	write (*,*)'Line ',i*3+1,' in soil_vegetation.dat contains more soil types than specified in do.dat'
+	write (*,*)'Line ',h,' in soil_vegetation.dat contains ',dummy1,' soil types - more than specified in maxdim.dat or assumed by default.'
 	stop
   end if
-  READ(cdummy,*) luse_subbas(i),luse_lu(i),luse_tc(i),  &
+  k=0
+  READ(cdummy,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
       rocky(i),nbr_svc(i),(id_soil_intern(c,i),c=1,dummy1)	!!ii: nbr_svc, rocky, id_soil_intern sind feststehende Parameter für einen TC-Typ und sollten nur einmal pro TC-typ gespeichert werden
-  READ(11,*) luse_subbas(i),luse_lu(i),luse_tc(i),  &
+  k=k+istate
+  READ(11,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
       rocky(i),nbr_svc(i),(id_veg_intern(c,i),c=1,dummy1)
-  READ(11,*) luse_subbas(i),luse_lu(i),luse_tc(i),  &
+  k=k+istate
+  h=h+1 !count lines
+  READ(11,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
       rocky(i),nbr_svc(i),(frac_svc(c,i),c=1,dummy1)
+  k=k+istate
+  h=h+1 !count lines
+  
+  if (istate/=0) then	!premature end of file
+	  write(*,'(a,i0)')'ERROR (soil_vegetation.dat): Format error in line ',h
+	  stop
+  end if
+
+
 END DO
 CLOSE(11)
 
@@ -328,10 +399,10 @@ OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/soil.dat',STATUS='old')
 READ(11,*)
 READ(11,*)
 READ(11,'(a)') cdummy
-  dummy1=MOD(GetNumberOfSubstrings(cdummy),13) !Till: count number of fields to decide if this is an older input file version
-if (dummy1==3) then
+  c=MOD(GetNumberOfSubstrings(cdummy),13) !Till: count number of fields to decide if this is an older input file version
+if (c==3) then
 	write(*,*)'WARNING: old version of soil.dat without alluvial_flag. Soils 1-3 assumed to be alluvial.'
-elseif (dummy1/=4) then
+elseif (c/=4) then
 	write(*,*)'ERROR: unknown version of soil.dat'
 	stop
 end if
@@ -339,6 +410,7 @@ end if
 rewind(11)
 READ(11,*)
 READ(11,*)
+h=3
 
 alluvial_flag=0
 
@@ -353,7 +425,14 @@ DO j=1,nsoil
 	stop
   end if
 
-	if (dummy1==3) then	!old format
+  dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields 
+ 
+  if (dummy1 > 2+maxhori*13+1+(c-3)) then
+	write (*,'(A,i0,a,i0,a)')'Line ',h,' in soil.dat contains ',(dummy1-3-(c-3))/13,' horizons - more than specified in maxdim.dat or assumed by default.'
+	stop
+  end if
+
+	if (c==3) then	!old format
 		READ(cdummy,*,IOSTAT=istate) id_soil_extern(j),nbrhori(j), (thetar(j,k),soilpwp(j,k),  &
 		soilfc(j,k),soilfc63(j,k), soilnfk(j,k),thetas(j,k),  &
 		temp_hori_thick(j,k), k_sat(j,k),saug(j,k),poresz(j,k),  &
@@ -369,9 +448,10 @@ DO j=1,nsoil
 	end if
 
 	if (istate/=0) then
-			write(*,*)'ERROR: Format error in soil.dat, line ',j+2
+			write(*,'(a, i0)')'ERROR (soil.dat): Format error in , line ',h
 			stop
 	end if
+	h=h+1
 
 	DO k=1,nbrhori(j)
 	  if (coarse(j,k)>1.) then
@@ -745,9 +825,15 @@ END DO
 DO i=1,nsoter
   DO j=1, nbrterrain(i)
     n=1
-    DO WHILE (id_terrain_extern(n) /= id_terrain_intern(j,i))	!search until the current external ID has been found...
+    DO WHILE ((n<=nterrain) .AND. (id_terrain_extern(n) /= id_terrain_intern(j,i)))	!search until the current external ID has been found...
       n=n+1
     END DO
+
+	IF (n > nterrain) THEN	!reference to undefined TC
+		WRITE(*,'(a, I0,a, I0, a)') 'WARNING: TC ', id_terrain_intern(j,i), ' (Subbasin ', id_subbas_extern(i), ') in soter.dat not found in tc.dat. Toposequence truncated.'
+		nbrterrain(i)=j-1
+		exit  
+	END IF
     id_terrain_intern(j,i)=n									!replace internal ID with external ID
   END DO
 END DO
@@ -761,7 +847,7 @@ DO i=1,sv_comb
       n=n+1
     END DO
 
-	IF (n > nsoil) THEN	!reference to undefined LU
+	IF (n > nsoil) THEN	!reference to undefined SOIL
 			WRITE(*,'(a, I0, a)') 'Soil ', id_soil_intern(j,i), ' not found in soil.dat.'
 			STOP
 	END IF
