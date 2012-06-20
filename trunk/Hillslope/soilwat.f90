@@ -4,6 +4,9 @@ SUBROUTINE soilwat(hh,day,month,i_subbas2,i_ce,i_lu,oc2,tcid_instance2,id_tc_typ
         tcsoilet,tcintc,prec,precday,prechall2,petday,  &
         tcarea2,bal, rootd_act,height_act,lai_act,alb_act,sed_in_tc,sed_out_tc)
 
+!Till: computationally irrelevant: disabled pause and debugging parts
+!2012-06-20
+
 !Till: computationally irrelevant: disabled TC-wise erosion when calcualtion on subbasin-scale was enabled
 !2012-05-30
 
@@ -284,10 +287,6 @@ INTEGER :: doshrink
 !   thact is average soil moisture of TC (mm).
 !   watbal checks water balance of TC for each timestep (mm)
 
-IF (i_subbas2/=i_ce) THEN
-	write(*,*)"Sie sind auch manchmal verschieden!"
-End if
-
 !for debugging - remove
 DO i=1,nbr_svc(tcid_instance2)
 	DO h=1,nbrhori(id_soil_intern(i,tcid_instance2))
@@ -421,7 +420,7 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
 
                 temp3=MIN(temp3,temp2)					!Till: actual amount of water going into current horizon
                 horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)+temp3
-                
+
 				remainlat(1:lath)=0.
                 IF (temp3 < temp2) THEN					!Till: if inflow is limited by conductivity, the rest is stored for further redistribution
                   remainlat(lath)=temp2-temp3
@@ -473,7 +472,7 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
 
 				temp3=MIN(temp3,temp2)
                 horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)+temp3
-				
+
 				remainlat(:)=0.
                 IF (temp3 < temp2) THEN
                   remainlat(1)=temp2-temp3
@@ -616,8 +615,8 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
 					remainlat(lath)=remainlat(lath)+ (horithact(tcid_instance2,i,h)-  &
 						thetas(soilid,h)*horiz_thickness(tcid_instance2,i,h))
 					horithact(tcid_instance2,i,h)=thetas(soilid,h)* horiz_thickness(tcid_instance2,i,h)
-
 					
+
 				  END IF
 				END IF
 			  END IF
@@ -1687,7 +1686,7 @@ DO n_iter=1,2
 						END DO
 						IF (infh > 0.001) THEN
 						  WRITE(*,*) 'infall zu gross,tcod2,i',tcid_instance2,i,infh
-						  call pause1
+!						  call pause1
 						END IF
 
 						!   all horizons if macropore infiltration occured
@@ -1881,7 +1880,7 @@ DO n_iter=1,2
 				DO WHILE (j <= nbrhori(soilid) .AND.  &
 					  infup > 0.001 .AND. j /= hsat(i))
 				  tempx=MIN(infup,na(i,j)*horiz_thickness(tcid_instance2,i,j))		!Till: maximum amount of water that can go into current horizon
-    			  horithact(tcid_instance2,i,j)= horithact(tcid_instance2,i,j) + tempx	!Till: increase soil water content
+				  horithact(tcid_instance2,i,j)= horithact(tcid_instance2,i,j) + tempx	!Till: increase soil water content
 				  infup=infup-tempx													!Till: decrease amount of water available for lower horizons
 				  j=j+1
 				END DO
@@ -2286,9 +2285,9 @@ if (isnan(evaps)) then
     temp4=scaet
     DO h=1,nbrrooth(i)
       IF (aktnfk(h) > 0.) THEN
-        horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)  &
+		horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)  &
             -MIN(evapveg*etpvert(h)/temp3+tempx,aktnfk(h))
-		
+
 
         temp4=temp4- MIN(evapveg*etpvert(h)/temp3+tempx,aktnfk(h))
         IF (aktnfk(h) < evapveg*etpvert(h)/temp3+tempx) THEN
@@ -2623,7 +2622,7 @@ DO i=1,nbr_svc(tcid_instance2)
 							* temp3*temp2* slope(id_tc_type2)/100. 	&
 							/  slength(i_lu) / fracterrain(id_tc_type2)/1000. 
 			
-	
+
 				!Original equation from Andreas: equal to new corrected equation with extra factor /2.			
 				!l2_test2=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))*  &
 				!		 thfree(i,h)/(thetas(soilid,h)-soilfc(soilid,h)) *temp2  &
@@ -2650,7 +2649,7 @@ DO i=1,nbr_svc(tcid_instance2)
 ! maximum possible outflow of horizon is defined by its
 ! available moisture content above FC
       test=thfree(i,h)			!Till: this is available
-      tempx=percol(h)+l2(h)		!Till: this can potentially drain
+	  tempx=percol(h)+l2(h)		!Till: this can potentially drain
       IF (tempx > test) THEN	!Till: percolation and lateral outflow are rescaled to be (in sum) thfree at maximum
         percol(h)=test*percol(h)/tempx
         l2(h)=test*l2(h)/tempx
@@ -2679,7 +2678,7 @@ DO i=1,nbr_svc(tcid_instance2)
 !  update soil moisture of deeper horizons by macroporeflow
       DO j=1,nbrhori(soilid)
         horithact(tcid_instance2,i,j)= horithact(tcid_instance2,i,j)+percolmac(j)	!ii vectorize
-			
+
 
       END DO
       
