@@ -42,5 +42,6 @@ section river
 		- M.F. Lambert, R.H.J. Sellin: DISCHARGE PREDICTION IN STRAIGHT COMPOUND CHANNELS USING THE MIXING LENGTH CONCEPT
 		- Christodolou G.C. and W.R.C. Myers.  (1999).  Apparent Friction Factor on the Flood Plain-Main Channel Interface of Compound Channel Sections, Proceedings of 28th Congress of the International Association for Hydraulic Research, Craz, Austria, SE3, A379.
 		- Fredrik Huthoff et al 2008 (http://scitation.aip.org/getabs/servlet/GetabsServlet?prog=normal&id=JHEND8000134000008001158000001&idtype=cvips&gifs=yes&ref=no)
+- coupling/integration of DRYRIOS river module (Till)
 		
 
