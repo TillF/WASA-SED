@@ -402,9 +402,9 @@ REAL , allocatable :: soilet1sc(:,:)
 
 !Conrad/Till: TC-wise output of soil moisture
 real, allocatable :: meandepth_tc(:,:,:)!mean soil depths of TC instances
-real, allocatable :: theta_tc(:,:,:)		!theta of tcs [%]			(day,timestep,sv_comb)
-real, allocatable :: surfflow_tc(:,:,:)		!surface runoff of TCs [mm] (day,timestep,sv_comb)
-real, allocatable :: sedout_tc(:,:,:)		!sediment output of TCs [t/km2] (day,timestep,sv_comb)
+real, allocatable :: theta_tc(:,:,:)		!theta of tcs [%]			(day,timestep,ntcinst)
+real, allocatable :: surfflow_tc(:,:,:)		!surface runoff of TCs [mm] (day,timestep,ntcinst)
+real, allocatable :: sedout_tc(:,:,:)		!sediment output of TCs [t/km2] (day,timestep,ntcinst)
 
 
 !Till: these are all output variables that are currently not used

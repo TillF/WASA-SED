@@ -103,7 +103,7 @@ READ(11,*) tstop
 READ(11,*) mstart
 READ(11,*) mstop
 READ(11,*) subasin  !total no. of sub-basins
-READ(11,*) sv_comb  !total no. of sub-basin / SO / TC combinations
+READ(11,*) ntcinst  !total no. of sub-basin / SO / TC combinations
 READ(11,*) nsoter  !total no. of SOTER units in study area
 READ(11,*) nterrain  !total no. of terrain components in study area
 READ(11,*) nsoil  !total no. of soil components in study area
@@ -424,7 +424,7 @@ IF (istate==0) THEN
 	WRITE(11,*) 'start month of simulation: ',mstart
 	WRITE(11,*) 'end month of simulation: ',mstop
 	WRITE(11,*) 'no. of sub-basin: ',subasin
-	WRITE(11,*) 'no. of combinations: ',sv_comb
+	WRITE(11,*) 'no. of combinations: ',ntcinst
 	WRITE(11,*) 'total no. of SOTER units: ',nsoter
 	WRITE(11,*) 'total no. of terrain components: ',nterrain
 	WRITE(11,*) 'total no. of soil components: ',nsoil

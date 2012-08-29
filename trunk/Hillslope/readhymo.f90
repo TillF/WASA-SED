@@ -1,5 +1,9 @@
 SUBROUTINE readhymo
 
+!Till: consistency checks for soil_vegetation.dat
+!added missing initialisiation for id_terrain*
+!2012-08-28
+
 !Till: multiple safety checks to detect faulty input files
 !2012-06-20
 
@@ -143,7 +147,7 @@ IMPLICIT NONE
 
 INTEGER :: idummy,i,j,c,k,i_min,n,h,ii
 INTEGER :: dummy1, dummy2, loop
-INTEGER :: id_lu_int,id_lu_ext,id_tc_ext,id_tc_int,id_soil_int,test !,id_soil_ext
+INTEGER ::id_sub_int,id_lu_int,id_lu_ext,id_tc_ext,id_tc_int,id_soil_int,test !,id_soil_ext
 INTEGER :: idummy2(20),tausch,istate
 REAL :: temp1,temp2, maxthickness
 REAL :: sortier(maxterrain),tauschr
@@ -169,7 +173,7 @@ character(len=1000) :: fmtstr	!string for formatting file output
 
 ! temporary variables for reading landuse characteristics for all
 ! Subbasin-LandscapeUnit-TerrainComponent-combinations
-INTEGER :: luse_subbas(sv_comb),luse_lu(sv_comb),luse_tc(sv_comb)
+INTEGER :: luse_subbas(ntcinst),luse_lu(ntcinst),luse_tc(ntcinst)
 
 
 
@@ -275,6 +279,9 @@ OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/soter.dat',STATUS='old')
 READ(11,*); READ (11,*)
 h=2
 
+id_terrain_intern=0
+id_terrain_extern=0
+
 DO i=1,nsoter
 
 	READ(11,'(a)',IOSTAT=istate) cdummy
@@ -354,10 +361,10 @@ frac_svc=0.
 nbr_svc=0
 id_soil_intern=0
 
-DO i=1,sv_comb
+DO i=1,ntcinst
    READ(11,'(a)',IOSTAT=istate) cdummy
-   if (istate/=0 .AND. i<sv_comb) then	!premature end of file
-	  write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',sv_comb,' lines (#SVC-LU-SUBBAS-combinations) expected'
+   if (istate/=0 .AND. i<ntcinst) then	!premature end of file
+	  write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' lines (#SVC-LU-SUBBAS-combinations) expected'
 	  stop
 	end if
 	h=h+1 !count lines
@@ -387,6 +394,14 @@ DO i=1,sv_comb
 
 
 END DO
+
+cdummy=''
+READ(11,'(a)', IOSTAT=istate) cdummy
+if (trim(cdummy)/='') then
+	write(*,*)'ERROR: in soil_vegetation.dat: more than the expected 3 x ',ntcinst,', lines found.'
+	stop
+end if
+
 CLOSE(11)
 
 
@@ -840,7 +855,7 @@ END DO
 
 ! insert internal numbers of soils into
 ! Soil-Vegetation component arrays
-DO i=1,sv_comb
+DO i=1,ntcinst
   DO j=1, nbr_svc(i)
     n=1
     DO WHILE ((n<=nsoil) .AND. (id_soil_extern(n) /= id_soil_intern(j,i)))			!search until the current external ID has been found...
@@ -858,7 +873,7 @@ END DO
 
 ! insert internal numbers of vegetation units into
 ! Soil-Vegetation component arrays
-DO i=1,sv_comb
+DO i=1,ntcinst
   DO j=1, nbr_svc(i)
     n=1
     DO WHILE ((n<=nveg) .AND. (id_veg_extern(n) /= id_veg_intern(j,i)))			!search until the current external ID has been found...
@@ -901,32 +916,54 @@ DO k=1,nsoter
 END DO
 
 
-
-!  Soil-Vegetation components may be different for
-!  each TC in each LU in each cell
-!  (maximum number of these combinations is sv_comb) !Till: this differs from the concept you get with LUMP!
-!  Here a pointer is defined which points to the
-!  internal ID of a TC's Soil_vegetation information
-!  (which is the order of TCs in landuse_xxx.dat).
-!  (In contrast, general TC characteristics (as TC's slope gradient)
-!  are uniform for all LUs and sub-basins in which this TC occurs.)
 tcallid=-1
-DO i=1,subasin
-  DO j=1,nbr_lu(i)
-    id_lu_int=id_lu_intern(j,i)
-    id_lu_ext=id_lu_extern(id_lu_int)
-    DO k=1,nbrterrain(id_lu_int)
-      id_tc_int=id_terrain_intern(k,id_lu_int)
-      id_tc_ext=id_terrain_extern(id_tc_int)
-      DO n=1,sv_comb
-        IF (luse_subbas(n) == id_subbas_extern(i) .AND. luse_lu(n) == id_lu_ext .AND.  &
-              luse_tc(n) == id_tc_ext) THEN
-          tcallid(i,j,k)=n
-        END IF
-      END DO
-    END DO
+DO n=1,ntcinst  !sort in contents of soil_vegation.dat and check for excess entries
+	id_sub_int = id_ext2int(luse_subbas(n), id_subbas_extern)
+	id_lu_int  = id_ext2int(    luse_lu(n), id_lu_extern)
+	id_tc_int  = id_ext2int(    luse_tc(n), id_terrain_extern)
+
+	i=which1(id_lu_intern(:,id_sub_int)==id_lu_int) !get "position" of current LU in current subbasin
+	if (i==0) then
+		WRITE(*,'(a,i0,a,i0,a,i0)')'Error in soil_vegetation.dat, line ',(n-1)*3+4,': LU ',luse_lu(n),&
+		' not expected for subbasin ',luse_subbas(n)
+		STOP
+	END IF
+
+	j=which1(id_terrain_intern(:,id_lu_int)==id_tc_int) !get "position" of current TC in current LU
+	if (j==0) then
+		WRITE(*,'(a,i0,a,i0,a,i0)')'Error in soil_vegetation.dat, line ',(n-1)*3+4,': TC ',luse_tc(n),&
+		' not expected for LU ',luse_lu(n)
+		STOP
+	END IF
+
+	tcallid(id_sub_int,i,j) = n
+END DO
+
+DO id_sub_int=1,subasin !check contents of soil_vegation.dat and for missing entries
+  k = count(tcallid(id_sub_int,:,1)/=-1)
+  if (k /= nbr_lu(id_sub_int)) then
+			WRITE(*,'(a,i0,a,i0,a,i0)')'Error in soil_vegetation.dat: Expecting ',nbr_lu(id_sub_int),&
+			' LUs for subbasin',id_subbas_extern(id_sub_int),', found ',k
+			STOP
+  END IF
+
+  DO j=1,nbr_lu(id_sub_int)
+    id_lu_int=id_lu_intern(j,id_sub_int)
+
+	k=count(tcallid(id_sub_int,j,:)/=-1)
+	if (k /= nbrterrain(id_lu_int)) then
+		WRITE(*,'(a,i0,a,i0)')'Error in soil_vegetation.dat: Expecting ',nbrterrain(id_lu_int),&
+			' TCs for LU ',id_lu_extern(id_lu_int),',found ',k
+		STOP
+	END IF
   END DO
 END DO
+
+	
+
+
+
+
 
 
 !** define van-genuchten parameter from pore-size index for
@@ -940,7 +977,7 @@ END DO
 
 
 !Till: determine rocky_fraction from areal coverage of SVCs with a soil that has 100% coarse fragments in the top layer
-if (sum(rocky)==0.0) then		!this will nly be done if rocky has not been specified in soil_vegetation.dat explicitely
+if (sum(rocky)==0.0) then		!this will only be done if rocky has not been specified in soil_vegetation.dat explicitely
 
 !	!remove rocky SVCs from tc_contains_svc2 - should not be done, they influence areal USLE factors
 !	DO sb_counter=1,subasin
@@ -977,7 +1014,7 @@ if (sum(rocky)==0.0) then		!this will nly be done if rocky has not been specifie
 !
 
 
-	DO tcid_instance=1,sv_comb	!go thru all instances of TCs
+	DO tcid_instance=1,ntcinst	!go thru all instances of TCs
 		svc_counter=1
 		do while (svc_counter<=nbr_svc(tcid_instance))	!check all SVCs of the current TC
 			soilid=id_soil_intern(svc_counter,tcid_instance)		!get soil-ID
@@ -1090,7 +1127,7 @@ END DO
 !   (2)  flag indicating if bedrock occurs below deepest horizon or not (1/0)
 horiz_thickness(:,:,:)=0.
 maxthickness=0.	!determine maximum soil thickness
-DO n=1,sv_comb
+DO n=1,ntcinst
   DO j=1,nbr_svc(n)
     test=luse_subbas(n)
     id_soil_int=id_soil_intern(j,n)
@@ -1192,11 +1229,11 @@ maxthickness=max(maxthickness, maxval(sum(horiz_thickness(n,:,:),2) )  )
 
 
 END DO
-!allocate(latred(sv_comb,maxhori*4)) !Till: latred is now allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
+!allocate(latred(ntcinst,maxhori*4)) !Till: latred is now allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
 !maxthickness=maxval(sum(horiz_thickness, 3))	!Till: compute maximum total thickness among soil profiles - crashes with large arrays, so we use the loop above
 
 
-allocate(latred(sv_comb,ceiling(maxthickness/500.)+1)) !Till: latred is now allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
+allocate(latred(ntcinst,ceiling(maxthickness/500.)+1)) !Till: latred is now allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
 
 ! ..................................................................
 
@@ -1207,7 +1244,7 @@ allocate(latred(sv_comb,ceiling(maxthickness/500.)+1)) !Till: latred is now allo
 !  Van-Genuchten formula
 !  but pwp must not be smaller than residual water content
 
-DO i=1,sv_comb
+DO i=1,ntcinst
   DO j=1,nbr_svc(i)
     idummy=id_soil_intern(j,i)
     DO h=1,nbrhori(idummy)
@@ -1236,7 +1273,7 @@ END DO
 !** horizons of each soil component
 !   horiths is used in soilwat.f90 for lateral flow input (check if needed !)
 
-DO i=1,sv_comb
+DO i=1,ntcinst
   DO j=1,nbr_svc(i)
     id_soil_int=id_soil_intern(j,i)
 
@@ -1262,7 +1299,7 @@ END DO
 
 
 !** summary values of all horizons of each soil-veg-component
-DO i=1,sv_comb
+DO i=1,ntcinst
   DO j=1,nbr_svc(i)
     id_soil_int=id_soil_intern(j,i)
     thsprof(i,j)=0.
