@@ -16,8 +16,8 @@ use params_h
 IMPLICIT NONE
 
 
-REAL, INTENT(IN)                         :: theta(sv_comb,maxsoil)
-REAL, INTENT(OUT)                        :: out(5,2,sv_comb,maxsoil)
+REAL, INTENT(IN)                         :: theta(ntcinst,maxsoil)
+REAL, INTENT(OUT)                        :: out(5,2,ntcinst,maxsoil)
 
 !  theta:   input soil parameters for SVC (Vol%)
 !  out:     values of distribution funtion of soil parameter
@@ -38,7 +38,7 @@ var1=0.05
 var2=0.1
 
 !** Loop for each soil component
-DO k=1,sv_comb
+DO k=1,ntcinst
   DO i=1,nbr_svc(k)
     tempx=theta(k,i)
     

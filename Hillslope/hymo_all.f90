@@ -549,12 +549,12 @@ if (f_tc_theta .OR. f_tc_surfflow .OR. f_tc_sedout) then
 	dig_tc=max(1,ceiling(log10(1.*maxval(id_terrain_extern))))
 
 	
-	allocate(tc_idx(sv_comb))
+	allocate(tc_idx(ntcinst))
 	tc_idx=""
 
 	write(fmtstr,'(a,i0,a,i0,a,i0,a,i0,a,i0,a,i0,a)') '(I',dig_sub,'.',dig_sub,',I',dig_lu,'.',dig_lu,',I',dig_tc,'.',dig_tc,')'
 
-	DO tcid_instance=1,sv_comb
+	DO tcid_instance=1,ntcinst
 		i=0						!flag for indicating this TC still has to be treated
 		DO i_subbas=1,subasin 
 			DO lu_counter=1,nbr_lu(i_subbas)
@@ -603,7 +603,7 @@ end if
   IF (f_tc_theta) THEN	
   	 
 	 !Till: allocate memory for TC-wise output
-	 allocate(theta_tc(366,nt,sv_comb)) 
+	 allocate(theta_tc(366,nt,ntcinst)) 
 	 theta_tc=-1. !debugging help
 
 	!conrad: store average soil thickness for each TC (for each instance of a TC)
@@ -628,8 +628,8 @@ end if
 	!don't change headerline, needed by matlab- /R-script
 	
 	
-	WRITE(fmtstr,'(a,i0,a,i0,a)') '(i0,a,i0,a,i0,',sv_comb,'(a,a',dig_sub+dig_lu+dig_tc,'))'
-	WRITE(11,fmtstr)0,char(9),0,char(9),0,(char(9),tc_idx(i),i=1,sv_comb)		!tab separated output (TC indices as strings)
+	WRITE(fmtstr,'(a,i0,a,i0,a)') '(i0,a,i0,a,i0,',ntcinst,'(a,a',dig_sub+dig_lu+dig_tc,'))'
+	WRITE(11,fmtstr)0,char(9),0,char(9),0,(char(9),tc_idx(i),i=1,ntcinst)		!tab separated output (TC indices as strings)
 
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
@@ -639,13 +639,13 @@ end if
 
 OPEN(11,FILE=pfadn(1:pfadi)// 'tc_surfflow.out', STATUS='replace')
   IF (f_tc_surfflow) THEN	
-	allocate(surfflow_tc(366,nt,sv_comb)) !Till: allocate memory for TC-wise output of surface flow
+	allocate(surfflow_tc(366,nt,ntcinst)) !Till: allocate memory for TC-wise output of surface flow
 	WRITE(11,'(A)') 'surface runoff [mm] for tcs in lus in sub-basins (scheme: '//REPEAT('S',dig_sub)//&
 		REPEAT('L', dig_lu)//REPEAT('T', dig_tc)//') -> use with tc_plot.m in Matlab'
 	!don't change headerline, needed by matlab- /R-script
 	
-	WRITE(fmtstr,'(a,i0,a,i0,a)') '(i0,a,i0,a,i0,',sv_comb,'(a,a',dig_sub+dig_lu+dig_tc,'))'
-	WRITE(11,fmtstr)0,char(9),0,char(9),0,(char(9),tc_idx(i),i=1,sv_comb)		!tab separated output (TC indices as strings)
+	WRITE(fmtstr,'(a,i0,a,i0,a)') '(i0,a,i0,a,i0,',ntcinst,'(a,a',dig_sub+dig_lu+dig_tc,'))'
+	WRITE(11,fmtstr)0,char(9),0,char(9),0,(char(9),tc_idx(i),i=1,ntcinst)		!tab separated output (TC indices as strings)
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
 	CLOSE(11,status='delete')
@@ -653,13 +653,13 @@ OPEN(11,FILE=pfadn(1:pfadi)// 'tc_surfflow.out', STATUS='replace')
 
 OPEN(11,FILE=pfadn(1:pfadi)// 'tc_sedout.out', STATUS='replace')
   IF (dosediment .AND. f_tc_sedout .AND. .NOT. do_musle_subbasin) THEN	
-	allocate(sedout_tc(366,nt,sv_comb)) !Till: allocate memory for TC-wise output of sediment output
+	allocate(sedout_tc(366,nt,ntcinst)) !Till: allocate memory for TC-wise output of sediment output
 	WRITE(11,'(A)') 'sediment output [t/km²] for tcs in lus in sub-basins (scheme: '//REPEAT('S',dig_sub)//&
 		REPEAT('L', dig_lu)//REPEAT('T', dig_tc)//') -> use with tc_plot.m in Matlab'
 	!don't change headerline, needed by matlab- /R-script
 	
-	WRITE(fmtstr,'(a,i0,a,i0,a)') '(i0,a,i0,a,i0,',sv_comb,'(a,a',dig_sub+dig_lu+dig_tc,'))'
-	WRITE(11,fmtstr)0,char(9),0,char(9),0,(char(9),tc_idx(i),i=1,sv_comb)		!tab separated output (TC indices as strings)
+	WRITE(fmtstr,'(a,i0,a,i0,a)') '(i0,a,i0,a,i0,',ntcinst,'(a,a',dig_sub+dig_lu+dig_tc,'))'
+	WRITE(11,fmtstr)0,char(9),0,char(9),0,(char(9),tc_idx(i),i=1,ntcinst)		!tab separated output (TC indices as strings)
 	CLOSE(11)
   ELSE				!delete any existing file, if no output is desired
 	CLOSE(11,status='delete')
@@ -1410,10 +1410,10 @@ IF (STATUS == 3) THEN
 	!conrad: output of theta [%] for each tc from theta_tc
 	IF (f_tc_theta ) THEN
 		OPEN(11,FILE=pfadn(1:pfadi)//'tc_theta.out', STATUS='old',POSITION='append')
-		WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,',sv_comb,'(a,f5.3))'	!generate format string
+		WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,',ntcinst,'(a,f5.3))'	!generate format string
 		DO d=1,dayyear
 			DO count=1,nt
-				WRITE (11,fmtstr)t,char(9),d,char(9),count,(char(9),theta_tc(d,count,i),i=1,sv_comb)	!tab separated output		
+				WRITE (11,fmtstr)t,char(9),d,char(9),count,(char(9),theta_tc(d,count,i),i=1,ntcinst)	!tab separated output		
 			END DO
 		END DO
 		CLOSE(11)
@@ -1423,11 +1423,11 @@ IF (STATUS == 3) THEN
 
 	IF (f_tc_surfflow ) THEN	!Till: write TC-wise surface flow
 		OPEN(11,FILE=pfadn(1:pfadi)//'tc_surfflow.out', STATUS='old',POSITION='append')
-		WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,',sv_comb,'(a,f6.1))'	!generate format string
+		WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,',ntcinst,'(a,f6.1))'	!generate format string
 		
 		DO d=1,dayyear
 			DO count=1,nt
-				WRITE (11,fmtstr)t,char(9),d,char(9),count,(char(9),surfflow_tc(d,count,i),i=1,sv_comb)	!tab separated output
+				WRITE (11,fmtstr)t,char(9),d,char(9),count,(char(9),surfflow_tc(d,count,i),i=1,ntcinst)	!tab separated output
 			END DO
 		END DO
 		
@@ -1437,11 +1437,11 @@ IF (STATUS == 3) THEN
 
 	IF (dosediment .AND. f_tc_sedout .AND. .NOT. do_musle_subbasin) THEN	!Till: write TC-wise surface flow
 		OPEN(11,FILE=pfadn(1:pfadi)//'tc_sedout.out', STATUS='old',POSITION='append')
-		WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,',sv_comb,'(a,f8.1))'	!generate format string
+		WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,',ntcinst,'(a,f8.1))'	!generate format string
 		
 		DO d=1,dayyear
 			DO count=1,nt
-				WRITE (11,fmtstr)t,char(9),d,char(9),count,(char(9),sedout_tc(d,count,i),i=1,sv_comb)	!tab separated output
+				WRITE (11,fmtstr)t,char(9),d,char(9),count,(char(9),sedout_tc(d,count,i),i=1,ntcinst)	!tab separated output
 			END DO
 		END DO
 		

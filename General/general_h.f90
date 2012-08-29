@@ -130,7 +130,7 @@ INTEGER :: nsoil
 ! TOTAL NUMBER OF VEGETATION UNITS IN STUDY AREA (e.g. 34 units)
 INTEGER :: nveg
 ! TOTAL NUMBER OF CELL/SOTER UNIT/TERRAIN COMPONENT COMBINATIONS (e.g. 49 combinations)
-INTEGER :: sv_comb
+INTEGER :: ntcinst
 ! MAXIMUM NUMBER OF SOTER UNITS IN CELLS (7)
 INTEGER :: maxsoter
 !PARAMETER (maxsoter=7)
@@ -146,7 +146,7 @@ INTEGER :: maxhori
 ! TOTAL NUMBER OF TRANSPOSITIONS BETWEEN Sub-basins
 INTEGER :: ntrans
 !PARAMETER (ntrans=2)
-!common / basin_parameter / subasin, sv_comb, nsoter, nterrain, nsoil, nveg
+!common / basin_parameter / subasin, ntcinst, nsoter, nterrain, nsoil, nveg
 end module params_h
 
 
