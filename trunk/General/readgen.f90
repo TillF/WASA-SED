@@ -1,4 +1,6 @@
 SUBROUTINE readgen(path2do_dat)
+!Till: computationally irrelevant: added variable maxreservoir
+!2012-09-14 
 
 !Till: computationally irrelevant: optionally load doloadstate and dosavestate from do.dat
 !2012-06-14 
@@ -164,6 +166,7 @@ IF (i==0) THEN
 	READ(11,*)maxsoil
 	READ(11,*)maxhori
 	READ(11,*)ntrans
+	READ(11,*, IOSTAT=i)maxreservoir
 	CLOSE(11)
 else
 	write(*,*)pfadp(1:pfadj)// 'maxdim.dat could not be opened. Using default dimensions specified in the source code.'
@@ -172,6 +175,7 @@ else
 	maxsoil=28
 	maxhori=8
 	ntrans=2
+	maxreservoir=200
 END IF
 
 

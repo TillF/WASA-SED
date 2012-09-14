@@ -1,7 +1,10 @@
 SUBROUTINE lake_routing(muni,k,help,help2,help3)
+!Till: computationally irrelevant: outcommented unused vars
+!2012-09-14 
  
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:31
+
  
 use lake_h
 use common_h
@@ -17,15 +20,15 @@ REAL, INTENT(IN OUT)                  :: help
 REAL, INTENT(IN OUT)                  :: help2
 REAL, INTENT(IN OUT)                  :: help3
 
-INTEGER :: i,j,n,npts
-INTEGER :: ninterac,nbrbat1
+INTEGER :: i,n !,j,npts
+INTEGER :: ninterac !,nbrbat1
 
-REAL :: par_a,par_b,par_c,par_d
-REAL :: y1,y2,vol1,vol2,out1,out2,dvol,elev
+REAL :: par_c,par_d !,par_a,par_b
+REAL :: y1,y2,vol1,vol2,dvol !,elev,out1,out2
 REAL :: frtime,inflow_t,inflow_mean,outflow_mean
 REAL :: inflow,outflow
-REAL :: dummy1,dummy2,dummy3,dummy4,dummy5,error
-REAL :: volmax,areamax,volstep,time
+REAL :: dummy1,dummy2,error !,dummy3,dummy4,dummy5
+REAL :: volmax,volstep,time !,areamax
 REAL :: hmax0,vmax0,par_k,par_alpha
 REAL :: dummy
 ! -----------------------------------------------------------------------

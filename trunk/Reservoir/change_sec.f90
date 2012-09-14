@@ -1,5 +1,7 @@
 SUBROUTINE change_sec (j1,upstream)
- 
+!Till: computationally irrelevant: outcommented unused vars
+!2012-09-14 
+
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29
 
@@ -14,15 +16,15 @@ IMPLICIT NONE
 
 INTEGER, INTENT(IN OUT)                  :: upstream
 
-INTEGER :: j1,g,npt
+INTEGER :: j1,g !,npt
 
 !REAL :: max_dheight,min_dheight,dummy,dist_bank1,dist_bank2
-REAL :: max_adjust
+!REAL :: max_adjust
 REAL ::elev
 !REAL :: predom_grain,perc_grain
 
-REAL :: dummy1,dummy2
-real :: dummy,xmin_tw,dummy3,dummy4,damelev
+!REAL :: dummy1,dummy2
+real :: dummy3,dummy4 !,damelev, dummy,xmin_tw,
 real :: wfactor(200),dummy5
 ! -----------------------------------------------------------------------
 

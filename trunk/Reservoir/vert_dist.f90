@@ -1,5 +1,8 @@
 SUBROUTINE vert_dist(g,j,upstream,fbottom,fintake,fover)
- 
+
+! Till: computationally irrelevant: outcommented unused vars
+! 2012-09-14 
+
 ! Till: computationally irrelevant: minor changes to improve compiler compatibility
 ! 2011-04-29
 
@@ -15,12 +18,12 @@ implicit none
 
 INTEGER, INTENT(IN OUT)                  :: upstream
 INTEGER:: g,j
-INTEGER:: i,numb_interv
+!INTEGER:: i,numb_interv
 REAL:: fbottom,fintake,fover
 REAL:: a,dep,z
-REAL:: factor,interv,depth_bottom,depth_intake,depth_over
+REAL:: depth_bottom,depth_intake,depth_over !factor,interv,
 REAL:: wat_dens,sed_dens,visc,shear_vel,karman,tempres(d,upstream)
-REAL:: retention_s,time_s,suspension_0
+!REAL::  retention_s,time_s,suspension_0
 
 !Ge to include the DAILY mean temperature of the reservoir (celsius degree)
 !Ge tempres=20 C (temporarily)

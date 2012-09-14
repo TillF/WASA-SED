@@ -1,4 +1,6 @@
 SUBROUTINE eq2_ashida(upstream)
+!Till: computationally irrelevant: outcommented unused vars
+!2012-09-14 
 
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29
@@ -13,17 +15,17 @@ use reservoir_h
 IMPLICIT NONE
 
 INTEGER, INTENT(IN OUT)                  :: upstream
-INTEGER :: i,j,g,h,id,ih,irout,imun,dummy1
+INTEGER :: j,g,h !i,id,ih,irout,imun,dummy1,factor_sed
 real:: dummy2
 
 
-real :: manning_sed,shear_bed,shear_sec,crshear_D50,d50,accum1,accum2
+real :: crshear_D50,d50 !manning_sed,shear_bed,shear_sec,,accum1,accum2
 real :: spec_gravit,shear_vel,effshear_vel,karman,crshearvel_D50,C1
 real :: crshear_vel(n_sed_class),crshear(n_sed_class),effshear(n_sed_class),shear(n_sed_class)
 real :: wat_dens,sed_dens
-real :: visc,perc_bed(n_sed_class),perc_susp(n_sed_class)
-real :: transpfac_bed(n_sed_class),transpfac_susp(n_sed_class)
-real :: seta0,dummy6,dummy7,dummy3,dummy4,dummy5,dummy,f_seta0,f_seta,Ca,a
+real :: visc !,perc_bed(n_sed_class),perc_susp(n_sed_class)
+real :: transpfac_bed(n_sed_class) !,transpfac_susp(n_sed_class)
+real :: seta0,dummy6,dummy7,dummy3,dummy4,dummy,f_seta0,f_seta,Ca,a !,dummy5
 
 
 !Ge to include the DAILY mean temperature of the reservoir (celsius degree)

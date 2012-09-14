@@ -144,6 +144,11 @@ INTEGER :: maxsoil
 INTEGER :: maxhori
 !PARAMETER (maxhori=8)
 ! TOTAL NUMBER OF TRANSPOSITIONS BETWEEN Sub-basins
+
+! MAXIMUM NUMBER reservoirs
+INTEGER :: maxreservoir=200
+
+
 INTEGER :: ntrans
 !PARAMETER (ntrans=2)
 !common / basin_parameter / subasin, ntcinst, nsoter, nterrain, nsoil, nveg

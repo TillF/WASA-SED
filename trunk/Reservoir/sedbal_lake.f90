@@ -1,5 +1,8 @@
 SUBROUTINE sedbal_lake(muni,k)
- 
+
+! Till: computationally irrelevant: outcommented unused vars
+! 2012-09-14 
+
 ! Till: computationally irrelevant: minor changes to improve compiler compatibility
 ! 2011-04-29
 
@@ -16,17 +19,17 @@ IMPLICIT NONE
 
 INTEGER, INTENT(IN OUT)                  :: muni
 INTEGER, INTENT(IN OUT)                  :: k
-INTEGER :: i,n,g,l,nbrsteps
+INTEGER :: n,g,l,nbrsteps !i,
 real:: dummy
 
 real :: wat_dens,sed_dens,delta,grav,visc
 real :: overflow_rate,diam_equiv,frac_finer,trap_eff
-real :: frcum,frretent,frrelease
+real :: frretent,frrelease !frcum,
 real :: cumfrsed_in(n_sed_class),cumfrsed_out(n_sed_class),lower_limit(n_sed_class)
 real :: par_a,par_b,par_c
 real :: interv(200),setveloc(200),upper_diam(200),lower_diam(200),mean_diam(200),frfiner(200)
 real :: frfiner_out(200),cumfrrelease(200)
-real :: par_x(200),par_y(200),par_z(200)
+real :: par_x(200),par_y(200) !,par_z(200)
 
 !Ge to include the DAILY mean temperature of the reservoir (celsius degree)
 !Ge tempres=20 C (temporarily)
