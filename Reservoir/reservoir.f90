@@ -1,5 +1,8 @@
 SUBROUTINE reservoir (STATUS,upstream,res_h)
 
+!Till: computationally irrelevant: outcommented unused vars
+!2012-09-14 
+
 ! Till: computationally irrelevant: streamlined code and improved error message with routing.dat
 ! 2011-07-05
 
@@ -30,13 +33,13 @@ INTEGER, INTENT(IN OUT)                  :: res_h
 ! STATUS of CALL (0=initialization run, 1=initialization year,
 !                 2=calculation day,    3=finalization year)
 
-INTEGER :: i,id,irout,imun,dummy1,dummy2,dummy1a,dummy2a,cont,s,f,p,q,h,istate,ka,ih
+INTEGER :: i,id,dummy1,dummy2,cont,s,p,q,h,istate,ka,ih !,irout,imun,dummy1a,dummy2a,f
 !Ge include j,nbrbat1,cont,upstream,downstream
 INTEGER :: j,nbrbat1,flag_cav
-REAL :: elevhelp,elevhelp2,elevhelp3,evaphelp2,volhelp
-REAL :: help,help1,help2,help3,evaphelp,areahelp,infhelp,helpin,helpout,prechelp
+REAL :: elevhelp,evaphelp2,volhelp !,elevhelp2,elevhelp3
+REAL :: help,help1,help2,help3,evaphelp,areahelp,infhelp,helpout,prechelp !,helpin
 !Ge actual storage capacity of large river reservoir in a certain year[10**6 m**3]
-REAL :: storcapact
+!REAL :: storcapact
 
 REAL :: res_flag(subasin)
 CHARACTER(12) :: subarea
@@ -44,16 +47,16 @@ CHARACTER(12) :: subarea
 REAL :: r_level0,r_level1,r_overflow,r_qintake,r_qbottom
 REAL :: r_precip,r_etp,r_qinflow
 
-INTEGER :: idummy,n,nbrsec1,npt
-INTEGER :: dummy3
+INTEGER :: idummy,n !,npt, nbrsec1
+!INTEGER :: dummy3
 REAL :: dummy4,dummy5,dummy6
 character(len=1000) :: fmtstr	!string for formatting file output
 
 !*****************************************************************************
 !temporary variables used to test the cascade routing scheme of the lake module
-INTEGER :: a1,b1,c1,d1,e1,k1
-REAL :: inflow_class(6),outflow_class(6),retention_class(6),volume_class(6)
-REAL :: sedinflow_class(6),sedoutflow_class(6),sedretention_class(6),sedimentation_class(6)
+!INTEGER :: a1,b1,c1,d1,e1,k1
+!REAL :: inflow_class(6),outflow_class(6),retention_class(6),volume_class(6)
+!REAL :: sedinflow_class(6),sedoutflow_class(6),sedretention_class(6),sedimentation_class(6)
 ! -----------------------------------------------------------------------
 IF (STATUS == 0) THEN
 

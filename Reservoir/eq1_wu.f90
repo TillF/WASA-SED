@@ -1,5 +1,7 @@
 SUBROUTINE eq1_wu(upstream)
- 
+!Till: computationally irrelevant: outcommented unused vars
+!2012-09-14 
+
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29
 
@@ -13,14 +15,14 @@ use reservoir_h
 IMPLICIT NONE
 
 INTEGER, INTENT(IN OUT)                  :: upstream
-INTEGER :: i,j,g,h,id,ih,irout,imun,dummy1
-real :: dummy2
+INTEGER :: j,g,h !i,id,ih,irout,imun,dummy1,,factor_sed
+real:: dummy2
 
 
-real :: manning_sed,shear_bed,shear_sec,d50,accum1,accum2
+real :: manning_sed,shear_bed,shear_sec,d50 !,accum1,accum2
 real :: hidp(n_sed_class),expp(n_sed_class),hidexp(n_sed_class)
 real :: wat_dens,sed_dens,shield,crshear(n_sed_class)
-real :: visc,perc_bed(n_sed_class),perc_susp(n_sed_class)
+real :: visc !,perc_bed(n_sed_class),perc_susp(n_sed_class)
 real :: transpfac_bed(n_sed_class),transpfac_susp(n_sed_class)
 
 

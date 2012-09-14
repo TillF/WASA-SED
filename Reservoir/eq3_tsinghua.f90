@@ -1,5 +1,8 @@
 SUBROUTINE eq3_tsinghua(upstream)
 
+!Till: computationally irrelevant: outcommented unused vars
+!2012-09-14 
+
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29
 
@@ -13,8 +16,8 @@ use reservoir_h
 IMPLICIT NONE
 
 INTEGER, INTENT(IN OUT)                  :: upstream
-INTEGER :: i,j,g,h,id,ih,irout,imun,dummy1,factor_sed
-real:: dummy2
+INTEGER :: j,g,factor_sed !i,h,id,ih,irout,imun,dummy1,
+!real:: dummy2
 
 
 real :: wat_dens,sed_dens

@@ -1,5 +1,9 @@
 SUBROUTINE lake(STATUS,muni)
 
+! Till: fixed bugs in reading of lake_maxvol.dat, lake_number.dat, lake_frarea.dat
+!outcommented unused vars
+!2012-09-14 
+ 
 ! Till: computationally irrelevant: minor changes to improve compiler compatibility
 ! 2011-04-29
  
@@ -22,7 +26,7 @@ IMPLICIT NONE
 INTEGER, INTENT(IN)                      :: STATUS
 INTEGER, INTENT(IN)                     :: muni
 
-INTEGER :: imun,i,j,ii,ie,mm,k,dummy1,id,ih,d_laststep,g,loop,istate,ka,idummy2(20),dummy,dummy5(200)
+INTEGER :: imun,j,k,dummy1,id,ih,d_laststep,g,istate,ka,dummy,dummy5(subasin) !,i,ii,ie,mm,loop,idummy2(20)
 REAL :: xx(5),frac,frac_hrr(5)
 REAL :: lakeinflow_r(5),lakeoutflow_r(5),lakeretention_r(5),lakevolume_r(5),dummy9
 REAL :: lakesedinflow_r(5),lakesedoutflow_r(5),lakesedretention_r(5),lakesedimentation_r(5)
@@ -30,13 +34,13 @@ REAL :: lakesedinflow_r(5),lakesedoutflow_r(5),lakesedretention_r(5),lakesedimen
 REAL :: evap(5),rain(5)
 INTEGER :: overflow_delay
 REAL :: temparea,dummy2(5),dummy3(5,200),dummy4,dummy6(5),dummy7
-REAL :: help,help1,help2,help3,delta_vol(5),class
+REAL :: help,help1,help2,help3,delta_vol(5) !,class
 !*************************************************************************************
-REAL :: totallakeinflow,totallakeoutflow,totallakeprec,totallakeevap,totallakearea,totallakevol
+REAL :: totallakeinflow,totallakeoutflow,totallakeprec,totallakeevap,totallakevol !,totallakearea
 REAL :: totalsedinflow,totalsedoutflow,totalsedimentation,cumsedimentation
-REAL :: totalrunoff,directrunoff,wateryield,totalrunoff2,totalarea
-CHARACTER(12) :: subarea
-REAL :: cumarea,cumvolume,cumrunoff,cumrunoff2,cuminflow
+REAL :: totalrunoff2 !totalrunoff,directrunoff,wateryield,totalarea 
+!CHARACTER(12) :: subarea
+REAL :: cumarea,cumrunoff,cumrunoff2,cuminflow !cumvolume,
 !*************************************************************************************
 character(len=1000) :: fmtstr	!string for formatting file output
 
@@ -58,55 +62,43 @@ IF (STATUS == 0) THEN
 ! Read maximum fraction of volume of each hypothetical representative reservoir of class k (m3)
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lake_maxvol.dat',IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!lake_maxvol.dat not found
-	  write(*,*)pfadp(1:pfadj)// 'Reservoir/lake_maxvol.dat was not found. Run the model anyway.'
+	  write(*,*)pfadp(1:pfadj)// 'Reservoir/lake_maxvol.dat was not found. Run the model anyway using defaults.'
       DO imun=1,subasin
 	    maxlake(imun,1)=.5*maxlake0(1)
 	    DO k=2,5
 		  maxlake(imun,k)=sqrt(maxlake0(k)*maxlake0(k-1))
 	    ENDDO
-	    dummy5(imun)=id_subbas_extern(imun)
 	  ENDDO
 	ELSE
-      READ(11,*);READ (11,*)
-      DO imun=1,subasin
-	    DO k=1,5
-		  maxlake(imun,k)=0.
-	    ENDDO
-	    dummy5(imun)=id_subbas_extern(imun)
-	  ENDDO
-      READ(11,*,IOSTAT=ka)dummy1,(dummy6(k),k=1,5)
-      DO imun=1,subasin
-        IF (dummy1==id_subbas_extern(imun)) THEN
-	      DO k=1,5
-		    maxlake(imun,k)=dummy6(k)
-		  ENDDO
-		  dummy5(imun)=dummy1
-	    ENDIF
-	  ENDDO
+      READ(11,*);READ (11,*) !read empty lines
+  
+      maxlake(1:subasin,1:5)=0.
+      
+	  ka = 0
 	  DO WHILE (ka==0)
-        READ(11,*,IOSTAT=ka) dummy1,(dummy6(k),k=1,5)
-	    dummy5(imun)=dummy1
-        DO imun=1,subasin
-	      IF (dummy1==id_subbas_extern(imun)) THEN
-	        DO k=1,5
-		      maxlake(imun,k)=dummy6(k)
-		    ENDDO
-		    dummy5(imun)=dummy1
-		  ENDIF
-	    ENDDO
+        READ(11,*,IOSTAT=ka) dummy1,(dummy6(k),k=1,5) !Till: read single line
+
+		imun=which1(dummy1==id_subbas_extern) !search corresponding internal ID of subbasin
+		if (imun==0) then	!Till: the current subbasin was not contained in hymo.dat - error
+			WRITE(*,'(a, I0, a, I0, a)') 'ERROR in lake_maxvol.dat: Subbasin ',dummy,' not listed in hymo.dat.'		
+			stop
+		else
+			maxlake(imun,1:5)=dummy6(1:5)				!assign values of line read above
+			dummy5(imun)=dummy1
+		endif
 	  ENDDO
+	
+		if ( count(dummy5(1:subasin)/=id_subbas_extern(1:subasin)) > 0) then
+			WRITE(*,*) 'Sub-basin-IDs in file lake_maxvol.dat must have the same ordering scheme as in hymo.dat'
+			STOP
+		end if
+	
 	ENDIF
-    DO imun=1,subasin
-!write(*,'(2I4,10F10.4)')id_subbas_extern(imun),dummy5(imun),(maxlake_factor(imun,k),k=1,5)
-      IF (dummy5(imun) /= id_subbas_extern(imun)) THEN
-        WRITE(*,*) 'Sub-basin-IDs in file lake_maxvol.dat must have the same ordering scheme as in hymo.dat'
-        STOP
-      END IF
-    END DO
+
   CLOSE(11)
-  DO imun=1,subasin
-    maxlakesub0(imun,1:5)=maxlake(imun,1:5)
-  ENDDO
+  
+  maxlakesub0(1:subasin,1:5)=maxlake(1:subasin,1:5)
+  
 
 !   Andreas block begin
 !** read number of small reservoirs for each year and subbasin
@@ -148,92 +140,61 @@ IF (STATUS == 0) THEN
   IF (.NOT. doacudyear) THEN					!lake_number.dat not found
    OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lake_number.dat',STATUS='old')
     READ(11,*);READ(11,*)
-    DO imun=1,subasin
-	  DO k=1,5
-		acud(imun,k)=0.
-	  ENDDO
-	  dummy5(imun)=id_subbas_extern(imun)
-	ENDDO
-    READ(11,*,IOSTAT=ka)dummy1,(dummy6(k),k=1,5)
-    DO imun=1,subasin
-      IF (dummy1==id_subbas_extern(imun)) THEN
-	    DO k=1,5
-		  acud(imun,k)=dummy6(k)
-		ENDDO
-		dummy5(imun)=dummy1
-	  ENDIF
-	ENDDO
+	acud(1:subasin,1:5)=0.
+
+	ka = 0
 	DO WHILE (ka==0)
-      READ(11,*,IOSTAT=ka) dummy1,(dummy6(k),k=1,5)
-	  dummy5(imun)=dummy1
-      DO imun=1,subasin
-	    IF (dummy1==id_subbas_extern(imun)) THEN
-	      DO k=1,5
-		    acud(imun,k)=dummy6(k)
-		  ENDDO
-		  dummy5(imun)=dummy1
-		ENDIF
-	  ENDDO
+		READ(11,*,IOSTAT=ka) dummy1,(dummy6(k),k=1,5) !Till: read single line
+
+		imun=which1(dummy1==id_subbas_extern) !search corresponding internal ID of subbasin
+		if (imun==0) then	!Till: the current subbasin was not contained in hymo.dat - error
+			WRITE(*,'(a, I0, a, I0, a)') 'ERROR in lake_maxvol.dat: Subbasin ',dummy,' not listed in hymo.dat.'		
+			stop
+		else
+			acud(imun,1:5)=dummy6(1:5)			!assign values of line read above
+			dummy5(imun)=dummy1
+		endif
 	ENDDO
-    DO imun=1,subasin
-!write(*,'(2I4,10F7.2)')id_subbas_extern(imun),dummy5(imun),(acud(imun,k),k=1,5)
-      IF (dummy5(imun) /= id_subbas_extern(imun)) THEN
-        WRITE(*,*) 'Sub-basin-IDs in file lake_number.dat must have the same ordering scheme as in hymo.dat'
-        STOP
-      END IF
-    END DO
+
+	if ( count(dummy5(1:subasin)/=id_subbas_extern(1:subasin)) > 0) then
+		WRITE(*,*) 'Sub-basin-IDs in file lake_number.dat must have the same ordering scheme as in hymo.dat'
+		STOP
+	end if
+
    CLOSE(11)
   ELSE
-    write(*,*)pfadp(1:pfadj)// 'Reservoir/lake_number.dat was disregard (file lake_year.dat was used instead)'
+    write(*,*)pfadp(1:pfadj)// 'Reservoir/lake_number.dat was disregarded (file lake_year.dat was used instead)'
   ENDIF
 
 ! Read ratio between the runoff contributing area of the reservoir class and the total runoff contributing area of the sub-basin (-)
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lake_frarea.dat',IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!lake_frarea.dat not found
-	  write(*,*)pfadp(1:pfadj)// 'Reservoir/lake_frarea.dat was not found. Run the model anyway.'
-      DO imun=1,subasin
-	    DO k=1,5
-		  lakefrarea(imun,k)=.166
-	    ENDDO
-	    dummy5(imun)=id_subbas_extern(imun)
-	  ENDDO
+	  write(*,*)pfadp(1:pfadj)// 'Reservoir/lake_frarea.dat was not found. Run the model anyway using defaults.'
+      lakefrarea(1:subasin,1:5)=.166
+	  dummy5(1:subasin)=id_subbas_extern(1:subasin)
 	ELSE
       READ(11,*);READ(11,*)
-      DO imun=1,subasin
-	    DO k=1,5
-		  lakefrarea(imun,k)=0.
-	    ENDDO
-	    dummy5(imun)=id_subbas_extern(imun)
-	  ENDDO
-      READ(11,*,IOSTAT=ka)dummy1,(dummy6(k),k=1,5)
-      DO imun=1,subasin
-        IF (dummy1==id_subbas_extern(imun)) THEN
-	      DO k=1,5
-		    lakefrarea(imun,k)=dummy6(k)
-		  ENDDO
-		  dummy5(imun)=dummy1
-	    ENDIF
-	  ENDDO
-	  DO WHILE (ka==0)
-        READ(11,*,IOSTAT=ka) dummy1,(dummy6(k),k=1,5)
-	    dummy5(imun)=dummy1
-        DO imun=1,subasin
-	      IF (dummy1==id_subbas_extern(imun)) THEN
-	        DO k=1,5
-		      lakefrarea(imun,k)=dummy6(k)
-		    ENDDO
-		    dummy5(imun)=dummy1
-		  ENDIF
-	    ENDDO
-	  ENDDO
-	ENDIF
-    DO imun=1,subasin
-!write(*,'(2I4,10F10.4)')id_subbas_extern(imun),dummy5(imun),(lakefrarea(imun,k),k=1,5)
-      IF (dummy5(imun) /= id_subbas_extern(imun)) THEN
-        WRITE(*,*) 'Sub-basin-IDs in file lake_frarea.dat must have the same ordering scheme as in hymo.dat'
-        STOP
-      END IF
-    END DO
+	  lakefrarea(1:subasin,1:5)=0.
+
+		ka = 0
+		DO WHILE (ka==0)
+			READ(11,*,IOSTAT=ka) dummy1,(dummy6(k),k=1,5) !Till: read single line
+
+			imun=which1(dummy1==id_subbas_extern) !search corresponding internal ID of subbasin
+			if (imun==0) then	!Till: the current subbasin was not contained in hymo.dat - error
+				WRITE(*,'(a, I0, a, I0, a)') 'ERROR in lake_maxvol.dat: Subbasin ',dummy,' not listed in hymo.dat.'		
+				stop
+			else
+				lakefrarea(imun,1:5)=dummy6(1:5)			!assign values of line read above
+				dummy5(imun)=dummy1
+			endif
+		ENDDO
+
+		if ( count(dummy5(1:subasin)/=id_subbas_extern(1:subasin)) > 0) then
+			WRITE(*,*) 'Sub-basin-IDs in file lake_frarea.dat must have the same ordering scheme as in hymo.dat'
+			STOP
+		end if
+    END IF
   CLOSE(11)
 
 !Distribution of overflow discharges into the classes of larger reservoirs

@@ -1,4 +1,6 @@
 SUBROUTINE hydraul_res(upstream)
+!Till: computationally irrelevant: outcommented unused vars
+!2012-09-14 
 
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29
@@ -15,20 +17,20 @@ IMPLICIT NONE
 
 INTEGER, INTENT(IN OUT)                  :: upstream
 
-INTEGER :: i,j,n,p,k,l,id,ih,irout,imun,dummy1,dummy2,dummy3,nbrsec1,q
+INTEGER :: j,n,p,k,l,dummy1,dummy2,dummy3,q !i,id,ih,irout,imun,nbrsec1,
 INTEGER :: npt
-INTEGER :: a,b,c,c2,e,f
+INTEGER :: a,b,e,f !,c,c2
 INTEGER :: interv
 
-REAL :: damelev,side_slope,TAN,dist0_sec,discharge_calc
-REAL :: area1,elev1
-REAL :: maxelev,loclosscoef,coef,weight
+REAL :: damelev,TAN,dist0_sec,discharge_calc !,side_slope
+!REAL :: area1,elev1
+REAL :: loclosscoef,coef,weight !maxelev,
 REAL ::  lowlim,toplim,dep,error,error1
-REAL ::  area_part(200,200),centroid(200,200)
+REAL ::  area_part(200,200) !,centroid(200,200)
 REAL :: flow_regime,normaldepth(200)
 
 !temporary
-INTEGER :: dummy(200)
+!INTEGER :: dummy(200)
 
 REAL :: dummy4
 

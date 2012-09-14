@@ -1,5 +1,8 @@
 SUBROUTINE semres (STATUS,upstream)
 
+! Till: computationally irrelevant: outcommented unused vars
+! 2012-09-14 
+
 ! Till: computationally irrelevant: minor changes to improve compiler compatibility
 ! 2011-04-29
  
@@ -23,7 +26,7 @@ INTEGER, INTENT(IN OUT)                  :: upstream
 ! STATUS of CALL (0=initialization run, 1=initialization year,
 !                 2=calculation day,    3=finalization year)
 
-INTEGER :: i,j,j1,id,ih,irout,imun,dummy1,dummy2,nbrsec1,f,k,b,p,q,cont,istate,iname,dummy1a,ka
+INTEGER :: i,j,j1,id,ih,dummy1,dummy2,nbrsec1,k,b,p,cont,istate,iname,dummy1a,ka !irout,imun,f,q,
 INTEGER :: g, npt,nbrbat1
 
 CHARACTER(20) :: subarea,section
@@ -33,35 +36,35 @@ INTEGER :: c,dummy14
 !Ge the weighting factor to include incoming sediment into the carrying capacity has to be read
 !Ge in do.dat
 REAL :: weigth_factor
-real :: sediment_outflow
+!real :: sediment_outflow
 
 real :: conc_inflow
 REAL :: recov
 
 
-real :: TAN,loadincoming
-real :: predom_grain(200),perc_grain(200) !frsedinflow(366*nt,subasin,n_sed_class)
-real :: coarsest_grain
+real :: loadincoming !TAN,
+!real :: predom_grain(200),perc_grain(200) !frsedinflow(366*nt,subasin,n_sed_class)
+!real :: coarsest_grain
 real :: thickness_act(200)
 real :: dummy3
 real :: elev
-real :: x_p1,x_p2,y_p1,y_p2,factor_x,side_p1,side_p2
+real :: x_p1,x_p2,side_p1,side_p2 !,y_p1,y_p2,factor_x
 integer :: p1,p2
 
 real :: dummy4,dummy5,dummy6,dummy7
-INTEGER :: dummy8
-real :: discharge_mod(200),weight,retent(200)
-real :: perc1(10),perc2(10),discharg1,discharg2
+!INTEGER :: dummy8
+real :: weight,retent(200) !discharge_mod(200),
+!real :: perc1(10),perc2(10),discharg1,discharg2
 
 real :: discharge(200),topwidth(200),area_mean(200)
-real :: dep_fac
+!real :: dep_fac
 real :: factor_over,factor_intake,factor_bottom
 real :: factor_over2,factor_intake2,factor_bottom2
 CHARACTER (LEN=200) :: cdummy
-REAL :: temp1,temp2
+REAL :: temp1 !,temp2
 real :: areasec(200),widthsec(200),areasec2(200),widthsec2(200)
 real :: elevhelp,areahelp(200),volhelp(200),areahelp2(200),volhelp2(200)
-real :: dummy9,dummy12,dummy13
+real :: dummy9 !,dummy12,dummy13
 real :: accum1,accum2,dummy15,gsize(2)
 character(len=1000) :: fmtstr	!string for formatting file output
 

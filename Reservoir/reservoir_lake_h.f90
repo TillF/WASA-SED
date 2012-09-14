@@ -1,3 +1,6 @@
+! Till: computationally irrelevant: outcommented unused variables
+! 2012-09-14
+!
 ! Till: computationally irrelevant: minor changes to improve compiler compatibility
 ! 2011-04-29
 !
@@ -11,13 +14,13 @@ save
 INTEGER :: reservoir_balance	!option to read (0) or calculate (1) outflow discharges and reservoir levels 
 INTEGER :: reservoir_check		!option to run the WASA Model with river and hillslope modules (0) or without them (1)
 INTEGER :: reservoir_print		!option to print the output files within the timestep (0) or once a year (1)
-
-!Reservoir water balance arrays
-!simulation timestep
+!
+!!Reservoir water balance arrays
+!!simulation timestep
 integer :: step
 !hour (on day)
 integer :: hour
-
+!
 !flag to calculate the ratio between the reservoir volumes given in the file cav.dat and that derived from the cross sections  [0 = initial value; 1 = after first calculation]
 integer, allocatable :: fcav(:)
 !flag to simulate reservoir routing during spillway overflow of the sub-basin's reservoir [0 = without time delay; 1 = with time delay]
@@ -38,7 +41,7 @@ integer, allocatable :: operat_start(:)
 integer, allocatable :: operat_stop(:)
 !maximum reservoir level for the sediment management measures [m**3]
 integer, allocatable :: operat_elev(:)
-!maximum water depth used for the overflow calculation (m)
+!!maximum water depth used for the overflow calculation (m)
 real, allocatable :: hmax(:)
 !water volume above the spillway elevation on the day before (m3/timestep)
 real, allocatable :: volume_last(:)
@@ -76,10 +79,10 @@ real, allocatable :: infdam(:,:)
 real, allocatable :: maxdamarea(:)
 !actual reservoir area [m**2]
 real, allocatable :: damareaact(:)
-!volume=k*Hv**alpha (Volume/heigth) relationship parameters
+!!volume=k*Hv**alpha (Volume/heigth) relationship parameters
 real, allocatable :: alpha_over(:)
 real, allocatable :: k_over(:)
-!area=a*Vol**b (Volume/area) relationship parameters
+!!area=a*Vol**b (Volume/area) relationship parameters
 real, allocatable :: dama(:)
 real, allocatable :: damb(:)
 !Qout=c*Hv**d rating curve of the spillway, where Hv is the water height above the spillway
@@ -149,16 +152,16 @@ real, allocatable :: res_precip(:,:)
 real, allocatable :: res_pet(:,:)
 !total outflow discharge in the sub-basin's reservoir (m**3/s)
 real, allocatable :: res_qout(:,:)
-
-!Reservoir sedimentation (semres) arrays
-!general parameters
+!
+!!Reservoir sedimentation (semres) arrays
+!!general parameters
 !external IDs of cross sections in the sub-basin's reservoir
 integer, allocatable :: id_sec_extern(:,:)
 !number of cross sections in the sub-basin's reservoir
 integer, allocatable :: nbrsec(:)
 !number of points at the cross section of the reservoir in the sub-basin
 integer, allocatable :: npoints(:,:)
-!number of cases for the calculation of bed geometry changes between two adjacent points 
+!!number of cases for the calculation of bed geometry changes between two adjacent points 
 !at the cross section of the reservoir in the sub-basin
 integer, allocatable :: geom(:,:)
 !decrease of stored volume in the subbasin's reservoir [m**3]
@@ -175,14 +178,14 @@ real, allocatable :: decdamalert(:,:)
 real, allocatable :: manning_sec(:,:)
 !distance to the downstream cross section [m]
 real, allocatable :: dist_sec(:,:)
-!values at the x-axis for each point in the cross section of the reservoir
+!!values at the x-axis for each point in the cross section of the reservoir
 !(from left to right, seen from upstream) [m]
 real, allocatable :: x_sec0(:,:,:)
-!values at the y-axis for each point in the cross section of the reservoir
+!!values at the y-axis for each point in the cross section of the reservoir
 !(from left to right, seen from upstream) [m]
 real, allocatable :: y_sec0(:,:,:)
-!suspended sediment in the subbasin's reservoir [ton/timestep]
-real, allocatable :: sed_susp(:,:)
+!!suspended sediment in the subbasin's reservoir [ton/timestep]
+!real, allocatable :: sed_susp(:,:)
 !sediment retention in the subbasin's reservoir [ton/timestep]
 real, allocatable :: sed_ret(:,:)
 !volume of overflowed sediment out the subbasin's reservoir [ton/timestep]
@@ -203,15 +206,15 @@ real, allocatable :: diam(:)
 real, allocatable :: sedimentation(:,:)
 !cumulative sedimentation in the sub-basin's reservoir [ton]
 real, allocatable :: cum_sedimentation(:)
-!minimum sediment concentration in the sub-basin's reservoir [mg/l]
-real, allocatable :: min_conc(:)
-!initial sediment concentration in the sub-basin's reservoir [mg/l]
-real, allocatable :: sed_conc0(:)
-!wet bulk density for sediments in the sub-basin's reservoir [ton/m**3]
-real, allocatable :: wet_dens(:)
+!!minimum sediment concentration in the sub-basin's reservoir [mg/l]
+!real, allocatable :: min_conc(:)
+!!initial sediment concentration in the sub-basin's reservoir [mg/l]
+!real, allocatable :: sed_conc0(:)
+!!wet bulk density for sediments in the sub-basin's reservoir [ton/m**3]
+!real, allocatable :: wet_dens(:)
 !! sediment release from reservoir for each particle size class k (tons/timestep)
 real, allocatable :: res_sediment_out(:,:)
-!grain size distribution of the sediment inflow into the subbasin's reservoir [-]
+!!grain size distribution of the sediment inflow into the subbasin's reservoir [-]
 real, allocatable :: frsediment_in(:,:)
 !grain size distribution of the sediment outflow from the subbasin's reservoir [-]
 real, allocatable :: frsediment_out(:,:)
@@ -223,26 +226,26 @@ real, allocatable :: factor_actlay(:)
 integer, allocatable :: sed_flag(:)
 !flag to simulate sediment routing by using of flushing technique in the sub-basin's reservoir  [0 = without flushing scenario; 1 = with flushing scenario]
 integer, allocatable :: sed_routing_flag(:)
-!amount of correlations between water inflow discharge and incoming sediment into the subbasin's reservoir [-]
-integer, allocatable :: numbeqs(:)
-!water discharge that represents the upper limit of applicability of each correlation 
-!between water inflow discharge and incoming sediment into the subbasin's reservoir [-]
-real, allocatable :: Q_max(:,:)
-!Qsed=a*Q**b (water input x sediment input) relationship parameters [-]
-real, allocatable :: param_a(:,:)
-real, allocatable :: param_b(:,:)
-!number of size distribution of the incoming sediment into the subbasin's reservoir [-]
-integer, allocatable :: nbsizedist(:)
-!water discharge value with a given size distribution of the incoming sediment into the subbasin's reservoir [-]
-real, allocatable :: Q_refer(:,:)
-!computed size distribution of the incoming sediment into the subbasin's reservoir [-]
-real, allocatable :: perc(:,:,:)
+!!amount of correlations between water inflow discharge and incoming sediment into the subbasin's reservoir [-]
+!integer, allocatable :: numbeqs(:)
+!!water discharge that represents the upper limit of applicability of each correlation 
+!!between water inflow discharge and incoming sediment into the subbasin's reservoir [-]
+!real, allocatable :: Q_max(:,:)
+!!Qsed=a*Q**b (water input x sediment input) relationship parameters [-]
+!real, allocatable :: param_a(:,:)
+!real, allocatable :: param_b(:,:)
+!!number of size distribution of the incoming sediment into the subbasin's reservoir [-]
+!integer, allocatable :: nbsizedist(:)
+!!water discharge value with a given size distribution of the incoming sediment into the subbasin's reservoir [-]
+!real, allocatable :: Q_refer(:,:)
+!!computed size distribution of the incoming sediment into the subbasin's reservoir [-]
+!real, allocatable :: perc(:,:,:)
 !sediment inflow into the subbasin's reservoir related to grain size g [ton(timestep]
 real, allocatable :: sedinflow_g(:,:,:)
 !sediment inflow into the subbasin's reservoir related to grain size g [ton(timestep]
 real, allocatable :: sedoutflow_g(:,:,:)
-
-!hydraulic calculations
+!
+!!hydraulic calculations
 !mean reservoir level at the simulation timestep in the sub-basin used for the hydraulic calculation [m]
 real, allocatable :: damelev_mean(:,:)
 !location of the minimum elevation at the x-axis of each cross section in the sub-basin's reservoir [m]
@@ -313,18 +316,18 @@ real, allocatable :: crhydrad_sec(:,:)
 real, allocatable :: normalelev_sec(:,:)
 !normal wetted area of each cross section in the sub-basin's reservoir [m]
 real, allocatable :: normalarea_sec(:,:)
-
-!sediment transport
+!
+!!sediment transport
 !settling velocity [m/s]
 real, allocatable :: setvel(:)
-!closest point above the water line at the left site (seen from upstream) of the cross section in the sub-basin's reservoir [m]
-real, allocatable :: point1_bank(:,:)
-!closest point above the water line at the right site (seen from upstream) of the cross section in the sub-basin's reservoir [m]
-real, allocatable :: point2_bank(:,:)
-!first point below the water line (seen from upstream) of the cross section in the sub-basin's reservoir [m**2]
-real, allocatable :: point1_sub(:,:)
-!last point below the water line (seen from upstream) of the cross section in the sub-basin's reservoir [m**2]
-real, allocatable :: point2_sub(:,:)
+!!closest point above the water line at the left site (seen from upstream) of the cross section in the sub-basin's reservoir [m]
+!!real, allocatable :: point1_bank(:,:)
+!!closest point above the water line at the right site (seen from upstream) of the cross section in the sub-basin's reservoir [m]
+!real, allocatable :: point2_bank(:,:)
+!!first point below the water line (seen from upstream) of the cross section in the sub-basin's reservoir [m**2]
+!real, allocatable :: point1_sub(:,:)
+!!last point below the water line (seen from upstream) of the cross section in the sub-basin's reservoir [m**2]
+!real, allocatable :: point2_sub(:,:)
 !active layer area for each cross section in the sub-basin's reservoir [m**2]
 real, allocatable :: area_actlay(:,:)
 !top layer area for each cross section in the sub-basin's reservoir [m**2]
@@ -341,12 +344,12 @@ real, allocatable :: frerosion(:,:)
 real, allocatable :: frdeposition(:,:)
 !fractional deposition of the material coming from the dam for each cross section in the sub-basin's reservoir [ton]
 real, allocatable :: frretention(:,:)
-!fractional suspention of the material retained at the top layer for each cross section in the sub-basin's reservoir [ton]
-real, allocatable :: frsuspension(:,:)
-!fractional bed load transport for each cross section in the sub-basin's reservoir [ton]
-real, allocatable :: frbed_discharge(:,:)
-!fractional suspended load transport for each cross section in the sub-basin's reservoir [ton]
-real, allocatable :: frsusp_discharge(:,:)
+!!fractional suspention of the material retained at the top layer for each cross section in the sub-basin's reservoir [ton]
+!real, allocatable :: frsuspension(:,:)
+!!fractional bed load transport for each cross section in the sub-basin's reservoir [ton]
+!real, allocatable :: frbed_discharge(:,:)
+!!fractional suspended load transport for each cross section in the sub-basin's reservoir [ton]
+!real, allocatable :: frsusp_discharge(:,:)
 !fractional sediment transport for each cross section in the sub-basin's reservoir [ton]
 real, allocatable :: frtotal_discharge(:,:)
 !total sediment erosion at the active layer for each cross section in the sub-basin's reservoir [ton]
@@ -355,8 +358,8 @@ real, allocatable :: erosion(:,:)
 real, allocatable :: deposition(:,:)
 !total deposition of the material coming from the dam at the active layer for each cross section in the sub-basin's reservoir [ton]
 real, allocatable :: retention(:,:)
-!total suspention of the material retained at the top layer for each cross section in the sub-basin's reservoir [ton]
-real, allocatable :: suspension(:,:)
+!!total suspention of the material retained at the top layer for each cross section in the sub-basin's reservoir [ton]
+!real, allocatable :: suspension(:,:)
 !total sediment tranport at the active layer for each cross section in the sub-basin's reservoir [ton]
 real, allocatable :: totalload(:,:)
 !fractional bed carrying capacity (ton)
@@ -365,8 +368,8 @@ real, allocatable :: bed_frtransp(:,:)
 real, allocatable :: susp_frtransp(:,:)
 !fractional carrying capacity for total load (ton)
 real, allocatable :: fr_capacity(:,:)
-!depth change of bed sediment due to deposition or scour for each cross section in the sub-basin's reservoir [m]
-real, allocatable :: dheight_sed(:,:)
+!!depth change of bed sediment due to deposition or scour for each cross section in the sub-basin's reservoir [m]
+!real, allocatable :: dheight_sed(:,:)
 !change in the area of bed sediment due to deposition or scour for each cross section in the sub-basin's reservoir [m**2]
 real, allocatable :: darea_sed(:,:)
 !change in the volume of bed sediment due to deposition or scour for each cross section in the sub-basin's reservoir [m**3]
@@ -397,16 +400,16 @@ real, allocatable :: d50_actlay(:,:)
 real, allocatable :: d90_actlay(:,:)
 !sediment entering sub-basin's reservoir for each particle size class k [tons/timestep]
 real, allocatable :: frsedinflow(:,:,:)
-!internal variables (temporarily described here) 
+!!internal variables (temporarily described here) 
 real, allocatable :: frvol_actlay0(:,:,:)
 real, allocatable :: totvol_actlay0(:,:)
-
-
-!reservoir bed elevation changes
-!bed changes at the x-axis for each point in the cross section of the reservoir
+!
+!
+!!reservoir bed elevation changes
+!!bed changes at the x-axis for each point in the cross section of the reservoir
 !(from left to right, seen from upstream) [m]
 real, allocatable :: x_sec(:,:,:)
-!bed changes at the y-axis for each point in the cross section of the reservoir
+!!bed changes at the y-axis for each point in the cross section of the reservoir
 !(from left to right, seen from upstream) [m]
 real, allocatable :: y_sec(:,:,:)
 !active layer elevation for each cross section in the sub-basin's reservoir [m]
@@ -425,10 +428,10 @@ real, allocatable :: frac_susp(:,:,:)
 real, allocatable :: partarea_actlay(:,:,:)
 !partial area of the top layer between two adjacent points for each cross section in the sub-basin's reservoir [m**2]
 real, allocatable :: partarea_toplay(:,:,:)
-!weighting factor for the calculation of changes at the active layer elevation for each cross section in the sub-basin's reservoir [-]
-real, allocatable :: weightfac_actlay(:,:,:)
-!weighting factor for the calculation of changes at the top layer elevation for each cross section in the sub-basin's reservoir [-]
-real, allocatable :: weightfac_toplay(:,:,:)
+!!weighting factor for the calculation of changes at the active layer elevation for each cross section in the sub-basin's reservoir [-]
+!real, allocatable :: weightfac_actlay(:,:,:)
+!!weighting factor for the calculation of changes at the top layer elevation for each cross section in the sub-basin's reservoir [-]
+!real, allocatable :: weightfac_toplay(:,:,:)
 !bed elevation at the beginning of the actual simulation timestep for each cross section in the sub-basin's reservoir [m]
 real, allocatable :: y_laststep(:,:,:)
 !water level used to attenuate elevation changes caused by erosion [m] 
@@ -451,9 +454,9 @@ real, allocatable :: sideslope_pt1(:,:)
 real, allocatable :: sideslope_pt2(:,:)
 !Bed slope at the end of the delta plunge point in the sub-basin's reservoir [m/m]
 real, allocatable :: slope_long(:)
-
-!printable variables
-!reservoir water balance
+!
+!!printable variables
+!!reservoir water balance
 real, allocatable :: daydamelevact(:,:)			!described above as damelevact
 real, allocatable :: daydamareaact(:,:)			!described above as damareaact
 real, allocatable :: dayelev_bat(:,:,:)			!described above as elev_bat
