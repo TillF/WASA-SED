@@ -96,12 +96,12 @@ allocate( &
 	  fvol_bottom(subasin), &
 	  withdrawal(subasin), &
 	  lakeret(366*nt,subasin), &
-	  elev_bat0(maxreservoir,subasin), &
-	  area_bat0(maxreservoir,subasin), &
-	  vol_bat0(maxreservoir,subasin), &
-	  elev_bat(maxreservoir,subasin), &
-	  area_bat(maxreservoir,subasin), &
-	  vol_bat(maxreservoir,subasin), &
+!	  elev_bat0(maxreservoir,subasin), &
+!	  area_bat0(maxreservoir,subasin), &
+!	  vol_bat0(maxreservoir,subasin), &
+!	  elev_bat(maxreservoir,subasin), &
+!	  area_bat(maxreservoir,subasin), &
+!	  vol_bat(maxreservoir,subasin), &
 	  vol0(subasin), &
 	  qlateral(366*nt,subasin), &
 	  qinflow(366*nt,subasin), &

@@ -1,7 +1,12 @@
 SUBROUTINE reservoir (STATUS,upstream,res_h)
 
-!Till: computationally irrelevant: outcommented unused vars
-!2012-09-14 
+! Till: made reading of reservoir.dat, cav.dat independent of order of IDs
+! memory allocation according to content of these files
+! various minor code beautifications
+! 2012-09-17 
+
+! Till: computationally irrelevant: outcommented unused vars
+! 2012-09-14 
 
 ! Till: computationally irrelevant: streamlined code and improved error message with routing.dat
 ! 2011-07-05
@@ -132,50 +137,73 @@ if (reservoir_check==0) reservoir_balance=1
 	END DO
   ENDIF
 
-! Read reservoir parameters
-  DO i=1,subasin
-    res_flag(i)=-999.
-  ENDDO
+!! Read reservoir parameters
+res_flag(:)=-999.
+storcap(:)=0.
+
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/reservoir.dat',IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!reservoir.dat not found
-	  write(*,*)pfadp(1:pfadj)// 'Reservoir/reservoir.dat was not found. Please enter the file reservoir.dat.'
+	  write(*,*)pfadp(1:pfadj)// 'Reservoir/reservoir.dat was not found, please provide it.'
 	  stop
-    ELSE
-      READ(11,*)
-	  READ(11,*)
-      READ(11,*,IOSTAT=ka) dummy1,dummy2
-      DO i=1,subasin
-        IF (dummy1==id_subbas_extern(i)) THEN
-          res_flag(i)=dummy2
-	    ENDIF
-	  ENDDO
-      DO WHILE (ka==0)
-	    READ(11,*, IOSTAT=ka) dummy1,dummy2					!read next line in file
-        DO i=1,subasin
-          IF (dummy1==id_subbas_extern(i)) THEN
-            res_flag(i)=dummy2
-		  ENDIF
-	    ENDDO
-      END DO
 	ENDIF
-  CLOSE (11)
+
+!    ELSE
+!      READ(11,*)
+!	  READ(11,*)
+!      READ(11,*,IOSTAT=ka) dummy1,dummy2
+!      DO i=1,subasin
+!        IF (dummy1==id_subbas_extern(i)) THEN
+!          res_flag(i)=dummy2
+!	    ENDIF
+!	  ENDDO
+!      DO WHILE (ka==0)
+!	    READ(11,*, IOSTAT=ka) dummy1,dummy2					!read next line in file
+!        DO i=1,subasin
+!          IF (dummy1==id_subbas_extern(i)) THEN
+!            res_flag(i)=dummy2
+!		  ENDIF
+!	    ENDDO
+!      END DO
+!	ENDIF
+!  CLOSE (11)
 
 !DO i=1,subasin
 !write(*,*)id_subbas_extern(i),res_flag(i)
 !enddo
 !stop
-  OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/reservoir.dat',IOSTAT=istate,STATUS='old')
+
   READ(11,*)
   READ(11,*)
-  DO i=1,subasin
-	IF (res_flag(i) /= -999.) THEN
-      READ (11,*)dummy1, minlevel(i), maxlevel(i),vol0(i),storcap(i), &
-		damflow(i),damq_frac(i),withdrawal(i),damyear(i),maxdamarea(i), &
-		damdead(i),damalert(i),dama(i),damb(i),qoutlet(i),fvol_bottom(i), &
-		fvol_over(i),damc(i),damd(i),elevbottom(i)
+  istate=0
+  j=2 !for counting lines
+
+  DO WHILE (.TRUE.)
+	  READ (11,'(A)', IOSTAT=istate)fmtstr
+	  if (istate/=0) exit !exit loop when no more line encountered
+	  j=j+1
+	  READ (fmtstr,*, IOSTAT=istate)dummy1
+	
+      i=which1(id_subbas_extern == dummy1)
+  
+	  IF (i==0) THEN
+		  WRITE (*,'(A,I0,A)') 'unknown upstream subbasin ID ', dummy1,' in reservoir.dat'
+		  STOP
+	  END IF
+
+	  READ (fmtstr,*,IOSTAT=istate) dummy1, minlevel(i), maxlevel(i),vol0(i),storcap(i), &
+			damflow(i),damq_frac(i),withdrawal(i),damyear(i),maxdamarea(i), &
+			damdead(i),damalert(i),dama(i),damb(i),qoutlet(i),fvol_bottom(i), &
+			fvol_over(i),damc(i),damd(i),elevbottom(i)
+      
+	  IF (istate/=0) THEN
+		  WRITE (*,'(A,i0,A,A)') 'Format error in reservoir.dat, line',j,':', fmtstr
+		  STOP
+	  END IF
+
 !Ge "storcap" and "vol0" are read in 1000m**3 and after that they are converted into 10**6 m**3  &
 !Ge damarea renamed to maxdamarea  &
 !Ge "damdead" is read in 1000m**3 and after that it is converted into 10**6 m**3  &
+
       forma_factor(i)=1.e3*storcap(i)/((maxlevel(i)-minlevel(i))**3)
       IF (vol0(i) /= -999.) THEN
         vol0(i)=vol0(i)/1.e3
@@ -183,22 +211,12 @@ if (reservoir_check==0) reservoir_balance=1
       storcap(i)=storcap(i)/1.e3
       damdead(i)=damdead(i)/1.e3
       damalert(i)=damalert(i)/1.e3
-    ELSE
-      dummy1=id_subbas_extern(i)
-      storcap(i)=0.
-	ENDIF
-
-    IF (dummy1 /= id_subbas_extern(i)) THEN
-      WRITE(*,*) 'Sub-basin-IDs in file reservoir.dat must have the same ordering scheme as in hymo.dat'
-      STOP
-    END IF   
   END DO
   CLOSE (11)
 
 ! Check lateral inflow directly into the subbasins' reservoir
-  DO i=1,subasin
-	latflow_res(i)=0
-  ENDDO
+  latflow_res(1:subasin)=0.
+
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!lateral_inflow.dat not found
 	  write(*,*)pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat was not found. Run the model anyway.'
@@ -305,10 +323,8 @@ if (reservoir_check==0) reservoir_balance=1
   ENDIF 
   
 !Ge stage-volume curves for each sub-basin
-  DO i=1,subasin
-	nbrbat(i)=0
-  ENDDO
-
+  nbrbat(1:subasin)=0
+  
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/cav.dat', IOSTAT=istate,STATUS='old')
   IF (istate/=0) THEN					!cav.dat not found
 	write(*,*)pfadp(1:pfadj)// 'Reservoir/cav.dat was not found. Run the model anyway.'
@@ -334,18 +350,67 @@ if (reservoir_check==0) reservoir_balance=1
     END DO
   ENDIF
   CLOSE(11)
+  i=maxval(nbrbat) !getmaximum number of rating curve points included and allocate necessary memory
+  allocate(elev_bat0(i,subasin), &
+		   area_bat0(i,subasin), &
+			vol_bat0(i,subasin), &
+			elev_bat(i,subasin), &
+		   area_bat(i,subasin), &
+			vol_bat(i,subasin), &
+			STAT = istate)
+	elev_bat0=0
+	area_bat0=0
+	vol_bat0=0
+	elev_bat=0
+	area_bat=0
+	vol_bat=0
+
+	if (istate/=0) then
+		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in reservoir-module (rating curves too detailed).' 
+		stop
+	end if
+
 
   IF (flag_cav==1) THEN
    OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/cav.dat',STATUS='unknown')
    READ(11,*)
    READ(11,*)
-   DO i=1,subasin
-    nbrbat1=nbrbat(i)
-    IF (nbrbat(i) /= 0) THEN
-      READ(11,*) dummy1,dummy2,(elev_bat0(j,i),j=1,nbrbat1)
-      READ(11,*) dummy1,dummy2,(area_bat0(j,i),j=1,nbrbat1)
-      READ(11,*) dummy1,dummy2,(vol_bat0(j,i),j=1,nbrbat1)
-      IF (maxlevel(i) > elev_bat0(nbrbat1,i)) THEN
+   j=2
+   
+   DO WHILE (.TRUE.)
+	  READ (11,'(A)', IOSTAT=istate)fmtstr
+	  
+	  if (istate/=0) exit !exit loop when no more line encountered
+	  j=j+1
+	  READ (fmtstr,*, IOSTAT=istate) dummy1, dummy2
+	
+	  i=which1(id_subbas_extern == dummy1)
+  
+	  IF (i==0) THEN
+		  WRITE (*,'(A,I0,A)') 'unknown upstream subbasin ID ', dummy1,' in cav.dat'
+		  STOP
+	  END IF
+
+	  READ(fmtstr,*, IOSTAT=istate) dummy1,dummy2,(elev_bat0(ka,i),ka=1,dummy2)
+      IF (istate/=0) THEN
+		  WRITE (*,'(A,i0,A,A)') 'Format error in cav.dat, line',j,':', fmtstr
+		  STOP
+	  END IF
+	  READ(11,*,IOSTAT=istate) dummy1,dummy2,(area_bat0(ka,i),ka=1,dummy2)
+      j=j+1
+	  IF (istate/=0) THEN
+		  WRITE (*,'(A,i0,A,A)') 'Format error in cav.dat, line',j,':', fmtstr
+		  STOP
+	  END IF
+	  READ(11,*,IOSTAT=istate) dummy1,dummy2,(vol_bat0(ka,i),ka=1,dummy2)
+	  j=j+1
+	  
+      IF (istate/=0) THEN
+		  WRITE (*,'(A,i0,A,A)') 'Format error in cav.dat, line',j,':', fmtstr
+		  STOP
+	  END IF
+
+      IF (maxlevel(i) > elev_bat0(dummy2,i)) THEN
         WRITE(*,*)'ERROR subasin ',id_subbas_extern(i),  &
             'MAXIMUM RESERVOIR LEVEL VALUE IS GREATER THAN THE MAXIMUM ELEVATION AT THE STAGE-AREA-VOLUME CURVE (FILE: cav.dat)'
         STOP
@@ -354,13 +419,7 @@ if (reservoir_check==0) reservoir_balance=1
             'MINIMUM RESERVOIR LEVEL VALUE IS LESS THAN THE MINIMUM ELEVATION AT THE STAGE-AREA-VOLUME CURVE (FILE: cav.dat)'
         STOP
       END IF
-	ELSE
-	  dummy1=id_subbas_extern(i)
-    END IF
-    IF (dummy1 /= id_subbas_extern(i)) THEN
-      WRITE(*,*) 'Sub-basin-IDs in file cav.dat must have the same ordering scheme as in hymo.dat'
-      STOP
-    END IF   
+	
    END DO
    CLOSE(11)
   ENDIF
