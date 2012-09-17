@@ -148,7 +148,7 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 !  CLOSE (11)
   
 ! calculate routing response function for each sub-basin
-! (given partaneter lag-time tL and retention-time tR)
+! (given parameter lag-time tL and retention-time tR)
   OPEN(11,FILE=pfadn(1:pfadi)//'routing_response.out' ,STATUS='replace')
   WRITE(11,'(a)') 'Output of linear response function'
   WRITE(11,'(a)')'Subasin-ID,translation [days], retention [days], uh(1,7) [-]'
