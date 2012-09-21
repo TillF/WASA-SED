@@ -1,3 +1,6 @@
+!Till: computationally irrelevant: relocated vars
+!2012-09-21 
+
 ! Till: computationally irrelevant: minor changes to improve compiler compatibility
 ! 2011-04-29
 
@@ -144,10 +147,6 @@ INTEGER :: maxsoil
 INTEGER :: maxhori
 !PARAMETER (maxhori=8)
 ! TOTAL NUMBER OF TRANSPOSITIONS BETWEEN Sub-basins
-
-! MAXIMUM NUMBER reservoirs
-INTEGER :: maxreservoir=200
-
 
 INTEGER :: ntrans
 !PARAMETER (ntrans=2)

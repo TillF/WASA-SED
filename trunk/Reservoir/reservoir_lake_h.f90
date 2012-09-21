@@ -10,6 +10,11 @@
 module reservoir_h
 save
 
+INTEGER :: nxsection_res=200 !number of cross sections at the strategic reservoirs
+INTEGER :: npointsxsect=200 !number of points (x,y) along the cross sections and also number of cross sections at the strategic reservoirs
+
+
+
 ! Options to run the WASA Model without river and hillslope modules
 INTEGER :: reservoir_balance	!option to read (0) or calculate (1) outflow discharges and reservoir levels 
 INTEGER :: reservoir_check		!option to run the WASA Model with river and hillslope modules (0) or without them (1)

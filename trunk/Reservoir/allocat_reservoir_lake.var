@@ -1,3 +1,6 @@
+!Till: computationally irrelevant: renamed and diversified vars
+!2012-09-21 
+
 !Till: computationally irrelevant: outcommented unused vars
 !2012-09-14 
 
@@ -8,7 +11,7 @@ allocate( &
 
       acud(subasin,5), &
 	  acudfloat(subasin,5), &
-	  acudfloatyear(subasin,5,maxreservoir), &
+	  acudfloatyear(subasin,5,tstop-tstart+1), &
 	  maxlakesub0(subasin,5), &
 	  lakewater0(subasin,5), &
 	  laketrend(subasin,5), &
@@ -96,12 +99,12 @@ allocate( &
 	  fvol_bottom(subasin), &
 	  withdrawal(subasin), &
 	  lakeret(366*nt,subasin), &
-!	  elev_bat0(maxreservoir,subasin), &
-!	  area_bat0(maxreservoir,subasin), &
-!	  vol_bat0(maxreservoir,subasin), &
-!	  elev_bat(maxreservoir,subasin), &
-!	  area_bat(maxreservoir,subasin), &
-!	  vol_bat(maxreservoir,subasin), &
+!	  elev_bat0(maxreservoir_b,subasin), &
+!	  area_bat0(maxreservoir_b,subasin), &
+!	  vol_bat0(maxreservoir_b,subasin), &
+!	  elev_bat(maxreservoir_b,subasin), &
+!	  area_bat(maxreservoir_b,subasin), &
+!	  vol_bat(maxreservoir_b,subasin), &
 	  vol0(subasin), &
 	  qlateral(366*nt,subasin), &
 	  qinflow(366*nt,subasin), &
@@ -124,19 +127,19 @@ allocate( &
 	  res_pet(366*nt,subasin), &
 	  res_qout(366*nt,subasin), &
 
-	  id_sec_extern(maxreservoir,subasin), &
+	  id_sec_extern(nxsection_res,subasin), &
 	  nbrsec(subasin), &
-	  npoints(maxreservoir,subasin), &
-	  geom(maxreservoir,maxreservoir), &
+	  npoints(nxsection_res,subasin), &
+	  geom(npointsxsect,nxsection_res), &
 	  decvolact(366*nt,subasin), &
 	  decstorcap(366*nt,subasin), &
 	  decmaxdamarea(366*nt,subasin), &
 	  decdamdead(366*nt,subasin), &
 	  decdamalert(366*nt,subasin), &
-	  manning_sec(maxreservoir,subasin), &
-	  dist_sec(maxreservoir,subasin), &
-	  x_sec0(maxreservoir,maxreservoir,subasin), &
-	  y_sec0(maxreservoir,maxreservoir,subasin), &
+	  manning_sec(nxsection_res,subasin), &
+	  dist_sec(nxsection_res,subasin), &
+	  x_sec0(npointsxsect,nxsection_res,subasin), &
+	  y_sec0(npointsxsect,nxsection_res,subasin), &
 !	  sed_susp(366*nt,subasin), &
 	  sed_ret(366*nt,subasin), &
 	  sed_overflow(366*nt,subasin), &
@@ -168,126 +171,126 @@ allocate( &
 	  sedoutflow_g(366*nt,subasin,n_sed_class), &
 
 	  damelev_mean(366*nt,subasin), &
-	  x_minelev(maxreservoir,subasin), &
-	  minelev_sec(maxreservoir,subasin), &
-	  bedslope_sec(maxreservoir,subasin), &	 
-	  area_sec(maxreservoir,subasin), &
-	  resarea_sec(maxreservoir,subasin), &
-	  resvol_sec(maxreservoir,subasin), &
+	  x_minelev(nxsection_res,subasin), &
+	  minelev_sec(nxsection_res,subasin), &
+	  bedslope_sec(nxsection_res,subasin), &	 
+	  area_sec(nxsection_res,subasin), &
+	  resarea_sec(nxsection_res,subasin), &
+	  resvol_sec(nxsection_res,subasin), &
 	  resvol(subasin), &
-	  topwidth_sec(maxreservoir,subasin), &
-	  weight_sec(maxreservoir,subasin), &
-	  discharge_sec(maxreservoir,subasin), &
-	  depth_sec(maxreservoir,subasin), &
-	  watelev_sec(maxreservoir,subasin), &
-	  wetper_sec(maxreservoir,subasin), &
-	  hydrad_sec(maxreservoir,subasin), &
-	  meanvel_sec(maxreservoir,subasin), &
-	  energslope_sec(maxreservoir,subasin), &
-	  dynhead_sec(maxreservoir,subasin), &
-	  tothead_sec(maxreservoir,subasin), &
-	  headloss_sec(maxreservoir,subasin), &
-	  locloss_sec(maxreservoir,subasin), &
-	  calctothead_sec(maxreservoir,subasin), &
-	  maxarea_sec(maxreservoir,subasin), &
-	  maxelev_sec(maxreservoir,subasin), &
-	  maxdepth_sec(maxreservoir,subasin), &
-	  crdepth_sec(maxreservoir,subasin), &
-	  crwatelev_sec(maxreservoir,subasin), &
-	  crarea_sec(maxreservoir,subasin), &
-	  crtopwidth_sec(maxreservoir,subasin), &
-	  crwetper_sec(maxreservoir,subasin), &
-	  crslope_sec(maxreservoir,subasin), &	 
-	  crvel_sec(maxreservoir,subasin), &	 
-	  crhydrad_sec(maxreservoir,subasin), &	 
-	  normalelev_sec(maxreservoir,subasin), &	 
-	  normalarea_sec(maxreservoir,subasin), &	 
+	  topwidth_sec(nxsection_res,subasin), &
+	  weight_sec(nxsection_res,subasin), &
+	  discharge_sec(nxsection_res,subasin), &
+	  depth_sec(nxsection_res,subasin), &
+	  watelev_sec(nxsection_res,subasin), &
+	  wetper_sec(nxsection_res,subasin), &
+	  hydrad_sec(nxsection_res,subasin), &
+	  meanvel_sec(nxsection_res,subasin), &
+	  energslope_sec(nxsection_res,subasin), &
+	  dynhead_sec(nxsection_res,subasin), &
+	  tothead_sec(nxsection_res,subasin), &
+	  headloss_sec(nxsection_res,subasin), &
+	  locloss_sec(nxsection_res,subasin), &
+	  calctothead_sec(nxsection_res,subasin), &
+	  maxarea_sec(nxsection_res,subasin), &
+	  maxelev_sec(nxsection_res,subasin), &
+	  maxdepth_sec(nxsection_res,subasin), &
+	  crdepth_sec(nxsection_res,subasin), &
+	  crwatelev_sec(nxsection_res,subasin), &
+	  crarea_sec(nxsection_res,subasin), &
+	  crtopwidth_sec(nxsection_res,subasin), &
+	  crwetper_sec(nxsection_res,subasin), &
+	  crslope_sec(nxsection_res,subasin), &	 
+	  crvel_sec(nxsection_res,subasin), &	 
+	  crhydrad_sec(nxsection_res,subasin), &	 
+	  normalelev_sec(nxsection_res,subasin), &	 
+	  normalarea_sec(nxsection_res,subasin), &	 
 
 
 	  setvel(n_sed_class), &
-!	  point1_sub(maxreservoir,subasin), &
-!	  point2_sub(maxreservoir,subasin), &
-!	  point1_bank(maxreservoir,subasin), &
-!	  point2_bank(maxreservoir,subasin), &
-	  area_actlay(maxreservoir,subasin), &
-	  area_toplay(maxreservoir,subasin), &
-	  vol_actlay(maxreservoir,subasin), &
-	  vol_toplay(maxreservoir,subasin), &
-	  frsedavailab(n_sed_class,maxreservoir), &
-	  frerosion(n_sed_class,maxreservoir), &
-	  frdeposition(n_sed_class,maxreservoir), &
-	  frretention(n_sed_class,maxreservoir), &
-!	  frsuspension(n_sed_class,maxreservoir), &
-!	  frbed_discharge(n_sed_class,maxreservoir), &
-!	  frsusp_discharge(n_sed_class,maxreservoir), &
-	  frtotal_discharge(n_sed_class,maxreservoir), &
-	  erosion(maxreservoir,subasin), &
-	  deposition(maxreservoir,subasin), &
-	  retention(maxreservoir,subasin), &
-!	  suspension(maxreservoir,subasin), &
-	  totalload(maxreservoir,subasin), &
-	  bed_frtransp(n_sed_class,maxreservoir), &
-	  susp_frtransp(n_sed_class,maxreservoir), &
-	  fr_capacity(n_sed_class,maxreservoir), &
-!	  dheight_sed(maxreservoir,subasin), &
-	  darea_sed(maxreservoir,subasin), &
-	  dvol_sed(maxreservoir,subasin), &
-	  frvol_actlay(n_sed_class,maxreservoir,subasin), &
-	  totvol_actlay(maxreservoir,subasin), &
-	  conc(maxreservoir,subasin), &
-	  frconc(n_sed_class,maxreservoir), &
-	  area_sedim(maxreservoir,subasin), &
-	  vol_sedim(maxreservoir,subasin), &
+!	  point1_sub(nxsection_res,subasin), &
+!	  point2_sub(nxsection_res,subasin), &
+!	  point1_bank(nxsection_res,subasin), &
+!	  point2_bank(nxsection_res,subasin), &
+	  area_actlay(nxsection_res,subasin), &
+	  area_toplay(nxsection_res,subasin), &
+	  vol_actlay(nxsection_res,subasin), &
+	  vol_toplay(nxsection_res,subasin), &
+	  frsedavailab(n_sed_class,nxsection_res), &
+	  frerosion(n_sed_class,nxsection_res), &
+	  frdeposition(n_sed_class,nxsection_res), &
+	  frretention(n_sed_class,nxsection_res), &
+!	  frsuspension(n_sed_class,nxsection_res), &
+!	  frbed_discharge(n_sed_class,nxsection_res), &
+!	  frsusp_discharge(n_sed_class,nxsection_res), &
+	  frtotal_discharge(n_sed_class,nxsection_res), &
+	  erosion(nxsection_res,subasin), &
+	  deposition(nxsection_res,subasin), &
+	  retention(nxsection_res,subasin), &
+!	  suspension(nxsection_res,subasin), &
+	  totalload(nxsection_res,subasin), &
+	  bed_frtransp(n_sed_class,nxsection_res), &
+	  susp_frtransp(n_sed_class,nxsection_res), &
+	  fr_capacity(n_sed_class,nxsection_res), &
+!	  dheight_sed(nxsection_res,subasin), &
+	  darea_sed(nxsection_res,subasin), &
+	  dvol_sed(nxsection_res,subasin), &
+	  frvol_actlay(n_sed_class,nxsection_res,subasin), &
+	  totvol_actlay(nxsection_res,subasin), &
+	  conc(nxsection_res,subasin), &
+	  frconc(n_sed_class,nxsection_res), &
+	  area_sedim(nxsection_res,subasin), &
+	  vol_sedim(nxsection_res,subasin), &
 	  volbed0(subasin), &
 	  length_plunge(subasin), &
-	  cumlength_sec(maxreservoir,subasin), &
-	  length_sec(maxreservoir,subasin), &
-	  d50_actlay(maxreservoir,subasin), &
-	  d90_actlay(maxreservoir,subasin), &
+	  cumlength_sec(nxsection_res,subasin), &
+	  length_sec(nxsection_res,subasin), &
+	  d50_actlay(nxsection_res,subasin), &
+	  d90_actlay(nxsection_res,subasin), &
 	  frsedinflow(366*nt,subasin,n_sed_class), &
-	  frvol_actlay0(n_sed_class,maxreservoir,subasin), &
-	  totvol_actlay0(maxreservoir,subasin), &
+	  frvol_actlay0(n_sed_class,nxsection_res,subasin), &
+	  totvol_actlay0(nxsection_res,subasin), &
 
-	  x_sec(maxreservoir,maxreservoir,subasin), &
-	  y_sec(maxreservoir,maxreservoir,subasin), &
-	  y_actlay(maxreservoir,maxreservoir,subasin), &
-	  y_original(maxreservoir,maxreservoir,subasin), &
-	  frac_actlay(n_sed_class,maxreservoir,subasin), &
-	  frac_toplay(n_sed_class,maxreservoir,subasin), &
-	  frac_comlay(n_sed_class,maxreservoir,subasin), &
-	  frac_susp(n_sed_class,maxreservoir,subasin), &
-	  partarea_actlay(maxreservoir,maxreservoir,subasin), &
-	  partarea_toplay(maxreservoir,maxreservoir,subasin), &
-!	  weightfac_actlay(maxreservoir,maxreservoir,subasin), &
-!	  weightfac_toplay(maxreservoir,maxreservoir,subasin), &
-	  y_laststep(maxreservoir,maxreservoir,subasin), &
-	  erosion_level(maxreservoir,subasin), &
-	  pt1(maxreservoir,subasin), &
-	  pt2(maxreservoir,subasin), &
-	  pt3(maxreservoir,subasin), &
-	  pt4(maxreservoir,subasin), &
+	  x_sec(npointsxsect,nxsection_res,subasin), &
+	  y_sec(npointsxsect,nxsection_res,subasin), &
+	  y_actlay(npointsxsect,nxsection_res,subasin), &
+	  y_original(npointsxsect,nxsection_res,subasin), &
+	  frac_actlay(n_sed_class,nxsection_res,subasin), &
+	  frac_toplay(n_sed_class,nxsection_res,subasin), &
+	  frac_comlay(n_sed_class,nxsection_res,subasin), &
+	  frac_susp(n_sed_class,nxsection_res,subasin), &
+	  partarea_actlay(npointsxsect,nxsection_res,subasin), &
+	  partarea_toplay(npointsxsect,nxsection_res,subasin), &
+!	  weightfac_actlay(npointsxsect,nxsection_res,subasin), &
+!	  weightfac_toplay(npointsxsect,nxsection_res,subasin), &
+	  y_laststep(npointsxsect,nxsection_res,subasin), &
+	  erosion_level(nxsection_res,subasin), &
+	  pt1(nxsection_res,subasin), &
+	  pt2(nxsection_res,subasin), &
+	  pt3(nxsection_res,subasin), &
+	  pt4(nxsection_res,subasin), &
 	  pt_long0(subasin), &
 	  pt_long(subasin), &
-	  sideslope_pt1(maxreservoir,subasin), &
-	  sideslope_pt2(maxreservoir,subasin), &
+	  sideslope_pt1(nxsection_res,subasin), &
+	  sideslope_pt2(nxsection_res,subasin), &
 	  slope_long(subasin), &
 
 	  daydamelevact(366*nt,subasin), &
 	  daydamareaact(366*nt,subasin), &
-	  dayelev_bat(366*nt,maxreservoir,subasin), &
-	  dayarea_bat(366*nt,maxreservoir,subasin), &
-	  dayvol_bat(366*nt,maxreservoir,subasin), &
+	  dayelev_bat(366*nt,nxsection_res,subasin), &
+	  dayarea_bat(366*nt,nxsection_res,subasin), &
+	  dayvol_bat(366*nt,nxsection_res,subasin), &
 
-	  daydepth_sec(366*nt,maxreservoir,subasin), &
-	  daywatelev_sec(366*nt,maxreservoir,subasin), &
-	  dayarea_sec(366*nt,maxreservoir,subasin), &
-	  daytopwidth_sec(366*nt,maxreservoir,subasin), &
-	  dayenergslope_sec(366*nt,maxreservoir,subasin), &
-	  dayhydrad_sec(366*nt,maxreservoir,subasin), &
-	  daymeanvel_sec(366*nt,maxreservoir,subasin), &
-	  daydischarge_sec(366*nt,maxreservoir,subasin), &
-	  dayminelev_sec(366*nt,maxreservoir,subasin), &
-	  dayy_sec(366*nt,maxreservoir,maxreservoir,subasin), &
+	  daydepth_sec(366*nt,nxsection_res,subasin), &
+	  daywatelev_sec(366*nt,nxsection_res,subasin), &
+	  dayarea_sec(366*nt,nxsection_res,subasin), &
+	  daytopwidth_sec(366*nt,nxsection_res,subasin), &
+	  dayenergslope_sec(366*nt,nxsection_res,subasin), &
+	  dayhydrad_sec(366*nt,nxsection_res,subasin), &
+	  daymeanvel_sec(366*nt,nxsection_res,subasin), &
+	  daydischarge_sec(366*nt,nxsection_res,subasin), &
+	  dayminelev_sec(366*nt,nxsection_res,subasin), &
+	  dayy_sec(366*nt,npointsxsect,nxsection_res,subasin), &
 	  daycumsed(366*nt,subasin), &
 	  dayfrsediment_out(366*nt,subasin,n_sed_class), &
 	 STAT = istate)
