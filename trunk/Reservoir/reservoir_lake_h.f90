@@ -11,7 +11,7 @@ module reservoir_h
 save
 
 INTEGER :: nxsection_res=200 !number of cross sections at the strategic reservoirs
-INTEGER :: npointsxsect=200 !number of points (x,y) along the cross sections and also number of cross sections at the strategic reservoirs
+INTEGER :: npointsxsect=200  !number of points (x,y) along the cross sections 
 
 
 
