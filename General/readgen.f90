@@ -478,9 +478,7 @@ INCLUDE '../Hillslope/allocat_hymo.var'
 INCLUDE '../Hillslope/allocat_erosion.var'
 INCLUDE '../River/allocat_routing.var'
 nt = int(24/dt)	!Till: number of simulation steps per day		
-if (doreservoir.or.doacud) then
-	INCLUDE '../Reservoir/allocat_reservoir_lake.var'
-end if
+INCLUDE '../Reservoir/allocat_reservoir_lake.var'
 
 
 RETURN

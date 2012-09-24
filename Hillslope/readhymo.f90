@@ -147,7 +147,7 @@ IMPLICIT NONE
 
 INTEGER :: idummy,i,j,c,k,i_min,n,h,ii
 INTEGER :: dummy1, dummy2, loop
-INTEGER ::id_sub_int,id_lu_int,id_lu_ext,id_tc_ext,id_tc_int,id_soil_int,test !,id_soil_ext
+INTEGER ::id_sub_int,id_lu_int,id_lu_ext,id_tc_int,id_soil_int,test !,id_soil_ext,id_tc_ext
 INTEGER :: idummy2(20),tausch,istate
 REAL :: temp1,temp2, maxthickness
 REAL :: sortier(maxterrain),tauschr

@@ -26,7 +26,7 @@ IMPLICIT NONE
 INTEGER, INTENT(IN)                      :: STATUS
 INTEGER, INTENT(IN)                     :: muni
 
-INTEGER :: imun,j,k,dummy1,id,ih,d_laststep,g,istate,ka,dummy,dummy5(subasin) !,i,ii,ie,mm,loop,idummy2(20)
+INTEGER :: imun,j,k,dummy1,ih,d_laststep,g,istate,ka,dummy,dummy5(subasin) !,i,ii,ie,mm,loop,idummy2(20),id
 REAL :: xx(5),frac,frac_hrr(5)
 REAL :: lakeinflow_r(5),lakeoutflow_r(5),lakeretention_r(5),lakevolume_r(5),dummy9
 REAL :: lakesedinflow_r(5),lakesedoutflow_r(5),lakesedretention_r(5),lakesedimentation_r(5)
@@ -295,11 +295,9 @@ IF (STATUS == 0) THEN
    END DO
   END IF !end block Andreas
 
-  DO imun=1,subasin
-    outflow_last_hrr(imun,1:5)=0.
-    volume_last_hrr(imun,1:5)=0.
-	cumseddep(imun)=0.
-  ENDDO
+	outflow_last_hrr(1:subasin,1:5)=0.
+	volume_last_hrr(1:subasin,1:5)=0.
+	if (dosediment) cumseddep(1:subasin)=0.
 
   DO imun=1,subasin
     hmax_hrr(imun,1:5)=((maxlake(imun,1:5))/damk_Molle(1:5))**(1./alpha_Molle(1:5))
@@ -315,7 +313,7 @@ IF (STATUS == 0) THEN
   END DO
 !stop
 
-  cumsedimentation=0.
+  if (dosediment) cumsedimentation=0.
   totalrunoff2=0.
 
 
@@ -525,16 +523,13 @@ IF (STATUS == 1) THEN
 
   
 !** Initialization for actual year of calculation
-  DO imun=1,subasin
-    DO id=1,dayyear*nt
-	  lakeoutflow(id,imun) = 0.
-	  lakesedout(id,imun)=0.
-	  DO g=1,n_sed_class
-		lakefracsedout(id,imun,g)=0.
-	  ENDDO
-    END DO
-	damareaact(imun)=0. !for subbasin without strategic reservoir
-  END DO				!for subbasin with strategic reservoir, surface area is updated in the reservoir module
+	lakeoutflow(1:dayyear*nt,1:subasin) = 0.
+	damareaact(1:subasin)=0. !for subbasin without strategic reservoir
+  				!for subbasin with strategic reservoir, surface area is updated in the reservoir module
+	if (dosediment) then
+		lakesedout(1:dayyear*nt,1:subasin)=0.
+		lakefracsedout(1:dayyear*nt,1:subasin,1:n_sed_class)=0.
+	end if
 
 !  DO imun=1,subasin
 !    maxlakewater(imun,1:5)=maxlake(imun,1:5)*acud(imun,1:5)

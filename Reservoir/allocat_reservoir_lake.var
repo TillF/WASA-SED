@@ -7,11 +7,12 @@
 !Till: throw error message if allocation fails
 !8-08-12
 
-allocate( &
 
-      acud(subasin,5), &
-	  acudfloat(subasin,5), &
-	  acudfloatyear(subasin,5,tstop-tstart+1), &
+IF (doacud) THEN
+	allocate( &	
+	acud(subasin,5), &
+	acudfloat(subasin,5), &
+	acudfloatyear(subasin,5,tstop-tstart+1), &
 	  maxlakesub0(subasin,5), &
 	  lakewater0(subasin,5), &
 	  laketrend(subasin,5), &
@@ -45,21 +46,47 @@ allocate( &
       lakecumfrout(subasin,5), &
       lakerunoff(366*nt,subasin), &
 
-	  lakesedin(366*nt,subasin), &
-	  lakesedout(366*nt,subasin), &
-	  lakefracsedin(366*nt,subasin,n_sed_class), &
-	  lakefracsedout(366*nt,subasin,n_sed_class), &
-	  lakesedin_hrr(366*nt,subasin,5), &
-	  lakesedout_hrr(366*nt,subasin,5), &
-	  lakefracsedin_hrr(366*nt,subasin,5,n_sed_class), &
-	  lakefracsedout_hrr(366*nt,subasin,5,n_sed_class), &
-	  lakedep_hrr(366*nt,subasin,5), &
-	  lakecumdep_hrr(subasin,5), &
-	  lake_vollost(366*nt,subasin,5), &
-	  cumseddep(subasin), &
-	  lake_cumseddep(366*nt,subasin,5), &
+	STAT = istate)
 
-	  fcav(subasin), &
+	if (istate/=0) then
+		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in acude-module (small reservoirs).' 
+		stop
+	end if
+
+
+	if (dosediment) then
+		allocate( &	
+		  lakesedin(366*nt,subasin), &
+		  lakesedout(366*nt,subasin), &
+		  lakefracsedin(366*nt,subasin,n_sed_class), &
+		  lakefracsedout(366*nt,subasin,n_sed_class), &
+		  lakesedin_hrr(366*nt,subasin,5), &
+		  lakesedout_hrr(366*nt,subasin,5), &
+		  lakefracsedin_hrr(366*nt,subasin,5,n_sed_class), &
+		  lakefracsedout_hrr(366*nt,subasin,5,n_sed_class), &
+		  lakedep_hrr(366*nt,subasin,5), &
+		  lakecumdep_hrr(subasin,5), &
+		  lake_vollost(366*nt,subasin,5), &
+		  cumseddep(subasin), &
+		  lake_cumseddep(366*nt,subasin,5), &
+
+		STAT = istate)
+		if (istate/=0) then
+			write(*,'(A,i0,a)')'Memory allocation error (',istate,') in acude-module (small reservoirs, sediment).' 
+			stop
+		end if
+	end if
+
+END IF
+
+
+
+
+
+
+IF (doreservoir) THEN
+	allocate( &
+   	  fcav(subasin), &
 	  fvol_over(subasin), &
       latflow_res(subasin), &
       reservoir_down(subasin), &
@@ -281,21 +308,43 @@ allocate( &
 	  dayarea_bat(366*nt,nxsection_res,subasin), &
 	  dayvol_bat(366*nt,nxsection_res,subasin), &
 
-	  daydepth_sec(366*nt,nxsection_res,subasin), &
-	  daywatelev_sec(366*nt,nxsection_res,subasin), &
-	  dayarea_sec(366*nt,nxsection_res,subasin), &
-	  daytopwidth_sec(366*nt,nxsection_res,subasin), &
-	  dayenergslope_sec(366*nt,nxsection_res,subasin), &
-	  dayhydrad_sec(366*nt,nxsection_res,subasin), &
-	  daymeanvel_sec(366*nt,nxsection_res,subasin), &
-	  daydischarge_sec(366*nt,nxsection_res,subasin), &
-	  dayminelev_sec(366*nt,nxsection_res,subasin), &
-	  dayy_sec(366*nt,npointsxsect,nxsection_res,subasin), &
-	  daycumsed(366*nt,subasin), &
-	  dayfrsediment_out(366*nt,subasin,n_sed_class), &
+	  
 	 STAT = istate)
 
 	if (istate/=0) then
 		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in reservoir-module.' 
 		stop
 	end if
+
+
+
+	if (dosediment) then
+		allocate( &	
+
+		  daydepth_sec(366*nt,nxsection_res,subasin), &
+		  daywatelev_sec(366*nt,nxsection_res,subasin), &
+		  dayarea_sec(366*nt,nxsection_res,subasin), &
+		  daytopwidth_sec(366*nt,nxsection_res,subasin), &
+		  dayenergslope_sec(366*nt,nxsection_res,subasin), &
+		  dayhydrad_sec(366*nt,nxsection_res,subasin), &
+		  daymeanvel_sec(366*nt,nxsection_res,subasin), &
+		  daydischarge_sec(366*nt,nxsection_res,subasin), &
+		  dayminelev_sec(366*nt,nxsection_res,subasin), &
+		  dayy_sec(366*nt,npointsxsect,nxsection_res,subasin), &
+		  daycumsed(366*nt,subasin), &
+		  dayfrsediment_out(366*nt,subasin,n_sed_class), &
+		STAT = istate)
+
+		if (istate/=0) then
+			write(*,'(A,i0,a)')'Memory allocation error (',istate,') in reservoir-module (sediments).' 
+			stop
+		end if
+
+	end if
+		
+
+
+END IF
+
+
+
