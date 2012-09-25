@@ -1,4 +1,7 @@
 SUBROUTINE readgen(path2do_dat)
+!Till: computationally irrelevant: create output directory, if not existing
+!2012-09-25 
+
 !Till: computationally irrelevant: optionally read nxsection_res, npointsxsectfrom maxdim.dat
 !2012-09-21 
 
@@ -74,7 +77,7 @@ CHARACTER (LEN=160) :: path2do_dat		!Till: path to central control file (do.dat)
 
 INTEGER :: i,istate !,imun,imicro,imeso
 CHARACTER (LEN=150) :: custompath
-CHARACTER (30) :: dummy
+CHARACTER (LEN=150) :: dummy
 
 if (trim(path2do_dat)=='') then
 	path2do_dat='./Input/do.dat'			!Till: use default, if no command line argument was specified
@@ -424,7 +427,29 @@ END IF
 
 ! save settings of this run to output directory
 OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='unknown',IOSTAT=istate)	
-IF (istate==0) THEN
+IF (istate/=0) THEN
+	write(*,*)'Error: Output path ',pfadn(1:pfadi),' not found, trying to create...'
+	dummy=pfadn(1:pfadi)
+	do i=1,pfadi
+		if (dummy(i:i)=="\") dummy(i:i)="/" !using slashes as delimiter (*nix)
+	end do
+
+	CALL system('mkdir '//dummy)
+	
+	OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='unknown',IOSTAT=istate)	
+	if (istate/=0) then
+		do i=1,pfadi
+			if (dummy(i:i)=="/") dummy(i:i)="\" !using backslashes as delimiter (windows)
+		end do
+		CALL system('mkdir '//dummy)
+		
+		OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='unknown',IOSTAT=istate)	
+		if (istate/=0) then
+			write(*,*)'Error: Output file ',pfadn(1:pfadi)//'parameter.out',' could not be created, aborting.'
+			stop
+		end if
+	end if
+else
 	WRITE(11,*)
 	WRITE(11,'(a)') pfadp
 	WRITE(11,'(a)') pfadn
@@ -465,9 +490,6 @@ IF (istate==0) THEN
 	end if
 	WRITE(11,*) 'WASA model, ',trim(rev_string1),'; ',trim(rev_string2)
 	CLOSE(11)
-else
-	write(*,*)'Error: Output file ',pfadn(1:pfadi)//'parameter.out',' could not be created, aborting.'
-	stop
 END IF
 
 
