@@ -160,11 +160,11 @@ module time_h
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 save
 ! time of start/end of simulation
-INTEGER :: tstart, tstop, mstart, mstop
+INTEGER :: tstart, tstop, mstart, mstop, dstart, dstop
 ! year
 INTEGER :: t
 ! month
-INTEGER :: m
+!INTEGER :: m
 ! day (in year)
 INTEGER :: d, dprev
 ! day since simulation start
@@ -174,15 +174,18 @@ INTEGER :: dayyear, daylastyear, dayoutsim
 ! days in months
 INTEGER :: daymon(12)
 
-! number of normal years (no leap year) in calculation period
-INTEGER :: nos
 ! number of years in calculation period
 INTEGER :: years
-INTEGER :: idold,idmon,mnew
+!INTEGER :: idold,idmon,mnew
 INTEGER :: mon_day(12)
-!COMMON /maintime/ tstart, tstop, mstart, mstop, t, m, d,  &
-!    dprev, dtot, dayyear, daylastyear, idold, idmon, mnew, nos, years
-!COMMON /timedat/ daymon,daynr,monnr,mon_day
+
+contains
+logical FUNCTION is_leapyear(yr) !check if this is a leap year
+integer :: yr
+ is_leapyear = (MOD(yr,4) == 0)  .AND. ( (MOD(yr,100) /= 0) .OR. (MOD(yr,400) == 0) )
+ return
+END FUNCTION is_leapyear
+
 end module time_h
 
 
@@ -192,27 +195,20 @@ module climo_h
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 save
 ! daily average temperatures (oC)
- !Allocatable      real temp(366,nmun)
 real, allocatable :: temp(:,:)
 ! daily precipitation (mm/day)
-!Allocatable      real precip(366,nmun)
 real, allocatable :: precip(:,:)
 ! daily potential evapotranspiration (mm/day)
-!Allocatable      real pet(366,nmun)
 real, allocatable :: pet(:,:)
 ! daily mean shortwave radiation (W/m^2)
-!Allocatable      real rad(366,nmun)
 real, allocatable :: rad(:,:)
 ! incoming radiation above atmosphere (W/m²)
 REAL :: radex(366)
 ! relative humidity (%)
-!Allocatable      real rhum(366,nmun)
 real, allocatable :: rhum(:,:)
 ! wind velocity (m/s)
-!Allocatable      real wind(366,nmun)
 real, allocatable :: wind(:,:)
 ! climate variables for hourly model version
-!Allocatable      real preciph(366*24)
 real, allocatable :: preciph(:,:)
 
 

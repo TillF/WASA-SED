@@ -49,7 +49,7 @@ SUBROUTINE routing_coefficients(i, STATUS, flow, r_area, p)
 !!                               |Manning's equation)
 !!    a           |m^2           |cross-sectional area of channel
 !!    bottom_width(i)           |m             |bottom width of channel
-!!    d           |m             |depth of flow
+!!    dep         |m             |depth of flow
 !!    fps         |none          |change in horizontal distance per unit
 !!                               |change in vertical distance on floodplain side
 !!                               |slopes; always set to 4 (slope=1/4)
@@ -76,7 +76,7 @@ INTEGER, INTENT(IN) :: i, STATUS
 REAL, INTENT(OUT) :: r_area, p, flow
 
 !REAL :: fps, qq1, tt1, tt2, aa, phi8, phi9, phi11, phi12, sed_con
-REAL :: q_bankful100, d
+REAL :: q_bankful100, dep
 REAL::  d_it !, q_it, percent, error,
 REAL :: vol, s1, s2 
 
@@ -95,14 +95,14 @@ r_depth_cur(i)=-1000.
 IF (STATUS == 1) THEN
 
 	! Calculation of bottom width
-	d = r_depth(i)
-	bottom_width(i) = r_width(i) - 2. * d * r_sideratio(i)
+	dep = r_depth(i)
+	bottom_width(i) = r_width(i) - 2. * dep * r_sideratio(i)
 
 	!! check if bottom width (bottom_width(i)) is < 0
 	IF (bottom_width(i) <= 0.) THEN
 	  write(*,*)"WARNING: to low river width for depth / side slopes combination at ",i,"th stretch, side slopes adjusted."
 	  bottom_width(i) = .5 * r_width(i)
-	  r_sideratio(i) = (r_width(i) - bottom_width(i)) / (2. * d)
+	  r_sideratio(i) = (r_width(i) - bottom_width(i)) / (2. * dep)
 	END IF
 
 !! compute flow and travel time at bankfull depth
@@ -198,31 +198,31 @@ endif
 
 
 contains    
-REAL FUNCTION calc_q(d)
-!compute discharge for a given depth d in the current subreach indexed with i
+REAL FUNCTION calc_q(dep)
+!compute discharge for a given depth dep in the current subreach indexed with i
 !i:reach_index
-!d: reach_index
+!dep: reach_index
 ! Calculation of composite Manning factor taking into account the roughness values of the floodplains (for derivation of composite Manning: siehe Wasserbauskriptum)
 implicit none
 
-real, intent(in) :: d	!water depth, for which the discharge is to be calculated
+real, intent(in) :: dep	!water depth, for which the discharge is to be calculated
 real :: d_fp = 0.	!depth of water in flood-plain
 real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch 
 
-	if (d<0.) then
+	if (dep<0.) then
 		write(*,*)"ERROR: negative river depth in routing_coefficients.f90"
 		stop
 	end if
-	p_ch = bottom_width(i) + 2. * min(d,r_depth(i)) * SQRT(1. + s1 * s1)	!wetted perimeter in channel
-	a_ch = (bottom_width(i) + r_sideratio(i) * d) * d						!cross-section area
+	p_ch = bottom_width(i) + 2. * min(dep,r_depth(i)) * SQRT(1. + s1 * s1)	!wetted perimeter in channel
+	a_ch = (bottom_width(i) + r_sideratio(i) * dep) * dep						!cross-section area
 	q_ch = a_ch * (a_ch/p_ch) ** 0.6666 * SQRT(r_slope(i))/manning(i)				!Till: discharge according to Manning's equation
 
-	if (d <= r_depth(i)) then			
+	if (dep <= r_depth(i)) then			
 		a_fp = 0.	!no flow in floodplain
 		p_fp = 0.
 		q_fp = 0.
 	else
-		d_fp = d - r_depth(i)
+		d_fp = dep - r_depth(i)
 		a_fp = ((r_width_fp(i)-r_width(i)) + s2 * d_fp) * d_fp
 		p_fp =  (r_width_fp(i)-r_width(i)) + 2. * d_fp * SQRT(1. + s2 * s2)		!flow on floodplains
 		q_fp = a_fp * (a_fp/p_fp) ** 0.6666 * SQRT(r_slope(i))/manning_fp(i)				!Till: discharge according to Manning's equation (flood plain)
@@ -232,39 +232,39 @@ real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch
 	
 END FUNCTION calc_q
 
-SUBROUTINE calc_q_a_p(d, q, a, p)
-!compute discharge q. cross-section-area a and wetted perimeter p for a given depth d in the current subreach indexed with i
+SUBROUTINE calc_q_a_p(dep, q, a, p)
+!compute discharge q. cross-section-area a and wetted perimeter p for a given depth dep in the current subreach indexed with i
 !i:reach_index
-!d: reach_index
+!dep: reach_index
 ! Calculation of composite Manning factor taking into account the roughness values of the floodplains (for derivation of composite Manning: siehe Wasserbauskriptum)
 implicit none
-real, intent(in) :: d	!water depth, for which the discharge is to be calculated
+real, intent(in) :: dep	!water depth, for which the discharge is to be calculated
 real, intent(out) :: q, a, p
 real :: d_fp = 0.	!depth of water in flood-plain
 real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch
 
-	if (d<0.) then
+	if (dep<0.) then
 		write(*,*)"ERROR: negative river depth in routing_coefficients.f90"
 		stop
 	end if
 	
-	if (d == 0.) then
+	if (dep == 0.) then
 		a = 0.
 		p = 0.
 		q = 0.
 		return
 	end if
 
-	p_ch = bottom_width(i) + 2. * min(d,r_depth(i)) * SQRT(1. + s1 * s1)	!wetted perimeter in channel
-	a_ch = (bottom_width(i) + r_sideratio(i) * d) * d						!cross-section area
+	p_ch = bottom_width(i) + 2. * min(dep,r_depth(i)) * SQRT(1. + s1 * s1)	!wetted perimeter in channel
+	a_ch = (bottom_width(i) + r_sideratio(i) * dep) * dep						!cross-section area
 	q_ch = a_ch * (a_ch/p_ch) ** 0.6666 * SQRT(r_slope(i))/manning(i)				!Till: discharge according to Manning's equation
 
-	if (d <= r_depth(i)) then			
+	if (dep <= r_depth(i)) then			
 		a_fp = 0.	!no flow in floodplain
 		p_fp = 0.
 		q_fp = 0.
 	else
-		d_fp = d - r_depth(i)
+		d_fp = dep - r_depth(i)
 		a_fp = ((r_width_fp(i)-r_width(i)) + s2 * d_fp) * d_fp
 		p_fp =  (r_width_fp(i)-r_width(i)) + 2. * d_fp * SQRT(1. + s2 * s2)		!flow on floodplains
 		q_fp = a_fp * (a_fp/p_fp) ** 0.6666 * SQRT(r_slope(i))/manning_fp(i)				!Till: discharge according to Manning's equation (flood plain)
@@ -276,7 +276,7 @@ real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch
 END SUBROUTINE calc_q_a_p
 
 REAL FUNCTION calc_d(q)
-!compute depth d for a given discharge q in the current subreach indexed with i
+!compute depth dep for a given discharge q in the current subreach indexed with i
 !see http://nptel.iitm.ac.in/courses/IIT-MADRAS/Hydraulics/pdfs/Unit12/12_1b.pdf
 !i:reach_index
 !q: discharge

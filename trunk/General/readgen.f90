@@ -108,8 +108,26 @@ READ(11,'(a)') pfadp
 READ(11,'(a)') pfadn
 READ(11,*) tstart
 READ(11,*) tstop
-READ(11,*) mstart
-READ(11,*) mstop
+
+READ(11,'(A)') dummy !READ mstart (optional: dstart)
+	READ(dummy,*,IOSTAT=i)mstart,dstart
+	IF (i/=0 .OR. dstart==0.) THEN	!no dstart specified, assume 1
+		READ(dummy,*)mstart
+		dstart=1
+	END IF
+
+READ(11,'(A)') dummy !READ mstop (optional: dstop)
+	READ(dummy,*,IOSTAT=i)mstop,dstop
+	IF (i/=0 .OR. dstop==0.) THEN	!no dstop specified, assume 31
+		READ(dummy,*)mstop
+		dstop=31
+	END IF
+
+if (dstart<1 .OR. dstart>31 .OR. dstop<1 .OR. dstop>31 .OR. (mstart==mstop .AND. dstart>dstop) ) then
+	write(*,*)'ERROR: Invalid specification of start/stop day.'
+	stop
+end if
+
 READ(11,*) subasin  !total no. of sub-basins
 READ(11,*) ntcinst  !total no. of sub-basin / SO / TC combinations
 READ(11,*) nsoter  !total no. of SOTER units in study area
@@ -127,8 +145,8 @@ READ(11,*) dotrans
 READ(11,*) dohour
 READ(11,*) scenario
 READ(11,*) krig
-!READ(11,*) kfkorr
-READ(11,'(A)') dummy
+
+READ(11,'(A)') dummy !READ kfkorr (optional: kfkorr_a and kfkorr_b)
 	READ(dummy,*,IOSTAT=i)kfkorr,kfkorr_a,kfkorr_b
 	IF (i/=0 .OR. kfkorr_a==0.) THEN	!no parameters for variable kfcorr specified, use constant kfcorr (as in old version)
 		READ(dummy,*)kfkorr
@@ -455,8 +473,8 @@ else
 	WRITE(11,'(a)') pfadn
 	WRITE(11,*) 'start year of simulation: ', tstart
 	WRITE(11,*) 'end year of simulation: ', tstop
-	WRITE(11,*) 'start month of simulation: ',mstart
-	WRITE(11,*) 'end month of simulation: ',mstop
+	WRITE(11,*) 'start of simulation (month, day): ',mstart, dstart
+	WRITE(11,*) 'end of simulation (month, day): ',mstop, dstop
 	WRITE(11,*) 'no. of sub-basin: ',subasin
 	WRITE(11,*) 'no. of combinations: ',ntcinst
 	WRITE(11,*) 'total no. of SOTER units: ',nsoter

@@ -1616,7 +1616,7 @@ IF (do_pre_outflow .AND. .NOT. allocated(pre_subbas_outflow)) THEN	!first call o
 
 	  do_pre_outflow=.TRUE.
  
-	  call date_seek(91,tstart,mstart,'subbasin_out.dat')	!set internal filepointer to correct line in file
+	  call date_seek(91,tstart,mstart, dstart, 'subbasin_out.dat')	!set internal filepointer to correct line in file
   END IF
 END IF
 
@@ -1662,7 +1662,7 @@ ELSE
 
 		  do_pre_outsed=.TRUE.
  
-		  call date_seek(92,tstart,mstart,'subbasin_outsed.dat')	!set internal filepointer to correct line in file
+		  call date_seek(92,tstart,mstart,dstart, 'subbasin_outsed.dat')	!set internal filepointer to correct line in file
 	  END IF
 	END IF
 END IF
