@@ -51,14 +51,14 @@
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-06-30  Time: 13:45:46
 
-SUBROUTINE date_seek(fid,tstart,mstart,filename)
+SUBROUTINE date_seek(fid,tstart,mstart, dstart, filename)
 !move file pointer to position corresponding to start of simulation period
 
 use params_h
 
 implicit none
 	INTEGER, INTENT(IN)                  :: fid	!file handle
-	INTEGER, INTENT(IN)                  :: tstart, mstart	!start year, start month of simulation
+	INTEGER, INTENT(IN)                  :: tstart, mstart, dstart	!start year, month and day of simulation
 	CHARACTER(LEN=*),  INTENT(IN)                  :: filename	!name of file to produce meaningful error message
 
 	INTEGER                  :: date_num, dum,iostat, linecount	!dummy values. line counter
@@ -66,22 +66,23 @@ implicit none
 
 	linecount=4
 	READ(fid,*,IOSTAT=iostat) date_num,dum,temp2
-	do while ((mod(date_num,1000000)/=mstart*10000+tstart) .AND. (iostat==0))
-		READ(fid,*,IOSTAT=iostat) date_num,dum,temp2		!advance until start month is reached
+	do while ( ((mod(date_num,1000000)/=mstart*10000+tstart) .OR.&
+				(date_num/1000000 /= dstart)) .AND. &
+				(iostat==0))
+		READ(fid,*,IOSTAT=iostat) date_num,dum,temp2		!advance until start month and day is reached
 		linecount = linecount+1
 	end do
+	
+	if (iostat==-1) then	!reached end of file
+		write(*,'(A,i3,a,i0)')'ABORTED: input file '//filename//' does not contain simulation start ',dstart,'/',mstart,'/',tstart,' (d/m/y)'
+		stop
+	end if
 	
 	if (iostat/=0) then	!format error
 		write(*,'(A,i0)')'ABORTED: format error in '//trim(filename)//' in line ',linecount
 		stop
 	end if
 
-
-	if ((iostat/=0) .OR. (floor(date_num/1000000.0)/=1)) then	!abort if start month does not start with its first day
-		write(*,'(A,i3,a,i0)')'ABORTED: input file '//filename//' does not contain first day of simulation start month',mstart,'/',tstart
-		stop
-	end if
-	
 	BACKSPACE (fid)		!rewind line just read
 
 
@@ -220,10 +221,10 @@ IF (STATUS == 0) THEN
   allocate(inputbuffer(366*nt,maxval(no_columns)))		!Till: prepare input buffer to fit the data
   
  !set internal filepointers to correct line (simulation start)
-  call date_seek(81,tstart,mstart,'temperature.dat')
-  call date_seek(82,tstart,mstart,'humidity.dat')
-  call date_seek(83,tstart,mstart,'radiation.dat')
-  call date_seek(84,tstart,mstart,dumstr)	
+  call date_seek(81,tstart,mstart, dstart, 'temperature.dat')
+  call date_seek(82,tstart,mstart, dstart, 'humidity.dat')
+  call date_seek(83,tstart,mstart, dstart, 'radiation.dat')
+  call date_seek(84,tstart,mstart, dstart, dumstr)	
   
   
 END IF
