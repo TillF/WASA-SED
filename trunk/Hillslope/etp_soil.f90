@@ -1,5 +1,7 @@
 SUBROUTINE etp_soil(i_subbas3,vegi,defi,facwi,act,actveg,acts,  &
         height_act,lai_act,alb_act,rsfinal)
+
+!Jose: an upper theshold for soil surface resistance "rss" was introduced. For very high values of "rss" a divi
  
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29

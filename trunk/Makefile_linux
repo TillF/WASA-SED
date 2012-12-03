@@ -1,9 +1,9 @@
-#CC=/usr/bin/gfortran44
-#CFLAGS=-c
-#FLAGS= -ffree-line-length-none 
+CC=/usr/bin/gfortran
+CFLAGS=-c -ggdb
+FLAGS= -ffree-line-length-none -ggdb
 
-CC=pgfortran
-CFLAGS=-c -Mfree
+# CC=pgfortran
+# CFLAGS=-c -Mfree
 
 SOURCES=./General/general_h.f90 \
 ./Hillslope/erosion_h.f90 \
@@ -52,14 +52,15 @@ SOURCES=./General/general_h.f90 \
 
 EXECUTABLE=wasa.lin
 
+# top-level rule to compile the whole program.
 all: $(SOURCES) $(EXECUTABLE)
+
+# program is made of several source files.
 $(EXECUTABLE): $(SOURCES)
 	./update_revision_no.sh
 	$(CC) $(FLAGS) $(SOURCES) -o $(EXECUTABLE)
 
 .o:
 	$(CC) $(CFLAGS) $< -o $@
-	
 clean:
 	rm *.mod *.o $(EXECUTABLE)
-	
