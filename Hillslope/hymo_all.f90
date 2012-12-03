@@ -819,13 +819,13 @@ IF (STATUS == 2) THEN
 	height_act=calc_seasonality(t,julian_day,period(i_subbas,:),height)	!compute heights of current day
 	lai_act   =calc_seasonality(t,julian_day,period(i_subbas,:),lai)	!compute LAIs of current day
 	alb_act   =calc_seasonality(t,julian_day,period(i_subbas,:),alb)	!compute albedos of current day
-
-	svc_k_fac_day     =calc_seasonality(t,julian_day,seasonality_k     (i_subbas,:),svc_k_fac)	        !compute K-factors of current day
-	svc_c_fac_day     =calc_seasonality(t,julian_day,seasonality_c     (i_subbas,:),svc_c_fac)	        !compute c-factors of current day
-	svc_p_fac_day     =calc_seasonality(t,julian_day,seasonality_p     (i_subbas,:),svc_p_fac)	        !compute p-factors of current day
-	svc_coarse_fac_day=calc_seasonality(t,julian_day,seasonality_coarse(i_subbas,:),svc_coarse_fac)	!compute coarse-factors of current day
-	svc_n_day         =calc_seasonality(t,julian_day,seasonality_n     (i_subbas,:),svc_n)	            !compute n of current day
-
+ if(dosediment) then
+    svc_k_fac_day     =calc_seasonality(t,julian_day,seasonality_k     (i_subbas,:),svc_k_fac)	        !compute K-factors of current day
+    svc_c_fac_day     =calc_seasonality(t,julian_day,seasonality_c     (i_subbas,:),svc_c_fac)	        !compute c-factors of current day
+    svc_p_fac_day     =calc_seasonality(t,julian_day,seasonality_p     (i_subbas,:),svc_p_fac)	        !compute p-factors of current day
+    svc_coarse_fac_day=calc_seasonality(t,julian_day,seasonality_coarse(i_subbas,:),svc_coarse_fac)	!compute coarse-factors of current day
+    svc_n_day         =calc_seasonality(t,julian_day,seasonality_n     (i_subbas,:),svc_n)	            !compute n of current day
+ endif
 	kfkorr_day=kfkorr*(kfkorr_a*1/max(precip(d,i_subbas),0.001)+kfkorr_b)	!compute kfkorr as a function of daily precipitation (use a minimum value of 0.001 for precip to avoid division by zero)
 	
 
