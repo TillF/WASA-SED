@@ -1,7 +1,8 @@
 SUBROUTINE etp_soil(i_subbas3,vegi,defi,facwi,act,actveg,acts,  &
         height_act,lai_act,alb_act,rsfinal)
 
-!Jose: an upper theshold for soil surface resistance "rss" was introduced. For very high values of "rss" a divi
+!Jose: an upper theshold for soil surface resistance "rss" was introduced. For very high values of "rss" a divi! jose miguel: for very low soil water content, the rss tends to infinity. This is not accepted by the computations, so the maximum of surface resistance of bare soil is limited to 1.0e6 (arbitrary huge number beyond maximum value obtained by Domingo et al. 1999) in order to prevent errors. See Domingo et al./Agricultural and Forest Meteorology 95 (1999) 76-77 
+!2012-12-05
  
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29
@@ -231,8 +232,13 @@ rabs=rabs+(ras-rabs)*fcov
 !      write(*,*) 'ras,rap,rabs,raa',ras,rap,rabs,raa
 
 ! surface resistance of bare soil
-rss=facwi
-!      rss=1000000.0
+! jose miguel: for very low soil water content, the rss tends to infinity. This is not accepted by the computations, so the maximum of surface resistance of bare soil is limited to 1.0e6 (arbitrary huge number beyond maximum value obtained by Domingo et al. 1999) in order to prevent errors. See Domingo et al./Agricultural and Forest Meteorology 95 (1999) 76-77 
+if (facwi<1.0e6) then
+   rss=facwi
+else
+   rss=1.0e6
+endif
+!      rss=1.0e6
 rsbs=rss
 !      write(*,*) 'rss',rss
 
