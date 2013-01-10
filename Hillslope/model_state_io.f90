@@ -519,7 +519,7 @@ contains
     use params_h
     
     character(len=*),intent(in):: lake_conds_file		!file to load from
-    integer :: sb_counter,acud_class,iostatus
+    integer :: sb_counter,acud_class,iostatus,dummy1
     
     write(*,'(a,a,a)')'Inititalize lake storage from file ''',trim(lake_conds_file),'''.'
     
@@ -529,7 +529,7 @@ contains
     
     DO sb_counter=1,subasin
        DO acud_class=1,5
-          READ(11,IOSTAT=iostatus) dummy1,dummy2,lakewater0(sb_counter,acud_class)
+          READ(11,IOSTAT=iostatus) dummy1,dummy1,lakewater0(sb_counter,acud_class)
           IF (iostatus<0) WRITE(*,'(a,a,a)') 'WARNING: Problem with state variable file ''',trim(lake_conds_file),'''. Not enough lake classes or subbasins or the file does not exist. Consider running the model with doloadstate switched off (in do.dat file)'
           
        ENDDO
