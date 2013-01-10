@@ -481,6 +481,7 @@ real, allocatable :: dayy_sec(:,:,:,:)			!described above as y_sec
 real, allocatable :: daycumsed(:,:)				!described above as cum_sedimentation
 real, allocatable :: dayfrsediment_out(:,:,:)	!described above as frsediment_out
 
+integer :: m
 end module reservoir_h
 
 

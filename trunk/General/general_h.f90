@@ -164,7 +164,7 @@ INTEGER :: tstart, tstop, mstart, mstop, dstart, dstop
 ! year
 INTEGER :: t
 ! month
-INTEGER :: m
+INTEGER :: mm
 ! day (in year)
 INTEGER :: d, dprev
 ! day since simulation start

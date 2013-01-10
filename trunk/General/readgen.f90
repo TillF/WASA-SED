@@ -335,7 +335,7 @@ IF (istate==0) THEN
 			CASE ('river_sediment_concentration')
 				f_river_sediment_concentration =dosediment
 			CASE ('river_sediment_total')
-				f_river_sediment_total=.TRUE.
+				f_river_sediment_total=dosediment
 			CASE ('river_sediment_total_dailyaverage')
 				f_river_sediment_total_dailyaverage =dosediment
 			CASE ('river_storage')
@@ -349,7 +349,7 @@ IF (istate==0) THEN
 			CASE ('tc_surfflow')
 				f_tc_surfflow=.TRUE.
 			CASE ('tc_sedout')
-				f_tc_sedout=.TRUE.
+				f_tc_sedout=dosediment
 
 			CASE ('actetranspiration')
 				f_actetranspiration=.TRUE.
@@ -377,13 +377,13 @@ IF (istate==0) THEN
 			CASE ('res_hydraul')
 				f_res_hydraul=.TRUE.
 			CASE ('res_bedchange')
-				f_res_bedchange=.TRUE.
+				f_res_bedchange=dosediment
 			CASE ('res_sedbal')
-				f_res_sedbal=.TRUE.
+				f_res_sedbal=dosediment
 			CASE ('res_longitudunal')
 				f_res_longitudunal=.TRUE.
 			CASE ('res_sedcomposition')
-				f_res_sedcomposition=.TRUE.
+				f_res_sedcomposition=dosediment
 			CASE ('lake_inflow_r')
 				f_lake_inflow_r=.TRUE.
 			CASE ('lake_outflow_r')
@@ -393,17 +393,17 @@ IF (istate==0) THEN
 			CASE ('lake_volume_r')
 				f_lake_volume_r=.TRUE.
 			CASE ('lake_sedinflow_r')
-				f_lake_sedinflow_r=.TRUE.
+				f_lake_sedinflow_r=dosediment
 			CASE ('lake_sedoutflow_r')
-				f_lake_sedoutflow_r=.TRUE.
+				f_lake_sedoutflow_r=dosediment
 			CASE ('lake_sedretention_r')
-				f_lake_sedretention_r=.TRUE.
+				f_lake_sedretention_r=dosediment
 			CASE ('lake_sedimentation_r')
-				f_lake_sedimentation_r=.TRUE.
+				f_lake_sedimentation_r=dosediment
 			CASE ('lake_watbal')
 				f_lake_watbal=.TRUE.
 			CASE ('lake_sedbal')
-				f_lake_sedbal=.TRUE.
+				f_lake_sedbal=dosediment
 			CASE ('lake_inflow')
 				f_lake_inflow=.TRUE.
 			CASE ('lake_outflow')
@@ -415,11 +415,11 @@ IF (istate==0) THEN
 			CASE ('lake_vollost')
 				f_lake_vollost=.TRUE.
 			CASE ('lake_sedinflow')
-				f_lake_sedinflow=.TRUE.
+				f_lake_sedinflow=dosediment
 			CASE ('lake_sedoutflow')
-				f_lake_sedoutflow=.TRUE.
+				f_lake_sedoutflow=dosediment
 			CASE ('lake_sizedistoutflow')
-				f_lake_sizedistoutflow=.TRUE.
+				f_lake_sizedistoutflow=dosediment
 
 
  	END SELECT

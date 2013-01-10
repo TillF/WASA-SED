@@ -65,7 +65,6 @@ DO t=tstart, tstop
 !!! MAIN LOOP FOR DAILY TIME STEPS
   DO d=1,dayyear
   write(*,*) d
-    CALL calcday
     CALL hymo_all(2)
  !Call routing routine
 	if (river_transport.eq.1) CALL routing(2)
