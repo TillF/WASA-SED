@@ -1,5 +1,14 @@
 module model_state_io
-  !contains subroutines for saving and loading model state (soil water, ground water, interception)
+  !contains subroutines for saving and loading model state (soil water, ground water, interception)#
+
+  !Jose Miguel: replaced "call pause1" for "return", which takes the execution of the subprogram to the program of an upper level 
+  !2013-01-14
+
+  !Jose Miguel: added the initialization of river_storage from the river_storage.stat file.
+  !2013-01-14
+ 
+  !Jose Miguel: added code to save additional state variable r_storage, which represents the volume stored in the river chanel at the end of the model run. It is stored in river_storage.stat
+  !2012-12-05 
 
   !Jose Miguel: added code to save additional state variable lakewater_hrr, which represents the volume stored in the lake classes at the end of the model run. It is stored in lake_volume.stat
   !2012-12-05 
@@ -49,21 +58,24 @@ contains
        call init_soil_conds(trim(pfadn)//'soil_moisture.stat')	!Till: load initial status of soil moisture
        call init_gw_conds(trim(pfadn)//'gw_storage.stat')	!Till: load initial status of gw storage
        call init_lake_conds(trim(pfadn)//'lake_volume.stat')	!Jose Miguel: load initial status of lake storage
+       call init_river_conds(trim(pfadn)//'river_storage.stat')	!Jose Miguel: load initial status of river storage
     else			!ii: default init is currently still done in hymo_all.f90, needs to be changed
        call init_soil_conds('')	!Till: set default initial status of soil moisture
        call init_gw_conds('')	!Till: set default status of gw storage
        call init_lake_conds('')	!Jose Miguel: set default status of lake storage
+       call init_river_conds('')	!Jose Miguel: set default status of river storage
     end if
-    CALL save_all_conds('','','','',trim(pfadn)//'storage.stats_start')		!Till: save only summary on initial storage
+    CALL save_all_conds('','','','','',trim(pfadn)//'storage.stats_start')		!Till: save only summary on initial storage
   end subroutine init_model_state
 
   subroutine save_model_state		!save model state variables
-    call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',trim(pfadn)//'lake_volume.stat',trim(pfadn)//'storage.stats')	!Till: save status
+    call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',trim(pfadn)//'storage.stats')	!Till: save status
+
   end subroutine save_model_state
 
 
 
-  subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, lake_conds_file, summary_file)
+  subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, lake_conds_file, river_conds_file, summary_file)
     !store current conditions of soil moisture, ground water and interception in the specified files
     use hymo_h
     use params_h
@@ -77,19 +89,20 @@ contains
 
     implicit none
 
-    character(len=*),intent(in):: soil_conds_file, gw_conds_file, ic_conds_file,lake_conds_file,summary_file		!files to save to
+    character(len=*),intent(in):: soil_conds_file, gw_conds_file, ic_conds_file,lake_conds_file,river_conds_file,summary_file		!files to save to
 
     INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter,h,acud_class	! counters
     INTEGER :: i_lu,id_tc_type,i_svc,i_soil,i_veg		! ids of components in work
     INTEGER :: tcid_instance	!(internal) id of TC-instance (unique subbas-LU-TC-combination)
-    REAL	:: total_storage_soil, total_storage_gw, total_storage_intercept, total_storage_lake(5) 	!total amount of water stored  [m3]
+    REAL	:: total_storage_soil, total_storage_gw, total_storage_intercept, total_storage_lake(5), total_storage_river	!total amount of water stored  [m3]
     REAL	:: lu_area, svc_area	!area of current lu/svc [m3]
-    INTEGER	::	soil_file_hdle, gw_file_hdle, intercept_file_hdle, lake_file_hdle	!file handles to output files
+    INTEGER	::	soil_file_hdle, gw_file_hdle, intercept_file_hdle, lake_file_hdle, river_file_hdle	!file handles to output files
 
     total_storage_soil=0.
     total_storage_gw=0.
     total_storage_intercept=0.
     total_storage_lake=0.
+    total_storage_river=0.
 
     if (trim(soil_conds_file)=='') then		!don't do anything if an empty filename is specified
        soil_file_hdle=0
@@ -127,24 +140,37 @@ contains
        WRITE(lake_file_hdle,*)'Subbasin', char(9),'Lake_order',char(9),'volume[m^3]' !tab separated output
     end if
 
+    if (trim(river_conds_file)=='') then		!don't do anything if an empty filename is specified
+       river_file_hdle=0
+    else 
+       river_file_hdle=14
+       OPEN(river_file_hdle,FILE=river_conds_file, STATUS='replace')
+       WRITE(river_file_hdle,'(a)') 'river reach volume status (for analysis or model re-start)'
+       WRITE(river_file_hdle,*)'Subbasin', char(9),'volume[m^3]' !tab separated output
+    endif
 
     DO sb_counter=1,subasin
+       !Jose Miguel: write river storage state to .stat file .
+       if (river_file_hdle/=0) then
+          WRITE(river_file_hdle,'(I0,A1,F8.2)') id_subbas_extern(sb_counter), char(9),r_storage(sb_counter) !tab separated output
+       endif
+       total_storage_river=total_storage_river+r_storage(sb_counter) !sum up total storage
 
        !Jose Miguel: loop over the acud classes.
        DO acud_class=1,5
           if (lake_file_hdle/=0) then
              WRITE(lake_file_hdle,'(I0,A1,I0,A1,F8.2)') id_subbas_extern(sb_counter), char(9),acud_class,char(9),lakewater_hrr((d-2)*nt+hour,sb_counter,acud_class)
-          end if
+          endif
           total_storage_lake(acud_class)=total_storage_lake(acud_class)+lakewater_hrr((d-2)*nt+hour,sb_counter,acud_class) !sum up total storage
        ENDDO
-
+       
        DO lu_counter=1,nbr_lu(sb_counter)
           i_lu=id_lu_intern(lu_counter,sb_counter)
           lu_area=area(sb_counter)*frac_lu(lu_counter,sb_counter)*1e6
           if (gw_file_hdle/=0) then
              WRITE(gw_file_hdle,'(2(I0,A1),F8.2,A1,F12.1)') id_subbas_extern(sb_counter), char(9),id_lu_extern(i_lu), char(9),&
                   deepgw(sb_counter,lu_counter)/lu_area*1e3, char(9),area(sb_counter)*frac_lu(lu_counter,sb_counter)*1e6	!tab separated output
-          end if
+          endif
           total_storage_gw=total_storage_gw+deepgw(sb_counter,lu_counter) !sum up total storage
 
           DO tc_counter=1,nbrterrain(i_lu)
@@ -164,7 +190,7 @@ contains
                    WRITE(intercept_file_hdle,'(4(I0,A1),F8.2,A1,F12.1)') id_subbas_extern(sb_counter), char(9),id_lu_extern(i_lu),char(9),&
                         id_terrain_extern(id_tc_type), char(9),id_svc_extern(i_svc), char(9),intercept(tcid_instance,svc_counter),&
                         char(9),	svc_area	!tab separated output
-                end if
+                endif
                 total_storage_intercept=total_storage_intercept+intercept(tcid_instance,svc_counter)*1e-3*svc_area !sum up total storage
 
 
@@ -174,17 +200,18 @@ contains
                            char(9),id_lu_extern(i_lu), char(9),id_terrain_extern(id_tc_type),&
                            char(9),id_svc_extern(i_svc), char(9),h, char(9),horithact(tcid_instance,svc_counter,h), &
                            char(9),	svc_area	!tab separated output
-                   end if
+                   endif
                    total_storage_soil=total_storage_soil+horithact(tcid_instance,svc_counter,h)*1e-3*svc_area !sum up total storage
-                END DO	!loop horizons
-             END DO	!loop SVC
-          END DO	!loop TCs
-       END DO	!loop LUs
-    END DO	!loop subbasins
+                ENDDO	!loop horizons
+             ENDDO	!loop SVC
+          ENDDO	!loop TCs
+       ENDDO	!loop LUs
+    ENDDO	!loop subbasins
     CLOSE(soil_file_hdle, iostat=i_lu)	!close output files
     CLOSE(gw_file_hdle, iostat=i_lu)
     CLOSE(intercept_file_hdle, iostat=i_lu)
     CLOSE(lake_file_hdle, iostat=i_lu)
+    CLOSE(river_file_hdle, iostat=i_lu)	!close output files
 
 
     OPEN(11,FILE=summary_file, STATUS='replace')		!write to summary file
@@ -195,6 +222,8 @@ contains
     DO acud_class=1,5
        WRITE(11,*)'lake_storage ', acud_class, char(9),total_storage_lake(acud_class)
     ENDDO
+    WRITE(11,*)'river_storage', char(9),total_storage_river
+
     CLOSE(11)
   end subroutine save_all_conds
 
@@ -225,7 +254,7 @@ contains
     OPEN(11,FILE=soil_conds_file,STATUS='old',action='read',  IOSTAT=i)	!check existence of file
     if (i/=0) then
        write(*,'(a,a,a)')'WARNING: Soil moisture file ''',trim(soil_conds_file),''' not found, using defaults.'
-       call pause1
+       return
     else
        CLOSE(11)
     end if
@@ -325,7 +354,7 @@ contains
        file_read=1
        CLOSE(11)
        if (errors>0) then
-          !call pause1 
+          return 
        end if
     end if
 
@@ -374,7 +403,7 @@ contains
     !		DO h=1,nbrhori(id_soil_intern(i,tcid_instance)	)
     !			IF (horithact(tcid_instance,i,h) - thetas(id_soil_intern(i,tcid_instance)	,h)* horiz_thickness(tcid_instance,i,h)> 0.1 ) THEN	!Till: if water content exceeds saturation...
     !				write(*,*)"Init: Oversaturated horizon in TC/svc/horizon ",tcid_instance,i,h
-    !				call pause1
+    !				return
     !			END IF
     !		END DO
     !	END DO
@@ -383,7 +412,7 @@ contains
 
 
     if (errors>0) then
-       call pause1 
+       return
     end if
 
   end subroutine init_soil_conds
@@ -416,7 +445,7 @@ contains
     OPEN(11,FILE=gw_conds_file,STATUS='old',action='read',  IOSTAT=i)	!check existence of file
     if (i/=0) then
        write(*,'(a,a,a)')'WARNING: GW storage file ''',trim(gw_conds_file),''' not found, using defaults.'
-       call pause1
+       return
     else
        CLOSE(11)
     end if
@@ -481,7 +510,7 @@ contains
        file_read=1
        CLOSE(11)
        if (errors>0) then
-          call pause1 
+          return
        end if
     end if
 
@@ -507,20 +536,76 @@ contains
        deepgw(i_subbas,(nbr_lu(i_subbas)+1):maxsoter)=0.		!set water content of irrelevant storages to 0
     END DO
     if (errors>0) then
-       call pause1 
+       return
+    end if
+    close(11)
+  end subroutine init_gw_conds
+
+
+  subroutine init_river_conds(river_conds_file)
+    !which variables have to be declared?
+  
+    use routing_h
+    use time_h
+    use params_h
+    use utils_h
+    character(len=*),intent(in):: river_conds_file		!file to load from
+    integer :: sb_counter,iostatus,i
+    real :: dummy1, dummy3(subasin)
+
+    i=0
+    OPEN(11,FILE=river_conds_file,STATUS='old',action='read',  IOSTAT=i)	!check existence of file
+    if (i/=0) then
+       write(*,'(a,a,a)')'WARNING: River storage file ''',trim(river_conds_file),''' not found, using defaults.'
+       return
+    else
+       CLOSE(11)
     end if
 
-  end subroutine init_gw_conds
+    write(*,'(a,a,a)')'Inititalize river storage from file ''',trim(river_conds_file),'''.'
+    
+    OPEN(11,FILE=river_conds_file,STATUS='old',action='read',IOSTAT=iostatus)
+    !read 2 header lines into buffer
+    READ(11,*); READ(11,*)
+    
+    DO sb_counter=1,subasin
+       READ(11,*) dummy1,dummy3(sb_counter)
+       IF (iostatus<0) THEN
+          WRITE(*,'(a,a,a)') 'ERROR: could not read initial river storage from river_storage.stat. Check model_state_io.f90 or consider switching off doloadstate in file do.dat'
+          EXIT
+       ENDIF
+       
+       r_storage(sb_counter)=r_storage(sb_counter)+dummy3(sb_counter); !add the previous storage to the river reach additionally to eventual volume from spring or runoff contribution.     
+    ENDDO
+    close(11)
+  end subroutine init_river_conds
+
 
   subroutine init_lake_conds(lake_conds_file)
     !the variable that should be initialized here is the lakewater0 which is used in lake.f90 and declared in reservoir_lake_h.f90
     use lake_h
     use time_h
     use params_h
-    
+    use utils_h
+
     character(len=*),intent(in):: lake_conds_file		!file to load from
+<<<<<<< .mine
+    integer :: sb_counter,acud_class,iostatus,i
+    real :: dummy1, dummy2
+=======
     integer :: sb_counter,acud_class,iostatus,dummy1
+>>>>>>> .r67
     
+    i=0
+    OPEN(11,FILE=lake_conds_file,STATUS='old',action='read',  IOSTAT=i)	!check existence of file
+    if (i/=0) then
+       write(*,'(a,a,a)')'WARNING: Lake storage file ''',trim(lake_conds_file),''' not found, using defaults.'
+       return
+    else
+       CLOSE(11)
+    end if
+
+
     write(*,'(a,a,a)')'Inititalize lake storage from file ''',trim(lake_conds_file),'''.'
     
     OPEN(11,FILE=lake_conds_file,STATUS='old',action='read',IOSTAT=iostatus)
@@ -534,7 +619,7 @@ contains
           
        ENDDO
     ENDDO
-    
+    close(11)
   end subroutine init_lake_conds
 
 end module model_state_io
