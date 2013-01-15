@@ -589,12 +589,8 @@ contains
     use utils_h
 
     character(len=*),intent(in):: lake_conds_file		!file to load from
-<<<<<<< .mine
     integer :: sb_counter,acud_class,iostatus,i
     real :: dummy1, dummy2
-=======
-    integer :: sb_counter,acud_class,iostatus,dummy1
->>>>>>> .r67
     
     i=0
     OPEN(11,FILE=lake_conds_file,STATUS='old',action='read',  IOSTAT=i)	!check existence of file
