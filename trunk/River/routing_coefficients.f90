@@ -70,6 +70,7 @@ SUBROUTINE routing_coefficients(i, STATUS, flow, r_area, p)
 use routing_h
 use common_h
 use hymo_h
+use model_state_io !Jose Miguel: in order to be able to use init_river_conds
 
 implicit none
 INTEGER, INTENT(IN) :: i, STATUS
@@ -120,12 +121,13 @@ IF (STATUS == 1) THEN
 	if (flow < 0.) r_area=0.
 
 	!Calculation of initial water volume for each river stretch [m3]
-	if (r_qin(2,i) == 0.) then
-	  r_storage(i) = 0. 
-	else
-	  r_storage(i) =   r_area * r_length(i) * 1000.
-	  sed_storage(i,1) = 0.
-	endif
+ if (r_qin(2,i) == 0.) then
+    r_storage(i) = 0. 
+ else
+    r_storage(i) =   r_area * r_length(i) * 1000.
+    sed_storage(i,1) = 0.
+ endif
+ IF (doloadstate) CALL init_river_conds(trim(pfadn)//'river_storage.stat')!Jose Miguel: load river storage of previous run of the model
 
 ENDIF
 
@@ -134,6 +136,8 @@ IF (STATUS == 3) THEN
 ELSE
 	vol = r_storage(i)
 END IF
+
+
 
 IF (STATUS == 1  .OR.STATUS == 2 .OR. STATUS == 3) THEN
 ! adjust water depth to current volume in reach
