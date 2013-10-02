@@ -1,10 +1,13 @@
+! Till: added specifiyable SDR for TCs
+! 2013-10-02
+
 ! Pedro: added variables for TC_wise output
 ! 2009-06-03
 
 ! Till: include optional specification for LU-based correction of beta/m (exponent for L-factor calculation)
 ! 2008-10-22
 
-! Till: added specifiyable SDR
+! Till: added specifyable SDR for LUs
 ! 2008-09-09
 
 ! Till: implemented variables for optional pre-specified sediment outflow of selected subbasins
@@ -115,7 +118,9 @@ real, allocatable ::  pre_subbas_outsed(:,:,:)	!Till: pre-specified outflow of s
 integer, pointer :: corr_column_pre_subbas_outsed(:)	!Till: holds corresponding columns of input files to be related to internal numbering of subbasins 
 real, allocatable :: pre_psd(:)						!Till: mean particle size distribution of pre-specified sediment outflow
 
-real, allocatable :: sdr(:)						!Till: optionally specified sediment delivery ratio for landscape units
+real, allocatable :: sdr_lu(:)						!Till: optionally specified sediment delivery ratio for landscape units on LU-scale
+real, allocatable :: sdr_tc(:)                      !Till: optionally specified sediment delivery ratio for landscape units on TC-scale
+
 real, allocatable :: beta_fac(:)				!Till: optionally specified correction factor for beta on LU-scale(rill/interrill ratio, used for the computation of L-factor, see Renard, 1997, pp.101
 real, allocatable :: beta_fac_tc(:)				!Till: optionally specified correction factor for beta on TC-scale(rill/interrill ratio, used for the computation of L-factor, see Renard, 1997, pp.101
 

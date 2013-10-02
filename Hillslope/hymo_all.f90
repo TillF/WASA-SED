@@ -1086,7 +1086,7 @@ IF (STATUS == 2) THEN
 		
 		IF (dosediment)  THEN	
 			sediment_subbasin_t(d,timestep_counter,i_subbas,:)=sediment_subbasin_t(d,timestep_counter,i_subbas,:)+sedsu(lu_counter,:)	
-			IF (allocated(sdr) ) sedsu(lu_counter,:)=sdr(i_lu)*sedsu(lu_counter,:) !apply prespecified SDR, if present
+			IF (allocated(sdr_lu) ) sedsu(lu_counter,:)=sdr_lu(i_lu)*sedsu(lu_counter,:) !apply prespecified SDR, if present
 		END IF
 		
 	  END DO
