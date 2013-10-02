@@ -333,13 +333,18 @@ dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
 rewind(11)
 READ(11,*);READ(11,*)
 
-if (dummy1==4) then
-  READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),i=1,nterrain)	!4 columns, old version
-else 
+if (dummy1==4) then !4 columns, old version
+  READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),i=1,nterrain)
+elseif (dummy1==5) then !5 columns, containing beta correction factor
   allocate(beta_fac_tc(nterrain))
-  beta_fac_tc=1.		!default value, no beta correction
-  READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),i=1,nterrain)	!5 columns, containing beta correction factor
+  beta_fac_tc=1.        !default value, no beta correction
+  READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),i=1,nterrain)
   if (.NOT. dosediment) deallocate(beta_fac_tc)
+elseif (dummy1==6) then !6 columns, containing beta correction factor and TC-wise SDR
+  allocate(sdr_tc(nterrain))
+  sdr_tc=1.        !default value, no SDR correction
+  READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),sdr_tc,i=1,nterrain)
+  if (.NOT. dosediment) deallocate(sdr_tc)
 end if
 
 !slope=slope*sensfactor
@@ -963,9 +968,6 @@ END DO
 
 
 
-
-
-
 !** define van-genuchten parameter from pore-size index for
 !   calculation of unsaturated hydraulic conductivity
 DO i=1,nsoil
@@ -1425,40 +1427,48 @@ if (dosediment) THEN
 
 
 	!Till: eg for scenanario with badland remediation
-	OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/sdr.dat',IOSTAT=istate,STATUS='old')	
+	OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/sdr_lu.dat',IOSTAT=istate,STATUS='old')
 	IF (istate==0) THEN
-		allocate(sdr(nsoter))
-		sdr=1.	!default value: all sediment is delivered
-		READ(11,*,IOSTAT=istate) !skip header
-		READ(11,*,IOSTAT=istate)
-		do while (istate==0)
-			READ(11,*,IOSTAT=istate)id_lu_ext,temp1
-			i_lu=id_ext2int(id_lu_ext,id_lu_extern)	!convert to internal lu id
-			if (i_lu==-1) then
-				write(*,'(a,i0,a)')'Unknown LU-ID ',id_lu_ext,' in sdr.dat, ignored.'
-				cycle	!proceed with next line
-			end if
-			sdr(i_lu)=temp1
-		end do
+		if (allocated(sdr_tc)) then
+		    write(*,*)'WARNING: SDRs for TCs found in terrain.dat, contents of sdr_lu.dat ignored.'
+		else
+    		allocate(sdr_lu(nsoter))
+            sdr_lu=1.	!default value: all sediment is delivered
+            READ(11,*,IOSTAT=istate) !skip header
+            READ(11,*,IOSTAT=istate)
+            do while (istate==0)
+                READ(11,*,IOSTAT=istate)id_lu_ext,temp1
+                i_lu=id_ext2int(id_lu_ext,id_lu_extern)	!convert to internal lu id
+                if (i_lu==-1) then
+                    write(*,'(a,i0,a)')'Unknown LU-ID ',id_lu_ext,' in sdr_lu.dat, ignored.'
+                    cycle	!proceed with next line
+                end if
+                sdr_lu(i_lu)=temp1
+            end do
+        end if
 		CLOSE(11)
 	END IF
 
 	!Till: eg implementing highly erodible surface such as badlands
-	OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/beta_fac.dat',IOSTAT=istate,STATUS='old')	
+	OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/beta_fac_lu.dat',IOSTAT=istate,STATUS='old')
 	IF (istate==0) THEN
-		allocate(beta_fac(nsoter))
-		beta_fac=1.	!default value: no correction of beta
-		READ(11,*,IOSTAT=istate) !skip header
-		READ(11,*,IOSTAT=istate)
-		do while (istate==0)
-			READ(11,*,IOSTAT=istate)id_lu_ext,temp1
-			i_lu=id_ext2int(id_lu_ext,id_lu_extern)	!convert to internal lu id
-			if (i_lu==-1) then
-				write(*,'(a,i0,a)')'Unknown LU-ID ',id_lu_ext,' in beta_fac.dat, ignored.'
-				cycle	!proceed with next line
-			end if
-			beta_fac(i_lu)=temp1
-		end do
+		if (allocated(beta_fac_tc)) then
+		    write(*,*)'WARNING: Beta values for TCs found in terrain.dat, contents of beta_fac_lu.dat ignored.'
+        else
+            allocate(beta_fac(nsoter))
+            beta_fac=1.	!default value: no correction of beta
+            READ(11,*,IOSTAT=istate) !skip header
+            READ(11,*,IOSTAT=istate)
+            do while (istate==0)
+                READ(11,*,IOSTAT=istate)id_lu_ext,temp1
+                i_lu=id_ext2int(id_lu_ext,id_lu_extern)	!convert to internal lu id
+                if (i_lu==-1) then
+                    write(*,'(a,i0,a)')'Unknown LU-ID ',id_lu_ext,' in beta_fac.dat, ignored.'
+                    cycle	!proceed with next line
+                end if
+                beta_fac(i_lu)=temp1
+            end do
+         end if
 		CLOSE(11)
 	END IF
 END IF
