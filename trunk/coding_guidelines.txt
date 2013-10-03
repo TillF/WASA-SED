@@ -8,6 +8,7 @@ These suggestions concern general recommendations for future enhancements. They 
 	•	adhere to Fortran95 standard (gfortran). This includes:
 	•	don’t use dynamic format specifiers (eg “’I A0 <number>F’”), generate this string by yourself instead.
 	•	No lines longer than 80 characters
+	•	No tabs, use spaces instead
 	•	Address fields of structs using the “%”, not the “.”
 	•	Be strict about the difference between logical .TRUE. and integer 1
 	•	Use “/” instead of “\” when specifying path strings
@@ -25,7 +26,7 @@ These suggestions concern general recommendations for future enhancements. They 
 	•	Sufficiently comment your code in English adding your name
 	•	Add a short summary of your modifications at the beginning of the file
 	•	Use this summary when uploading your changes to the SVN-repository
-	•	update the WASA-SED documentation, if necessary
+	•	update the WASA-SED documentation file, if necessary
 
 2.	input / output files
 •	file header

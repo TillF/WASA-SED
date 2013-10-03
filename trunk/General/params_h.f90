@@ -1,4 +1,4 @@
-! Till: separated tools to allow easier use by  eclipse
+! Till: separated modules to allow easier use by eclipse
 ! 2013-10-02 
 
 ! Till: computationally irrelevant: relocated vars
