@@ -70,7 +70,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE F90 /check:bounds /compile_only /dbglibs /debug:full /nologo /traceback /warn:argument_checking /warn:nofileopt
-# ADD F90 /browser /check:bounds /check:format /check:output_conversion /compile_only /dbglibs /debug:full /fpscomp:general /nologo /traceback /warn:argument_checking /warn:declarations /warn:nofileopt /warn:unused
+# ADD F90 /browser /check:bounds /check:format /check:output_conversion /compile_only /dbglibs /debug:full /fpscomp:general /nologo /reentrancy:threaded /stand:none /traceback /warn:argument_checking /warn:declarations /warn:nofileopt /warn:truncated_source /warn:unused
 # SUBTRACT F90 /check:arg_temp_created
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
 # ADD CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR /YX /FD /GZ /c
@@ -97,79 +97,89 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\General\general_h.f90
+SOURCE=.\General\climo_h.f90
+# End Source File
+# Begin Source File
+
+SOURCE=.\General\common_h.f90
+# End Source File
+# Begin Source File
+
+SOURCE=.\General\params_h.f90
 # End Source File
 # Begin Source File
 
 SOURCE=.\General\svn_rev.var
+# End Source File
+# Begin Source File
+
+SOURCE=.\General\time_h.f90
+# End Source File
+# Begin Source File
+
+SOURCE=.\General\utils_h.f90
 # End Source File
 # End Group
 # Begin Source File
 
 SOURCE=.\General\calcyear.f90
 DEP_F90_CALCY=\
-	".\Debug\time_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\General\climo.f90
 DEP_F90_CLIMO=\
-	".\Debug\climo_h.mod"\
-	".\Debug\common_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\time_h.mod"\
-	".\Debug\utils_h.mod"\
+	".\Release\climo_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\time_h.mod"\
+	".\Release\utils_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\General\petcalc.f90
 DEP_F90_PETCA=\
-	".\Debug\climo_h.mod"\
-	".\Debug\common_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\climo_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\General\readgen.f90
 DEP_F90_READG=\
-	".\Debug\climo_h.mod"\
-	".\Debug\common_h.mod"\
-	".\Debug\erosion_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\lake_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\routing_h.mod"\
-	".\Debug\time_h.mod"\
-	".\Debug\utils_h.mod"\
 	".\General\allocat_general.var"\
 	".\Hillslope\allocat_erosion.var"\
 	".\Hillslope\allocat_hymo.var"\
+	".\Release\climo_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\erosion_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\lake_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\routing_h.mod"\
+	".\Release\time_h.mod"\
+	".\Release\utils_h.mod"\
 	".\Reservoir\allocat_reservoir_lake.var"\
 	".\River\allocat_routing.var"\
 	
 # End Source File
 # Begin Source File
 
-SOURCE=.\General\utils_h.f90
-# End Source File
-# Begin Source File
-
 SOURCE=.\General\wasa.f90
 DEP_F90_WASA_=\
 	".\General\svn_rev.var"\
-	
-NODEP_F90_WASA_=\
-	".\Debug\common_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\routing_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\routing_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # End Group
@@ -195,8 +205,8 @@ SOURCE=.\Hillslope\erosion_h.f90
 
 SOURCE=.\Hillslope\hymo_h.f90
 DEP_F90_HYMO_=\
-	".\Debug\common_h.mod"\
-	".\Debug\params_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\params_h.mod"\
 	
 # End Source File
 # End Group
@@ -204,131 +214,131 @@ DEP_F90_HYMO_=\
 
 SOURCE=.\Hillslope\check_climate.f90
 DEP_F90_CHECK=\
-	".\Debug\climo_h.mod"\
-	".\Debug\common_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\climo_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Hillslope\etp_max.f90
 DEP_F90_ETP_M=\
-	".\Debug\climo_h.mod"\
-	".\Debug\common_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\climo_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Hillslope\etp_soil.f90
 DEP_F90_ETP_S=\
-	".\Debug\climo_h.mod"\
-	".\Debug\common_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\climo_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Hillslope\etp_soil_hour.f90
 DEP_F90_ETP_SO=\
-	".\Debug\climo_h.mod"\
-	".\Debug\common_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\climo_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Hillslope\hymo_all.f90
 DEP_F90_HYMO_A=\
-	".\Debug\climo_h.mod"\
-	".\Debug\common_h.mod"\
-	".\Debug\erosion_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\lake_h.mod"\
-	".\Debug\model_state_io.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\routing_h.mod"\
-	".\Debug\time_h.mod"\
-	".\Debug\utils_h.mod"\
+	".\Release\climo_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\erosion_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\lake_h.mod"\
+	".\Release\model_state_io.mod"\
+	".\Release\params_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\routing_h.mod"\
+	".\Release\time_h.mod"\
+	".\Release\utils_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Hillslope\model_state_io.f90
 DEP_F90_MODEL=\
-	".\Debug\common_h.mod"\
-	".\Debug\erosion_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\lake_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\routing_h.mod"\
-	".\Debug\time_h.mod"\
-	".\Debug\utils_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\erosion_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\lake_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\routing_h.mod"\
+	".\Release\time_h.mod"\
+	".\Release\utils_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Hillslope\readhymo.f90
 DEP_F90_READH=\
-	".\Debug\common_h.mod"\
-	".\Debug\erosion_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\lake_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\routing_h.mod"\
-	".\Debug\time_h.mod"\
-	".\Debug\utils_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\erosion_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\lake_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\routing_h.mod"\
+	".\Release\time_h.mod"\
+	".\Release\utils_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Hillslope\sedi_yield.f90
 DEP_F90_SEDI_=\
-	".\Debug\climo_h.mod"\
-	".\Debug\common_h.mod"\
-	".\Debug\erosion_h.mod"\
-	".\Debug\hymo_h.mod"\
+	".\Release\climo_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\erosion_h.mod"\
+	".\Release\hymo_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Hillslope\sedi_yield_subbas.f90
 DEP_F90_SEDI_Y=\
-	".\Debug\climo_h.mod"\
-	".\Debug\common_h.mod"\
-	".\Debug\erosion_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\climo_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\erosion_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Hillslope\soildistr.f90
 DEP_F90_SOILD=\
-	".\Debug\common_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\params_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\params_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Hillslope\soilwat.f90
 DEP_F90_SOILW=\
-	".\Debug\common_h.mod"\
-	".\Debug\erosion_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\utils_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\erosion_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\utils_h.mod"\
 	
 # End Source File
 # End Group
@@ -351,68 +361,69 @@ SOURCE=.\River\routing_h.f90
 
 SOURCE=.\River\bedload.f90
 DEP_F90_BEDLO=\
-	".\Debug\common_h.mod"\
-	".\Debug\routing_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\routing_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\River\muskingum.f90
 DEP_F90_MUSKI=\
-	".\Debug\climo_h.mod"\
-	".\Debug\common_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\routing_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\climo_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\routing_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\River\route_sediments.f90
 DEP_F90_ROUTE=\
-	".\Debug\common_h.mod"\
-	".\Debug\routing_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\routing_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\River\routing.f90
 DEP_F90_ROUTI=\
-	".\Debug\climo_h.mod"\
-	".\Debug\common_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\lake_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\routing_h.mod"\
-	".\Debug\time_h.mod"\
-	".\Debug\utils_h.mod"\
+	".\Release\climo_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\lake_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\routing_h.mod"\
+	".\Release\time_h.mod"\
+	".\Release\utils_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\River\routing_coefficients.f90
 DEP_F90_ROUTIN=\
-	".\Debug\common_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\routing_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\model_state_io.mod"\
+	".\Release\routing_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\River\routing_new.f90
 DEP_F90_ROUTING=\
-	".\Debug\climo_h.mod"\
-	".\Debug\common_h.mod"\
-	".\Debug\erosion_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\lake_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\routing_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\climo_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\erosion_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\lake_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\routing_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # End Group
@@ -428,155 +439,159 @@ SOURCE=.\Reservoir\allocat_reservoir_lake.var
 # End Source File
 # Begin Source File
 
-SOURCE=.\Reservoir\reservoir_lake_h.f90
+SOURCE=.\Reservoir\lake_h.f90
+# End Source File
+# Begin Source File
+
+SOURCE=.\Reservoir\reservoir_h.f90
 # End Source File
 # End Group
 # Begin Source File
 
 SOURCE=.\Reservoir\change_sec.f90
 DEP_F90_CHANG=\
-	".\Debug\common_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Reservoir\eq1_wu.f90
 DEP_F90_EQ1_W=\
-	".\Debug\common_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Reservoir\eq2_ashida.f90
 DEP_F90_EQ2_A=\
-	".\Debug\common_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Reservoir\eq3_tsinghua.f90
 DEP_F90_EQ3_T=\
-	".\Debug\common_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Reservoir\eq4_ackers.f90
 DEP_F90_EQ4_A=\
-	".\Debug\common_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Reservoir\hydraul_res.f90
 DEP_F90_HYDRA=\
-	".\Debug\common_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\routing_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\routing_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Reservoir\lake.f90
 DEP_F90_LAKE_=\
-	".\Debug\climo_h.mod"\
-	".\Debug\common_h.mod"\
-	".\Debug\erosion_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\lake_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\time_h.mod"\
-	".\Debug\utils_h.mod"\
+	".\Release\climo_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\erosion_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\lake_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\time_h.mod"\
+	".\Release\utils_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Reservoir\lake_routing.f90
 DEP_F90_LAKE_R=\
-	".\Debug\common_h.mod"\
-	".\Debug\lake_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\lake_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Reservoir\reservoir.f90
 DEP_F90_RESER=\
-	".\Debug\climo_h.mod"\
-	".\Debug\common_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\routing_h.mod"\
-	".\Debug\time_h.mod"\
-	".\Debug\utils_h.mod"\
+	".\Release\climo_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\routing_h.mod"\
+	".\Release\time_h.mod"\
+	".\Release\utils_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Reservoir\reservoir_routing.f90
 DEP_F90_RESERV=\
-	".\Debug\common_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Reservoir\sedbal.f90
 DEP_F90_SEDBA=\
-	".\Debug\common_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\routing_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\routing_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Reservoir\sedbal_lake.f90
 DEP_F90_SEDBAL=\
-	".\Debug\common_h.mod"\
-	".\Debug\lake_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\routing_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\lake_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\routing_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Reservoir\semres.f90
-NODEP_F90_SEMRE=\
-	".\Debug\common_h.mod"\
-	".\Debug\hymo_h.mod"\
-	".\Debug\params_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\routing_h.mod"\
-	".\Debug\time_h.mod"\
+DEP_F90_SEMRE=\
+	".\Release\common_h.mod"\
+	".\Release\hymo_h.mod"\
+	".\Release\params_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\routing_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=.\Reservoir\vert_dist.f90
 DEP_F90_VERT_=\
-	".\Debug\common_h.mod"\
-	".\Debug\reservoir_h.mod"\
-	".\Debug\time_h.mod"\
+	".\Release\common_h.mod"\
+	".\Release\reservoir_h.mod"\
+	".\Release\time_h.mod"\
 	
 # End Source File
 # End Group

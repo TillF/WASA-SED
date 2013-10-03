@@ -2,7 +2,7 @@ module model_state_io
     !contains subroutines for saving and loading model state (soil water, ground water, interception)#
 
     !Till: dirty temporary fix to prevent crash at startup
-	! code formatting fro increased compatibility (long lines, indent, removed tabs)
+    ! code formatting fro increased compatibility (long lines, indent, removed tabs)
     !2013-10-02
 
     !Jose Miguel: replaced "call pause1" for "return", which takes the execution of the subprogram to the program of an upper level
@@ -74,7 +74,7 @@ contains
 
     subroutine save_model_state        !save model state variables
         call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',&
-                            trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',trim(pfadn)//'storage.stats')    !Till: save status
+            trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',trim(pfadn)//'storage.stats')    !Till: save status
 
     end subroutine save_model_state
 
@@ -116,7 +116,7 @@ contains
             OPEN(soil_file_hdle,FILE=soil_conds_file, STATUS='replace')
             WRITE(soil_file_hdle,'(a)') 'soil moisture status (for analysis or model re-start)'
             WRITE(soil_file_hdle,*)'Subbasin', char(9),'LU', char(9),'TC' , char(9),'SVC' , char(9),'horizon', char(9),&
-                                   'watercontent_[mm]', char(9),'area_[m²]'        !tab separated output
+                'watercontent_[mm]', char(9),'area_[m²]'        !tab separated output
         end if
 
         if (trim(gw_conds_file)=='') then        !don't do anything if an empty filename is specified
@@ -135,7 +135,7 @@ contains
             OPEN(intercept_file_hdle,FILE=ic_conds_file, STATUS='replace')
             WRITE(intercept_file_hdle,'(a)') 'interception storage (for analysis or model re-start)'
             WRITE(intercept_file_hdle,*)'Subbasin', char(9),'LU', char(9),'TC' , char(9),'SVC' , char(9),&
-                     'storage_[mm]', char(9),'area_[m²]'        !tab separated output
+                'storage_[mm]', char(9),'area_[m²]'        !tab separated output
         end if
 
         if (trim(lake_conds_file)=='') then        !don't do anything if an empty filename is specified
@@ -166,10 +166,10 @@ contains
             !Jose Miguel: loop over the acud classes.
             DO acud_class=1,5
                 tt = (d-2)*nt+hour
-				if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. José, please check this
-				if (lake_file_hdle/=0) then
+                if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. José, please check this
+                if (lake_file_hdle/=0) then
                     WRITE(lake_file_hdle,'(I0,A1,I0,A1,F8.2)') id_subbas_extern(sb_counter), char(9),acud_class,char(9),&
-                               lakewater_hrr(tt,sb_counter,acud_class)
+                        lakewater_hrr(tt,sb_counter,acud_class)
                 endif
                 total_storage_lake(acud_class)=total_storage_lake(acud_class)+lakewater_hrr(tt,sb_counter,acud_class) !sum up total storage
             ENDDO
@@ -179,8 +179,8 @@ contains
                 lu_area=area(sb_counter)*frac_lu(lu_counter,sb_counter)*1e6
                 if (gw_file_hdle/=0) then
                     WRITE(gw_file_hdle,'(2(I0,A1),F8.2,A1,F12.1)') id_subbas_extern(sb_counter), char(9),id_lu_extern(i_lu),&
-                                        char(9),deepgw(sb_counter,lu_counter)/lu_area*1e3,&
-                         char(9),area(sb_counter)*frac_lu(lu_counter,sb_counter)*1e6    !tab separated output
+                        char(9),deepgw(sb_counter,lu_counter)/lu_area*1e3,&
+                        char(9),area(sb_counter)*frac_lu(lu_counter,sb_counter)*1e6    !tab separated output
                 endif
                 total_storage_gw=total_storage_gw+deepgw(sb_counter,lu_counter) !sum up total storage
 
@@ -199,8 +199,8 @@ contains
                         if (intercept_file_hdle/=0) then
                             ! ##
                             WRITE(intercept_file_hdle,'(4(I0,A1),F8.2,A1,F12.1)') id_subbas_extern(sb_counter), char(9),&
-                                           id_lu_extern(i_lu),char(9),id_terrain_extern(id_tc_type), char(9),&
-                                           id_svc_extern(i_svc), char(9),intercept(tcid_instance,svc_counter),&
+                                id_lu_extern(i_lu),char(9),id_terrain_extern(id_tc_type), char(9),&
+                                id_svc_extern(i_svc), char(9),intercept(tcid_instance,svc_counter),&
                                 char(9),    svc_area    !tab separated output
                         endif
                         total_storage_intercept=total_storage_intercept+intercept(tcid_instance,svc_counter)*1e-3*svc_area !sum up total storage
@@ -286,7 +286,7 @@ contains
                 IF (len(trim(error_msg))/=0) THEN    !print error message, if occured
                     if (errors==0) then !print heading at before first error
                         write(*,'(A,/,6a12)')' Entities not found in current domain (ignored):','Line','subbasin','LU','TC','SVC',&
-                                              'horizon'
+                            'horizon'
                     end if
                     write(*,*)trim(error_msg)
                     error_msg='' !reset error message
@@ -352,7 +352,7 @@ contains
 
 
                 if (horithact_temp > thetas(id_soil_intern(svc_counter,tcid_instance),h)*&
-                                         horiz_thickness(tcid_instance,svc_counter,h)*1.01) then            !exceeds sotrage capacity
+                    horiz_thickness(tcid_instance,svc_counter,h)*1.01) then            !exceeds sotrage capacity
                     if (errors==0) then    !produce header before first warning only
                         write(*,'(A,/,5a12)')' water content of following horizons exceed porosity. Corrected to thetaS.',&
                             'subbasin','LU','TC','SVC','horizon'
@@ -360,7 +360,7 @@ contains
                     errors=errors+1
                     write(*,'(5i12)')i_subbasx, i_lux, i_tcx,i_svcx, h            !issue warning
                     horithact_temp = thetas(id_soil_intern(svc_counter,tcid_instance),h) * &
-                                                        horiz_thickness(tcid_instance,svc_counter,h)
+                        horiz_thickness(tcid_instance,svc_counter,h)
                 end if
 
                 horithact(tcid_instance,svc_counter,h)=horithact_temp            !set soil water content
@@ -394,17 +394,17 @@ contains
                                 if (file_read==1) then                        !but this should have been done before
                                     if (errors==0) then    !produce header before first warning only
                                         write(*,'(A,f4.2,a,/,5a12)')' Following entities not initialised, using defaults ',&
-                                                '(rel.saturation=', default_rel_sat,'):','subbasin','LU','TC','SVC','horizon'
+                                            '(rel.saturation=', default_rel_sat,'):','subbasin','LU','TC','SVC','horizon'
                                     end if
                                     errors=errors+1
                                     write(*,'(5i12)')id_subbas_extern(sb_counter), id_lu_extern(i_lu),&
-                                                     id_terrain_extern(id_tc_type), id_svc_extern(i_svc), h            !issue warning
+                                        id_terrain_extern(id_tc_type), id_svc_extern(i_svc), h            !issue warning
                                    !write(*,5i12)'Subbasin ',id_subbas_extern(sb_counter), ', LU ',id_lu_extern(i_lu), ', TC ',id_terrain_extern(id_tc_type),&
                                    !', SVC ',id_svc_extern(i_svc), ', horiz ',h, ' not found, setting to ',default_rel_sat,' rel. sat.'            !issue warning
                                 end if
 
                                 horithact(tcid_instance,svc_counter,h)=(thetar(i_soil,h)+&
-                                  (thetas(i_soil,h)-thetar(i_soil,h))*default_rel_sat)*horiz_thickness(tcid_instance,svc_counter,h)        !set to default relative saturation
+                                    (thetas(i_soil,h)-thetar(i_soil,h))*default_rel_sat)*horiz_thickness(tcid_instance,svc_counter,h)        !set to default relative saturation
                             end if
                         END DO
                         horithact(tcid_instance,svc_counter,(nbrhori(i_soil)+1):maxhori)=0.        !set water content of irrelevant horizons values to 0
