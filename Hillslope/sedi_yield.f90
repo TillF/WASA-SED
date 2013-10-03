@@ -244,21 +244,9 @@ SELECT CASE (erosion_equation)
 	   WRITE (*,*) "Erosion equation ",erosion_equation," not defined, please check manual"
 END SELECT
 
+if (allocated(sdr_tc))	r = sdr_tc(tc_type_id) * r !use pre-specified TC-wise SDR
+
 sed_yield=r*mean_particle		!overall yield is distributed among size classes according to their percentage, no selective removal of finer fractions
-
-
-!if (tc_type_id==id_terrain_intern(5,id_ext2int(22111,id_lu_extern)) .AND. id_subbas_intern(subbas_id)==1) then		!debugging output !remove
-!!if (tc_type_id==id_terrain_intern(5,id_ext2int(11211,id_lu_extern)) .AND. id_subbas_intern(subbas_id)==1) then		!debugging output !remove
-!	debug_out2(d,1)=q !debug output, remove
-!	debug_out2(d,2)=q_peak !debug output, remove
-!	debug_out2(d,3)=ei !debug output, remove
-!	debug_out2(d,4)=K_fac !debug output, remove
-!	debug_out2(d,5)=C_fac !debug output, remove
-!	debug_out2(d,6)=P_fac !debug output, remove
-!	debug_out2(d,7)=LS_fac !debug output, remove
-!	debug_out2(d,8)=CFRG_fac !debug output, remove
-!end if
-!
 
 
 SELECT CASE (routing_mode)		!different modes how incoming sediment from upslope is treated
