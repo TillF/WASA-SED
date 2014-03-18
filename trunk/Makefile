@@ -1,4 +1,4 @@
-CC=/usr/bin/gfortran
+CC=gfortran
 CFLAGS=-c -ggdb
 FLAGS= -ffree-line-length-none -ggdb
 
@@ -8,10 +8,10 @@ FLAGS= -ffree-line-length-none -ggdb
 
 SOURCES=./Hillslope/erosion_h.f90 \
 ./General/common_h.f90 \
+./General/params_h.f90 \
 ./Hillslope/hymo_h.f90 \
 ./River/routing_h.f90 \
 ./General/time_h.f90 \
-./General/params_h.f90 \
 ./General/utils_h.f90 \
 ./General/calcyear.f90 \
 ./General/climo_h.f90 \
