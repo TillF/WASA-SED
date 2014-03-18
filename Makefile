@@ -5,16 +5,20 @@ FLAGS= -ffree-line-length-none -ggdb
 # CC=pgfortran
 # CFLAGS=-c -Mfree
 
-SOURCES=./General/general_h.f90 \
-./Hillslope/erosion_h.f90 \
+
+SOURCES=./Hillslope/erosion_h.f90 \
+./General/common_h.f90 \
 ./Hillslope/hymo_h.f90 \
 ./River/routing_h.f90 \
-./Reservoir/reservoir_lake_h.f90 \
+./General/time_h.f90 \
+./General/params_h.f90 \
 ./General/utils_h.f90 \
-./General/calcday.f90 \
 ./General/calcyear.f90 \
+./General/climo_h.f90 \
 ./General/climo.f90 \
 ./General/petcalc.f90 \
+./Reservoir/lake_h.f90 \
+./Reservoir/reservoir_h.f90 \
 ./General/readgen.f90 \
 ./Hillslope/check_climate.f90 \
 ./Hillslope/erosion.f90 \
@@ -54,7 +58,6 @@ EXECUTABLE=wasa.lin
 
 # top-level rule to compile the whole program.
 all: $(SOURCES) $(EXECUTABLE)
-
 # program is made of several source files.
 $(EXECUTABLE): $(SOURCES)
 	./update_revision_no.sh
