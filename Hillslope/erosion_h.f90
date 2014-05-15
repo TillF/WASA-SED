@@ -101,12 +101,14 @@ module erosion_h
     real :: ei            !USLE energy factor ["proper units" (Williams, 1995]
     real :: earea        !area of erosive unit [m2]
 
-    real, allocatable :: runoff_TC(:,:)
-    real, allocatable :: sed_yield_TC(:,:)
-    real, allocatable :: deposition_TC(:,:)
-    real, allocatable :: area_TC(:,:)
-    real, allocatable :: cum_erosion_TC(:,:)
-    real, allocatable :: cum_deposition_TC(:,:)
+     !!Print hydrologic variable on TC scale. If not used, DISABLE
+        !!************************************************************************
+!    real, allocatable :: runoff_TC(:,:)
+!    real, allocatable :: sed_yield_TC(:,:)
+!    real, allocatable :: deposition_TC(:,:)
+!    real, allocatable :: area_TC(:,:)
+!    real, allocatable :: cum_erosion_TC(:,:)
+!    real, allocatable :: cum_deposition_TC(:,:)
 
 
 

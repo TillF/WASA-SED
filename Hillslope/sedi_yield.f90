@@ -326,13 +326,15 @@ SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v
 
 
     !Pedro: TC-wise outputs
-    runoff_TC(subbas_id,tc_type_id)=q*1000.
-    sed_yield_TC(subbas_id,tc_type_id)=sum(sed_yield)/tc_area
-    deposition_TC(subbas_id,tc_type_id)=1.-(sum(sed_yield)/(r+sum(sed_in)))
-
-    area_TC(subbas_id,tc_type_id)=tc_area
-    cum_erosion_TC(subbas_id,tc_type_id)=cum_erosion_TC(subbas_id,tc_type_id)+r
-    cum_deposition_TC(subbas_id,tc_type_id)=cum_deposition_TC(subbas_id,tc_type_id)+(r+sum(sed_in)-sum(sed_yield))
+     !!Print hydrologic variable on TC scale. If not used, DISABLE
+        !!************************************************************************
+!    runoff_TC(subbas_id,tc_type_id)=q*1000.
+!    sed_yield_TC(subbas_id,tc_type_id)=sum(sed_yield)/tc_area
+!    deposition_TC(subbas_id,tc_type_id)=1.-(sum(sed_yield)/(r+sum(sed_in)))
+!
+!    area_TC(subbas_id,tc_type_id)=tc_area
+!    cum_erosion_TC(subbas_id,tc_type_id)=cum_erosion_TC(subbas_id,tc_type_id)+r
+!    cum_deposition_TC(subbas_id,tc_type_id)=cum_deposition_TC(subbas_id,tc_type_id)+(r+sum(sed_in)-sum(sed_yield))
 
 
     !!deposition_TC(subbas_id,tc_type_id)=q_out/tc_area

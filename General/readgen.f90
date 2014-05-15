@@ -1,4 +1,7 @@
 SUBROUTINE readgen(path2do_dat)
+!Till: computationally irrelevant: added options for LU-wise sediment output
+!2014-05-15
+	
 !Till: computationally irrelevant: create output directory, if not existing
 !2012-09-25 
 
@@ -239,6 +242,7 @@ f_river_velocity=.FALSE.
 f_river_bedload=.FALSE.
 f_tc_surfflow=.FALSE.
 f_tc_sedout=.FALSE.
+f_lu_sedout=.FALSE.
 
 f_actetranspiration=.FALSE.
 f_qhorton=.FALSE.
@@ -349,7 +353,9 @@ IF (istate==0) THEN
 			CASE ('tc_surfflow')
 				f_tc_surfflow=.TRUE.
 			CASE ('tc_sedout')
-				f_tc_sedout=dosediment
+                f_tc_sedout=dosediment
+            CASE ('lu_sedout')
+                f_lu_sedout=dosediment
 
 			CASE ('actetranspiration')
 				f_actetranspiration=.TRUE.

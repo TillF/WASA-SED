@@ -2,6 +2,9 @@ module hymo_h
 use common_h
 save
 
+!Till: computationally irrelevant: added options for LU-wise sediment output
+!2014-05-15
+
 ! Till: optional subdaily output of actetranspiration.out,qhorton.out,subsurface_runoff.out,total_overlandflow.out,gw_discharge.out,potetranspiration.out,gw_loss.out,gw_recharge.out
 ! 2009-04-16
 
@@ -400,11 +403,13 @@ REAL , allocatable :: aet1sc(:,:)
 REAL , allocatable :: soilet1sc(:,:)
 
 
-!Conrad/Till: TC-wise output of soil moisture
+!Conrad/Till: TC-wise output of soil moisture, surface flow and sediment output
 real, allocatable :: meandepth_tc(:,:,:)!mean soil depths of TC instances
 real, allocatable :: theta_tc(:,:,:)		!theta of tcs [%]			(day,timestep,ntcinst)
 real, allocatable :: surfflow_tc(:,:,:)		!surface runoff of TCs [mm] (day,timestep,ntcinst)
 real, allocatable :: sedout_tc(:,:,:)		!sediment output of TCs [t/km2] (day,timestep,ntcinst)
+
+real, allocatable :: sedout_lu(:,:,:)       !sediment output of TCs [t/km2] (day,timestep,ntcinst)
 
 
 !Till: these are all output variables that are currently not used
