@@ -1,4 +1,7 @@
 SUBROUTINE hymo_all(STATUS)
+    !Till: computationally irrelevant: added options for LU-wise sediment output
+	!2014-05-15
+
     !Till: computationally irrelevant: minor changes to improve compiler compatibility
     !2011-04-29
 
@@ -188,6 +191,9 @@ SUBROUTINE hymo_all(STATUS)
     !(internal) id of TC-instance (unique subbas-LU-TC-combination)
     INTEGER :: tcid_instance
 
+   !(internal) id of LU-instance (unique subbas-LU-combination)
+    INTEGER :: luid_instance
+
     ! ids of components in work
     INTEGER :: i_subbas,i_lu,id_tc_type,isoil
 
@@ -278,8 +284,8 @@ SUBROUTINE hymo_all(STATUS)
         horithact(:,:,:)=0.    !set soil moisture of each horizon to 0
         intercept(:,:)=0.        !set interception storage to 0
 
-        cum_erosion_TC(:,:)=0.
-        cum_deposition_TC(:,:)=0.
+        !cum_erosion_TC(:,:)=0.
+        !cum_deposition_TC(:,:)=0.
   
         if (doloadstate) then
             call init_model_state        !load initital conditions from file
@@ -664,14 +670,36 @@ SUBROUTINE hymo_all(STATUS)
         ELSE                !delete any existing file, if no output is desired
             CLOSE(11,status='delete')
         END IF
-
-
-
-
-
         if (allocated(tc_idx)) then
-            deallocate(tc_idx)        !TC-indices are no longer needed
+            deallocate(tc_idx)        !output TC-indices are no longer needed
         end if
+
+
+        OPEN(11,FILE=pfadn(1:pfadi)// 'lu_sedout.out', STATUS='replace')
+        IF (dosediment .AND. f_lu_sedout .AND. .NOT. do_musle_subbasin) THEN
+            allocate(sedout_lu(366,nt,sum(nbr_lu))) !Till: allocate memory for LU-wise output of sediment output
+			sedout_lu = -1. !Till: for demarking uncomputed LUs
+            dig_sub = max(1,ceiling(log10(1.*maxval(id_subbas_extern))))    !determine digits necessary to display the IDs
+            dig_lu = max(1,ceiling(log10(1.*maxval(id_lu_extern))))
+
+            write(fmtstr,'(a,i0,a,i0,a,i0,a,i0,a)') '(A1,I',dig_sub,'.',dig_sub,',I',dig_lu,'.',dig_lu,')'
+
+            WRITE(11,'(A)') 'sediment output [t] for LUs in in sub-basins (scheme: '//REPEAT('S',dig_sub)//&
+                REPEAT('L', dig_lu)//')'
+
+            write(11,'(A)', advance='no')'y'//char(9)//'d'//char(9)//'t' !first three header fields for year, day and timestep
+             DO i_subbas=1,subasin
+                DO lu_counter=1,nbr_lu(i_subbas)
+                    i_lu=id_lu_intern(lu_counter,i_subbas)
+                    write(11,fmtstr, advance='no') char(9),id_subbas_extern(i_subbas),id_lu_extern(i_lu)
+                END DO
+             END DO
+             write(11,fmtstr) !add newline
+            CLOSE(11)
+        ELSE                !delete any existing file, if no output is desired
+            CLOSE(11,status='delete')
+        END IF
+
 
 
         !!Print hydrologic variable on TC scale. If not used, DISABLE
@@ -768,9 +796,8 @@ SUBROUTINE hymo_all(STATUS)
     !-------------------------------------------------------------------
     IF (STATUS == 2) THEN
         !** Calculation for one timestep (i.e. 1 day)
-
-
-        DO i_subbas=1,subasin
+		
+		DO i_subbas=1,subasin
     
             j=0    !Till: temporary indicator if this subbasin can be skipped because of prespecified values
 
@@ -831,10 +858,11 @@ SUBROUTINE hymo_all(STATUS)
 
             deepgwrsu=0.
 
-
+			luid_instance = sum(nbr_lu(1:(i_subbas-1)))  !counter/index for LU-instances - it is computed here to cope with skipped subbasins above
             ! LOOPs through all Landscape Units of specific sub-basin
             DO lu_counter=1,nbr_lu(i_subbas)
-                i_lu=id_lu_intern(lu_counter,i_subbas)
+				luid_instance = luid_instance +1
+                i_lu=id_lu_intern(lu_counter,i_subbas) !internal LU-ID
       
                 balance=0.0
                 frac_satsu=0.0
@@ -920,11 +948,11 @@ SUBROUTINE hymo_all(STATUS)
           
                         !Print hydrologic variable on TC scale. If not used, DISABLE
                         !**************************************************************************************************
-                        IF (precip(d,i_subbas) == 0.) deposition_TC(i_subbas,id_tc_type)=0.
-                        IF (precip(d,i_subbas) /= 0.) deposition_TC(i_subbas,id_tc_type)=1.
-
-                        runoff_TC(i_subbas,id_tc_type)=0.
-                        sed_yield_TC(i_subbas,id_tc_type)=0.
+!                        IF (precip(d,i_subbas) == 0.) deposition_TC(i_subbas,id_tc_type)=0.
+!                        IF (precip(d,i_subbas) /= 0.) deposition_TC(i_subbas,id_tc_type)=1.
+!
+!                        runoff_TC(i_subbas,id_tc_type)=0.
+!                        sed_yield_TC(i_subbas,id_tc_type)=0.
                         !**************************************************************************************************
 
                         gwr=0.
@@ -1036,7 +1064,7 @@ SUBROUTINE hymo_all(STATUS)
                                                                                               !Till: sediment goes directly to river and into next downslope TC (no redistribution among all more-downslope TCs as with water)
                                     END DO
                                     !  Remaining outflow of each terrain component, which is not routed to lower TCs
-                                    !  is surface runoff of entire landscape unit (direct dunoff to river)
+                                    !  is surface runoff of entire landscape unit (direct runoff to river)
                                     qsurf_lu(lu_counter  )=qsurf_lu(lu_counter  )+surfflow_out(tc_counter)   * fractemp(tc_counter)/temp2
                                     hortsu  (lu_counter  )=hortsu  (lu_counter  )+horth                      * fractemp(tc_counter)/temp2
                                     IF (dosediment) sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:) * fractemp(tc_counter)/temp2
@@ -1085,8 +1113,10 @@ SUBROUTINE hymo_all(STATUS)
                     if (associated(ovflow_t )) ovflow_t  (d,timestep_counter,i_subbas) = ovflow_t   (d,timestep_counter,i_subbas) + qsurf_lu(lu_counter)
         
                     IF (dosediment)  THEN
-                        sediment_subbasin_t(d,timestep_counter,i_subbas,:)=sediment_subbasin_t(d,timestep_counter,i_subbas,:)+sedsu(lu_counter,:)
-                        IF (allocated(sdr_lu) ) sedsu(lu_counter,:)=sdr_lu(i_lu)*sedsu(lu_counter,:) !apply prespecified SDR, if present
+                        IF (allocated(sdr_lu) ) sedsu(lu_counter,:) = sdr_lu(i_lu)*sedsu(lu_counter,:) !apply prespecified SDR, if present
+                        sediment_subbasin_t(d,timestep_counter,i_subbas,:) = sediment_subbasin_t(d,timestep_counter,i_subbas,:)+sedsu(lu_counter,:)
+
+                        IF (f_lu_sedout) sedout_lu(d,timestep_counter,luid_instance) = sum(sedsu(lu_counter,:))    !prepare LU-wise output, if selected
                     END IF
         
                 END DO
@@ -1200,7 +1230,7 @@ SUBROUTINE hymo_all(STATUS)
             IF (dosediment .AND. do_musle_subbasin .AND. (ovflow(d,i_subbas)>0.) ) THEN    !calculate sediment yield on subbasin scale (in contrast to on TC-scale)
                 !sediment_subbasin(d,i_subbas,:)=sedi_yield_subbas(subbas_id, ovflow(d,i_subbas), sed_yield_subbas)
                 CALL sedi_yield_subbas(i_subbas, ovflow(d,i_subbas), sediment_subbasin(d,i_subbas,:))
-                sediment_subbasin_t(d,1,i_subbas,:)=sediment_subbasin(d,i_subbas,:) / nt !distribute daily yield equally among timesteps (needs to be improved)
+                sediment_subbasin_t(d,1,i_subbas,:)=sediment_subbasin(d,i_subbas,:) / nt !ii distribute daily yield equally among timesteps (needs to be improved)
             END IF
 
  
@@ -1435,16 +1465,29 @@ SUBROUTINE hymo_all(STATUS)
         END IF
 
 
-        IF (dosediment .AND. f_tc_sedout .AND. .NOT. do_musle_subbasin) THEN    !Till: write TC-wise surface flow
+        IF (dosediment .AND. f_tc_sedout .AND. .NOT. do_musle_subbasin) THEN    !Till: write TC-wise sediment output
             OPEN(11,FILE=pfadn(1:pfadi)//'tc_sedout.out', STATUS='old',POSITION='append')
             WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,',ntcinst,'(a,f8.1))'    !generate format string
-        
+
             DO d=1,dayyear
                 DO count=1,nt
                     WRITE (11,fmtstr)t,char(9),d,char(9),count,(char(9),sedout_tc(d,count,i),i=1,ntcinst)    !tab separated output
                 END DO
             END DO
-        
+            CLOSE(11)
+        END IF
+
+
+        IF (dosediment .AND. f_lu_sedout .AND. .NOT. do_musle_subbasin) THEN    !Till: write LU-wise sediment output
+            OPEN(11,FILE=pfadn(1:pfadi)//'lu_sedout.out', STATUS='old',POSITION='append')
+            j = size(sedout_lu,3) !number of LU-instances
+			WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,', j,'(a,f8.1))'    !generate format string
+
+            DO d=1,dayyear
+                DO count=1,nt
+                    WRITE (11,fmtstr)t,char(9),d,char(9),count,(char(9),sedout_lu(d,count,i),i=1, j)    !tab separated output
+                END DO
+            END DO
             CLOSE(11)
         END IF
 
@@ -1459,9 +1502,6 @@ SUBROUTINE hymo_all(STATUS)
 
     RETURN
 
-900 FORMAT(i4)
-999 FORMAT(3(1X,f5.0))
-998 FORMAT(3(1X,f5.3))
 
 contains
     FUNCTION calc_seasonality(year,julian_day,node_days,param_node_array)
