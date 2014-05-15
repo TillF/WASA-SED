@@ -1,6 +1,6 @@
 SUBROUTINE readhymo
-	!Till: computationally irrelevant: added options for LU-wise sediment output
-	!2014-05-15
+    !Till: computationally irrelevant: added options for LU-wise sediment output
+    !2014-05-15
 
     !Till: read optional specifyable sdr for LUs and TCs
     !2013-10-02
@@ -1506,8 +1506,8 @@ SUBROUTINE readhymo
     !Till: allocation part - these variable are allocated here, because their dimension is not known before
      !!Print hydrologic variable on TC scale. If not used, DISABLE
      !!************************************************************************
-!    allocate (runoff_TC(subasin,nterrain))
-!    allocate (area_TC(subasin,nterrain))
+    !    allocate (runoff_TC(subasin,nterrain))
+    !    allocate (area_TC(subasin,nterrain))
 
     !Till: ii: these shouldn't be allocated if dosediment=FALSE
     allocate (sedsu(maxsoter,n_sed_class))
