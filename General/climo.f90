@@ -247,24 +247,34 @@ IF (STATUS == 1) THEN
  rad=30.0
  precip=50.0
  
- READ(81,*,IOSTAT=iostat) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(1)),id=1,dayyear)		!Till: faster than using loop
+ 
+ READ(81,*,IOSTAT=iostat, END=200) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(1)),id=1,dayyear)		!Till: faster than using loop
  if (iostat/=0) then	!
 		write(*,*)'ERROR: input file format error in temperature.dat'
 		stop
+ 200    write(*,*)'ERROR: premature end in temperature.dat'
+		stop
  end if
+ 
+ 
+
  temp(1:dayyear,1:subasin)= inputbuffer(1:dayyear,corr_column_temp)	!Till: rearrange column order to match order of hymo.dat
  
- READ(82,*,IOSTAT=iostat) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(2)),id=1,dayyear)		!Till: faster than using loop
+ READ(82,*,IOSTAT=iostat, END=201) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(2)),id=1,dayyear)		!Till: faster than using loop
  if (iostat/=0) then	!
 		write(*,*)'ERROR: input file format error in humidity.dat'
+		stop
+ 201    write(*,*)'ERROR: premature end in humidity.dat'
 		stop
  end if
  rhum(1:dayyear,1:subasin)= inputbuffer (1:dayyear,corr_column_rhum)	!Till: rearrange column order to match order of hymo.dat
  
  
- READ(83,*,IOSTAT=iostat) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(3)),id=1,dayyear)		!Till: faster than using loop
+ READ(83,*,IOSTAT=iostat, END=202) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(3)),id=1,dayyear)		!Till: faster than using loop
  if (iostat/=0) then	!
 		write(*,*)'ERROR: input file format error in radiation.dat'
+		stop
+ 202    write(*,*)'ERROR: premature end in radiation.dat'
 		stop
  end if
  rad(1:dayyear,1:subasin)= inputbuffer (1:dayyear,corr_column_rad)	!Till: rearrange column order to match order of hymo.dat 
@@ -272,9 +282,11 @@ IF (STATUS == 1) THEN
 
 
 	IF (.NOT. dohour) THEN
-		READ(84,*,IOSTAT=iostat) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(4)),id=1,dayyear)		!Till: faster than using loop
+		READ(84,*,IOSTAT=iostat, END=203) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(4)),id=1,dayyear)		!Till: faster than using loop
 		if (iostat/=0) then	!
 			write(*,*)'ERROR: input file format error in ',trim(dumstr)
+			stop
+		203    write(*,*)'ERROR: premature end in ',trim(dumstr)
 			stop
 		end if
 		precip(:,1:subasin)= inputbuffer (:,corr_column_precip)	!Till: rearrange column order to match order of hymo.dat	 
@@ -284,9 +296,11 @@ IF (STATUS == 1) THEN
 
 			preciph(:,:)=-1.0	!hourly precip
 
-		READ (84,*,IOSTAT=iostat) ((n,k,(inputbuffer((i-1)*24+j,id),id=1,no_columns(4)),j=1,nt),i=1,dayyear)
+		READ (84,*,IOSTAT=iostat, END=204) ((n,k,(inputbuffer((i-1)*24+j,id),id=1,no_columns(4)),j=1,nt),i=1,dayyear)
 		if (iostat/=0) then	!
 			write(*,*)'ERROR: input file format error in ',trim(dumstr)
+			stop
+		204    write(*,*)'ERROR: premature end in ',trim(dumstr)
 			stop
 		end if
 
