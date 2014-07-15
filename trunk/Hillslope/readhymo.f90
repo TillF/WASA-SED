@@ -382,12 +382,22 @@ SUBROUTINE readhymo
     nbr_svc=0
     id_soil_intern=0
 
-    DO i=1,ntcinst
+	i=1
+    !DO i=1,ntcinst
+	DO WHILE (.TRUE.) !read till end of file 
         READ(11,'(a)',IOSTAT=istate) cdummy
-        if (istate/=0 .AND. i<ntcinst) then    !premature end of file
-            write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' lines (#SVC-LU-SUBBAS-combinations) expected'
-            stop
-        end if
+        if (istate/=0) then
+			if ((h-4<ntcinst)  ) then    !premature end of file
+				write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' lines (#SVC-LU-SUBBAS-combinations) expected'
+				stop
+			else
+				if (i-1/=ntcinst) then    !less entities read than expected
+					write(*,'(a,i0)')'WARNING (soil_vegetation.dat): ',i,' instead of the expected ',ntcinst,' TCs read.'
+					ntcinst=i-1 !correct value
+				end if
+				exit !enough lines read, abort loop
+			end if
+		end if
         h=h+1 !count lines
     
         dummy1=GetNumberOfSubstrings(cdummy)-5 !Till: count number of fields (ie SVCs) specified for this combination
@@ -396,20 +406,30 @@ SUBROUTINE readhymo
             stop
         end if
         k=0
-        READ(cdummy,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
-            rocky(i),nbr_svc(i),(id_soil_intern(c,i),c=1,dummy1)    !!ii: nbr_svc, rocky, id_soil_intern sind feststehende Parameter für einen TC-Typ und sollten nur einmal pro TC-typ gespeichert werden
-        k=k+istate
-        READ(11,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
-            rocky(i),nbr_svc(i),(id_veg_intern(c,i),c=1,dummy1)
-        k=k+istate
-        h=h+1 !count lines
-        READ(11,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
-            rocky(i),nbr_svc(i),(frac_svc(c,i),c=1,dummy1)
-        k=k+istate
-        h=h+1 !count lines
+        READ(cdummy,*,IOSTAT=istate) luse_subbas(i) !read subbasin ID only
+
+		if (which1(luse_subbas(i) == id_subbas_extern) == 0) then
+			!write(*,'(a,i0)')'WARNING (soil_vegetation.dat): Unknown subbasin ',luse_subbas(i),' in line ',h,', ignored.'
+			READ(11,'(a)',IOSTAT=istate) cdummy !skip next two lines
+			READ(11,'(a)',IOSTAT=istate) cdummy
+			h=h+2 !count lines
+		else
+			READ(cdummy,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
+				rocky(i),nbr_svc(i),(id_soil_intern(c,i),c=1,dummy1)    !!ii: nbr_svc, rocky, id_soil_intern sind feststehende Parameter für einen TC-Typ und sollten nur einmal pro TC-typ gespeichert werden
+			k=k+istate
+			READ(11,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
+				rocky(i),nbr_svc(i),(id_veg_intern(c,i),c=1,dummy1)
+			k=k+istate
+			h=h+1 !count lines
+			READ(11,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
+				rocky(i),nbr_svc(i),(frac_svc(c,i),c=1,dummy1)
+			k=k+istate
+			h=h+1 !count lines
+			i=i+1 !count instances that have been read
+		end if
   
         if (istate/=0) then    !premature end of file
-            write(*,'(a,i0)')'ERROR (soil_vegetation.dat): Format error in line ',h
+            write(*,'(a,i0)')'ERROR (soil_vegetation.dat): Format error or unexpected end in line ',h
             stop
         end if
 
