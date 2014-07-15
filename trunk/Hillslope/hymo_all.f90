@@ -844,7 +844,11 @@ SUBROUTINE hymo_all(STATUS)
             !  (height, root depth, LAI, albedo) for all vegetation units
             rootd_act =calc_seasonality(t,julian_day,period(i_subbas,:),rootdep)    !compute root depths of current day
             height_act=calc_seasonality(t,julian_day,period(i_subbas,:),height)    !compute heights of current day
-            lai_act   =calc_seasonality(t,julian_day,period(i_subbas,:),lai)    !compute LAIs of current day
+			WHERE (height_act == .0)
+				height_act=0.01 !prevent 0 which will cause problems in division otherwise
+       		END WHERE
+			
+			lai_act   =calc_seasonality(t,julian_day,period(i_subbas,:),lai)    !compute LAIs of current day
             alb_act   =calc_seasonality(t,julian_day,period(i_subbas,:),alb)    !compute albedos of current day
             if(dosediment) then
                 svc_k_fac_day     =calc_seasonality(t,julian_day,seasonality_k     (i_subbas,:),svc_k_fac)            !compute K-factors of current day
