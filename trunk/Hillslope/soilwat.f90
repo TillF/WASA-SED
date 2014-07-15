@@ -288,14 +288,14 @@ INTEGER :: doshrink
 !   watbal checks water balance of TC for each timestep (mm)
 
 !for debugging - remove
-DO i=1,nbr_svc(tcid_instance2)
-	DO h=1,nbrhori(id_soil_intern(i,tcid_instance2))
-		IF (horithact(tcid_instance2,i,h) - thetas(id_soil_intern(i,tcid_instance2),h)* horiz_thickness(tcid_instance2,i,h)> 0.1 ) THEN	!Till: if water content exceeds saturation...
-			write(*,*)"start: Oversaturated horizon in TC/svc/horizon ",tcid_instance2,i,h
-			!call pause1
-		END IF
-	END DO
-END DO
+!DO i=1,nbr_svc(tcid_instance2)
+!	DO h=1,nbrhori(id_soil_intern(i,tcid_instance2))
+!		IF (horithact(tcid_instance2,i,h) - thetas(id_soil_intern(i,tcid_instance2),h)* horiz_thickness(tcid_instance2,i,h)> 0.1 ) THEN	!Till: if water content exceeds saturation...
+!			write(*,*)"start: Oversaturated horizon in TC/svc/horizon ",tcid_instance2,i,h
+!			!call pause1
+!		END IF
+!	END DO
+!END DO
 !for debugging - remove end
 
 
@@ -2011,37 +2011,41 @@ nbrrooth(:)=0
 hfrac(:)=0.
 DO i=1,nbr_svc(tcid_instance2)
   soilid=id_soil_intern(i,tcid_instance2)
-  tempx=0.
-  temp3=rootd_act(id_veg_intern(i,tcid_instance2))
+  tempx=0.                                         !Till: for summing up soil layer thickness
   
-  h=1
-  DO WHILE (nbrrooth(i) == 0 .AND. h <= nbrhori(soilid))
-    tempx=tempx+horiz_thickness(tcid_instance2,i,h)
-    IF (tempx >= temp3) THEN
-      nbrrooth(i)=h
-      IF (h > 1) THEN
-        hfrac(i)=(temp3-sum(horiz_thickness(tcid_instance2,i,1:h-1)))/ horiz_thickness(tcid_instance2,i,h)
-      ELSE
-        hfrac(i)=temp3/horiz_thickness(tcid_instance2,i,h)
-      END IF
-    ELSE IF (h == nbrhori(soilid)) THEN
-      nbrrooth(i)=h
-      hfrac(i)=1.
-    END IF
-    h=h+1
-  END DO
+  temp3=rootd_act(id_veg_intern(i,tcid_instance2)) !Till: current seasonal root depth
+  if (temp3 ==0) then
+	nbrrooth(i)=1
+	hfrac(i)=0.01 !Till: prevent later division by 0
+  else
+	  h=1
+	  DO WHILE (nbrrooth(i) == 0 .AND. h <= nbrhori(soilid))
+		tempx=tempx+horiz_thickness(tcid_instance2,i,h)
+		IF (tempx >= temp3) THEN
+		  nbrrooth(i)=h
+		  IF (h > 1) THEN
+			hfrac(i)=(temp3-sum(horiz_thickness(tcid_instance2,i,1:h-1)))/ horiz_thickness(tcid_instance2,i,h)
+		  ELSE
+			hfrac(i)=temp3/horiz_thickness(tcid_instance2,i,h)
+		  END IF
+		ELSE IF (h == nbrhori(soilid)) THEN
+		  nbrrooth(i)=h
+		  hfrac(i)=1.
+		END IF
+		h=h+1
+	  END DO
   
-!    ansonsten: mist:
-  IF (nbrrooth(i) == 0.) THEN
-    WRITE(*,*) 'no roots ?, tcid_instance2,i',tcid_instance2,i
-    !call pause1
-  END IF
+	!    ansonsten: mist:
+	  IF (nbrrooth(i) == 0.) THEN
+		WRITE(*,*) 'no roots ?, tcid_instance2,i',tcid_instance2,i
+		!call pause1
+	  END IF
 
-  IF (hfrac(i)==0.) THEN
-    WRITE(*,*) 'calculted rooted fraction is 0, set to 0.001, tcid_instance2,i',tcid_instance2,i
-	hfrac(i)=0.01
-  END IF
-
+	  IF (hfrac(i)==0.) THEN
+		WRITE(*,*) 'calculated rooted fraction is 0, set to 0.001, tcid_instance2,i',tcid_instance2,i
+		hfrac(i)=0.01
+	  END IF
+   end if
 
 END DO
 
