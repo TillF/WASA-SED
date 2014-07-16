@@ -32,7 +32,7 @@ INTEGER, INTENT(IN OUT)                  :: STATUS
 INTEGER :: irout,idummy,id !,imun,imunx,irout2,irout_d,imeso,istate
 INTEGER :: upstream, downstream
 INTEGER :: itl, itr, ih, i, j, istate, h !, mm, imunout, iout, make
-REAL :: check,temp2,temp3,qtemp  !,xdum(48),storcapact
+REAL :: temp2,temp3,qtemp  !,xdum(48),storcapact
 character(len=1000) :: fmtstr	!string for formatting file output
 
 
@@ -149,33 +149,24 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
   
 ! calculate routing response function for each sub-basin
 ! (given parameter lag-time tL and retention-time tR)
+  allocate( hrout(nint(maxval(sum(prout, dim=2))) ,subasin)) !allocate memory for triangular unit hydrograph
+  hrout(:,:)=0.
+ 
   OPEN(11,FILE=pfadn(1:pfadi)//'routing_response.out' ,STATUS='replace')
   WRITE(11,'(a)') 'Output of linear response function'
-  WRITE(11,'(a)')'Subasin-ID,translation [days], retention [days], uh(1,7) [-]'
+  WRITE(11,'(a,i0,a)')'Subasin-ID,translation [days], retention [days], uh(1,',size(hrout,dim=1),') [-]'
   
   DO i=1,subasin
     itl = nint (prout(i,1))
     itr = nint (prout(i,2))
-    DO ih =1,7
-      IF (ih <= itl) THEN
-        hrout(ih,i)=0.
-      ELSE IF (ih > itl+itr) THEN
-        hrout(ih,i)=0.
-      ELSE
+    DO ih =itl+1,itl+itr
 ! Calculation of the linear response function for runoff routing in the river network
         hrout(ih,i)=1./REAL(itr*itr)* (2.*REAL(itr)-2.*REAL(ih-itl)+1.)
-      END IF
     END DO
-    check=0.
-    DO ih =1,7
-      check=check+hrout(ih,i)
-    END DO
-    IF (check < 0.1) THEN
-      hrout(1,i) = 1.0
-    END IF
     
-    WRITE (11,'(I5,2f10.2,2x,7f5.2)')  &
-        id_subbas_extern(i),prout(i,1),prout(i,2),(hrout(ih,i),ih=1,7)
+    write(fmtstr,'(a,i0,a)')'(I5,2f10.2,2x,',size(hrout,dim=1),'f5.2)'		!generate format string
+	WRITE (11,fmtstr)  &
+        id_subbas_extern(i),prout(i,1),prout(i,2),(hrout(ih,i),ih=1, size(hrout,dim=1))
   END DO
   
 ! CALL Reservoir Sedimentation and Management Modules
@@ -280,8 +271,8 @@ IF (STATUS == 2) THEN
     upstream=upbasin(i)  !internal code-ID for most upstream sub-basin
     downstream=downbasin(i) !internal code-ID for receiving sub-basin
     
-! Route inflow from upstream sub-basins (qin) through actual sub-basin within 7 days
-    DO ih=1,7
+! Route inflow from upstream sub-basins (qin) through actual sub-basin within nn days
+    DO ih=1,size(hrout,dim=1)
       qout(d+ih-1,upstream)=qin(d,upstream)*hrout(ih,upstream)  &
           + qout(d+ih-1,upstream)
 ! Transmission losses by evaporation in river
