@@ -118,14 +118,6 @@ DO i=1,subasin
 END DO
 
 
-! initialize
-  DO i=1,subasin
-    DO id=1,dayyear+6
-      qout  (id,i) = 0.
-      qin   (id,i) = 0.
-    END DO
-  END DO
- 
  
 ! INITIALISATION OF OUTPUT FILES
 
@@ -151,7 +143,13 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 ! (given parameter lag-time tL and retention-time tR)
   allocate( hrout(nint(maxval(sum(prout, dim=2))) ,subasin)) !allocate memory for triangular unit hydrograph
   hrout(:,:)=0.
- 
+
+  !allocate arrays for in- and outflow into/out of subbasins, as their length needs to accomodate hrout, too
+  allocate( qout(365 + size(hrout,dim=1) , subasin))
+  allocate( qin (365 + size(hrout,dim=1) , subasin)) 
+	qout(:,:)=0.
+	qin (:,:)=0.
+
   OPEN(11,FILE=pfadn(1:pfadi)//'routing_response.out' ,STATUS='replace')
   WRITE(11,'(a)') 'Output of linear response function'
   WRITE(11,'(a,i0,a)')'Subasin-ID,translation [days], retention [days], uh(1,',size(hrout,dim=1),') [-]'
@@ -180,30 +178,21 @@ END IF
 IF (STATUS == 1) THEN
   
 ! initialize ...
-! ... and take qout and volact from the last 6 days of last year
+! ... and take qout and volact from the last nn days of last year (nn:length of unit hydrograph)
+  
   IF (t > tstart) THEN
     DO i=1,subasin
-      DO id=1,6
-        qout(id,i)  =qout(daylastyear+id,i)
+      DO id=1,size(hrout,dim=1)-1
+        qout(id,1:subasin)  =qout(daylastyear+id,i)
       END DO
     END DO
-    DO i=1,subasin
-      DO id=7,dayyear
-        qout(id,i)=0.
-      END DO
-    END DO
+    qout(size(hrout,dim=1):dayyear,1:subasin)=0.
   ELSE IF (t == tstart) THEN
-    DO i=1,subasin
-      qout(1,i)=0.
-    END DO
+    qout(1,1:subasin)=0.
   END IF
   
 ! ... and initialize remaining values
-  DO i=1,subasin
-    DO id=dayyear+1, dayyear+6
-      qout(id,i)=0.
-    END DO
-  END DO
+  qout((dayyear+1):size(qout,dim=1),1:subasin)=0.
   
 ! CALL Reservoir Sedimentation and Management Modules
   IF (doreservoir) THEN
@@ -257,11 +246,10 @@ IF (STATUS == 2) THEN
     qout(d+1,i)=water_subbasin(d,i)+qout(d+1,i)
   END DO
 ! set inflow qin = zero for all sub-basin
-  DO i=1,subasin
-    DO ih=1,7
-      qin(d+ih-1,i)=0.
+    DO ih=1,size(hrout,dim=1)
+      qin(d+ih-1,1:subasin)=0.
     END DO
-  END DO
+
   
 !cccccccccccccccccccccccccccc
 ! MAIN ROUTING LOOP
