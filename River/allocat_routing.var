@@ -4,10 +4,9 @@
 	 allocate ( &
      upbasin(subasin), &
 	 downbasin(subasin), &	 
-	 qin(372,subasin), &
- 	 qout(372,subasin), &
+!	 qin(372,subasin), &
+! 	 qout(372,subasin), &
 	 prout (subasin,2), &
-	 hrout(7,subasin), &
 	 r_qin(2,subasin), &
 	 r_qout(2,subasin), &
 	 r_storage(subasin), &
