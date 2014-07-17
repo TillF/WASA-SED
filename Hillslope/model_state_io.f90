@@ -164,15 +164,17 @@ contains
             total_storage_river=total_storage_river+r_storage(sb_counter) !sum up total storage
 
             !Jose Miguel: loop over the acud classes.
-            DO acud_class=1,5
-                tt = (d-2)*nt+hour
-                if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. José, please check this
-                if (lake_file_hdle/=0) then
-                    WRITE(lake_file_hdle,'(I0,A1,I0,A1,F8.2)') id_subbas_extern(sb_counter), char(9),acud_class,char(9),&
-                        lakewater_hrr(tt,sb_counter,acud_class)
-                endif
-                total_storage_lake(acud_class)=total_storage_lake(acud_class)+lakewater_hrr(tt,sb_counter,acud_class) !sum up total storage
-            ENDDO
+            IF (doacud) THEN
+				DO acud_class=1,5
+					tt = (d-2)*nt+hour
+					if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. José, please check this
+					if (lake_file_hdle/=0) then
+						WRITE(lake_file_hdle,'(I0,A1,I0,A1,F8.2)') id_subbas_extern(sb_counter), char(9),acud_class,char(9),&
+							lakewater_hrr(tt,sb_counter,acud_class)
+					endif
+					total_storage_lake(acud_class)=total_storage_lake(acud_class)+lakewater_hrr(tt,sb_counter,acud_class) !sum up total storage
+				ENDDO
+			END IF
        
             DO lu_counter=1,nbr_lu(sb_counter)
                 i_lu=id_lu_intern(lu_counter,sb_counter)
@@ -393,7 +395,7 @@ contains
                             if (horithact(tcid_instance,svc_counter,h)==-9999.) then            !not yet set?
                                 if (file_read==1) then                        !but this should have been done before
                                     if (errors==0) then    !produce header before first warning only
-                                        write(*,'(A,f4.2,a,/,5a12)')' Following entities not initialised, using defaults ',&
+                                        write(*,'(A,f4.2,a,/,5a12)')' Following entities not initialised, using defaults '// &
                                             '(rel.saturation=', default_rel_sat,'):','subbasin','LU','TC','SVC','horizon'
                                     end if
                                     errors=errors+1
@@ -584,12 +586,12 @@ contains
         OPEN(11,FILE=river_conds_file,STATUS='old',action='read',IOSTAT=iostatus)
         !read 2 header lines into buffer
         READ(11,*); READ(11,*)
-    
+		r_storage(:)=0.
         DO sb_counter=1,subasin
-            READ(11,*) dummy1,dummy3(sb_counter)
-            IF (iostatus<0) THEN
-                WRITE(*,'(a,a,a)') 'ERROR: could not read initial river storage from river_storage.stat.',&
-                    ' Check model_state_io.f90 or consider switching off doloadstate in file do.dat'
+            READ(11,*,IOSTAT=iostatus) dummy1,dummy3(sb_counter)
+            IF (iostatus/=0) THEN
+                WRITE(*,'(a,a,a)') 'WARNING: could not read initial river storage from river_storage.stat, ignored, assumed 0.',&
+                    ' Check this file, model_state_io.f90 or consider switching off doloadstate in file do.dat'
                 EXIT
             ENDIF
        
