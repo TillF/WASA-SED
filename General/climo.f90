@@ -146,10 +146,26 @@ IF (STATUS == 0) THEN
 !  OPEN(83,FILE=pfadp(1:pfadj)// '/Time_series/radiation.dat',STATUS='old',action='read',readonly,shared)
 !  OPEN(84,FILE=pfadp(1:pfadj)// dumstr,STATUS='old',action='read',readonly,shared)
 
-  OPEN(81,FILE=pfadp(1:pfadj)// '/Time_series/temperature.dat',STATUS='old',action='read')
-  OPEN(82,FILE=pfadp(1:pfadj)// '/Time_series/humidity.dat',STATUS='old',action='read')
-  OPEN(83,FILE=pfadp(1:pfadj)// '/Time_series/radiation.dat',STATUS='old',action='read')
-  OPEN(84,FILE=pfadp(1:pfadj)// '/Time_series/'//dumstr,STATUS='old',action='read')
+  OPEN(81,FILE=pfadp(1:pfadj)// '/Time_series/temperature.dat',STATUS='old',action='read', IOSTAT=iostat)
+  if (iostat/=0) then	
+		write(*,*)'ERROR:',pfadp(1:pfadj)// '/Time_series/temperature.dat not found.'
+		stop
+  end if
+  OPEN(82,FILE=pfadp(1:pfadj)// '/Time_series/humidity.dat',STATUS='old',action='read', IOSTAT=iostat)
+  if (iostat/=0) then	
+		write(*,*)'ERROR:',pfadp(1:pfadj)// '/Time_series/humidity.dat not found.'
+		stop
+  end if
+  OPEN(83,FILE=pfadp(1:pfadj)// '/Time_series/radiation.dat',STATUS='old',action='read', IOSTAT=iostat)
+  if (iostat/=0) then	
+		write(*,*)'ERROR:',pfadp(1:pfadj)// '/Time_series/radiation.dat not found.'
+		stop
+  end if
+  OPEN(84,FILE=pfadp(1:pfadj)// '/Time_series/'//dumstr,STATUS='old',action='read', IOSTAT=iostat)
+  if (iostat/=0) then	
+		write(*,*)'ERROR:',pfadp(1:pfadj)// '/Time_series/'//dumstr//' not found.'
+		stop
+  end if
 
 
   READ(81,*); READ (82,*); READ (83,*); READ (84,*)
