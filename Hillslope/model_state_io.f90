@@ -234,7 +234,7 @@ contains
         WRITE(11,*)'gw_storage', char(9),total_storage_gw
         WRITE(11,*)'interception_storage', char(9),total_storage_intercept
         DO acud_class=1,5
-            WRITE(11,*)'lake_storage ', acud_class, char(9),total_storage_lake(acud_class)
+            WRITE(11,'(A,I0,A,F12.1)')'lake_storage', acud_class, char(9),total_storage_lake(acud_class)
         ENDDO
         WRITE(11,*)'river_storage', char(9),total_storage_river
 
@@ -268,9 +268,8 @@ contains
         OPEN(11,FILE=soil_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
         if (i/=0) then
             write(*,'(a,a,a)')'WARNING: Soil moisture file ''',trim(soil_conds_file),''' not found, using defaults.'
-            return
-        else
             CLOSE(11)
+			return
         end if
 
 
@@ -278,8 +277,6 @@ contains
         if (trim(soil_conds_file)/='' .AND. i==0) then        !load values from file
             write(*,'(a,a,a)')'Inititalize soil moisture from file ''',trim(soil_conds_file),''''
 
-            OPEN(11,FILE=soil_conds_file,STATUS='old',action='read')
-            !OPEN(11,FILE=soil_conds_file,STATUS='old',action='read',readonly,shared)
             READ(11,*); READ (11,*)    !skip header lines
             line=2
             errors=0
@@ -464,9 +461,8 @@ contains
         OPEN(11,FILE=gw_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
         if (i/=0) then
             write(*,'(a,a,a)')'WARNING: GW storage file ''',trim(gw_conds_file),''' not found, using defaults.'
-            return
-        else
             CLOSE(11)
+			return
         end if
 
 
@@ -474,9 +470,6 @@ contains
         if (trim(gw_conds_file)/='' .AND. i==0) then        !load values from file
             write(*,'(a,a,a)')'Inititalize ground water storage from file ''',trim(gw_conds_file),''''
 
-
-            OPEN(11,FILE=gw_conds_file,STATUS='old',action='read')
-            !OPEN(11,FILE=gw_conds_file,STATUS='old',action='read',readonly,shared)
             READ(11,*); READ (11,*)    !skip header lines
             line=2
             errors=0
@@ -568,34 +561,39 @@ contains
         use time_h
         use params_h
         use utils_h
+		use hymo_h
+
         character(len=*),intent(in):: river_conds_file        !file to load from
-        integer :: sb_counter,iostatus,i
-        real :: dummy1, dummy3(subasin)
+        integer :: sb_counter, iostatus, i
+        real :: dummy1
 
         i=0
-        OPEN(11,FILE=river_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
+        OPEN(11,FILE=river_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
         if (i/=0) then
             write(*,'(a,a,a)')'WARNING: River storage file ''',trim(river_conds_file),''' not found, using defaults.'
-            return
-        else
             CLOSE(11)
+			return
         end if
 
         write(*,'(a,a,a)')'Inititalize river storage from file ''',trim(river_conds_file),'''.'
     
-        OPEN(11,FILE=river_conds_file,STATUS='old',action='read',IOSTAT=iostatus)
         !read 2 header lines into buffer
         READ(11,*); READ(11,*)
 		r_storage(:)=0.
         DO sb_counter=1,subasin
-            READ(11,*,IOSTAT=iostatus) dummy1,dummy3(sb_counter)
-            IF (iostatus/=0) THEN
+            READ(11,*,IOSTAT=iostatus) i, dummy1
+			IF (iostatus/=0) THEN
                 WRITE(*,'(a,a,a)') 'WARNING: could not read initial river storage from river_storage.stat, ignored, assumed 0.',&
                     ' Check this file, model_state_io.f90 or consider switching off doloadstate in file do.dat'
                 EXIT
             ENDIF
+
+            i = id_ext2int(i, id_subbas_extern) !convert external to internal id
+			if (i < 1 .OR. i> subasin) then
+				WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in river_storage.stat, ignored.'
+			end if
        
-            r_storage(sb_counter)=r_storage(sb_counter)+dummy3(sb_counter);        !add the previous storage to the river reach additionally to eventual volume from spring or runoff contribution.
+            r_storage(i)=r_storage(i)+dummy1        !add the previous storage to the river reach additionally to eventual volume from spring or runoff contribution.
         ENDDO
         close(11)
     end subroutine init_river_conds
@@ -616,16 +614,14 @@ contains
         OPEN(11,FILE=lake_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
         if (i/=0) then
             write(*,'(a,a,a)')'WARNING: Lake storage file ''',trim(lake_conds_file),''' not found, using defaults.'
-            return
-        else
             CLOSE(11)
+            return
         end if
 
 
         write(*,'(a,a,a)')'Inititalize lake storage from file ''',trim(lake_conds_file),'''.'
     
-        OPEN(11,FILE=lake_conds_file,STATUS='old',action='read',IOSTAT=iostatus)
-    
+   
         READ(11,*); READ(11,*)!read 2 header lines into buffer
     
         DO sb_counter=1,subasin

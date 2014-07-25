@@ -117,6 +117,12 @@ DO i=1,subasin
   END IF
 END DO
 
+!allocate memory for subbasin in- and outflow
+allocate( qout(365 + size(hrout,dim=1) , subasin))
+allocate( qin (365 + size(hrout,dim=1) , subasin)) 
+qout(:,:)=0.
+qin (:,:)=0.
+
 
 ! INITIALISATION OF RESERVOIR MODULE
 !George (status,upstream,h) instead (status,upstream)
