@@ -33,6 +33,7 @@ use routing_h
 use time_h
 use reservoir_h
 use erosion_h
+use utils_h
 
 IMPLICIT NONE
 
@@ -40,7 +41,7 @@ INTEGER, INTENT(IN OUT) :: STATUS
 !INTEGER :: bat
 INTEGER :: idummy !,imun,imunx,irout,irout2,irout_d,id,imeso,istate ! id: additional loop variable of days (total 7 days)
 INTEGER :: upstream, downstream
-INTEGER :: i, j, h,k !itl, itr, ih, mm, imunout, iout,  make
+INTEGER :: i, j, h,k, istate !itl, itr, ih, mm, imunout, iout,  make
 !REAL :: xdum(48),check,temp2,qtemp, storcapact, con_sed
 REAL :: flow, r_area !, sediment_temp(24), temp_rain(366), dummy
 Real :: temp_water(17), temp_sediment(17)
@@ -51,20 +52,54 @@ Real :: r_sediment_storage(subasin)		!sediment storage in reach [t]
 IF (STATUS == 0) THEN
 
 ! READ INPUT FILES
-! Read hydrological response and river paramters
- OPEN(11,FILE=pfadp(1:pfadj)// 'River/river.dat'  &
-    ,STATUS='old')
+! Read hydrological response and river parameters
+ OPEN(11,FILE=pfadp(1:pfadj)// 'River/river.dat', IOSTAT=istate,STATUS='old')
+        IF (istate/=0) THEN
+            write(*,*)pfadp(1:pfadj)// 'River/river.dat could not be opened. Aborting.'
+            stop
+        END IF
   READ (11,*); READ(11,*)
-  DO i=1,subasin
-   READ (11,*) idummy, r_depth(i),r_width(i), r_sideratio(i),r_width_fp(i),r_sideratio_fp(i), &
-   r_slope(i), r_length(i),manning(i), manning_fp(i),r_ksat(i),r_efactor(i),r_cover(i),r_rock(i),r_alpha(i), &
-   msk_x(i), msk_k(i),Q_spring(i)
-     IF (idummy /= id_subbas_extern(i)) THEN
-     WRITE(*,*) 'Sub-basin-IDs in file river.dat must have the same ordering scheme as in hymo.dat'
-     STOP 
-   END IF
-  END DO
-  CLOSE (11)
+  
+!  DO i=1,subasin
+!   READ (11,*) idummy, r_depth(i),r_width(i), r_sideratio(i),r_width_fp(i),r_sideratio_fp(i), &
+!   r_slope(i), r_length(i),manning(i), manning_fp(i),r_ksat(i),r_efactor(i),r_cover(i),r_rock(i),r_alpha(i), &
+!   msk_x(i), msk_k(i),Q_spring(i)
+!     IF (idummy /= id_subbas_extern(i)) THEN
+!     WRITE(*,*) 'Sub-basin-IDs in file river.dat must have the same ordering scheme as in hymo.dat'
+!     STOP 
+!   END IF
+!  END DO
+ 
+ r_depth(:)=-1. !for checking completeness
+ DO WHILE (.TRUE.)        
+            READ(11,'(a)', IOSTAT=istate) fmtstr
+            
+			IF (istate/=0) THEN    !no further line
+                exit        !exit loop
+            END IF
+            READ(fmtstr,*, IOSTAT=istate) i
+			k=id_ext2int(i, id_subbas_extern)    !convert to internal subbas id
+            IF (k==-1) THEN    !ID not found
+                write(*,'(A,i0,A)')'WARNING: Unknown SUBBAS-ID ', i,' in river.dat, ignored.'
+				cycle
+             END IF
+            READ (fmtstr,*, IOSTAT=istate) i,r_depth(k),r_width(k), r_sideratio(k),r_width_fp(k),r_sideratio_fp(k), &
+   r_slope(k), r_length(k),manning(k), manning_fp(k),r_ksat(k),r_efactor(k),r_cover(k),r_rock(k),r_alpha(k), &
+   msk_x(k), msk_k(k),Q_spring(k)
+
+			IF (istate/=0) THEN    !no further line
+                write(*,'(A,i0,A)')'ERROR: format error in river.dat.'
+                stop
+            END IF
+ END DO
+
+ i=which1(r_depth(:) == -1.) !check for non-specified subbasins
+ if (i/=0) then	
+	write(*,'(A,i0,A)')'ERROR: SUBBAS-ID ', id_subbas_extern(i),' missing in river.dat.'
+    stop
+ END IF
+
+ CLOSE (11)
 
 ! READ INPUT FILES
 ! Read configuration of river system (in routing order)
@@ -83,7 +118,7 @@ if(river_transport.eq.3) then
   DO i=1,subasin
 	READ (11,*) idummy, D50(i)
 	IF (idummy /= id_subbas_extern(i)) THEN
-		WRITE(*,*) 'Sub-basin-IDs in file river.dat must have the same ordering scheme as in hymo.dat'
+		WRITE(*,*) 'Sub-basin-IDs in file bedload.dat must have the same ordering scheme as in hymo.dat'
 		STOP 
 	END IF
   END DO
