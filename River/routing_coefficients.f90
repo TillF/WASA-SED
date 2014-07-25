@@ -121,14 +121,16 @@ IF (STATUS == 1) THEN
 	if (flow < 0.) r_area=0.
 
 	!Calculation of initial water volume for each river stretch [m3]
- if (r_qin(2,i) == 0.) then
-    r_storage(i) = 0. 
- else
-    r_storage(i) =   r_area * r_length(i) * 1000.
-    sed_storage(i,1) = 0.
- endif
- IF (doloadstate) CALL init_river_conds(trim(pfadn)//'river_storage.stat')!Jose Miguel: load river storage of previous run of the model
-
+ IF (.NOT. doloadstate) then
+	 if (r_qin(2,i) == 0.) then
+		r_storage(i) = 0. 
+	 else
+		r_storage(i) =   r_area * r_length(i) * 1000.
+		sed_storage(i,1) = 0.
+	 endif
+ END IF
+	 !IF (doloadstate) CALL init_river_conds(trim(pfadn)//'river_storage.stat')!Jose Miguel: load river storage of previous run of the model
+     !Till: outcommented previous line as initialisation has been done before already
 ENDIF
 
 IF (STATUS == 3) THEN
