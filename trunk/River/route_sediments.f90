@@ -98,7 +98,7 @@ ENDIF
 r_storage_previous=r_storage(i)+(r_qout(2,i)-r_qin(2,i))*dt*3600.
 volume = r_storage_previous+r_qin(2,i)*3600.*dt
 
-!! check if it is an ephermeal river (as set in Muskingum.f90) that starts to flow
+!! check if it is an ephemeral river (as set in Muskingum.f90) that starts to flow
 if (r_qout(1,i) .eq. 0. .and. r_storage(i) .eq. (r_qin(2,i)+3600.*dt)) then
   sediment_out(i,:) = 0.
   sed_storage(i,:) = 0.
@@ -120,11 +120,6 @@ det = 24/dt	!Amount of simulation step per day
 
 
 
-!Loop through all sediment classes
-do k=1, n_sed_class
-
-  sed_mass = sediment_in(i,k)+ sed_storage(i,k)
-
 !! Calculation of flow velocity [m/s]
   IF (velocity(i) < .010) THEN
     vel_peak = 0.01
@@ -137,6 +132,13 @@ do k=1, n_sed_class
     write(*,*) 'very large flow velocity for sediment transport in sub-basin ', i
   endif
   
+
+!Loop through all sediment classes
+do k=1, n_sed_class
+
+  sed_mass = sediment_in(i,k)+ sed_storage(i,k)
+
+
 ! Calculation of current and maximum sediment carrying capacity concentration [ton/m3, kg/l]
   conc_in = sed_mass / volume
   conc_max = spcon(k) * vel_peak ** spexp(k)
