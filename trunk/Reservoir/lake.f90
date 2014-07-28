@@ -2,14 +2,14 @@ SUBROUTINE lake(STATUS,muni)
 
 ! Till: fixed bugs in reading of lake_maxvol.dat, lake_number.dat, lake_frarea.dat
 !outcommented unused vars
-!2012-09-14 
- 
+!2012-09-14
+
 ! Till: computationally irrelevant: minor changes to improve compiler compatibility
 ! 2011-04-29
- 
+
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-06-30  Time: 13:47:13
- 
+
 use lake_h
 use climo_h
 use common_h
@@ -38,7 +38,7 @@ REAL :: help,help1,help2,help3,delta_vol(5) !,class
 !*************************************************************************************
 REAL :: totallakeinflow,totallakeoutflow,totallakeprec,totallakeevap,totallakevol !,totallakearea
 REAL :: totalsedinflow,totalsedoutflow,totalsedimentation,cumsedimentation
-REAL :: totalrunoff2 !totalrunoff,directrunoff,wateryield,totalarea 
+REAL :: totalrunoff2 !totalrunoff,directrunoff,wateryield,totalarea
 !CHARACTER(12) :: subarea
 REAL :: cumarea,cumrunoff,cumrunoff2,cuminflow !cumvolume,
 !*************************************************************************************
@@ -48,7 +48,7 @@ character(len=1000) :: fmtstr	!string for formatting file output
 !REAL :: dummy7(24),dummy8(24,100)
 !** -------------------------------------------------------------------
 IF (STATUS == 0) THEN
-  
+
 !write(*,*)doacudyear
 ! Read of small reservoir characteristics
 ! Read number of reservoir per classes
@@ -71,39 +71,39 @@ IF (STATUS == 0) THEN
 	  ENDDO
 	ELSE
       READ(11,*);READ (11,*) !read empty lines
-  
+
       maxlake(1:subasin,1:5)=0.
-      
+
 	  ka = 0
 	  DO WHILE (ka==0)
         READ(11,*,IOSTAT=ka) dummy1,(dummy6(k),k=1,5) !Till: read single line
 
 		imun=which1(dummy1==id_subbas_extern) !search corresponding internal ID of subbasin
 		if (imun==0) then	!Till: the current subbasin was not contained in hymo.dat - error
-			WRITE(*,'(a, I0, a, I0, a)') 'ERROR in lake_maxvol.dat: Subbasin ',dummy,' not listed in hymo.dat.'		
+			WRITE(*,'(a, I0, a, I0, a)') 'ERROR in lake_maxvol.dat: Subbasin ',dummy,' not listed in hymo.dat.'
 			stop
 		else
 			maxlake(imun,1:5)=dummy6(1:5)				!assign values of line read above
 			dummy5(imun)=dummy1
 		endif
 	  ENDDO
-	
+
 		if ( count(dummy5(1:subasin)/=id_subbas_extern(1:subasin)) > 0) then
 			WRITE(*,*) 'Sub-basin-IDs in file lake_maxvol.dat must have the same ordering scheme as in hymo.dat'
 			STOP
 		end if
-	
+
 	ENDIF
 
   CLOSE(11)
-  
+
   maxlakesub0(1:subasin,1:5)=maxlake(1:subasin,1:5)
-  
+
 
 !   Andreas block begin
 !** read number of small reservoirs for each year and subbasin
 !   if data are in the file (index in line 3 (doacudyear) is .true.) then
-!   the exact values will be used instead of the function 
+!   the exact values will be used instead of the function
 !   of temporal variation of acudes number
   acudfloatyear(:,:,:)=-999.
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lake_year.dat', IOSTAT=istate,STATUS='old')
@@ -122,8 +122,8 @@ IF (STATUS == 0) THEN
 	  READ(11,*);READ(11,*)
 	  DO t=tstart,tstop
        DO imun=1,subasin
-        READ(11,*) dummy, dummy1,(acudfloatyear(imun,k,t-tstart+1),k=1,5) 
-       ENDDO 
+        READ(11,*) dummy, dummy1,(acudfloatyear(imun,k,t-tstart+1),k=1,5)
+       ENDDO
       END DO
 	ENDIF
   CLOSE(11)
@@ -148,7 +148,7 @@ IF (STATUS == 0) THEN
 
 		imun=which1(dummy1==id_subbas_extern) !search corresponding internal ID of subbasin
 		if (imun==0) then	!Till: the current subbasin was not contained in hymo.dat - error
-			WRITE(*,'(a, I0, a, I0, a)') 'ERROR in lake_maxvol.dat: Subbasin ',dummy,' not listed in hymo.dat.'		
+			WRITE(*,'(a, I0, a, I0, a)') 'ERROR in lake_maxvol.dat: Subbasin ',dummy,' not listed in hymo.dat.'
 			stop
 		else
 			acud(imun,1:5)=dummy6(1:5)			!assign values of line read above
@@ -182,7 +182,7 @@ IF (STATUS == 0) THEN
 
 			imun=which1(dummy1==id_subbas_extern) !search corresponding internal ID of subbasin
 			if (imun==0) then	!Till: the current subbasin was not contained in hymo.dat - error
-				WRITE(*,'(a, I0, a, I0, a)') 'ERROR in lake_maxvol.dat: Subbasin ',dummy,' not listed in hymo.dat.'		
+				WRITE(*,'(a, I0, a, I0, a)') 'ERROR in lake_maxvol.dat: Subbasin ',dummy,' not listed in hymo.dat.'
 				stop
 			else
 				lakefrarea(imun,1:5)=dummy6(1:5)			!assign values of line read above
@@ -242,7 +242,7 @@ IF (STATUS == 0) THEN
 !write(*,'(I4,F10.2,5F7.4)')id_subbas_extern(imun),area(imun),(lakefrarea(imun,k),k=1,5)
 !write(*,'(I4,F10.2,5F7.4)')id_subbas_extern(imun),subfrout(imun),(lakefrout(imun,k),k=1,5)
   ENDDO
-	  
+
 
 !George Initialization of the maximum storage capacity of each reservoir class (m**3)
 !  DO imun=1,subasin
@@ -405,7 +405,7 @@ IF (STATUS == 0) THEN
   OPEN(11,FILE=pfadn(1:pfadi)//'lake_inflow.out',STATUS='replace')
   IF (f_lake_inflow) then
 	WRITE(11,*)'Year, day, hour, reservoir_class, lakeinflow(m**3/timestep)'
-    write(fmtstr,'(a,i0,a)')'(A24,',subasin,'I15)'		!generate format string	    
+    write(fmtstr,'(a,i0,a)')'(A24,',subasin,'I15)'		!generate format string
 	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
 	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
     CLOSE(11)
@@ -489,15 +489,15 @@ IF (STATUS == 0) THEN
 !	WRITE(11,*)'Year, day, hour, totalrunoff(m**3), directrunoff(m**3), totallakeinflow(m**3), totallakeoutflow(m**3), &
 !				wateryield(m**3)'
 !  CLOSE(11)
- 
+
 END IF
 
 
 !** ----------------------------------------------------------------------
 IF (STATUS == 1) THEN
-  
+
 !   trend of construction of new reservoirs increases storage capacity
-  
+
 !*****************************************************************
 ! OLD VERSION
 !  BAZIN (1992) found an exponential increase in the number of
@@ -521,7 +521,7 @@ IF (STATUS == 1) THEN
     END DO
   END IF !end block Andreas
 
-  
+
 !** Initialization for actual year of calculation
 	lakeoutflow(1:dayyear*nt,1:subasin) = 0.
 	damareaact(1:subasin)=0. !for subbasin without strategic reservoir
@@ -540,16 +540,16 @@ END IF
 
 !** -----------------------------------------------------------------------
 IF (STATUS == 2) THEN
-  
+
 !   Lakes are filled with surface flow (lakeinflow) and are emptied
 !   by evaporation
-  
+
 !  water balance of acudes, water is distributed between volume classes
 !  it is assumed that smaller volume class acudes are lying above
 !  larger acudes in the basin, i.e. if total storage capacity of
 !  one volume class is filled, additional inflow is added to next
 !  larger volume class
-  
+
 !  modification 06.06.01:
 !  this routing scheme may be too strict (percentage of total runoff
 !  which is captured by small reservoirs is too high), as not all dams
@@ -562,7 +562,7 @@ IF (STATUS == 2) THEN
 
 !if(d==13)stop
 
-!George 
+!George
 ! routing between landscape units
 ! currently, simple summing up of runoff of all LUs
 ! inflow to acudes of lowlands: lakeinflow
@@ -573,7 +573,7 @@ IF (STATUS == 2) THEN
 
 ! check water and sediment inflow discharge into the small reservoirs
 !George revised runoff contributing area by subtraction of the small reservoirs' areas
-  DO ih=1,nt					
+  DO ih=1,nt
     hour=ih
     step=(d-1)*nt+hour
 !**********************************************************************************
@@ -609,7 +609,7 @@ endif
 !write(*,'(3I6,3F15.3)')t,d,muni,temparea,damareaact(muni)/1.e6
     temparea=MAX(0.,1.-temparea/area(muni))
 !write(*,'(3I6,3F15.3)')t,d,muni,temparea
-!George revised water inflow into the small reservoirs 
+!George revised water inflow into the small reservoirs
 !    IF (.NOT. dohour) THEN
 !      lakeinflow(d,muni)=lakeinflow(d,muni)*temparea
 !    ELSE
@@ -645,7 +645,7 @@ endif
 
 
   IF (dosediment) then
-    DO ih=1,nt					
+    DO ih=1,nt
       hour=ih
       step=(d-1)*nt+hour
 	  lakesedin(step,muni)=0.
@@ -684,7 +684,7 @@ endif
       temparea=temparea+damareaact(muni)/1.e6
 !write(*,'(3I6,3F15.3)')t,d,muni,temparea,damareaact(muni)/1.e6
       temparea=MAX(0.,1.-temparea/area(muni))
-!George revised water inflow into the small reservoirs 
+!George revised water inflow into the small reservoirs
       lakesedin(step,muni)=lakesedin(step,muni)*temparea
 	  DO g=1,n_sed_class
  	    sediment_subbasin_t(d,ih,muni,g)=sediment_subbasin_t(d,ih,muni,g)*temparea	!reduce sub-daily runoff
@@ -695,10 +695,10 @@ endif
 		  sediment_subbasin(d,muni,g)=sediment_subbasin(d,muni,g)*temparea
 		endif
       END DO
-    ENDDO 
+    ENDDO
   ENDIF
 
-!George calculation of actual water volume and outflow discharges 
+!George calculation of actual water volume and outflow discharges
   DO ih=1,nt
     hour=ih
     step=(d-1)*nt+hour
@@ -708,9 +708,9 @@ endif
 
 !**********************************************************************************
 !if(step<5)water_subbasin_t(d,ih,muni)=1500000.
-!if(step<5)lakeinflow(step,muni)=1500000.			
+!if(step<5)lakeinflow(step,muni)=1500000.
 !if(step<5)sediment_subbasin_t(d,ih,muni,:)=150.
-!if(step<5)lakesedin(step,muni)=150.		
+!if(step<5)lakesedin(step,muni)=150.
 !**********************************************************************************
 
 !George water balance calculation, not considering outflow discharges
@@ -728,10 +728,10 @@ endif
       END IF
 !write(*,*)muni,k,step,d_laststep,lakearea(muni,k),lakewater(d_laststep,muni,k)
     END DO
-  
+
 !  Calculate direct evaporation losses (m**3)
     DO k=1,5
-	  IF (dohour) THEN	
+	  IF (dohour) THEN
         evap(k)=MIN(lakewater(d_laststep,muni,k),(pet(d,muni)/nt)*lakearea(muni,k)*  &
 			1.e3*acud(muni,k))
 	  ELSE
@@ -739,7 +739,7 @@ endif
 			1.e3*acud(muni,k))
 	  ENDIF
     END DO
-  
+
 !  Infiltration losses (according to Molle, 1989:
 !  mean additional fraction of evaporation of 34%)
 !  study was made for acudes up to about 2Mio m**3 storage volume
@@ -751,17 +751,17 @@ endif
       if (maxlake(muni,k)>2.e6) evap(k)=evap(k)+evap(k)*0.34
     END DO
     lakeevap(step,muni,1:5)=evap(1:5)
-  
+
 !  Input by direct rainfall on lake surface (m**3)
     DO k=1,5
-	  IF (dohour) THEN	
+	  IF (dohour) THEN
         rain(k)=preciph(step,muni)*lakearea(muni,k)* 1.e3*acud(muni,k)
 	  ELSE
         rain(k)=precip(d,muni)*lakearea(muni,k)* 1.e3*acud(muni,k)
 	  ENDIF
     END DO
 	lakeprec(step,muni,1:5)=rain(1:5)
-  
+
 !  water balance of lake
     delta_vol(1:5)=rain(1:5)-evap(1:5)
 
@@ -868,7 +868,7 @@ endif
 !if(muni==5)write(*,'(3I5,6F10.1)')step,muni,k,(lakeoutflow_hrr(step,muni,k),k=1,5)
 !stop
 
-  
+
 !  water inflow into the small reservoirs (m**3)
     lakeinflow(step,muni)=lakeinflow(step,muni)*(1.-subfrarea(muni))
 
@@ -886,7 +886,7 @@ endif
 !  total retention of incoming runoff in all acudes in this timestep (m**3)
     muniret(step,muni)=MAX(0.,(lakeinflow(step,muni)-  &
 		lakeoutflow(step,muni)))
-  
+
 !  Estimate area of open water storage depending on volume (km**2)
 !  formula by Molle (1989) (for acudes < 2 Mio m**3)
 !  alpha,mean=2.7 ; K häufig = 1000.
@@ -898,7 +898,7 @@ endif
 	    lakearea(muni,k)=0.
       END IF
     END DO
-  
+
 
 !  total amount of water storaged in sub-basin (m**3)
     laketot(step,muni)=sum(lakewater(step,muni,1:5))
@@ -906,7 +906,7 @@ endif
 !if(muni==2)write(*,'(I5,6F10.1)')muni,lakeinflow(step,muni),lakeoutflow(step,muni),laketot(step,muni)
 
 !if (d==10)stop
-  
+
 !  water storage relative to storage capacity
     DO k=1,5
       IF (maxlakewater(muni,k) > 0.) THEN
@@ -931,7 +931,7 @@ endif
 
 !if(t==2002)read(*,*)
 
-	
+
 !	IF (muni==subasin .and. ih==nt) THEN
 !      OPEN(11,FILE=pfadn(1:pfadi)//'lake_watbal.out',STATUS='old',  &
 !		 POSITION='append')
@@ -975,7 +975,7 @@ endif
 	        DO g=1,n_sed_class
 		      frac_hrr(g)=(lakefracsedout_hrr(step,muni,k,g)*lakesedout_hrr(step,muni,k))*(lakefrout(muni,j)/lakecumfrout(muni,k))
 			  dummy3(j,g)=dummy3(j,g)+frac_hrr(g)
-            END DO		    
+            END DO
           END DO
 		  dummy4=lakesedout(step,muni)
           lakesedout(step,muni)=lakesedout(step,muni)+(lakesedout_hrr(step,muni,k)*(subfrout(muni)/lakecumfrout(muni,k)))
@@ -998,7 +998,7 @@ endif
 	        DO g=1,n_sed_class
 		      frac_hrr(g)=(lakefracsedout_hrr(step,muni,k,g)*lakesedout_hrr(step,muni,k))*(lakefrout(muni,j)/lakecumfrout(muni,k))
 			  dummy3(j,g)=dummy3(j,g)+frac_hrr(g)
-            END DO		    
+            END DO
           END DO
 		  dummy4=lakesedout(step,muni)
           lakesedout(step,muni)=lakesedout(step,muni)+(lakesedout_hrr(step,muni,k)*(subfrout(muni)/lakecumfrout(muni,k)))
@@ -1084,10 +1084,10 @@ endif
 !	ENDDO
 
 !if(muni==2)write(*,'(I5,6F10.1)')muni,lakesedin(step,muni),lakesedout(step,muni),sum(lake_vollost(step,muni,1:5)*acud(muni,1:5)*1.5),cumseddep(muni)
-	
+
 !DO k=1,5
 !write(*,'(3I5,5F12.3)')step,muni,k,acud(muni,k),lakesedin_hrr(step,muni,k),lakesedout_hrr(step,muni,k),lakesedin(step,muni),lakesedout(step,muni)
-!DO g=1,n_sed_class		    
+!DO g=1,n_sed_class
 !if(g==1)write(*,'(4I4,4F10.3)')step,muni,k,g,frac_hrr(g),dummy3(k,g),lakesedin_hrr(step,muni,k)*lakefracsedout_hrr(step,muni,k,g),lakesedin_hrr(step,muni,k)
 !if(g==1)write(*,'(4I4,5F10.3)')step,muni,k,g,acud(muni,k),frac_hrr(g),dummy3(k,g),lakesedin_hrr(step,muni,k)*lakefracsedin_hrr(step,muni,k,g),lakesedout_hrr(step,muni,k)*lakefracsedout_hrr(step,muni,k,g)
 !if(g==1)write(*,'(3I5,5F12.3)')step,muni,k,acud(muni,k),lakefracsedin_hrr(step,muni,k,g),lakefracsedout_hrr(step,muni,k,g)
@@ -1157,7 +1157,7 @@ endif
 !	  cumsedimentation=cumsedimentation+(lake_vollost(step,muni,k)*acud(muni,k)*1.5)
 !	ENDDO
 
-	
+
 !	IF (muni==subasin .and. ih==nt) THEN
 !      OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedbal.out',STATUS='old',  &
 !		 POSITION='append')
@@ -1173,9 +1173,9 @@ END IF
 
 !--------------------------------------------------------------------
 IF (STATUS == 3) THEN
-  
+
 !** Obtain monthly and annual values
-  
+
 !        call average(laketot,annlaketot,monlaketot,1.)
 !        call average(lakewater(:,:,1),annlaketot1,monlaketot1,1.)
 !        call average(lakewater(:,:,2),annlaketot2,monlaketot2,1.)
@@ -1188,7 +1188,7 @@ IF (STATUS == 3) THEN
 !        call total  (lakeevap(:,:,4),annlakeevap4,monlakeevap4,1.)
 !        call total  (lakeevap(:,:,5),annlakeevap5,monlakeevap5,1.)
 !        call average(laketotfrac,annlakefrac,monlakefrac,1.)
-  
+
 !Eva output files deleted
 
 !    OPEN(11,FILE=pfadn(1:pfadi)//'lake_checkwatbal.out',STATUS='old',  &
@@ -1427,7 +1427,7 @@ IF (STATUS == 3) THEN
     IF (f_lake_inflow) then
     OPEN(11,FILE=pfadn(1:pfadi)//'lake_inflow.out',STATUS='old',  &
 		 POSITION='append')
-      write(fmtstr,'(a,i0,a)')'(4I6,',subasin,'F15.3)'		!generate format string	    
+      write(fmtstr,'(a,i0,a)')'(4I6,',subasin,'F15.3)'		!generate format string
 
 	  DO d=1,dayyear
 	    DO ih=1,nt
@@ -1538,7 +1538,7 @@ IF (STATUS == 3) THEN
 	  ENDDO
      CLOSE(11)
 	 ENDIF
-    
+
      IF (f_lake_sizedistoutflow) then
      OPEN(11,FILE=pfadn(1:pfadi)//'lake_sizedistoutflow.out',STATUS='old',  &
 		 POSITION='append')
@@ -1555,21 +1555,17 @@ IF (STATUS == 3) THEN
      CLOSE(11)
 	 ENDIF
 	ENDIF
-    
-    
+
+
 !        do  j=1,12
 !        call areasum(monlaketot(j,1:subasin),mesolaketot(j,:),
 !     .               statelaketot(j,:),1)
 !        enddo
-  
+
 END IF
 !--------------------------------------------------------------------
 
 RETURN
 
-900   FORMAT(i4)
-999   FORMAT(3(1X,f5.0))
-998   FORMAT(3(1X,f5.3))
-800   FORMAT(3(1X,f7.0))
 
 END SUBROUTINE lake

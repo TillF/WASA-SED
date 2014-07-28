@@ -1,14 +1,14 @@
 SUBROUTINE sedbal(upstream)
 
 !Till: computationally irrelevant: outcommented unused vars
-!2012-09-14 
+!2012-09-14
 
 ! Till: computationally irrelevant: minor changes to improve compiler compatibility
 ! 2011-04-29
- 
+
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:31
- 
+
 use common_h
 use time_h
 use reservoir_h
@@ -59,7 +59,7 @@ if (res_qout(step,upstream)/=0.) then
   overflow_rate=res_qout(step,upstream)/damareaact(upstream)
 !  overflow_rate=0.00032
 
-! calculation of the corresponding equivalent diameter (mm) 
+! calculation of the corresponding equivalent diameter (mm)
   par_a=1.09*(delta)*grav
   par_b=-(overflow_rate**2)
   par_c=-27.9*overflow_rate*visc
@@ -94,7 +94,7 @@ if (res_qout(step,upstream)/=0.) then
       frac_finer=cumfrsed_in(g)* &
 		(log10(diam_equiv)-log10(lower_limit(g)))/ &
 		(log10(upper_limit(g))-log10(lower_limit(g)))
-	  exit  
+	  exit
 	else if (diam_equiv<lower_limit(1)) then
 	  frac_finer=0.
 	else if (diam_equiv>upper_limit(n_sed_class)) then
@@ -117,17 +117,17 @@ if (res_qout(step,upstream)/=0.) then
       DO g=1,n_sed_class
 	    frsediment_out(upstream,g)=0.
 	  enddo
-    endif	  
+    endif
   else
     dummy=0.
     DO g=1,n_sed_class
       if (diam_equiv>=lower_limit(g)) then
-	    dummy=dummy+1. 
+	    dummy=dummy+1.
 	  else
 	    exit
 	  endif
 	enddo
-    nbrsteps=10.*dummy
+    nbrsteps=int(10.*dummy)
 	lower_diam(1)=lower_limit(1)
 !	interv=frac_finer/nbrsteps
     k=0
@@ -144,7 +144,7 @@ if (res_qout(step,upstream)/=0.) then
 	    if (frac_finer<cumfrsed_in(g)) &
 		  dummy=frac_finer/10.
 	  endif
-	    
+
       do l=1,10
 	    k=k+1
 	    interv(k)=dummy
@@ -219,11 +219,11 @@ if (res_qout(step,upstream)/=0.) then
 		  endif
 		enddo
 	  endif
-	  if (g==1) frsediment_out(upstream,g)=cumfrsed_out(g)     
-	  if (g>1) frsediment_out(upstream,g)=cumfrsed_out(g)-cumfrsed_out(g-1)    
+	  if (g==1) frsediment_out(upstream,g)=cumfrsed_out(g)
+	  if (g>1) frsediment_out(upstream,g)=cumfrsed_out(g)-cumfrsed_out(g-1)
 
 !write(*,'(I3,2F12.8)')g,frsediment_out(upstream,g),cumfrsed_out(g)
-	enddo		    
+	enddo
   endif
   sed_outflow(step,upstream)=sed_inflow(step,upstream)*(1.-trap_eff)
 else

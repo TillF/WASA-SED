@@ -67,10 +67,10 @@ END INTERFACE
 REAL :: del,fsum
 INTEGER(4) :: it
 if (n == 1) then
-  s=0.5*(b-a)*sum(func( (/ a,b /),par(:) )) 
+  s=0.5*(b-a)*sum(func( (/ a,b /),par(:) ))
 else
   it=2**(n-2)
-  del=(b-a)/dble(it)                                 !This is the spacing of the points to be added.
+  del=(b-a)/real(it)                                 !This is the spacing of the points to be added.
   fsum=sum(func(arth_d(a+0.5*del,del,it),par(:)))
   s=0.5*(s+del*fsum)                               !This replaces s by its refined value.
 end if
