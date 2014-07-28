@@ -1,6 +1,29 @@
+# ATTENTION:
+# at first run 'update_revision_no.sh' in your svn directory and copy General/svn_rev.var into your actual working tree
+
 CC=gfortran
 CFLAGS=-c -ggdb
-FLAGS= -ffree-line-length-none -ggdb
+FLAGS= -ffree-line-length-none -ggdb -Wtabs
+
+# compiler flag explanations
+# COMMON
+# -ffree-line-length-none: free line length in source code
+# -c: compiling without linking -> produces object files
+# -fimplicit-none: no implicit typing allowed; even if "implicit none" was not specified in a function, subroutine etc.
+# DEBUG only (slow compiling and execution)
+# -g: produce debugging symbols
+# -Wtabs: tab characters in source code allowed
+# -Wall: enable all common compiler warnings
+# -Wextra: extra warnings
+# -fcheck=all: enable all run-time tests (e.g. array subscripts etc.)
+# -fbacktrace: output backtrace of run-time errors
+# -Wno-maybe-uninitialized
+# 	- -Wall turns on -Wmaybe-uninitialized: detects variables that are potentially used uninitialized
+# 	- may cause spurious warnings, so turn it off with -Wno-maybe-uninitialized
+# -Og: optimizations that do/should not interfere with debugging, gfortran 4.8+
+# RELEASE only (fast execution but warnings and errors omitted as far as possible)
+# -O1 [-O2, -O3]: optimize for speed
+# -Os: optimize for size of compiled executable
 
 # CC=pgfortran
 # CFLAGS=-c -Mfree
@@ -60,7 +83,7 @@ EXECUTABLE=wasa.lin
 all: $(SOURCES) $(EXECUTABLE)
 # program is made of several source files.
 $(EXECUTABLE): $(SOURCES)
-	./update_revision_no.sh
+	#./update_revision_no.sh
 	$(CC) $(FLAGS) $(SOURCES) -o $(EXECUTABLE)
 
 .o:
