@@ -3,20 +3,20 @@ SUBROUTINE reservoir (STATUS,upstream,res_h)
 ! Till: made reading of reservoir.dat, cav.dat independent of order of IDs
 ! memory allocation according to content of these files
 ! various minor code beautifications
-! 2012-09-17 
+! 2012-09-17
 
 ! Till: computationally irrelevant: outcommented unused vars
-! 2012-09-14 
+! 2012-09-14
 
 ! Till: computationally irrelevant: streamlined code and improved error message with routing.dat
 ! 2011-07-05
 
 ! Till: computationally irrelevant: minor changes to improve compiler compatibility
 ! 2011-04-29
- 
+
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:56:42
- 
+
 use common_h
 use params_h
 use routing_h
@@ -67,7 +67,7 @@ IF (STATUS == 0) THEN
 
 reservoir_check=0 !(0=simulation will all components; 1=simulation without hillslope and river modules)
 reservoir_balance=1 !(0=inflow and outflow discharges must be provided as input file; 1=only inflow discharges must be provided as input file)
-reservoir_print=0 !(0=results printed at the end of the timestep; 1=results printed at the end of the simulated year) 
+reservoir_print=0 !(0=results printed at the end of the timestep; 1=results printed at the end of the simulated year)
 
 if (reservoir_check==0) reservoir_balance=1
 
@@ -116,18 +116,18 @@ if (reservoir_check==0) reservoir_balance=1
 	DO i=1,subasin
 	  !upstream basin referencing
 	  ih=which1(id_subbas_extern == upbasin(i))
-  
+
 	  IF (ih==0) THEN
 		  WRITE (*,'(A,I0,A)') 'unknown upstream subbasin ID ', upbasin(i),' in routing.dat'
 		  STOP
 	  else
 		upbasin(i)=ih
 	  END IF
-  
+
 	  !downstream basin referencing
 	  IF (downbasin(i) == 999 .OR. downbasin(i) == 9999) cycle 	!999 and 9999 mark outlet
 	  ih=which1(id_subbas_extern == downbasin(i))
-  
+
 	  IF (ih==0) THEN
 		  WRITE (*,'(A,I0,A)') 'unknown downstream subbasin ID ', downbasin(i),' in routing.dat'
 		  STOP
@@ -182,9 +182,9 @@ storcap(:)=0.
 	  if (istate/=0) exit !exit loop when no more line encountered
 	  j=j+1
 	  READ (fmtstr,*, IOSTAT=istate)dummy1
-	
+
       i=which1(id_subbas_extern == dummy1)
-  
+
 	  IF (i==0) THEN
 		  WRITE (*,'(A,I0,A)') 'unknown upstream subbasin ID ', dummy1,' in reservoir.dat'
 		  STOP
@@ -194,7 +194,7 @@ storcap(:)=0.
 			damflow(i),damq_frac(i),withdrawal(i),damyear(i),maxdamarea(i), &
 			damdead(i),damalert(i),dama(i),damb(i),qoutlet(i),fvol_bottom(i), &
 			fvol_over(i),damc(i),damd(i),elevbottom(i)
-      
+
 	  IF (istate/=0) THEN
 		  WRITE (*,'(A,i0,A,A)') 'Format error in reservoir.dat, line',j,':', fmtstr
 		  STOP
@@ -215,7 +215,7 @@ storcap(:)=0.
   CLOSE (11)
 
 ! Check lateral inflow directly into the subbasins' reservoir
-  latflow_res(1:subasin)=0.
+  latflow_res(1:subasin)=0
 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!lateral_inflow.dat not found
@@ -241,7 +241,7 @@ storcap(:)=0.
 	    ENDDO
       END DO
 	ENDIF
-  CLOSE (11)  
+  CLOSE (11)
 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat', IOSTAT=istate,STATUS='old')
 	IF (istate==0) THEN
@@ -254,7 +254,7 @@ storcap(:)=0.
           IF (dummy1 /= id_subbas_extern(i)) THEN
             WRITE(*,*) 'Sub-basin-IDs in file lateral_inflow.dat must have the same ordering scheme as in hymo.dat'
             STOP
-          END IF   
+          END IF
 
           IF (reservoir_down(i) /= 999.AND.reservoir_down(i) /= 9999) THEN
             j=1
@@ -273,10 +273,10 @@ storcap(:)=0.
         IF (dummy1 /= id_subbas_extern(i)) THEN
          WRITE(*,*) 'Sub-basin-IDs in file operat_rule.dat must have the same ordering scheme as in hymo.dat'
          STOP
-        END IF   
+        END IF
      ENDDO
 	ENDIF
-  CLOSE (11)  
+  CLOSE (11)
 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/operat_rule.dat', IOSTAT=istate,STATUS='old')
   IF (istate/=0) THEN					!operat_rule.dat not found
@@ -296,7 +296,7 @@ storcap(:)=0.
       IF (dummy1 /= id_subbas_extern(i)) THEN
         WRITE(*,*) 'Sub-basin-IDs in file operat_rule.dat must have the same ordering scheme as in hymo.dat'
         STOP
-      END IF   
+      END IF
 	ENDDO
   ENDIF
 
@@ -318,13 +318,13 @@ storcap(:)=0.
       IF (dummy1 /= id_subbas_extern(i)) THEN
         WRITE(*,*) 'Sub-basin-IDs in file operat_bottom.dat must have the same ordering scheme as in hymo.dat'
         STOP
-      END IF   
+      END IF
 	ENDDO
-  ENDIF 
-  
+  ENDIF
+
 !Ge stage-volume curves for each sub-basin
   nbrbat(1:subasin)=0
-  
+
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/cav.dat', IOSTAT=istate,STATUS='old')
   IF (istate/=0) THEN					!cav.dat not found
 	write(*,*)pfadp(1:pfadj)// 'Reservoir/cav.dat was not found. Run the model anyway.'
@@ -366,7 +366,7 @@ storcap(:)=0.
 	vol_bat=0
 
 	if (istate/=0) then
-		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in reservoir-module (rating curves too detailed).' 
+		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in reservoir-module (rating curves too detailed).'
 		stop
 	end if
 
@@ -376,16 +376,16 @@ storcap(:)=0.
    READ(11,*)
    READ(11,*)
    j=2
-   
+
    DO WHILE (.TRUE.)
 	  READ (11,'(A)', IOSTAT=istate)fmtstr
-	  
+
 	  if (istate/=0) exit !exit loop when no more line encountered
 	  j=j+1
 	  READ (fmtstr,*, IOSTAT=istate) dummy1, dummy2
-	
+
 	  i=which1(id_subbas_extern == dummy1)
-  
+
 	  IF (i==0) THEN
 		  WRITE (*,'(A,I0,A)') 'unknown upstream subbasin ID ', dummy1,' in cav.dat'
 		  STOP
@@ -404,7 +404,7 @@ storcap(:)=0.
 	  END IF
 	  READ(11,*,IOSTAT=istate) dummy1,dummy2,(vol_bat0(ka,i),ka=1,dummy2)
 	  j=j+1
-	  
+
       IF (istate/=0) THEN
 		  WRITE (*,'(A,i0,A,A)') 'Format error in cav.dat, line',j,':', fmtstr
 		  STOP
@@ -419,11 +419,11 @@ storcap(:)=0.
             'MINIMUM RESERVOIR LEVEL VALUE IS LESS THAN THE MINIMUM ELEVATION AT THE STAGE-AREA-VOLUME CURVE (FILE: cav.dat)'
         STOP
       END IF
-	
+
    END DO
    CLOSE(11)
   ENDIF
-  
+
   DO i=1,subasin
     nbrbat1=nbrbat(i)
     IF (nbrbat(i) /= 0) THEN
@@ -433,7 +433,7 @@ storcap(:)=0.
       END DO
     END IF
   END DO
-  
+
 !Ge initialization of the stage-volume curves for each sub-basin (erosion/deposition process)
   DO i=1,subasin
     nbrbat1=nbrbat(i)
@@ -456,8 +456,8 @@ storcap(:)=0.
             damdead(i)*1.e6 <= vol_bat(j+1,i)) THEN
           elevdead(i)=elev_bat(j,i)+((damdead(i)*1.e6)-vol_bat  &
                 (j,i))/(vol_bat(j+1,i)-vol_bat(j,i))*  &
-                (elev_bat(j+1,i)-elev_bat(j,i))  
-	    ENDIF        
+                (elev_bat(j+1,i)-elev_bat(j,i))
+	    ENDIF
         IF (damalert(i)*1.e6 >= vol_bat(j,i).AND.  &
             damalert(i)*1.e6 <= vol_bat(j+1,i)) THEN
           elevalert(i)=elev_bat(j,i)+((damalert(i)*1.e6)-vol_bat  &
@@ -476,7 +476,7 @@ storcap(:)=0.
         elevhelp=((damalert(i)*1.e6)/forma_factor(i))**(1./3.)
 	  else
         elevhelp=0.
-	  endif    
+	  endif
 	  elevalert(i)=elevhelp+minlevel(i)
     ENDIF
    ENDIF
@@ -499,7 +499,7 @@ storcap(:)=0.
   IF (dosediment) THEN
     CALL semres (status,upstream)
   END IF
-  
+
 !Ge initialization of output files
   OPEN(11,FILE=pfadn(1:pfadi)//'River_Velocity.out',STATUS='replace')
   if (f_river_velocity) then
@@ -512,7 +512,7 @@ storcap(:)=0.
   endif
 
   DO i=1,subasin
-    IF (storcap(i) /= 0.) THEN   
+    IF (storcap(i) /= 0.) THEN
       WRITE(subarea,*)id_subbas_extern(i)
 	  DO j=1,12
         IF (subarea(j:j) /= ' ') THEN
@@ -522,7 +522,7 @@ storcap(:)=0.
       END DO
 	  OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_watbal.out',STATUS='replace')
       IF (f_res_watbal) then
-	    WRITE(11,*)'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), elevation(m), area(m**2), volume(m**3)'		
+	    WRITE(11,*)'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), elevation(m), area(m**2), volume(m**3)'
         CLOSE(11)
 	  ELSE
         CLOSE(11, status='delete') !delete any existing file, if no output is desired
@@ -532,7 +532,7 @@ storcap(:)=0.
 
 !Ge initialization of output files
   DO i=1,subasin
-    IF (storcap(i) /= 0.) THEN   
+    IF (storcap(i) /= 0.) THEN
       WRITE(subarea,*)id_subbas_extern(i)
 	  DO j=1,12
         IF (subarea(j:j) /= ' ') THEN
@@ -542,7 +542,7 @@ storcap(:)=0.
       END DO
 	  OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_vollost.out',STATUS='replace')
       IF (f_res_vollost) then
-	    WRITE(11,*)'Subasin-ID, year, day, hour, deadvol(m**3), alertvol(m**3), storcap(m**3)'		
+	    WRITE(11,*)'Subasin-ID, year, day, hour, deadvol(m**3), alertvol(m**3), storcap(m**3)'
         CLOSE(11)
 	  ELSE
         CLOSE(11, status='delete') !delete any existing file, if no output is desired
@@ -553,7 +553,7 @@ storcap(:)=0.
 !Ge initialization of output files
   DO i=1,subasin
    IF (nbrbat(i) /= 0) THEN
-    IF (storcap(i) /= 0.) THEN   
+    IF (storcap(i) /= 0.) THEN
       WRITE(subarea,*)id_subbas_extern(i)
 	  DO j=1,12
         IF (subarea(j:j) /= ' ') THEN
@@ -563,7 +563,7 @@ storcap(:)=0.
       END DO
 	  OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_cav.out',STATUS='replace')
       IF (f_res_cav) then
-	    WRITE(11,*)'Subasin-ID, year, day, hour, 1st row: elev_bat(m), 2nd row: area_bat(m**2), 3rd row: vol_bat(m**3)'		
+	    WRITE(11,*)'Subasin-ID, year, day, hour, 1st row: elev_bat(m), 2nd row: area_bat(m**2), 3rd row: vol_bat(m**3)'
         CLOSE(11)
 	  ELSE
         CLOSE(11, status='delete') !delete any existing file, if no output is desired
@@ -576,34 +576,34 @@ storcap(:)=0.
 !Ge temporary output files to test the cascade routing scheme of the lake module
 !  IF (.not. doacud) THEN
 !   DO i=1,subasin
-!    IF (storcap(i) /= 0.) THEN   
+!    IF (storcap(i) /= 0.) THEN
 !	  OPEN(11,FILE=pfadn(1:pfadi)//'res_watbal_lake.out',STATUS='replace')
-!	    WRITE(11,*)'Subasin-ID, year, day, hour, inflow_classes(m**3), outflow_classes(m**3), retention_classes(m**3), volume_classes(m**3)'		
+!	    WRITE(11,*)'Subasin-ID, year, day, hour, inflow_classes(m**3), outflow_classes(m**3), retention_classes(m**3), volume_classes(m**3)'
 !      CLOSE(11)
 !	ENDIF
 !   ENDDO
 !   DO i=1,subasin
 !    IF (dosediment) THEN
-!     IF (storcap(i) /= 0.) THEN   
+!     IF (storcap(i) /= 0.) THEN
 !	  OPEN(11,FILE=pfadn(1:pfadi)//'res_sedbal_lake.out',STATUS='replace')
-!	    WRITE(11,*)'Subasin-ID, year, day, hour, sedinflow_classes(ton), sedoutflow_classes(ton), sedretention_classes(ton), sedimentation_class'		
+!	    WRITE(11,*)'Subasin-ID, year, day, hour, sedinflow_classes(ton), sedoutflow_classes(ton), sedretention_classes(ton), sedimentation_class'
 !      CLOSE(11)
 !	 ENDIF
 !	ENDIF
 !   ENDDO
 !  ELSE
 !   DO i=1,subasin
-!    IF (storcap(i) /= 0.) THEN   
+!    IF (storcap(i) /= 0.) THEN
 !	  OPEN(11,FILE=pfadn(1:pfadi)//'res_watbal_lake.out',STATUS='replace')
-!	    WRITE(11,*)'Subasin-ID, year, day, hour, inflow_strateg(m**3), outflow_strateg(m**3), retention_strateg(m**3), volume_strateg(m**3)'		
+!	    WRITE(11,*)'Subasin-ID, year, day, hour, inflow_strateg(m**3), outflow_strateg(m**3), retention_strateg(m**3), volume_strateg(m**3)'
 !      CLOSE(11)
 !	ENDIF
 !   ENDDO
 !   DO i=1,subasin
 !    IF (dosediment) THEN
-!     IF (storcap(i) /= 0.) THEN   
+!     IF (storcap(i) /= 0.) THEN
 !	  OPEN(11,FILE=pfadn(1:pfadi)//'res_sedbal_lake.out',STATUS='replace')
-!	    WRITE(11,*)'Subasin-ID, year, day, hour, sedinflow_strateg(ton), sedoutflow_strateg(ton), sedretention_strateg(ton), sedimentation_class'		
+!	    WRITE(11,*)'Subasin-ID, year, day, hour, sedinflow_strateg(ton), sedoutflow_strateg(ton), sedretention_strateg(ton), sedimentation_class'
 !      CLOSE(11)
 !	 ENDIF
 !	ENDIF
@@ -611,14 +611,14 @@ storcap(:)=0.
 !  ENDIF
 !**************************************************************************************
 
-  
+
 END IF
 
 
 ! -----------------------------------------------------------------------
 IF (STATUS == 1) THEN
 ! initialize ...
-  
+
 !Ge initialization of parameters
   DO i=1,subasin
     DO id=1,dayyear*nt
@@ -631,7 +631,7 @@ IF (STATUS == 1) THEN
     END DO
     damareaact(i)=0.
   END DO
-  
+
   !IF (t > tstart) THEN !Andreas
   DO i=1,subasin !Andreas
    IF (storcap(i) > 0.) THEN
@@ -656,22 +656,22 @@ IF (STATUS == 1) THEN
 	   dayminlevel(1,i)=minlevel(i)
      ELSE
        volact(1,i)=0.
-       daystorcap(1,i)=0. 
+       daystorcap(1,i)=0.
        daydamalert(1,i)=0.
        daydamdead(1,i)=0.
-       daymaxdamarea(1,i)=0. 
+       daymaxdamarea(1,i)=0.
        dayminlevel(1,i)=0.
 	 ENDIF
    END IF
 !write(*,*)id_subbas_extern(i),volact(1,i),storcap(i),vol0(i)
   END DO !Andreas
-  
-  
+
+
 !Ge water availability approach for reservoirs has to be included
   avail_ac(:,:)=0. !water availability
   avail_all(:,:)=0.   !water availability
   damex(:,:)=0.
-  
+
 !  actual storage capacity in this year (as derived from the data in ??.dat)
 !  storcapact=0.
 !  DO i=1,subasin
@@ -696,7 +696,7 @@ IF (STATUS == 1) THEN
             volact(1,i)*1.e6 <= vol_bat(j+1,i)) THEN
           damareaact(i)=area_bat(j,i)+((volact(1,i)*1.e6)-vol_bat  &
                 (j,i))/(vol_bat(j+1,i)-vol_bat(j,i))*  &
-                (area_bat(j+1,i)-area_bat(j,i))  
+                (area_bat(j+1,i)-area_bat(j,i))
 	    ENDIF
 	  ENDDO
      ELSE
@@ -711,13 +711,13 @@ IF (STATUS == 1) THEN
 !write(*,*)id_subbas_extern(i),damareaact(i),volact(1,i)*1.e6,dama(i),damb(i)
   END DO
 !  stop
-   
+
 !Ge read daily data on reservoir level and outflow discharges
  IF (reservoir_check == 1) THEN
    IF (reservoir_balance == 0) THEN
     DO i=1,subasin
      IF (t >= damyear(i)) THEN !Andreas
-	  IF (storcap(i) > 0.) THEN 
+	  IF (storcap(i) > 0.) THEN
         WRITE(subarea,*)id_subbas_extern(i)
 	    DO j=1,12
           IF (subarea(j:j) /= ' ') THEN
@@ -734,7 +734,7 @@ IF (STATUS == 1) THEN
             READ(11,*)
           END DO
           DO id=1,dayyear*nt
-            READ(11,*) dummy1,dummy2,r_precip,r_etp,r_qinflow, & 
+            READ(11,*) dummy1,dummy2,r_precip,r_etp,r_qinflow, &
 				r_overflow,r_qintake,r_qbottom,r_level0,r_level1
 	        damelev0(id,i)=r_level0
 	        damelev1(id,i)=r_level1
@@ -767,7 +767,7 @@ IF (STATUS == 1) THEN
    IF (reservoir_balance == 1) THEN
     DO i=1,subasin
      IF (t >= damyear(i)) THEN !Andreas
-	  IF (storcap(i) > 0.) THEN 
+	  IF (storcap(i) > 0.) THEN
         WRITE(subarea,*)id_subbas_extern(i)
 	    DO j=1,12
           IF (subarea(j:j) /= ' ') THEN
@@ -843,7 +843,7 @@ IF (STATUS == 1) THEN
   IF (reservoir_balance == 1) THEN
    DO i=1,subasin
     IF (t >= damyear(i)) THEN
-     IF (damq_frac(i) == -888.) THEN 
+     IF (damq_frac(i) == -888.) THEN
       WRITE(subarea,*)id_subbas_extern(i)
 	  DO j=1,12
        IF (subarea(j:j) /= ' ') THEN
@@ -879,12 +879,12 @@ IF (STATUS == 1) THEN
 
 
 
-  
+
 END IF
 
 ! -----------------------------------------------------------------------
 IF (STATUS == 2) THEN
-  
+
 ! simulation timestep
   if (river_transport.ne.1) then
     hour=res_h
@@ -896,7 +896,7 @@ IF (STATUS == 2) THEN
 
 ! Computation of reservoir water balance
   IF (storcap(upstream) > 0.) THEN
-    IF (reservoir_balance == 1) THEN   
+    IF (reservoir_balance == 1) THEN
       IF (reservoir_check == 1) THEN
 	    qinflow(step,upstream)=qinflow(step,upstream)*(86400./nt)
 	  ELSE
@@ -945,10 +945,10 @@ IF (STATUS == 2) THEN
         volact(step,upstream)=help
 	  ELSE
 	    lakeret(step,upstream)=qinflow(step,upstream)
-        volact(step,upstream)=help3	    
+        volact(step,upstream)=help3
       END IF
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),help,volact(step,upstream),daystorcap(step,upstream),overflow(step,upstream)
-!if (d==31)stop      
+!if (d==31)stop
 !write(*,'(2I4,4F15.3)')d,id_subbas_extern(upstream),fvol_over(upstream),daystorcap(step,upstream),volact(step,upstream)+qinflow(step,upstream),overflow(step,upstream)
 !write(*,'(2I4,4F15.3)')d,id_subbas_extern(upstream),volact(step,upstream)
 
@@ -977,9 +977,9 @@ IF (STATUS == 2) THEN
       damelevact(upstream)=elevhelp
       damareaact(upstream)=areahelp
 !write(*,'(2I4,4F15.3)')d,id_subbas_extern(upstream),damelevact(upstream),damareaact(upstream)
-      
-      
-! Calculation of increase or decrease of the reservoir level due to precip and evap.     
+
+
+! Calculation of increase or decrease of the reservoir level due to precip and evap.
 ! (using the stage-area-volume curve)
       evaphelp2=0.
       IF (nbrbat(upstream) /= 0) THEN
@@ -1020,7 +1020,7 @@ IF (STATUS == 2) THEN
       ELSE
         evaphelp=MIN(volact(step,upstream),(res_pet(step,upstream)/1000.)*areahelp)
         prechelp=(res_precip(step,upstream)/1000.)*areahelp
-        infhelp=0.               
+        infhelp=0.
         volact(step,upstream)=volact(step,upstream)+ (prechelp-evaphelp-infhelp)
 
 ! Check overflow due to precipitation
@@ -1032,7 +1032,7 @@ IF (STATUS == 2) THEN
 !write(*,'(2I4,4F15.3)')d,id_subbas_extern(upstream),overflow(step,upstream),volact(step,upstream)
 !write(*,'(2I4,3F15.4)')step,id_subbas_extern(upstream),volact(step,upstream)
 
-      
+
 ! 3) reservoir evaporation in mm
       IF (nbrbat(upstream) /= 0) THEN
         evapdam(step,upstream)=MAX(0.,res_pet(step,upstream)-(evaphelp2*1.e3))
@@ -1042,10 +1042,10 @@ IF (STATUS == 2) THEN
 !     reservoir evaporation in Mio m**3
       etdam(step,upstream)=evaphelp/1.e6
       infdam(step,upstream)=infhelp/1E6
-      
-      
+
+
 ! 4) Check flow through the reservoir
-! 4a) Water intake device 
+! 4a) Water intake device
 !     - dam outflow is fraction of Q90
 !     - according to J.C.Araújo this fraction is estimated to be 90%,
 !       and 80% for larger, strategic dams (e.g. Oros)
@@ -1053,7 +1053,7 @@ IF (STATUS == 2) THEN
 !     - no outflow if storage is below dead volume (if given for dam)
 !     - for non-strategic dams outflow is demand of regular (mean precip) years
 !       (not yet implemented)
-      
+
 ! Calculation of the maximum controlled outflow discharge using a factor defined in the reservoir.dat
 	  IF (damq_frac(upstream) >= 0.0) THEN !Andreas
 	    helpout=damflow(upstream)*damq_frac(upstream)
@@ -1087,7 +1087,7 @@ IF (STATUS == 2) THEN
       IF (volact(step,upstream) < (daydamdead(step,upstream)+helpout))THEN
         helpout=volact(step,upstream)-daydamdead(step,upstream)
       END IF
-      
+
       IF (volact(step,upstream) <= daydamdead(step,upstream)) helpout=0.
       IF (elevdead(upstream) <= dayminlevel(step,upstream)) helpout=0.
  !write(*,*)step,id_subbas_extern(upstream),helpout/86400.
@@ -1104,7 +1104,7 @@ IF (STATUS == 2) THEN
                 operat_elev(upstream) <= elev_bat(j+1,upstream)) THEN
             volhelp=vol_bat(j,upstream)+(operat_elev(upstream)-elev_bat  &
                 (j,upstream))/(elev_bat(j+1,upstream)-elev_bat(j,upstream))*  &
-                (vol_bat(j+1,upstream)-vol_bat(j,upstream))          
+                (vol_bat(j+1,upstream)-vol_bat(j,upstream))
          END IF
         END DO
       ELSE
@@ -1139,7 +1139,7 @@ IF (STATUS == 2) THEN
 	  ENDIF
 
 !write(*,'(3I4,3F15.4)')step,operat_start(upstream),operat_stop(upstream),fvol_bottom(upstream)
-	
+
 !      IF (elevbottom(upstream) <= dayminlevel(step,upstream)) helpout=0.
 
 !write(*,*)step,id_subbas_extern(upstream),helpout,fvol_bottom(upstream),volact(step,upstream),daystorcap(step,upstream)
@@ -1166,7 +1166,7 @@ IF (STATUS == 2) THEN
 !write(*,'(2I4,6F11.1)')step,id_subbas_extern(upstream),help,help1,help2,help3,volact(step,upstream),daystorcap(step,upstream)
         IF (help1 > daystorcap(step,upstream)) THEN
 !write(*,'(2I4,6F15.2)')step,id_subbas_extern(upstream),help,help2
-         call reservoir_routing(upstream,help,help2)  
+         call reservoir_routing(upstream,help,help2)
 !         help=max(0.,help-overflow(step,upstream))
          if(help2 > daystorcap(step,upstream)) lakeret(step,upstream)=lakeret(step,upstream)+(max(0.,volact(step,upstream)-help2))
          if(help2 <= daystorcap(step,upstream)) lakeret(step,upstream)=lakeret(step,upstream)+(max(0.,volact(step,upstream)-daystorcap(step,upstream)))
@@ -1204,7 +1204,7 @@ IF (STATUS == 2) THEN
                 (area_bat(j+1,upstream)-area_bat(j,upstream))
             elevhelp=elev_bat(j,upstream)+(volact(step,upstream)-vol_bat  &
                 (j,upstream))/(vol_bat(j+1,upstream)-vol_bat(j,upstream))*  &
-                (elev_bat(j+1,upstream)-elev_bat(j,upstream))           
+                (elev_bat(j+1,upstream)-elev_bat(j,upstream))
           END IF
         END DO
       ELSE
@@ -1224,8 +1224,8 @@ IF (STATUS == 2) THEN
 	  qbottom(step,upstream)=qbottom(step,upstream)/(86400./nt)
 
 
-! Calculation of reservoir surface area and reservoir volume when inflow discharges, outflow discharges 
-! and reservoir levels are still provided in the res_"ID_SUBBAS_EXTERN"_daily.dat      
+! Calculation of reservoir surface area and reservoir volume when inflow discharges, outflow discharges
+! and reservoir levels are still provided in the res_"ID_SUBBAS_EXTERN"_daily.dat
     ELSE IF (reservoir_balance == 0) THEN
 
 !      write(*,*)t,d,hour,upstream,qinflow(step,upstream)
@@ -1248,7 +1248,7 @@ IF (STATUS == 2) THEN
             areahelp=area_bat(j,upstream)+(damelevact(upstream)-elev_bat  &
                 (j,upstream))/(elev_bat(j+1,upstream)-elev_bat(j,upstream))*  &
                 (area_bat(j+1,upstream)-area_bat(j,upstream))
-            
+
          END IF
         END DO
       ELSE
@@ -1259,15 +1259,15 @@ IF (STATUS == 2) THEN
       damareaact(upstream)=areahelp
 	  volact(step,upstream)=volhelp
     ENDIF
-    damex(step,upstream)=res_qout(step,upstream)+withdrawal(upstream)    
+    damex(step,upstream)=res_qout(step,upstream)+withdrawal(upstream)
 
-! Call sediment balance sub-routine     
+! Call sediment balance sub-routine
     IF (dosediment) then
-      CALL semres (status,upstream)  
+      CALL semres (status,upstream)
 
 !write(*,'(2I4,3F15.4)')d,id_subbas_extern(upstream),decstorcap(step,upstream),dayminlevel(step,upstream),daystorcap(step,upstream)
 
-! Calculation of storage capacity reduction  
+! Calculation of storage capacity reduction
       if (decstorcap(step,upstream)/=0.) then
 
 ! CASE 1: stage-area-volume curve is not provided
@@ -1414,7 +1414,7 @@ IF (STATUS == 2) THEN
 	      else
 	       daymaxdamarea(step,upstream)=0.
 	      endif
-	     enddo 
+	     enddo
 	    endif
 
 ! CASE 2b: detailed information of the reservoir geometry is provided (cross sections)
@@ -1473,7 +1473,7 @@ IF (STATUS == 2) THEN
 	      else
 	       daymaxdamarea(step,upstream)=0.
 	      endif
-	     enddo 
+	     enddo
 	    endif
 	   endif
 	  endif
@@ -1490,7 +1490,7 @@ IF (STATUS == 2) THEN
          dummy1=j
          EXIT
        END IF
-     END DO     
+     END DO
 	 IF (f_res_watbal) THEN
      OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_watbal.out',STATUS='old',  &
 		  POSITION='append')
@@ -1500,8 +1500,8 @@ IF (STATUS == 2) THEN
      CLOSE(11)
 	 ENDIF
 
-     
-! print storage losses due to reservoir sedimentation     
+
+! print storage losses due to reservoir sedimentation
 	 IF (f_res_vollost) THEN
      OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_vollost.out',STATUS='old',  &
 		  POSITION='append')
@@ -1510,7 +1510,7 @@ IF (STATUS == 2) THEN
      CLOSE(11)
 	 ENDIF
 
-! print temporal evolution of the stage-area-volume curve, when the initial curve is given by the user     
+! print temporal evolution of the stage-area-volume curve, when the initial curve is given by the user
      write(fmtstr,'(a,i0,a)')'(4I6,',nbrbat(upstream),'F15.2)'		!generate format string
      IF (nbrbat(upstream) /= 0) THEN
 	  IF (f_res_cav) THEN
@@ -1532,17 +1532,17 @@ IF (STATUS == 2) THEN
 	 ENDDO
 	ENDIF
 
-	  
+
     volact(step,upstream)=volact(step,upstream)/1.e6
 	daymaxdamarea(step,upstream)=daymaxdamarea(step,upstream)/1.e4
 	daystorcap(step,upstream)=daystorcap(step,upstream)/1.e6
 	daydamalert(step,upstream)=daydamalert(step,upstream)/1.e6
 	daydamdead(step,upstream)=daydamdead(step,upstream)/1.e6
 	damflow(upstream)=damflow(upstream)/(86400./nt)
-	qoutlet(upstream)=qoutlet(upstream)/(86400./nt)    
+	qoutlet(upstream)=qoutlet(upstream)/(86400./nt)
 	withdrawal(upstream)=withdrawal(upstream)/(86400./nt)
-      
-      
+
+
 	IF (step < dayyear*nt) THEN
 	  volact(step+1,upstream)=volact(step,upstream)
 	  daystorcap(step+1,upstream)=daystorcap(step,upstream)
@@ -1553,8 +1553,8 @@ IF (STATUS == 2) THEN
 	END IF
 
 !write(*,'(2I4,3F15.4)')d,id_subbas_extern(upstream),dayminlevel(step,upstream),decstorcap(step,upstream)
-!if (d==4)stop		
-  
+!if (d==4)stop
+
 ! END of IF (storcap(upstream) > 0.) THEN
   ENDIF
 
@@ -1567,7 +1567,7 @@ IF (STATUS == 3) THEN
 ! Output files of Reservoir Modules
   IF (reservoir_print == 1) THEN
     DO i=1,subasin
-      IF (storcap(i) /= 0. .and. t >= damyear(i)) THEN   
+      IF (storcap(i) /= 0. .and. t >= damyear(i)) THEN
         WRITE(subarea,*)id_subbas_extern(i)
 	    DO j=1,12
           IF (subarea(j:j) /= ' ') THEN
@@ -1613,7 +1613,7 @@ IF (STATUS == 3) THEN
 		IF (f_res_cav) THEN
         OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_cav.out',STATUS='old',  &
 		    POSITION='append')
-	    write(fmtstr,'(a,i0,a)')'(4I6,',nbrbat(i),'F15.2)'		!generate format string	    
+	    write(fmtstr,'(a,i0,a)')'(4I6,',nbrbat(i),'F15.2)'		!generate format string
 		DO d=1,dayyear
 	      DO ih=1,nt
 		    hour=ih
@@ -1632,8 +1632,8 @@ IF (STATUS == 3) THEN
     ENDDO
   ENDIF
 
-!Check simulation results for the Bengue catchment 
-!Grouping results on water and sediment balance of all reservoirs in the Bengue catchment into the reservoir classes 
+!Check simulation results for the Bengue catchment
+!Grouping results on water and sediment balance of all reservoirs in the Bengue catchment into the reservoir classes
 !***************************************************************************************************************
 !  IF (reservoir_print == 1) THEN
 !   IF (.not. doacud) THEN
@@ -1800,8 +1800,8 @@ IF (STATUS == 3) THEN
 !  ENDIF
 !***************************************************************************************************************
 
-  IF (dosediment) CALL semres (status,upstream)  
-  
+  IF (dosediment) CALL semres (status,upstream)
+
 END IF
 
 

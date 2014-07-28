@@ -120,7 +120,7 @@ SUBROUTINE readhymo
 
     ! Till: reading of rainy_season.dat modified to be independent of ordering scheme in file
     ! 2005-09-26
- 
+
     ! Till: allow variable line length in soter.dat (no dummy columns for non-existent TCs)
     ! 2005-08-08
 
@@ -270,7 +270,7 @@ SUBROUTINE readhymo
         end if
     END DO
     CLOSE(11)
-    
+
     if (size(whichn(id_subbas_intern(1:subasin)==0,0))>0) then    !check if there are subbasins read from routing.dat that were not found in hymo.dat
         write(*,*)'ERROR: The following subbasins have been listed in routing.dat, but are missing in hymo.dat:'
         write(*,*)id_subbas_extern(whichn(id_subbas_intern(1:subasin)==0,0))
@@ -346,22 +346,21 @@ SUBROUTINE readhymo
     if (dummy1>5) then !6 columns, containing beta correction factor and TC-wise SDR
         allocate(sdr_tc(nterrain))
         sdr_tc=1.        !default value, no SDR correction
-    end if    
-    
-    
+    end if
+
+
     if (dummy1==4) then !4 columns, old version
         READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),i=1,nterrain)
     elseif (dummy1==5) then !5 columns, containing beta correction factor
         READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),i=1,nterrain)
-        if (.NOT. dosediment) deallocate(beta_fac_tc)
     elseif (dummy1==6) then !6 columns, containing beta correction factor and TC-wise SDR
         READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),sdr_tc(i),i=1,nterrain)
     end if
 
-    if (.NOT. dosediment) then
-        deallocate(beta_fac_tc)
-        deallocate(sdr_tc)
-    end if
+    if ( (.NOT. dosediment) .AND. allocated(beta_fac_tc)) deallocate(beta_fac_tc)
+
+    if ( (.NOT. dosediment) .AND. allocated(sdr_tc)) deallocate(sdr_tc)
+
 
     !slope=slope*sensfactor
     CLOSE(11)
@@ -384,7 +383,7 @@ SUBROUTINE readhymo
 
 	i=1
     !DO i=1,ntcinst
-	DO WHILE (.TRUE.) !read till end of file 
+	DO WHILE (.TRUE.) !read till end of file
         READ(11,'(a)',IOSTAT=istate) cdummy
         if (istate/=0) then
 			if ((h-4<ntcinst)  ) then    !premature end of file
@@ -399,7 +398,7 @@ SUBROUTINE readhymo
 			end if
 		end if
         h=h+1 !count lines
-    
+
         dummy1=GetNumberOfSubstrings(cdummy)-5 !Till: count number of fields (ie SVCs) specified for this combination
         if (dummy1 > maxsoil) then
             write (*,*)'Line ',h,' in soil_vegetation.dat contains ',dummy1,' soil types - more than specified in maxdim.dat or assumed by default.'
@@ -427,7 +426,7 @@ SUBROUTINE readhymo
 			h=h+1 !count lines
 			i=i+1 !count instances that have been read
 		end if
-  
+
         if (istate/=0) then    !premature end of file
             write(*,'(a,i0)')'ERROR (soil_vegetation.dat): Format error or unexpected end in line ',h
             stop
@@ -474,7 +473,7 @@ SUBROUTINE readhymo
     shrink = 0.
     DO j=1,nsoil
 
-  
+
         READ(11,'(a)',IOSTAT=istate) cdummy
         if ((istate/=0).OR. (trim(cdummy)=='')) then
             write(*,*)'ERROR: in soil.dat: Expected ',nsoil,', found ',j-1,' soil types.'
@@ -482,7 +481,7 @@ SUBROUTINE readhymo
         end if
 
         dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields
- 
+
         if (dummy1 > 2+maxhori*13+1+(c-3)) then
             write (*,'(A,i0,a,i0,a)')'Line ',h,' in soil.dat contains ',(dummy1-3-(c-3))/13,' horizons - more than specified in maxdim.dat or assumed by default.'
             stop
@@ -542,8 +541,8 @@ SUBROUTINE readhymo
         seasonality_p=>seasonality_array('p_seasons.dat')    !read seasonality of P-factor
         seasonality_coarse=>seasonality_array('coarse_seasons.dat')    !read seasonality of coarse fraction factor
         seasonality_n=>seasonality_array('n_seasons.dat')    !read seasonality of Manning's n
-    
-    
+
+
         !** read SVC information (numbering scheme, erosion properties)
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/svc.dat', IOSTAT=istate,STATUS='old')
         IF (istate/=0) THEN
@@ -552,7 +551,7 @@ SUBROUTINE readhymo
         END IF
         READ(11,*)
         READ(11,*)
-    
+
         i=0            !for counting SVC records
         DO WHILE (.TRUE.)
             READ(11,'(a)', IOSTAT=k) cdummy
@@ -562,12 +561,12 @@ SUBROUTINE readhymo
             END IF
             i=i+1            !increase record counter
         END DO
-    
+
         k=0    !count number of columns to be expected in file
 
         allocate(id_svc_extern(i))    !allocate memory for SVC-IDs to be read
-    
-    
+
+
         j=(tstop-tstart)+1        !number of years to simulate
         allocate (svc_k_fac(i, max(1,SIZE(seasonality_k,dim=2)/j)))
         if (SIZE(seasonality_k,dim=2)==1) then
@@ -615,7 +614,7 @@ SUBROUTINE readhymo
         rewind(11)
         READ(11,*)
         READ(11,*)
-    
+
         k=k+3    !3 IDs plus numerous fields
         write(fmtstr,*)'(3i, ', SIZE(seasonality_k,dim=2),'F, ',SIZE(seasonality_c,dim=2),'F, ',SIZE(seasonality_p,dim=2),'F, ',SIZE(seasonality_coarse,dim=2),'F, ',SIZE(seasonality_n,dim=2),'F)'    !gererate format string according to number of columns to be expected
         DO i=1,nsvc
@@ -638,7 +637,7 @@ SUBROUTINE readhymo
     end if
 
     if (dosediment)    then                !Till: if erosion is to be modelled, read these files
-    
+
         !** read particle size classes
         OPEN(11,FILE=pfadp(1:pfadj)// 'part_class.dat', IOSTAT=istate,STATUS='old')
         IF (istate/=0) THEN                    !part_class.dat not found
@@ -660,13 +659,13 @@ SUBROUTINE readhymo
                 END IF
                 i=i+1                    !increase record counter
             END DO
-        
+
             allocate(upper_limit(n_sed_class))    !allocate memory for particle size classes to be read
             allocate(particle_classes(n_sed_class))    !allocate memory for particle size classes to be read
             rewind(11)
             READ(11,*)
             READ(11,*)
-        
+
             DO i=1,n_sed_class
                 READ(11,*,  IOSTAT=istate) j, temp1
                 IF (istate/=0) THEN            !no further line
@@ -676,7 +675,7 @@ SUBROUTINE readhymo
                 upper_limit(i)=temp1        !store upper limit of particle size class
             END DO
             CLOSE(11)
-    
+
             !convert class limits to "mean" diameter
             DO i=2,n_sed_class
                 particle_classes(i)=sqrt(upper_limit(i)*upper_limit(i-1))        !use geometric mean as a mean diameter for each class
@@ -684,7 +683,7 @@ SUBROUTINE readhymo
             particle_classes(1)=upper_limit(1)/sqrt(2.)    !use arithmetic mean for first class (geometric won't work here)
 
         END IF
-    
+
         !** read particle size information for uppermost soil horizons
         k=0
         IF (n_sed_class > 1) THEN    !if several particle classes are to be treated, try to open file
@@ -699,10 +698,10 @@ SUBROUTINE readhymo
         ELSE
             READ(11,*)
             READ(11,*)
-        
+
             allocate(soil_particles(nsoil, n_sed_class))    !allocate memory for each soil and particle class
             soil_particles(:,:)=-1.                            !to detect missing values later
-                
+
             loop=3                                            !line counter
             READ(11,*,  IOSTAT=istate) i, ii, temp1
             DO WHILE (istate==0)
@@ -731,7 +730,7 @@ SUBROUTINE readhymo
         END IF
 
 
-    
+
 
         !** read SVC relations towards TCs
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/svc_in_tc.dat', IOSTAT=istate,STATUS='old')
@@ -741,7 +740,7 @@ SUBROUTINE readhymo
         END IF
         READ(11,*)
         READ(11,*)
-    
+
         nbr_svc2=0
 
         DO WHILE (.TRUE.)        !count SVCs in each TC
@@ -774,11 +773,11 @@ SUBROUTINE readhymo
             END IF
             k=id_ext2int(i, id_terrain_extern)    !convert to internal id
             n=id_ext2int(j, id_svc_extern)    !convert to internal id
-        
+
             nbr_svc2(k)=nbr_svc2(k)+1
             tc_contains_svc2(k)%p(nbr_svc2(k))%svc_id=n    !store internal id
             tc_contains_svc2(k)%p(nbr_svc2(k))%fraction=temp1    !store SVC-fraction
-        
+
         END DO
         CLOSE(11)
 
@@ -829,7 +828,7 @@ SUBROUTINE readhymo
                 stop
             end if
             k_sat(i,:)=k_sat(i,:)*temp1                !modify Ksat of specified soil
-        
+
         END DO
         CLOSE(11)
     END IF
@@ -1000,7 +999,7 @@ SUBROUTINE readhymo
         END DO
     END DO
 
-    
+
 
 
 
@@ -1073,7 +1072,7 @@ SUBROUTINE readhymo
 
         END DO
 
-    
+
     !    do id_tc_type=1,size(tc_contains_svc2)    !loop over all TC-types
     !        i=size(tc_contains_svc2(id_tc_type)%p)        !number of SVCs in current TC
     !        temp1=0
@@ -1123,7 +1122,7 @@ SUBROUTINE readhymo
                 tcid_instance=tcallid(sb_counter,lu_counter,tc_counter)    !id of TC instance
                 if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
                 id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
-    
+
                 do svc_counter=1,nbr_svc(tcid_instance)    !check all SVCs of the current TC
                     temp1= sum(frac_svc(:,tcid_instance)) + rocky(tcid_instance) !current sum of fractions
                     if (temp1>1.5 .OR. temp1<0.66) then
@@ -1169,12 +1168,12 @@ SUBROUTINE readhymo
         DO j=1,nbr_svc(n)
             test=luse_subbas(n)
             id_soil_int=id_soil_intern(j,n)
-    
+
             h=nbrhori(id_soil_int)
             DO i=1,h
                 horiz_thickness(n,j,i)=temp_hori_thick(id_soil_int,i) !Till: horizon thicknesses are stored for each instance of a soil
             END DO
-    
+
             !  determine lowest horizon to which roots go down
             temp1=maxval(rootdep(id_veg_intern(j,n),:))
             svcrooth(n,j)=99
@@ -1187,25 +1186,25 @@ SUBROUTINE readhymo
                 END IF
                 i=i+1
             END DO
-    
-    
+
+
             id_lu_ext=luse_lu(n)
             id_lu_int=1
             DO WHILE (id_lu_extern(id_lu_int) /= id_lu_ext)
                 id_lu_int=id_lu_int+1
             END DO
-    
+
             !  if no permanent groundwater table (normal case)
             IF (gw_flag(id_lu_int) == 0 .OR. gw_flag(id_lu_int) == 1) THEN
-      
+
                 !  bedrock is given for soil profile
                 IF (bedrock(id_soil_int) == 1) THEN
                     svcbedr(n,j)=1
                 END IF
-        
+
                 !  no bedrock is given for soil profile or this is an alluvial soil (is always extended to maxdepth, regardless of bedrock flag)
                 IF (bedrock(id_soil_int) == 0 .OR. (alluvial_flag(id_soil_int)==1)) THEN
-        
+
                       !id_soil_extern(id_soil_int)
                     IF (alluvial_flag(id_soil_int)==1) THEN
                         temp1=maxdep(id_lu_int)    !Till: alluvial soils reach at least to maxdepth of LU
@@ -1215,14 +1214,14 @@ SUBROUTINE readhymo
 
                     !  if bedrock depth is given for LU...
                     IF (temp1>0.) THEN    !...extent lowest horizon, if necessary
-            
+
                         IF (alluvial_flag(id_soil_int)==1) THEN
                             svcbedr(n,j)=bedrock(id_soil_int)    !alluvial soils are always extended but keep their original bedrock flag
                         ELSE
                             svcbedr(n,j)=1
                         END IF
-            
-          
+
+
                         IF (sum(temp_hori_thick(id_soil_int,:)) < temp1) THEN !Till: expand deepest horizon to bedrock, if necessary
                             IF (h > 1) THEN
                                 horiz_thickness(n,j,h)=temp1-sum(temp_hori_thick(id_soil_int,1:h-1))
@@ -1234,7 +1233,7 @@ SUBROUTINE readhymo
                     ELSE
                         svcbedr(n,j)=0                                !Till: expand deepest horizon to rooting depth, if necessary
                         temp1=maxval(rootdep(id_veg_intern(j,n),:))    !get maximum rooting depth
-          
+
                         IF (sum(temp_hori_thick(id_soil_int,:)) < temp1) THEN    !if rooting depth is greater than specified horizons
                             IF (h > 1) THEN                                !enlarge deepest horizon to maximum rooting depth
                                 horiz_thickness(n,j,h)=temp1-sum(temp_hori_thick(id_soil_int,1:h-1))
@@ -1287,7 +1286,7 @@ SUBROUTINE readhymo
             idummy=id_soil_intern(j,i)
             DO h=1,nbrhori(idummy)
                 temp1=poresz(idummy,h)+1.
-      
+
                 if (bubble(idummy,h)<=0.) then
                     write(*,'(a,i0,a,i0)')'ERROR: Non-positive bubble pressure point for soil ',id_soil_extern(idummy), ', horizon ',h
                     stop
@@ -1316,7 +1315,7 @@ SUBROUTINE readhymo
             id_soil_int=id_soil_intern(j,i)
 
             temp2=sum(horiz_thickness(i,j,1:nbrhori(id_soil_int))*thetas(id_soil_int,1:nbrhori(id_soil_int))*(1.-coarse(id_soil_int,1:nbrhori(id_soil_int))))    !Till: sum up overall potential storage of this profile
-    
+
             horiths(i,j,1:nbrhori(id_soil_int))=thetas(id_soil_int,1:nbrhori(id_soil_int))*horiz_thickness(i,j,1:nbrhori(id_soil_int))* (1.-coarse(id_soil_int,1:nbrhori(id_soil_int)))/temp2    !Till: relative distribution of maximum water storage among horizons of a profile
         END DO
     END DO
@@ -1391,7 +1390,7 @@ SUBROUTINE readhymo
         ! Use Map IDs in the previous expressions
         END DO
         CLOSE(11)
-  
+
         !Eva this relates the MAP IDs (id_subbas_extern(subasin)) to the sorted CODE IDs (id_subbas_intern(subasin)),
         DO i=1,ntrans
             j=1
@@ -1413,7 +1412,7 @@ SUBROUTINE readhymo
             END DO
             trans_end(1,i)=j
         END DO
-  
+
     END IF
 
 
@@ -1549,7 +1548,7 @@ contains
 
         implicit none
         character(len=*), INTENT(IN)                  :: inputfile_name    !name of input file
-        integer, pointer :: node_days(:,:)    
+        integer, pointer :: node_days(:,:)
         integer :: i,j,k
 
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/'//inputfile_name,STATUS='old',IOSTAT=istate)
@@ -1560,10 +1559,10 @@ contains
         else
             allocate(node_days(subasin,(tstop-tstart+1)*4))
             node_days=-1000    !initialise entire array to detect missing data after reading
-            
+
             READ(11,*); READ(11,*); READ(11,*)    !read headerlines
             loop=3
-            READ(11,*,IOSTAT=k) dummy1, dummy2,(idummy2(i),i=1,4) 
+            READ(11,*,IOSTAT=k) dummy1, dummy2,(idummy2(i),i=1,4)
             DO WHILE (k==0)
                 IF ((dummy2 > tstop) .OR. (dummy2 < tstart)) THEN        !found specification for a year that is out of the simulation range
                 !        WRITE (*,'(a, I4, a, I4,a)') inputfile_name//', line ', loop, ': year ', dummy2 ,' out of simulation range, ignored.'
@@ -1583,14 +1582,14 @@ contains
 
             DO i=1,years !check completeness
                 DO j=1,subasin
-                    IF (size(whichn(node_days(j,(i-1)*4+1:i*4)==-1000,0))>0) then        !found seasonality_array_old/subbasin for which no seasonality data has been read 
+                    IF (size(whichn(node_days(j,(i-1)*4+1:i*4)==-1000,0))>0) then        !found seasonality_array_old/subbasin for which no seasonality data has been read
                         WRITE(*,'(a, I0, a, I0)') inputfile_name//': Sub-basin ', id_subbas_extern(j),&
                             ' lacks seasonality data for simulation year ', i+tstart-1
                         STOP
                     END IF
                 END DO
             END DO
-            
+
             j=0        !count days of completed years
             do i=1,(tstop-tstart+1)    !loop through all simulation years and generate daynumber (starting from begin of first year) of all periods/nodes
                 node_days(:,4*(i-1)+1:4*i)=node_days(:,4*(i-1)+1:4*i)+j    !increase each entry by offset specified by j
@@ -1610,8 +1609,8 @@ contains
                     END IF
                 END DO
             END DO
-        
-            
+
+
         end if
 
     END FUNCTION seasonality_array
@@ -1650,13 +1649,13 @@ SUBROUTINE read_pre_subbas_outflow    !Till: reads predefined subbasin outflow (
     INTEGER   :: columnheader(1000)    !Till: for storing column headings of input files
     CHARACTER (LEN=1000) :: linedummy    !Till: dummy for reading input header
     INTEGER,save  :: no_columns(2)        !number of columns of input files for the input file
-  
+
     IF (do_pre_outflow .AND. .NOT. allocated(pre_subbas_outflow)) THEN    !first call of function
         do_pre_outflow=.FALSE.
         OPEN(91,FILE=pfadp(1:pfadj)// '/Time_series/subbasin_out.dat',IOSTAT=i,STATUS='old')
         IF (i==0) THEN
             write(*,*)'Reading pre-specified subbasin outflow from file...'
-  
+
             READ(91,*)        !skip headerlines
             READ(91,*)
 
@@ -1665,7 +1664,7 @@ SUBROUTINE read_pre_subbas_outflow    !Till: reads predefined subbasin outflow (
             no_columns(1)=GetNumberOfSubstrings(linedummy)-2    !Till: count number of columns
             allocate (pre_subbas_outflow(366,nt,no_columns(1)))
             pre_subbas_outflow(:,:,:)=-2.
-  
+
             READ (linedummy,*) dummy, dummy, (columnheader(i), i=1,no_columns(1))    !Till: extract column headers
             corr_column_pre_subbas_outflow=>set_corr_column(columnheader, 'subbasin_out.dat')
             WHERE(corr_column_pre_subbas_outflow/=0)
@@ -1677,7 +1676,7 @@ SUBROUTINE read_pre_subbas_outflow    !Till: reads predefined subbasin outflow (
             end if
 
             do_pre_outflow=.TRUE.
- 
+
             call date_seek(91,tstart,mstart, dstart, 'subbasin_out.dat')    !set internal filepointer to correct line in file
         END IF
     END IF
@@ -1690,7 +1689,7 @@ SUBROUTINE read_pre_subbas_outflow    !Till: reads predefined subbasin outflow (
             OPEN(92,FILE=pfadp(1:pfadj)// '/Time_series/subbasin_outsed.dat',IOSTAT=i,STATUS='old')
             IF (i==0) THEN
                 write(*,*)'Reading pre-specified subbasin sediment output from file...'
-  
+
                 allocate (pre_psd(n_sed_class))    !allocate storage for mean particle size distribution
 
                 !READ(92,*)        !skip headerlines
@@ -1701,7 +1700,7 @@ SUBROUTINE read_pre_subbas_outflow    !Till: reads predefined subbasin outflow (
                         exit
                     end if
                 END DO
-        
+
                 READ (linedummy,*,IOSTAT=i) pre_psd
 
                 if (abs(1.-sum(pre_psd))>0.05) then
@@ -1714,7 +1713,7 @@ SUBROUTINE read_pre_subbas_outflow    !Till: reads predefined subbasin outflow (
                 no_columns(2)=GetNumberOfSubstrings(linedummy)-2    !Till: count number of columns
                 allocate (pre_subbas_outsed(366,nt,no_columns(2)))
                 pre_subbas_outsed(:,:,:)=-2.
-  
+
                 READ (linedummy,*) dummy, dummy, (columnheader(i), i=1,no_columns(2))    !Till: extract column headers
                 corr_column_pre_subbas_outsed=>set_corr_column(columnheader, 'subbasin_outsed.dat')
                 if (sum(corr_column_pre_subbas_outsed)==0) then
@@ -1723,7 +1722,7 @@ SUBROUTINE read_pre_subbas_outflow    !Till: reads predefined subbasin outflow (
                 end if
 
                 do_pre_outsed=.TRUE.
- 
+
                 call date_seek(92,tstart,mstart,dstart, 'subbasin_outsed.dat')    !set internal filepointer to correct line in file
             END IF
         END IF
@@ -1731,27 +1730,31 @@ SUBROUTINE read_pre_subbas_outflow    !Till: reads predefined subbasin outflow (
 
 
     ! -------------------------------------------------------------
-    IF (do_pre_outflow .AND. (t/=tstart .OR. pre_subbas_outflow(1,1,1)==-2.)) THEN    !this clumsy check ensures that we do not read further when this function is called twice before the actual simulation starts
-        !read outflow
-        pre_subbas_outflow(:,:,:)=-1.
-        READ(91,*) (dummy,dummy,((pre_subbas_outflow(dc,j,i),i=1,no_columns(1)),j=1,nt),dc=1,dayyear)        !Reads in daily time series for pre-specified outflow from upstream basins
-        WHERE(pre_subbas_outflow < 0.)
-            pre_subbas_outflow=-1.        !Till: mask negative values
-        ENDWHERE
+    IF (allocated(pre_subbas_outflow)) THEN
+        IF (do_pre_outflow .AND. (t/=tstart .OR. pre_subbas_outflow(1,1,1)==-2.)) THEN    !this clumsy check ensures that we do not read further when this function is called twice before the actual simulation starts
+            !read outflow
+            pre_subbas_outflow(:,:,:)=-1.
+            READ(91,*) (dummy,dummy,((pre_subbas_outflow(dc,j,i),i=1,no_columns(1)),j=1,nt),dc=1,dayyear)        !Reads in daily time series for pre-specified outflow from upstream basins
+            WHERE(pre_subbas_outflow < 0.)
+                pre_subbas_outflow=-1.        !Till: mask negative values
+            ENDWHERE
 
+        END IF
     END IF
 
 
-    IF (do_pre_outsed .AND. (t/=tstart .OR. pre_subbas_outsed(1,1,1)==-2.)) THEN    !this clumsy check ensures that we do not read further when this function is called twice before the actual simulation starts
-        !read sediment outflow
-        pre_subbas_outsed(:,:,:)=-1.
-        if (do_pre_outsed) then
-            READ(92,*) (dummy,dummy,((pre_subbas_outsed(dc,j,i),i=1,no_columns(2)),j=1,nt),dc=1,dayyear)        !Reads in daily time series for pre-specified outflow from upstream basins
+    IF (allocated(pre_subbas_outflow)) THEN
+        IF (do_pre_outsed .AND. (t/=tstart .OR. pre_subbas_outsed(1,1,1)==-2.)) THEN    !this clumsy check ensures that we do not read further when this function is called twice before the actual simulation starts
+            !read sediment outflow
+            pre_subbas_outsed(:,:,:)=-1.
+            if (do_pre_outsed) then
+                READ(92,*) (dummy,dummy,((pre_subbas_outsed(dc,j,i),i=1,no_columns(2)),j=1,nt),dc=1,dayyear)        !Reads in daily time series for pre-specified outflow from upstream basins
 
-            WHERE(pre_subbas_outsed < 0.)
-                pre_subbas_outsed=-1000.        !Till: mask negative values
-            ENDWHERE
-        end if
+                WHERE(pre_subbas_outsed < 0.)
+                    pre_subbas_outsed=-1000.        !Till: mask negative values
+                ENDWHERE
+            end if
+        END IF
     END IF
 
 
@@ -1770,10 +1773,10 @@ contains
         INTEGER, INTENT(IN)                  :: input_header(:)    !order of subbasins in input file
         character(len=*), INTENT(IN)                  :: inputfile_name    !name of input file
         integer    :: i,j
-        
-        allocate(set_corr_column(subasin))    
+
+        allocate(set_corr_column(subasin))
         set_corr_column=0
-        
+
         DO i=1,subasin
             DO j=1,size(input_header)
                 IF(input_header(j) == id_subbas_extern(i)) THEN
@@ -1785,7 +1788,7 @@ contains
                     WRITE(*,'(a,i0,a,a,a)') 'ERROR: Sub-basin-ID ',id_subbas_extern(i),' not found in ',inputfile_name,', quitting.'
                     stop
                 end if
-                
+
             END DO
 
         END DO
