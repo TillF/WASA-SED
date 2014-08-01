@@ -368,9 +368,9 @@ contains
             END DO
             file_read=1
             CLOSE(11)
-            if (errors>0) then
-                return
-            end if
+!            if (errors>0) then
+!                return
+!            end if
         end if
 
         errors=0

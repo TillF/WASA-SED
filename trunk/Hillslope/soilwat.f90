@@ -1,4 +1,4 @@
-SUBROUTINE soilwat(hh,day,month,i_subbas2,i_ce,i_lu,oc2,tcid_instance2,id_tc_type2,tc_counter2,  &
+SUBROUTINE soilwat(hh,day,month,i_subbas2,i_ce,i_lu,lu_counter2,tcid_instance2,id_tc_type2,tc_counter2,  &
         thact,thactroot,q_surf_in,q_surf_out,q_sub_in,q_sub_out,qgw,deepqgw,  &
         hortf,tcaet,tclai,  &
         tcsoilet,tcintc,prec,precday,prechall2,petday,  &
@@ -183,7 +183,7 @@ INTEGER, INTENT(IN)                  :: month
 INTEGER, INTENT(IN)                  :: i_subbas2		!internal representation of i_subbas2in (id of subbasin)
 INTEGER, INTENT(IN)                  :: i_ce			!internal representation of i_subbas2in (id of subbasin)
 INTEGER, INTENT(IN)                  :: i_lu			!internal representation of isot (id of LU)
-INTEGER, INTENT(IN)                  :: oc2
+INTEGER, INTENT(IN)                  :: lu_counter2	    !internal representation of lu_counter
 INTEGER, INTENT(IN)                      :: tcid_instance2		!(internal) id of TC-instance (unique subbas-LU-TC-combination)
 INTEGER, INTENT(IN)                  :: id_tc_type2			!ID of TC type
 INTEGER, INTENT(IN)                      :: tc_counter2
@@ -597,7 +597,7 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
 				  !Till: compute maximum inflow according to "exchange surface"
 				  temp3=(k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))*  &
 					horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100)* &
-					area(i_subbas2)*frac_lu(oc2,i_subbas2) * frac_svc(i,tcid_instance2) /&
+					area(i_subbas2)*frac_lu(lu_counter2,i_subbas2) * frac_svc(i,tcid_instance2) /&
 					slength(i_lu)		!subsurface inflow into horizon(s) admitted due to conductivity
 
 				  temp3=MIN(temp3,temp2)
@@ -2601,7 +2601,7 @@ DO i=1,nbr_svc(tcid_instance2)
 				!dsi = temp3*temp2 /1000. 
 				!
 				!!Eq 4.45 cross section of lateral flow in m2
-				!Aq  = frac_svc(i,tcid_instance2)*area(i_subbas2)*frac_lu(oc2,i_subbas2)*1000000  &
+				!Aq  = frac_svc(i,tcid_instance2)*area(i_subbas2)*frac_lu(lu_counter2,i_subbas2)*1000000  &
 				!	  /slength(i_lu)  &
 				!	  *dsi			  											
 				!
@@ -2611,14 +2611,14 @@ DO i=1,nbr_svc(tcid_instance2)
 				!
 				!
 				!!lateral flow in mm (convert area from km2 to m2, then convert flow from m to mm)
-				!l2_test1=Q_li/(area(i_subbas2)*frac_lu(oc2,i_subbas2) * frac_svc(i,tcid_instance2) * fracterrain(id_tc_type2)*1000000)*1000
+				!l2_test1=Q_li/(area(i_subbas2)*frac_lu(lu_counter2,i_subbas2) * frac_svc(i,tcid_instance2) * fracterrain(id_tc_type2)*1000000)*1000
 
 
 				!! above lines in one step:
-				!l2(h)=frac_svc(i,tcid_instance2)*area(i_subbas2)*frac_lu(oc2,i_subbas2)*1000000  /  slength(i_lu)  &    ! Aq
+				!l2(h)=frac_svc(i,tcid_instance2)*area(i_subbas2)*frac_lu(lu_counter2,i_subbas2)*1000000  /  slength(i_lu)  &    ! Aq
 				!	  * temp3*temp2 /1000	&											   ! dsi
 				!	  * (k_sat(soilid,h)/1000)/dt_per_day*(1.-coarse(soilid,h)) * slope(id_tc_type2)/100.  &		   ! Q_li
-				!	  / (area(i_subbas2)*frac_lu(oc2,i_subbas2) * frac_svc(i,tcid_instance2) * fracterrain(id_tc_type2)*1000000)  *  1000  !/area
+				!	  / (area(i_subbas2)*frac_lu(lu_counter2,i_subbas2) * frac_svc(i,tcid_instance2) * fracterrain(id_tc_type2)*1000000)  *  1000  !/area
 
 				
 				! above lines in one step and shorter
@@ -2925,14 +2925,14 @@ watbal=watbal-q_surf_out/(tcarea2*1.e3)
 watbal=watbal+(thact1-thact)
 !IF (watbal**2 > 0.001) THEN
 !         write(*,*) 'WATBAL +- delta_theta',watbal,(thact1-thact)
-!         write(*,*) i_subbas2,i_lu,oc2,tcid_instance2,tc_counter2,nbr_svc(tcid_instance2)
+!         write(*,*) i_subbas2,i_lu,lu_counter2,tcid_instance2,tc_counter2,nbr_svc(tcid_instance2)
 !         write(*,*) 'tcid_instance2,frac_svc',tcid_instance2,frac_svc(:,tcid_instance2)
 !         write(*,*) 'fracsat',frac_sat(tcid_instance2,:)
 !         !call pause1
 !END IF
 !IF (q_surf_out/(tcarea2*1.e3) < -0.001) THEN
 !         write(*,*) 'WATBAL +- delta_theta',watbal,(thact1-thact)
-!         write(*,*) i_subbas2,i_lu,oc2,tcid_instance2,tc_counter2,nbr_svc(tcid_instance2)
+!         write(*,*) i_subbas2,i_lu,lu_counter2,tcid_instance2,tc_counter2,nbr_svc(tcid_instance2)
 !         write(*,*) 'tcid_instance2,frac_svc',tcid_instance2,frac_svc(:,tcid_instance2)
 !         write(*,*) 'fracsat',frac_sat(tcid_instance2,:)
 !         write(*,*) 'q_surf_out (m**3)',q_surf_out

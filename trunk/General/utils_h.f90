@@ -78,11 +78,12 @@ INTEGER FUNCTION id_ext2int(ext_id, id_array)
 END FUNCTION id_ext2int
 
 
-function which1(boolarray) result(indexarray1)
+function which1(boolarray, nowarning) result(indexarray1)
 !returns index of the FIRST element that is TRUE in the input array
 !if there are more, stop
 implicit none
 logical,dimension(:),intent(in):: boolarray
+logical, optional :: nowarning
 integer,dimension(max(1,count(boolarray))):: indexarray
 integer:: indexarray1
 integer:: i
@@ -91,7 +92,8 @@ integer:: i
 	else
 	  indexarray(:)= pack((/(i,i=1,size(boolarray))/),boolarray)
 	end if
-	if (size(indexarray)>1) then
+	
+	if (size(indexarray)>1 .AND.  (.NOT. present(nowarning))  ) then 
 		write(*,*)'Ambiguous result in which1 (replicates of soil/veg combination in TC?). Saved init_conds questionable.'
 		indexarray1=indexarray(1)		!use first occurence anyway
 		!stop 
