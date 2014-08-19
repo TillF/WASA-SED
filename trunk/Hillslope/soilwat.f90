@@ -874,11 +874,14 @@ IF (q_sub_in /= 0.) THEN				!Till: lateral inflow present
     
 !  return flow from SVC if storage capacity is exceeded in this
 !  timestep by lateral inflow
-    tempth=sum(horithact(tcid_instance2,i,:))+(q_sub_in*frac_svc(i,tcid_instance2)-  &
-        qotemp)/(tcarea2*1.e3*frac_svc(i,tcid_instance2))
-    IF (tempth > thsprof(tcid_instance2,i)) THEN
-      tempx=tempth-thsprof(tcid_instance2,i)
-      tempth=thsprof(tcid_instance2,i)
+
+	remain=(q_sub_in*frac_svc(i,tcid_instance2)-qotemp)/ (tcarea2*1.e3*frac_svc(i,tcid_instance2)) !Till: amount of subsurface flow that needs to be distributed in the current SVC (that has not been diverted to other SVCs already) [mm]
+
+
+	tempx = sum(horithact(tcid_instance2,i,:)  - thetas(soilid,:) * horiz_thickness(tcid_instance2,i,:) ) + remain !Till: compute amount of excess water [mm]
+
+    IF (tempx > 0.) THEN
+      tempth=thsprof(tcid_instance2,i)				 !Till: set new water content of profile to saturation
       frac_sat(tcid_instance2,i)=frac_svc(i,tcid_instance2)
       
       IF (dolatsc) THEN
@@ -894,43 +897,34 @@ IF (q_sub_in /= 0.) THEN				!Till: lateral inflow present
         q_surf_out=q_surf_out+tempx*tcarea2*1.e3*frac_svc(i,tcid_instance2)
       END IF
       
-      h=1
-      DO WHILE (h <= nbrhori(soilid))
-        horithact(tcid_instance2,i,h)=thetas(soilid,h)* horiz_thickness(tcid_instance2,i,h)	!Till: whole profile is saturated
-
-        h=h+1
-      END DO
+	  horithact(tcid_instance2,i, 1:nbrhori(soilid))=thetas(soilid,1:nbrhori(soilid))* horiz_thickness(tcid_instance2,i,1:nbrhori(soilid))	!Till: whole profile is saturated
       
     ELSE
       
 !  distribution of lateral inflow among horizons if profile
 !  is not completely saturated
       
+	  tempth = tempx + thsprof(tcid_instance2,i) !Till: new total water content in soil profile [mm]
       horitemp(1:maxhori)=horiths(tcid_instance2,i,1:maxhori) !Till: get relative distribution of maximum water storage among horizons of a profile
-      remain=(q_sub_in*frac_svc(i,tcid_instance2)-qotemp)/ (tcarea2*1.e3*frac_svc(i,tcid_instance2)) !Till: amount of subsurface flow that needs to be distributed in the current SVC (that has not been diverted to other SVCs already) [mm]
       
       DO WHILE (remain > 0.001)
-        h=1
         
 !  distribute according to fraction of thetasat [mm] of each horizon
 !  on total thetasat of profile [mm] (given by horiths)
-        DO WHILE (h <= nbrhori(soilid))	!ii use do
-          horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)+ remain*horitemp(h)
+        
+		horithact(tcid_instance2,i,1:nbrhori(soilid)) = horithact(tcid_instance2,i,1:nbrhori(soilid))+ remain*horitemp(1:nbrhori(soilid))
 
-          h=h+1
-        END DO
         remain=0.
         
 !  check if any horizon is more than saturated
-        h=1
-        DO WHILE (h <= nbrhori(soilid))	!ii use do
+        
+        DO h=1,nbrhori(soilid)
           temp2=thetas(soilid,h)*horiz_thickness(tcid_instance2,i,h)	!max water content of horizon [mm]
 		  IF (horithact(tcid_instance2,i,h) > temp2) THEN
             remain=remain+horithact(tcid_instance2,i,h)- temp2
             horithact(tcid_instance2,i,h)=temp2
             horitemp(h)=0.
           END IF
-          h=h+1
         END DO
         
 !  if there is remaining lateral inflow, calculate new horitemp,
