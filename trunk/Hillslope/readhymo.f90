@@ -528,8 +528,18 @@ SUBROUTINE readhymo
     OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/vegetation.dat',STATUS='old')
     READ(11,*); READ (11,*)
     DO j=1,nveg
-        READ(11,*) id_veg_extern(j),resist(j),wstressmin(j),wstressmax(j),  &
+        READ(11,*, IOSTAT=istate) id_veg_extern(j),resist(j),wstressmin(j),wstressmax(j),  &
             (height(j,i),i=1,4),(rootdep(j,i),i=1,4), (lai(j,i),i=1,4),(alb(j,i),i=1,4)
+		
+		if (istate /= 0) then
+			write(*,'(a,i0)')'ERROR: vegetation.dat, format error in line ',j+2
+            stop
+		end if
+
+		if (wstressmin(j) >= wstressmax(j)) then
+			write(*,'(a,i0,a)')'ERROR: vegetation.dat, line ',j+2,': wstressmin must be > wstressmax'
+            stop
+		end if
     END DO
     CLOSE(11)
     rootdep(:,:)=rootdep(:,:)*1000.

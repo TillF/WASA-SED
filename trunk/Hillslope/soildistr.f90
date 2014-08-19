@@ -37,6 +37,8 @@ var1=0.05
 !  (reference to soil characteristic in mm)
 var2=0.1
 
+!Till: saturated soil water content distribution. For each soil, the maximum water storage is modified by -10,-5,0,5,10 % (5 values). The second dimension just holds these percentages (why?)
+
 !** Loop for each soil component
 DO k=1,ntcinst
   DO i=1,nbr_svc(k)
