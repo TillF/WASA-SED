@@ -537,7 +537,7 @@ SUBROUTINE readhymo
 		end if
 
 		if (wstressmin(j) >= wstressmax(j)) then
-			write(*,'(a,i0,a)')'ERROR: vegetation.dat, line ',j+2,': wstressmin must be > wstressmax'
+			write(*,'(a,i0,a)')'ERROR: vegetation.dat, line ',j+2,': wstressmin must be < wstressmax'
             stop
 		end if
     END DO
