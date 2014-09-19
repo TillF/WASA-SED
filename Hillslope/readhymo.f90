@@ -801,26 +801,41 @@ SUBROUTINE readhymo
 
 
 
-    ! ** read cell-based scaling factor, see Guentner (2002), p. 67 !Till: the scaling factor described there refers to Kfkorr, but this here seems to be merely a calibration thing?
-    IF (doscale) THEN
-        OPEN(11,FILE=pfadp(1:pfadj)// 'Others/scaling_factor.dat',STATUS='old')
-        READ(11,*)
-        DO i=1,subasin
-            READ(11,*) dummy1, kfkorrc(i)
-            IF (dummy1 /= id_subbas_extern(i)) THEN
-                WRITE(*,*) 'Sub-basin-IDs in file scaling_factor.dat must have the same ordering scheme as in hymo.dat'
-                STOP
-            END IF
-            intcfc(i)=intcf/(0.340+0.647*kfkorrc(i))
-        END DO
-        CLOSE(11)
-    ELSE IF (.NOT.doscale) THEN
+    ! ** read cell-based scaling factor, see Guentner (2002), p. 67 
+	!Till: the scaling factor described there refers to Kfkorr, 
+	! but this here affects both Kfkorr and interception capacity
+	IF (doscale) THEN
+		OPEN(11,FILE=pfadp(1:pfadj)// 'Others/scaling_factor.dat', IOSTAT=istate, STATUS='old')
+		IF (istate==0) THEN                    !scaling_factor.dat found
+			READ(11,*)
+			DO WHILE (.TRUE.)
+				READ(11,'(a)',IOSTAT=istate)cdummy    !try to read next line
+				if (istate/=0) exit
+
+				READ(cdummy,*)dummy1,temp1
+				if (dummy1==-1) then
+					kfkorrc(:) = temp1 !universal calibration factor for all subbasins
+					intcfc(:)  = intcf/(0.340+0.647*kfkorrc(:))  !Till: as in the original code: interception capacity is aslos modified. I dunno why.
+					cycle                         !go to next line
+				end if
+				i=id_ext2int(dummy1,id_subbas_extern)    !convert external to internal ID
+				if (i==-1) then
+					write(*,'(a,i0,a)')'Unknown subbasin-ID ',dummy1,' in scaling_factor.dat'
+					stop
+				end if
+				kfkorrc(i) = temp1                !modify kfkorrc of specified subbasin
+				intcfc(i)  =intcf/(0.340+0.647*kfkorrc(i)) !Till: as in the original code: interception capacity is aslos modified. I dunno why.
+			END DO
+		  CLOSE(11)
+		END IF
+	ELSE 
         kfkorrc(:)=1.
         intcfc(:)=intcf
     END IF
 
+
     !Till: read calibration factors
-    OPEN(11,FILE=pfadp(1:pfadj)// 'Others/calibration.dat', IOSTAT=istate,STATUS='old')
+    OPEN(11,FILE=pfadp(1:pfadj)// 'Others/calibration.dat', IOSTAT=istate, STATUS='old')
     IF (istate==0) THEN                    !calibration.dat found
         READ(11,*)
         DO WHILE (.TRUE.)
