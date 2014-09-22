@@ -96,12 +96,13 @@ contains
 
         character(len=*),intent(in):: soil_conds_file, gw_conds_file, ic_conds_file,lake_conds_file,river_conds_file,summary_file        !files to save to
 
-        INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter,h,acud_class, tt    ! counters
+        INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter,h,acud_class, tt, digits    ! counters
         INTEGER :: i_lu,id_tc_type,i_svc,i_soil,i_veg        ! ids of components in work
         INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
         REAL    :: total_storage_soil, total_storage_gw, total_storage_intercept, total_storage_lake(5), total_storage_river    !total amount of water stored  [m3]
         REAL    :: lu_area, svc_area    !area of current lu/svc [m3]
         INTEGER    ::    soil_file_hdle, gw_file_hdle, intercept_file_hdle, lake_file_hdle, river_file_hdle    !file handles to output files
+		character(len=1000) :: fmtstr    !string for formatting file output
 
         total_storage_soil=0.
         total_storage_gw=0.
@@ -158,8 +159,12 @@ contains
 
         DO sb_counter=1,subasin
             !Jose Miguel: write river storage state to .stat file .
-            if (river_file_hdle/=0) then
-                WRITE(river_file_hdle,'(I0,A1,F8.2)') id_subbas_extern(sb_counter), char(9),r_storage(sb_counter) !tab separated output
+            digits=floor(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
+            write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,F',max(11,digits),'.',max(0,11-digits-1),'))'        !generate format string
+
+			
+			if (river_file_hdle/=0) then
+                WRITE(river_file_hdle,trim(fmtstr))id_subbas_extern(sb_counter), char(9),r_storage(sb_counter) !tab separated output
             endif
             total_storage_river=total_storage_river+r_storage(sb_counter) !sum up total storage
 
