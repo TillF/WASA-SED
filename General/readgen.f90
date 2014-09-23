@@ -145,7 +145,7 @@ SUBROUTINE readgen(path2do_dat)
     READ(11,*) dolatscsub
     READ(11,*) dotrans
 
-    READ(11,*) dohour
+    READ(11,*) dohour !overwritten by value of dt
     READ(11,*) scenario
     READ(11,*) krig
 
@@ -173,7 +173,13 @@ SUBROUTINE readgen(path2do_dat)
 
     CLOSE(11)
 
-    if (trim(custompath)/='') then		!if a custom path was specified, all paths are relative to this one
+    if (dt/=1 .AND. dt /=24) then
+		write(*,*)'ERROR: dt must be set to 1 or 24 (do.dat).'
+        stop
+    end if
+	dohour = dt == 1
+	
+	if (trim(custompath)/='') then		!if a custom path was specified, all paths are relative to this one
         pfadp=trim(custompath)//pfadp
         pfadn=trim(custompath)//pfadn
     end if
