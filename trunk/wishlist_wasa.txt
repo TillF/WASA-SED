@@ -3,6 +3,9 @@ Wishlist WASA-SED - proposed features and improvements
 Please add the proposer's name in brackets - in case clarification is needed. 
 
 responsibility all:
+model concept:
+- also use hourly humidity,temperature,radiation; not only rainfall(Till)
+code:
 - improve performance indicated with "ii" in the source code
 - abschaltbare Ausgabedateien (siehe outfiles.dat)(optimierte Geschwindigkeit) (Till)
 - Tab separated output in all output files (see output of hillslope routines)(Till)
@@ -16,24 +19,29 @@ responsibility all:
 - option "append to existing output files" if a run is recommenced(Till)
 - remove water_subbasin, sediment_subbasin, replace by *._t(Till)
 - vectorize array assignments, use implicit loops for file output (speed!)(Till)
-- also use hourly humidity,temperature,radiation; not only rainfall(Till)
 - allow output in hourly resolution for also for other variables than water_subbasin(Till)
 - graceful termination if input files are not found
 - delete output files of prior runs if they are disabled to avoid confusion (see hymo_all.f90) (Till)
 
+
 section hillslope:
-- create output directory, if non-existent(Till)
-- open input files with read-only (allows access to already opened files, done for climo-files)(Till)
-- read maxsoter, maxterrain, maxsoil, maxhori, ntrans from structure of inputfile rather than from maxdim, nveg, nsoil(Till)
-- multiple Subbasins could use the same climate series(Till)
-- Tolerante Reihenfolge der Ids in den unterschiedlichen Eingabedateien (realisiert für soil_particles.dat, rainy_seasons.dat,climo-files (except rain_hourly))(Till)
+model concept:
 - Fließzeiten innerhalb TC beachten, variable Verknüpfung der SCVs untereinander(Till)
 - Index für Klumpung der SVCs innerhalb einer TC(Till)
 - TC mit variabler Breite, um konzentrierten Abfluss erzeugen zu können(Till)
 – Nbrsoil enthält die Anzahl der Böden in einer TC. Dies muss eigentlich nicht für jede subbasin-LU-TC-Kombination extra gespeichert werden, sondern nur einmal für den TC-Typ. Ebenso bei Rocky (enthält Anteil an Felsen in einer TC). Ebenso ID_soil_intern. Ebenso horiz_thickness, svcrooth, svcbedr. Bei Speicherbedarf, umbauen, Außer  horiz_thickness, die sich ggf. durch Erosion verringern könnte(Till)
 - Einbauen: keine Vegetation(Till)
 - Unterschied gwsu / deepgwrsu klären --> ggf redundanz deepgw_r, gw_recharge aufheben(Till)
+
+code:
+- create output directory, if non-existent(Till)
+- open input files with read-only (allows access to already opened files, done for climo-files)(Till)
+- read maxsoter, maxterrain, maxsoil, maxhori, ntrans from structure of inputfile rather than from maxdim, nveg, nsoil(Till)
+- multiple Subbasins could use the same climate series(Till)
+- Tolerante Reihenfolge der Ids in den unterschiedlichen Eingabedateien (realisiert für soil_particles.dat, rainy_seasons.dat, c_seasons, climo-files (except rain_hourly))(Till)
 - revise system of input files: eliminate redundancies, strict relational database scheme(Till)
+- merge etp_soil.f90 and etp_soil_hour.f90 (Till)
+
 
 section river
 - consider channel-floodplain interaction of discharge, probably treat differently for assessing sedimentation dynamics

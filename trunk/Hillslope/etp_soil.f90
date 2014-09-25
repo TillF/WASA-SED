@@ -346,8 +346,9 @@ IF (.NOT. domean) THEN
   
   
 ! ............................................................
+! if specific calculation for night hours
   IF (donight) THEN
-! night values
+
     
 ! canopy resistance as function of nFK deficit (Hough, 1997)
     rsp=2500.
@@ -416,10 +417,10 @@ IF (.NOT. domean) THEN
 !      write(*,*) 'ETP total',act
 !      write(*,*) 'check:',actveg+acts+actbs
 !      write(*,*) 'ETP,night,veg,s,bs',actveg-dumv,acts-dums,actbs-dumbs
-! End of night calculation
+! End of specific night calculation
   END IF
   
-  
+
 ! aggregate soil evaporation from bare soil and soil under canopy
   acts=acts+actbs
   
