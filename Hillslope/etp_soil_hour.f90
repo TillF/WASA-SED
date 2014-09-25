@@ -1,6 +1,8 @@
 SUBROUTINE etp_soil_hour(hh,i_subbas3,vegi,defi,facwi,act,actveg,acts,  &
         height_act,lai_act,alb_act,rsfinal)
 
+!Jose: an upper theshold for soil surface resistance "rss" was introduced. For very high values of "rss" a divi! jose miguel: for very low soil water content, the rss tends to infinity. This is not accepted by the computations, so the maximum of surface resistance of bare soil is limited to 1.0e6 (arbitrary huge number beyond maximum value obtained by Domingo et al. 1999) in order to prevent errors. See Domingo et al./Agricultural and Forest Meteorology 95 (1999) 76-77 
+!2012-12-05
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29
 
@@ -150,7 +152,6 @@ transd=seconds_of_daylight/2.45E6
 transn=(86400.-seconds_of_daylight)/2.45E6
 
 
-
 ! check wind
 ! program is not defined for windspeed=0.
 !average wind velocity (m/s) is set constant
@@ -160,9 +161,9 @@ wind(d,i_subbas3)=1.0
 zr=6.0
 ! if canopy height > measurement height
 ! wind speed in canopy height is assumed to be that of measurement height
-IF (zr < height_act(vegi)) THEN
-  zr=height_act(vegi)
-END IF
+
+  zr=max(zr,height_act(vegi))
+
 
 
 ! constant parameters for day and night
@@ -180,7 +181,6 @@ else
 	x=0.07*lai_act(vegi)
 	dp=1.1*height_act(vegi)*LOG(1.+x**0.25)
 end if
-
 
 IF (x < 0.2) THEN
   z0=z0s+0.3*height_act(vegi)*x**0.5
@@ -230,8 +230,13 @@ rabs=rabs+(ras-rabs)*fcov
 !      write(*,*) 'ras,rap,rabs,raa',ras,rap,rabs,raa
 
 ! surface resistance of bare soil
-rss=facwi
-!      rss=1000000.0
+! jose miguel: for very low soil water content, the rss tends to infinity. This is not accepted by the computations, so the maximum of surface resistance of bare soil is limited to 1.0e6 (arbitrary huge number beyond maximum value obtained by Domingo et al. 1999) in order to prevent errors. See Domingo et al./Agricultural and Forest Meteorology 95 (1999) 76-77 
+if (facwi<1.0e6) then
+   rss=facwi
+else
+   rss=1.0e6
+endif
+!      rss=1.0e6
 rsbs=rss
 !      write(*,*) 'rss',rss
 
@@ -268,11 +273,10 @@ IF (.NOT. domean) THEN
 !  as function of LAI (Brenner & Lincoln, 1997, p.190).
 !  (here parameterized according to Saugier & Katerji (1991) for
 !   total short-wave radiation)
-    
+   
     rs=1./(((1./rs)/extpar)* LOG((bq+extpar*rad(d,i_subbas3)*24./hours_of_daylight)/  &
 	      (bq+extpar*rad(d,i_subbas3)*24./hours_of_daylight* EXP(-1.*3.1416*MAX(0.01,lai_act(vegi))))))
   !Till: added MAX() function to prevent NaN when LAI is 0
-
 
 ! canopy conductance is mean leaf conductance (per unit LAI)
 ! multiplied by LAI
@@ -297,8 +301,8 @@ IF (.NOT. domean) THEN
 ! daytime time mean of short wave radiation = daily mean * 24/hours_of_daylight
 ! Rnetto=Rkurz+Rlang
     
-    rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(tempd+273.2)**4 &
-        +(1.-alpha)*rad(d,i_subbas3)*24./hours_of_daylight
+    rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(tempd+273.2)**4 +&
+        (1.-alpha)*rad(d,i_subbas3)*24./hours_of_daylight
     rnettos =rnetto*EXP(-1.*ext*lai_act(vegi))
 !      Gstream =gfracd*Rnettos
 !      Anetto  =Rnetto-Gstream
@@ -350,6 +354,7 @@ IF (.NOT. domean) THEN
   ELSE
 ! if specific calculation for night hours
     IF (donight) THEN
+
       
 ! canopy resistance as function of nFK deficit (Hough, 1997)
       rsp=2500.
