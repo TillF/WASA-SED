@@ -124,19 +124,19 @@ module erosion_h
 
 
 
-    integer, pointer :: seasonality_k(:,:)    ! four key nodes in time for temporal dynamics of K-factor within year (index: subbasin,(1:4)*simulation_year,)
+    integer, pointer :: seasonality_k(:,:)    ! four key nodes in time for temporal dynamics of K-factor within year (1:Subbasin,(1:4)*simulation_years)
     REAL, pointer :: svc_k_fac_day(:)        !erosion factor dynamics of current day and subbasin
 
-    integer, pointer :: seasonality_c(:,:)    ! four key nodes in time for temporal dynamics of C-factor within year (index: subbasin,(1:4)*simulation_year,)
+    integer, pointer :: seasonality_c(:,:)    ! four key nodes in time for temporal dynamics of C-factor within year (1:Subbasin,(1:4)*simulation_years)
     REAL, pointer :: svc_c_fac_day(:)        !erosion factor dynamics of current day and subbasin
 
-    integer, pointer :: seasonality_p(:,:)    ! four key nodes in time for temporal dynamics of P-factor within year (index: subbasin,(1:4)*simulation_year,)
+    integer, pointer :: seasonality_p(:,:)    ! four key nodes in time for temporal dynamics of P-factor within year (1:Subbasin,(1:4)*simulation_years)
     REAL, pointer :: svc_p_fac_day(:)        !erosion factor dynamics of current day and subbasin
 
-    integer, pointer :: seasonality_coarse(:,:)    ! four key nodes in time for temporal dynamics of coarse fraction-factor within year (index: subbasin,(1:4)*simulation_year,)
+    integer, pointer :: seasonality_coarse(:,:)    ! four key nodes in time for temporal dynamics of coarse fraction-factor within year (1:Subbasin,(1:4)*simulation_years)
     REAL, pointer :: svc_coarse_fac_day(:)        !erosion factor dynamics of current day and subbasin
 
-    integer, pointer :: seasonality_n(:,:)    ! four key nodes in time for temporal dynamics of Mannings n within year (index: subbasin,(1:4)*simulation_year,)
+    integer, pointer :: seasonality_n(:,:)    ! four key nodes in time for temporal dynamics of Mannings n within year (1:Subbasin,(1:4)*simulation_years)
     REAL, pointer :: svc_n_day(:)        !erosion factor dynamics of current day and subbasin
 
 
