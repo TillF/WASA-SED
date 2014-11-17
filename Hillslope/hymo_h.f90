@@ -244,7 +244,7 @@ module hymo_h
     ! (begin/end of rainy period)
     ! specific for each Sub-basin and year
     !      integer period(4,subasin,200)
-    integer, pointer :: period(:,:)	! four key nodes in time for temporal vegetastion dynamics within year (index: subbasin,(1:4)*simulation_year,)
+    integer, pointer :: period(:,:)	! four key nodes in time for temporal vegetation dynamics within year (index: subbasin,(1:4)*simulation_year,)
 
 
     ! daily mean LAI (m²/m²)
@@ -553,6 +553,116 @@ contains
             nullify(allocate_hourly_array)
         end if
     END FUNCTION allocate_hourly_array
+
+
+	FUNCTION calc_seasonality2(subbas_id, year, julian_day ,seasonality_array, support_values)
+        !replaces calc_seasonality
+		!compute seasonality (value of current parameter for current timestep and subbasin) by interpolation between node_n and node_n+1
+
+        use utils_h
+        implicit none
+        
+     
+		INTEGER, INTENT(IN) :: subbas_id, year, julian_day
+        INTEGER, INTENT(IN) :: seasonality_array(:,:) !seasonality values as read from file
+		REAL, INTENT(IN) :: support_values(:,:) !real values for n classes and 4 DOYs to be interpolated
+
+        real :: calc_seasonality2(size(support_values,dim=1))    !return value: a single value for each class (e.g. vegetation)
+
+        integer    :: k, irow, search_year
+        integer :: d        !distance between start node and current day (in days)
+        integer :: d_nodes        !distance between start node and end_node (in days)
+        real :: node1_value, node2_value        !parameter values at nodepoints (start and end-point of interpolation)
+        integer :: i_node1, i_node2    !indices to relevant nodes in seasonality_array
+        integer :: doy_node1, doy_node2    !corresponding DOYs
+        integer :: i_matchrow1, i_matchrow2    !index to matching in seasonality_array
+        
+        if (size(seasonality_array)==1) then !no seasonality for this parameter
+            calc_seasonality2=support_values(:,1)    !use single value
+            return
+        end if
+		
+		calc_seasonality2(:) = tiny(calc_seasonality2(1)) !flag for "not set" - initial value for all entities
+
+		DO irow=1, size(support_values,dim=1) !do loop for all rows (i.e. all vegetation classes)
+			!find matching row in seasonality array for current entity
+
+			i_node2 = 0 !not set
+			
+			i_matchrow1 = &
+			which1(	 (seasonality_array(:,1) == subbas_id .OR. seasonality_array(:,1) == -1) .AND. &
+					 (seasonality_array(:,2) == irow      .OR. seasonality_array(:,2) == -1) .AND. &
+					 (seasonality_array(:,3) == year      .OR. seasonality_array(:,3) == -1), nowarning=.TRUE.)
+
+			if (i_matchrow1 == 0) cycle  !no matching row found
+			i_matchrow2 = i_matchrow1    !default: other node is also in the same year (row)
+					 
+			k = 4 !find preceding node in nodearray (first of the 4 entries smaller than current julian day)
+			do while ((seasonality_array(i_matchrow1, k) <= julian_day) .AND. k < 8)
+				k = k + 1
+			end do
+			i_node1 = k - 4
+
+			if (i_node1 == 0) then !current DOY is BEFORE first node, lookup other node in previous year
+				search_year = -1 !search in the previous year for the other node
+			elseif (i_node1 == 4) then !current DOY is AFTER last node, lookup other node in next year
+				search_year =  1 !search in the next year for the other node
+			else
+				search_year = 0 !other node is still in the same year
+			end if
+
+			if (search_year /=0) then !search in the other year for the other node (interpolation over year break)
+				i_matchrow2 = &
+					which1(	 (seasonality_array(:,1) == subbas_id .OR. seasonality_array(:,1) == -1) .AND. &
+							 (seasonality_array(:,2) == irow      .OR. seasonality_array(:,2) == -1) .AND. &
+							 (seasonality_array(:,3) == year+search_year    .OR. seasonality_array(:,3) == -1), nowarning=.TRUE.)
+						
+			end if
+					
+			if (i_node2 == 0) i_node2 = MOD(i_node1,4) + 1   !only modify i_node2, if it has not been set before
+			
+			
+			if (i_matchrow2 == 0) then  !no matching row found...
+					if (search_year == 1) then 
+						i_node1 = 4  !extrapolate last value
+					else
+					    i_node1 = 1	!extrapolate first value
+					end if
+					calc_seasonality2(irow) = support_values(irow, i_node1)
+					cycle
+			end if
+			
+			if (i_node1 == 0) then !swap node_1 and node_2 (interpolation over year break)
+				k           = i_matchrow2
+				i_matchrow2 = i_matchrow1
+				i_matchrow1 = k
+				i_node1 = 4
+			end if
+				
+			doy_node1 = seasonality_array(i_matchrow1, 3 + i_node1)
+			doy_node2 = seasonality_array(i_matchrow2, 3 + i_node2)
+			
+			if (i_node1 == 4) then 
+				if (doy_node1 > 0) doy_node1 = doy_node1 - 365 !force a negative value, as we are looking at the previous year
+				if (doy_node2 < 0) doy_node2 = doy_node2 + 365 !force a positive value, as we are looking at the next year 
+			end if 
+
+			d       = julian_day - doy_node1       !distance between start node and current day (in days)
+			d_nodes = doy_node2  - doy_node1       !distance between start node and end_node (in days)
+
+			if (d < 0 .OR. d_nodes < 0) then !error (presumably in input file)
+				calc_seasonality2(irow) = tiny(calc_seasonality2(1)) !flag for "not set" - initial value for all entities
+				cycle
+			end if
+
+			node1_value = support_values(irow, i_node1)    !parameter values at nodepoints (start and end-point of interpolation)
+			node2_value = support_values(irow, i_node2)
+			calc_seasonality2(irow) = node1_value+ (node2_value-node1_value) * d/d_nodes        !linear interpolation between nodes
+		END DO  !end loop for all rows (i.e. all vegetation classes
+
+        return
+
+    END FUNCTION calc_seasonality2
 
 
 end module hymo_h

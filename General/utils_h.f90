@@ -80,7 +80,7 @@ END FUNCTION id_ext2int
 
 function which1(boolarray, nowarning) result(indexarray1)
 !returns index of the FIRST element that is TRUE in the input array
-!if there are more, stop
+!if there are more, issue warning, if enabled
 implicit none
 logical,dimension(:),intent(in):: boolarray
 logical, optional :: nowarning
@@ -102,7 +102,7 @@ integer:: i
 	end if
 end function which1
 
-function whichn(boolarray,return0) result(indexarray)
+function whichn(boolarray, return0) result(indexarray)
 !returns indices of the ALL elements that are TRUE in the input array
 !return0: determine, if empty array or 0 is returned when entire array is false
 implicit none

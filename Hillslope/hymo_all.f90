@@ -842,20 +842,22 @@ SUBROUTINE hymo_all(STATUS)
 
             !  determine actual vegetation characteristics
             !  (height, root depth, LAI, albedo) for all vegetation units
-            rootd_act =calc_seasonality(t,julian_day,period(i_subbas,:),rootdep)    !compute root depths of current day
-            height_act=calc_seasonality(t,julian_day,period(i_subbas,:),height)    !compute heights of current day
+            rootd_act =     calc_seasonality2(i_subbas, t, julian_day, period, rootdep)            !compute root depths of current day
+			lai_act   =     calc_seasonality2(i_subbas, t, julian_day, period, lai)    !compute LAIs of current day
+            alb_act   =     calc_seasonality2(i_subbas, t, julian_day, period, alb)    !compute albedos of current day
+			height_act =	calc_seasonality2(i_subbas, t, julian_day, period, height)            !compute heights of current day
 			WHERE (height_act == .0)
 				height_act=0.01 !prevent 0 which will cause problems in division otherwise
        		END WHERE
 			
-			lai_act   =calc_seasonality(t,julian_day,period(i_subbas,:),lai)    !compute LAIs of current day
-            alb_act   =calc_seasonality(t,julian_day,period(i_subbas,:),alb)    !compute albedos of current day
+
             if(dosediment) then
-                svc_k_fac_day     =calc_seasonality(t,julian_day,seasonality_k     (i_subbas,:),svc_k_fac)            !compute K-factors of current day
-                svc_c_fac_day     =calc_seasonality(t,julian_day,seasonality_c     (i_subbas,:),svc_c_fac)            !compute c-factors of current day
-                svc_p_fac_day     =calc_seasonality(t,julian_day,seasonality_p     (i_subbas,:),svc_p_fac)            !compute p-factors of current day
-                svc_coarse_fac_day=calc_seasonality(t,julian_day,seasonality_coarse(i_subbas,:),svc_coarse_fac)    !compute coarse-factors of current day
-                svc_n_day         =calc_seasonality(t,julian_day,seasonality_n     (i_subbas,:),svc_n)                !compute n of current day
+                svc_k_fac_day     = calc_seasonality2(i_subbas, t, julian_day, seasonality_k, svc_k_fac)            !compute K-factors of current day
+                svc_c_fac_day     = calc_seasonality2(i_subbas, t, julian_day, seasonality_c, svc_c_fac)            !compute c-factors of current day
+
+				svc_p_fac_day     = calc_seasonality2(i_subbas, t, julian_day, seasonality_p,      svc_p_fac)            !compute p-factors of current day
+                svc_coarse_fac_day= calc_seasonality2(i_subbas, t, julian_day, seasonality_coarse, svc_coarse_fac)    !compute coarse-factors of current day
+                svc_n_day         = calc_seasonality2(i_subbas, t, julian_day, seasonality_n,      svc_n)                !compute n of current day
             endif
             kfkorr_day=kfkorr*(kfkorr_a*1/max(precip(d,i_subbas),0.001)+kfkorr_b)    !compute kfkorr as a function of daily precipitation (use a minimum value of 0.001 for precip to avoid division by zero)
     
@@ -1508,62 +1510,6 @@ SUBROUTINE hymo_all(STATUS)
 
 
 contains
-    FUNCTION calc_seasonality(year,julian_day,node_days,param_node_array)
-        !compute seasonality (value of current parameter for current timestep and subbasin) by interpolation between node1 and node2
-
-        use utils_h
-        implicit none
-        real :: param_node_array(:,:)
-        real :: calc_seasonality(size(param_node_array,dim=1))    !return value
-        INTEGER, INTENT(IN)                  :: year,julian_day    
-        integer, INTENT(IN) :: node_days(:)
-
-
-        
-        integer    :: i,k
-        integer :: d        !distance between start node and current day (in days)
-        integer :: d_nodes        !distance between start node and end_node (in days)
-        real :: node1_value,node2_value        !parameter values at nodepoints (start and end-point of interpolation)
-        integer :: i_node1,i_node2    !indices to nodes
-        !integer :: i_current_year    !index to current year in seasonality_array
-        
-
-        if (size(node_days)==1) then !no seasonality for this parameter
-            calc_seasonality=param_node_array(:,1)    !use single value
-            return
-        end if
-
-        k=0
-        do i=tstart,year-1    !compute sum of days before current simulation year
-            k=k+365        !sum up total days since start of start year
-            IF (MOD((i),4) == 0)  THEN    !leap year
-                k=k+1
-            ENDIF
-        end do
-        
-        i_node1=maxval(whichn(node_days<=julian_day+k,1))    !find index to node 1
-        i_node2=minval(whichn(node_days> julian_day+k,1))    !find index to node 2
-        
-        if ((i_node1==0) .OR. (i_node2==0)) then  !special cases: simulation day is before or after last specified node 
-            i_node1=max(i_node1,i_node2)        !set to first or last node, whichever is non-zero
-            calc_seasonality(:)=param_node_array(:,1+mod(i_node1-1,4))        !just extrapolate beyond first or last node-value
-        else                                !normal case: real interpolation
-            d_nodes=node_days(i_node2)-node_days(i_node1)    !distance between nodes
-            d      =julian_day+k      -node_days(i_node1)    !distance between node1 and current day
-
-            do i=1,size(calc_seasonality)    !loop through all entities to compute current parameter value
-                node1_value=param_node_array(i,1+mod(i_node1-1,4))    !parameter values at nodepoints (start and end-point of interpolation)
-                node2_value=param_node_array(i,1+mod(i_node2-1,4))
-                calc_seasonality(i)=node1_value+ (node2_value-node1_value)*d/d_nodes        !linear interpolation between nodes
-            end do
-        end if
-
-        return
-
-    END FUNCTION calc_seasonality
-
-
-  
 
     SUBROUTINE open_subdaily_output(f_flag,file_name,headerline)
         ! open file Output for subdaily values or delete any existing files

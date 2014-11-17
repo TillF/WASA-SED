@@ -2159,6 +2159,10 @@ DO i=1,nbr_svc(tcid_instance2)
   
   
   IF (dohour) THEN
+	
+!	evapt=-7.
+!	evapveg=-7.
+!	evaps=-7.
 	CALL etp_soil_hour(hh,i_subbas2,id_veg_intern(i,tcid_instance2),def,facw,  &
 		evapt,evapveg,evaps, height_act,lai_act,alb_act,rsfinday)
 	!only for output
@@ -2174,6 +2178,9 @@ DO i=1,nbr_svc(tcid_instance2)
 
 if (isnan(evaps)) then
  write(*,*)'NAN value produced! (4)'
+!	write(*,*)i_subbas2,id_veg_intern(i,tcid_instance2),def,facw, evapt,evapveg,evaps,  &
+!	height_act,lai_act,alb_act,rsfinday
+
  end if
 
   
@@ -2191,7 +2198,7 @@ if (isnan(evaps)) then
 
 if (isnan(evapt)) then
  evaps=1.
- write(*,*)'problems with evaps'
+ write(*,*)'problems with evaps1'
  stop
  end if  
   
