@@ -1683,11 +1683,11 @@ contains
         real :: test_ar(size(seasonality_array, dim=1))
 
 		integer :: irow 
-		svc_c_fac = 0.		!for testing, the actual values are not important. Since "svc_c_fac" is not initialized yet, we do so here.
+		rootdep = 0.		!for testing, the actual values are not important. Since "rootdep" is not initialized yet, we do so here.
 		
             DO i = tstart, tstop !check completeness
                 DO j=1,subasin
-		            test_ar = calc_seasonality2(j, i, 1, seasonality_array, svc_c_fac)            !compute c-factors of first day
+		            test_ar = calc_seasonality2(j, i, 1, seasonality_array, rootdep)            !compute c-factors of first day
 					IF (all(test_ar == tiny(test_ar))) then
 						WRITE(*,'(a, I0, a, I0)') ' '//inputfile_name//': Sub-basin ', id_subbas_extern(j), &
 							' lacks seasonality data for begin of simulation year ', i
