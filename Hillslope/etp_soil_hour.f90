@@ -38,8 +38,8 @@ use time_h
 IMPLICIT NONE
 
 INTEGER, INTENT(IN)                      :: hh
-INTEGER, INTENT(IN OUT)                  :: i_subbas3
-INTEGER, INTENT(IN OUT)                  :: vegi
+INTEGER, INTENT(IN)                  :: i_subbas3
+INTEGER, INTENT(IN)                  :: vegi
 REAL, INTENT(IN)                         :: defi
 REAL, INTENT(IN)                         :: facwi
 REAL, INTENT(OUT)                        :: act

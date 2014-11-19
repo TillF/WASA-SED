@@ -18,7 +18,7 @@ use reservoir_h
 
 IMPLICIT NONE
 
-INTEGER, INTENT(IN OUT)                  :: STATUS
+INTEGER, INTENT(IN)                  :: STATUS
 INTEGER, INTENT(IN OUT)                  :: upstream
 
 

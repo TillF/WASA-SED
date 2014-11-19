@@ -21,7 +21,7 @@ use utils_h
 
 IMPLICIT NONE
 
-INTEGER, INTENT(IN OUT)                  :: STATUS
+INTEGER, INTENT(IN)                  :: STATUS
 
 
 ! status of call (0=initialization run, 1=initialization year,
@@ -145,8 +145,8 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
   hrout(:,:)=0.
 
   !allocate arrays for in- and outflow into/out of subbasins, as their length needs to accomodate hrout, too
-  allocate( qout(365 + size(hrout,dim=1) , subasin))
-  allocate( qin (365 + size(hrout,dim=1) , subasin)) 
+  allocate( qout(366 + size(hrout,dim=1), subasin))
+  allocate( qin (366 + size(hrout,dim=1), subasin)) 
 	qout(:,:)=0.
 	qin (:,:)=0.
 
