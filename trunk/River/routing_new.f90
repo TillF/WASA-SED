@@ -37,7 +37,7 @@ use utils_h
 
 IMPLICIT NONE
 
-INTEGER, INTENT(IN OUT) :: STATUS
+INTEGER, INTENT(IN) :: STATUS
 !INTEGER :: bat
 INTEGER :: idummy !,imun,imunx,irout,irout2,irout_d,id,imeso,istate ! id: additional loop variable of days (total 7 days)
 INTEGER :: upstream, downstream
@@ -47,6 +47,7 @@ REAL :: flow, r_area !, sediment_temp(24), temp_rain(366), dummy
 Real :: temp_water(17), temp_sediment(17)
 character(len=1000) :: fmtstr	!string for formatting file output
 Real :: r_sediment_storage(subasin)		!sediment storage in reach [t]
+logical :: log_temp !temporary logical variable needed for compiler compatibility
 
 ! -----------------------------------------------------------------------
 IF (STATUS == 0) THEN
@@ -153,8 +154,8 @@ DO i=1,subasin
 END DO
 
 !allocate memory for subbasin in- and outflow
-allocate( qout(365 + size(hrout,dim=1) , subasin))
-allocate( qin (365 + size(hrout,dim=1) , subasin)) 
+allocate( qout(366 + size(hrout,dim=1) , subasin)) !
+allocate( qin (366 + size(hrout,dim=1) , subasin)) 
 qout(:,:)=0.
 qin (:,:)=0.
 
@@ -381,13 +382,28 @@ DO h=1,nt
    upstream=upbasin(i)  !internal code-ID for most upstream sub-basin
    downstream=downbasin(i) !internal code-ID for receiving sub-basin
 
-   if (do_pre_outflow .AND. (corr_column_pre_subbas_outflow(i)>0)) then		!Till: if water outflow from upstream subbasins is given
+   
+   log_temp = .FALSE.
+   if (do_pre_outflow) then
+        if (associated(corr_column_pre_subbas_outflow)) then  !Till: succesive evaluation is necessary to adhere to Fortran standard (no short-circuit-evaluation guaranteed)
+            if (corr_column_pre_subbas_outflow(i)>0) log_temp = .TRUE.		!Till: if water outflow from upstream subbasins is given
+        end if
+   end if
+   
+   if (log_temp) then		!Till: if water outflow from upstream subbasins is given
      r_qout(2,upstream)=water_subbasin_t(d,h,upstream)
    else
      call muskingum (upstream, flow, r_area,h)								!normal routing
    end if 
 
-   if (do_pre_outsed .AND. (corr_column_pre_subbas_outsed(i)>0)) then		!Till: if water outsed from upstream subbasins is given and if outsed of subbasin is prespecified
+   log_temp = .FALSE.
+   if (do_pre_outsed) then
+        if (associated(corr_column_pre_subbas_outsed)) then   !Till: succesive evaluation is necessary to adhere to Fortran standard (no short-circuit-evaluation guaranteed)
+            if (corr_column_pre_subbas_outsed(i)>0) log_temp = .TRUE.		!Till: if water outsed from upstream subbasins is given and if outsed of subbasin is prespecified
+        end if
+    end if
+
+   if (log_temp) then		!Till: if water outsed from upstream subbasins is given and if outsed of subbasin is prespecified
 	do k=1,n_sed_class
 		sediment_out(upstream,k)=sediment_subbasin_t(d,h,upstream,k)
 	end do

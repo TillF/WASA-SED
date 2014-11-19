@@ -31,7 +31,7 @@ use utils_h
 IMPLICIT NONE
 
 
-INTEGER, INTENT(IN OUT)                  :: STATUS
+INTEGER, INTENT(IN)                  :: STATUS
 INTEGER, INTENT(IN OUT)                  :: upstream
 INTEGER, INTENT(IN OUT)                  :: res_h
 

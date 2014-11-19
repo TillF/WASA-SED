@@ -100,7 +100,7 @@ use utils_h
 IMPLICIT NONE
 
 
-INTEGER, INTENT(IN OUT)                  :: STATUS
+INTEGER, INTENT(IN)                  :: STATUS
 
 ! status of call (0=initialization, 1=start of year,
 !                 2=daily step,     3=end of year)

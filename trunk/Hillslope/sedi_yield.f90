@@ -79,7 +79,7 @@ SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v
     REAL, INTENT(IN):: q_out        !overland flow leaving the TC downslope [m**3]
     REAL, INTENT(IN):: q_peak_in    !peak overland flow rate  [m**3/s]
     REAL, INTENT(IN):: sed_in(1:n_sed_class)        !sediment entering the TC from uplope [tons/timestep] for each particle size class [currently not considered yet]
-    REAL, INTENT(IN):: timestep        !timestep which the given flows are related to [h]
+    INTEGER, INTENT(IN):: timestep        !timestep which the given flows are related to [h]
     REAL, INTENT(IN) :: tc_area        !area of TC [km**2]
     REAL, INTENT(IN) :: v_ov_in        !overland flow velocity [m/s]
     REAL, INTENT(OUT) :: sed_yield(1:n_sed_class)                !sediment yield [tons/timestep] (usually applied daily) for each particle size class
