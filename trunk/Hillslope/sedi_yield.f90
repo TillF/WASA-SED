@@ -132,10 +132,10 @@ SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v
     DO i=1,size(tc_contains_svc2(tc_type_id)%p)
         svc_id=tc_contains_svc2(tc_type_id)%p(i)%svc_id                !get id of current SVC to be treated
         r2=    tc_contains_svc2(tc_type_id)%p(i)%fraction                    !get fraction of SVC
-        K_fac=K_fac            +(svc_k_fac_day(svc_id))*r2            !erodibility factor that was read from svc.dat
-        C_fac=C_fac            +(svc_c_fac_day(svc_id))*r2            !crop factor that was read from svc.dat
-        P_fac=P_fac            +(svc_p_fac_day(svc_id))*r2            !practice factor that was read from svc.dat
-        CFRG_fac=CFRG_fac   +exp(-0.03*svc_coarse_fac_day(svc_id))*r2        !coarse fragment factor that was read from svc.dat
+        K_fac=K_fac            +(svc_k_fac_day(svc_id))*r2            !current erodibility factor 
+        C_fac=C_fac            +(svc_c_fac_day(svc_id))*r2            !current crop factor 
+        P_fac=P_fac            +(svc_p_fac_day(svc_id))*r2            !current practice factor 
+        CFRG_fac=CFRG_fac   +exp(-0.03*svc_coarse_fac_day(svc_id))*r2        !current coarse fragment factor 
                                             !ii: convert musle_fac(*,4) to exp(musle_fac(*,4)) at beginning of program
         mean_particle=mean_particle+soil_particles(svc_soil_veg(svc_id,1),:)*r2        !sum up all fractions for particle classes
 
