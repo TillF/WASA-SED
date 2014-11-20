@@ -43,12 +43,12 @@ use climo_h
 IMPLICIT NONE
 INTEGER, INTENT(IN OUT) :: i, h
 integer :: dummy
-real ::  r_area,  p, rttime, topw, flow, r_evp,r_infil !,vol, c, rh, tbase, s1, s2
+real ::  r_area,  p, rttime, topw, flow, r_evp,r_infil, dummy2 !,vol, c, rh, tbase, s1, s2
 real :: c0, c1, c2, c3, yy !, Fr
 
 !! Initialise water and sediment storage in each reach   
 if (t == tstart.and.d == 1.and.h == 1) then
-    call routing_coefficients(i,1, dummy, dummy, dummy)
+    call routing_coefficients(i,1, dummy2, dummy2, dummy2)
 endif
 !-------------------------------------------------------------
 if (r_storage(i) > 0.) then

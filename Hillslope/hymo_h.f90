@@ -567,8 +567,14 @@ contains
         INTEGER, INTENT(IN) :: seasonality_array(:,:) !seasonality values as read from file
 		REAL, INTENT(IN) :: support_values(:,:) !real values for n classes and 4 DOYs to be interpolated
 
-        real :: calc_seasonality2(size(support_values,dim=1))    !return value: a single value for each class (e.g. vegetation)
+        !real, target :: calc_seasonality2(size(support_values,dim=1))    !return value: a single value for each class (e.g. vegetation)
+        !Error	in readhymo:	 error #6678: When the target is an expression it must deliver a pointer result.	E:\till\uni\wasa\wasa_svn_comp\Hillslope\readhymo.f90	1695	
+        
+        !real, pointer :: calc_seasonality2(size(support_values,dim=1))    !return value: a single value for each class (e.g. vegetation)
+        !error: ALLOCATABLE or POINTER attribute dictates a deferred-shape-array   [CALC_SEASONALITY2]
 
+        real, pointer :: calc_seasonality2(:)    !return value: a single value for each class (e.g. vegetation)
+        
         integer    :: k, irow, search_year
         integer :: d        !distance between start node and current day (in days)
         integer :: d_nodes        !distance between start node and end_node (in days)
@@ -576,6 +582,8 @@ contains
         integer :: i_node1, i_node2    !indices to relevant nodes in seasonality_array
         integer :: doy_node1, doy_node2    !corresponding DOYs
         integer :: i_matchrow1, i_matchrow2    !index to matching in seasonality_array
+        
+        allocate(calc_seasonality2(size(support_values,dim=1))) 
         
         if (size(seasonality_array)==1) then !no seasonality for this parameter
             calc_seasonality2=support_values(:,1)    !use single value
@@ -597,11 +605,12 @@ contains
 			if (i_matchrow1 == 0) cycle  !no matching row found
 			i_matchrow2 = i_matchrow1    !default: other node is also in the same year (row)
 					 
-			k = 4 !find preceding node in nodearray (first of the 4 entries smaller than current julian day)
-			do while ((seasonality_array(i_matchrow1, k) <= julian_day) .AND. k < 8)
-				k = k + 1
+   			do k=4,7
+				if (seasonality_array(i_matchrow1, k) > julian_day) exit
 			end do
-			i_node1 = k - 4
+
+            i_node1 = k - 4
+            
 
 			if (i_node1 == 0) then !current DOY is BEFORE first node, lookup other node in previous year
 				search_year = -1 !search in the previous year for the other node

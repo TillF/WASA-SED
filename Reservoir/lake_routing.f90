@@ -14,11 +14,11 @@ use params_h
 
 IMPLICIT NONE
 
-INTEGER, INTENT(IN OUT)               :: muni
-INTEGER, INTENT(IN OUT)               :: k
-REAL, INTENT(IN OUT)                  :: help
-REAL, INTENT(IN OUT)                  :: help2
-REAL, INTENT(IN OUT)                  :: help3
+INTEGER, INTENT(IN)               :: muni
+INTEGER, INTENT(IN)               :: k
+REAL, INTENT(IN)                  :: help
+REAL, INTENT(IN)                  :: help2
+REAL, INTENT(OUT)                  :: help3
 
 INTEGER :: i,n !,j,npts
 INTEGER :: ninterac !,nbrbat1

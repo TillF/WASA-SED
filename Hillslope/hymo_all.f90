@@ -981,14 +981,6 @@ SUBROUTINE hymo_all(STATUS)
                             gwrtc(tcid_instance)=gwr
                             deepgwrtc(tcid_instance)=deepgwr
             
-                          !if ( (tc_counter==nbrterrain(i_lu)) .AND. (i_lu==1)) then        !debugging output !remove
-                           !debug_out(d)=aettc(tcid_instance)
-                           !debug_out(d)=svc_k_fac_day(6)
-                           !debug_out(d)=lai_act(1)
-                           !debug_out(d)=svc_c_fac_day(1)
-                          !end if
-
-
 
                         ELSE
                             aeth=0.

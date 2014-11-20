@@ -17,8 +17,8 @@ use routing_h
 
 IMPLICIT NONE
 
-INTEGER, INTENT(IN OUT)                  :: muni
-INTEGER, INTENT(IN OUT)                  :: k
+INTEGER, INTENT(IN)                  :: muni
+INTEGER, INTENT(IN)                  :: k
 INTEGER :: n,g,l,nbrsteps !i,
 real:: dummy
 
