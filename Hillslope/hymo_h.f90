@@ -654,10 +654,11 @@ contains
 			if (i_node1 == 4) then 
 				if (doy_node1 > 0) doy_node1 = doy_node1 - 365 !force a negative value, as we are looking at the previous year
 				if (doy_node2 < 0) doy_node2 = doy_node2 + 365 !force a positive value, as we are looking at the next year 
-			end if 
-
+            end if 
+            
 			d       = julian_day - doy_node1       !distance between start node and current day (in days)
-			d_nodes = doy_node2  - doy_node1       !distance between start node and end_node (in days)
+			if (d >= 365) d = d - 365 !if current day is after all nodes
+            d_nodes = doy_node2  - doy_node1       !distance between start node and end_node (in days)
 
 			if (d < 0 .OR. d_nodes < 0) then !error (presumably in input file)
 				calc_seasonality2(irow) = tiny(calc_seasonality2(1)) !flag for "not set" - initial value for all entities
@@ -666,8 +667,8 @@ contains
 
 			node1_value = support_values(irow, i_node1)    !parameter values at nodepoints (start and end-point of interpolation)
 			node2_value = support_values(irow, i_node2)
-			calc_seasonality2(irow) = node1_value+ (node2_value-node1_value) * d/d_nodes        !linear interpolation between nodes
-		END DO  !end loop for all rows (i.e. all vegetation classes
+			calc_seasonality2(irow) = node1_value+ (node2_value-node1_value) * real(d)/d_nodes        !linear interpolation between nodes
+        END DO  !end loop for all rows (i.e. all vegetation classes
 
         return
 

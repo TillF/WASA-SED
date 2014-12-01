@@ -1675,43 +1675,6 @@ contains
     END FUNCTION seasonality_array2
 
 
-SUBROUTINE check_seasonality_superfluous(seasonality_array, inputfile_name, external_ids)        !check for superfluous entries in seasonality data
- use hymo_h
-		implicit none
-        character(len=*), INTENT(IN)                  :: inputfile_name    !name of input file
-        integer, pointer :: seasonality_array(:,:), s2(:,:)
-        integer, INTENT(IN) :: external_ids(:) !array holding external IDs of entities to check (e.g. SVCs, vegetation classes, ...)
-        integer :: i, j, dummy2
-        integer :: obsolete_lines(size(seasonality_array, dim=1)) 
-  
-        if (size(seasonality_array, dim=2) == 1) return !no seasonality to check
-        obsolete_lines = 0
-        do i=1, size(seasonality_array, dim=1) !through all "lines" of seasonality file
-            dummy2 = seasonality_array(i, 2)
-            if (dummy2 /=-1) then !wildcard for "all vegetation" / SVCs
-				j = id_ext2int(dummy2, external_ids)            !convert external to internal ID
-				IF (j == -1) THEN                                        !found unknown id
-                    WRITE(*,'(a, I0, a, I0, a)') inputfile_name//': vegetation/SVC-ID ', dummy2, ' not found in vegetation/svc.dat, ignored.'
-					obsolete_lines(i) = 1 !mark line as "obsolete"
-				end if
-            end if
-        end do !through all "lines" of seasonality file
-
-        if (sum(obsolete_lines) > 0) then         !some obsolete lines: remove and free memory
-			allocate(s2(  size(seasonality_array, dim=1) - sum(obsolete_lines), &
-                            size(seasonality_array, dim=2)))    !allocate new space for cleansed seasonality
-
-            
-			
-            			
-            s2 = seasonality_array(whichn(obsolete_lines == 0, 0), :)
-			deallocate(seasonality_array)
-			seasonality_array => s2           !point to cleansed array
-        end if	      
-                
-END SUBROUTINE check_seasonality_superfluous
-
-
 	SUBROUTINE check_seasonality(seasonality_array, inputfile_name, external_ids)        !check completeness in seasonality data
 
         use hymo_h
@@ -1719,16 +1682,10 @@ END SUBROUTINE check_seasonality_superfluous
         character(len=*), INTENT(IN)                  :: inputfile_name    !name of input file
         integer, pointer :: seasonality_array(:,:)
         integer, INTENT(IN) :: external_ids(:) !array holding external IDs of entities to check (e.g. SVCs, vegetation classes, ...)
-        !integer, INTENT(IN) :: n_ent !number of entities to check for (e.g. SVCs, vegetation classes, ...)
-        
-		!integer  :: missing(size(seasonality_array, dim=1)), n_missing = 0, k
-		!integer  :: missing(n_ent), n_missing = 0, k
         integer  :: missing(size(external_ids, dim=1)), n_missing = 0, k
         real  :: dummy(size(external_ids, dim=1), 4) 
-        !integer, pointer  :: missing(:)
-        !real :: test_ar(size(seasonality_array, dim=1))
         real, pointer :: test_ar(:)
-        integer :: irow 
+        
         
         dummy = .0
 	
@@ -1762,9 +1719,45 @@ END SUBROUTINE check_seasonality_superfluous
                     END IF       
                 END DO
             END DO
-	END SUBROUTINE check_seasonality
+    END SUBROUTINE check_seasonality
 
+    SUBROUTINE check_seasonality_superfluous(seasonality_array, inputfile_name, external_ids)        !check for superfluous entries in seasonality data
+     use hymo_h
+		    implicit none
+            character(len=*), INTENT(IN)                  :: inputfile_name    !name of input file
+            integer, pointer :: seasonality_array(:,:), s2(:,:)
+            integer, INTENT(IN) :: external_ids(:) !array holding external IDs of entities to check (e.g. SVCs, vegetation classes, ...)
+            integer :: i, j, dummy2
+            integer :: obsolete_lines(size(seasonality_array, dim=1)) 
+  
+            if (size(seasonality_array, dim=2) == 1) return !no seasonality to check
+            obsolete_lines = 0
+            do i=1, size(seasonality_array, dim=1) !through all "lines" of seasonality file
+                dummy2 = seasonality_array(i, 2)
+                if (dummy2 /=-1) then !wildcard for "all vegetation" / SVCs
+				    j = id_ext2int(dummy2, external_ids)            !convert external to internal ID
+				    IF (j == -1) THEN                                        !found unknown id
+                        WRITE(*,'(a, I0, a, I0, a)') inputfile_name//': vegetation/SVC-ID ', dummy2, ' not found in vegetation/svc.dat, ignored.'
+					    obsolete_lines(i) = 1 !mark line as "obsolete"
+				    end if
+                end if
+            end do !through all "lines" of seasonality file
 
+            if (sum(obsolete_lines) > 0) then         !some obsolete lines: remove and free memory
+			    allocate(s2(  size(seasonality_array, dim=1) - sum(obsolete_lines), &
+                                size(seasonality_array, dim=2)))    !allocate new space for cleansed seasonality
+
+            
+			
+            			
+                s2 = seasonality_array(whichn(obsolete_lines == 0, 0), :)
+			    deallocate(seasonality_array)
+			    seasonality_array => s2           !point to cleansed array
+            end if	      
+                
+    END SUBROUTINE check_seasonality_superfluous
+    
+    
 END SUBROUTINE readhymo
 
 

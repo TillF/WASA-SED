@@ -218,7 +218,7 @@ SUBROUTINE hymo_all(STATUS)
     REAL :: balance,balance_tc
 
     ! dummy
-    INTEGER :: dummy,count
+    INTEGER :: dummy, counti
     REAL ::    rtemp,rtemp2
 
     ! vegetation characteristics of current day
@@ -847,17 +847,54 @@ SUBROUTINE hymo_all(STATUS)
             alb_act   =     calc_seasonality2(i_subbas, t, julian_day, period, alb)    !compute albedos of current day
 			height_act =	calc_seasonality2(i_subbas, t, julian_day, period, height)            !compute heights of current day
 			WHERE (height_act == .0)
-				height_act=0.01 !prevent 0 which will cause problems in division otherwise
+				height_act=0.01 !prevent 0, which will cause problems in division otherwise
        		END WHERE
-			
+			if (count(lai_act < 0) > 0) then
+                write(*,*)'Negative root depth, check rainy_season.dat and vegetation.dat.'
+                stop
+            END IF
+			if (count(lai_act < 0) > 0) then
+                write(*,*)'Negative LAI, check rainy_season.dat and vegetation.dat.'
+                stop
+            END IF
+			if (count(lai_act < 0) > 0) then
+                write(*,*)'Negative albedo, check rainy_season.dat and vegetation.dat.'
+                stop
+            END IF
+			if (count(lai_act < 0) > 0) then
+                write(*,*)'Negative vegetaton height, check rainy_season.dat and vegetation.dat.'
+                stop
+            END IF
 
+            
             if(dosediment) then
                 svc_k_fac_day     = calc_seasonality2(i_subbas, t, julian_day, seasonality_k, svc_k_fac)            !compute K-factors of current day
                 svc_c_fac_day     = calc_seasonality2(i_subbas, t, julian_day, seasonality_c, svc_c_fac)            !compute c-factors of current day
-
 				svc_p_fac_day     = calc_seasonality2(i_subbas, t, julian_day, seasonality_p,      svc_p_fac)            !compute p-factors of current day
                 svc_coarse_fac_day= calc_seasonality2(i_subbas, t, julian_day, seasonality_coarse, svc_coarse_fac)    !compute coarse-factors of current day
                 svc_n_day         = calc_seasonality2(i_subbas, t, julian_day, seasonality_n,      svc_n)                !compute n of current day
+            
+                if (count(svc_k_fac_day < 0) > 0) then
+                    write(*,*)'Negative K-factor, check rainy_season.dat and svc.dat.'
+                    stop
+                END IF
+                if (count(svc_c_fac_day < 0) > 0) then
+                    write(*,*)'Negative C-factor, check rainy_season.dat and svc.dat.'
+                    stop
+                END IF
+                if (count(svc_p_fac_day < 0) > 0) then
+                    write(*,*)'Negative P-factor, check rainy_season.dat and svc.dat.'
+                    stop
+                END IF
+                if (count(svc_coarse_fac_day < 0) > 0) then
+                    write(*,*)'Negative coarse fraction, check rainy_season.dat and svc.dat.'
+                    stop
+                END IF
+                if (count(svc_n_day < 0) > 0) then
+                    write(*,*)'Negative Manning''s n, check rainy_season.dat and svc.dat.'
+                    stop
+                END IF
+            
             endif
             kfkorr_day=kfkorr*(kfkorr_a*1/max(precip(d,i_subbas),0.001)+kfkorr_b)    !compute kfkorr as a function of daily precipitation (use a minimum value of 0.001 for precip to avoid division by zero)
     
@@ -1413,8 +1450,8 @@ SUBROUTINE hymo_all(STATUS)
             WRITE(fmtstr,'(a,i0,a,i0,a)')'(i0,a,i0,a,i0,',n_sed_class,'(',subasin,'(a,f13.4)))'    !generate format string
     
             DO d=1,dayyear
-                DO count=1,nt
-                    WRITE (11,fmtstr)t, char(9), d,  char(9), count, ((char(9),sediment_subbasin_t(d,count,i,j),j=1,n_sed_class),i=1,subasin)
+                DO counti=1,nt
+                    WRITE (11,fmtstr)t, char(9), d,  char(9), counti, ((char(9),sediment_subbasin_t(d,counti,i,j),j=1,n_sed_class),i=1,subasin)
                 END DO
             END DO
             CLOSE(11)
@@ -1440,8 +1477,8 @@ SUBROUTINE hymo_all(STATUS)
             OPEN(11,FILE=pfadn(1:pfadi)//'tc_theta.out', STATUS='old',POSITION='append')
             WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,',ntcinst,'(a,f5.3))'    !generate format string
             DO d=1,dayyear
-                DO count=1,nt
-                    WRITE (11,fmtstr)t,char(9),d,char(9),count,(char(9),theta_tc(d,count,i),i=1,ntcinst)    !tab separated output
+                DO counti=1,nt
+                    WRITE (11,fmtstr)t,char(9),d,char(9),counti,(char(9),theta_tc(d,counti,i),i=1,ntcinst)    !tab separated output
                 END DO
             END DO
             CLOSE(11)
@@ -1454,8 +1491,8 @@ SUBROUTINE hymo_all(STATUS)
             WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,',ntcinst,'(a,f6.1))'    !generate format string
         
             DO d=1,dayyear
-                DO count=1,nt
-                    WRITE (11,fmtstr)t,char(9),d,char(9),count,(char(9),surfflow_tc(d,count,i),i=1,ntcinst)    !tab separated output
+                DO counti=1,nt
+                    WRITE (11,fmtstr)t,char(9),d,char(9),counti,(char(9),surfflow_tc(d,counti,i),i=1,ntcinst)    !tab separated output
                 END DO
             END DO
         
@@ -1468,8 +1505,8 @@ SUBROUTINE hymo_all(STATUS)
             WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,',ntcinst,'(a,f8.1))'    !generate format string
 
             DO d=1,dayyear
-                DO count=1,nt
-                    WRITE (11,fmtstr)t,char(9),d,char(9),count,(char(9),sedout_tc(d,count,i),i=1,ntcinst)    !tab separated output
+                DO counti=1,nt
+                    WRITE (11,fmtstr)t,char(9),d,char(9),counti,(char(9),sedout_tc(d,counti,i),i=1,ntcinst)    !tab separated output
                 END DO
             END DO
             CLOSE(11)
@@ -1482,8 +1519,8 @@ SUBROUTINE hymo_all(STATUS)
             WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,', j,'(a,f8.1))'    !generate format string
 
             DO d=1,dayyear
-                DO count=1,nt
-                    WRITE (11,fmtstr)t,char(9),d,char(9),count,(char(9),sedout_lu(d,count,i),i=1, j)    !tab separated output
+                DO counti=1,nt
+                    WRITE (11,fmtstr)t,char(9),d,char(9),counti,(char(9),sedout_lu(d,counti,i),i=1, j)    !tab separated output
                 END DO
             END DO
             CLOSE(11)
