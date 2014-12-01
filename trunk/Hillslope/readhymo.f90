@@ -547,16 +547,16 @@ SUBROUTINE readhymo
    	!!** read key points for temporal distribution of vegetation
     !!   characteristics within year (end/begin of rainy season)
     period => seasonality_array2('rainy_season.dat')
-	CALL check_seasonality(period, "rainy_season.dat", id_veg_extern)  !check completeness of seasonality file file
+	CALL check_seasonality(period, "rainy_season.dat", id_veg_extern)  !check completeness of seasonality file
 
 
     if (doloadstate .OR. dosavestate .OR. dosediment) then
         seasonality_k     => seasonality_array2('k_seasons.dat')    !read seasonality of K-factor
 		seasonality_c     => seasonality_array2('c_seasons.dat')    !read seasonality of C-factor
 
-        seasonality_p     => seasonality_array2('p_seasons.dat')    !read seasonality of P-factor
+        seasonality_p     => seasonality_array2('p_seasons.dat'     )    !read seasonality of P-factor
         seasonality_coarse=> seasonality_array2('coarse_seasons.dat')    !read seasonality of coarse fraction factor
-        seasonality_n     => seasonality_array2('n_seasons.dat')    !read seasonality of Manning's n
+        seasonality_n     => seasonality_array2('n_seasons.dat'     )    !read seasonality of Manning's n
 
 
         !** read SVC information (numbering scheme, erosion properties)
@@ -590,7 +590,7 @@ SUBROUTINE readhymo
 			svc_k_fac_day=>svc_k_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_k_fac(nsvc, 4))
-			CALL check_seasonality(seasonality_k, "k_seasons.dat", id_svc_extern)  !check completeness of seasonality file file
+			CALL check_seasonality(seasonality_k, "k_seasons.dat", id_svc_extern)  !check completeness of seasonality file
 			allocate(svc_k_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_k_fac,dim=2)
@@ -600,7 +600,7 @@ SUBROUTINE readhymo
 			svc_c_fac_day=>svc_c_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_c_fac(nsvc, 4))
-			CALL check_seasonality(seasonality_c, "c_seasons.dat", id_svc_extern)  !check completeness of seasonality file file
+			CALL check_seasonality(seasonality_c, "c_seasons.dat", id_svc_extern)  !check completeness of seasonality file
 			allocate(svc_c_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_c_fac,dim=2)
@@ -611,7 +611,7 @@ SUBROUTINE readhymo
 			svc_p_fac_day=>svc_p_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_p_fac(nsvc, 4))
-			CALL check_seasonality(seasonality_p, "p_seasons.dat", id_svc_extern)  !check completeness of seasonality file file
+			CALL check_seasonality(seasonality_p, "p_seasons.dat", id_svc_extern)  !check completeness of seasonality file
 			allocate(svc_p_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_p_fac,dim=2)
@@ -621,7 +621,7 @@ SUBROUTINE readhymo
 			svc_coarse_fac_day=>svc_coarse_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_coarse_fac(nsvc, 4))
-			CALL check_seasonality(seasonality_coarse, "coarse_seasons.dat", id_svc_extern)  !check completeness of seasonality file file
+			CALL check_seasonality(seasonality_coarse, "coarse_seasons.dat", id_svc_extern)  !check completeness of seasonality file
 			allocate(svc_coarse_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_coarse_fac,dim=2)
@@ -631,7 +631,7 @@ SUBROUTINE readhymo
 			svc_n_day=>svc_n(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_n(nsvc, 4))
-			CALL check_seasonality(seasonality_n, "n_seasons.dat", id_svc_extern)  !check completeness of seasonality file file
+			CALL check_seasonality(seasonality_n, "n_seasons.dat", id_svc_extern)  !check completeness of seasonality file
 			allocate(svc_n_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_n,dim=2)
@@ -663,6 +663,13 @@ SUBROUTINE readhymo
         CLOSE(11)
     end if
 
+    CALL check_seasonality_superfluous(seasonality_k,      "k_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
+    CALL check_seasonality_superfluous(seasonality_c,      "c_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
+    CALL check_seasonality_superfluous(seasonality_p,      "p_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
+    CALL check_seasonality_superfluous(seasonality_coarse, "coarse_seasons.dat", id_svc_extern)  !check for obsolete entries in seasonality file
+    CALL check_seasonality_superfluous(seasonality_n,      "n_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
+			
+    
     if (dosediment)    then                !Till: if erosion is to be modelled, read these files
 
         !** read particle size classes
@@ -1589,6 +1596,7 @@ contains
 
         implicit none
         character(len=*), INTENT(IN)                  :: inputfile_name    !name of input file
+        
         integer, pointer :: node_days(:,:), n2(:,:)
         integer :: i,j,k, dummy1, dummy2, dummy3, fields, irow 
 
@@ -1608,7 +1616,7 @@ contains
 			rewind(11) !back to start of file
 			i=i-3-1 !substract headerlines and last unsuccessful line
 			
-			allocate(node_days(i, 3+4)) !accomodate all lines; per line: subbasin-id, (veg-id,), year, 4 doys      !!, last_line indicator (for calc_seasonality)
+			allocate(node_days(i, 3+4)) !accomodate all lines; per line: subbasin-id, (veg-id/SVC-id,), year, 4 doys      !!, last_line indicator (for calc_seasonality)
             node_days(:,:)=0
             READ(11,*); READ(11,*); READ(11,*)    !read headerlines
 			READ(11,'(a)') cdummy
@@ -1621,9 +1629,9 @@ contains
  			
 			DO WHILE (.TRUE.)
 
-				dummy2 = -1 !default for "all vegetation classes"
+				dummy2 = -1 !default for "all vegetation/SVC classes"
 				if (fields == 6) then
-					READ(11,*,IOSTAT=k) dummy1,         dummy3,(idummy2(i),i=1,4) !old format without veg-id
+					READ(11,*,IOSTAT=k) dummy1,         dummy3,(idummy2(i),i=1,4) !old format without veg/SVC-id
 				else
 					READ(11,*,IOSTAT=k) dummy1, dummy2, dummy3,(idummy2(i),i=1,4)
 				end if
@@ -1640,17 +1648,9 @@ contains
 						cycle
 					end if
 					dummy1 = j
-				end if
+                end if
 
-                if (dummy2 /=-1) then !wildcard for "all vegetation"
-					j = id_ext2int(dummy2, id_veg_extern)            !convert external to internal ID
-					IF (j == -1) THEN                                        !found unknown subbasin id
-                        WRITE(*,'(a, I0, a, I0, a)') inputfile_name//', line ', loop, ': vegetation-ID ', dummy2, ' not found in vegetation.dat, ignored.'
-						cycle
-					end if
-					dummy2 = j
-				end if
-
+                !validity of veg/SVC-dis cannot be checked here yet, because they are not yet available                
 				irow = irow + 1 !increase counter for valid rows
 				node_days(irow, :) = [dummy1, dummy2, dummy3, idummy2(1:4)]        !store read values in proper position
             END DO
@@ -1674,6 +1674,42 @@ contains
 
     END FUNCTION seasonality_array2
 
+
+SUBROUTINE check_seasonality_superfluous(seasonality_array, inputfile_name, external_ids)        !check for superfluous entries in seasonality data
+ use hymo_h
+		implicit none
+        character(len=*), INTENT(IN)                  :: inputfile_name    !name of input file
+        integer, pointer :: seasonality_array(:,:), s2(:,:)
+        integer, INTENT(IN) :: external_ids(:) !array holding external IDs of entities to check (e.g. SVCs, vegetation classes, ...)
+        integer :: i, j, dummy2
+        integer :: obsolete_lines(size(seasonality_array, dim=1)) 
+  
+        if (size(seasonality_array, dim=2) == 1) return !no seasonality to check
+        obsolete_lines = 0
+        do i=1, size(seasonality_array, dim=1) !through all "lines" of seasonality file
+            dummy2 = seasonality_array(i, 2)
+            if (dummy2 /=-1) then !wildcard for "all vegetation" / SVCs
+				j = id_ext2int(dummy2, external_ids)            !convert external to internal ID
+				IF (j == -1) THEN                                        !found unknown id
+                    WRITE(*,'(a, I0, a, I0, a)') inputfile_name//': vegetation/SVC-ID ', dummy2, ' not found in vegetation/svc.dat, ignored.'
+					obsolete_lines(i) = 1 !mark line as "obsolete"
+				end if
+            end if
+        end do !through all "lines" of seasonality file
+
+        if (sum(obsolete_lines) > 0) then         !some obsolete lines: remove and free memory
+			allocate(s2(  size(seasonality_array, dim=1) - sum(obsolete_lines), &
+                            size(seasonality_array, dim=2)))    !allocate new space for cleansed seasonality
+
+            
+			
+            			
+            s2 = seasonality_array(whichn(obsolete_lines == 0, 0), :)
+			deallocate(seasonality_array)
+			seasonality_array => s2           !point to cleansed array
+        end if	      
+                
+END SUBROUTINE check_seasonality_superfluous
 
 
 	SUBROUTINE check_seasonality(seasonality_array, inputfile_name, external_ids)        !check completeness in seasonality data
