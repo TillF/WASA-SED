@@ -225,7 +225,7 @@ logical :: isnan
 !**   q_sub_out:    lateral subsurface flow towards lower TC (m**3)
 !**   qgw:    percolation below root zone (mm)
 !**   deepqgw:deep groundwater recharge (leaving profile)(mm)
-!**   hortf:  hortonian overland flow (mm)
+!**   hortf:  hortonian overland flow (m**3)
 !**   k_sat:saturated hydraulic conductivity (mm/day)
 !**   slope:  slope of terrain component (%)
 !**   saug:   suction at the wetting front (mm)
@@ -1656,13 +1656,13 @@ DO n_iter=1,2
 						END DO
 					ELSE !Till: second iteration
 						IF (dolatsc) THEN
-							q_surf_out=q_surf_out+remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i)
-							hortf=hortf+(remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i))
+							q_surf_out=q_surf_out + remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i)
+							hortf=         hortf  +(remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i))
 							!only for output
 							!hortsc(day,i)=hortsc(day,i)+(remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i))/(tcarea2*1.e3*frac_svc(i,tcid_instance2))
 						ELSE
-							q_surf_out=q_surf_out+remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)
-							hortf=hortf+remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)
+							q_surf_out = q_surf_out + remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)
+							hortf      = hortf      + remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)
 							!only for output
 							!hortsc(day,i)=hortsc(day,i)+remain
 						END IF
@@ -1780,12 +1780,12 @@ DO n_iter=1,2
 				!  micro- and macropores -> surface runoff
 						  IF (remain > 0.) THEN
 							IF (dolatsc) THEN
-							  q_surf_out=q_surf_out+remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i)
-							  hortf=hortf+(remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i))
+							  q_surf_out=q_surf_out+ remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i)
+							  hortf     =hortf     +(remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i))
 							  !hortsc(day,i)=hortsc(day,i)+(remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)-qmerk2(i))/(tcarea2*1.e3*frac_svc(i,tcid_instance2))
 							ELSE
 							  q_surf_out=q_surf_out+remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)
-							  hortf=hortf+remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)
+							  hortf     =hortf     +remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)
 							  !only for output
 							  !hortsc(day,i)=hortsc(day,i)+remain
 							END IF
