@@ -340,7 +340,7 @@ SUBROUTINE hymo_all(STATUS)
                 END DO
             END DO
 
-            if (dosavestate) CALL save_all_conds('','','','','',trim(pfadn)//'storage.stats_start')        !Till: save summary on initial storage
+            if (dosavestate) CALL save_all_conds('','','','','','',trim(pfadn)//'storage.stats_start')        !Till: save summary on initial storage
   
         end if
 
