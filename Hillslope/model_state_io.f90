@@ -69,18 +69,18 @@ contains
             call init_lake_conds('')    !Jose Miguel: set default status of lake storage
             call init_river_conds('')    !Jose Miguel: set default status of river storage
         end if
-        CALL save_all_conds('','','','','',trim(pfadn)//'storage.stats_start')        !Till: save only summary on initial storage
+        CALL save_all_conds('','','','','','',trim(pfadn)//'storage.stats_start')        !Till: save only summary on initial storage
     end subroutine init_model_state
 
     subroutine save_model_state        !save model state variables
         call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',&
-            trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',trim(pfadn)//'storage.stats')    !Till: save status
+            trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',trim(pfadn)//'sediment_storage.stat',trim(pfadn)//'storage.stats')    !Till: save status
 
     end subroutine save_model_state
 
 
 
-    subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, lake_conds_file, river_conds_file, summary_file)
+    subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, lake_conds_file, river_conds_file, sediment_conds_file, summary_file)
         !store current conditions of soil moisture, ground water and interception in the specified files
         use hymo_h
         use params_h
@@ -91,17 +91,18 @@ contains
         use lake_h
         use reservoir_h
         use time_h
+        use common_h
 
         implicit none
 
-        character(len=*),intent(in):: soil_conds_file, gw_conds_file, ic_conds_file,lake_conds_file,river_conds_file,summary_file        !files to save to
+        character(len=*),intent(in):: soil_conds_file, gw_conds_file, ic_conds_file,lake_conds_file,river_conds_file,sediment_conds_file,summary_file        !files to save to
 
-        INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter,h,acud_class, tt, digits    ! counters
+        INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter,h,acud_class, k, tt, digits    ! counters
         INTEGER :: i_lu,id_tc_type,i_svc,i_soil,i_veg        ! ids of components in work
         INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
-        REAL    :: total_storage_soil, total_storage_gw, total_storage_intercept, total_storage_lake(5), total_storage_river    !total amount of water stored  [m3]
+        REAL    :: total_storage_soil, total_storage_gw, total_storage_intercept, total_storage_lake(5), total_storage_river, total_storage_sediment    !total amount of water stored  [m3]
         REAL    :: lu_area, svc_area    !area of current lu/svc [m3]
-        INTEGER    ::    soil_file_hdle, gw_file_hdle, intercept_file_hdle, lake_file_hdle, river_file_hdle    !file handles to output files
+        INTEGER    ::    soil_file_hdle, gw_file_hdle, intercept_file_hdle, lake_file_hdle, river_file_hdle,sediment_file_hdle    !file handles to output files
 		character(len=1000) :: fmtstr    !string for formatting file output
 
         total_storage_soil=0.
@@ -109,6 +110,7 @@ contains
         total_storage_intercept=0.
         total_storage_lake=0.
         total_storage_river=0.
+        total_storage_sediment=0.
 
         if (trim(soil_conds_file)=='') then        !don't do anything if an empty filename is specified
             soil_file_hdle=0
@@ -139,15 +141,6 @@ contains
                 'storage_[mm]', char(9),'area_[m²]'        !tab separated output
         end if
 
-        if (trim(lake_conds_file)=='') then        !don't do anything if an empty filename is specified
-            lake_file_hdle=0
-        else
-            lake_file_hdle=15
-            OPEN(lake_file_hdle,FILE=lake_conds_file, STATUS='replace')
-            WRITE(lake_file_hdle,'(a)') 'Lake volume status (for analysis or model re-start)'
-            WRITE(lake_file_hdle,*)'Subbasin', char(9),'Lake_order',char(9),'volume[m^3]' !tab separated output
-        end if
-
         if (trim(river_conds_file)=='') then        !don't do anything if an empty filename is specified
             river_file_hdle=0
         else
@@ -157,17 +150,52 @@ contains
             WRITE(river_file_hdle,*)'Subbasin', char(9),'volume[m^3]' !tab separated output
         endif
 
-        DO sb_counter=1,subasin
+        if (trim(lake_conds_file)=='') then        !don't do anything if an empty filename is specified
+            lake_file_hdle=0
+        else
+            lake_file_hdle=15
+            OPEN(lake_file_hdle,FILE=lake_conds_file, STATUS='replace')
+            WRITE(lake_file_hdle,'(a)') 'Lake volume status (for analysis or model re-start)'
+            WRITE(lake_file_hdle,*)'Subbasin', char(9),'Lake_order',char(9),'volume[m^3]' !tab separated output
+        end if
+
+
+        if (trim(sediment_conds_file)=='') then        !don't do anything if an empty filename is specified
+            sediment_file_hdle=0
+        else
+            sediment_file_hdle=16
+            OPEN(sediment_file_hdle,FILE=sediment_conds_file, STATUS='replace')
+            WRITE(sediment_file_hdle,'(a)') 'river reach sediment volume status (for analysis or model re-start)'
+            WRITE(sediment_file_hdle,*)'Subbasin', char(9),'sed. class' ,char(9),'weight[ton]' !tab separated output
+        endif
+        
+        DO sb_counter=1,subasin !river, groundwater, intercept and soil storages inside
             !Jose Miguel: write river storage state to .stat file .
             digits=floor(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
             write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,F',max(11,digits),'.',max(0,11-digits-1),'))'        !generate format string
 
 			
-			if (river_file_hdle/=0) then
+            if (river_file_hdle/=0) then
                 WRITE(river_file_hdle,trim(fmtstr))id_subbas_extern(sb_counter), char(9),r_storage(sb_counter) !tab separated output
+                total_storage_river=total_storage_river+r_storage(sb_counter) !sum up total storage
+            else
+                total_storage_river=0
             endif
-            total_storage_river=total_storage_river+r_storage(sb_counter) !sum up total storage
 
+           if (sediment_file_hdle/=0) then
+                sed_reach=0
+                do k=1, n_sed_class
+                     sed_reach=sed_reach+sed_storage(sb_counter,k)
+                     WRITE(sediment_file_hdle,'(I0,A1,I0,A1,F11.2)')id_subbas_extern(sb_counter), char(9), k, char(9) ,sed_storage(sb_counter,k) !print each sediment class
+!                                         write(*,'(F8.2,I0,I0)')sed_storage(sb_counter,k),sb_counter,k
+
+                enddo
+                total_storage_sediment=total_storage_sediment+sed_reach !sum up total storage
+            else
+                total_storage_sediment=0
+            endif
+            
+            
             !Jose Miguel: loop over the acud classes.
             IF (doacud) THEN
 				DO acud_class=1,5
@@ -181,7 +209,7 @@ contains
 				ENDDO
 			END IF
        
-            DO lu_counter=1,nbr_lu(sb_counter)
+            DO lu_counter=1,nbr_lu(sb_counter) !groundwater, intercept and soil storages inside
                 i_lu=id_lu_intern(lu_counter,sb_counter)
                 lu_area=area(sb_counter)*frac_lu(lu_counter,sb_counter)*1e6
                 if (gw_file_hdle/=0) then
@@ -191,12 +219,12 @@ contains
                 endif
                 total_storage_gw=total_storage_gw+deepgw(sb_counter,lu_counter) !sum up total storage
 
-                DO tc_counter=1,nbrterrain(i_lu)
+                DO tc_counter=1,nbrterrain(i_lu) !intercept and soil storages inside
                     tcid_instance=tcallid(sb_counter,lu_counter,tc_counter)    !id of TC instance
                     if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
                     id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
 
-                    DO svc_counter=1,nbr_svc(tcid_instance)
+                    DO svc_counter=1,nbr_svc(tcid_instance) !intercept and soil storages inside
                         i_soil=id_soil_intern(svc_counter,tcid_instance)        !internal id of soil type
                         i_veg=  id_veg_intern(svc_counter,tcid_instance)
                         i_svc=which1(svc_soil_veg(:,1)==i_soil .AND. svc_soil_veg(:,2)==i_veg)            !get internal id of svc-type
@@ -213,7 +241,7 @@ contains
                         total_storage_intercept=total_storage_intercept+intercept(tcid_instance,svc_counter)*1e-3*svc_area !sum up total storage
 
 
-                        DO h=1,nbrhori(i_soil)
+                        DO h=1,nbrhori(i_soil) !soil storages inside
                             if (soil_file_hdle/=0) then
                                 WRITE(soil_file_hdle,'(5(I0,A1),F8.2,A1,F12.1)') id_subbas_extern(sb_counter),&
                                     char(9),id_lu_extern(i_lu), char(9),id_terrain_extern(id_tc_type),&
@@ -226,11 +254,15 @@ contains
                 ENDDO    !loop TCs
             ENDDO    !loop LUs
         ENDDO    !loop subbasins
+        
+
+        
         CLOSE(soil_file_hdle, iostat=i_lu)    !close output files
         CLOSE(gw_file_hdle, iostat=i_lu)
         CLOSE(intercept_file_hdle, iostat=i_lu)
         CLOSE(lake_file_hdle, iostat=i_lu)
         CLOSE(river_file_hdle, iostat=i_lu)    !close output files
+        CLOSE(sediment_file_hdle, iostat=i_lu)    !close output files
 
 
         OPEN(11,FILE=summary_file, STATUS='replace')        !write to summary file
@@ -238,6 +270,7 @@ contains
         WRITE(11,*)'soil_storage', char(9),total_storage_soil
         WRITE(11,*)'gw_storage', char(9),total_storage_gw
         WRITE(11,*)'interception_storage', char(9),total_storage_intercept
+
         DO acud_class=1,5
             WRITE(11,'(A,I0,A,F12.1)')'lake_storage', acud_class, char(9),total_storage_lake(acud_class)
         ENDDO
