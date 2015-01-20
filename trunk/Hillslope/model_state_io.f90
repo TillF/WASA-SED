@@ -184,13 +184,13 @@ contains
 
            if (sediment_file_hdle/=0) then
                 sed_reach=0
+                total_storage_sediment=0
                 do k=1, n_sed_class
-                     sed_reach=sed_reach+sed_storage(sb_counter,k)
                      WRITE(sediment_file_hdle,'(I0,A1,I0,A1,F11.2)')id_subbas_extern(sb_counter), char(9), k, char(9) ,sed_storage(sb_counter,k) !print each sediment class
 !                                         write(*,'(F8.2,I0,I0)')sed_storage(sb_counter,k),sb_counter,k
+                total_storage_sediment=total_storage_sediment+sed_storage(sb_counter,k) !sum up total storage
 
                 enddo
-                total_storage_sediment=total_storage_sediment+sed_reach !sum up total storage
             else
                 total_storage_sediment=0
             endif
