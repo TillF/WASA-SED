@@ -84,13 +84,17 @@ REAL ::   r_storage_previous !depdeg,dot,
 !if no or only very little water flow in reach, no sediment calculation is performed
 if (r_storage(i).eq.0.) then
  sediment_out(i,:) = 0.
- sed_storage(i,:) = 0.
+ if (.not. doloadstate) then
+     sed_storage(i,:) = 0.
+ endif
  return
 endif
 
 IF (r_storage(i) .eq. 0. .and. r_qin(2,i) .lt. 1.e-1) then
  sediment_out(i,:) = 0.
- sed_storage(i,:) = 0.
+ if (.not. doloadstate) then
+     sed_storage(i,:) = 0.
+ endif
  return
 ENDIF
 
@@ -101,14 +105,18 @@ volume = r_storage_previous+r_qin(2,i)*3600.*dt
 !! check if it is an ephemeral river (as set in Muskingum.f90) that starts to flow
 if (r_qout(1,i) .eq. 0. .and. r_storage(i) .eq. (r_qin(2,i)+3600.*dt)) then
   sediment_out(i,:) = 0.
-  sed_storage(i,:) = 0.
+  if (.not. doloadstate) then
+      sed_storage(i,:) = 0.
+  endif
   volume = r_storage(i)
   return
 endif
 !! do not perform sediment routing if no water in reach
 IF (volume <= 0.01) then 
  sediment_out(i,:) = 0.
- sed_storage(i,:) = 0.
+ if (.not. doloadstate) then
+     sed_storage(i,:) = 0.
+ endif
  RETURN
 ENDIF
 !! initialize sediment mass in reach during time step [tons]
