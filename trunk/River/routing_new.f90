@@ -327,7 +327,9 @@ IF (STATUS == 1) THEN
 	  sed_storage(i,k)=0.
 	  river_deposition(i,k)=0.
 	  river_degradation(i,k)=0.
-	  riverbed_storage(i,k)=0.
+	  if (.not. doloadstate) then
+	    riverbed_storage(i,k)=0.
+	  endif
      enddo
 	elseif(river_transport.eq.3) then
 	  bedload(i,:) = 0.
