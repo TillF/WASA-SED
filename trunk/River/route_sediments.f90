@@ -72,6 +72,7 @@ SUBROUTINE route_sediments(i)
 use routing_h
 use common_h
 use time_h
+use model_state_io
 
 IMPLICIT NONE
 INTEGER, INTENT(IN OUT) :: i
@@ -84,17 +85,13 @@ REAL ::   r_storage_previous !depdeg,dot,
 !if no or only very little water flow in reach, no sediment calculation is performed
 if (r_storage(i).eq.0.) then
  sediment_out(i,:) = 0.
- if (.not. doloadstate) then
-     sed_storage(i,:) = 0.
- endif
+ sed_storage(i,:) = 0.
  return
 endif
 
 IF (r_storage(i) .eq. 0. .and. r_qin(2,i) .lt. 1.e-1) then
  sediment_out(i,:) = 0.
- if (.not. doloadstate) then
-     sed_storage(i,:) = 0.
- endif
+ sed_storage(i,:) = 0.
  return
 ENDIF
 
@@ -105,18 +102,14 @@ volume = r_storage_previous+r_qin(2,i)*3600.*dt
 !! check if it is an ephemeral river (as set in Muskingum.f90) that starts to flow
 if (r_qout(1,i) .eq. 0. .and. r_storage(i) .eq. (r_qin(2,i)+3600.*dt)) then
   sediment_out(i,:) = 0.
-  if (.not. doloadstate) then
-      sed_storage(i,:) = 0.
-  endif
+  sed_storage(i,:) = 0.
   volume = r_storage(i)
   return
 endif
 !! do not perform sediment routing if no water in reach
 IF (volume <= 0.01) then 
  sediment_out(i,:) = 0.
- if (.not. doloadstate) then
-     sed_storage(i,:) = 0.
- endif
+ sed_storage(i,:) = 0.
  RETURN
 ENDIF
 !! initialize sediment mass in reach during time step [tons]
@@ -160,13 +153,12 @@ do k=1, n_sed_class
 ! only allow degradation if discharge larger than 0.1 m3/s
 	if (r_qout(1,i).gt.0.1) then   
 	   river_degradation(i,k) = depnet * r_efactor(i) * r_cover(i) * (1. - r_rock(i))
-	else
-       river_degradation (i,k) = 0.
-	endif
+       else
+           river_degradation (i,k) = 0.
+       endif
 
-    river_deposition(i,k) = 0.
-!  Check if sediment is available in temporary sediment storage of riverbed
-!	if (river_degradation(i,k).gt.riverbed_storage(i,k)) river_degradation(i,k)=riverbed_storage(i,k) 
+       river_deposition(i,k) = 0.
+
 ! Calculation of deposition [tons]
   ELSE
     river_deposition(i,k) = -depnet
@@ -174,8 +166,9 @@ do k=1, n_sed_class
   END IF
 
 ! Calculation of temporary storage of sediments in the riverbed of the stretch [tons]
-!  riverbed_storage(i,k)=riverbed_storage(i,k) + river_deposition(i,k) - river_degradation(i,k)
-!  if (riverbed_storage(i,k).lt.0.) riverbed_storage(i,k) = 0.
+ riverbed_storage(i,k)=riverbed_storage(i,k) + river_deposition(i,k) - river_degradation(i,k)
+ if (riverbed_storage(i,k).lt.0.) riverbed_storage(i,k) = 0.
+
 
 ! Calculation of sediment balance [tons] (assuming instaneous mixing)
   sed_storage(i,k) = sed_storage(i,k)+ sediment_in(i,k) + river_degradation(i,k) - river_deposition(i,k)
