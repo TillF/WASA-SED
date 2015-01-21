@@ -188,9 +188,9 @@ contains
            if (sediment_file_hdle/=0) then
                 total_storage_sediment=0
                 do k=1, n_sed_class
-                     WRITE(sediment_file_hdle,'(I0,A1,I0,A1,F11.2)')id_subbas_extern(sb_counter), char(9), k, char(9) ,sed_storage(sb_counter,k) !print each sediment class
+                     WRITE(sediment_file_hdle,'(I0,A1,I0,A1,F11.2)')id_subbas_extern(sb_counter), char(9), k, char(9) ,riverbed_storage(sb_counter,k) !print each sediment class
 !                                         write(*,'(F8.2,I0,I0)')sed_storage(sb_counter,k),sb_counter,k
-                total_storage_sediment=total_storage_sediment+sed_storage(sb_counter,k) !sum up total storage
+                total_storage_sediment=total_storage_sediment+riverbed_storage(sb_counter,k) !sum up total storage
 
                 enddo
             else
@@ -650,7 +650,6 @@ contains
     
         !read 2 header lines into buffer
         READ(11,*); READ(11,*)
-		r_storage(:)=0.
         DO sb_counter=1,subasin
               do class_counter=1,n_sed_class
 
@@ -664,7 +663,7 @@ contains
 		    if (i < 1 .OR. i> subasin) then
 		 	WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in sediment_storage.stat, ignored.'
 		    end if
-	      sed_storage(i,k)=dummy1
+	      riverbed_storage(i,k)=dummy1
 	      enddo
         ENDDO
         close(11)
