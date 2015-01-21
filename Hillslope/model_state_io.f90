@@ -63,11 +63,14 @@ contains
             call init_gw_conds(trim(pfadn)//'gw_storage.stat')    !Till: load initial status of gw storage
             call init_lake_conds(trim(pfadn)//'lake_volume.stat')    !Jose Miguel: load initial status of lake storage
             call init_river_conds(trim(pfadn)//'river_storage.stat')    !Jose Miguel: load initial status of river storage
+            call init_sediment_conds(trim(pfadn)//'sediment_storage.stat')    !Jose Miguel: load initial status of sediment storage
+
         else            !ii: default init is currently still done in hymo_all.f90, needs to be changed
             call init_soil_conds('')    !Till: set default initial status of soil moisture
             call init_gw_conds('')    !Till: set default status of gw storage
             call init_lake_conds('')    !Jose Miguel: set default status of lake storage
             call init_river_conds('')    !Jose Miguel: set default status of river storage
+            call init_sediment_conds('')    !Jose Miguel: set default status of sediment storage
         end if
         CALL save_all_conds('','','','','','',trim(pfadn)//'storage.stats_start')        !Till: save only summary on initial storage
     end subroutine init_model_state
@@ -584,7 +587,7 @@ contains
         use time_h
         use params_h
         use utils_h
-		use hymo_h
+	use hymo_h
 
         character(len=*),intent(in):: river_conds_file        !file to load from
         integer :: sb_counter, iostatus, i
@@ -621,7 +624,55 @@ contains
         close(11)
     end subroutine init_river_conds
 
+    
+        subroutine init_sediment_conds(sediment_conds_file)
+        !which variables have to be declared?
+  
+        use routing_h
+        use time_h
+        use params_h
+        use utils_h
+	use hymo_h
 
+        character(len=*),intent(in):: sediment_conds_file        !file to load from
+        integer :: sb_counter, iostatus, i,k,class_counter
+        real :: dummy1
+
+        i=0
+        OPEN(11,FILE=sediment_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
+        if (i/=0) then
+            write(*,'(a,a,a)')'WARNING: Sediment storage file ''',trim(sediment_conds_file),''' not found, using defaults.'
+            CLOSE(11)
+			return
+        end if
+
+        write(*,'(a,a,a)')'Inititalize sediment storage from file ''',trim(sediment_conds_file),'''.'
+    
+        !read 2 header lines into buffer
+        READ(11,*); READ(11,*)
+		r_storage(:)=0.
+        DO sb_counter=1,subasin
+              do class_counter=1,n_sed_class
+
+	            READ(11,*,IOSTAT=iostatus) i, k, dummy1
+		    IF (iostatus/=0) THEN
+		      WRITE(*,'(a,a,a)') 'WARNING: could not read initial sediment storage from sediment_storage.stat, ignored, assumed 0.',&
+                      ' Check this file, model_state_io.f90 or consider switching off doloadstate in file do.dat'
+                    EXIT
+                    ENDIF
+                    i = id_ext2int(i, id_subbas_extern) !convert external to internal id
+		    if (i < 1 .OR. i> subasin) then
+		 	WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in sediment_storage.stat, ignored.'
+		    end if
+	      sed_storage(i,k)=dummy1
+	      enddo
+        ENDDO
+        close(11)
+    end subroutine init_sediment_conds
+
+    
+    
+    
     subroutine init_lake_conds(lake_conds_file)
         !the variable that should be initialized here is the lakewater0 which is used in lake.f90 and declared in reservoir_lake_h.f90
         use lake_h
