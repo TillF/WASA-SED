@@ -183,7 +183,6 @@ contains
             endif
 
            if (sediment_file_hdle/=0) then
-                sed_reach=0
                 total_storage_sediment=0
                 do k=1, n_sed_class
                      WRITE(sediment_file_hdle,'(I0,A1,I0,A1,F11.2)')id_subbas_extern(sb_counter), char(9), k, char(9) ,sed_storage(sb_counter,k) !print each sediment class
@@ -449,20 +448,6 @@ contains
                 END DO
             END DO
         END DO
-
-
-        !!for debugging - remove
-        !DO tcid_instance=1,30
-        !    DO i=1,nbr_svc(tcid_instance)
-        !        DO h=1,nbrhori(id_soil_intern(i,tcid_instance)    )
-        !            IF (horithact(tcid_instance,i,h) - thetas(id_soil_intern(i,tcid_instance)    ,h)* horiz_thickness(tcid_instance,i,h)> 0.1 ) THEN    !Till: if water content exceeds saturation...
-        !                write(*,*)"Init: Oversaturated horizon in TC/svc/horizon ",tcid_instance,i,h
-        !                return
-        !            END IF
-        !        END DO
-        !    END DO
-        !END DO
-        !!for debugging - remove
 
 
         if (errors>0) then
