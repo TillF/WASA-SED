@@ -55,7 +55,6 @@ module model_state_io
     !2008-02-01
 
     use common_h
-
 contains
     subroutine init_model_state        !load initial conditions
         if (.TRUE.) then
@@ -63,27 +62,38 @@ contains
             call init_gw_conds(trim(pfadn)//'gw_storage.stat')    !Till: load initial status of gw storage
             call init_lake_conds(trim(pfadn)//'lake_volume.stat')    !Jose Miguel: load initial status of lake storage
             call init_river_conds(trim(pfadn)//'river_storage.stat')    !Jose Miguel: load initial status of river storage
-            call init_sediment_conds(trim(pfadn)//'sediment_storage.stat')    !Jose Miguel: load initial status of sediment storage
-
-        else            !ii: default init is currently still done in hymo_all.f90, needs to be changed
+            if (dosediment) then
+               call init_sediment_conds(trim(pfadn)//'sediment_storage.stat')    !Jose Miguel: load initial status of sediment storage
+               call init_susp_sediment_conds(trim(pfadn)//'susp_sediment_storage.stat')    !Jose Miguel: load initial status of sediment storage
+            endif
+         else            !ii: default init is currently still done in hymo_all.f90, needs to be changed
             call init_soil_conds('')    !Till: set default initial status of soil moisture
             call init_gw_conds('')    !Till: set default status of gw storage
             call init_lake_conds('')    !Jose Miguel: set default status of lake storage
             call init_river_conds('')    !Jose Miguel: set default status of river storage
-            call init_sediment_conds('')    !Jose Miguel: set default status of sediment storage
+            if (dosediment) then
+               call init_sediment_conds('')    !Jose Miguel: set default status of sediment storage
+               call init_susp_sediment_conds('')    !Jose Miguel: set default status of sediment storage
+            endif
         end if
-        CALL save_all_conds('','','','','','',trim(pfadn)//'storage.stats_start')        !Till: save only summary on initial storage
+        CALL save_all_conds('','','','','','','',trim(pfadn)//'storage.stats_start')        !Till: save only summary on initial storage
     end subroutine init_model_state
 
     subroutine save_model_state        !save model state variables
-        call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',&
-            trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',trim(pfadn)//'sediment_storage.stat',trim(pfadn)//'storage.stats')    !Till: save status
-
+        if (dosediment) then
+           call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',&
+            trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',&
+            trim(pfadn)//'sediment_storage.stat',trim(pfadn)//'susp_sediment_storage.stat',trim(pfadn)//'storage.stats')    !Till: save status
+        else
+           call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',&
+            trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',&
+            '','',trim(pfadn)//'storage.stats')
+        endif
     end subroutine save_model_state
 
 
 
-    subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, lake_conds_file, river_conds_file, sediment_conds_file, summary_file)
+    subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, lake_conds_file, river_conds_file, sediment_conds_file, susp_sediment_conds_file, summary_file)
         !store current conditions of soil moisture, ground water and interception in the specified files
         use hymo_h
         use params_h
@@ -98,14 +108,14 @@ contains
 
         implicit none
 
-        character(len=*),intent(in):: soil_conds_file, gw_conds_file, ic_conds_file,lake_conds_file,river_conds_file,sediment_conds_file,summary_file        !files to save to
+        character(len=*),intent(in):: soil_conds_file, gw_conds_file, ic_conds_file,lake_conds_file,river_conds_file,sediment_conds_file,susp_sediment_conds_file,summary_file        !files to save to
 
         INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter,h,acud_class, k, tt, digits    ! counters
         INTEGER :: i_lu,id_tc_type,i_svc,i_soil,i_veg        ! ids of components in work
         INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
-        REAL    :: total_storage_soil, total_storage_gw, total_storage_intercept, total_storage_lake(5), total_storage_river, total_storage_sediment    !total amount of water stored  [m3]
+        REAL    :: total_storage_soil, total_storage_gw, total_storage_intercept, total_storage_lake(5), total_storage_river, total_storage_sediment,total_storage_suspsediment    !total amount of water stored  [m3]
         REAL    :: lu_area, svc_area    !area of current lu/svc [m3]
-        INTEGER    ::    soil_file_hdle, gw_file_hdle, intercept_file_hdle, lake_file_hdle, river_file_hdle,sediment_file_hdle    !file handles to output files
+        INTEGER    ::    soil_file_hdle, gw_file_hdle, intercept_file_hdle, lake_file_hdle, river_file_hdle,sediment_file_hdle,susp_sediment_file_hdle    !file handles to output files
 		character(len=1000) :: fmtstr    !string for formatting file output
 
         total_storage_soil=0.
@@ -168,9 +178,19 @@ contains
         else
             sediment_file_hdle=16
             OPEN(sediment_file_hdle,FILE=sediment_conds_file, STATUS='replace')
-            WRITE(sediment_file_hdle,'(a)') 'river reach sediment volume status (for analysis or model re-start)'
+            WRITE(sediment_file_hdle,'(a)') 'river reach deposition sediment weight status (for analysis or model re-start)'
             WRITE(sediment_file_hdle,*)'Subbasin', char(9),'sed. class' ,char(9),'weight[ton]' !tab separated output
         endif
+        
+        if (trim(susp_sediment_conds_file)=='') then        !don't do anything if an empty filename is specified
+            susp_sediment_file_hdle=0
+        else
+            susp_sediment_file_hdle=17
+            OPEN(susp_sediment_file_hdle,FILE=susp_sediment_conds_file, STATUS='replace')
+            WRITE(susp_sediment_file_hdle,'(a)') 'river reach suspended sediment weight status (for analysis or model re-start)'
+            WRITE(susp_sediment_file_hdle,*)'Subbasin', char(9),'sed. class' ,char(9),'weight[ton]' !tab separated output
+        endif
+        
         
         DO sb_counter=1,subasin !river, groundwater, intercept and soil storages inside
             !Jose Miguel: write river storage state to .stat file .
@@ -186,15 +206,21 @@ contains
             endif
 
            if (sediment_file_hdle/=0) then
-                total_storage_sediment=0
                 do k=1, n_sed_class
-                     WRITE(sediment_file_hdle,'(I0,A1,I0,A1,F11.2)')id_subbas_extern(sb_counter), char(9), k, char(9) ,riverbed_storage(sb_counter,k) !print each sediment class
-!                                         write(*,'(F8.2,I0,I0)')sed_storage(sb_counter,k),sb_counter,k
-                total_storage_sediment=total_storage_sediment+riverbed_storage(sb_counter,k) !sum up total storage
-
+                     WRITE(sediment_file_hdle,'(I0,A1,I0,A1,F13.2)')id_subbas_extern(sb_counter), char(9), k, char(9) ,riverbed_storage(sb_counter,k) !print each sediment class
+                     total_storage_sediment=total_storage_sediment+riverbed_storage(sb_counter,k) !sum up total storage
                 enddo
             else
                 total_storage_sediment=0
+            endif
+            
+           if (susp_sediment_file_hdle/=0) then
+                do k=1, n_sed_class
+                     WRITE(susp_sediment_file_hdle,'(I0,A1,I0,A1,F13.2)')id_subbas_extern(sb_counter), char(9), k, char(9) ,sed_storage(sb_counter,k) !print each sediment class
+                     total_storage_suspsediment=total_storage_suspsediment+sed_storage(sb_counter,k) !sum up total storage
+                enddo
+            else
+                total_storage_suspsediment=0
             endif
             
             
@@ -668,6 +694,50 @@ contains
         ENDDO
         close(11)
     end subroutine init_sediment_conds
+
+    subroutine init_susp_sediment_conds(susp_sediment_conds_file)
+        !which variables have to be declared?
+  
+        use routing_h
+        use time_h
+        use params_h
+        use utils_h
+	use hymo_h
+
+        character(len=*),intent(in):: susp_sediment_conds_file        !file to load from
+        integer :: sb_counter, iostatus, i,k,class_counter
+        real :: dummy1
+
+        i=0
+        OPEN(11,FILE=susp_sediment_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
+        if (i/=0) then
+            write(*,'(a,a,a)')'WARNING: Suspended sediment storage file ''',trim(susp_sediment_conds_file),''' not found, using defaults.'
+            CLOSE(11)
+			return
+        end if
+
+        write(*,'(a,a,a)')'Inititalize suspended sediment storage from file ''',trim(susp_sediment_conds_file),'''.'
+    
+        !read 2 header lines into buffer
+        READ(11,*); READ(11,*)
+        DO sb_counter=1,subasin
+              do class_counter=1,n_sed_class
+
+	            READ(11,*,IOSTAT=iostatus) i, k, dummy1
+		    IF (iostatus/=0) THEN
+		      WRITE(*,'(a,a,a)') 'WARNING: could not read initial suspended sediment storage from susp_sediment_storage.stat, ignored, assumed 0.',&
+                      ' Check this file, model_state_io.f90 or consider switching off doloadstate in file do.dat'
+                    EXIT
+                    ENDIF
+                    i = id_ext2int(i, id_subbas_extern) !convert external to internal id
+		    if (i < 1 .OR. i> subasin) then
+		 	WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in susp_sediment_storage.stat, ignored.'
+		    end if
+	      sed_storage(i,k)=dummy1
+	      enddo
+        ENDDO
+        close(11)
+    end subroutine init_susp_sediment_conds
 
     
     

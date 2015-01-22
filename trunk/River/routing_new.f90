@@ -310,7 +310,7 @@ endif
 END IF
 ! ------------------------------------------------------------------------
 IF (STATUS == 1) THEN
-  
+
 ! Initialisation for first year and day
  IF (t == tstart) THEN
   DO i=1,subasin
@@ -324,7 +324,7 @@ IF (STATUS == 1) THEN
      do k=1,n_sed_class
       sediment_in(i,k)=0.
 	  sediment_out(i,k)=0.
-	  sed_storage(i,k)=0.
+          sed_storage(i,k)=0.
 	  river_deposition(i,k)=0.
 	  river_degradation(i,k)=0.
 	  if (.not. doloadstate) then

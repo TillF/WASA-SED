@@ -85,7 +85,7 @@ REAL ::   r_storage_previous !depdeg,dot,
 !if no or only very little water flow in reach, no sediment calculation is performed
 if (r_storage(i).eq.0.) then
  sediment_out(i,:) = 0.
- sed_storage(i,:) = 0.
+ sed_storage(i,:) = 0. 
  return
 endif
 
@@ -164,14 +164,14 @@ do k=1, n_sed_class
     river_deposition(i,k) = -depnet
     river_degradation(i,k) = 0.
   END IF
-
 ! Calculation of temporary storage of sediments in the riverbed of the stretch [tons]
  riverbed_storage(i,k)=riverbed_storage(i,k) + river_deposition(i,k) - river_degradation(i,k)
  if (riverbed_storage(i,k).lt.0.) riverbed_storage(i,k) = 0.
 
 
 ! Calculation of sediment balance [tons] (assuming instaneous mixing)
-  sed_storage(i,k) = sed_storage(i,k)+ sediment_in(i,k) + river_degradation(i,k) - river_deposition(i,k)
+  sed_storage(i,k) = sed_storage(i,k)+ sediment_in(i,k) +  river_degradation(i,k) - river_deposition(i,k)
+  
 !Calculation of sediment leaving the reach [tons]
   sediment_out(i,k) = sed_storage(i,k)/ volume * (r_qout(2,i)*3600.*dt)
   IF (sediment_out(i,k) < 0.) sediment_out(i,k) = 0.

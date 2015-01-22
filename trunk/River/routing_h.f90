@@ -106,7 +106,8 @@ real, allocatable :: river_deposition(:,:)
 !! sediment reentrained in water by channel degradation in tons/(timestep and river stretch)
 real, allocatable :: river_degradation(:,:)
 !! temporary storage of sediment on top of the riverbed in river reach [tons]
-real, allocatable :: riverbed_storage(:,:)
+real, allocatable :: riverbed_storage(:,:) !!! why 2 dimensions?
+
 
 !BEDLOAD MODELLING VARIABLES
 ! bedload(subasin,5) rate in (kg/s) as submerged weight for five bedload formula
