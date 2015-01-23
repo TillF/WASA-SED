@@ -164,6 +164,8 @@ do k=1, n_sed_class
     river_deposition(i,k) = -depnet
     river_degradation(i,k) = 0.
   END IF
+
+  
 ! Calculation of temporary storage of sediments in the riverbed of the stretch [tons]
  riverbed_storage(i,k)=riverbed_storage(i,k) + river_deposition(i,k) - river_degradation(i,k)
  if (riverbed_storage(i,k).lt.0.) riverbed_storage(i,k) = 0.
