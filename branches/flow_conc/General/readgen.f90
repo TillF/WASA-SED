@@ -165,7 +165,7 @@ SUBROUTINE readgen(path2do_dat)
     READ(11,*) dt
     READ(11,*) dosediment
     READ(11,*) n_sed_class
-    READ(11,*) hill_transport
+    READ(11,*)  !line ignored
     READ(11,*) river_transport
     READ(11,*) reservoir_transport
     READ(11,*, IOSTAT=i) doloadstate
@@ -510,7 +510,7 @@ SUBROUTINE readgen(path2do_dat)
         WRITE(11,*) sensfactor
         write(11,*) dosediment
         write(11,*) n_sed_class
-        write(11,*) hill_transport
+        write(11,*) "[not used]"
         write(11,*) river_transport
         write(11,*) reservoir_transport
         if (dosediment) then
