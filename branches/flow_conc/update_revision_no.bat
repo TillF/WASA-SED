@@ -1,0 +1,1 @@
+SubWCRev .\ General\svn_rev_template.txt General\svn_rev.var
