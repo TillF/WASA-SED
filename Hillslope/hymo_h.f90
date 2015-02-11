@@ -32,7 +32,7 @@ module hymo_h
 
     real, allocatable :: area(:)
 
-    ! GRID CELL PARAMETERS
+    ! SUBBASIN / GRID CELL PARAMETERS
     ! IDs of subbasins (external and internal IDs)
     !Allocatable integer id_subbas_extern(subasin)
     integer, allocatable ::  id_subbas_extern(:),id_subbas_intern(:)
@@ -128,7 +128,10 @@ module hymo_h
     ! IDs of all Subbasin-LU-TC-combinations
     !Allocatable      real tcallid(subasin,maxsoter,maxterrain)
     integer, allocatable :: tcallid(:,:,:)
+    !fraction of sheetflow that gets concentrated within the TC (and vice-versa)
+    real, allocatable :: frac_diff2conc(:), frac_conc2diff(:)
 
+    
     ! SOIL-VEGETATION COMPONENT PARAMETERS
     ! Till thickness of horizons (lowest horizon may be different from that of profiles)
     !Allocatable      real horiz_thickness(nmunsutc,maxsoil,maxhori)

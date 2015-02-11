@@ -219,7 +219,8 @@ SUBROUTINE hymo_all(STATUS)
 
     ! dummy
     INTEGER :: dummy, counti
-    REAL ::    rtemp,rtemp2
+    REAL ::    rtemp,rtemp2, stemp(n_sed_class), stemp2(n_sed_class)
+
 
     ! vegetation characteristics of current day
     REAL :: rootd_act(nveg), height_act(nveg)
@@ -1086,26 +1087,53 @@ SUBROUTINE hymo_all(STATUS)
 
                             IF (dolattc) THEN
                                 sublat_in(tc_counter+1)  =sublat_in(tc_counter+1)+sublat_out(tc_counter)
-                                IF (doalllattc) THEN
+                                IF (doalllattc) THEN !Till: all surface fluxes directly to next TC
                                     surfflow_in(tc_counter+1)=surfflow_in(tc_counter+1)+surfflow_out(tc_counter)
-                                    !hortsu(lu_counter)=hortsu(lu_counter)
                                     IF (dosediment) sed_in(tc_counter+1,:)=sed_out(tc_counter,:)    !Till: all sediment leaving the upper TC enters the next downslope TC
                                                                     ! prepare sed_in this for the next downslope TC
-                                ELSE
+                                ELSE IF (allocated(frac_diff2conc)) then !Till: distribute surface fluxes according to specified factors 
+                                    rtemp  = surfflow_out(tc_counter) * frac_diff2conc(id_tc_type) !amount of sheetflow that will be channelized
+                                    surfflow_out(tc_counter) = surfflow_out(tc_counter) - rtemp    !amount of sheetflow that will remain sheetflow (i.e. the rest)
+                                    
+                                    rtemp2 = qsurf_lu(lu_counter  ) * frac_conc2diff(id_tc_type) !amount of concentrated flow that will be redistributed to sheetflow
+                                    qsurf_lu(lu_counter  ) = qsurf_lu(lu_counter  ) - rtemp2     !amount of channelized flow remaining channelized (the rest)
+                                    
+                                    surfflow_in(tc_counter+1) = surfflow_out(tc_counter) + rtemp2 !add new de-concentrated rillflow to sheetflow
+                                    qsurf_lu(lu_counter  ) = qsurf_lu(lu_counter  ) + rtemp       !add new concentrated sheetflow to rillflow
+                                    
+                                    hortsu  (lu_counter  )= hortsu  (lu_counter  ) * (1-frac_conc2diff(id_tc_type)) + horth   !for output only: assume that a part of the collected hortonian flow is also redistributed                   
+                                    
+                                    IF (dosediment) then 
+                                        stemp  = sed_out(tc_counter,:) * frac_diff2conc(id_tc_type) !amount of sheetflow-borne sediment that will be channelized
+                                        sed_out(tc_counter,:) = sed_out(tc_counter,:) - stemp       !amount of sheetflow-borne sediment that will remain sheetflow-borne sediment (i.e. the rest)
+                                        
+                                        stemp2 = sedsu   (lu_counter,:) * frac_conc2diff(id_tc_type) !amount of concentrated flow-borne sediment that will be redistributed to sheetflow
+                                        sedsu   (lu_counter,:) = sedsu   (lu_counter,:) - stemp2     !amount of channelized flow-borne sediment remaining channelized-borne sediment (the rest)
+                                  
+                                        sed_in(tc_counter+1,:) = sed_out(tc_counter,:) + stemp2     !add new de-concentrated rillflow sediment to sheetflow-borne sediment
+                                        sedsu   (lu_counter,:) = sedsu   (lu_counter,:) + stemp     !add new concentrated sheetflow-borne sediment to rillflow-borne sediment
+                                    END IF
+                                
+                                        
+                                ELSE !Till: distribute surface fluxes according to fraction of remaining TCs 
                                     temp2=sum(fractemp(tc_counter:nbrterrain(i_lu))) !fraction of all remaining TCs in this LU
+                                    
                                     DO i=tc_counter+1,nbrterrain(i_lu)                !Till: overland flow is distributed among lower TCs proportional to area
-                                        surfflow_in(i)=surfflow_in(i)  +surfflow_out(tc_counter  )* fractemp(i)/temp2
-                                        IF (dosediment) sed_in(i,:)   =sed_in     (i,:)+sed_out     (tc_counter,:)* fractemp(i)/temp2
-                                                                                              !Till: sediment goes directly to river and into next downslope TC (no redistribution among all more-downslope TCs as with water)
+                                        surfflow_in(i)= surfflow_in(i)  + surfflow_out(tc_counter  ) * fractemp(i)/temp2
+                                        IF (dosediment) &
+                                        sed_in(i,:)   = sed_in     (i,:)+ sed_out     (tc_counter,:) * fractemp(i)/temp2
+                                                                                              !Till: sediment goes directly to river and into next downslope TC
                                     END DO
                                     !  Remaining outflow of each terrain component, which is not routed to lower TCs
                                     !  is surface runoff of entire landscape unit (direct runoff to river)
                                     qsurf_lu(lu_counter  )=qsurf_lu(lu_counter  )+surfflow_out(tc_counter)   * fractemp(tc_counter)/temp2
                                     hortsu  (lu_counter  )=hortsu  (lu_counter  )+horth                      * fractemp(tc_counter)/temp2
-                                    IF (dosediment) sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:) * fractemp(tc_counter)/temp2
+                                    IF (dosediment) then 
+                                        sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:) * fractemp(tc_counter)/temp2
                                             !Till: remaining sediment that is not routed to the lower TC reaches the river directly
+                                    END IF
                                 END IF
-                            ELSE IF (.NOT. dolattc) THEN        !Till: no flow between TCs, all flows leave the LU directly
+                            ELSE         !((.NOT. dolattc): Till: no flow between TCs, all flows from leave the LU directly
                                 qsub_lu   (lu_counter)=qsub_lu(lu_counter)+sublat_out(tc_counter)
                                 qsurf_lu(lu_counter  )=qsurf_lu(lu_counter)  +surfflow_out(tc_counter)
                                 hortsu  (lu_counter  )=hortsu  (lu_counter)  +horth

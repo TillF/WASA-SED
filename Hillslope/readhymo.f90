@@ -348,6 +348,13 @@ SUBROUTINE readhymo
         sdr_tc=1.        !default value, no SDR correction
     end if
 
+    if (dummy1 == 8) then !8 columns, containing beta correction factor, TC-wise SDR and concentration factors
+        allocate(frac_diff2conc(nterrain))
+        allocate(frac_conc2diff(nterrain))
+        frac_diff2conc = 0. !default values, same as dolattc = doalllattc = TRUE
+        frac_conc2diff = 0.        
+    end if
+
 
     if (dummy1==4) then !4 columns, old version
         READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),i=1,nterrain)
@@ -355,14 +362,14 @@ SUBROUTINE readhymo
         READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),i=1,nterrain)
     elseif (dummy1==6) then !6 columns, containing beta correction factor and TC-wise SDR
         READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),sdr_tc(i),i=1,nterrain)
+    elseif (dummy1==8) then !8 columns, containing beta correction factor, TC-wise SDR and concentration factors
+        READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),sdr_tc(i),frac_diff2conc(i),frac_conc2diff(i),i=1,nterrain)
     end if
 
-    if ( (.NOT. dosediment) .AND. allocated(beta_fac_tc)) deallocate(beta_fac_tc)
+    !free memory containing correction factors, if sediment is disabled or all set to 1
+    if ( allocated(beta_fac_tc) .AND. ((.NOT. dosediment) .OR. all(beta_fac_tc==1.))) deallocate(beta_fac_tc)
+    if ( allocated(sdr_tc)      .AND. ((.NOT. dosediment) .OR. all(sdr_tc==1.)))      deallocate(sdr_tc)
 
-    if ( (.NOT. dosediment) .AND. allocated(sdr_tc)) deallocate(sdr_tc)
-
-
-    !slope=slope*sensfactor
     CLOSE(11)
 
 
