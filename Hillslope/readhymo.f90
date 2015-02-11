@@ -1508,6 +1508,7 @@ SUBROUTINE readhymo
                 erosion_equation=3            !default erosion equation to be used: MUSLE
             END IF
         ELSE        !no such file found
+            write(*,*)'WARNING: erosion.ctl not found, using defaults.'
             erosion_equation=3            !default erosion equation to be used: MUSLE
             do_musle_subbasin=.FALSE.            !default 0: compute erosion on TC-scale
         END IF
