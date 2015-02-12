@@ -1507,10 +1507,11 @@ SUBROUTINE readhymo
                 write(*,*)'WARNING: erosion_equation was outside [1..4], assumed to be 3 (MUSLE).'
                 erosion_equation=3            !default erosion equation to be used: MUSLE
             END IF
-        ELSE        !no such file found
+        ELSE        !erosion.ctl not found
             write(*,*)'WARNING: erosion.ctl not found, using defaults.'
             erosion_equation=3            !default erosion equation to be used: MUSLE
             do_musle_subbasin=.FALSE.            !default 0: compute erosion on TC-scale
+            transport_limit_mode=2 !transport capacity according to Everaert (1991)
         END IF
         !end insert Till
 
