@@ -1012,7 +1012,7 @@ SUBROUTINE hymo_all(STATUS)
                                 aeth, laitc(tcid_instance),  &
                                 soilettc(tcid_instance), intctc(tcid_instance),  &
                                 prec,precday,prechall, pet(d,i_subbas),  &
-                                tcarea,balance_tc, rootd_act,height_act,lai_act,alb_act,sed_in(tc_counter,:),sed_out(tc_counter,:))
+                                tcarea,balance_tc, rootd_act,height_act,lai_act,alb_act,sed_in(tc_counter,:),sed_out(tc_counter,:), qsurf_lu(lu_counter))
                             balance=balance+balance_tc*fracterrain(id_tc_type)    !Till: compute water balance for LU [mm]
             
                             soilwater(d,tcid_instance)=thact        !Till: save these values, because they were written to vars that will be recycled
@@ -1034,7 +1034,7 @@ SUBROUTINE hymo_all(STATUS)
                                 surfflow_out(tc_counter),sublat_in(tc_counter),sublat_out(tc_counter),  &
                                 gwr,deepgwr,horth,aeth,laih,soileth,inth,  &
                                 prec,precday,prechall(1:24), pet(d,i_subbas),  &
-                                tcarea,balance_tc, rootd_act,height_act,lai_act,alb_act,sed_in(tc_counter,:),sed_out(tc_counter,:))
+                                tcarea,balance_tc, rootd_act,height_act,lai_act,alb_act,sed_in(tc_counter,:),sed_out(tc_counter,:), qsurf_lu(lu_counter))
                             balance=balance+balance_tc*fracterrain(id_tc_type)    !Till: compute water balance for LU [mm]
             
                             gwrtc    (tcid_instance)=gwrtc    (tcid_instance)+gwr        !ii make these assignements optional
