@@ -2,7 +2,7 @@ SUBROUTINE soilwat(hh,day,month,i_subbas2,i_ce,i_lu,lu_counter2,tcid_instance2,i
         thact,thactroot,q_surf_in,q_surf_out,q_sub_in,q_sub_out,qgw,deepqgw,  &
         hortf,tcaet,tclai,  &
         tcsoilet,tcintc,prec,precday,prechall2,petday,  &
-        tcarea2,bal, rootd_act,height_act,lai_act,alb_act,sed_in_tc,sed_out_tc)
+        tcarea2,bal, rootd_act,height_act,lai_act,alb_act,sed_in_tc,sed_out_tc, q_rill_in)
 
 !Till: computationally irrelevant: disabled pause and debugging parts
 !2012-06-20
@@ -189,7 +189,7 @@ INTEGER, INTENT(IN)                  :: id_tc_type2			!ID of TC type
 INTEGER, INTENT(IN)                      :: tc_counter2
 REAL, INTENT(IN OUT)                     :: thact			!internal representation of thact ((average) actual water content of TC [mm])
 REAL, INTENT(OUT)                        :: thactroot
-REAL, INTENT(IN)                         :: q_surf_in
+REAL, INTENT(IN)                         :: q_surf_in !sheet flow entering TC from uphill
 REAL, INTENT(OUT)                        :: q_surf_out
 REAL, INTENT(IN)                         :: q_sub_in			!internal representation of sublat_in
 REAL, INTENT(OUT)                        :: q_sub_out			!internal representation of sublat_out
@@ -212,6 +212,8 @@ REAL, INTENT(IN)                         :: lai_act(nveg)
 REAL, INTENT(IN)                     :: alb_act(nveg)
 REAL, INTENT(IN)					:: sed_in_tc(n_sed_class)
 REAL, INTENT(OUT)					:: sed_out_tc(n_sed_class)
+REAL, INTENT(IN)                         :: q_rill_in !rill flow entering TC from uphill
+
 
 logical :: isnan
 !** Soil water model for terrain component (TC)
@@ -270,7 +272,8 @@ INTEGER :: nbrrooth(maxsoil)
 INTEGER :: i,it,j,h,soilid,n_iter
 INTEGER :: horton,hsat(maxsoil),testi,hmerk,testi2,lath
 
-REAL :: q_surf								!surface runoff [mm H2O]			
+REAL :: q_surf								!surface runoff [mm H2O]	
+REAL :: q_rill_out, q_surf_out2				!modified surface fluxes to pass to sedi_yield	
 REAL :: r		
 						
 ! REAL :: dsi, Aq, Q_li, l2_test1   !these variables are only needed for derivation of lateral subsurface flow equations
@@ -2948,20 +2951,31 @@ watbal=watbal+(thact1-thact)
 
 bal=watbal
 
-if (dosediment .AND. (q_surf_out > 0.) .AND. .NOT. do_musle_subbasin) then !if hillslope erosion is to be computed and there is runoff
+if (dosediment  .AND. .NOT. do_musle_subbasin .AND. (q_surf_out + q_rill_in > 0.)) then !if hillslope erosion is to be computed and there is runoff
 	!the following calculation in the peak runoff rate q_peak uses the equations given in the SWAT Theoretical Documentation, pp.105, 2002
 	
-	!run_cf=(q_surf_out-q_surf_in)/prec	!compute runoff coefficient for this timestep not needed
+	q_rill_out      = q_rill_in 
+    q_surf_out2     = q_surf_out
+    
+    IF (allocated(frac_diff2conc)) then !Till: redistribute sheet/rillflow (temporarily). This is later done again in hymo_all again. Could be done more elegantly only once (ii)
+        tempx = q_surf_out * frac_diff2conc(id_tc_type2) !amount of sheetflow that will be channelized
+        temp2 = q_rill_in  * frac_conc2diff(id_tc_type2) !amount of concentrated flow that will be redistributed to sheetflow
+        q_surf_out2  = q_surf_out2 - tempx + temp2      !sheet flow
+        q_rill_out   = q_rill_out  + tempx - temp2      !rill flow
+        !beta = q_sheet_out / q_rill_out !interrill/rill-ratio
+    END IF
 
-	q_surf=q_surf_out/tcarea2/1000.		!surface runoff [mm H2O]			
-
+    q_surf_out2     = q_surf_out2 + q_rill_out !qfix Sum up total surface runoff. The distinction is not important any more
+    
+	q_surf=q_surf_out2/tcarea2/1000.		!surface runoff [mm H2O]			
+    
 	!ii do this only once for all models at the beginning of model run
 	manning_n=0.
 	r=0.		!for summing up fractions (actually, these should sum up to 1, but we'll do so just in case)
 
 	DO i=1,size(tc_contains_svc2(id_tc_type2)%p)
-		j=tc_contains_svc2(id_tc_type2)%p(i)%svc_id				!get id of current SVC to be treated
-		temp2=tc_contains_svc2(id_tc_type2)%p(i)%fraction					!get fraction of SVC
+		j      =tc_contains_svc2(id_tc_type2)%p(i)%svc_id				!get id of current SVC to be treated
+		temp2  =tc_contains_svc2(id_tc_type2)%p(i)%fraction					!get fraction of SVC
 		manning_n=manning_n+(svc_n_day(j))*temp2			!average Manning-factors throughout TC, weighted by fraction
 		r=r+temp2								!sum up fractions 
 	end do
@@ -2973,8 +2987,12 @@ if (dosediment .AND. (q_surf_out > 0.) .AND. .NOT. do_musle_subbasin) then !if h
 	r=atan(slope(id_tc_type2)/100.)				!convert slope [%] to radiant, avoid multiple computation
 	L_slp=slength(i_lu)*fracterrain(id_tc_type2)	 !absolute slope length of TC [m] (projected length, Haan 1994, p.261) (was:.../ cos(r))
 
-	q_ov=(q_surf_in+q_surf_out)/2./(dt*3600./kfkorr_day)/(tcarea2*1e6/L_slp)		!compute average overland flow rate [m**3/s] on a  1-m-strip
+	!q_ov=(q_surf_in+q_surf_out)/2./(dt*3600./kfkorr_day)/(tcarea2*1e6/L_slp)		!compute average overland flow rate [m**3/s] on a  1-m-strip (no consieration of rillflow, delete)
+	
+    q_ov=(q_surf_in+q_surf_out+q_rill_in+q_rill_out)/2. &
+        /(dt*3600./kfkorr_day)/(tcarea2*1e6/L_slp)		!compute average overland flow rate [m**3/s] on a  1-m-strip qfix
 
+    
 	v_ov=(q_ov**0.4)*((slope(id_tc_type2)/100.)**0.3)/manning_n**0.6				!overland flow velocity [m/s] (6.3.4)
 
 	
@@ -3013,7 +3031,7 @@ if (dosediment .AND. (q_surf_out > 0.) .AND. .NOT. do_musle_subbasin) then !if h
 	!write(*,'(A,f8.4)') "sed_yield: ", r
 	!sed_out_tc(:)=r/n_sed_class	!currently, the particle classes are not treated seperately yet
 
-	CALL sedi_yield(day, i_subbas2, i_lu, id_tc_type2, q_surf_in, q_surf_out, q_peak, v_ov, sed_in_tc, dt, tcarea2,sed_out_tc)
+	CALL sedi_yield(day, i_subbas2, i_lu, id_tc_type2, q_surf_in, q_surf_out2, q_peak, v_ov, sed_in_tc, dt, tcarea2,sed_out_tc)
 else
 	sed_out_tc(:)=0.
 end if !end (do sediment)
