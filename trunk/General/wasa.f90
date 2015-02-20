@@ -53,15 +53,15 @@ DO t=tstart, tstop
   WRITE(*,*) tstart,tstop
   IF (t /= tstart) CALL calcyear
   WRITE(*,*) 'calculations for year ',t
-!          
+!
 ! Call routines for climate time series for current year
   IF (t /= tstart) CALL climo(1)
-	
+
 ! Update annual values for hydrology and agriculture at start of each simulation year
      call hymo_all(1)
 	 if (river_transport.eq.1) call routing(1)
 	 if (river_transport.ne.1) call routing_new(1)
-    
+
 !!! MAIN LOOP FOR DAILY TIME STEPS
   DO d=1,dayyear
   write(*,*) d
