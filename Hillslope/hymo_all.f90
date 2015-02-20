@@ -150,10 +150,10 @@ SUBROUTINE hymo_all(STATUS)
 
     ! Till: water_subbasin converted from m**3 into m**3/s
     ! 2005-10-13
-  
+
     ! Till: routing is no longer called from hymo, but wasa.f90
     ! 2005-10-12
- 
+
     ! Till: fixed formatting bug in daily_sediment_production.out
     ! 2005-09-29
 
@@ -262,21 +262,21 @@ SUBROUTINE hymo_all(STATUS)
     !CCCCCCCCCCCCCCCCCCCC MODULE CODE CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
     IF (STATUS == 0) THEN    !Till: initialisation before first run
         !** Initialization from datafile
-    
+
         CALL readhymo
 
         if (do_pre_outflow) then        !if water outflow from upstream subbasins is given
             call read_pre_subbas_outflow        !read
         end if
-  
+
         !** Additional intializations
-  
+
         !George    lakeoutflow(dprev,1:subasin)=0.
         water_subbasin(dprev,1:subasin)=0.
         soilwater(dprev,:)=0.
         deepgw(1:subasin,:)=0.
-  
-  
+
+
         allocate(sed_in(maxval(nbrterrain),n_sed_class),sed_out(maxval(nbrterrain),n_sed_class))
 
 
@@ -286,7 +286,7 @@ SUBROUTINE hymo_all(STATUS)
 
         !cum_erosion_TC(:,:)=0.
         !cum_deposition_TC(:,:)=0.
-  
+
         if (doloadstate) then
             call init_model_state        !load initital conditions from file
         else
@@ -302,10 +302,10 @@ SUBROUTINE hymo_all(STATUS)
                                 isoil=id_soil_intern(sc,tcid_instance)
                                 DO h=1,nbrhori(isoil)
                                     horithact(tcid_instance,sc,h)= soilpwp(isoil,h)*horiz_thickness(tcid_instance,sc,h) !Till: set water content to wilting point
-                  
-                  
+
+
                                 END DO
-    
+
                                 soilwater(dprev,tcid_instance)= soilwater(dprev,tcid_instance)+  &
                                     sum(horithact(tcid_instance,sc,:))* frac_svc(sc,tcid_instance)
                             END DO
@@ -341,17 +341,17 @@ SUBROUTINE hymo_all(STATUS)
             END DO
 
             if (dosavestate) CALL save_all_conds('','','','','','','',trim(pfadn)//'storage.stats_start')        !Till: save summary on initial storage
-  
+
         end if
 
-  
-  
+
+
         !   initialize saturated fraction of TC
         frac_sat(:,:)=0.0
-  
+
         if (doacud)  CALL lake(0,dummy)
 
-  
+
         ! create and open output files
         ! Output daily water contribution to river (m**3/s)
         OPEN(11,FILE=pfadn(1:pfadi)// 'daily_water_subbasin.out', STATUS='replace')
@@ -489,14 +489,14 @@ SUBROUTINE hymo_all(STATUS)
         OPEN(11,FILE=pfadn(1:pfadi)//'water_subbasin.out', STATUS='replace')
         IF (f_water_subbasin) THEN    !Till: if sub-daily resolution is required
             WRITE(11,'(a)') 'sub-daily contribution to river [m3/s] for all sub-basins (MAP-IDs)'
-    
+
             write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'        !generate format string
             WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep', (char(9),id_subbas_extern(i),i=1,subasin)
             CLOSE(11)
         ELSE                !delete any existing file, if no output is desired
             CLOSE(11,status='delete')
         END IF
-  
+
         !     Output sediment production (t)
         OPEN(11,FILE=pfadn(1:pfadi)//'daily_sediment_production.out', STATUS='replace')
         IF (f_daily_sediment_production .AND. dosediment) THEN
@@ -512,7 +512,7 @@ SUBROUTINE hymo_all(STATUS)
         ELSE                !delete any existing file, if no output is desired
             CLOSE(11,status='delete')
         END IF
-  
+
         !     Output sub-saily sediment production (t)
         OPEN(11,FILE=pfadn(1:pfadi)//'sediment_production.out', STATUS='replace')
         IF (f_sediment_production .AND. dosediment .AND. dt<24) THEN    !only do output if file is desired, sediment modelling is enabled and model runs in sub-daily resolution
@@ -528,7 +528,7 @@ SUBROUTINE hymo_all(STATUS)
         ELSE                !delete any existing file, if no output is desired
             CLOSE(11,status='delete')
         END IF
-  
+
 
 
         !!     debug Output for checking purposes !remove
@@ -542,7 +542,7 @@ SUBROUTINE hymo_all(STATUS)
         !     debug_out2=0
         !    CLOSE(11)
 
-  
+
 
 
 
@@ -554,7 +554,7 @@ SUBROUTINE hymo_all(STATUS)
             dig_lu=max(1,ceiling(log10(1.*maxval(id_lu_extern))))
             dig_tc=max(1,ceiling(log10(1.*maxval(id_terrain_extern))))
 
-    
+
             allocate(tc_idx(ntcinst))
             tc_idx=""
 
@@ -579,7 +579,7 @@ SUBROUTINE hymo_all(STATUS)
 
             i=1
 
-    
+
         !    m=0        !sum up storage required
         !    do i=1,length(year_print)    !compute number of timesteps that need to be saved
         !        if (year_print(i)==-1) then    !save all model time
@@ -607,7 +607,7 @@ SUBROUTINE hymo_all(STATUS)
         !conrad: tc-wise theta output file preparation
         OPEN(11,FILE=pfadn(1:pfadi)// 'tc_theta.out', STATUS='replace')
         IF (f_tc_theta) THEN
-       
+
             !Till: allocate memory for TC-wise output
             allocate(theta_tc(366,nt,ntcinst))
             theta_tc=-1. !debugging help
@@ -627,13 +627,13 @@ SUBROUTINE hymo_all(STATUS)
                     END DO
                 END DO
             END DO
-    
-    
+
+
             WRITE(11,'(A)') 'daily theta [%] for tcs in lus in sub-basins (scheme: '//REPEAT('S',dig_sub)//&
                 REPEAT('L', dig_lu)//REPEAT('T', dig_tc)//') -> use with tc_plot.m in Matlab'
             !don't change headerline, needed by matlab- /R-script
-    
-    
+
+
             WRITE(fmtstr,'(a,i0,a,i0,a)') '(i0,a,i0,a,i0,',ntcinst,'(a,a',dig_sub+dig_lu+dig_tc,'))'
             WRITE(11,fmtstr)0,char(9),0,char(9),0,(char(9),tc_idx(i),i=1,ntcinst)        !tab separated output (TC indices as strings)
 
@@ -649,7 +649,7 @@ SUBROUTINE hymo_all(STATUS)
             WRITE(11,'(A)') 'surface runoff [mm] for tcs in lus in sub-basins (scheme: '//REPEAT('S',dig_sub)//&
                 REPEAT('L', dig_lu)//REPEAT('T', dig_tc)//') -> use with tc_plot.m in Matlab'
             !don't change headerline, needed by matlab- /R-script
-    
+
             WRITE(fmtstr,'(a,i0,a,i0,a)') '(i0,a,i0,a,i0,',ntcinst,'(a,a',dig_sub+dig_lu+dig_tc,'))'
             WRITE(11,fmtstr)0,char(9),0,char(9),0,(char(9),tc_idx(i),i=1,ntcinst)        !tab separated output (TC indices as strings)
             CLOSE(11)
@@ -663,7 +663,7 @@ SUBROUTINE hymo_all(STATUS)
             WRITE(11,'(A)') 'sediment output [t/km²] for tcs in lus in sub-basins (scheme: '//REPEAT('S',dig_sub)//&
                 REPEAT('L', dig_lu)//REPEAT('T', dig_tc)//') -> use with tc_plot.m in Matlab'
             !don't change headerline, needed by matlab- /R-script
-    
+
             WRITE(fmtstr,'(a,i0,a,i0,a)') '(i0,a,i0,a,i0,',ntcinst,'(a,a',dig_sub+dig_lu+dig_tc,'))'
             WRITE(11,fmtstr)0,char(9),0,char(9),0,(char(9),tc_idx(i),i=1,ntcinst)        !tab separated output (TC indices as strings)
             CLOSE(11)
@@ -796,9 +796,9 @@ SUBROUTINE hymo_all(STATUS)
     !-------------------------------------------------------------------
     IF (STATUS == 2) THEN
                 !** Calculation for one timestep (i.e. 1 day)
-		
+
         DO i_subbas=1,subasin
-    
+
             j=0    !Till: temporary indicator if this subbasin can be skipped because of prespecified values
 
             if (do_pre_outflow) then        !if water outflow from upstream subbasins is given
@@ -812,7 +812,7 @@ SUBROUTINE hymo_all(STATUS)
                     end if
                 end if
             end if !do outflow
-    
+
             if (do_pre_outsed) then        !if water outsed from upstream subbasins is given
                 if (corr_column_pre_subbas_outsed(i_subbas)>0) then            !if outsed of subbasin is prespecified
                     sediment_subbasin(d,i_subbas,:) = sum(pre_subbas_outsed(d,1:nt,corr_column_pre_subbas_outsed(i_subbas)))*pre_psd
@@ -824,19 +824,15 @@ SUBROUTINE hymo_all(STATUS)
                     dosediment=.TRUE.
                 end if
             end if !do outsed
-    
+
 
             if (j==1) cycle        !Till: indicator: this subbasin can be skipped because of prespecified values
-    
+
             precday=precip(d,i_subbas)        !daily precip
 
             julian_day=d
             IF (t == tstart) THEN
                 julian_day=julian_day+sum(daymon(1:mstart-1))
-            ENDIF
-    
-            IF (MOD((t),4) == 0)  THEN    !compute julian day
-                julian_day=julian_day+1
             ENDIF
 
 
@@ -866,14 +862,14 @@ SUBROUTINE hymo_all(STATUS)
                 stop
             END IF
 
-            
+
             if(dosediment) then
                 svc_k_fac_day     = calc_seasonality2(i_subbas, t, julian_day, seasonality_k, svc_k_fac)            !compute K-factors of current day
                 svc_c_fac_day     = calc_seasonality2(i_subbas, t, julian_day, seasonality_c, svc_c_fac)            !compute c-factors of current day
 				svc_p_fac_day     = calc_seasonality2(i_subbas, t, julian_day, seasonality_p,      svc_p_fac)            !compute p-factors of current day
                 svc_coarse_fac_day= calc_seasonality2(i_subbas, t, julian_day, seasonality_coarse, svc_coarse_fac)    !compute coarse-factors of current day
                 svc_n_day         = calc_seasonality2(i_subbas, t, julian_day, seasonality_n,      svc_n)                !compute n of current day
-            
+
                 if (count(svc_k_fac_day < 0) > 0) then
                     write(*,*)'Negative K-factor, check rainy_season.dat and svc.dat.'
                     stop
@@ -894,10 +890,10 @@ SUBROUTINE hymo_all(STATUS)
                     write(*,*)'Negative Manning''s n, check rainy_season.dat and svc.dat.'
                     stop
                 END IF
-            
+
             endif
             kfkorr_day=kfkorr*(kfkorr_a*1/max(precip(d,i_subbas),0.001)+kfkorr_b)    !compute kfkorr as a function of daily precipitation (use a minimum value of 0.001 for precip to avoid division by zero)
-    
+
 
             deepgwrsu=0.
 
@@ -906,13 +902,13 @@ SUBROUTINE hymo_all(STATUS)
             DO lu_counter=1,nbr_lu(i_subbas)
                 luid_instance = luid_instance +1
                 i_lu=id_lu_intern(lu_counter,i_subbas) !internal LU-ID
-      
+
                 balance=0.0
                 frac_satsu=0.0
 
                 fractemp(:)=0.
                 fractemp(1:nbrterrain(i_lu))=fracterrain(id_terrain_intern(1:nbrterrain(i_lu),i_lu))    !Till: initialise auxiliary array that holds the saturated fraction of each TC in the current LU
-      
+
 
 
                 !      IF (dohour) THEN
@@ -947,7 +943,7 @@ SUBROUTINE hymo_all(STATUS)
                     intcsu   (lu_counter)=0.
                     soilmsu  (lu_counter)=0.
                     sedsu    (lu_counter,:)=0.
-        
+
                     surfflow_in(:) =0.            !Till: reset TC-related variables
                     surfflow_out(:)=0.
                     sublat_in(:)   =0.
@@ -963,16 +959,16 @@ SUBROUTINE hymo_all(STATUS)
                     !        intctc  (:)=0.
 
 
-        
+
                     soilmrootsu(lu_counter)=0.
-        
+
                     ! LOOPs through all Terrain Components of specific Landscape Unit (of specific sub-basin)
 
                     L_cum=0.    !Pedro - zero the cumulated slope length for erosion calculations
-  
+
                     DO tc_counter=1,nbrterrain(i_lu)
                         tcid_instance=tcallid(i_subbas,lu_counter,tc_counter)
-          
+
                         id_tc_type=id_terrain_intern(tc_counter,i_lu)
                         tcarea=area(i_subbas)*frac_lu(lu_counter,i_subbas)* fracterrain(id_tc_type)
 
@@ -988,7 +984,7 @@ SUBROUTINE hymo_all(STATUS)
                             deepgwrtc(tcid_instance)=0.
                         END IF
 
-          
+
                         !Print hydrologic variable on TC scale. If not used, DISABLE
                         !**************************************************************************************************
                         !                        IF (precip(d,i_subbas) == 0.) deposition_TC(i_subbas,id_tc_type)=0.
@@ -1000,7 +996,7 @@ SUBROUTINE hymo_all(STATUS)
 
                         gwr=0.
                         deepgwr=0.
-          
+
                         IF (.NOT. dohour) THEN    !ii: join daily and hourly branch
                             prec=precip(d,i_subbas)
                             hh=0
@@ -1013,11 +1009,11 @@ SUBROUTINE hymo_all(STATUS)
                                 prec,precday,prechall, pet(d,i_subbas),  &
                                 tcarea,balance_tc, rootd_act,height_act,lai_act,alb_act,sed_in(tc_counter,:),sed_out(tc_counter,:))
                             balance=balance+balance_tc*fracterrain(id_tc_type)    !Till: compute water balance for LU [mm]
-            
+
                             soilwater(d,tcid_instance)=thact        !Till: save these values, because they were written to vars that will be recycled
                             gwrtc(tcid_instance)=gwr
                             deepgwrtc(tcid_instance)=deepgwr
-            
+
 
                         ELSE
                             aeth=0.
@@ -1035,13 +1031,13 @@ SUBROUTINE hymo_all(STATUS)
                                 prec,precday,prechall(1:24), pet(d,i_subbas),  &
                                 tcarea,balance_tc, rootd_act,height_act,lai_act,alb_act,sed_in(tc_counter,:),sed_out(tc_counter,:))
                             balance=balance+balance_tc*fracterrain(id_tc_type)    !Till: compute water balance for LU [mm]
-            
+
                             gwrtc    (tcid_instance)=gwrtc    (tcid_instance)+gwr        !ii make these assignements optional
                             deepgwrtc(tcid_instance)=deepgwrtc(tcid_instance)+deepgwr
                             laitc    (tcid_instance)=laitc    (tcid_instance)+laih/24.
                             soilettc (tcid_instance)=soilettc (tcid_instance)+soileth
                             intctc   (tcid_instance)=intctc   (tcid_instance)+inth
-            
+
 
                             IF (timestep_counter == 24) THEN
                                 soilwater(d,tcid_instance)=thact
@@ -1051,7 +1047,7 @@ SUBROUTINE hymo_all(STATUS)
                         END IF    !dohour
                         horttc   (tcid_instance)=horttc   (tcid_instance)+horth            !ii: possibly obsolete, since not used any further
                         aettc    (tcid_instance)=aettc    (tcid_instance)+aeth
-          
+
                         !conrad: convert thact (in mm) into percent of soil volume using mean soil depth in tc
                         if (f_tc_theta) then
                             !theta_tc(d,nt,tcid_instance)=thact/meandepth_tc(i_subbas,lu_counter,tc_counter) !original version, using mean theta for entire profile (instead of topmost horizon only, see below)
@@ -1065,11 +1061,11 @@ SUBROUTINE hymo_all(STATUS)
                         if (f_tc_surfflow) then    !Till: safe TC-wise surface runoff
                             surfflow_tc(d,timestep_counter,tcid_instance)=surfflow_out(tc_counter)/(tcarea*1e3)
                         end if
-          
+
                         if (dosediment .AND. f_tc_sedout .and. .NOT. do_musle_subbasin) then    !Till: safe TC-wise sediment output
                             sedout_tc(d,timestep_counter,tcid_instance)=sum(sed_out(tc_counter,:))/tcarea
                         end if
-          
+
 
                         !  lateral flow between terrain components (TCs)
                         !  lateral outflow is lateral inflow to deeper terrain compent
@@ -1081,7 +1077,7 @@ SUBROUTINE hymo_all(STATUS)
                             !Till: this implicitly accounts for preferential flow
                         !  this refers to surface flow only, subsurface flow is always completely
                         !  routed to next downstream TC if dolattc is set
-        
+
                         IF (tc_counter < nbrterrain(i_lu)) THEN
 
                             IF (dolattc) THEN
@@ -1120,13 +1116,13 @@ SUBROUTINE hymo_all(STATUS)
                             hortsu  (lu_counter  )=hortsu  (lu_counter  )+horth
                             IF (dosediment) sedsu   (lu_counter,:)=sedsu   (lu_counter,:)+sed_out     (tc_counter,:)
                         END IF
-            
-        
+
+
                         IF (.NOT. dohour) THEN
                             soilmsu(lu_counter)=soilmsu(lu_counter)+ thact*fracterrain(id_tc_type)    !compute mean soil moisture in LU
                         END IF
 
-        
+
                         if (f_actetranspiration)  aet_t(d,timestep_counter,i_subbas) = aet_t(d,timestep_counter,i_subbas) + aeth*fracterrain(id_tc_type)*frac_lu(lu_counter,i_subbas) !Till: store subdaily values, if enabled
 
                     END DO !end of calculations for each terrain component in the landscape unit
@@ -1135,44 +1131,44 @@ SUBROUTINE hymo_all(STATUS)
                     water_subbasin_t(d,timestep_counter,i_subbas)  = water_subbasin_t(d,timestep_counter,i_subbas) + &
                         (qsurf_lu(lu_counter)+qsub_lu(lu_counter))
                     !old: water_subbasin_t(d,timestep_counter,i_subbas)  = water_subbasin_t(d,timestep_counter,i_subbas) + (1.-intercepted)*(qsurf_lu(lu_counter)+qsub_lu(lu_counter))
-        
+
                     !George: disable subsurface flow (for debugging) - outcomment previous line, include following line
                     !water_subbasin_t(d,timestep_counter,i_subbas)  = water_subbasin_t(d,timestep_counter,i_subbas) + (qsurf_lu(lu_counter))
                     !old: water_subbasin_t(d,timestep_counter,i_subbas)  = water_subbasin_t(d,timestep_counter,i_subbas) + (1.-intercepted)*(qsurf_lu(lu_counter))
-        
+
                     !Till: store subdaily values, if enabled
                     if (f_qhorton)  then
                         hortflow_t(d,timestep_counter,i_subbas) = hortflow_t(d,timestep_counter,i_subbas)  + hortsu  (lu_counter)
                     end if
                     if (associated(subflow_t)) subflow_t (d,timestep_counter,i_subbas) = subflow_t  (d,timestep_counter,i_subbas) + qsub_lu (lu_counter)
                     if (associated(ovflow_t )) ovflow_t  (d,timestep_counter,i_subbas) = ovflow_t   (d,timestep_counter,i_subbas) + qsurf_lu(lu_counter)
-        
+
                     IF (dosediment)  THEN
                         IF (allocated(sdr_lu) ) sedsu(lu_counter,:) = sdr_lu(i_lu)*sedsu(lu_counter,:) !apply prespecified SDR, if present
                         sediment_subbasin_t(d,timestep_counter,i_subbas,:) = sediment_subbasin_t(d,timestep_counter,i_subbas,:)+sedsu(lu_counter,:)
 
                         IF (f_lu_sedout) sedout_lu(d,timestep_counter,luid_instance) = sum(sedsu(lu_counter,:))    !prepare LU-wise output, if selected
                     END IF
-        
+
                 END DO
                 !  END of loop over subdaily timesteps
-      
-      
+
+
                 if (f_potetranspiration) pet_t(d,:,i_subbas) = pet(d,i_subbas)/nt !Till: store subdaily values, if enabled (simple equal distribution over day)
 
                 !  calculate (daily) water balance variables at landscape unit scale
                 DO tc_counter=1,nbrterrain(i_lu)
                     tcid_instance=tcallid(i_subbas,lu_counter,tc_counter)
                     id_tc_type=id_terrain_intern(tc_counter,i_lu)
-        
+
                     aetsu    (lu_counter)=aetsu    (lu_counter)+ aettc    (tcid_instance)*fracterrain(id_tc_type)
                     laisu    (lu_counter)=laisu    (lu_counter)+ laitc    (tcid_instance)*fracterrain(id_tc_type)
                     soiletsu (lu_counter)=soiletsu (lu_counter)+ soilettc (tcid_instance)*fracterrain(id_tc_type)
                     intcsu   (lu_counter)=intcsu   (lu_counter)+ intctc   (tcid_instance)*fracterrain(id_tc_type)
-    
+
                     deepgwrsu(lu_counter)=deepgwrsu(lu_counter)+ deepgwrtc(tcid_instance)*fracterrain(id_tc_type) !new
                     gwrsu    (lu_counter)=gwrsu    (lu_counter)+ gwrtc    (tcid_instance)*fracterrain(id_tc_type)
-        
+
                     IF (dohour) THEN
                         soilmsu(lu_counter)=soilmsu(lu_counter)+ thact*fracterrain(id_tc_type)    !Till: use last value of day to compute mean soil moisture in LU
                                                                                                 !thact ist nur von letzter TC in LU. Müsste das nicht irgendwie in die TC-Schleife mit rein?
@@ -1187,7 +1183,7 @@ SUBROUTINE hymo_all(STATUS)
                                                                                 !Till: ii gw_dist is zero anyway, eliminate it
 
                     tcid_instance=tcallid(i_subbas,lu_counter,nbrterrain(i_lu))    !Till: get ID of lowermost TC in current LU
-        
+
                     rtemp=deepgwrsu(lu_counter)* (1.-gw_dist(i_lu))*  &
                         area(i_subbas)*frac_lu(lu_counter,i_subbas)*1.e3    !Till: compute ground water recharge [m3]
                     deepgw(i_subbas,lu_counter)=deepgw(i_subbas,lu_counter)+rtemp        !Till: add gw recharge to gw storage [m3]
@@ -1197,7 +1193,7 @@ SUBROUTINE hymo_all(STATUS)
 
                     !rtemp=0. !George: disable groundwater contribution: enable this line, outcomment next line
                     rtemp=min(deepgw(i_subbas,lu_counter),deepgw(i_subbas,lu_counter)/gw_delay(i_lu))        !Till: compute gw-discharge [m3], at maximum this equals the entire stored volume
-        
+
                     if ((rtemp>0.) .AND. (frac_direct_gw<1.)) then !Till: ground water discharge is (partially) routed into interflow of lowermost tc
                         dummy=min(INT(maxval(sum(horiz_thickness(tcid_instance,:,:),2))/500.)+1,size(latred, DIM = 2)  ) !Till: compute number of horizon layers needed for storing the subsurface flow
                         latred(tcid_instance,1:dummy)=latred(tcid_instance,1:dummy)+ rtemp*(1.-frac_direct_gw)/dummy
@@ -1207,19 +1203,19 @@ SUBROUTINE hymo_all(STATUS)
 
                     qsub_lu(lu_counter)=qsub_lu(lu_counter)+rtemp2        !Till: add gw-discharge to total subsurface runoff
                     !old water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas)+(1.-intercepted)*rtemp2/nt    !Till: deep gw discharge is distributed equally among all timesteps of day
-        
+
                     water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas)+rtemp2/nt    !Till: deep gw discharge is distributed equally among all timesteps of day
                     if (f_gw_discharge)       deep_gw_discharge_t(d,:,i_subbas) = deep_gw_discharge_t(d,:,i_subbas) + rtemp2/nt
                     if (associated(subflow_t))  subflow_t          (d,:,i_subbas) = subflow_t          (d,:,i_subbas) + rtemp2/nt !Till: groundwater is (traditionally) included in subsurface fluxes
-        
+
                     deepgwrsu(lu_counter)=deepgwrsu(lu_counter)-deepgwrsu(lu_counter)*(1.-gw_dist(i_lu))    !Till: must be zeroed, everything still in there leaves the model domain
                     deepgw(i_subbas,lu_counter)=deepgw(i_subbas,lu_counter)- rtemp                              !Till: gw storage is reduced according to outflow (direct outflow to river and outflow to lowest TC)
-        
+
                     IF (f_deep_gw_discharge) THEN    !Till: sum up daily groundwater discharge (effective part into river) (for output only)
                         deep_gw_discharge(d,i_subbas)=deep_gw_discharge(d,i_subbas)+rtemp2        !(1.-intercepted)
                     END IF
 
-        
+
                   !qsub_lu(lu_counter)=qsub_lu(lu_counter)+deepgw(i_subbas,lu_counter)/gw_delay(i_lu)        !Till: compute gw discharge from subbasin
                   !water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas)+(1.-intercepted)*deepgw(i_subbas,lu_counter)/gw_delay(i_lu)/nt    !Till: deep gw discharge is distributed equally among all timesteps of day
                   !deepgwrsu(lu_counter)=deepgwrsu(lu_counter)-deepgwrsu(lu_counter)*(1.-gw_dist(i_lu))    !gw storage is reduced according to outflow (losses from model domain)
@@ -1257,19 +1253,19 @@ SUBROUTINE hymo_all(STATUS)
             if (f_qhorton)  hortflow(d,i_subbas)= hortflow (d,i_subbas)+sum(hortflow_t(d,:,i_subbas))
             ovflow   (d,i_subbas)= ovflow   (d,i_subbas)+sum(ovflow_t  (d,:,i_subbas))
             subflow  (d,i_subbas)= subflow  (d,i_subbas)+sum(subflow_t (d,:,i_subbas))
-    
+
             !  runoff generated in cells units is simply summed to give runoff of
             !  entire watershed
             !  ETP, horton flow. gwr and soil moisture is area-weighted mean (mm)
- 
+
             IF (dosediment .AND. do_musle_subbasin .AND. (ovflow(d,i_subbas)>0.) ) THEN    !calculate sediment yield on subbasin scale (in contrast to on TC-scale)
                 !sediment_subbasin(d,i_subbas,:)=sedi_yield_subbas(subbas_id, ovflow(d,i_subbas), sed_yield_subbas)
                 CALL sedi_yield_subbas(i_subbas, ovflow(d,i_subbas), sediment_subbasin(d,i_subbas,:))
                 sediment_subbasin_t(d,1,i_subbas,:)=sediment_subbasin(d,i_subbas,:) / nt !ii distribute daily yield equally among timesteps (needs to be improved)
             END IF
 
- 
-    
+
+
             !George *****************************************************
             ! routing between landscape units
             ! currently, simple summing up of runoff of all LUs
@@ -1280,12 +1276,12 @@ SUBROUTINE hymo_all(STATUS)
             !George        intercepted*subflow(d,i_subbas)
             !George endif
             !George *****************************************************
-    
+
             !** water_subbasin composed of components:
             !    1) remaining surface flow generated in the lowlands
             !    2) outflow from largest volume class of small acudes is added later
             !    3) groundwater exfiltration in the lowlands downstream small acudes
-    
+
             !    !threshold value for eliminating minimum outflow
             !    rtemp=(1.-intercepted)*(ovflow(d,i_subbas)+ subflow(d,i_subbas))
             !    if ((rtemp>0.) .AND. (rtemp <= 0.000*3600*24*area(i_subbas))) then                !Till: effective discharge only if more than 0.001 m3/s/km2 is exceeded (prevents very low flows)
@@ -1305,22 +1301,22 @@ SUBROUTINE hymo_all(STATUS)
             !        else
             !            water_subbasin(d,i_subbas)  = rtemp            !normal case: all water flux components are directed to the river
             !    end if
-    
+
             !    water_subbasin(d,i_subbas)  = water_subbasin(d,i_subbas)+(1.-intercepted)*(ovflow(d,i_subbas)+ subflow(d,i_subbas))
             water_subbasin(d,i_subbas)  = water_subbasin(d,i_subbas)+(ovflow(d,i_subbas)+ subflow(d,i_subbas))
 
 
             !George    water_subbasin(d,i_subbas)  = (1.-intercepted)*(ovflow(d,i_subbas))
             !write(*,*)water_subbasin (d,i_subbas),water_subbasin_t(d,1,i_subbas)
-    
+
             !  this is the end of calculations for each sub-basin
-    
+
             !  correct runoff volumes by fraction of actual lake surface area
             !  on total watershed area
             !  (which receives direct precipitation)
             !  assessment of total lake surface in watershed:
             !  (small lake area given in km**2, largedam area in m**2)
-    
+
             !George new values for the variables water_subbasin_t and sediment_subbasin_t are obtained
             ! directly in the lake.f90
             IF (doacud) THEN
@@ -1330,7 +1326,7 @@ SUBROUTINE hymo_all(STATUS)
                     water_subbasin (d,i_subbas)=water_subbasin(d,i_subbas)*(1.-((damareaact(i_subbas)/1.e6)/area(i_subbas)))
                 END IF
             END IF
-    
+
             water_subbasin (d,i_subbas) = water_subbasin (d,i_subbas) / (24.*3600.)    !convert m**3/d into m**3/s
             water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas) / (dt*3600.)    !convert m**3 into m**3/s
 
@@ -1341,7 +1337,7 @@ SUBROUTINE hymo_all(STATUS)
             end if
 
             if (f_gw_loss) gw_loss_t(d,:,i_subbas) = rtemp2/nt
-        
+
         !!Print hydrologic variable on TC scale. If not used, DISABLE
         !!************************************************************************
         !    DO lu_counter=1,nbr_lu(i_subbas)
@@ -1377,25 +1373,25 @@ SUBROUTINE hymo_all(STATUS)
         !      ENDDO
         !    ENDDO
         !!*************************************************************************
-    
+
         !   river runoff of each sub-basin is
         !   used in subroutine "routing",incl. water balance of large reservoirs
-    
+
         !   end of loop for all sub-basins
         END DO
- 
+
         if (do_pre_outsed) then        !if water outsed from upstream subbasins is given
             dosediment=.TRUE.        !this may have been switched off temproarily if the last subbas was a prespecified one - switch it on again
         end if
-    
+
     END IF
 
     !----------------------------------------------------------------------
     IF (STATUS == 3) THEN
-  
+
         CALL write_output(f_daily_water_subbasin,'daily_water_subbasin.out',water_subbasin)    ! Output daily water contribution into river (m**3/s)
         CALL write_output(f_daily_water_subbasin,'daily_water_subbasin2.out',sum(water_subbasin_t,dim=2)*3600.*dt)    ! Output daily water contribution into river (m**3/s)
-    
+
         CALL write_output(f_daily_actetranspiration,'daily_actetranspiration.out',aet,3)    ! Output daily actual evapotranspiration
         CALL write_output(f_daily_potetranspiration,'daily_potetranspiration.out',pet,3)    ! Output daily potential evapotranspiration
         CALL write_output(f_daily_theta,'daily_theta.out',soilm)        ! Output daily soil moisture
@@ -1416,7 +1412,7 @@ SUBROUTINE hymo_all(STATUS)
         CALL write_subdaily_output(f_gw_recharge,       'gw_recharge.out',        deep_gw_recharge_t)
         CALL write_subdaily_output(f_potetranspiration, 'potetranspiration.out',  pet_t)
         CALL write_subdaily_output(f_gw_loss,           'gw_loss.out',            gw_loss_t)
-    
+
         !    CALL write_subdaily_output(f_water_subbasin,    'water_subbasin.out',     water_subbasin_t)    !ii use this output routine instead of the lower one
 
         ! Output sub-daily water flux
@@ -1448,7 +1444,7 @@ SUBROUTINE hymo_all(STATUS)
         IF (f_sediment_production .AND. dosediment .AND. dt<24) THEN    !only do output if file is desired, sediment modelling is enabled and model runs in sub-daily resolution
             OPEN(11,FILE=pfadn(1:pfadi)//'sediment_production.out', STATUS='old',POSITION='append')
             WRITE(fmtstr,'(a,i0,a,i0,a)')'(i0,a,i0,a,i0,',n_sed_class,'(',subasin,'(a,f13.4)))'    !generate format string
-    
+
             DO d=1,dayyear
                 DO counti=1,nt
                     WRITE (11,fmtstr)t, char(9), d,  char(9), counti, ((char(9),sediment_subbasin_t(d,counti,i,j),j=1,n_sed_class),i=1,subasin)
@@ -1489,13 +1485,13 @@ SUBROUTINE hymo_all(STATUS)
         IF (f_tc_surfflow ) THEN    !Till: write TC-wise surface flow
             OPEN(11,FILE=pfadn(1:pfadi)//'tc_surfflow.out', STATUS='old',POSITION='append')
             WRITE(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,',ntcinst,'(a,f6.1))'    !generate format string
-        
+
             DO d=1,dayyear
                 DO counti=1,nt
                     WRITE (11,fmtstr)t,char(9),d,char(9),counti,(char(9),surfflow_tc(d,counti,i),i=1,ntcinst)    !tab separated output
                 END DO
             END DO
-        
+
             CLOSE(11)
         END IF
 
@@ -1558,7 +1554,7 @@ contains
     END SUBROUTINE open_subdaily_output
 
 
-    
+
     SUBROUTINE write_output(f_flag,file_name,value_array,spec_decimals)
         ! Output daily values of given array
         IMPLICIT NONE
@@ -1566,21 +1562,21 @@ contains
         CHARACTER(len=*), INTENT(IN)         :: file_name
         REAL, INTENT(IN)                  :: value_array(:,:)
         INTEGER, optional ::  spec_decimals
-        INTEGER :: digits, decimals 
+        INTEGER :: digits, decimals
 
         IF (f_flag) THEN    !if output file is enabled
             OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old',POSITION='append')
 
             digits=floor(log10(max(1.0,maxval(value_array))))+1    !Till: number of pre-decimal digits required
 
-            if (present(spec_decimals)) then 
-                decimals=spec_decimals     
+            if (present(spec_decimals)) then
+                decimals=spec_decimals
             else
                 decimals=max(0,10-digits)     !default: use 11 digits in total in output
             end if
-            
+
             write(fmtstr,'(a,i0,a,i0,a,i0,a)') '(i0,a,i0,',subasin,'(a,f',digits+decimals+1,'.',decimals,'))'        !generate format string (subdaily format)
-            
+
             !write(fmtstr,'(a,i0,a)') '(i0,a,i0,',subasin,'(a,f14.3))'        !generate format string (daily format)
             DO d=1,dayyear
                 write(11,trim(fmtstr))t,char(9),d,(char(9),value_array(d,i),i=1,subasin)
@@ -1605,7 +1601,7 @@ contains
             write(fmtstr,'(a,i0,a,i0,a,i0,a)') '(i0,a,i0,a,i0,',subasin,'(a,f',max(11,digits),'.',max(0,11-digits-1),'))'        !generate format string (subdaily format)
             DO d=1,dayyear
                 DO j=1,nt
-                    WRITE (11,fmtstr)t, char(9), d, char(9), j, (char(9),value_array(d,j,i),i=1,subasin) 
+                    WRITE (11,fmtstr)t, char(9), d, char(9), j, (char(9),value_array(d,j,i),i=1,subasin)
                 END DO
             END DO
             CLOSE(11)

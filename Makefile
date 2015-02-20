@@ -2,8 +2,10 @@
 # at first run 'update_revision_no.sh' in your svn directory and copy General/svn_rev.var into your actual working tree
 
 CC=gfortran
-CFLAGS=-c -ggdb
-FLAGS= -ffree-line-length-none -ggdb -Wtabs
+CFLAGS=-c
+
+# DEBUG
+FLAGS= -g -fcheck=all -Wall -Wextra -fimplicit-none -ffree-line-length-none -Wno-maybe-uninitialized -Wtabs -fbacktrace
 
 # compiler flag explanations
 # COMMON
