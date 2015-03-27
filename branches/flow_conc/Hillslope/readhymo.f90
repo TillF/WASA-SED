@@ -233,6 +233,7 @@ SUBROUTINE readhymo
     istate=0
     id_subbas_extern=upbasin
     id_subbas_intern=0
+    id_lu_intern=0
     c=0 !count successfully read subbasins
     h=3 !count lines
 
@@ -263,8 +264,8 @@ SUBROUTINE readhymo
         else
             area(i)=temp1
             nbr_lu(i)=k
-            id_lu_intern(:,i)=lu_temp
-            frac_lu(:,i)=frac_lu_temp
+            id_lu_intern(1:k,i)=lu_temp     (1:k)
+            frac_lu     (1:k,i)=frac_lu_temp(1:k)
             id_subbas_intern(i)=id_subbas_extern(i)
             c=c+1 !count successfully read subbasins
         end if
