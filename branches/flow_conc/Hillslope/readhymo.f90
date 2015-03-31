@@ -368,8 +368,12 @@ SUBROUTINE readhymo
     end if
 
     !free memory containing correction factors, if sediment is disabled or all set to 1
-    if ( allocated(beta_fac_tc) .AND. ((.NOT. dosediment) .OR. all(beta_fac_tc==1.))) deallocate(beta_fac_tc)
-    if ( allocated(sdr_tc)      .AND. ((.NOT. dosediment) .OR. all(sdr_tc==1.)))      deallocate(sdr_tc)
+    if (allocated(beta_fac_tc)) then
+        if ((.NOT. dosediment) .OR. all(beta_fac_tc==1.)) deallocate(beta_fac_tc)
+    end if    
+    if ( allocated(sdr_tc))     then
+        if ((.NOT. dosediment) .OR. all(sdr_tc==1.))       deallocate(sdr_tc)
+    end if 
 
     CLOSE(11)
 
@@ -1180,7 +1184,7 @@ SUBROUTINE readhymo
                 do svc_counter=1,nbr_svc(tcid_instance)    !check all SVCs of the current TC
                     temp1= sum(frac_svc(:,tcid_instance)) + rocky(tcid_instance) !current sum of fractions
                     if (temp1>1.5 .OR. temp1<0.66) then
-                        write(*,'(A,i0,a,i0)')'WARNING: Sum of SVC- and rocky fraction was ',temp1,', now normalized to 1. (TC ',&
+                        write(*,'(A,f4.2,a,i0)')'WARNING: Sum of SVC- and rocky fraction was ',temp1,', now normalized to 1. (TC ',&
                             id_terrain_extern(id_tc_type),')'
                     end if
                     rocky(tcid_instance)=rocky(tcid_instance)/temp1    !correct fractions
