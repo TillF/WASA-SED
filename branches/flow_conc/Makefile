@@ -2,8 +2,13 @@
 # at first run 'update_revision_no.sh' in your svn directory and copy General/svn_rev.var into your actual working tree
 
 CC=gfortran
-CFLAGS=-c -ggdb
-FLAGS= -ffree-line-length-none -ggdb -Wtabs
+#release settings
+CFLAGS=-c -ggdb -g
+FLAGS= -ffree-line-length-none -ggdb -Wtabs 
+
+#debug setting
+#CFLAGS=-c -ggdb -g -fcheck=all -fbacktrace -Og
+#FLAGS= -ffree-line-length-none -ggdb -Wtabs -g -fbacktrace
 
 # compiler flag explanations
 # COMMON
@@ -77,16 +82,16 @@ SOURCES=./Hillslope/erosion_h.f90 \
 ./River/routing_new.f90 \
 ./General/wasa.f90
 
-EXECUTABLE=wasa.lin
+EXECUTABLE=wasa.exe
 
 # top-level rule to compile the whole program.
+.o:
+	$(CC) $(CFLAGS) $< -o $@
 all: $(SOURCES) $(EXECUTABLE)
 # program is made of several source files.
 $(EXECUTABLE): $(SOURCES)
 	#./update_revision_no.sh
 	$(CC) $(FLAGS) $(SOURCES) -o $(EXECUTABLE)
 
-.o:
-	$(CC) $(CFLAGS) $< -o $@
 clean:
-	rm *.mod *.o $(EXECUTABLE)
+	rm *.mod *.o $(EXECUTABLE) 2> /dev/null
