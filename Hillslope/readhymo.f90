@@ -973,13 +973,12 @@ SUBROUTINE readhymo
     ! Soil-Vegetation component arrays
     DO i=1,ntcinst
         DO j=1, nbr_svc(i)
-            n=1
-            DO WHILE ((n<=nveg) .AND. (id_veg_extern(n) /= id_veg_intern(j,i)))            !search until the current external ID has been found...
-                n=n+1
+            DO n=1,nveg
+                if (id_veg_extern(n) == id_veg_intern(j,i)) exit           !search until the current external ID has been found...
             END DO
 
             if (n>nveg) then
-                write(*,'(a, I0, a)')'Vegetation class ',id_veg_intern(j,i),' not found in vegetation.dat.'
+                write(*,'(a, I0, a, I0, a)')'Vegetation class ',id_veg_intern(j,i),' not found in vegetation.dat (', nveg,' lines read).'
                 stop
             end if
             id_veg_intern(j,i)=n                                        !replace internal ID with external ID
