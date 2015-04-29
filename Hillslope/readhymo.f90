@@ -272,6 +272,11 @@ SUBROUTINE readhymo
     END DO
     CLOSE(11)
 
+    if (c<subasin) then    !less subbasins found than expected
+        write(*,*)'ERROR: hymo.dat: expected ',subasin,' subbasins, found ',c
+        stop
+    end if
+ 
     if (size(whichn(id_subbas_intern(1:subasin)==0,0))>0) then    !check if there are subbasins read from routing.dat that were not found in hymo.dat
         write(*,*)'ERROR: The following subbasins have been listed in routing.dat, but are missing in hymo.dat:'
         write(*,*)id_subbas_extern(whichn(id_subbas_intern(1:subasin)==0,0))
