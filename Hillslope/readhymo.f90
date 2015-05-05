@@ -1187,12 +1187,12 @@ SUBROUTINE readhymo
 
                 do svc_counter=1,nbr_svc(tcid_instance)    !check all SVCs of the current TC
                     temp1= sum(frac_svc(:,tcid_instance)) + rocky(tcid_instance) !current sum of fractions
-                    if (temp1>1.5 .OR. temp1<0.66) then
+                    if (temp1>1.05 .OR. temp1<0.95) then
                         write(*,'(A,f4.2,a,i0)')'WARNING: Sum of SVC- and rocky fraction was ',temp1,', now normalized to 1. (TC ',&
                             id_terrain_extern(id_tc_type),')'
                     end if
-                    rocky(tcid_instance)=rocky(tcid_instance)/temp1    !correct fractions
-                    frac_svc(:,tcid_instance)=frac_svc(:,tcid_instance)/temp1
+                    rocky(tcid_instance)     = rocky(tcid_instance)     / temp1    !correct fractions
+                    frac_svc(:,tcid_instance)= frac_svc(:,tcid_instance)/ temp1
                 end do
             END DO
         END DO
