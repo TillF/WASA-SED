@@ -11,7 +11,7 @@ SUBROUTINE soilwat(hh,day,month,i_subbas2,i_ce,i_lu,lu_counter2,tcid_instance2,i
 !2012-05-30
 
 !Till: dimensions of remainlat are taken from latred - produced crashes with single-layered soils before
-!computationally irrelevant: modified summation of latred that lead to crash when only single sol horizons  were present
+!computationally irrelevant: modified summation of latred that lead to crash when only single soil horizons  were present
 !2012-05-15
 
 !Till: computationally irrelevant: removed unused parameter h
@@ -353,13 +353,21 @@ watbal=0.
 templat=0.
 IF (dolatscsub) THEN										!Till: if lateral subsurface runoff is to be computed...
   templat=sum(latred(tcid_instance2,:))					!lateral subsurface runoff to be redistributed between SVCs (m**3)
+    
+!  q_surf_out=templat    !debugremove! - no more excess
+!  latred(tcid_instance2,:)=0.
+!  templat=0
 END IF														
 
 !  inflow into SVCs by return flow of rocky areas
-IF (dolatsc) THEN			
+IF (dolatsc .AND. rocky(tcid_instance2)>0. .AND. templat>0.) THEN			 !debugremove: disabling the return flow reduces excess by 50 %
     DO i=1,nbr_svc(tcid_instance2)
         qsurf(i)=qsurf(i)+templat*rocky(tcid_instance2)*frac_svc(i,tcid_instance2)
     END DO
+    !10% deficit instead of 100 % excess
+    !tempx = templat*rocky(tcid_instance2) !amount of subsurface flow to convert to return flow
+    !latred(tcid_instance2,:) = latred(tcid_instance2,:) - frac_svc(:, tcid_instance2) * tempx  !reduce remaining lateral subsurface flow
+    !templat = templat - tempx
 END IF
 
 
@@ -378,34 +386,32 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
     END IF
     
     
-! check if alluvial soil
-    merkalluv(:)=0.
-    DO i=1,nbr_svc(tcid_instance2)
-      soilid=id_soil_intern(i,tcid_instance2)
-      !IF (soilid == 1 .OR. soilid == 2 .OR. soilid == 3) THEN
-	  IF (alluvial_flag(soilid)==1) THEN	!Till: check if this soil is an alluvial soil
-        merkalluv(i)=frac_svc(i,tcid_instance2)
-      END IF
-    END DO
-! total fraction of alluvial soils
-    allalluv=sum(merkalluv(1:maxsoil))
+! check if alluvial soils exist and sum up their fractions !ii: this is a static property and could by computed once
+    merkalluv(:)=0. !fraction of SVC covered by alluvial soil (i.e. 0 for non-alluvials, otherwise fraction of SVC)
+    
+    merkalluv(1:nbr_svc(tcid_instance2)) = &
+        alluvial_flag(id_soil_intern(1:nbr_svc(tcid_instance2), tcid_instance2)) *&
+        frac_svc     (               1:nbr_svc(tcid_instance2), tcid_instance2)
+        
+! total fraction of alluvial soils in current TC
+    allalluv=sum(merkalluv(1:nbr_svc(tcid_instance2))) 
     
 ! if any alluvial soils occur in TC
-    IF (allalluv > 0.) THEN
+    !debugremove: this eliminates the excess!
+    IF (allalluv > 0.) THEN 
       
 !  maximum lateral inflow into this SVC
       DO i=1,nbr_svc(tcid_instance2)
-		soilid=id_soil_intern(i,tcid_instance2)	!Till: added by Till, was missing before
         IF (merkalluv(i) > 0.) THEN	!Till: if the current SVC has an alluvial soil, treat it
+		  soilid=id_soil_intern(i,tcid_instance2)	
           remainlat(:)=0.
           testi=0
           
 !  maximum lateral inflow into this SVC
-          DO h=1,size(remainlat)
-            remainlat(h)=(latred(tcid_instance2,h)* merkalluv(i)/allalluv)/ (tcarea2*1.e3*frac_svc(i,tcid_instance2))
-				!Till: all potential subsurface flow is distributed among alluvial SVCs [mm] (still "remains to be distributed")
-          END DO
-          
+          h=size(remainlat)
+		  remainlat(1:h)=(latred(tcid_instance2, 1:h)* merkalluv(i)/allalluv)/ (tcarea2*1.e3*frac_svc(i,tcid_instance2)) !ii vectorize
+          				!Till: all potential subsurface flow is distributed among alluvial SVCs [mm] (still "remains to be distributed")
+                    
 !  distribute inflow among horizons
           DO h=1,nbrhori(soilid)
             lath=min(size(remainlat),INT(sum(horiz_thickness(tcid_instance2,i,1:h))/500.))	!Till: compute number of "exchange horizons" to be used from remainlat to be fed into the current profile
@@ -448,17 +454,22 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
           temp2=sum(remainlat(:))
           IF (temp2 > 0.) THEN
             
-            lath=0
-            h=1
-            DO WHILE (lath == 0)						!ii: Schleife restrukturieren: for cycle exit continue 
+            lath=maxhori !default: use all horizons
+            DO h=1,maxhori !reduce number of exchange horizons according to depth of riverbed
               IF (sum(horiz_thickness(tcid_instance2,i,1:h)) > riverbed(i_lu)) THEN
                 lath=h
-              END IF
-              h=h+1
-              IF (h >= maxhori) THEN
-                lath=maxhori
+				exit
               END IF
             END DO
+!			DO WHILE (lath == 0)						!ii: Schleife restrukturieren: for cycle exit continue 
+!              IF (sum(horiz_thickness(tcid_instance2,i,1:h)) > riverbed(i_lu)) THEN
+!                lath=h
+!              END IF
+!              h=h+1
+!              IF (h >= maxhori) THEN
+!                lath=maxhori
+!              END IF
+!            END DO
             DO h=lath,nbrhori(soilid)
               temp2=sum(remainlat(:))
               
@@ -471,7 +482,6 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
 			    temp3=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))* &           ! Q_li 
 				    horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100.  &
 					/  slength(i_lu) / fracterrain(id_tc_type2)/1000.  
-
 
 				temp3=MIN(temp3,temp2)
                 horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)+temp3
@@ -544,7 +554,6 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
               END IF
             END DO
           END IF ! end of update saturated fraction of SVC
-          
 
         END IF	! endif alluvial SVC
 
@@ -557,7 +566,7 @@ IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a d
 		watbal=templat/(tcarea2*1.e3)							!reset water balance
 		q_sub_out=0.											!Till: no surface runoff yet - may result later after treatment of non-alluvial SVCs
 	  else
-		latred(tcid_instance2,:)=0.								!Till: nothin more to do
+		latred(tcid_instance2,:)=0.								!Till: nothing more to do
 	  end if
 
 	END IF ! endif alluvial soils occur in this most downslope TC
@@ -1096,9 +1105,7 @@ ELSE
             if (precday==0.) then						!no precip this day - distribute evaporation of leftover interception equally
 				intcept_mem=intc_evap(j)/24.
 			else
-				DO i=1,24								!normal case: rain this day !ii vectorize
-				  intcept_mem(tc_counter2,j,i)=intc_evap(j)* prechall2(i)/precday	!Till: distribute according to rainfall amount that fell
-				END DO
+			  intcept_mem(tc_counter2,j, 1:24)=intc_evap(j)* prechall2(1:24)/precday	!Till: distribute according to rainfall amount that fell
 			end if
             
             intcred(j)=intcept_mem(tc_counter2,j,hh)
@@ -1216,7 +1223,7 @@ IF (rocky(tcid_instance2) > 0.) THEN
     ELSE
       q_surf_out=q_surf_out+(INPUT-MIN(prec,intcfc(i_ce)))*tcarea2*1.e3*rocky(tcid_instance2)*rocky(tcid_instance2)
     END IF
-    IF (dolatsc) THEN									!ii: intcred(i) benutzen statt Interzeption erneut zu berechnen?
+    IF (dolatsc) THEN									!ii: use intcred(i) instead of computing interception anew?
       DO j=1,nbr_svc(tcid_instance2)
         qsurf(j)=qsurf(j)+(INPUT-MIN(prec,intcfc(i_ce)))*tcarea2*1.e3*  &		!Till: to each SVC the runoff produced by the rocky fraction is assigned according to its fraction 
             rocky(tcid_instance2)*frac_svc(j,tcid_instance2)
@@ -1427,7 +1434,6 @@ DO n_iter=1,2
 !   soil component is saturated
 !   if dolatsc (lateral redistribution) there might be input from other SVCs
       IF (frac_sat(tcid_instance2,i) == frac_svc(i,tcid_instance2)) THEN
-        na(i,:)=0.	!ii: possibly obsolete assignment
         zfrac(i)=0.
         IF (n_iter==1) THEN !Till first iteration
 			DO j=1,nbr_svc(tcid_instance2)
@@ -1462,16 +1468,15 @@ DO n_iter=1,2
 !   soil component is partly or not saturated
       ELSE
         zfrac(i)=frac_svc(i,tcid_instance2)-frac_sat(tcid_instance2,i) !Till: fraction of non-saturation of current SVC 
-        h=1
-        DO WHILE (h <= nbrhori(soilid))	!ii use DO loop instead
+        
+        DO h=1,nbrhori(soilid)	
           na(i,h)=thetas(soilid,h)- horithact(tcid_instance2,i,h)/horiz_thickness(tcid_instance2,i,h) !Till: compute refillable porosity for all horizons [-]
 !   horizon is saturated
           IF (na(i,h) <= 0.0001) THEN
             na(i,h)=0.0
             hsat(i)=h				!Till: determine number of topmost saturated horizon (?)
-            h=nbrhori(soilid)+1
+            exit
           END IF
-          h=h+1
         END DO
       END IF	!if (frac_sat(tcid_instance2,i) == frac_svc(i,tcid_instance2))
       
@@ -1584,7 +1589,7 @@ DO n_iter=1,2
                   
                   infh=MIN(infh,INPUT)
                   tempx=fillup+namic*horiz_thickness(tcid_instance2,i,h)	!Till: maximum refillable porosity until current horizon [mm]
-                  IF (infh > tempx) THEN	!Till: maximum refillable porosity should not be exceeded ii use max()
+                  IF (infh > tempx) THEN	!Till: maximum refillable porosity should not be exceeded
                     infh=tempx
                   END IF
                   
@@ -2684,11 +2689,7 @@ DO i=1,nbr_svc(tcid_instance2)
       q_sub_out=q_sub_out+l2eff(h)*tcarea2*frac_svc(i,tcid_instance2)*1.e3
       
 !  update soil moisture of deeper horizons by macroporeflow
-      DO j=1,nbrhori(soilid)
-        horithact(tcid_instance2,i,j)= horithact(tcid_instance2,i,j)+percolmac(j)	!ii vectorize
-
-
-      END DO
+      horithact(tcid_instance2,i, 1:nbrhori(soilid))= horithact(tcid_instance2,i, 1:nbrhori(soilid))+percolmac(1:nbrhori(soilid))	
       
 !  update soil moisture of deeper horizon
 !  check if refillable porosity is larger than percolation
