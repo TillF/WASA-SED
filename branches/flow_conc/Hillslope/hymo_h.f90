@@ -10,7 +10,7 @@ module hymo_h
 
     ! Till: outcommented unnecessary variable
     ! 2008-06-24
- 
+
     ! 2007-10-29 Till:
     ! added variables for time-variant kfkorr and debug-output
 
@@ -545,7 +545,6 @@ contains
         LOGICAL, INTENT(IN)                  :: f_flag
         !CHARACTER(len=*), INTENT(IN)         :: name
         integer :: istate
-	
         if (f_flag) then
             allocate(allocate_hourly_array(366,nt,subasin),STAT = istate)
             if (istate/=0) then
@@ -564,20 +563,16 @@ contains
 
         use utils_h
         implicit none
-        
-     
 		INTEGER, INTENT(IN) :: subbas_id, year, julian_day
         INTEGER, INTENT(IN) :: seasonality_array(:,:) !seasonality values as read from file
 		REAL, INTENT(IN) :: support_values(:,:) !real values for n classes and 4 DOYs to be interpolated
 
         !real, target :: calc_seasonality2(size(support_values,dim=1))    !return value: a single value for each class (e.g. vegetation)
-        !Error	in readhymo:	 error #6678: When the target is an expression it must deliver a pointer result.	E:\till\uni\wasa\wasa_svn_comp\Hillslope\readhymo.f90	1695	
-        
+        !Error	in readhymo:	 error #6678: When the target is an expression it must deliver a pointer result.	E:\till\uni\wasa\wasa_svn_comp\Hillslope\readhymo.f90	1695
         !real, pointer :: calc_seasonality2(size(support_values,dim=1))    !return value: a single value for each class (e.g. vegetation)
         !error: ALLOCATABLE or POINTER attribute dictates a deferred-shape-array   [CALC_SEASONALITY2]
 
         real, pointer :: calc_seasonality2(:)    !return value: a single value for each class (e.g. vegetation)
-        
         integer    :: k, irow, search_year
         integer :: d        !distance between start node and current day (in days)
         integer :: d_nodes        !distance between start node and end_node (in days)
@@ -585,21 +580,29 @@ contains
         integer :: i_node1, i_node2    !indices to relevant nodes in seasonality_array
         integer :: doy_node1, doy_node2    !corresponding DOYs
         integer :: i_matchrow1, i_matchrow2    !index to matching in seasonality_array
-        
-        allocate(calc_seasonality2(size(support_values,dim=1))) 
-        
+        integer :: dy !number of days in the current year (365 or 366 in leap years)
+
+
+        !handling of leap years
+        IF (MOD((year),4) == 0)  THEN
+            dy=366
+        ELSE
+            dy=365
+        ENDIF
+
+
+        allocate(calc_seasonality2(size(support_values,dim=1)))
+
         if (size(seasonality_array)==1) then !no seasonality for this parameter
             calc_seasonality2=support_values(:,1)    !use single value
             return
         end if
-		
 		calc_seasonality2(:) = tiny(calc_seasonality2(1)) !flag for "not set" - initial value for all entities
 
 		DO irow=1, size(support_values,dim=1) !do loop for all rows (i.e. all vegetation classes)
 			!find matching row in seasonality array for current entity
 
 			i_node2 = 0 !not set
-			
 			i_matchrow1 = &
 			which1(	 (seasonality_array(:,1) == subbas_id .OR. seasonality_array(:,1) == -1) .AND. &
 					 (seasonality_array(:,2) == irow      .OR. seasonality_array(:,2) == -1) .AND. &
@@ -607,13 +610,11 @@ contains
 
 			if (i_matchrow1 == 0) cycle  !no matching row found
 			i_matchrow2 = i_matchrow1    !default: other node is also in the same year (row)
-					 
    			do k=4,7
 				if (seasonality_array(i_matchrow1, k) > julian_day) exit
 			end do
 
             i_node1 = k - 4
-            
 
 			if (i_node1 == 0) then !current DOY is BEFORE first node, lookup other node in previous year
 				search_year = -1 !search in the previous year for the other node
@@ -628,14 +629,10 @@ contains
 					which1(	 (seasonality_array(:,1) == subbas_id .OR. seasonality_array(:,1) == -1) .AND. &
 							 (seasonality_array(:,2) == irow      .OR. seasonality_array(:,2) == -1) .AND. &
 							 (seasonality_array(:,3) == year+search_year    .OR. seasonality_array(:,3) == -1), nowarning=.TRUE.)
-						
 			end if
-					
 			if (i_node2 == 0) i_node2 = MOD(i_node1,4) + 1   !only modify i_node2, if it has not been set before
-			
-			
 			if (i_matchrow2 == 0) then  !no matching row found...
-					if (search_year == 1) then 
+					if (search_year == 1) then
 						i_node1 = 4  !extrapolate last value
 					else
 					    i_node1 = 1	!extrapolate first value
@@ -643,24 +640,20 @@ contains
 					calc_seasonality2(irow) = support_values(irow, i_node1)
 					cycle
 			end if
-			
 			if (i_node1 == 0) then !swap node_1 and node_2 (interpolation over year break)
 				k           = i_matchrow2
 				i_matchrow2 = i_matchrow1
 				i_matchrow1 = k
 				i_node1 = 4
 			end if
-				
 			doy_node1 = seasonality_array(i_matchrow1, 3 + i_node1)
 			doy_node2 = seasonality_array(i_matchrow2, 3 + i_node2)
-			
-			if (i_node1 == 4) then 
-				if (doy_node1 > 0) doy_node1 = doy_node1 - 365 !force a negative value, as we are looking at the previous year
-				if (doy_node2 < 0) doy_node2 = doy_node2 + 365 !force a positive value, as we are looking at the next year 
-            end if 
-            
+			if (i_node1 == 4) then
+				if (doy_node1 > 0) doy_node1 = doy_node1 - dy !force a negative value, as we are looking at the previous year
+				if (doy_node2 < 0) doy_node2 = doy_node2 + dy !force a positive value, as we are looking at the next year
+            end if
 			d       = julian_day - doy_node1       !distance between start node and current day (in days)
-			if (d >= 365) d = d - 365 !if current day is after all nodes
+			if (d >= dy) d = d - dy !if current day is after all nodes
             d_nodes = doy_node2  - doy_node1       !distance between start node and end_node (in days)
 
 			if (d < 0 .OR. d_nodes < 0) then !error (presumably in input file)
