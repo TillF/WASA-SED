@@ -408,13 +408,13 @@ SUBROUTINE readhymo
 				stop
 			else
 				if (i-1/=ntcinst) then    !less entities read than expected
-					write(*,'(a,i0)')'WARNING (soil_vegetation.dat): ',i,' instead of the expected ',ntcinst,' TCs read.'
+					write(*,'(a,i0,a,i0)')'WARNING (soil_vegetation.dat): ',i-1,' instead of the expected ',ntcinst,' TCs read.'
 					ntcinst=i-1 !correct value
 				end if
 				exit !enough lines read, abort loop
 			end if
 		end if
-        h=h+1 !count lines
+        
 
         dummy1=GetNumberOfSubstrings(cdummy)-5 !Till: count number of fields (ie SVCs) specified for this combination
         if (dummy1 > maxsoil) then
@@ -423,7 +423,7 @@ SUBROUTINE readhymo
         end if
         k=0
         READ(cdummy,*,IOSTAT=istate) luse_subbas(i) !read subbasin ID only
-
+        h=h+1 !count lines
 		if (which1(luse_subbas(i) == id_subbas_extern) == 0) then
 			!write(*,'(a,i0)')'WARNING (soil_vegetation.dat): Unknown subbasin ',luse_subbas(i),' in line ',h,', ignored.'
 			READ(11,'(a)',IOSTAT=istate) cdummy !skip next two lines
