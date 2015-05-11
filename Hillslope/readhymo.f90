@@ -363,15 +363,20 @@ SUBROUTINE readhymo
 
 
     if (dummy1==4) then !4 columns, old version
-        READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),i=1,nterrain)
+        READ(11,*,IOSTAT=istate) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),i=1,nterrain)
     elseif (dummy1==5) then !5 columns, containing beta correction factor
-        READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),i=1,nterrain)
+        READ(11,*,IOSTAT=istate) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),i=1,nterrain)
     elseif (dummy1==6) then !6 columns, containing beta correction factor and TC-wise SDR
-        READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),sdr_tc(i),i=1,nterrain)
+        READ(11,*,IOSTAT=istate) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),sdr_tc(i),i=1,nterrain)
     elseif (dummy1==8) then !8 columns, containing beta correction factor, TC-wise SDR and concentration factors
-        READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),sdr_tc(i),frac_diff2conc(i),frac_conc2diff(i),i=1,nterrain)
+        READ(11,*,IOSTAT=istate) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),sdr_tc(i),frac_diff2conc(i),frac_conc2diff(i),i=1,nterrain)
     end if
 
+    if (istate/=0) then    !format error
+            write(*,'(a,i0,a)')'ERROR (terrain.dat): Format error in line ',i+2,". Check formatting and number of TCs specified in do.dat"
+            stop
+    end if
+    
     !free memory containing correction factors, if sediment is disabled or all set to 1
     if (allocated(beta_fac_tc)) then
         if ((.NOT. dosediment) .OR. all(beta_fac_tc==1.)) deallocate(beta_fac_tc)
@@ -404,7 +409,7 @@ SUBROUTINE readhymo
         READ(11,'(a)',IOSTAT=istate) cdummy
         if (istate/=0) then
 			if ((h-4<ntcinst)  ) then    !premature end of file
-				write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' lines (#SVC-LU-SUBBAS-combinations) expected'
+				write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' x 3 lines (#SVC-LU-SUBBAS-combinations) expected'
 				stop
 			else
 				if (i-1/=ntcinst) then    !less entities read than expected
@@ -413,7 +418,12 @@ SUBROUTINE readhymo
 				end if
 				exit !enough lines read, abort loop
 			end if
-		end if
+        end if
+        
+        if (i > ntcinst  ) then    !more lines than expected
+			write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' x 3 lines (#SVC-LU-SUBBAS-combinations) expected'
+			stop
+        end if
         
 
         dummy1=GetNumberOfSubstrings(cdummy)-5 !Till: count number of fields (ie SVCs) specified for this combination
@@ -939,15 +949,11 @@ SUBROUTINE readhymo
     END DO
 
 
-    !   IDs of terrain components
+    !   IDs of terrain components: convert external to internal
     DO i=1,nsoter
         DO j=1, nbrterrain(i)
-            n=1
-            DO WHILE ((n<=nterrain) .AND. (id_terrain_extern(n) /= id_terrain_intern(j,i)))    !search until the current external ID has been found...
-                n=n+1
-            END DO
-
-            IF (n > nterrain) THEN    !reference to undefined TC
+            n=which1(id_terrain_extern == id_terrain_intern(j,i))
+            IF (n == 0) THEN    !reference to undefined TC
                 WRITE(*,'(a, I0,a, I0, a)') 'WARNING: TC ', id_terrain_intern(j,i), ' (Subbasin ', id_subbas_extern(i), ') in soter.dat not found in tc.dat. Toposequence truncated.'
                 nbrterrain(i)=j-1
                 exit
@@ -956,6 +962,24 @@ SUBROUTINE readhymo
         END DO
     END DO
 
+    !check fractions of TCs in LUs and normalize, if necessary
+    DO i_lu = 1,nsoter
+        temp1 = 0. 
+        DO tc_counter=1,nbrterrain(i_lu)
+            !tcid_instance=tcallid(sb_counter,lu_counter,tc_counter)    !id of TC instance
+            id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
+            temp1 = temp1 + fracterrain(id_tc_type) !current sum of fractions
+        END DO
+        if (temp1>1.05 .OR. temp1<0.95) then !correct fractions
+            write(*,'(A,i0,a,f4.2,a)')'WARNING: Sum of TC-fractions for LU ', id_lu_extern(i_lu),' was ',temp1,', now normalized to 1.'
+            DO tc_counter=1,nbrterrain(i_lu)
+                id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
+                fracterrain(id_tc_type) = fracterrain(id_tc_type) /temp1   !correct fractions
+            END DO
+        end if
+    END DO
+    
+    
     ! insert internal numbers of soils into
     ! Soil-Vegetation component arrays
     DO i=1,ntcinst
