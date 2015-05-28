@@ -377,6 +377,11 @@ SUBROUTINE readhymo
             stop
     end if
     
+    READ(11,'(a)',IOSTAT=istate) cdummy
+    if (istate==0 .AND. cdummy/="") then    !excess lines
+            write(*,'(a,i0,a)')'WARNING (terrain.dat): Found more than the expected ',nterrain," data lines. File truncated. Check number of TCs specified in do.dat"
+    end if
+    
     !free memory containing correction factors, if sediment is disabled or all set to 1
     if (allocated(beta_fac_tc)) then
         if ((.NOT. dosediment) .OR. all(beta_fac_tc==1.)) deallocate(beta_fac_tc)
@@ -413,7 +418,7 @@ SUBROUTINE readhymo
 				stop
 			else
 				if (i-1/=ntcinst) then    !less entities read than expected
-					write(*,'(a,i0,a,i0)')'WARNING (soil_vegetation.dat): ',i-1,' instead of the expected ',ntcinst,' TCs read.'
+					write(*,'(a,i0,a,i0,a)')'WARNING (soil_vegetation.dat): ',i-1,' instead of the expected ',ntcinst,' TCs read.'
 					ntcinst=i-1 !correct value
 				end if
 				exit !enough lines read, abort loop
@@ -954,7 +959,7 @@ SUBROUTINE readhymo
         DO j=1, nbrterrain(i)
             n=which1(id_terrain_extern == id_terrain_intern(j,i))
             IF (n == 0) THEN    !reference to undefined TC
-                WRITE(*,'(a, I0,a, I0, a)') 'WARNING: TC ', id_terrain_intern(j,i), ' (Subbasin ', id_subbas_extern(i), ') in soter.dat not found in tc.dat. Toposequence truncated.'
+                WRITE(*,'(a, I0,a, I0, a)') 'WARNING: TC ', id_terrain_intern(j,i), ' (Subbasin ', id_subbas_extern(i), ') in soter.dat not found in terrain.dat. Toposequence truncated.'
                 nbrterrain(i)=j-1
                 exit
             END IF
