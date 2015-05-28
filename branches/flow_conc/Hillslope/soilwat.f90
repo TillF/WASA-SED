@@ -266,7 +266,7 @@
     REAL :: hfrac(maxsoil),merkalluv(maxsoil)
 
     REAL :: allalluv
-
+    
 
     INTEGER :: nbrrooth(maxsoil)
     INTEGER :: i,it,j,h,soilid,n_iter
@@ -302,6 +302,7 @@
     !for debugging - remove end
 
 
+    remainlat=0.
     IF (dohour) THEN
         dt_per_day=24.
         doshrink=0
@@ -350,39 +351,43 @@
     !		- saturated fraction of each SVC in each TC (-) (frac_sat)
 
 
-    templat=0.
+    
     IF (dolatscsub) THEN										!Till: if lateral subsurface runoff is to be computed...
         templat=sum(latred(tcid_instance2,:))					!lateral subsurface runoff to be redistributed between SVCs (m**3)
-
-        !  q_surf_out=templat    !debugremove! - no more excess
-        !  latred(tcid_instance2,:)=0.
-        !  templat=0
+    ELSE    
+        templat=0.
     END IF
-
-    !  inflow into SVCs by return flow of rocky areas
-    IF (dolatsc .AND. rocky(tcid_instance2)>0. .AND. templat>0.) THEN			 !debugremove: disabling the return flow reduces excess by 50 %
-        DO i=1,nbr_svc(tcid_instance2)
-            qsurf(i)=qsurf(i)+templat*rocky(tcid_instance2)*frac_svc(i,tcid_instance2)
-        END DO
-        !10% deficit instead of 100 % excess
-        !tempx = templat*rocky(tcid_instance2) !amount of subsurface flow to convert to return flow
-        !latred(tcid_instance2,:) = latred(tcid_instance2,:) - frac_svc(:, tcid_instance2) * tempx  !reduce remaining lateral subsurface flow
-        !templat = templat - tempx
-    END IF
-
-
 
     IF (templat > 0.) THEN					!Till: is there subsurface runoff to be redistributed?
-        watbal=watbal+templat/(tcarea2*1.e3)	!ii tcarea gleich am Anfang mit 1000 multiplizieren
-        IF (nbr_svc(tcid_instance2) == 0) THEN	!Till: if whole TC consists of rock...
-            q_surf_out=q_surf_out+templat				!Till: subsurface inflow becomes returnflow and leaves the TC as surface runoff
-        ELSE IF (.NOT. dolatsc) THEN				!Till: if no lateral flowdistribution...
-            q_surf_out=q_surf_out+templat*rocky(tcid_instance2)	!Till: surface runoff is increased according to fraction of rocky parts
-        ELSE
-            q_surf_out=q_surf_out+templat*rocky(tcid_instance2)*rocky(tcid_instance2) !Till: surface runoff is increased according to fraction of rocky parts, but reduced due to lateral redistribution
+    
+        !return flow from rocky areas...
+        !...onto other SVCs
+        IF (dolatsc .AND. rocky(tcid_instance2)>0. ) THEN			 
+            DO i=1,nbr_svc(tcid_instance2)
+                qsurf(i)=qsurf(i)+templat*rocky(tcid_instance2)*frac_svc(i,tcid_instance2)
+            END DO
+        
+            !fix 2
+            tempx = templat*rocky(tcid_instance2)*(1-rocky(tcid_instance2)) !amount of subsurface flow to convert to return flow
+            latred(tcid_instance2,:) = latred(tcid_instance2,:) * (1-tempx/templat) !Till: reduce pending lateral inflow 
+            templat = templat - tempx
         END IF
 
-        IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a different way
+        !...onto rocky areas -> surface runoff
+        watbal=watbal+templat/(tcarea2*1.e3)	!ii tcarea gleich am Anfang mit 1000 multiplizieren
+        IF (nbr_svc(tcid_instance2) == 0) THEN	!Till: if whole TC consists of rock...
+            tempx = 1.				!Till: subsurface inflow becomes returnflow and leaves the TC as surface runoff
+        ELSE IF (.NOT. dolatsc) THEN				!Till: if no lateral flowdistribution...
+            tempx = rocky(tcid_instance2)	!Till: surface runoff is increased according to fraction of rocky parts
+        ELSE
+            tempx = rocky(tcid_instance2)*rocky(tcid_instance2) !Till: surface runoff is increased according to fraction of rocky parts, but reduced due to lateral redistribution
+        END IF
+        q_surf_out = q_surf_out + tempx * templat
+        !fix 1
+        latred(tcid_instance2,:) = latred(tcid_instance2,:) * (1-tempx) !Till: reduce pending lateral inflow !debugadded - remove?!
+        templat = templat * (1-tempx)
+        
+        IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a different way: treat alluvial soils
             merkalluv(:)=0. !fraction of SVC covered by alluvial soil (i.e. 0 for non-alluvials, otherwise fraction of SVC)
             ! check if alluvial soils exist and sum up their fractions !ii: this is a static property and could be computed only once
             merkalluv(1:nbr_svc(tcid_instance2)) = &
@@ -393,7 +398,6 @@
             allalluv=sum(merkalluv(1:nbr_svc(tcid_instance2)))
 
             ! if any alluvial soils occur in TC
-            !debugremove: this eliminates the excess!
             IF (allalluv > 0.) THEN
                 !  maximum lateral inflow into this SVC
                 DO i=1,nbr_svc(tcid_instance2)
@@ -412,7 +416,7 @@
                             lath=min(size(remainlat),INT(sum(horiz_thickness(tcid_instance2,i,1:h))/500.))	!Till: compute number of "exchange horizons" to be used from remainlat to be fed into the current profile
                             IF (lath > 0) THEN
                                 temp2=sum(remainlat(1:lath))			!Till: max amount of water that is available to be routed into this horizon [mm]
-                                !ii: wouldn't remainlat(lath-1:lath) suffice, as the higher horizons are zeroed anyway some line below? better simply use an extra var "excessfromhigherhorizons" or add the excess to remainlat(lath+1)
+                                !ii: better simply use an extra var "excessfromhigherhorizons" or add the excess to remainlat(lath+1)
                                 !  update soil moisture of this horizon
                                 !  maximum inflow may be limited by hydraulic conductivity
                                 IF (temp2 > 0.) THEN
@@ -446,50 +450,52 @@
                         ! may then be distributed also in higher horizons which are below river bed
                         ! repeat procedure for all deeper horizons
                         ! remaining latflow is river runoff
-                        temp2=sum(remainlat(:))
-                        IF (temp2 > 0.) THEN !hier: debugremove wenn diese Schleife aus ist, stimmts
-
+                        temp2=sum(remainlat(:)) 
+						IF (temp2 > 0.) THEN 
                             lath=maxhori !default: use all horizons
                             DO h=1,maxhori !reduce number of exchange horizons according to depth of riverbed !ii: use "nbrhori(soilid)" instead?
                                 IF (sum(horiz_thickness(tcid_instance2,i,1:h)) > riverbed(i_lu)) THEN
-                                    lath=h
+                                    lath=h !debugremove: wrong, when total soil profile is shallower than river: then, lowest horizon is still treated (but shouldn't be)
                                     exit
                                 END IF
                             END DO
-
-                            DO h=lath,nbrhori(soilid)
+                            
+							DO h=lath,nbrhori(soilid)
                                 temp2=sum(remainlat(:))
-
                                 !  update soil moisture of this horizon
                                 !  maximum inflow may be limited by hydraulic conductivity
                                 IF (temp2 > 0.) THEN
 
-                                    !Till: compute maximum inflow according to "exchange surface"
+									!Till: compute maximum inflow according to "exchange surface"
                                     !Andreas: has to be in unit mm, correct calculation similar to lateral outflow calculation
                                     temp3=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))* &           ! Q_li
                                     horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100.  &
                                         /  slength(i_lu) / fracterrain(id_tc_type2)/1000.
 
                                     temp3=MIN(temp3,temp2)
+                                    
                                     horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)+temp3
-
+							
                                     remainlat(:)=0.
-                                    IF (temp3 < temp2) THEN
+								
+									IF (temp3 < temp2) THEN
                                         remainlat(1)=temp2-temp3
                                     END IF
 
                                     !  if horizon is saturated, remaining lateral inflow may be added to
                                     !  lower horizon
-                                    temp2=thetas(soilid,h)*horiz_thickness(tcid_instance2,i,h)	!Till: compute saturated water content [mm]
+                                    temp5=thetas(soilid,h)*horiz_thickness(tcid_instance2,i,h)	!Till: compute saturated water content [mm]
 
-                                    IF (horithact(tcid_instance2,i,h) > temp2) THEN
-                                        remainlat(1)=remainlat(1)+ (horithact(tcid_instance2,i,h)- temp2)
-                                        horithact(tcid_instance2,i,h)=temp2
+                                    IF (horithact(tcid_instance2,i,h) > temp5) THEN !Till: if water content exceeds saturation...
+                                        remainlat(1)=remainlat(1)+ (horithact(tcid_instance2,i,h)- temp5)
+                                        horithact(tcid_instance2,i,h)=temp5
                                     END IF
+							
                                 END IF
 
                                 ! enddo for all horizons
                             END DO
+
                         END IF
 
                         !  if not all lateral inflow to this SVC can be distributed among the horizons,
@@ -497,25 +503,23 @@
                         !  terrain component
                         !  (this is e.g. also the case if the current soil profile is very shallow)
                         temp2=sum(remainlat(:))
-                        IF (temp2 > 0.) THEN
-                            q_sub_out=q_sub_out+temp2*tcarea2*frac_svc(i,tcid_instance2)*1.e3	!Till: excess water is temporarily assumed subsurface runoff from TC [m3]
+						IF (temp2 > 0.) THEN
+                            q_sub_out=q_sub_out+temp2*tcarea2*1.e3*frac_svc(i,tcid_instance2)	!Till: excess water is temporarily assumed subsurface runoff from TC [m3]
                             watbal=watbal-temp2*frac_svc(i,tcid_instance2)						!Till: ATTENTION: this water is redistributed among non-alluvial SVCs later
                         END IF
 
 
                         !  Calculate new fraction of saturation of current SVC
                         !  frac_sat value is relative to TC, not to SVC !!
-
-                        tempth=sum(horithact(tcid_instance2,i,:))
-
+                        tempth=sum(horithact(tcid_instance2,i,:)) !sum up total water content in entire profile [mm]
+                        IF (tempth <= tctheta_s(1,1,tcid_instance2,i)) THEN 
                         ! no part of SVC is saturated
-
-                        IF (tempth <= tctheta_s(1,1,tcid_instance2,i)) THEN
                             frac_sat(tcid_instance2,i)=0.
-
-                            ! soil component is partly or completely saturated
                         ELSE
-
+                        ! soil component is partly or completely saturated
+                            !ii: Till: the following branch seems to serve for simulationg distributions of saturation
+                            ! is is, however, disabled by having testi=0. Why?
+                            !same for more instances down below
                             tempalt=0.
                             testi=0
 
@@ -547,18 +551,22 @@
                 END DO	! enddo over all SVCs
 
 
-                if ((allalluv <= 1.) .AND. (q_sub_out > 0.)) then		!Till: if there are also non-alluvial soils AND not all subsurface inflow has been absorbed by the alluvials before
-                    !Till: distribute among exchange horizons with the same proportions as before the alluvial influence
-                    latred(tcid_instance2,:)=latred(tcid_instance2,:)/sum(latred(tcid_instance2,:))*q_sub_out
-                    watbal=templat/(tcarea2*1.e3)							!reset water balance
-                    q_sub_out=0.											!Till: no surface runoff yet - may result later after treatment of non-alluvial SVCs
+                if (q_sub_out > 0) then	!Till: if there are also non-alluvial soils AND not all subsurface inflow has been absorbed by the alluvials before
+                    if ((allalluv <= 1.)) then
+						!Till: distribute among exchange horizons with the same proportions as before the alluvial influence
+						latred(tcid_instance2,:)=latred(tcid_instance2,:)/sum(latred(tcid_instance2,:))*q_sub_out
+						watbal=templat/(tcarea2*1.e3)							!reset water balance
+						q_sub_out=0.											!Till: no surface runoff yet - may result later after treatment of non-alluvial SVCs
+                    else
+						temp5=3 !should not occur
+					end if
                 else
                     latred(tcid_instance2,:)=0.								!Till: nothing more to do
                 end if
 
             END IF ! endif alluvial soils occur in this most downslope TC
         ELSE
-            allalluv=0. !set alluvial fraction to 0 for non-lowermost TCs
+            allalluv=0. !set alluvial fraction to 0 for non-lowermost TCs !ii probably obsolete
         END IF ! end if this is the lowermost TC
 
 
@@ -633,7 +641,7 @@
             !  (this is e.g. also the case if the current soil profile is very shallow)
             temp2=sum(remainlat(:))
             IF (temp2 > 0.) THEN
-                q_sub_out=q_sub_out+temp2*tcarea2*frac_svc(i,tcid_instance2)*1.e3
+                q_sub_out=q_sub_out+temp2*tcarea2*1.e3*frac_svc(i,tcid_instance2)
                 watbal=watbal-temp2*frac_svc(i,tcid_instance2)
             END IF
 
@@ -2824,7 +2832,7 @@
 
         q_surf_out2     = q_surf_out2 + q_rill_out !qfix Sum up total surface runoff. The distinction is not important any more
 
-        q_surf=q_surf_out2/tcarea2/1000.		!surface runoff [mm H2O]
+        q_surf=q_surf_out2/(tcarea2*1e3)		!surface runoff [mm H2O]
 
         !ii do this only once for all models at the beginning of model run
         manning_n=0.
