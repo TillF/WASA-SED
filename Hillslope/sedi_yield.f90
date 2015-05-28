@@ -216,14 +216,11 @@ SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v
     END IF
 
 
-    IF ((erosion_equation==2) .OR. (erosion_equation==3) .OR. (erosion_equation==4)) THEN
+    IF ((erosion_equation==2) .OR. (erosion_equation==4)) THEN
         !compute surface runoff and peak flow for Onstad-Foster (2), MUSLE (3), MUST (4)
         !given as parameter q_surf=q_out/earea/1e6/1000        !surface runoff [mm H2O]
         !given as parameter q_peak = alpha_t_conc*q_surf*earea/1e6 / (3.6*t_conc)        !(6.3.20) estimation of peak runoff rate [m**3/s]
         q_peak_mm_h=q_peak*3.6/(earea/1e6)    !convert peak runoff from [m³/s] to [mm/h]
-    ELSE
-        q_peak=-1.        !just for debugging
-        q_peak_mm_h=-1.
     END IF
 
     SELECT CASE (erosion_equation)

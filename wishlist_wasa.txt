@@ -26,6 +26,7 @@ code:
 
 section hillslope:
 model concept:
+- init_intercept_conds is missing, add!
 - Fließzeiten innerhalb TC beachten, variable Verknüpfung der SCVs untereinander(Till)
 - Index für Klumpung der SVCs innerhalb einer TC(Till)
 - TC mit variabler Breite, um konzentrierten Abfluss erzeugen zu können(Till)

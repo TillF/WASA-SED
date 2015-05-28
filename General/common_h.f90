@@ -84,7 +84,6 @@ module common_h
     INTEGER :: dt               !time step in [hours]
     LOGICAL :: dosediment         !do sediment calculation for hillslope, river and reservoir
     INTEGER :: n_sed_class         !number of particles classes
-    INTEGER :: hill_transport      !type of hillslope sediment transport
     INTEGER :: river_transport      !type of river sediment transport
     INTEGER :: reservoir_transport   !type of reservoir sediment transport
     INTEGER :: nt               !number of timesteps per day (computed as 24/dt)
