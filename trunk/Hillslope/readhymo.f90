@@ -233,6 +233,7 @@ SUBROUTINE readhymo
     istate=0
     id_subbas_extern=upbasin
     id_subbas_intern=0
+    id_lu_intern=0
     c=0 !count successfully read subbasins
     h=3 !count lines
 
@@ -263,14 +264,19 @@ SUBROUTINE readhymo
         else
             area(i)=temp1
             nbr_lu(i)=k
-            id_lu_intern(:,i)=lu_temp
-            frac_lu(:,i)=frac_lu_temp
+            id_lu_intern(1:k,i)=lu_temp     (1:k)
+            frac_lu     (1:k,i)=frac_lu_temp(1:k)
             id_subbas_intern(i)=id_subbas_extern(i)
             c=c+1 !count successfully read subbasins
         end if
     END DO
     CLOSE(11)
 
+    if (c<subasin) then    !less subbasins found than expected
+        write(*,*)'ERROR: hymo.dat: expected ',subasin,' subbasins, found ',c
+        stop
+    end if
+ 
     if (size(whichn(id_subbas_intern(1:subasin)==0,0))>0) then    !check if there are subbasins read from routing.dat that were not found in hymo.dat
         write(*,*)'ERROR: The following subbasins have been listed in routing.dat, but are missing in hymo.dat:'
         write(*,*)id_subbas_extern(whichn(id_subbas_intern(1:subasin)==0,0))
@@ -348,21 +354,42 @@ SUBROUTINE readhymo
         sdr_tc=1.        !default value, no SDR correction
     end if
 
-
-    if (dummy1==4) then !4 columns, old version
-        READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),i=1,nterrain)
-    elseif (dummy1==5) then !5 columns, containing beta correction factor
-        READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),i=1,nterrain)
-    elseif (dummy1==6) then !6 columns, containing beta correction factor and TC-wise SDR
-        READ(11,*) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),sdr_tc(i),i=1,nterrain)
+    if (dummy1 == 8) then !8 columns, containing beta correction factor, TC-wise SDR and concentration factors
+        allocate(frac_diff2conc(nterrain))
+        allocate(frac_conc2diff(nterrain))
+        frac_diff2conc = 0. !default values, same as dolattc = doalllattc = TRUE
+        frac_conc2diff = 0.        
     end if
 
-    if ( (.NOT. dosediment) .AND. allocated(beta_fac_tc)) deallocate(beta_fac_tc)
 
-    if ( (.NOT. dosediment) .AND. allocated(sdr_tc)) deallocate(sdr_tc)
+    if (dummy1==4) then !4 columns, old version
+        READ(11,*,IOSTAT=istate) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),i=1,nterrain)
+    elseif (dummy1==5) then !5 columns, containing beta correction factor
+        READ(11,*,IOSTAT=istate) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),i=1,nterrain)
+    elseif (dummy1==6) then !6 columns, containing beta correction factor and TC-wise SDR
+        READ(11,*,IOSTAT=istate) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),sdr_tc(i),i=1,nterrain)
+    elseif (dummy1==8) then !8 columns, containing beta correction factor, TC-wise SDR and concentration factors
+        READ(11,*,IOSTAT=istate) (id_terrain_extern(i),fracterrain(i), slope(i),posterrain(i),beta_fac_tc(i),sdr_tc(i),frac_diff2conc(i),frac_conc2diff(i),i=1,nterrain)
+    end if
 
+    if (istate/=0) then    !format error
+            write(*,'(a,i0,a)')'ERROR (terrain.dat): Format error in line ',i+2,". Check formatting and number of TCs specified in do.dat"
+            stop
+    end if
+    
+    READ(11,'(a)',IOSTAT=istate) cdummy
+    if (istate==0 .AND. cdummy/="") then    !excess lines
+            write(*,'(a,i0,a)')'WARNING (terrain.dat): Found more than the expected ',nterrain," data lines. File truncated. Check number of TCs specified in do.dat"
+    end if
+    
+    !free memory containing correction factors, if sediment is disabled or all set to 1
+    if (allocated(beta_fac_tc)) then
+        if ((.NOT. dosediment) .OR. all(beta_fac_tc==1.)) deallocate(beta_fac_tc)
+    end if    
+    if ( allocated(sdr_tc))     then
+        if ((.NOT. dosediment) .OR. all(sdr_tc==1.))       deallocate(sdr_tc)
+    end if 
 
-    !slope=slope*sensfactor
     CLOSE(11)
 
 
@@ -387,17 +414,22 @@ SUBROUTINE readhymo
         READ(11,'(a)',IOSTAT=istate) cdummy
         if (istate/=0) then
 			if ((h-4<ntcinst)  ) then    !premature end of file
-				write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' lines (#SVC-LU-SUBBAS-combinations) expected'
+				write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' x 3 lines (#SVC-LU-SUBBAS-combinations) expected'
 				stop
 			else
 				if (i-1/=ntcinst) then    !less entities read than expected
-					write(*,'(a,i0)')'WARNING (soil_vegetation.dat): ',i,' instead of the expected ',ntcinst,' TCs read.'
+					write(*,'(a,i0,a,i0,a)')'WARNING (soil_vegetation.dat): ',i-1,' instead of the expected ',ntcinst,' TCs read.'
 					ntcinst=i-1 !correct value
 				end if
 				exit !enough lines read, abort loop
 			end if
-		end if
-        h=h+1 !count lines
+        end if
+        
+        if (i > ntcinst  ) then    !more lines than expected
+			write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' x 3 lines (#SVC-LU-SUBBAS-combinations) expected'
+			stop
+        end if
+        
 
         dummy1=GetNumberOfSubstrings(cdummy)-5 !Till: count number of fields (ie SVCs) specified for this combination
         if (dummy1 > maxsoil) then
@@ -406,7 +438,7 @@ SUBROUTINE readhymo
         end if
         k=0
         READ(cdummy,*,IOSTAT=istate) luse_subbas(i) !read subbasin ID only
-
+        h=h+1 !count lines
 		if (which1(luse_subbas(i) == id_subbas_extern) == 0) then
 			!write(*,'(a,i0)')'WARNING (soil_vegetation.dat): Unknown subbasin ',luse_subbas(i),' in line ',h,', ignored.'
 			READ(11,'(a)',IOSTAT=istate) cdummy !skip next two lines
@@ -776,7 +808,7 @@ SUBROUTINE readhymo
         READ(11,*)
 
         nbr_svc2=0
-
+        ii=-1
         DO WHILE (.TRUE.)        !count SVCs in each TC
             READ(11,*,  IOSTAT=istate) i, j, temp1
             IF (istate/=0) THEN    !no further line
@@ -784,8 +816,9 @@ SUBROUTINE readhymo
             END IF
             k=id_ext2int(i, id_terrain_extern)    !convert to internal TC-type id
             IF (k==-1) THEN    !ID not found
-                write(*,'(A,i0,A)')'TC-ID ', i,' in svc_in_tc.dat not found in terrain.dat. Aborting.'
-                stop
+                if (i /=ii) write(*,'(A,i0,A)')'WARNING: TC-ID ', i,' in svc_in_tc.dat not found in terrain.dat. Ignored.'
+                ii=i !prevent repeated error messages of same TC
+                cycle
             END IF
             nbr_svc2(k)=nbr_svc2(k)+1        !increase number SVCs for this TC
         END DO
@@ -806,6 +839,8 @@ SUBROUTINE readhymo
                 exit        !exit loop
             END IF
             k=id_ext2int(i, id_terrain_extern)    !convert to internal id
+            IF (k==-1) cycle!ID not found
+            
             n=id_ext2int(j, id_svc_extern)    !convert to internal id
 
             nbr_svc2(k)=nbr_svc2(k)+1
@@ -922,16 +957,12 @@ SUBROUTINE readhymo
     END DO
 
 
-    !   IDs of terrain components
+    !   IDs of terrain components: convert external to internal
     DO i=1,nsoter
         DO j=1, nbrterrain(i)
-            n=1
-            DO WHILE ((n<=nterrain) .AND. (id_terrain_extern(n) /= id_terrain_intern(j,i)))    !search until the current external ID has been found...
-                n=n+1
-            END DO
-
-            IF (n > nterrain) THEN    !reference to undefined TC
-                WRITE(*,'(a, I0,a, I0, a)') 'WARNING: TC ', id_terrain_intern(j,i), ' (Subbasin ', id_subbas_extern(i), ') in soter.dat not found in tc.dat. Toposequence truncated.'
+            n=which1(id_terrain_extern == id_terrain_intern(j,i))
+            IF (n == 0) THEN    !reference to undefined TC
+                WRITE(*,'(a, I0,a, I0, a)') 'WARNING: TC ', id_terrain_intern(j,i), ' (Subbasin ', id_subbas_extern(i), ') in soter.dat not found in terrain.dat. Toposequence truncated.'
                 nbrterrain(i)=j-1
                 exit
             END IF
@@ -939,6 +970,24 @@ SUBROUTINE readhymo
         END DO
     END DO
 
+    !check fractions of TCs in LUs and normalize, if necessary
+    DO i_lu = 1,nsoter
+        temp1 = 0. 
+        DO tc_counter=1,nbrterrain(i_lu)
+            !tcid_instance=tcallid(sb_counter,lu_counter,tc_counter)    !id of TC instance
+            id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
+            temp1 = temp1 + fracterrain(id_tc_type) !current sum of fractions
+        END DO
+        if (temp1>1.05 .OR. temp1<0.95) then !correct fractions
+            write(*,'(A,i0,a,f4.2,a)')'WARNING: Sum of TC-fractions for LU ', id_lu_extern(i_lu),' was ',temp1,', now normalized to 1.'
+            DO tc_counter=1,nbrterrain(i_lu)
+                id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
+                fracterrain(id_tc_type) = fracterrain(id_tc_type) /temp1   !correct fractions
+            END DO
+        end if
+    END DO
+    
+    
     ! insert internal numbers of soils into
     ! Soil-Vegetation component arrays
     DO i=1,ntcinst
@@ -961,13 +1010,12 @@ SUBROUTINE readhymo
     ! Soil-Vegetation component arrays
     DO i=1,ntcinst
         DO j=1, nbr_svc(i)
-            n=1
-            DO WHILE ((n<=nveg) .AND. (id_veg_extern(n) /= id_veg_intern(j,i)))            !search until the current external ID has been found...
-                n=n+1
+            DO n=1,nveg
+                if (id_veg_extern(n) == id_veg_intern(j,i)) exit           !search until the current external ID has been found...
             END DO
 
             if (n>nveg) then
-                write(*,'(a, I0, a)')'Vegetation class ',id_veg_intern(j,i),' not found in vegetation.dat.'
+                write(*,'(a, I0, a, I0, a)')'Vegetation class ',id_veg_intern(j,i),' not found in vegetation.dat (', nveg,' lines read).'
                 stop
             end if
             id_veg_intern(j,i)=n                                        !replace internal ID with external ID
@@ -1171,12 +1219,12 @@ SUBROUTINE readhymo
 
                 do svc_counter=1,nbr_svc(tcid_instance)    !check all SVCs of the current TC
                     temp1= sum(frac_svc(:,tcid_instance)) + rocky(tcid_instance) !current sum of fractions
-                    if (temp1>1.5 .OR. temp1<0.66) then
-                        write(*,'(A,i0,a,i0)')'WARNING: Sum of SVC- and rocky fraction was ',temp1,', now normalized to 1. (TC ',&
+                    if (temp1>1.05 .OR. temp1<0.95) then
+                        write(*,'(A,f4.2,a,i0)')'WARNING: Sum of SVC- and rocky fraction was ',temp1,', now normalized to 1. (TC ',&
                             id_terrain_extern(id_tc_type),')'
                     end if
-                    rocky(tcid_instance)=rocky(tcid_instance)/temp1    !correct fractions
-                    frac_svc(:,tcid_instance)=frac_svc(:,tcid_instance)/temp1
+                    rocky(tcid_instance)     = rocky(tcid_instance)     / temp1    !correct fractions
+                    frac_svc(:,tcid_instance)= frac_svc(:,tcid_instance)/ temp1
                 end do
             END DO
         END DO
@@ -1500,9 +1548,11 @@ SUBROUTINE readhymo
                 write(*,*)'WARNING: erosion_equation was outside [1..4], assumed to be 3 (MUSLE).'
                 erosion_equation=3            !default erosion equation to be used: MUSLE
             END IF
-        ELSE        !no such file found
+        ELSE        !erosion.ctl not found
+            write(*,*)'WARNING: erosion.ctl not found, using defaults.'
             erosion_equation=3            !default erosion equation to be used: MUSLE
             do_musle_subbasin=.FALSE.            !default 0: compute erosion on TC-scale
+            transport_limit_mode=2 !transport capacity according to Everaert (1991)
         END IF
         !end insert Till
 

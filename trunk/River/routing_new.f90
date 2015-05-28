@@ -94,7 +94,7 @@ IF (STATUS == 0) THEN
             END IF
  END DO
 
- i=which1(r_depth(:) == -1.) !check for non-specified subbasins
+ i=which1(r_depth(1:subasin) == -1.) !check for non-specified subbasins
  if (i/=0) then	
 	write(*,'(A,i0,A)')'ERROR: SUBBAS-ID ', id_subbas_extern(i),' missing in river.dat.'
     stop

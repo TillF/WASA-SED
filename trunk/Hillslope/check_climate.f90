@@ -33,6 +33,7 @@ INTEGER :: ii,jj
 REAL :: store=1.
 
 !check temperature data
+store=10. !default value for temperature
 DO jj=1,min(dayyear,size(temp,DIM=1))
 	DO ii=1,size(temp,DIM=2)
 		if ((temp(jj,ii)>50.) .OR. (temp(jj,ii)<-50.)) then
@@ -49,6 +50,7 @@ END DO
 
 
 !check humidity data
+store=50. !default value for humidity
 DO jj=1,min(dayyear,size(rhum,DIM=1))
 	DO ii=1,size(rhum,DIM=2)
 		if ((rhum(jj,ii)>100.) .OR. (rhum(jj,ii)<0.)) then
@@ -65,6 +67,7 @@ END DO
 
 
 !check radiation data
+store=50. !default value for radiation
 DO jj=1,min(dayyear,size(rad,DIM=1))
 	DO ii=1,size(rad,DIM=2)
 		if ((rad(jj,ii)>700.) .OR. (rad(jj,ii)<1.)) then
@@ -80,6 +83,7 @@ DO jj=1,min(dayyear,size(rad,DIM=1))
 END DO
 
 !check hourly precip data
+store=0. !default value for rainfall
 if (dohour) then
 	DO jj=1,min(dayyear*nt,size(preciph,DIM=1))
 		DO ii=1,size(preciph,DIM=2)
@@ -98,6 +102,7 @@ end if
 
 
 !check precip data
+store=0. !default value for rainfall
 DO jj=1,min(dayyear,size(precip,DIM=1))
 	DO ii=1,size(precip,DIM=2)
 		if ((precip(jj,ii)>50.*24.) .OR. (precip(jj,ii)<0.)) then

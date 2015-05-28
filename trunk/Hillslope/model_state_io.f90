@@ -57,7 +57,6 @@ module model_state_io
     use common_h
 contains
     subroutine init_model_state        !load initial conditions
-        if (.TRUE.) then
             call init_soil_conds(trim(pfadn)//'soil_moisture.stat')    !Till: load initial status of soil moisture
             call init_gw_conds(trim(pfadn)//'gw_storage.stat')    !Till: load initial status of gw storage
             call init_lake_conds(trim(pfadn)//'lake_volume.stat')    !Jose Miguel: load initial status of lake storage
@@ -66,22 +65,21 @@ contains
                call init_sediment_conds(trim(pfadn)//'sediment_storage.stat')    !Jose Miguel: load initial status of sediment storage
                call init_susp_sediment_conds(trim(pfadn)//'susp_sediment_storage.stat')    !Jose Miguel: load initial status of sediment storage
             endif
-         else            !ii: default init is currently still done in hymo_all.f90, needs to be changed
-            call init_soil_conds('')    !Till: set default initial status of soil moisture
-            call init_gw_conds('')    !Till: set default status of gw storage
-            call init_lake_conds('')    !Jose Miguel: set default status of lake storage
-            call init_river_conds('')    !Jose Miguel: set default status of river storage
-            if (dosediment) then
-               call init_sediment_conds('')    !Jose Miguel: set default status of sediment storage
-               call init_susp_sediment_conds('')    !Jose Miguel: set default status of sediment storage
-            endif
-        end if
-        CALL save_all_conds('','','','','','','',trim(pfadn)//'storage.stats_start')        !Till: save only summary on initial storage
+
+            CALL save_all_conds('','','','','','','',trim(pfadn)//'storage.stats_start')        !Till: save only summary on initial storage
     end subroutine init_model_state
 
     subroutine save_model_state        !save model state variables
+        !keep initial conditions
+        call rename(trim(pfadn)//'soil_moisture.stat'     , trim(pfadn)//'soil_moisture.stat_start')
+        call rename(trim(pfadn)//'gw_storage.stat'        ,trim(pfadn)//'gw_storage.stat_start')
+        call rename(trim(pfadn)//'intercept_storage.stat' ,trim(pfadn)//'intercept_storage.stat_start')
+        call rename(trim(pfadn)//'lake_volume.stat'       ,trim(pfadn)//'lake_volume.stat_start')
+        call rename(trim(pfadn)//'river_storage.stat'     ,trim(pfadn)//'river_storage.stat_start')
         if (dosediment) then
-           call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',&
+            call rename(trim(pfadn)//'sediment_storage.stat'     ,trim(pfadn)//'sediment_storage.stat_start')
+            call rename(trim(pfadn)//'susp_sediment_storage.stat',trim(pfadn)//'susp_sediment_storage.stat_start')
+            call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',&
             trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',&
             trim(pfadn)//'sediment_storage.stat',trim(pfadn)//'susp_sediment_storage.stat',trim(pfadn)//'storage.stats')    !Till: save status
         else
