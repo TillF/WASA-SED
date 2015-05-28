@@ -1,0 +1,40 @@
+	lath=INT(sum(horiz_thickness(tcid_instance2,i,1:h))/500.)
+				IF (lath > 0) THEN
+					temp2=sum(remainlat(1:lath))
+
+					!  update soil moisture of this horizon
+					!  maximum inflow may be limited by hydraulic conductivity
+					IF (temp2 > 0.) THEN
+						!Till: compute maximum inflow according to "exchange surface"
+						IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a different way
+							!ii: this different treatment is most likely an error. I assume Andreas' bugfix (below) has only be applied to non-lowermost TCs (before merging the two code branches into the current form). Check this!
+							temp3=(k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))*  &
+								horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100)* &
+								area(i_subbas2)*frac_lu(lu_counter2,i_subbas2) * frac_svc(i,tcid_instance2) /&
+								slength(i_lu)		!subsurface inflow into horizon(s) admitted due to conductivity
+						ELSE
+							!Andreas: has to be in unit mm, correct calculation similar to lateral outflow calculation
+							temp3=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))* &           ! Q_li
+							horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100.  &
+								/  slength(i_lu) / fracterrain(id_tc_type2)/1000.
+						END IF
+
+
+						temp3=MIN(temp3,temp2)
+						horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)+temp3
+
+						remainlat(1:lath)=0.
+						IF (temp3 < temp2) THEN
+							remainlat(lath)=temp2-temp3
+						END IF
+
+						!  if horizon is saturated, remaining lateral inflow may be added to
+						!  lower horizon
+						IF (horithact(tcid_instance2,i,h) > thetas(soilid,h)*  &
+							horiz_thickness(tcid_instance2,i,h)) THEN
+						remainlat(lath)=remainlat(lath)+ (horithact(tcid_instance2,i,h)-  &
+							thetas(soilid,h)*horiz_thickness(tcid_instance2,i,h))
+						horithact(tcid_instance2,i,h)=thetas(soilid,h)* horiz_thickness(tcid_instance2,i,h)
+
+
+						END IF
