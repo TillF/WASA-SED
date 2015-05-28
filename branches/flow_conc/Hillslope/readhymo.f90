@@ -808,7 +808,7 @@ SUBROUTINE readhymo
         READ(11,*)
 
         nbr_svc2=0
-
+        ii=-1
         DO WHILE (.TRUE.)        !count SVCs in each TC
             READ(11,*,  IOSTAT=istate) i, j, temp1
             IF (istate/=0) THEN    !no further line
@@ -816,8 +816,9 @@ SUBROUTINE readhymo
             END IF
             k=id_ext2int(i, id_terrain_extern)    !convert to internal TC-type id
             IF (k==-1) THEN    !ID not found
-                write(*,'(A,i0,A)')'TC-ID ', i,' in svc_in_tc.dat not found in terrain.dat. Aborting.'
-                stop
+                if (i /=ii) write(*,'(A,i0,A)')'WARNING: TC-ID ', i,' in svc_in_tc.dat not found in terrain.dat. Ignored.'
+                ii=i !prevent repeated error messages of same TC
+                cycle
             END IF
             nbr_svc2(k)=nbr_svc2(k)+1        !increase number SVCs for this TC
         END DO
@@ -838,6 +839,8 @@ SUBROUTINE readhymo
                 exit        !exit loop
             END IF
             k=id_ext2int(i, id_terrain_extern)    !convert to internal id
+            IF (k==-1) cycle!ID not found
+            
             n=id_ext2int(j, id_svc_extern)    !convert to internal id
 
             nbr_svc2(k)=nbr_svc2(k)+1

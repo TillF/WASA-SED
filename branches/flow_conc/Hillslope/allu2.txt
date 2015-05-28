@@ -1,0 +1,34 @@
+DO h=lath,nbrhori(soilid)
+                            temp2=sum(remainlat(:)) 
+
+                            !  update soil moisture of this horizon
+                            !  maximum inflow may be limited by hydraulic conductivity
+                            IF (temp2 > 0.) THEN
+
+                                !Till: compute maximum inflow according to "exchange surface"
+                                !Andreas: has to be in unit mm, correct calculation similar to lateral outflow calculation
+                                temp3=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))* &           ! Q_li
+                                horiz_thickness(tcid_instance2,i,h)*slope(id_tc_type2)/100.  &
+                                    /  slength(i_lu) / fracterrain(id_tc_type2)/1000.
+
+                                temp3=MIN(temp3,temp2)
+                                horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)+temp3
+
+                                remainlat(:)=0.
+                                IF (temp3 < temp2) THEN
+                                    remainlat(1)=temp2-temp3
+                                END IF
+
+                                !  if horizon is saturated, remaining lateral inflow may be added to
+                                !  lower horizon
+                                temp2=thetas(soilid,h)*horiz_thickness(tcid_instance2,i,h)	!Till: compute saturated water content [mm]
+
+                                IF (horithact(tcid_instance2,i,h) > temp2) THEN
+                                    remainlat(1)=remainlat(1)+ (horithact(tcid_instance2,i,h)- temp2)
+                                    horithact(tcid_instance2,i,h)=temp2
+                                END IF
+                            END IF
+
+                            ! enddo for all horizons
+                        END DO
+                    END IF
