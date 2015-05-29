@@ -168,7 +168,7 @@ qin (:,:)=0.
 ! INITIALISATION OF OUTPUT FILES
   OPEN(111,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
   if (f_river_flow) then
-    WRITE (111,*) 'Output files for river discharge q_out (m3/s) (with MAP IDs as in hymo.dat)'
+    WRITE (111,*) 'Output file for river discharge q_out (m3/s) (with MAP IDs as in hymo.dat)'
 	    
 	if (dohour) then
 		write(fmtstr,'(a,i0,a)')'(3a6,',subasin,'i14)'		!generate format string
@@ -307,7 +307,7 @@ endif
     close(11, status='delete') !delete any existing file, if no output is desired
   endif
 
-END IF
+END IF !routing mode=2
 ! ------------------------------------------------------------------------
 IF (STATUS == 1) THEN
 
@@ -712,7 +712,7 @@ IF (STATUS == 3) THEN
 !				CLOSE (11) 
 !			endif
 !		endif
-	endif
+    endif
 
 END IF
 

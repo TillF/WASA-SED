@@ -246,6 +246,7 @@ SUBROUTINE readgen(path2do_dat)
     f_river_sediment_storage=.FALSE.
     f_river_velocity=.FALSE.
     f_river_bedload=.FALSE.
+    f_river_infiltration=.FALSE.
     f_tc_surfflow=.FALSE.
     f_tc_sedout=.FALSE.
     f_lu_sedout=.FALSE.
@@ -356,6 +357,8 @@ SUBROUTINE readgen(path2do_dat)
                     f_river_velocity=.TRUE.
                 CASE ('river_bedload')
                     f_river_bedload=dosediment
+                CASE ('river_infiltration')
+                    f_river_infiltration=.TRUE. .AND. river_transport /= 1
                 CASE ('tc_surfflow')
                     f_tc_surfflow=.TRUE.
                 CASE ('tc_sedout')

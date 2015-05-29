@@ -158,6 +158,7 @@
 	pet_t              => allocate_hourly_array(f_potetranspiration)
 	deep_gw_recharge_t => allocate_hourly_array(f_gw_recharge)
 	gw_loss_t          => allocate_hourly_array(f_gw_loss)
+	river_infiltration_t=> allocate_hourly_array(f_river_infiltration)
 
     subflow_t          => allocate_hourly_array(f_subsurface_runoff .OR. .TRUE.)	!Till: currently, these are needed in any case
 	ovflow_t           => allocate_hourly_array(f_total_overlandflow .OR. .TRUE.)
