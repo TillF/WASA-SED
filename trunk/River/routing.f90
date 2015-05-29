@@ -79,7 +79,7 @@ DO WHILE (i<subasin)
   j=which1(idummy == id_subbas_extern) !relate to external IDs from routing.dat
   
   if (j==0) then
-	write(*,'(a, i0)')'Warning (routing.dat): Unknown subbasin ',idummy,', skipped.'
+	write(*,'(a, i0, a)')'Warning (routing.dat): Unknown subbasin ',idummy,', skipped.'
   else
 	prout(j,1)=temp2
 	prout(j,2)=temp3

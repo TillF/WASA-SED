@@ -737,6 +737,7 @@ SUBROUTINE hymo_all(STATUS)
         CALL open_subdaily_output(f_potetranspiration, 'potetranspiration.out', 'potential evaporation [mm] for all sub-basins (MAP-IDs)')
         CALL open_subdaily_output(f_gw_loss,           'gw_loss.out',           'model loss (deep seepage) [m**3/timestep] for all sub-basins (MAP-IDs)')
         CALL open_subdaily_output(f_gw_recharge,       'gw_recharge.out',       'groundwater recharge [m**3/timestep] for all sub-basins (MAP-IDs)')
+        CALL open_subdaily_output(f_river_infiltration,'River_Infiltration.out','Output file for river infiltration  (m3/timestep) (with MAP IDs as in hymo.dat)')
 
     END IF
 
@@ -786,7 +787,9 @@ SUBROUTINE hymo_all(STATUS)
         if (associated(pet_t))               pet_t               =0.0 !potential evaporation
         if (associated(deep_gw_recharge_t))    deep_gw_recharge_t  =0.0 !groundwater rescharge
         if (associated(gw_loss_t))           gw_loss_t           =0.0 !deep seepage, loss from model domain
-
+        if (associated(river_infiltration_t))           river_infiltration_t           =0.0 !infiltration into riverbed, loss from model domain
+        
+        
         if (do_pre_outflow) then        !if water outflow from upstream subbasins is given
             call read_pre_subbas_outflow        !read
         end if
@@ -1440,6 +1443,7 @@ SUBROUTINE hymo_all(STATUS)
         CALL write_subdaily_output(f_gw_recharge,       'gw_recharge.out',        deep_gw_recharge_t)
         CALL write_subdaily_output(f_potetranspiration, 'potetranspiration.out',  pet_t)
         CALL write_subdaily_output(f_gw_loss,           'gw_loss.out',            gw_loss_t)
+        CALL write_subdaily_output(f_river_infiltration,'River_Infiltration.out', river_infiltration_t)
 
         !    CALL write_subdaily_output(f_water_subbasin,    'water_subbasin.out',     water_subbasin_t)    !ii use this output routine instead of the lower one
 

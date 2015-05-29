@@ -280,6 +280,8 @@ module hymo_h
     real, pointer ::  pet_t(:,:,:)				!potential evapotrans for each day and timestep(366,nt,subasin)
     real, pointer ::  deep_gw_recharge_t(:,:,:)		!groundwater rescharge for each day and timestep(366,nt,subasin)
     real, pointer ::  gw_loss_t(:,:,:)				!ground water loss (deep percolation in LUs with no ground water flag) for each day and timestep(366,nt,subasin)
+    real, pointer ::  river_infiltration_t(:,:,:)	!infiltration into riverbed, loss from model domain
+   
 
     ! daily soil evaporation (mm/day)
     !Allocatable       real soilet(366,subasin)
