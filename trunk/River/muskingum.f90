@@ -44,7 +44,8 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: i !internal subbasin-ID
 INTEGER, INTENT(IN) :: h !subdaily timestep
 integer :: dummy
-real ::  r_area,  p, rttime, topw, flow, r_evp,r_infil, dummy2 !,vol, c, rh, tbase, s1, s2
+real ::  r_area,  p !wetted perimeter
+real ::  rttime, topw, flow, r_evp,r_infil, dummy2 !,vol, c, rh, tbase, s1, s2
 real :: c0, c1, c2, c3, yy !, Fr
 
 !! Initialise water and sediment storage in each reach   
@@ -108,7 +109,7 @@ r_infil = 0.
 !  r_infil=0.
 !else
 !  if (r_qout(2,i) > 1.e-2) then
-    r_infil = r_ksat(i)* 1e-3 * dt * (r_length(i)* 1000.) * p
+    r_infil = r_ksat(i)* 1e-3 * dt * (r_length(i)* 1000.) * p ![m3] mm/h * h * km
     if (f_river_infiltration) river_infiltration_t(d, h, i) = r_infil
     
 !  END IF

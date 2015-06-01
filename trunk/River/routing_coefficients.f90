@@ -73,7 +73,7 @@ use hymo_h
 use model_state_io !Jose Miguel: in order to be able to use init_river_conds
 
 implicit none
-INTEGER, INTENT(IN) :: i, STATUS
+INTEGER, INTENT(IN) :: i, STATUS !ID of river reach, flag perennial (2) or ephemeral (1)
 REAL, INTENT(OUT) :: r_area, p, flow
 
 !REAL :: fps, qq1, tt1, tt2, aa, phi8, phi9, phi11, phi12, sed_con
