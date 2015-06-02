@@ -139,6 +139,7 @@ SUBROUTINE readhymo
     use routing_h
     use utils_h
     use erosion_h
+    use climo_h
 
     IMPLICIT NONE
 
@@ -217,6 +218,7 @@ SUBROUTINE readhymo
         call pause1
     end if
 
+    INCLUDE '../General/allocat_general.var'
 
 
     !** read subbasin parameters
