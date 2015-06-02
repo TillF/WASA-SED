@@ -1036,8 +1036,9 @@ SUBROUTINE hymo_all(STATUS)
                                 tcarea,balance_tc, rootd_act,height_act,lai_act,alb_act,sed_in(tc_counter,:),sed_out(tc_counter,:), qsurf_lu(lu_counter))
                             balance=balance+balance_tc*fracterrain(id_tc_type)    !Till: compute water balance for LU [mm]
 
-                            gwrtc    (tcid_instance)=gwrtc    (tcid_instance)+gwr        !ii make these assignements optional
+                            gwrtc    (tcid_instance)=gwrtc    (tcid_instance)+gwr        !ii make these assignments optional
                             deepgwrtc(tcid_instance)=deepgwrtc(tcid_instance)+deepgwr
+                                                        
                             laitc    (tcid_instance)=laitc    (tcid_instance)+laih/24.
                             soilettc (tcid_instance)=soilettc (tcid_instance)+soileth
                             intctc   (tcid_instance)=intctc   (tcid_instance)+inth
@@ -1049,6 +1050,8 @@ SUBROUTINE hymo_all(STATUS)
                             END IF
 
                         END IF    !dohour
+                        deepgwrsu(lu_counter) = deepgwrsu(lu_counter)+ deepgwr * fracterrain(id_tc_type) !increase groundwater storage
+                        
                         horttc   (tcid_instance)=horttc   (tcid_instance)+horth            !ii: possibly obsolete, since not used any further
                         aettc    (tcid_instance)=aettc    (tcid_instance)+aeth
 
@@ -1181,6 +1184,60 @@ SUBROUTINE hymo_all(STATUS)
                         IF (f_lu_sedout) sedout_lu(d,timestep_counter,luid_instance) = sum(sedsu(lu_counter,:))    !prepare LU-wise output, if selected
                     END IF
 
+
+                    ! deep groundwater runoff of each landscape unit 
+                    IF (gw_flag(i_lu) == 1 .AND. gw_dist(i_lu) <= 1.) THEN        !Till: if gw is enabled and normal case (gw_dist(i_lu)/= 99)...
+                                                                                    !Till: ii gw_dist is zero anyway, eliminate it
+                        tcid_instance=tcallid(i_subbas,lu_counter,nbrterrain(i_lu))    !Till: get ID of lowermost TC in current LU
+
+                        rtemp=deepgwrsu(lu_counter)* (1.-gw_dist(i_lu))*  &
+                            area(i_subbas)*frac_lu(lu_counter,i_subbas)*1.e3    !Till: compute ground water recharge [m3]
+                        
+                        deepgw(i_subbas,lu_counter)=deepgw(i_subbas,lu_counter)+rtemp        !Till: add gw recharge to gw storage [m3]
+
+                        gw_recharge(d,i_subbas)= gw_recharge(d,i_subbas)+rtemp                            !Till: for output of gw-recharge
+                        if (f_gw_recharge)       deep_gw_recharge_t(d,timestep_counter,i_subbas) = deep_gw_recharge_t(d,timestep_counter,i_subbas) + rtemp            
+
+                        !rtemp=0. !George: disable groundwater discharge: enable this line, outcomment next line
+                        rtemp=min(deepgw(i_subbas,lu_counter),deepgw(i_subbas,lu_counter)/gw_delay(i_lu) / (dt/24.) )        !Till: compute gw-discharge [m3], at maximum this equals the entire stored volume
+                        if (isnan(rtemp)) then
+                            rtemp=1
+                            end if
+                        
+                        if ((rtemp>0.) .AND. (frac_direct_gw<1.)) then !Till: ground water discharge is (partially) routed into interflow of lowermost tc
+                            dummy=min(INT(maxval(sum(horiz_thickness(tcid_instance,:,:),2))/500.)+1,size(latred, DIM = 2)  ) !Till: compute number of horizon layers needed for storing the subsurface flow
+                            latred(tcid_instance,1:dummy)=latred(tcid_instance,1:dummy)+ rtemp*(1.-frac_direct_gw)/dummy
+                            !distribute gw-fraction routed to subsurface flow of lowest TC equally among soil horizons (to be redistributed in next timestep)
+                        end if
+                        rtemp2=rtemp*frac_direct_gw    !Till: fraction directly routed to the river
+
+                        qsub_lu(lu_counter)=qsub_lu(lu_counter)+rtemp2        !Till: add gw-discharge to total subsurface runoff
+                        
+                        water_subbasin_t(d,timestep_counter,i_subbas) = water_subbasin_t(d,timestep_counter,i_subbas)+rtemp2    
+                        if (f_gw_discharge)       deep_gw_discharge_t(d,timestep_counter,i_subbas) = deep_gw_discharge_t(d,timestep_counter,i_subbas) + rtemp2
+                        if (associated(subflow_t))  subflow_t        (d,timestep_counter,i_subbas) = subflow_t          (d,timestep_counter,i_subbas) + rtemp2 !Till: groundwater is (traditionally) included in subsurface fluxes
+
+                        deepgwrsu(lu_counter)=deepgwrsu(lu_counter)-deepgwrsu(lu_counter)*(1.-gw_dist(i_lu))    !Till: must be zeroed, everything still in there leaves the model domain
+                        deepgw(i_subbas,lu_counter)=deepgw(i_subbas,lu_counter)- rtemp                              !Till: gw storage is reduced according to outflow (direct outflow to river and outflow to lowest TC)
+
+                        IF (f_deep_gw_discharge) THEN    !Till: sum up daily groundwater discharge (effective part into river) (for output only)
+                            deep_gw_discharge(d,i_subbas)=deep_gw_discharge(d,i_subbas)+rtemp2        !(1.-intercepted)
+                        END IF
+
+
+                      !qsub_lu(lu_counter)=qsub_lu(lu_counter)+deepgw(i_subbas,lu_counter)/gw_delay(i_lu)        !Till: compute gw discharge from subbasin
+                      !water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas)+(1.-intercepted)*deepgw(i_subbas,lu_counter)/gw_delay(i_lu)/nt    !Till: deep gw discharge is distributed equally among all timesteps of day
+                      !deepgwrsu(lu_counter)=deepgwrsu(lu_counter)-deepgwrsu(lu_counter)*(1.-gw_dist(i_lu))    !gw storage is reduced according to outflow (losses from model domain)
+                      !deepgw(i_subbas,lu_counter)=deepgw(i_subbas,lu_counter)- deepgw(i_subbas,lu_counter)/gw_delay(i_lu) !gw storage is reduced according to outflow
+                    END IF
+
+                    !        !Till: ground water is disabled: seepage below profile is lost
+                    !        IF (gw_flag(i_lu) == 0 ) THEN
+                    !
+                    !        END IF
+                
+                
+                
                 END DO
                 !  END of loop over subdaily timesteps
 
@@ -1197,7 +1254,7 @@ SUBROUTINE hymo_all(STATUS)
                     soiletsu (lu_counter)=soiletsu (lu_counter)+ soilettc (tcid_instance)*fracterrain(id_tc_type)
                     intcsu   (lu_counter)=intcsu   (lu_counter)+ intctc   (tcid_instance)*fracterrain(id_tc_type)
 
-                    deepgwrsu(lu_counter)=deepgwrsu(lu_counter)+ deepgwrtc(tcid_instance)*fracterrain(id_tc_type) !new
+                    !deepgwrsu(lu_counter)=deepgwrsu(lu_counter)+ deepgwrtc(tcid_instance)*fracterrain(id_tc_type) !new
                     gwrsu    (lu_counter)=gwrsu    (lu_counter)+ gwrtc    (tcid_instance)*fracterrain(id_tc_type)
 
                     IF (dohour) THEN
@@ -1209,54 +1266,7 @@ SUBROUTINE hymo_all(STATUS)
                     END IF
                 END DO    !thru all TCs of current LU
 
-                ! deep groundwater runoff of each landscape unit (daily budget)
-                IF (gw_flag(i_lu) == 1 .AND. gw_dist(i_lu) <= 1.) THEN        !Till: if gw is enabled and normal case (gw_dist(i_lu)/= 99)...
-                                                                                !Till: ii gw_dist is zero anyway, eliminate it
 
-                    tcid_instance=tcallid(i_subbas,lu_counter,nbrterrain(i_lu))    !Till: get ID of lowermost TC in current LU
-
-                    rtemp=deepgwrsu(lu_counter)* (1.-gw_dist(i_lu))*  &
-                        area(i_subbas)*frac_lu(lu_counter,i_subbas)*1.e3    !Till: compute ground water recharge [m3]
-                    deepgw(i_subbas,lu_counter)=deepgw(i_subbas,lu_counter)+rtemp        !Till: add gw recharge to gw storage [m3]
-
-                    gw_recharge(d,i_subbas)= gw_recharge(d,i_subbas)+rtemp                            !Till: for output of gw-recharge
-                    if (f_gw_recharge)       deep_gw_recharge_t(d,:,i_subbas) = deep_gw_recharge_t(d,:,i_subbas) + rtemp/nt            !Till: simply distributed for entire day
-
-                    !rtemp=0. !George: disable groundwater contribution: enable this line, outcomment next line
-                    rtemp=min(deepgw(i_subbas,lu_counter),deepgw(i_subbas,lu_counter)/gw_delay(i_lu))        !Till: compute gw-discharge [m3], at maximum this equals the entire stored volume
-
-                    if ((rtemp>0.) .AND. (frac_direct_gw<1.)) then !Till: ground water discharge is (partially) routed into interflow of lowermost tc
-                        dummy=min(INT(maxval(sum(horiz_thickness(tcid_instance,:,:),2))/500.)+1,size(latred, DIM = 2)  ) !Till: compute number of horizon layers needed for storing the subsurface flow
-                        latred(tcid_instance,1:dummy)=latred(tcid_instance,1:dummy)+ rtemp*(1.-frac_direct_gw)/dummy
-                        !distribute gw-fraction routed to subsurface flow of lowest TC equally among soil horizons (to be redistributed in next timestep)
-                    end if
-                    rtemp2=rtemp*frac_direct_gw    !Till: fraction directly routed to the river
-
-                    qsub_lu(lu_counter)=qsub_lu(lu_counter)+rtemp2        !Till: add gw-discharge to total subsurface runoff
-                    !old water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas)+(1.-intercepted)*rtemp2/nt    !Till: deep gw discharge is distributed equally among all timesteps of day
-
-                    water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas)+rtemp2/nt    !Till: deep gw discharge is distributed equally among all timesteps of day
-                    if (f_gw_discharge)       deep_gw_discharge_t(d,:,i_subbas) = deep_gw_discharge_t(d,:,i_subbas) + rtemp2/nt
-                    if (associated(subflow_t))  subflow_t          (d,:,i_subbas) = subflow_t          (d,:,i_subbas) + rtemp2/nt !Till: groundwater is (traditionally) included in subsurface fluxes
-
-                    deepgwrsu(lu_counter)=deepgwrsu(lu_counter)-deepgwrsu(lu_counter)*(1.-gw_dist(i_lu))    !Till: must be zeroed, everything still in there leaves the model domain
-                    deepgw(i_subbas,lu_counter)=deepgw(i_subbas,lu_counter)- rtemp                              !Till: gw storage is reduced according to outflow (direct outflow to river and outflow to lowest TC)
-
-                    IF (f_deep_gw_discharge) THEN    !Till: sum up daily groundwater discharge (effective part into river) (for output only)
-                        deep_gw_discharge(d,i_subbas)=deep_gw_discharge(d,i_subbas)+rtemp2        !(1.-intercepted)
-                    END IF
-
-
-                  !qsub_lu(lu_counter)=qsub_lu(lu_counter)+deepgw(i_subbas,lu_counter)/gw_delay(i_lu)        !Till: compute gw discharge from subbasin
-                  !water_subbasin_t(d,:,i_subbas)=water_subbasin_t(d,:,i_subbas)+(1.-intercepted)*deepgw(i_subbas,lu_counter)/gw_delay(i_lu)/nt    !Till: deep gw discharge is distributed equally among all timesteps of day
-                  !deepgwrsu(lu_counter)=deepgwrsu(lu_counter)-deepgwrsu(lu_counter)*(1.-gw_dist(i_lu))    !gw storage is reduced according to outflow (losses from model domain)
-                  !deepgw(i_subbas,lu_counter)=deepgw(i_subbas,lu_counter)- deepgw(i_subbas,lu_counter)/gw_delay(i_lu) !gw storage is reduced according to outflow
-                END IF
-
-                !        !Till: ground water is disabled: seepage below profile is lost
-                !        IF (gw_flag(i_lu) == 0 ) THEN
-                !
-                !        END IF
 
                 !  runoff generated in landscape units is simply summed to give runoff of
                 !  entire subbasin
