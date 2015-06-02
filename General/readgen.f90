@@ -528,7 +528,7 @@ SUBROUTINE readgen(path2do_dat)
 
     nt = int(24/dt)	!Till: number of simulation steps per day
 
-    INCLUDE '../General/allocat_general.var'
+!    INCLUDE '../General/allocat_general.var'
 INCLUDE '../Hillslope/allocat_hymo.var'
 INCLUDE '../Hillslope/allocat_erosion.var'
 INCLUDE '../River/allocat_routing.var'
