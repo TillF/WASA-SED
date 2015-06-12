@@ -174,14 +174,12 @@ SUBROUTINE readhymo
     INTEGER :: nbr_svc2(nterrain)    !number of SVCs for each TC-type
     character(len=1000) :: fmtstr    !string for formatting file output
 
-
-
-
     ! temporary variables for reading landuse characteristics for all
     ! Subbasin-LandscapeUnit-TerrainComponent-combinations
     INTEGER :: luse_subbas(ntcinst),luse_lu(ntcinst),luse_tc(ntcinst)
 
-
+    INTEGER :: i_svc,i_soil,i_veg        ! ids of components in work
+    
 
     !Till: Read routing.dat, which determines which of the given subbasins are to be modelled
     OPEN(11,FILE=pfadp(1:pfadj)// 'River/routing.dat',STATUS='old',IOSTAT=istate)    ! upbasin: MAP ID of upstream sub-basin (MAP IDs);! downbasin: MAP ID of downstream sub-basin (MAP IDs)
@@ -692,27 +690,42 @@ SUBROUTINE readhymo
         READ(11,*)
         READ(11,*)
 
-        k=k+3    !3 IDs plus numerous fields
-        write(fmtstr,*)'(3i, ', SIZE(seasonality_k,dim=2),'F, ',SIZE(seasonality_c,dim=2),'F, ',SIZE(seasonality_p,dim=2),'F, ',SIZE(seasonality_coarse,dim=2),'F, ',SIZE(seasonality_n,dim=2),'F)'    !gererate format string according to number of columns to be expected
-        DO i=1,nsvc
-            READ(11,'(a)') cdummy
-            IF (istate==24) THEN    !no further line
+        k=k+3    !number of fields plus columns for 3 IDs 
+        h=2 !for counting lines
+        i=1
+        write(fmtstr,*)'(3i, ', SIZE(seasonality_k,dim=2),'F, ',SIZE(seasonality_c,dim=2),'F, ',SIZE(seasonality_p,dim=2),'F, ',SIZE(seasonality_coarse,dim=2),'F, ',SIZE(seasonality_n,dim=2),'F)'    !generate format string according to number of columns to be expected
+        DO WHILE (.TRUE.)  
+            READ(11,'(a)', IOSTAT=istate) cdummy
+            h=h+1
+            IF (istate==-1) THEN    !no further line
                 nsvc=i-1    !correct total number of SVCs that have been read
                 exit        !exit loop
             END IF
             if (trim(cdummy)=='') cycle    !skip blank lines
             READ(cdummy,*, IOSTAT=istate) id_svc_extern(i), j, n, svc_k_fac(i,:), svc_c_fac(i,:), svc_p_fac(i,:), svc_coarse_fac(i,:), svc_n(i,:)
             IF (istate /= 0 .OR. GetNumberOfSubstrings(cdummy)/=k) THEN    !format error
-                write(*,'(a,i0,a)')'svc.dat, line ',i+3,': unexpected number of fields. Check *_seasons.dat'
+                write(*,'(a,i0,a)')'svc.dat, line ',h,': unexpected number of fields. Check *_seasons.dat'
                 stop
             END IF
 
             svc_soil_veg(i,1)=id_ext2int(j, id_soil_extern)    !store internal soil id of this SVC
-            svc_soil_veg(i,2)=id_ext2int(n, id_veg_extern)        !store internal vegetation id of this SVC
+            IF (svc_soil_veg(i,1)==-1) THEN    !specified soil not found
+                write(*,'(a,i0,a,i0,a)')'ERROR in svc.dat, line ',h,': could not find soil ', j,' in soil.dat'
+                cycle
+                !stop
+            END IF
+            
+            svc_soil_veg(i,2)=id_ext2int(n, id_veg_extern)     !store internal vegetation id of this SVC
+            IF (svc_soil_veg(i,2)==-1) THEN    !specified vegetation not found
+                write(*,'(a,i0,a,i0,a)')'ERROR in svc.dat, line ',h,': could not find vegetation ', n,' in vegetation.dat'
+                cycle
+                !stop
+            END IF
+            i=i+1
         END DO
         CLOSE(11)
     end if
-
+    
     CALL check_seasonality_superfluous(seasonality_k,      "k_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
     CALL check_seasonality_superfluous(seasonality_c,      "c_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
     CALL check_seasonality_superfluous(seasonality_p,      "p_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
@@ -1091,6 +1104,31 @@ SUBROUTINE readhymo
         tcallid(id_sub_int,i,j) = n
     END DO
 
+  DO sb_counter=1,subasin            !check, if all relevant SVCs have been specified
+       DO lu_counter=1,nbr_lu(sb_counter)
+         i_lu=id_lu_intern(lu_counter,sb_counter)
+             DO tc_counter=1,nbrterrain(i_lu)
+                 tcid_instance=tcallid(sb_counter,lu_counter,tc_counter) !id of TC instance
+                 id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
+                    if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
+                    DO svc_counter=1,nbr_svc(tcid_instance)
+                        i_soil=id_soil_intern(svc_counter,tcid_instance)        !internal id of soil type
+                        i_veg=  id_veg_intern(svc_counter,tcid_instance)
+                        i=which1(svc_soil_veg(:,1)==i_soil .AND. svc_soil_veg(:,2)==i_veg) 
+                        write(*,'(a,i0,a,i0)')'soil-vegetation combination ', id_soil_extern(i_soil),' :', id_veg_extern(i_veg)
+                        IF (i==0) THEN    !soil-vegetation combination not specified as an SVC
+                            write(*,'(a,i0,a,i0)')'ERROR in svc.dat: could not find soil-vegetation combination ', id_soil_extern(i_soil),' :', id_veg_extern(i_veg)
+                            write(*,'(a,i0,a,i0,a,i0,a,i0,a)')' found for subbasin ', id_subbas_extern(sb_counter),', LU ', id_lu_extern(i_lu), ', TC ', id_terrain_extern(id_tc_type), ' (position ', tc_counter,')'
+                            stop
+                        END IF
+                    END DO
+             END DO
+       END DO
+    END DO
+
+    
+    
+    
     DO id_sub_int=1,subasin !check contents of soil_vegation.dat and for missing entries
         k = count(tcallid(id_sub_int,:,1)/=-1)
         if (k /= nbr_lu(id_sub_int)) then
