@@ -1115,7 +1115,6 @@ SUBROUTINE readhymo
                         i_soil=id_soil_intern(svc_counter,tcid_instance)        !internal id of soil type
                         i_veg=  id_veg_intern(svc_counter,tcid_instance)
                         i=which1(svc_soil_veg(:,1)==i_soil .AND. svc_soil_veg(:,2)==i_veg) 
-                        write(*,'(a,i0,a,i0)')'soil-vegetation combination ', id_soil_extern(i_soil),' :', id_veg_extern(i_veg)
                         IF (i==0) THEN    !soil-vegetation combination not specified as an SVC
                             write(*,'(a,i0,a,i0)')'ERROR in svc.dat: could not find soil-vegetation combination ', id_soil_extern(i_soil),' :', id_veg_extern(i_veg)
                             write(*,'(a,i0,a,i0,a,i0,a,i0,a)')' found for subbasin ', id_subbas_extern(sb_counter),', LU ', id_lu_extern(i_lu), ', TC ', id_terrain_extern(id_tc_type), ' (position ', tc_counter,')'
