@@ -567,10 +567,16 @@ SUBROUTINE readhymo
         READ(11,*, IOSTAT=istate) id_veg_extern(j),resist(j),wstressmin(j),wstressmax(j),  &
             (height(j,i),i=1,4),(rootdep(j,i),i=1,4), (lai(j,i),i=1,4),(alb(j,i),i=1,4)
 		
-		if (istate /= 0) then
-			write(*,'(a,i0)')'ERROR: vegetation.dat, format error or unexpected end of file in line ',h
+		if (istate == -1) then
+			write(*,'(a,i0,a,i0)')'WARNING: vegetation.dat, expected ', nveg, ' valid entries, found ',j
+            exit
+        end if
+        
+        if (istate /= 0) then
+			write(*,'(a,i0)')'ERROR: vegetation.dat, format error in line ',h
             stop
         end if
+        
         h=h+1
         if (  size(pack(id_veg_intern, id_veg_extern(j) == id_veg_intern(:,:))) == 0  ) then
 			write(*,'(a,i0,a,i0,a)')'WARNING: unknown vegetation-id ',id_veg_extern(j),' in vegetation.dat, line ',h-1,', skipped'
