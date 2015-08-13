@@ -1443,7 +1443,7 @@ SUBROUTINE hymo_all(STATUS)
         CALL write_output(f_daily_gw_loss,'daily_gw_loss.out',gw_loss)            !   groundwater losses (leaving model domain)
         CALL write_output(f_daily_subsurface_runoff,'daily_subsurface_runoff.out',subflow)        !     Output total subsurface runoff (m³/d)
 
-        CALL write_output(f_river_sediment_total,'River_Sediment_total.out',qsediment)        !     Output total sediment flux (t/d)
+!        CALL write_output(f_river_sediment_total,'River_Sediment_total.out',qsediment)        !     Output total sediment flux (t/d) !Ze Miguel: should be commented out. In the hourly version it is writing the hourly and the daily results!
 
         CALL write_subdaily_output(f_actetranspiration, 'actetranspiration.out',  aet_t)        !     subdaily evapotranspiration [mm]
         CALL write_subdaily_output(f_qhorton,           'qhorton.out'          ,  hortflow_t)
