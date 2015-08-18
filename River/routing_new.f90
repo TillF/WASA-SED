@@ -310,6 +310,7 @@ endif
 END IF !routing mode=2
 ! ------------------------------------------------------------------------
 IF (STATUS == 1) THEN
+qsediment2_t=0.
 
 ! Initialisation for first year and day
  IF (t == tstart) THEN
@@ -320,7 +321,6 @@ IF (STATUS == 1) THEN
    enddo
    r_depth_cur(i)=0.
    if(river_transport.eq.2) then
-     qsediment_t(i) = 0.
      do k=1,n_sed_class
       sediment_in(i,k)=0.
 	  sediment_out(i,k)=0.
@@ -552,9 +552,7 @@ endif
 
 ! add up all sediment size classes to obtain total sediment mass
   do i = 1, subasin
-    do k = 1, n_sed_class
-     qsediment_t(i) = qsediment_t(i) + sediment_out(i,k)
-    enddo
+     qsediment2_t(d,h,i) = qsediment2_t(d,h,i) + sum(sediment_out(i, 1:n_sed_class))
   enddo
 
 ! calculate total sediment concentration
@@ -562,7 +560,7 @@ endif
      if (r_qout(2,i).eq. 0.) then
         r_sediment_concentration(i) = 0.
      else
-        r_sediment_concentration(i) = qsediment_t(i)/(r_qout(2,i)*3.6*dt)
+        r_sediment_concentration(i) = qsediment2_t(d,h,i)/(r_qout(2,i)*3.6*dt)
      endif
   enddo
  
@@ -575,16 +573,7 @@ endif
 	endif
  endif
 
-if (river_transport.eq.2) then !daily output in routing_new(3) to decrease simulation time
-	if (dohour) then
-	  if (f_river_sediment_total) then
-		OPEN(11,FILE=pfadn(1:pfadi)//'River_Sediment_total.out',STATUS='old' ,POSITION='append'  )
-		write(fmtstr,'(a,i0,a)')'(3i6,',subasin,'f14.3)'		!generate format string
-		WRITE (11,fmtstr)t,d,h, (qsediment_t(i),i=1,subasin)
-		CLOSE (11) 
-	  endif
-	endif
-
+if (river_transport.eq.2) then !ii: modify arrays to collect data of more timesteps (as e.g. qsediment2_t) to avoid file access in each single timestep (slow!)
   if (f_river_sediment_concentration) then
 	OPEN(11,FILE=pfadn(1:pfadi)//'River_Sediment_Concentration.out',STATUS='old' ,POSITION='append'  )
 	write(fmtstr,'(a,i0,a)')'(3i6,',subasin,'f14.3)'		!generate format string
@@ -667,12 +656,11 @@ endif
 ! Update flows for next timestep 
   DO i=1,subasin
     qout(d,i)= r_qout(2,i)
-	qsediment(d,i)=qsediment_t(i)
+!	qsediment(d,i)=qsediment2_t(d,h,i)
 	r_qin(1,i) = r_qin(2,i)			
 	r_qout(1,i)= r_qout(2,i)	
 	r_qin(2,i)=0.
 	r_qout(2,i)=0.
-	qsediment_t(i) = 0.
 	
 	sediment_in(i, 1:n_sed_class)=0.
   ENDDO
@@ -695,7 +683,7 @@ IF (STATUS == 3) THEN
   END IF
 
 
-! daily output of water and discharge in the river for entire year
+! output of daily water and discharge in the river for entire year
 	if (.not.dohour) then
 		if (f_river_flow) then
 			OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='old' ,POSITION='append'  )
@@ -706,14 +694,6 @@ IF (STATUS == 3) THEN
 			CLOSE (11)
 		endif
 
-!		if (river_transport.eq.2) then 
-!			if(f_river_sediment_total) then
-!				OPEN(11,FILE=pfadn(1:pfadi)//'River_Sediment_total.out',STATUS='old' ,POSITION='append'  )
-!				write(fmtstr,'(a,i0,a,i0,a)')'(',dayyear,'(2(i0,a),',subasin,'(f14.3,a)))'		!generate format string
-!				WRITE (11,fmtstr)(t,char(9),j,char(9),(qsediment(j,i),char(9),i=1,subasin),j=1, dayyear)
-!				CLOSE (11) 
-!			endif
-!		endif
     endif
 
 END IF
