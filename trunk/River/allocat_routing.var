@@ -46,7 +46,7 @@
 	 sed_storage(subasin,n_sed_class), &
 	 sediment_in(subasin,n_sed_class), &
 	 sediment_out(subasin,n_sed_class), &
-	 sediment_total(subasin), &
+	 qsediment_t(subasin), &
 	 r_sediment_concentration(subasin), &
 	 sediment(8784,subasin,n_sed_class), &
 	 spcon(n_sed_class), &
