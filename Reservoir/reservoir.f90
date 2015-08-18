@@ -33,7 +33,7 @@ IMPLICIT NONE
 
 INTEGER, INTENT(IN)                  :: STATUS
 INTEGER, INTENT(IN OUT)                  :: upstream
-INTEGER, INTENT(IN OUT)                  :: res_h
+INTEGER, INTENT(IN)                  :: res_h
 
 ! STATUS of CALL (0=initialization run, 1=initialization year,
 !                 2=calculation day,    3=finalization year)

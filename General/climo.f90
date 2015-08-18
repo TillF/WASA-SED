@@ -74,7 +74,7 @@ implicit none
 	end do
 	
 	if (iostat==-1) then	!reached end of file
-		write(*,'(A,i3,a,i0)')'ABORTED: input file '//filename//' does not contain simulation start ',dstart,'/',mstart,'/',tstart,' (d/m/y)'
+		write(*,'(A,i0,a,i0,a,i0)')'ABORTED: input file '//trim(filename)//' does not contain simulation start ',dstart,'/',mstart,'/',tstart,' (d/m/y)'
 		stop
 	end if
 	
@@ -163,7 +163,7 @@ IF (STATUS == 0) THEN
   end if
   OPEN(84,FILE=pfadp(1:pfadj)// '/Time_series/'//dumstr,STATUS='old',action='read', IOSTAT=iostat)
   if (iostat/=0) then	
-		write(*,*)'ERROR:',pfadp(1:pfadj)// '/Time_series/'//dumstr//' not found.'
+		write(*,*)'ERROR:',pfadp(1:pfadj)// '/Time_series/'//trim(dumstr)//' not found.'
 		stop
   end if
 
@@ -206,13 +206,13 @@ IF (STATUS == 0) THEN
   corr_column_rad=> set_corr_column(columnheader,'radiation.dat')
 
  
-
+  !rainfall data
   READ(84,'(a)') linedummy
   columnheader=0
   no_columns(4)=GetNumberOfSubstrings(linedummy)-2	!Till: count number of columns
   READ (linedummy,*, IOSTAT=iostat) dummy, dummy, (columnheader(i), i=1,no_columns(4))	!Till: extract column headers
   if (iostat/=0) then	
-		write(*,*)'Format error in '//dumstr
+		write(*,*)'Format error in '//trim(dumstr)
 		stop
   end if
   corr_column_precip=>set_corr_column(columnheader,dumstr)
