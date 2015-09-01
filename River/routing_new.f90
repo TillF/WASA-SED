@@ -188,15 +188,13 @@ if ((river_transport.eq.2)) then
   OPEN(11,FILE=pfadn(1:pfadi)//'River_Sediment_total.out',STATUS='replace')
   if(f_river_sediment_total) then
 	WRITE (11,*) 'Output file for sediment mass in ton/timestep (with MAP IDs as in hymo.dat)'
-	if (dohour) then
+!	if (dohour) then
 		write(fmtstr,'(a,i0,a)')'(3a6,',subasin,'i14)'		!generate format string
 		WRITE (11,fmtstr)' Year ', ' Day  ','  dt  ', (id_subbas_extern(i), i=1,subasin)
-		!WRITE (11,'(3a6,<subasin>i14)')' Year ', ' Day  ','  dt  ', (id_subbas_extern(i), i=1,subasin)
-	else
-		write(fmtstr,'(a,i0,a)')'(2a6,',subasin,'i14)'		!generate format string
-		WRITE (11,fmtstr)' Year ', ' Day  ', (id_subbas_extern(i), i=1,subasin)
-		!WRITE (11,'(2a6,<subasin>i14)')' Year ', ' Day  ', (id_subbas_extern(i), i=1,subasin)
-	endif
+!	else
+!		write(fmtstr,'(a,i0,a)')'(2a6,',subasin,'i14)'		!generate format string
+!		WRITE (11,fmtstr)' Year ', ' Day  ', (id_subbas_extern(i), i=1,subasin)
+!	endif
 	Close (11)
   else
     close(11, status='delete') !delete any existing file, if no output is desired
