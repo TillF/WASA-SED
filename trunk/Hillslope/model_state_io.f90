@@ -289,7 +289,8 @@ contains
         CLOSE(lake_file_hdle, iostat=i_lu)
         CLOSE(river_file_hdle, iostat=i_lu)    !close output files
         CLOSE(sediment_file_hdle, iostat=i_lu)    !close output files
-
+        CLOSE(susp_sediment_file_hdle, iostat=i_lu)    !close output files
+        
 
         OPEN(11,FILE=summary_file, STATUS='replace')        !write to summary file
         WRITE(11,*)'total water storage in catchment after model run [m3]'
