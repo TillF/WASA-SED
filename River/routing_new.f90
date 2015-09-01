@@ -656,7 +656,7 @@ endif
 ! Update flows for next timestep 
   DO i=1,subasin
     qout(d,i)= r_qout(2,i)
-!	qsediment(d,i)=qsediment2_t(d,h,i)
+
 	r_qin(1,i) = r_qin(2,i)			
 	r_qout(1,i)= r_qout(2,i)	
 	r_qin(2,i)=0.
