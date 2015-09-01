@@ -101,7 +101,7 @@ SUBROUTINE readgen(path2do_dat)
     ! read run-time parameters
     OPEN(11,FILE=trim(path2do_dat) ,IOSTAT=istate,STATUS='old')
     IF (istate/=0) THEN
-        write(*,*)'Error: Control file ',trim(path2do_dat),' could not be opened.'
+        write(*,'(A)')'Error: Control file '//trim(path2do_dat)//' could not be opened.'
         stop
     END IF
 	
