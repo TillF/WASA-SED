@@ -202,18 +202,22 @@ contains
                 total_storage_river=0
             endif
 
-           if (sediment_file_hdle/=0) then
+            digits=floor(log10(max(1.0,maxval(riverbed_storage))))+1    !Till: number of pre-decimal digits required
+            write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',max(11,digits),'.',max(0,11-digits-1),'))'        !generate format string
+            if (sediment_file_hdle/=0) then
                 do k=1, n_sed_class
-                     WRITE(sediment_file_hdle,'(I0,A1,I0,A1,F13.2)')id_subbas_extern(sb_counter), char(9), k, char(9) ,riverbed_storage(sb_counter,k) !print each sediment class
+                     WRITE(sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9) ,riverbed_storage(sb_counter,k) !print each sediment class
                      !total_storage_sediment=total_storage_sediment+riverbed_storage(sb_counter,k) !sum up total storage
                 enddo
 !            else
 !                total_storage_sediment=0
             endif
             
-           if (susp_sediment_file_hdle/=0) then
+            digits=floor(log10(max(1.0,maxval(sed_storage))))+1    !Till: number of pre-decimal digits required
+            write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',max(11,digits),'.',max(0,11-digits-1),'))'        !generate format string
+            if (susp_sediment_file_hdle/=0) then
                 do k=1, n_sed_class
-                     WRITE(susp_sediment_file_hdle,'(I0,A1,I0,A1,F13.2)')id_subbas_extern(sb_counter), char(9), k, char(9) ,sed_storage(sb_counter,k) !print each sediment class
+                     WRITE(susp_sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9) ,sed_storage(sb_counter,k) !print each sediment class
 !                     total_storage_suspsediment=total_storage_suspsediment+sed_storage(sb_counter,k) !sum up total storage
                 enddo
  !           else
