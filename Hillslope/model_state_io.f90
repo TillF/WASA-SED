@@ -111,7 +111,7 @@ contains
         INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter,h,acud_class, k, tt, digits    ! counters
         INTEGER :: i_lu,id_tc_type,i_svc,i_soil,i_veg        ! ids of components in work
         INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
-        REAL    :: total_storage_soil, total_storage_gw, total_storage_intercept, total_storage_lake(5), total_storage_river, total_storage_sediment,total_storage_suspsediment    !total amount of water stored  [m3]
+        REAL    :: total_storage_soil, total_storage_gw, total_storage_intercept, total_storage_lake(5), total_storage_river !, total_storage_sediment,total_storage_suspsediment    !total amount of water stored  [m3]
         REAL    :: lu_area, svc_area    !area of current lu/svc [m3]
         INTEGER    ::    soil_file_hdle, gw_file_hdle, intercept_file_hdle, lake_file_hdle, river_file_hdle,sediment_file_hdle,susp_sediment_file_hdle    !file handles to output files
 		character(len=1000) :: fmtstr    !string for formatting file output
@@ -121,7 +121,7 @@ contains
         total_storage_intercept=0.
         total_storage_lake=0.
         total_storage_river=0.
-        total_storage_sediment=0.
+!        total_storage_sediment=0.
 
         if (trim(soil_conds_file)=='') then        !don't do anything if an empty filename is specified
             soil_file_hdle=0
@@ -177,7 +177,7 @@ contains
             sediment_file_hdle=16
             OPEN(sediment_file_hdle,FILE=sediment_conds_file, STATUS='replace')
             WRITE(sediment_file_hdle,'(a)') 'river reach deposition sediment weight status (for analysis or model re-start)'
-            WRITE(sediment_file_hdle,*)'Subbasin', char(9),'sed. class' ,char(9),'weight[ton]' !tab separated output
+            WRITE(sediment_file_hdle,'(A)')'Subbasin'//char(9)//'particle_size_class'//char(9)//'mass[t]' !tab separated output
         endif
         
         if (trim(susp_sediment_conds_file)=='') then        !don't do anything if an empty filename is specified
@@ -186,7 +186,7 @@ contains
             susp_sediment_file_hdle=17
             OPEN(susp_sediment_file_hdle,FILE=susp_sediment_conds_file, STATUS='replace')
             WRITE(susp_sediment_file_hdle,'(a)') 'river reach suspended sediment weight status (for analysis or model re-start)'
-            WRITE(susp_sediment_file_hdle,*)'Subbasin', char(9),'sed. class' ,char(9),'weight[ton]' !tab separated output
+            WRITE(susp_sediment_file_hdle,'(A)')'Subbasin'//char(9)//'particle_size_class'//char(9)//'mass[t]' !tab separated output
         endif
         
         
@@ -195,7 +195,6 @@ contains
             digits=floor(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
             write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,F',max(11,digits),'.',max(0,11-digits-1),'))'        !generate format string
 
-			
             if (river_file_hdle/=0) then
                 WRITE(river_file_hdle,trim(fmtstr))id_subbas_extern(sb_counter), char(9),r_storage(sb_counter) !tab separated output
                 total_storage_river=total_storage_river+r_storage(sb_counter) !sum up total storage
@@ -206,19 +205,19 @@ contains
            if (sediment_file_hdle/=0) then
                 do k=1, n_sed_class
                      WRITE(sediment_file_hdle,'(I0,A1,I0,A1,F13.2)')id_subbas_extern(sb_counter), char(9), k, char(9) ,riverbed_storage(sb_counter,k) !print each sediment class
-                     total_storage_sediment=total_storage_sediment+riverbed_storage(sb_counter,k) !sum up total storage
+                     !total_storage_sediment=total_storage_sediment+riverbed_storage(sb_counter,k) !sum up total storage
                 enddo
-            else
-                total_storage_sediment=0
+!            else
+!                total_storage_sediment=0
             endif
             
            if (susp_sediment_file_hdle/=0) then
                 do k=1, n_sed_class
                      WRITE(susp_sediment_file_hdle,'(I0,A1,I0,A1,F13.2)')id_subbas_extern(sb_counter), char(9), k, char(9) ,sed_storage(sb_counter,k) !print each sediment class
-                     total_storage_suspsediment=total_storage_suspsediment+sed_storage(sb_counter,k) !sum up total storage
+!                     total_storage_suspsediment=total_storage_suspsediment+sed_storage(sb_counter,k) !sum up total storage
                 enddo
-            else
-                total_storage_suspsediment=0
+ !           else
+ !               total_storage_suspsediment=0
             endif
             
             
