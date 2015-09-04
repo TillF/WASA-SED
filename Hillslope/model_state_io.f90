@@ -202,8 +202,13 @@ contains
                 total_storage_river=0
             endif
 
+            !generate format string
             digits=floor(log10(max(1.0,maxval(riverbed_storage))))+1    !Till: number of pre-decimal digits required
-            write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',max(11,digits),'.',max(0,11-digits-1),'))'        !generate format string
+            if (digits<10) then
+               write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',digits,'.',max(0,11-digits-1),'))'
+            else       
+               fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
+            end if
             if (sediment_file_hdle/=0) then
                 do k=1, n_sed_class
                      WRITE(sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9) ,riverbed_storage(sb_counter,k) !print each sediment class
@@ -214,7 +219,11 @@ contains
             endif
             
             digits=floor(log10(max(1.0,maxval(sed_storage))))+1    !Till: number of pre-decimal digits required
-            write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',max(11,digits),'.',max(0,11-digits-1),'))'        !generate format string
+            if (digits<10) then
+              write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',digits,'.',max(0,11-digits-1),'))'        !generate format string
+            else       
+               fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
+            end if
             if (susp_sediment_file_hdle/=0) then
                 do k=1, n_sed_class
                      WRITE(susp_sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9) ,sed_storage(sb_counter,k) !print each sediment class
