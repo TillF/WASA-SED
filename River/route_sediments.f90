@@ -83,16 +83,13 @@ REAL ::   r_storage_previous !depdeg,dot,
 
 
 !if no or only very little water flow in reach, no sediment calculation is performed
-if (r_storage(i) == 0.) then
- sediment_out(i,:) = 0.
- sed_storage(i,:) = 0. 
- return
-endif
-
-IF (r_storage(i) == 0. .and. r_qin(2,i) < 1.e-1) then
- sediment_out(i,:) = 0.
- sed_storage(i,:) = 0.
- return
+IF ((r_storage(i) == 0.) .OR. &
+ (r_storage(i) == 0. .and. r_qin(2,i) < 1.e-1) ) then
+    river_deposition(i,:) = sediment_out(i,:) + sediment_in(i,:) !incoming and suspended sediment is deposited
+    riverbed_storage(i,:) = riverbed_storage(i,:) + river_deposition(i,:)
+    sediment_out(i,:) = 0.
+    sed_storage(i,:) = 0.
+    return
 ENDIF
 
 !! initialize water in reach during time step [m3]
@@ -101,13 +98,17 @@ volume = r_storage_previous+r_qin(2,i)*3600.*dt
 
 !! check if it is an ephemeral river (as set in Muskingum.f90) that starts to flow
 if (r_qout(1,i) == 0. .and. r_storage(i) == (r_qin(2,i)+3600.*dt)) then
-  sediment_out(i,:) = 0.
-  sed_storage(i,:) = 0.
-  volume = r_storage(i)
-  return
+    river_deposition(i,:) = sediment_out(i,:) + sediment_in(i,:) !incoming and suspended sediment is deposited
+    riverbed_storage(i,:) = riverbed_storage(i,:) + river_deposition(i,:)
+    sediment_out(i,:) = 0.
+    sed_storage(i,:) = 0.
+    volume = r_storage(i)
+    return
 endif
 !! do not perform sediment routing if no water in reach
 IF (volume <= 0.01) then 
+ river_deposition(i,:) = sediment_out(i,:) + sediment_in(i,:) !incoming and suspended sediment is deposited
+ riverbed_storage(i,:) = riverbed_storage(i,:) + river_deposition(i,:)
  sediment_out(i,:) = 0.
  sed_storage(i,:) = 0.
  RETURN
@@ -124,13 +125,13 @@ spexp (:)= 1.707			!1 - 1.5
 !! Calculation of flow velocity [m/s]
   IF (velocity(i) < .010) THEN
     vel_peak = 0.01
-    write(*,*) 'very small flow velocity for sediment transport in sub-basin: ', i
+    write(*,'(A, i0)') 'very low  flow velocity for sediment transport in sub-basin ', i
   ELSE
     vel_peak = prf * velocity(i)
   END IF
   IF (vel_peak > 5.) then
     vel_peak = 5.
-    write(*,*) 'very large flow velocity for sediment transport in sub-basin ', i
+    write(*,'(A, i0)') 'very high flow velocity for sediment transport in sub-basin ', i
   endif
   
 
