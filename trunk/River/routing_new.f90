@@ -255,7 +255,7 @@ endif
 
   OPEN(11,FILE=pfadn(1:pfadi)//'River_Sediment_Storage.out',STATUS='replace')
   if (f_river_sediment_storage) then
-	WRITE (11,*) 'Output file for river sediment storage in t (with MAP IDs as in hymo.dat)'
+	WRITE (11,'(A)') 'Output file for river sediment storage in t (with MAP IDs as in hymo.dat)'
 	write(fmtstr,'(a,i0,a)')'(5a,',subasin,'(a,i14))'		!generate format string
 	WRITE (11,fmtstr)' Year ',char(9), ' Day  ',char(9),'  dt  ', (char(9),id_subbas_extern(i), i=1,subasin)
 
@@ -266,7 +266,7 @@ endif
 
   OPEN(11,FILE=pfadn(1:pfadi)//'River_Deposition.out',STATUS='replace')
   if (f_river_deposition) then
-	WRITE (11,*) 'Output file for deposition of sediments in the riverbed in tons/river stretch (with MAP IDs as in hymo.dat)'
+	WRITE (11,'(A)') 'Output file for deposition of sediments in the riverbed in tons/river stretch (with MAP IDs as in hymo.dat)'
 	write(fmtstr,'(a,i0,a)')'(3a6,',subasin,'i14)'		!generate format string
 	WRITE (11,fmtstr)' Year ', ' Day  ','  dt  ', (id_subbas_extern(i), i=1,subasin)
 	Close (11)
