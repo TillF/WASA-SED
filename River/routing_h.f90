@@ -83,7 +83,7 @@ real, allocatable :: velocity(:)
 
 
 !SEDIMENT ROUTING VARIABLES
-!! amount of sediment stored in river reach for each particle size class k (tons/timestep)
+!! amount of sediment stored in river reach for each particle size class k (tons)
 real, allocatable :: sed_storage(:,:)
 !! sediment entering reach for each particle size class k (tons/timestep)
 real, allocatable :: sediment_in(:,:)
@@ -106,7 +106,7 @@ real, allocatable :: river_deposition(:,:)
 !! sediment reentrained in water by channel degradation in tons/(timestep and river stretch)
 real, allocatable :: river_degradation(:,:)
 !! temporary storage of sediment on top of the riverbed in river reach [tons]
-real, allocatable :: riverbed_storage(:,:) !!! why 2 dimensions?
+real, allocatable :: riverbed_storage(:,:) !!! subasin,n_sed_class
 
 
 !BEDLOAD MODELLING VARIABLES

@@ -291,7 +291,6 @@ SUBROUTINE readgen(path2do_dat)
     IF (istate==0) THEN
         READ(11,*,IOSTAT=istate)dummy
         READ(11,*,IOSTAT=istate)dummy
-        READ(11,*,IOSTAT=istate)dummy
 
         DO WHILE (istate==0)
             SELECT CASE (trim(locase(dummy)))		!enable/disable file output of desired results

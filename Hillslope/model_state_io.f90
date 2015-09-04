@@ -190,11 +190,15 @@ contains
         endif
         
         
-        DO sb_counter=1,subasin !river, groundwater, intercept and soil storages inside
+        DO sb_counter=1,subasin !river, groundwater, intercept and soil storages inside ii:wrap subbasin loop around each single entitity to save time in generating format string
             !Jose Miguel: write river storage state to .stat file .
             digits=floor(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
-            write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,F',max(11,digits),'.',max(0,11-digits-1),'))'        !generate format string
-
+            if (digits<10) then
+              write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
+            else       
+               fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
+            end if
+            
             if (river_file_hdle/=0) then
                 WRITE(river_file_hdle,trim(fmtstr))id_subbas_extern(sb_counter), char(9),r_storage(sb_counter) !tab separated output
                 total_storage_river=total_storage_river+r_storage(sb_counter) !sum up total storage
@@ -203,9 +207,10 @@ contains
             endif
 
             !generate format string
+            lu_area=maxval(riverbed_storage)
             digits=floor(log10(max(1.0,maxval(riverbed_storage))))+1    !Till: number of pre-decimal digits required
             if (digits<10) then
-               write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',digits,'.',max(0,11-digits-1),'))'
+              write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
             else       
                fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
             end if
@@ -218,9 +223,10 @@ contains
 !                total_storage_sediment=0
             endif
             
+            lu_area=maxval(sed_storage)
             digits=floor(log10(max(1.0,maxval(sed_storage))))+1    !Till: number of pre-decimal digits required
             if (digits<10) then
-              write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',digits,'.',max(0,11-digits-1),'))'        !generate format string
+              write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
             else       
                fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
             end if
@@ -646,7 +652,7 @@ contains
         DO sb_counter=1,subasin
             READ(11,*,IOSTAT=iostatus) i, dummy1
 			IF (iostatus/=0) THEN
-                WRITE(*,'(a,a,a)') 'WARNING: could not read initial river storage from river_storage.stat, ignored, assumed 0.',&
+                WRITE(*,'(a,a,a)') 'WARNING: could not read initial river storage from river_storage.stat, file ignored, assumed 0.',&
                     ' Check this file, model_state_io.f90 or consider switching off doloadstate in file do.dat'
                 EXIT
             ENDIF
@@ -692,7 +698,7 @@ contains
 
 	            READ(11,*,IOSTAT=iostatus) i, k, dummy1
 		    IF (iostatus/=0) THEN
-		      WRITE(*,'(a,a,a)') 'WARNING: could not read initial sediment storage from sediment_storage.stat, ignored, assumed 0.',&
+		      WRITE(*,'(a,a,a)') 'WARNING: could not read initial sediment storage from sediment_storage.stat, file ignored, assumed 0.',&
                       ' Check this file, model_state_io.f90 or consider switching off doloadstate in file do.dat'
                     EXIT
                     ENDIF
@@ -736,7 +742,7 @@ contains
 
 	            READ(11,*,IOSTAT=iostatus) i, k, dummy1
 		    IF (iostatus/=0) THEN
-		      WRITE(*,'(a,a,a)') 'WARNING: could not read initial suspended sediment storage from susp_sediment_storage.stat, ignored, assumed 0.',&
+		      WRITE(*,'(a,a,a)') 'WARNING: could not read initial suspended sediment storage from susp_sediment_storage.stat, file ignored, assumed 0.',&
                       ' Check this file, model_state_io.f90 or consider switching off doloadstate in file do.dat'
                     EXIT
                     ENDIF

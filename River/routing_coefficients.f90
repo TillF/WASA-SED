@@ -126,7 +126,7 @@ IF (STATUS == 1) THEN
 		r_storage(i) = 0. 
 	 else
 		r_storage(i) =   r_area * r_length(i) * 1000.
-		sed_storage(i,1) = 0.
+		sed_storage(i,:) = 0.
 	 endif
  END IF
 	 !IF (doloadstate) CALL init_river_conds(trim(pfadn)//'river_storage.stat')!Jose Miguel: load river storage of previous run of the model
