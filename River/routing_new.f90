@@ -88,10 +88,21 @@ IF (STATUS == 0) THEN
    r_slope(k), r_length(k),manning(k), manning_fp(k),r_ksat(k),r_efactor(k),r_cover(k),r_rock(k),r_alpha(k), &
    msk_x(k), msk_k(k),Q_spring(k)
 
-			IF (istate/=0) THEN    !no further line
+            IF (istate/=0) THEN    !no further line
                 write(*,'(A,i0,A)')'ERROR: format error in river.dat.'
                 stop
             END IF
+
+            if (r_efactor(k) < 0 .OR. r_efactor(k)>1) then
+                write(*,'(A,i0,A)')'WARNING: (river.dat, subbasin ',i,') river erodibility factor must be in [0..1]'
+                r_efactor(k)=min(1., max(0., r_efactor(k)))
+            end if
+            
+            if (r_cover(k) < 0 .OR. r_cover(k)>1) then
+                write(*,'(A,i0,A)')'WARNING: (river.dat, subbasin ',i,') river cover factor must be in [0..1]'
+                r_cover(k)=min(1., max(0., r_cover(k)))
+            end if
+            
  END DO
 
  i=which1(r_depth(1:subasin) == -1.) !check for non-specified subbasins
