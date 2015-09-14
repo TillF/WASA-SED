@@ -85,7 +85,7 @@ REAL ::   r_storage_previous !depdeg,dot,
 !if no or only very little water flow in reach, no sediment calculation is performed
 IF ((r_storage(i) == 0.) .OR. &
  (r_storage(i) == 0. .and. r_qin(2,i) < 1.e-1) ) then
-    river_deposition(i,:) = sediment_out(i,:) + sediment_in(i,:) !incoming and suspended sediment is deposited
+    river_deposition(i,:) = sed_storage(i,:) + sediment_in(i,:) !incoming and suspended sediment is deposited
     riverbed_storage(i,:) = riverbed_storage(i,:) + river_deposition(i,:)
     sediment_out(i,:) = 0.
     sed_storage(i,:) = 0.
@@ -98,7 +98,7 @@ volume = r_storage_previous+r_qin(2,i)*3600.*dt
 
 !! check if it is an ephemeral river (as set in Muskingum.f90) that starts to flow
 if (r_qout(1,i) == 0. .and. r_storage(i) == (r_qin(2,i)+3600.*dt)) then
-    river_deposition(i,:) = sediment_out(i,:) + sediment_in(i,:) !incoming and suspended sediment is deposited
+    river_deposition(i,:) = sed_storage(i,:) + sediment_in(i,:) !incoming and suspended sediment is deposited
     riverbed_storage(i,:) = riverbed_storage(i,:) + river_deposition(i,:)
     sediment_out(i,:) = 0.
     sed_storage(i,:) = 0.
@@ -107,7 +107,7 @@ if (r_qout(1,i) == 0. .and. r_storage(i) == (r_qin(2,i)+3600.*dt)) then
 endif
 !! do not perform sediment routing if no water in reach
 IF (volume <= 0.01) then 
- river_deposition(i,:) = sediment_out(i,:) + sediment_in(i,:) !incoming and suspended sediment is deposited
+ river_deposition(i,:) = sed_storage(i,:) + sediment_in(i,:) !incoming and suspended sediment is deposited
  riverbed_storage(i,:) = riverbed_storage(i,:) + river_deposition(i,:)
  sediment_out(i,:) = 0.
  sed_storage(i,:) = 0.
