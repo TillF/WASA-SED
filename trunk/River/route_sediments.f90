@@ -163,7 +163,7 @@ do k=1, n_sed_class
 
 ! Calculation of deposition [tons]
   ELSE
-    river_deposition(i,k) = -depnet
+    river_deposition(i,k) = min(-depnet, sed_storage(i,k) + sediment_in(i,k)) !don't deposit more sediment than available in suspended storage and inflow
     river_degradation(i,k) = 0.
   END IF
 
