@@ -206,8 +206,8 @@ contains
                 total_storage_river=0
             endif
 
+            !write riverbed sediment storage
             !generate format string
-            lu_area=maxval(riverbed_storage)
             digits=floor(log10(max(1.0,maxval(riverbed_storage))))+1    !Till: number of pre-decimal digits required
             if (digits<10) then
               write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
@@ -223,7 +223,7 @@ contains
 !                total_storage_sediment=0
             endif
             
-            lu_area=maxval(sed_storage)
+            !write suspended sediment storage
             digits=floor(log10(max(1.0,maxval(sed_storage))))+1    !Till: number of pre-decimal digits required
             if (digits<10) then
               write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
@@ -232,7 +232,7 @@ contains
             end if
             if (susp_sediment_file_hdle/=0) then
                 do k=1, n_sed_class
-                     WRITE(susp_sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9) ,sed_storage(sb_counter,k) !print each sediment class
+                     WRITE(susp_sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9), sed_storage(sb_counter,k) !print each sediment class
 !                     total_storage_suspsediment=total_storage_suspsediment+sed_storage(sb_counter,k) !sum up total storage
                 enddo
  !           else
@@ -624,19 +624,15 @@ contains
 
 
     subroutine init_river_conds(river_conds_file)
-        !which variables have to be declared?
-  
         use routing_h
-        use time_h
         use params_h
         use utils_h
-	use hymo_h
+    	use hymo_h
 
         character(len=*),intent(in):: river_conds_file        !file to load from
         integer :: sb_counter, iostatus, i
         real :: dummy1
 
-        i=0
         OPEN(11,FILE=river_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
         if (i/=0) then
             write(*,'(a,a,a)')'WARNING: River storage file ''',trim(river_conds_file),''' not found, using defaults.'
@@ -668,20 +664,18 @@ contains
     end subroutine init_river_conds
 
     
-        subroutine init_sediment_conds(sediment_conds_file)
-        !which variables have to be declared?
-  
+   subroutine init_sediment_conds(sediment_conds_file)
         use routing_h
-        use time_h
         use params_h
         use utils_h
-	use hymo_h
+	    use hymo_h
+        implicit none
 
         character(len=*),intent(in):: sediment_conds_file        !file to load from
         integer :: sb_counter, iostatus, i,k,class_counter
         real :: dummy1
 
-        i=0
+        riverbed_storage(:,:)=0.    !default value ii: check if all entities have been initialized
         OPEN(11,FILE=sediment_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
         if (i/=0) then
             write(*,'(a,a,a)')'WARNING: Sediment storage file ''',trim(sediment_conds_file),''' not found, using defaults.'
@@ -713,19 +707,18 @@ contains
     end subroutine init_sediment_conds
 
     subroutine init_susp_sediment_conds(susp_sediment_conds_file)
-        !which variables have to be declared?
   
         use routing_h
         use time_h
         use params_h
         use utils_h
-	use hymo_h
+    	use hymo_h
 
         character(len=*),intent(in):: susp_sediment_conds_file        !file to load from
         integer :: sb_counter, iostatus, i,k,class_counter
         real :: dummy1
 
-        i=0
+        sed_storage(:,:)=0.    !default value ii: check if all entities have been initialized
         OPEN(11,FILE=susp_sediment_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
         if (i/=0) then
             write(*,'(a,a,a)')'WARNING: Suspended sediment storage file ''',trim(susp_sediment_conds_file),''' not found, using defaults.'
