@@ -7,7 +7,7 @@
 !Till: swapped CALL hymo_all(0) and CALL climo(0) to allow filecheck
 ! 2007-05-07
 
-PROGRAM wasa2008
+PROGRAM wasa_sed
 
 use common_h
 use hymo_h
@@ -40,12 +40,6 @@ CALL climo(0)
 !Call routing routine
 if (river_transport.eq.1) CALL routing(0)
 if (river_transport.ne.1) CALL routing_new(0)
-! Call routines for climate time series
-CALL climo(1)
-CALL hymo_all(1)
-! Call routing routine
-if (river_transport.eq.1) CALL routing(1)
-if (river_transport.ne.1) CALL routing_new(1)
 
 
 !!! MAIN LOOP FOR EACH YEAR
@@ -53,9 +47,9 @@ DO t=tstart, tstop
   WRITE(*,*) tstart,tstop
   IF (t /= tstart) CALL calcyear
   WRITE(*,*) 'calculations for year ',t
-!
+
 ! Call routines for climate time series for current year
-  IF (t /= tstart) CALL climo(1)
+  CALL climo(1)
 
 ! Update annual values for hydrology and agriculture at start of each simulation year
      call hymo_all(1)
@@ -88,4 +82,4 @@ CLOSE(82)
 CLOSE(83)
 CLOSE(84)
 
-END PROGRAM wasa2008
+END PROGRAM wasa_sed
