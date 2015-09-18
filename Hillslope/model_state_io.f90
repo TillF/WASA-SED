@@ -201,45 +201,40 @@ contains
             
             if (river_file_hdle/=0) then
                 WRITE(river_file_hdle,trim(fmtstr))id_subbas_extern(sb_counter), char(9),r_storage(sb_counter) !tab separated output
-                total_storage_river=total_storage_river+r_storage(sb_counter) !sum up total storage
-            else
-                total_storage_river=0
             endif
-
-            !write riverbed sediment storage
-            !generate format string
-            digits=floor(log10(max(1.0,maxval(riverbed_storage))))+1    !Till: number of pre-decimal digits required
-            if (digits<10) then
-              write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
-            else       
-               fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
-            end if
-            if (sediment_file_hdle/=0) then
-                do k=1, n_sed_class
-                     WRITE(sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9) ,riverbed_storage(sb_counter,k) !print each sediment class
-                     !total_storage_sediment=total_storage_sediment+riverbed_storage(sb_counter,k) !sum up total storage
-                enddo
-!            else
-!                total_storage_sediment=0
-            endif
+            total_storage_river=total_storage_river+r_storage(sb_counter) !sum up total storage
             
-            !write suspended sediment storage
-            digits=floor(log10(max(1.0,maxval(sed_storage))))+1    !Till: number of pre-decimal digits required
-            if (digits<10) then
-              write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
-            else       
-               fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
-            end if
-            if (susp_sediment_file_hdle/=0) then
-                do k=1, n_sed_class
-                     WRITE(susp_sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9), sed_storage(sb_counter,k) !print each sediment class
-!                     total_storage_suspsediment=total_storage_suspsediment+sed_storage(sb_counter,k) !sum up total storage
-                enddo
- !           else
- !               total_storage_suspsediment=0
-            endif
+            if (dosediment) then
+                !write riverbed sediment storage
+                !generate format string
+                digits=floor(log10(max(1.0,maxval(riverbed_storage))))+1    !Till: number of pre-decimal digits required
+                if (digits<10) then
+                  write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
+                else       
+                   fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
+                end if
+                if (sediment_file_hdle/=0) then
+                    do k=1, n_sed_class
+                         WRITE(sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9) ,riverbed_storage(sb_counter,k) !print each sediment class
+                    enddo
+                endif
+                !total_storage_sediment=total_storage_sediment+sum(riverbed_storage(sb_counter,:)) !sum up total storage
             
-            
+                !write suspended sediment storage
+                digits=floor(log10(max(1.0,maxval(sed_storage))))+1    !Till: number of pre-decimal digits required
+                if (digits<10) then
+                  write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
+                else       
+                   fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
+                end if
+                if (susp_sediment_file_hdle/=0) then
+                    do k=1, n_sed_class
+                         WRITE(susp_sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9), sed_storage(sb_counter,k) !print each sediment class
+                    enddo
+                endif
+                !total_storage_suspsediment=total_storage_suspsediment+sum(sed_storage(sb_counter,:)) !sum up total storage            
+            end if !dosediment
+                
             !Jose Miguel: loop over the acud classes.
             IF (doacud) THEN
 				DO acud_class=1,5
