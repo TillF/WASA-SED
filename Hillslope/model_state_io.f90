@@ -66,27 +66,36 @@ contains
                call init_susp_sediment_conds(trim(pfadn)//'susp_sediment_storage.stat')    !Jose Miguel: load initial status of sediment storage
             endif
 
-            CALL save_all_conds('','','','','','','',trim(pfadn)//'storage.stats_start')        !Till: save only summary on initial storage
+            CALL save_model_state(.TRUE.) !Till: do backups of state files and save only summary on initial storage
+            !CALL save_all_conds('','','','','','','',trim(pfadn)//'storage.stats_start')        !Till: save only summary on initial storage
     end subroutine init_model_state
 
-    subroutine save_model_state        !save model state variables
-        !keep initial conditions
-        call rename(trim(pfadn)//'soil_moisture.stat'     , trim(pfadn)//'soil_moisture.stat_start')
-        call rename(trim(pfadn)//'gw_storage.stat'        ,trim(pfadn)//'gw_storage.stat_start')
-        call rename(trim(pfadn)//'intercept_storage.stat' ,trim(pfadn)//'intercept_storage.stat_start')
-        call rename(trim(pfadn)//'lake_volume.stat'       ,trim(pfadn)//'lake_volume.stat_start')
-        call rename(trim(pfadn)//'river_storage.stat'     ,trim(pfadn)//'river_storage.stat_start')
-        if (dosediment) then
-            call rename(trim(pfadn)//'sediment_storage.stat'     ,trim(pfadn)//'sediment_storage.stat_start')
-            call rename(trim(pfadn)//'susp_sediment_storage.stat',trim(pfadn)//'susp_sediment_storage.stat_start')
-            call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',&
-            trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',&
-            trim(pfadn)//'sediment_storage.stat',trim(pfadn)//'susp_sediment_storage.stat',trim(pfadn)//'storage.stats')    !Till: save status
-        else
-           call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',&
-            trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',&
-            '','',trim(pfadn)//'storage.stats')
-        endif
+    subroutine save_model_state(backup_files)        !save model state variables, optionally backup older files
+    implicit none
+    logical, intent(in) :: backup_files
+        if (backup_files) then
+            !keep files with initial conditions, save only summary on initial storages
+            call rename(trim(pfadn)//'soil_moisture.stat'     , trim(pfadn)//'soil_moisture.stat_start')
+            call rename(trim(pfadn)//'gw_storage.stat'        ,trim(pfadn)//'gw_storage.stat_start')
+            call rename(trim(pfadn)//'intercept_storage.stat' ,trim(pfadn)//'intercept_storage.stat_start')
+            call rename(trim(pfadn)//'lake_volume.stat'       ,trim(pfadn)//'lake_volume.stat_start')
+            call rename(trim(pfadn)//'river_storage.stat'     ,trim(pfadn)//'river_storage.stat_start')
+            if (dosediment) then
+                call rename(trim(pfadn)//'sediment_storage.stat'     ,trim(pfadn)//'sediment_storage.stat_start')
+                call rename(trim(pfadn)//'susp_sediment_storage.stat',trim(pfadn)//'susp_sediment_storage.stat_start')
+            end if    
+            CALL save_all_conds('','','','','','','',trim(pfadn)//'storage.stats_start')        !Till: save only summary on initial storage
+        else    
+            if (dosediment) then
+                call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',&
+                trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',&
+                trim(pfadn)//'sediment_storage.stat',trim(pfadn)//'susp_sediment_storage.stat',trim(pfadn)//'storage.stats')    !Till: save status
+            else
+               call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',&
+                trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',&
+                '','',trim(pfadn)//'storage.stats')
+            endif
+        end if    
     end subroutine save_model_state
 
 
@@ -123,6 +132,7 @@ contains
         total_storage_river=0.
 !        total_storage_sediment=0.
 
+!write file headers
         if (trim(soil_conds_file)=='') then        !don't do anything if an empty filename is specified
             soil_file_hdle=0
         else
@@ -189,8 +199,8 @@ contains
             WRITE(susp_sediment_file_hdle,'(A)')'Subbasin'//char(9)//'particle_size_class'//char(9)//'mass[t]' !tab separated output
         endif
         
-        
-        DO sb_counter=1,subasin !river, groundwater, intercept and soil storages inside ii:wrap subbasin loop around each single entitity to save time in generating format string
+!write file contents        
+        DO sb_counter=1,subasin !we wrap subbasin loop around each single entitity to save time in generating format string
             !Jose Miguel: write river storage state to .stat file .
             digits=floor(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
             if (digits<10) then
@@ -203,51 +213,63 @@ contains
                 WRITE(river_file_hdle,trim(fmtstr))id_subbas_extern(sb_counter), char(9),r_storage(sb_counter) !tab separated output
             endif
             total_storage_river=total_storage_river+r_storage(sb_counter) !sum up total storage
-            
-            if (dosediment) then
-                !write riverbed sediment storage
-                !generate format string
+        END DO
+        
+        if (dosediment) then
+            !write riverbed sediment storage
+            !generate format string
+            if (sediment_file_hdle/=0) then
                 digits=floor(log10(max(1.0,maxval(riverbed_storage))))+1    !Till: number of pre-decimal digits required
                 if (digits<10) then
-                  write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
+                    write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
                 else       
-                   fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
+                    fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
                 end if
+            END IF    
+            DO sb_counter=1,subasin !we wrap subbasin loop around each single entitity to save time in generating format string
                 if (sediment_file_hdle/=0) then
                     do k=1, n_sed_class
-                         WRITE(sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9) ,riverbed_storage(sb_counter,k) !print each sediment class
+                            WRITE(sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9) ,riverbed_storage(sb_counter,k) !print each sediment class
                     enddo
                 endif
                 !total_storage_sediment=total_storage_sediment+sum(riverbed_storage(sb_counter,:)) !sum up total storage
-            
-                !write suspended sediment storage
+            END DO
+        
+            !write suspended sediment storage
+            if (susp_sediment_file_hdle/=0) then
                 digits=floor(log10(max(1.0,maxval(sed_storage))))+1    !Till: number of pre-decimal digits required
                 if (digits<10) then
                   write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
                 else       
                    fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
                 end if
+            end if
+            DO sb_counter=1,subasin !we wrap subbasin loop around each single entitity to save time in generating format string
                 if (susp_sediment_file_hdle/=0) then
                     do k=1, n_sed_class
                          WRITE(susp_sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9), sed_storage(sb_counter,k) !print each sediment class
                     enddo
                 endif
                 !total_storage_suspsediment=total_storage_suspsediment+sum(sed_storage(sb_counter,:)) !sum up total storage            
-            end if !dosediment
+            END DO    
+        end if !dosediment
                 
-            !Jose Miguel: loop over the acud classes.
-            IF (doacud) THEN
-				DO acud_class=1,5
-					tt = (d-2)*nt+hour
-					if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. José, please check this
-					if (lake_file_hdle/=0) then
-						WRITE(lake_file_hdle,'(I0,A1,I0,A1,F8.2)') id_subbas_extern(sb_counter), char(9),acud_class,char(9),&
-							lakewater_hrr(tt,sb_counter,acud_class)
-					endif
-					total_storage_lake(acud_class)=total_storage_lake(acud_class)+lakewater_hrr(tt,sb_counter,acud_class) !sum up total storage
-				ENDDO
-			END IF
+        
+        IF (doacud) THEN
+		    DO sb_counter=1,subasin
+                DO acud_class=1,5
+				    tt = (d-2)*nt+hour
+				    if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. José, please check this
+				    if (lake_file_hdle/=0) then
+					    WRITE(lake_file_hdle,'(I0,A1,I0,A1,F8.2)') id_subbas_extern(sb_counter), char(9),acud_class,char(9),&
+						    lakewater_hrr(tt,sb_counter,acud_class)
+				    endif
+				    total_storage_lake(acud_class)=total_storage_lake(acud_class)+lakewater_hrr(tt,sb_counter,acud_class) !sum up total storage
+                ENDDO
+            END DO
+        END IF !small reservoirs
        
+        DO sb_counter=1,subasin
             DO lu_counter=1,nbr_lu(sb_counter) !groundwater, intercept and soil storages inside
                 i_lu=id_lu_intern(lu_counter,sb_counter)
                 lu_area=area(sb_counter)*frac_lu(lu_counter,sb_counter)*1e6
@@ -294,8 +316,7 @@ contains
             ENDDO    !loop LUs
         ENDDO    !loop subbasins
         
-
-        
+    
         CLOSE(soil_file_hdle, iostat=i_lu)    !close output files
         CLOSE(gw_file_hdle, iostat=i_lu)
         CLOSE(intercept_file_hdle, iostat=i_lu)
