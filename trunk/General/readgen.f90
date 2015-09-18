@@ -531,7 +531,7 @@ SUBROUTINE readgen(path2do_dat)
 INCLUDE '../Hillslope/allocat_hymo.var'
 INCLUDE '../Hillslope/allocat_erosion.var'
 INCLUDE '../River/allocat_routing.var'
-    nt = int(24/dt)	!Till: number of simulation steps per day
+    nt = int(24/dt)	!Till: number of simulation steps per day !ii: can be removed?
 INCLUDE '../Reservoir/allocat_reservoir_lake.var'
 
 

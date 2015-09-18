@@ -46,7 +46,7 @@ INTEGER :: i, j, h,k, istate !itl, itr, ih, mm, imunout, iout,  make
 REAL :: flow, r_area !, sediment_temp(24), temp_rain(366), dummy
 Real :: temp_water(subasin), temp_sediment(subasin)
 character(len=1000) :: fmtstr	!string for formatting file output
-Real :: r_sediment_storage(subasin)		!sediment storage in reach [t]
+Real :: r_sediment_storage(subasin)		!(suspended) sediment storage in reach [t] (for output only)
 logical :: log_temp !temporary logical variable needed for compiler compatibility
 
 ! -----------------------------------------------------------------------
@@ -94,12 +94,12 @@ IF (STATUS == 0) THEN
             END IF
 
             if (r_efactor(k) < 0 .OR. r_efactor(k)>1) then
-                write(*,'(A,i0,A)')'WARNING: (river.dat, subbasin ',i,') river erodibility factor must be in [0..1]'
+                write(*,'(A,i0,A)')'WARNING: (river.dat, subbasin ',i,') river erodibility factor must be in [0..1], truncated.'
                 r_efactor(k)=min(1., max(0., r_efactor(k)))
             end if
             
             if (r_cover(k) < 0 .OR. r_cover(k)>1) then
-                write(*,'(A,i0,A)')'WARNING: (river.dat, subbasin ',i,') river cover factor must be in [0..1]'
+                write(*,'(A,i0,A)')'WARNING: (river.dat, subbasin ',i,') river cover factor must be in [0..1], truncated.'
                 r_cover(k)=min(1., max(0., r_cover(k)))
             end if
             
@@ -266,7 +266,7 @@ endif
 
   OPEN(11,FILE=pfadn(1:pfadi)//'River_Sediment_Storage.out',STATUS='replace')
   if (f_river_sediment_storage) then
-	WRITE (11,'(A)') 'Output file for river sediment storage in t (with MAP IDs as in hymo.dat)'
+	WRITE (11,'(A)') 'Suspended sediment storage in river reach t (with MAP IDs as in hymo.dat)'
 	write(fmtstr,'(a,i0,a)')'(5a,',subasin,'(a,i14))'		!generate format string
 	WRITE (11,fmtstr)' Year ',char(9), ' Day  ',char(9),'  dt  ', (char(9),id_subbas_extern(i), i=1,subasin)
 
@@ -277,7 +277,7 @@ endif
 
   OPEN(11,FILE=pfadn(1:pfadi)//'River_Deposition.out',STATUS='replace')
   if (f_river_deposition) then
-	WRITE (11,'(A)') 'Output file for deposition of sediments in the riverbed in tons/river stretch (with MAP IDs as in hymo.dat)'
+	WRITE (11,'(A)') 'Deposition of sediments in the riverbed in t/timestep (with MAP IDs as in hymo.dat)'
 	write(fmtstr,'(a,i0,a)')'(3a6,',subasin,'i14)'		!generate format string
 	WRITE (11,fmtstr)' Year ', ' Day  ','  dt  ', (id_subbas_extern(i), i=1,subasin)
 	Close (11)
@@ -287,7 +287,7 @@ endif
 
   OPEN(11,FILE=pfadn(1:pfadi)//'River_Degradation.out',STATUS='replace')
   if (f_river_degradation) then
-	WRITE (11,*) 'Output file for erosion of sediments in the riverbed in tons/river stretch (with MAP IDs as in hymo.dat)'
+	WRITE (11,*) 'Erosion of sediments in the riverbed in t/timestep (with MAP IDs as in hymo.dat)'
 	write(fmtstr,'(a,i0,a)')'(3a6,',subasin,'i14)'		!generate format string
 	WRITE (11,fmtstr)' Year ', ' Day  ','  dt  ', (id_subbas_extern(i), i=1,subasin)
 	Close (11)
@@ -323,33 +323,28 @@ qsediment2_t=0.
 
 ! Initialisation for first year and day
  IF (t == tstart) THEN
-  DO i=1,subasin
-   do j=1,2
-	  r_qout(j,i)=0.
-	  r_qin(j,i)=0.
-   enddo
-   r_depth_cur(i)=0.
+    r_depth_cur(:)=0.
+    r_qout(:,:)=0.
+	r_qin(:,:)=0.
+      
    if(river_transport.eq.2) then
-     do k=1,n_sed_class
-      sediment_in(i,k)=0.
-	  sediment_out(i,k)=0.
-          sed_storage(i,k)=0.
-	  river_deposition(i,k)=0.
-	  river_degradation(i,k)=0.
+      sediment_in(:,:)=0.
+	  sediment_out(:,:)=0.
+ 
+	  river_deposition(:,:)=0.
+	  river_degradation(:,:)=0.
 	  if (.not. doloadstate) then
-	    riverbed_storage(i,k)=0.
+	    riverbed_storage(:,:)=0.
+        sed_storage(:,:)=0. 
 	  endif
-     enddo
 	elseif(river_transport.eq.3) then
-	  bedload(i,:) = 0.
+	  bedload(:,:) = 0.
 	endif
-  enddo
 
-  do i=1,subasin 
-   r_qin(1,i) = Q_spring(i)	!spring water, start of a river
-   r_qin(2,i) = Q_spring(i) !spring water, start of a river
-   r_qout(1,i)= Q_spring(i) !guestimation of the outflow discharge
-  END DO
+   r_qin(1,:) = Q_spring(:)	!spring water, start of a river
+   r_qin(2,:) = Q_spring(:) !spring water, start of a river
+   r_qout(1,:)= Q_spring(:) !guestimation of the outflow discharge
+  
 
  ENDIF
 
@@ -557,7 +552,7 @@ endif
 	
   END DO ! i=1,subasin
 
-	r_sediment_storage=sum(sed_storage,dim=2)  !Till: sum up sediment storage over all particle classes for all subbasins
+	r_sediment_storage=sum(sed_storage,dim=2)  !Till: sum up suspended sediment storage over all particle classes for all subbasins
 
 ! add up all sediment size classes to obtain total sediment mass
   do i = 1, subasin
