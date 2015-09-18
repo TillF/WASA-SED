@@ -1567,7 +1567,7 @@ SUBROUTINE hymo_all(STATUS)
 
 
         if (doacud) CALL lake(3,dummy)
-        if (dosavestate) call save_model_state !Till: saves model state (soil moisture, ground water, etc.) to file, if specified)
+        if (dosavestate) call save_model_state(.FALSE.) !Till: saves model state (soil moisture, ground water, etc.) to file, if specified)
 
 
     END IF
