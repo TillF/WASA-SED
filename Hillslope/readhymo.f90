@@ -1583,6 +1583,7 @@ SUBROUTINE readhymo
     if (dosediment) THEN
         spcon(:)=  0.016111		!0.0001-0.01  default values
         spexp (:)= 1.707			!1 - 1.5
+        erosion_equation=0
         OPEN(11,FILE=pfadp(1:pfadj)// 'erosion.ctl',IOSTAT=istate,STATUS='old')
         IF (istate==0) THEN
             READ(11,'(a)',IOSTAT=istate)cdummy
@@ -1607,7 +1608,7 @@ SUBROUTINE readhymo
                 READ(11,'(a)',IOSTAT=istate)cdummy
             end do
             CLOSE(11)
-            IF ((erosion_equation>4.).OR.(frac_direct_gw<0.)) THEN
+            IF ((erosion_equation>4.) .OR. (erosion_equation<0.)) THEN
                 write(*,*)'WARNING: erosion_equation was outside [1..4], assumed to be 3 (MUSLE).'
                 erosion_equation=3            !default erosion equation to be used: MUSLE
             END IF
