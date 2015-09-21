@@ -1581,6 +1581,8 @@ SUBROUTINE readhymo
     END IF
 
     if (dosediment) THEN
+        spcon(:)=  0.016111		!0.0001-0.01  default values
+        spexp (:)= 1.707			!1 - 1.5
         OPEN(11,FILE=pfadp(1:pfadj)// 'erosion.ctl',IOSTAT=istate,STATUS='old')
         IF (istate==0) THEN
             READ(11,'(a)',IOSTAT=istate)cdummy
@@ -1588,13 +1590,19 @@ SUBROUTINE readhymo
                 READ(cdummy,*,IOSTAT=istate)cdummy2
                 SELECT CASE (trim(cdummy2))
                     CASE ('application_scale')
-                        READ(cdummy,*,IOSTAT=istate)cdummy2,do_musle_subbasin
+                        READ(cdummy,*,IOSTAT=istate) cdummy2, do_musle_subbasin
                     CASE ('erosion_equation')
-                        READ(cdummy,*,IOSTAT=istate)cdummy2,erosion_equation
+                        READ(cdummy,*,IOSTAT=istate) cdummy2, erosion_equation
                     CASE ('ri_05_coeffs')
-                        READ(cdummy,*,IOSTAT=istate)cdummy2,a_i30,b_i30
+                        READ(cdummy,*,IOSTAT=istate) cdummy2, a_i30,b_i30
                     CASE ('transport_limit_mode')
-                        READ(cdummy,*,IOSTAT=istate)cdummy2,transport_limit_mode
+                        READ(cdummy,*,IOSTAT=istate) cdummy2, transport_limit_mode
+                    CASE ('transp_cap_a')
+                        READ(cdummy,*,IOSTAT=istate) cdummy2, spcon(1)
+                        spcon(:)=spcon(1)
+                    CASE ('transp_cap_b')
+                        READ(cdummy,*,IOSTAT=istate) cdummy2, spexp(1)
+                        spexp(:)=spexp(1)
                 END SELECT
                 READ(11,'(a)',IOSTAT=istate)cdummy
             end do
