@@ -116,8 +116,8 @@ ENDIF
 !! initialize sediment mass in reach during time step [tons]
 
 prf= 1.
-spcon(:)=  0.016111		!0.0001-0.01  
-spexp (:)= 1.707			!1 - 1.5
+!spcon(:)=  0.016111		!0.0001-0.01  
+!spexp (:)= 1.707			!1 - 1.5
 !det = 24/dt	!number of simulation steps per day
 
 
