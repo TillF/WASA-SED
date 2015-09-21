@@ -73,6 +73,7 @@ contains
     subroutine save_model_state(backup_files)        !save model state variables, optionally backup older files
     implicit none
     logical, intent(in) :: backup_files
+        if (.not. dosavestate) return    
         if (backup_files) then
             !keep files with initial conditions, save only summary on initial storages
             call rename(trim(pfadn)//'soil_moisture.stat'     , trim(pfadn)//'soil_moisture.stat_start')
