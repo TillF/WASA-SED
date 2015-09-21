@@ -144,7 +144,7 @@ do k=1, n_sed_class
 ! Calculation of current and maximum sediment carrying capacity concentration [ton/m3, kg/l]
   conc_in = sed_mass / volume
   conc_max = spcon(k) * vel_peak ** spexp(k)
-  ! conc_max = conc_in
+  !conc_max = 0.5*conc_in
 
 ! Calculation of net amount of sediment deposited or re-entrained [tons]
   depnet = volume * (conc_max - conc_in)
@@ -168,7 +168,7 @@ do k=1, n_sed_class
   END IF
 
   
-! Calculation of temporary storage of sediments in the riverbed of the stretch [tons] (Till: = deposited sediments?)
+! Calculation of deposited sediments in the riverbed of the stretch [tons] 
  riverbed_storage(i,k)=riverbed_storage(i,k) + river_deposition(i,k) - river_degradation(i,k)
  !if (riverbed_storage(i,k).lt.0.) riverbed_storage(i,k) = 0.
 
