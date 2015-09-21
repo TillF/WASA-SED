@@ -61,5 +61,11 @@
 	 STAT = istate)
 	
 	if (istate/=0) then
-		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in river-module: ' 
+		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in river-module.' 
 	end if
+
+	if (f_river_sediment_storage) allocate (river_sediment_storage_t(366,nt,subasin),  STAT = istate)
+	if (istate/=0) write(*,'(A,i0,a)')'Memory allocation error (',istate,') in river-module.' 
+
+	if (f_river_susp_sediment_storage) allocate (river_susp_sediment_storage_t(366,nt,subasin),  STAT = istate)
+	if (istate/=0) write(*,'(A,i0,a)')'Memory allocation error (',istate,') in river-module.' 

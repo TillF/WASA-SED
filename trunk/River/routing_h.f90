@@ -108,6 +108,12 @@ real, allocatable :: river_degradation(:,:)
 !! temporary storage of sediment on top of the riverbed in river reach [tons]
 real, allocatable :: riverbed_storage(:,:) !!! subasin,n_sed_class
 
+!!sediment storage in reach (for output only, if enabled)
+real, pointer :: river_sediment_storage_t(:,:,:)
+!!suspended sediment storage in reach (for output only, if enabled)
+real, pointer :: river_susp_sediment_storage_t(:,:,:)
+
+
 
 !BEDLOAD MODELLING VARIABLES
 ! bedload(subasin,5) rate in (kg/s) as submerged weight for five bedload formula

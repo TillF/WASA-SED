@@ -244,6 +244,7 @@ SUBROUTINE readgen(path2do_dat)
     f_river_sediment_total_dailyaverage =.FALSE.
     f_river_storage=.FALSE.
     f_river_sediment_storage=.FALSE.
+    f_river_susp_sediment_storage=.FALSE.
     f_river_velocity=.FALSE.
     f_river_bedload=.FALSE.
     f_river_infiltration=.FALSE.
@@ -352,6 +353,8 @@ SUBROUTINE readgen(path2do_dat)
                     f_river_storage=.TRUE.
                 CASE ('river_sediment_storage')
                     f_river_sediment_storage=dosediment
+                CASE ('river_susp_sediment_storage')
+                    f_river_susp_sediment_storage=dosediment
                 CASE ('river_velocity')
                     f_river_velocity=.TRUE.
                 CASE ('river_bedload')

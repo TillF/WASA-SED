@@ -195,22 +195,10 @@ qin (:,:)=0.
   endif
 
 
-if ((river_transport.eq.2)) then
-  OPEN(11,FILE=pfadn(1:pfadi)//'River_Sediment_total.out',STATUS='replace')
-  if(f_river_sediment_total) then
-	WRITE (11,*) 'Output file for sediment mass in ton/timestep (with MAP IDs as in hymo.dat)'
-!	if (dohour) then
-		write(fmtstr,'(a,i0,a)')'(3a6,',subasin,'i14)'		!generate format string
-		WRITE (11,fmtstr)' Year ', ' Day  ','  dt  ', (id_subbas_extern(i), i=1,subasin)
-!	else
-!		write(fmtstr,'(a,i0,a)')'(2a6,',subasin,'i14)'		!generate format string
-!		WRITE (11,fmtstr)' Year ', ' Day  ', (id_subbas_extern(i), i=1,subasin)
-!	endif
-	Close (11)
-  else
-    close(11, status='delete') !delete any existing file, if no output is desired
-  endif
-
+if ((river_transport == 2)) then
+  !  output of 'River_Sediment_total.out' handled in hymo_all.f90
+  !  output of 'River_Sediment_Storage.out' handled in hymo_all.f90
+  
   OPEN(11,FILE=pfadn(1:pfadi)//'River_Sediment_Concentration.out',STATUS='replace')
   if (f_river_sediment_concentration) then
 	WRITE (11,*) 'Output file for sediment concentration (g/l) (with MAP IDs as in hymo.dat)'
@@ -264,17 +252,8 @@ endif
     close(11, status='delete') !delete any existing file, if no output is desired
   endif
 
-  OPEN(11,FILE=pfadn(1:pfadi)//'River_Sediment_Storage.out',STATUS='replace')
-  if (f_river_sediment_storage) then
-	WRITE (11,'(A)') 'Suspended sediment storage in river reach t (with MAP IDs as in hymo.dat)'
-	write(fmtstr,'(a,i0,a)')'(5a,',subasin,'(a,i14))'		!generate format string
-	WRITE (11,fmtstr)' Year ',char(9), ' Day  ',char(9),'  dt  ', (char(9),id_subbas_extern(i), i=1,subasin)
-
-	Close (11)
-   else
-    close(11, status='delete') !delete any existing file, if no output is desired
-  endif
-
+ 
+ 
   OPEN(11,FILE=pfadn(1:pfadi)//'River_Deposition.out',STATUS='replace')
   if (f_river_deposition) then
 	WRITE (11,'(A)') 'Deposition of sediments in the riverbed in t/timestep (with MAP IDs as in hymo.dat)'
@@ -608,10 +587,11 @@ endif
   endif
 
   if(f_river_sediment_storage) then
-	OPEN(11,FILE=pfadn(1:pfadi)//'River_Sediment_Storage.out',STATUS='old' ,POSITION='append'  )
-	write(fmtstr,'(a,i0,a)')'(i0,a,i0,a,i0,',subasin,'(a,f0.1))'		!generate format string
-	WRITE (11,fmtstr)t,char(9),d,char(9),h,(char(9),r_sediment_storage(i),i=1,subasin)
-	CLOSE (11) 
+	river_sediment_storage_t(d,h,:)=sum(riverbed_storage(:,:), dim=2) !save current values in output array
+  endif
+
+  if(f_river_susp_sediment_storage) then
+	river_susp_sediment_storage_t(d,h,:)=r_sediment_storage(:) !save current values in output array
   endif
 
   if(f_river_flowdepth) then

@@ -96,7 +96,7 @@ module common_h
     LOGICAL :: f_daily_sediment_production,f_daily_subsurface_runoff,f_daily_theta,f_daily_total_overlandflow,f_daily_water_subbasin,f_routing_response,f_sediment_production,f_water_subbasin,f_deep_gw_recharge,f_deep_gw_discharge,f_daily_gw_loss,f_tc_theta
     LOGICAL :: f_tc_surfflow, f_tc_sedout, f_lu_sedout
     LOGICAL :: f_river_degradation, f_river_deposition, f_river_flow, f_river_flow_dailyaverage, f_river_flowdepth, f_river_sediment_concentration, f_river_sediment_total, f_river_sediment_total_dailyaverage, f_river_storage, f_river_sediment_storage
-    LOGICAL :: f_river_velocity, f_river_bedload, f_river_infiltration, f_actetranspiration,f_qhorton,f_subsurface_runoff,f_total_overlandflow,f_gw_discharge,f_potetranspiration,f_gw_loss,f_gw_recharge
+    LOGICAL :: f_river_susp_sediment_storage, f_river_velocity, f_river_bedload, f_river_infiltration, f_actetranspiration,f_qhorton,f_subsurface_runoff,f_total_overlandflow,f_gw_discharge,f_potetranspiration,f_gw_loss,f_gw_recharge
     LOGICAL :: f_res_watbal,f_res_vollost,f_res_cav,f_res_hydraul,f_res_bedchange,f_res_sedbal,f_res_longitudunal,f_res_sedcomposition
     LOGICAL :: f_lake_inflow_r,f_lake_outflow_r,f_lake_retention_r,f_lake_volume_r,f_lake_sedinflow_r,f_lake_sedoutflow_r,f_lake_sedretention_r,f_lake_sedimentation_r
     LOGICAL :: f_lake_watbal,f_lake_sedbal,f_lake_inflow,f_lake_outflow,f_lake_volume,f_lake_retention,f_lake_vollost,f_lake_sedinflow,f_lake_sedoutflow,f_lake_sizedistoutflow
