@@ -179,6 +179,7 @@ do k=1, n_sed_class
   
 !Calculation of sediment leaving the reach [tons]
   sediment_out(i,k) = sed_storage(i,k)/ volume * (r_qout(2,i)*3600.*dt) !export from reach [t] : concentration * volumes 
+  sediment_out(i,k) = max(0., sed_storage(i,k)) !Till: because outflow out of a river may exceed its storage volume (sadly), this needs to be done to ensure preservation of mass
   
   IF (sediment_out(i,k) < 0.) then
       sediment_out(i,k) = 0.

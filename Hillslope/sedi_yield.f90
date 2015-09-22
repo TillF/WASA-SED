@@ -211,6 +211,7 @@ SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v
         END IF
 
         if (R_d /=0.) ei=R_d*(12.1+8.9*(log10(r_p)-0.434))*ri_05/1000.    !USLE-energy factor in the "proper" units according to Williams, 1995 in Singh,1995, p.934,25.128
+        ei=max(0., ei) !prevent "-Inf" in case of r_p=0
     ELSE
         ei=-1.        !just for debugging
     END IF
