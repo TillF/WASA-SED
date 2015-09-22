@@ -347,22 +347,14 @@ DO h=1,nt
   !Water (m3/s) and sediment (ton/dt) fluxes from the hillslope module are added to river stretch
 	r_qin(2,i) = water_subbasin_t(d,h,i) + Q_Spring(i)
 	if(dosediment.and.river_transport.eq.2) then
-		do k= 1,n_sed_class
-				sediment_in(i,k) = sediment_subbasin_t(d,h,i,k)
-		enddo
+		sediment_in(i, :) = sediment_subbasin_t(d,h,i,:)
     endif !(dosediment)
   enddo	!(i=1, subasin)
 
 !George (initialization of the variable that calculates lateral water inflow into the reservoirs)
 !*************************************************************************
-  IF (doreservoir) THEN
-   if (dosediment) then
-    DO i=1,subasin
-	  do k= 1,n_sed_class
-	    sed_qlateral(i,k)=0.
-	  enddo
-    ENDDO
-   endif
+  IF (doreservoir .and. dosediment) then
+	    sed_qlateral(:,:)=0.
   ENDIF
 !*************************************************************************
 
