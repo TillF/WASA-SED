@@ -1,4 +1,4 @@
-SUBROUTINE sedi_yield_subbas(subbas_id, q_out, sed_yield_subbas)
+SUBROUTINE sedi_yield_subbas(precip_dt, subbas_id, q_out, sed_yield_subbas)
 ! Till: runoff during no-rain days caused math error (log(0)) - fixed
 ! 2012-05-15
 
@@ -29,7 +29,7 @@ use time_h
 
 IMPLICIT NONE
 
-
+real, INTENT(IN):: precip_dt            !precipitation in current timestep [mm]
 INTEGER, INTENT(IN):: subbas_id		!ID of subbasin currently treated internal numbering scheme)
 REAL, INTENT(IN):: q_out			!overland flow leaving the subbasin [m**3]
 
@@ -46,7 +46,7 @@ REAL :: slope_lu, slope_subbas	!"averaged" slope in LU and subbasin [%], respect
 INTEGER:: id_tc_type			!ID of TC that is currently treated (internal numbering scheme of TC-types, not instances)
 INTEGER:: tc_counter,lu_counter	!counter for treating all TC in current LU, and LUs in current subbasin
 INTEGER:: svc_id, lu_id,i			!ID of SVC, LU currently treated
-REAL :: r						!temporary real variable
+REAL :: r, RE						!temporary real variable
 
 !REAL :: q_peak,q_ov,v_ov,t_conc,alpha_05,alpha_t_conc  		!variables used for calculation of peak runoff rate
 REAL :: q_surf					!surface runoff [mm H2O]
@@ -197,39 +197,40 @@ earea=area(subbas_id)*1e6	!area of erosive unit [m2]
 !END IF
 
 
-IF ((erosion_equation==1) .OR. (erosion_equation==2))  THEN
-	!compute USLE-rainfall energy factor for USLE (1) and Onstad-Foster (2)
-	IF (dt<=1) THEN	!if high resolution precipitation is available
-		R_d=-1.		!to do: add equation here for subdaily rainfall
-		r_p=-1.
-	ELSE
-		R_d=precip(d,subbas_id)	!daily rainfall [mm]
-		!r_p=-2*R_d*log(1-min(alpha_05,0.99))	!peak rainfall rate [mm/h] Williams, 1995; eq. 25.132
-		!R_05=alpha_05*R_d						!maximum amount of rain in 30 min [mm]; Williams, 1995; 25.131
-		!ri_05=R_05/0.5							!maximum 0.5-h rainfall intensity [mm/h]
-
-		!rainfall intensities based on kfkorr showed low values, resulting in low erosion as well
-		if (R_d==0.) then
-			ei=0.	!do computations only when there is rainfall
-		else
-			ri_05=a_i30*(R_d**b_i30)
-			ri_05=min(ri_05,2.*R_d)					!maximum possible intensity
-			r_p=-2.*R_d*log(1-min((ri_05/2./R_d),0.99))
-		end if
-
-	END IF
-
-	if (R_d /=0.) ei=R_d*(12.1+8.9*(log10(r_p)-0.434))*ri_05/1000.	!USLE-energy factor in the "proper" units according to Williams, 1995 in Singh,1995, p.934,25.128
-ELSE
-	ei=-1.		!just for debugging
-END IF
+ !compute USLE-rainfall energy factor for USLE (1) and Onstad-Foster (2)
+    IF ( (erosion_equation==1) .OR. (erosion_equation==2))  THEN
+        if (precip_dt == 0.) then     !do computations only when there is rainfall
+            ei=0.
+        else
+            IF (dt <= 1) THEN    !if high resolution precipitation is available
+                RE = precip_dt*(12.1+8.9*(log10(precip_dt/dt))) !Williams, 1995 in Singh, 1995, p.934,25.125
+                ri_05=a_i30*(precip_dt**b_i30) !estimate maximum half-hour-intensity from daily/hourly rainfall using empirical coefficients provided [mm/h]
+                ei = RE * ri_05/1000 !USLE-energy factor in the "proper" units according to Williams, 1995 in Singh,1995, p.934,25.128
+            ELSE
+                R_d=precip_dt    !daily rainfall [mm]
+                !r_p=-2*R_d*log(1-min(alpha_05,0.99))    !peak rainfall rate [mm/h] Williams, 1995; eq. 25.132
+                !R_05=alpha_05*R_d                        !maximum amount of rain in 30 min [mm]; Williams, 1995; 25.131
+                !ri_05=R_05/0.5                            !maximum 0.5-h rainfall intensity [mm/h]
+                !rainfall intensities based on kfkorr showed low values, resulting in low erosion as well
+       
+                ri_05=a_i30*(R_d**b_i30) !estimate maximum half-hour-intensity from empirical coefficients provided
+                ri_05=min(ri_05,2.*R_d)                    !maximum possible intensity
+                r_p=-2.*R_d*log(1-min((ri_05/2./R_d),0.99))
+                
+                ei=R_d*(12.1+8.9*(log10(r_p)-0.434))*ri_05/1000.    !USLE-energy factor in the "proper" units according to Williams, 1995 in Singh,1995, p.934,25.128
+            END IF
+            ei=max(0., ei) !prevent "-Inf" in case of r_p=0
+        end if !precip_dt /= 0
+    ELSE
+        ei=-1.        !just for debugging
+    END IF
 
 
 IF ((erosion_equation==2) .OR. (erosion_equation==3) .OR. (erosion_equation==4)) THEN
-R_d=precip(d,subbas_id)	!daily rainfall [mm]
-ri_05=a_i30*(R_d**b_i30)
-!alpha_05=ri_05/2/R_d
-alpha_05=min(1.0,0.5*(kfkorr_day/kfkorr)/24.)
+    R_d=precip_dt	!rainfall in timestep [mm]
+    ri_05=a_i30*(precip_dt**b_i30)
+    !alpha_05=ri_05/2/R_d
+    alpha_05=min(1.0,0.5*(kfkorr_day/kfkorr)/24.)
 
 	IF (alpha_05==1.0) THEN
 		alpha_t_conc=1.0
@@ -250,7 +251,7 @@ END IF
 SELECT CASE (erosion_equation)
 	CASE (1)	!USLE
 		r = earea*1e-4 * ei*(K_fac*C_fac*P_fac*LS_fac*CFRG_fac)
-		!yield [t] according to USLE as given by Williams,1995 in Singh, 1995, p. 933
+		!yield [t] according to USLE as given by Williams, 1995 in Singh, 1995, p. 933
 	CASE (2)	!Onstad-Foster
 		r = earea*1e-4 * (0.646*ei+0.45*((q*1000.)*q_peak_mm_h)**0.33)*(K_fac*C_fac*P_fac*LS_fac*CFRG_fac)
 		!yield [t] according to Onstad-Forster as given by Williams,1995 in Singh, 1995, p. 933

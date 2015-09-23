@@ -880,7 +880,7 @@ SUBROUTINE hymo_all(STATUS)
                 svc_coarse_fac_day= calc_seasonality2(i_subbas, t, julian_day, seasonality_coarse, svc_coarse_fac)    !compute coarse-factors of current day
                 svc_n_day         = calc_seasonality2(i_subbas, t, julian_day, seasonality_n,      svc_n)                !compute n of current day
 
-                if (count(svc_k_fac_day < 0) > 0) then
+                if (count(svc_k_fac_day < 0) > 0) then !ii: check values beforehand, not every day
                     write(*,*)'Negative K-factor, check rainy_season.dat and svc.dat.'
                     stop
                 END IF
@@ -1307,7 +1307,7 @@ SUBROUTINE hymo_all(STATUS)
 
             IF (dosediment .AND. do_musle_subbasin .AND. (ovflow(d,i_subbas)>0.) ) THEN    !calculate sediment yield on subbasin scale (in contrast to on TC-scale)
                 !sediment_subbasin(d,i_subbas,:)=sedi_yield_subbas(subbas_id, ovflow(d,i_subbas), sed_yield_subbas)
-                CALL sedi_yield_subbas(i_subbas, ovflow(d,i_subbas), sediment_subbasin(d,i_subbas,:))
+                CALL sedi_yield_subbas(prec, i_subbas, ovflow(d,i_subbas), sediment_subbasin(d,i_subbas,:))
                 sediment_subbasin_t(d,1,i_subbas,:)=sediment_subbasin(d,i_subbas,:) / nt !ii distribute daily yield equally among timesteps (needs to be improved)
             END IF
 

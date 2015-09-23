@@ -2867,16 +2867,22 @@
 
         !compute maximum half_hour-rain: fraction of daily precipitation that falls within 30 min
         if (dt<=1) then	!if high resolution precipitation is available
-            alpha_05=(maxval(prechall2)/precday)/(dt*2)	!estimate the maximum rainfall rate based on given precipitation data
-            !	alpha_05= 0.9
+            if (precday==0) then
+                alpha_05=1. !overland flow without rain: may happen in small amounts, thus alpha_05 is not really important
+            else    
+                alpha_05=(maxval(prechall2)/precday)/(dt*2)	!estimate the maximum rainfall rate based on given precipitation data
+            end if
         else
             if (kfkorr_a==0.) then
                 alpha_05=0.5*kfkorr/24.	!time invariant kfkorr
             else
-                !based on kfcorr: time variant kfkorr: only the the precipitation-dependent part of the term is used (the kfkorr factor is considered
-                !a calibration factor for Ksat and not responsible for sub-daily rainfall dynamics)
+                !based on kfcorr: time variant kfkorr: only the the precipitation-dependent part of the term is used 
+                !(the "constant" part of kfkorr factor is considered a calibration factor for Ksat and not 
+                ! not representing sub-daily rainfall dynamics )
                 alpha_05=min(1.0,0.5*(kfkorr_day/kfkorr)/24.)
-                !alpha_05=0.5*a_i30*(precday**(b_i30-1))		!based on USLE Ri50-coefficients  - doubles sediment yield in Isábena
+                
+                !based on USLE Ri50-coefficients - doubles sediment yield in Isábena
+                !alpha_05=0.5*a_i30*(precday**(b_i30-1))		
             end if
             alpha_05=min(alpha_05,1.0)	!at maximum, all daily rainfall fell within 30 min
 
@@ -2896,7 +2902,7 @@
         !write(*,'(A,f8.4)') "sed_yield: ", r
         !sed_out_tc(:)=r/n_sed_class	!currently, the particle classes are not treated seperately yet
 
-        CALL sedi_yield(day, i_subbas2, i_lu, id_tc_type2, q_surf_in, q_surf_out2, q_peak, v_ov, sed_in_tc, dt, tcarea2,sed_out_tc)
+        CALL sedi_yield(prec, i_subbas2, i_lu, id_tc_type2, q_surf_in, q_surf_out2, q_peak, v_ov, sed_in_tc, dt, tcarea2,sed_out_tc)
     else
         sed_out_tc(:)=0.
     end if !end (do sediment)

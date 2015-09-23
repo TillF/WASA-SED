@@ -1,4 +1,4 @@
-SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v_ov_in, sed_in, timestep, tc_area, sed_yield)
+SUBROUTINE sedi_yield(precip_dt, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v_ov_in, sed_in, timestep, tc_area, sed_yield)
 
     ! hillslope erosion module for WASA
     ! to be called by soilwat.f90, Till Francke (till@comets.de)
@@ -68,10 +68,10 @@ SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v
     IMPLICIT NONE
 
     INTEGER, PARAMETER :: routing_mode=2 !different modes how incoming sediment from upslope is treated
-        !(1)                        !sediment from upslope TC is stored completely, no further transport
-        !(2)                        !sediment from upslope TC is transferred completely
+        !(1)                        !sediment from upslope TC is stored completely (deposited), no further transport
+        !(2)                        !sediment from upslope TC is transferred 
 
-    INTEGER, INTENT(IN):: d            !julian day of current day
+    real, INTENT(IN):: precip_dt            !precipitation in current timestep [mm]
     INTEGER, INTENT(IN):: subbas_id    !ID of subbasin currently treated (internal numbering scheme)
     INTEGER, INTENT(IN):: lu_id        !ID of LU currently treated TC belongs to (internal numbering scheme)
     INTEGER, INTENT(IN):: tc_type_id        !ID of TC-type that is currently treated (internal numbering scheme)
@@ -85,7 +85,7 @@ SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v
     REAL, INTENT(OUT) :: sed_yield(1:n_sed_class)                !sediment yield [tons/timestep] (usually applied daily) for each particle size class
 
     REAL :: q                        !mean overland flow during timestep [m H2O]
-    REAL :: r, r2                    !temporary real variable
+    REAL :: r, r2, RE                    !temporary real variable
 
     REAL :: mean_particle(1:n_sed_class)    !auxiliary variable to compute the mean particle size distribution of current TC
 
@@ -159,7 +159,6 @@ SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v
     IF (allocated(beta_fac)   ) r=beta_fac   (lu_id)                !use LU-prespecified correction factor for beta/m (rill/interill ratio)
     IF (allocated(beta_fac_tc)) r=beta_fac_tc(tc_type_id)        !use TC-prespecified correction factor for beta/m (rill/interill ratio), override LU value
     IF (r/=1.) THEN    !apply prespecified correction factor for beta/m (rill/interill ratio)
-        !m_ls = 2*m_ls/(m_ls+1.)  !TEST option
         m_ls = r*m_ls/(-m_ls+1.+r*m_ls) !(Haan 1994, p. table 8.6; Renard et al. 1997)
     END IF
 
@@ -188,30 +187,30 @@ SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v
     !END IF
 
 
+    !compute USLE-rainfall energy factor for USLE (1) and Onstad-Foster (2)
     IF ( (erosion_equation==1) .OR. (erosion_equation==2))  THEN
-        !compute USLE-rainfall energy factor for USLE (1) and Onstad-Foster (2)
-        IF (dt<=1) THEN    !if high resolution precipitation is available
-            R_d=-1.        !to do: add equation here for subdaily rainfall
-            r_p=-1.
-        ELSE
-            R_d=precip(d,subbas_id)    !daily rainfall [mm]
-            !r_p=-2*R_d*log(1-min(alpha_05,0.99))    !peak rainfall rate [mm/h] Williams, 1995; eq. 25.132
-            !R_05=alpha_05*R_d                        !maximum amount of rain in 30 min [mm]; Williams, 1995; 25.131
-            !ri_05=R_05/0.5                            !maximum 0.5-h rainfall intensity [mm/h]
-            !rainfall intensities based on kfkorr showed low values, resulting in low erosion as well
-        
-            if (R_d==0.) then
-                ei=0.    !do computations only when there is rainfall
-            else
-                ri_05=a_i30*(R_d**b_i30)
+        if (precip_dt == 0.) then     !do computations only when there is rainfall
+            ei=0.
+        else
+            IF (dt <= 1) THEN    !if high resolution precipitation is available
+                RE = precip_dt*(12.1+8.9*(log10(precip_dt/dt))) !Williams, 1995 in Singh, 1995, p.934,25.125
+                ri_05=a_i30*(precip_dt**b_i30) !estimate maximum half-hour-intensity from daily/hourly rainfall using empirical coefficients provided [mm/h]
+                ei = RE * ri_05/1000 !USLE-energy factor in the "proper" units according to Williams, 1995 in Singh,1995, p.934,25.128
+            ELSE
+                R_d=precip_dt    !daily rainfall [mm]
+                !r_p=-2*R_d*log(1-min(alpha_05,0.99))    !peak rainfall rate [mm/h] Williams, 1995; eq. 25.132
+                !R_05=alpha_05*R_d                        !maximum amount of rain in 30 min [mm]; Williams, 1995; 25.131
+                !ri_05=R_05/0.5                            !maximum 0.5-h rainfall intensity [mm/h]
+                !rainfall intensities based on kfkorr showed low values, resulting in low erosion as well
+       
+                ri_05=a_i30*(R_d**b_i30) !estimate maximum half-hour-intensity from empirical coefficients provided
                 ri_05=min(ri_05,2.*R_d)                    !maximum possible intensity
                 r_p=-2.*R_d*log(1-min((ri_05/2./R_d),0.99))
-            end if
-
-        END IF
-
-        if (R_d /=0.) ei=R_d*(12.1+8.9*(log10(r_p)-0.434))*ri_05/1000.    !USLE-energy factor in the "proper" units according to Williams, 1995 in Singh,1995, p.934,25.128
-        ei=max(0., ei) !prevent "-Inf" in case of r_p=0
+                
+                ei=R_d*(12.1+8.9*(log10(r_p)-0.434))*ri_05/1000.    !USLE-energy factor in the "proper" units according to Williams, 1995 in Singh,1995, p.934,25.128
+            END IF
+            ei=max(0., ei) !prevent "-Inf" in case of r_p=0
+        end if !precip_dt /= 0
     ELSE
         ei=-1.        !just for debugging
     END IF
@@ -250,7 +249,7 @@ SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v
     SELECT CASE (routing_mode)        !different modes how incoming sediment from upslope is treated
         CASE (1)        !sediment from upslope TC is stored completely
 
-        CASE (2)        !sediment from upslope TC is transferred completely
+        CASE (2)        !sediment from upslope TC is transferred
             sed_yield = sed_yield + sed_in
     END SELECT
 
@@ -311,7 +310,7 @@ SUBROUTINE sedi_yield(d, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v
     END SELECT
 
 
-    dummy4=sum(sed_yield)        !for comparing to yield after the application of transport capacity limits
+    ! dummy4=sum(sed_yield)        !for comparing to yield after the application of transport capacity limits
 
 
     !deposition_TC(subbas_id,tc_type_id)=sum(sed_yield)        !Till: temporary: TC-wise output of sediment yield

@@ -31,9 +31,8 @@ module erosion_h
     INTEGER  :: erosion_equation            !erosion equation to be used:1: USLE, 2: Onstad-Foster, 3:    MUSLE, 4: MUST
     LOGICAL :: do_musle_subbasin        !1: compute erosion on subbasin scale; 0: compute erosion on TC-scale
 
-    !Las Paules
-    REAL    :: a_i30=1.1630            ! coefficients for estimation of maximum half-hour rainfall intensity (ri_05) from daily rainfall data (R_day) (default, taken from erosion.ctl, if present)
-    REAL    :: b_i30=0.667981            ! ri_05=a*R_day^b
+    !coefficients for estimation of maximum half-hour rainfall intensity (ri_05) from timestep rainfall data (R_dt) 
+    REAL    :: a_i30, b_i30  ! ri_05=a*R_dt^b
 
 
     INTEGER :: transport_limit_mode=2    !different modes how/if transport capacity of runoff is limited (default, taken from erosion.ctl, if present)
