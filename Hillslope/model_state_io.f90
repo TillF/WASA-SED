@@ -177,8 +177,12 @@ contains
         else
             lake_file_hdle=15
             OPEN(lake_file_hdle,FILE=lake_conds_file, STATUS='replace')
-            WRITE(lake_file_hdle,'(a)') 'Lake volume status (for analysis or model re-start)'
-            WRITE(lake_file_hdle,*)'Subbasin', char(9),'Lake_order',char(9),'volume[m^3]' !tab separated output
+            if (doacud) then
+                WRITE(lake_file_hdle,'(a)') 'Lake volume status (for analysis or model re-start)'
+                WRITE(lake_file_hdle,*)'Subbasin', char(9),'Lake_order',char(9),'volume[m^3]' !tab separated output
+            else
+                CLOSE(lake_file_hdle,status='delete')
+            end if
         end if
 
 
