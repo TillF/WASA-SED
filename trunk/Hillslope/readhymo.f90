@@ -902,7 +902,7 @@ SUBROUTINE readhymo
 				READ(cdummy,*)dummy1,temp1
 				if (dummy1==-1) then
 					kfkorrc(:) = temp1 !universal calibration factor for all subbasins
-					intcfc(:)  = intcf/(0.340+0.647*kfkorrc(:))  !Till: as in the original code: interception capacity is aslos modified. I dunno why.
+					intcfc(:)  = intcf/(0.340+0.647*kfkorrc(:))  !Till: as in the original code: interception capacity is also modified. I dunno why.
 					cycle                         !go to next line
 				end if
 				i=id_ext2int(dummy1,id_subbas_extern)    !convert external to internal ID
@@ -911,7 +911,7 @@ SUBROUTINE readhymo
 					stop
 				end if
 				kfkorrc(i) = temp1                !modify kfkorrc of specified subbasin
-				intcfc(i)  =intcf/(0.340+0.647*kfkorrc(i)) !Till: as in the original code: interception capacity is aslos modified. I dunno why.
+				intcfc(i)  =intcf/(0.340+0.647*kfkorrc(i)) !Till: as in the original code: interception capacity is also modified. I dunno why.
 			END DO
 		  CLOSE(11)
 		END IF
@@ -1618,8 +1618,18 @@ SUBROUTINE readhymo
             do_musle_subbasin=.FALSE.            !default 0: compute erosion on TC-scale
             transport_limit_mode=2 !transport capacity according to Everaert (1991)
         END IF
-        !end insert Till
-
+        
+        !(taken from erosion.ctl, if present): default coefficients for estimation of maximum half-hour rainfall intensity (ri_05) from daily rainfall data (R_day) 
+        if (a_i30==-1) then !scaling coefficients for half-hour-intensity not set, use defaults (ri_05=a*R_dt^b)
+            if (dt==24) then
+                a_i30=1.1630         !default coefficients for estimation of maximum half-hour rainfall intensity (ri_05) from daily rainfall data (R_day)    
+                b_i30=0.667981            
+            else
+                a_i30=1.            
+                b_i30=1.
+            end if
+        end if
+        
 
         !Till: eg for scenanario with badland remediation
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/sdr_lu.dat',IOSTAT=istate,STATUS='old')
