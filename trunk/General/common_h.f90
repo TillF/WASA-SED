@@ -110,7 +110,8 @@ module common_h
 
     logical,parameter :: domean=.FALSE.   ! calculate daily ETP from mean daily values (this flag is dominant over donight)
     logical,parameter :: donight=.TRUE.      !if (domean==0):calculate daily ETP as sum of ETP for day and night (donight=1) or only day
-    real :: daily_delta_temp !daily temperature amplitude (Tmin=Tmean-daily_delta_temp; Tmax=Tmean+daily_delta_temp;)
+    real :: daily_delta_temp =0. !daily temperature amplitude (Tmin=Tmean-daily_delta_temp; Tmax=Tmean+daily_delta_temp;)
+                                !ii: This should better be a parameter or for hourly data computed 
     REAL,parameter :: hours_of_daylight=12.0 !number of hours with sunlight per day
 
 end module common_h
