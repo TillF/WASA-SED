@@ -142,8 +142,8 @@
 !     intetsc(366,maxsoil), &
 !     aettotsc(366,maxsoil), &
      
-	 debug_out(366), & !remove
-	 debug_out2(366,8), & !remove
+!	 debug_out(366), & !remove
+!	 debug_out2(366,8), & !remove
 	 
 	 STAT = istate)
 	

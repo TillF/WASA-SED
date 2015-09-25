@@ -379,7 +379,7 @@ contains
 
         horithact=-9999.                    !mark all horizons as "not (yet) initialised"
         if (trim(soil_conds_file)/='' .AND. i==0) then        !load values from file
-            write(*,'(a,a,a)')'Inititalize soil moisture from file ''',trim(soil_conds_file),''''
+            write(*,'(a,a,a)')'Initialize soil moisture from file ''',trim(soil_conds_file),''''
 
             READ(11,*); READ (11,*)    !skip header lines
             line=2
@@ -558,7 +558,7 @@ contains
 
         deepgw=-9999.                    !mark all gw storages as "not (yet) read"
         if (trim(gw_conds_file)/='' .AND. i==0) then        !load values from file
-            write(*,'(a,a,a)')'Inititalize ground water storage from file ''',trim(gw_conds_file),''''
+            write(*,'(a,a,a)')'Initialize ground water storage from file ''',trim(gw_conds_file),''''
 
             READ(11,*); READ (11,*)    !skip header lines
             line=2
@@ -661,7 +661,7 @@ contains
 			return
         end if
 
-        write(*,'(a,a,a)')'Inititalize river storage from file ''',trim(river_conds_file),'''.'
+        write(*,'(a,a,a)')'Initialize river storage from file ''',trim(river_conds_file),'''.'
     
         !read 2 header lines into buffer
         READ(11,*); READ(11,*)
@@ -704,7 +704,7 @@ contains
 			return
         end if
 
-        write(*,'(a,a,a)')'Inititalize sediment storage from file ''',trim(sediment_conds_file),'''.'
+        write(*,'(a,a,a)')'Initialize sediment storage from file ''',trim(sediment_conds_file),'''.'
     
         !read 2 header lines into buffer
         READ(11,*); READ(11,*)
@@ -747,7 +747,7 @@ contains
 			return
         end if
 
-        write(*,'(a,a,a)')'Inititalize suspended sediment storage from file ''',trim(susp_sediment_conds_file),'''.'
+        write(*,'(a,a,a)')'Initialize suspended sediment storage from file ''',trim(susp_sediment_conds_file),'''.'
     
         !read 2 header lines into buffer
         READ(11,*); READ(11,*)
@@ -797,7 +797,7 @@ contains
         end if
 
 
-        write(*,'(a,a,a)')'Inititalize lake storage from file ''',trim(lake_conds_file),'''.'
+        write(*,'(a,a,a)')'Initialize lake storage from file ''',trim(lake_conds_file),'''.'
     
    
         READ(11,*); READ(11,*)!read 2 header lines into buffer
