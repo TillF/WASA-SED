@@ -80,7 +80,8 @@ SUBROUTINE readgen(path2do_dat)
 
     INTEGER :: i,istate !,imun,imicro,imeso
     CHARACTER (LEN=150) :: custompath
-    CHARACTER (LEN=150) :: dummy
+    CHARACTER (LEN=150) :: dummy, dummy2
+
 
     if (trim(path2do_dat)=='') then
         path2do_dat='./Input/do.dat'			!Till: use default, if no command line argument was specified
@@ -213,8 +214,61 @@ SUBROUTINE readgen(path2do_dat)
         npointsxsect=200
     END IF
 
+!read general erosion parameters
+    if (dosediment) THEN
+        allocate( spcon(n_sed_class), spexp(n_sed_class))
+        
+        spcon(:)=  0.016111		!0.0001-0.01  default values
+        spexp (:)= 1.707			!1 - 1.5
+        erosion_equation=0
+        OPEN(11,FILE=pfadp(1:pfadj)// 'erosion.ctl',IOSTAT=istate,STATUS='old')
+        IF (istate==0) THEN
+            READ(11,'(a)',IOSTAT=istate)dummy
+            do while (istate==0)
+                READ(dummy,*,IOSTAT=istate)dummy2
+                SELECT CASE (trim(dummy2))
+                    CASE ('application_scale')
+                        READ(dummy,*,IOSTAT=istate) dummy2, do_musle_subbasin
+                    CASE ('erosion_equation')
+                        READ(dummy,*,IOSTAT=istate) dummy2, erosion_equation
+                    CASE ('ri_05_coeffs')
+                        READ(dummy,*,IOSTAT=istate) dummy2, a_i30,b_i30
+                    CASE ('transport_limit_mode')
+                        READ(dummy,*,IOSTAT=istate) dummy2, transport_limit_mode
+                    CASE ('transp_cap_a')
+                        READ(dummy,*,IOSTAT=istate) dummy2, spcon(1)
+                        spcon(:)=spcon(1)
+                    CASE ('transp_cap_b')
+                        READ(dummy,*,IOSTAT=istate) dummy2, spexp(1)
+                        spexp(:)=spexp(1)
+                END SELECT
+                READ(11,'(a)',IOSTAT=istate)dummy
+            end do
+            CLOSE(11)
+            IF ((erosion_equation>4.) .OR. (erosion_equation<0.)) THEN
+                write(*,*)'WARNING: erosion_equation was outside [1..4], assumed to be 3 (MUSLE).'
+                erosion_equation=3            !default erosion equation to be used: MUSLE
+            END IF
+        ELSE        !erosion.ctl not found
+            write(*,*)'WARNING: erosion.ctl not found, using defaults.'
+            erosion_equation=3            !default erosion equation to be used: MUSLE
+            do_musle_subbasin=.FALSE.            !default 0: compute erosion on TC-scale
+            transport_limit_mode=2 !transport capacity according to Everaert (1991)
+        END IF
+        
+        !(taken from erosion.ctl, if present): default coefficients for estimation of maximum half-hour rainfall intensity (ri_05) from daily rainfall data (R_day) 
+        if (a_i30==-1) then !scaling coefficients for half-hour-intensity not set, use defaults (ri_05=a*R_dt^b)
+            if (dt==24) then
+                a_i30=1.1630         !default coefficients for estimation of maximum half-hour rainfall intensity (ri_05) from daily rainfall data (R_day)    
+                b_i30=0.667981            
+            else
+                a_i30=1.            
+                b_i30=1.
+            end if
+        end if
+    END IF !dosediments
 
-    !Till: read desired output files
+!Till: read list of desired output files
     f_daily_actetranspiration=.FALSE.	!disable all output files
     f_daily_potetranspiration=.FALSE.
     f_daily_qhorton=.FALSE.
@@ -460,8 +514,23 @@ SUBROUTINE readgen(path2do_dat)
     !end insert Till
 
 
-    ! save settings of this run to output directory
-    OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='unknown',IOSTAT=istate)
+    
+    
+!allocate necessary memory
+    nt = int(24/dt)	!Till: number of simulation steps per day
+
+    INCLUDE '../Hillslope/allocat_hymo.var'
+    INCLUDE '../Hillslope/allocat_erosion.var'
+    INCLUDE '../River/allocat_routing.var'
+        nt = int(24/dt)	!Till: number of simulation steps per day !ii: can be removed?
+    INCLUDE '../Reservoir/allocat_reservoir_lake.var'
+
+
+    
+    
+    
+! save summary of settings to output directory
+    OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='unknown', IOSTAT=istate)
     IF (istate/=0) THEN
         write(*,*)'Error: Output path ',pfadn(1:pfadi),' not found, trying to create...'
         dummy=pfadn(1:pfadi)
@@ -527,15 +596,6 @@ SUBROUTINE readgen(path2do_dat)
         CLOSE(11)
     END IF
 
-
-    nt = int(24/dt)	!Till: number of simulation steps per day
-
-!    INCLUDE '../General/allocat_general.var'
-INCLUDE '../Hillslope/allocat_hymo.var'
-INCLUDE '../Hillslope/allocat_erosion.var'
-INCLUDE '../River/allocat_routing.var'
-    nt = int(24/dt)	!Till: number of simulation steps per day !ii: can be removed?
-INCLUDE '../Reservoir/allocat_reservoir_lake.var'
 
 
     RETURN
