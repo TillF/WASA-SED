@@ -17,8 +17,8 @@ real, allocatable :: r_qout(:,:)
 !storage volume (m3) in river reach
 real, allocatable :: r_storage (:)
 !array stores runoff from hillslopes (m3/s) and erosion (tons), if it is generated outside WASA
-real, allocatable :: runoff(:,:)
-real, allocatable :: sediment(:,:,:)
+!real, allocatable :: runoff(:,:)
+!real, allocatable :: sediment(:,:,:)
 
 ! ORIGINAL WASA ROUTING SCHEME	
 ! routing parameter (lag time and retention time) (days)
