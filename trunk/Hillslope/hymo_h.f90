@@ -531,9 +531,9 @@ module hymo_h
     REAL 	:: frac_direct_gw
 
 
-    real, allocatable :: debug_out(:)		!for debugging purposes !remove
-    real, allocatable :: debug_out2(:,:)		!for debugging purposes !remove
-
+ !   real, allocatable :: debug_out(:)		!for debugging purposes !remove
+ !   real, allocatable :: debug_out2(:,:)		!for debugging purposes !remove
+    integer :: debug_flag=0
 
 contains
 

@@ -67,6 +67,8 @@ SUBROUTINE sedi_yield(precip_dt, subbas_id, lu_id, tc_type_id, q_in, q_out, q_pe
 
     IMPLICIT NONE
 
+!    INTEGER, INTENT(IN)                     :: day !debug only, remove
+    
     INTEGER, PARAMETER :: routing_mode=2 !different modes how incoming sediment from upslope is treated
         !(1)                        !sediment from upslope TC is stored completely (deposited), no further transport
         !(2)                        !sediment from upslope TC is transferred 
@@ -204,7 +206,9 @@ SUBROUTINE sedi_yield(precip_dt, subbas_id, lu_id, tc_type_id, q_in, q_out, q_pe
                 !rainfall intensities based on kfkorr showed low values, resulting in low erosion as well
        
                 ri_05=a_i30*(R_d**b_i30) !estimate maximum half-hour-intensity from empirical coefficients provided
-                ri_05=min(ri_05,2.*R_d)                    !maximum possible intensity
+                ri_05=min(ri_05,2.*R_d)                    !maximum possible intensity (if all rain fell within half hour)
+                ri_05=max(ri_05,R_d/dt)                    !minimum possible intensity (if rain was evenly distributed)
+                
                 r_p=-2.*R_d*log(1-min((ri_05/2./R_d),0.99))
                 
                 ei=R_d*(12.1+8.9*(log10(r_p)-0.434))*ri_05/1000.    !USLE-energy factor in the "proper" units according to Williams, 1995 in Singh,1995, p.934,25.128
@@ -243,6 +247,22 @@ SUBROUTINE sedi_yield(precip_dt, subbas_id, lu_id, tc_type_id, q_in, q_out, q_pe
 
     if (allocated(sdr_tc))    r = sdr_tc(tc_type_id) * r !use pre-specified TC-wise SDR
 
+       
+    !if (subbas_id==1 .and. day==23) then
+    !    if (debug_flag==0) then
+    !       ! write(*,*)R_d !ok
+    !        write(*,*)a_i30
+    !        write(*,*)b_i30
+    !        write(*,*)a_i30*(R_d**b_i30)
+    !        write(*,*)ri_05
+    !       ! write(*,*)r_p
+    !        write(*,*)ei
+    !       ! write(*,*)r
+    !        debug_flag=1
+    !        stop
+    !    end if
+    !end if
+    
     sed_yield=r*mean_particle        !overall yield is distributed among size classes according to their percentage, no selective removal of finer fractions
 
 
@@ -321,7 +341,7 @@ SUBROUTINE sedi_yield(precip_dt, subbas_id, lu_id, tc_type_id, q_in, q_out, q_pe
         sed_yield=min(sed_yield,trans_cap)
     END IF
 
-
+     
     !Pedro: TC-wise outputs
      !!Print hydrologic variable on TC scale. If not used, DISABLE
         !!************************************************************************

@@ -1308,7 +1308,7 @@ SUBROUTINE hymo_all(STATUS)
             IF (dosediment .AND. do_musle_subbasin .AND. (ovflow(d,i_subbas)>0.) ) THEN    !calculate sediment yield on subbasin scale (in contrast to on TC-scale)
                 !sediment_subbasin(d,i_subbas,:)=sedi_yield_subbas(subbas_id, ovflow(d,i_subbas), sed_yield_subbas)
                 CALL sedi_yield_subbas(prec, i_subbas, ovflow(d,i_subbas), sediment_subbasin(d,i_subbas,:))
-                sediment_subbasin_t(d,1,i_subbas,:)=sediment_subbasin(d,i_subbas,:) / nt !ii distribute daily yield equally among timesteps (needs to be improved)
+                !sediment_subbasin_t(d,1,i_subbas,:)=sediment_subbasin(d,i_subbas,:) / nt !ii distribute daily yield equally among timesteps (needs to be improved)
             END IF
 
 
