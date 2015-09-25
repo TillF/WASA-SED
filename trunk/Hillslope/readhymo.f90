@@ -1580,57 +1580,8 @@ SUBROUTINE readhymo
         frac_direct_gw=1.
     END IF
 
-    if (dosediment) THEN
-        spcon(:)=  0.016111		!0.0001-0.01  default values
-        spexp (:)= 1.707			!1 - 1.5
-        erosion_equation=0
-        OPEN(11,FILE=pfadp(1:pfadj)// 'erosion.ctl',IOSTAT=istate,STATUS='old')
-        IF (istate==0) THEN
-            READ(11,'(a)',IOSTAT=istate)cdummy
-            do while (istate==0)
-                READ(cdummy,*,IOSTAT=istate)cdummy2
-                SELECT CASE (trim(cdummy2))
-                    CASE ('application_scale')
-                        READ(cdummy,*,IOSTAT=istate) cdummy2, do_musle_subbasin
-                    CASE ('erosion_equation')
-                        READ(cdummy,*,IOSTAT=istate) cdummy2, erosion_equation
-                    CASE ('ri_05_coeffs')
-                        READ(cdummy,*,IOSTAT=istate) cdummy2, a_i30,b_i30
-                    CASE ('transport_limit_mode')
-                        READ(cdummy,*,IOSTAT=istate) cdummy2, transport_limit_mode
-                    CASE ('transp_cap_a')
-                        READ(cdummy,*,IOSTAT=istate) cdummy2, spcon(1)
-                        spcon(:)=spcon(1)
-                    CASE ('transp_cap_b')
-                        READ(cdummy,*,IOSTAT=istate) cdummy2, spexp(1)
-                        spexp(:)=spexp(1)
-                END SELECT
-                READ(11,'(a)',IOSTAT=istate)cdummy
-            end do
-            CLOSE(11)
-            IF ((erosion_equation>4.) .OR. (erosion_equation<0.)) THEN
-                write(*,*)'WARNING: erosion_equation was outside [1..4], assumed to be 3 (MUSLE).'
-                erosion_equation=3            !default erosion equation to be used: MUSLE
-            END IF
-        ELSE        !erosion.ctl not found
-            write(*,*)'WARNING: erosion.ctl not found, using defaults.'
-            erosion_equation=3            !default erosion equation to be used: MUSLE
-            do_musle_subbasin=.FALSE.            !default 0: compute erosion on TC-scale
-            transport_limit_mode=2 !transport capacity according to Everaert (1991)
-        END IF
-        
-        !(taken from erosion.ctl, if present): default coefficients for estimation of maximum half-hour rainfall intensity (ri_05) from daily rainfall data (R_day) 
-        if (a_i30==-1) then !scaling coefficients for half-hour-intensity not set, use defaults (ri_05=a*R_dt^b)
-            if (dt==24) then
-                a_i30=1.1630         !default coefficients for estimation of maximum half-hour rainfall intensity (ri_05) from daily rainfall data (R_day)    
-                b_i30=0.667981            
-            else
-                a_i30=1.            
-                b_i30=1.
-            end if
-        end if
-        
-
+       
+if (dosediment) then
         !Till: eg for scenanario with badland remediation
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/sdr_lu.dat',IOSTAT=istate,STATUS='old')
         IF (istate==0) THEN
@@ -1688,7 +1639,7 @@ SUBROUTINE readhymo
             end if
             CLOSE(11)
         END IF
-    END IF
+    END IF !dosediments
 
 
 

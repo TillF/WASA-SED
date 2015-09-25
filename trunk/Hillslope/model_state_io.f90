@@ -784,7 +784,11 @@ contains
         integer :: sb_counter,acud_class,iostatus,i
         real :: dummy1
     
-        i=0
+        if (.not. doacud) then !don't try to load file if reservoirs have been disabled anyway
+            !lakewater0=0.
+            return
+        end if
+                
         OPEN(11,FILE=lake_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
         if (i/=0) then
             write(*,'(a,a,a)')'WARNING: Lake storage file ''',trim(lake_conds_file),''' not found, using defaults.'
