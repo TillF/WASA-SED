@@ -12,7 +12,7 @@
 	 r_storage(subasin), &
 !	 qsediment(372,subasin), &
 	 	 
-	 runoff(8784,subasin), &
+!	 runoff(8784,subasin), &
 
 	 r_width(subasin), &
      r_depth(subasin), &
@@ -48,9 +48,7 @@
 	 sediment_out(subasin,n_sed_class), &
 	 qsediment2_t(366,nt,subasin), &
 	 r_sediment_concentration(subasin), &
-	 sediment(8784,subasin,n_sed_class), &
-	 spcon(n_sed_class), &
-	 spexp(n_sed_class), &
+!	 sediment(8784,subasin,n_sed_class), & !use dynamic margins!
 	 river_deposition(subasin,n_sed_class), &
 	 river_degradation(subasin,n_sed_class), &
 	 riverbed_storage(subasin,n_sed_class), &
