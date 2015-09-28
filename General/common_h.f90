@@ -114,4 +114,5 @@ module common_h
                                 !ii: This should better be a parameter or for hourly data computed 
     REAL,parameter :: hours_of_daylight=12.0 !number of hours with sunlight per day
 
+    !REAL :: debugcheck(30,2)=0. !just for debugging, remove
 end module common_h

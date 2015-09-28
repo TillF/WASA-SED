@@ -902,8 +902,12 @@ SUBROUTINE hymo_all(STATUS)
                 END IF
 
             endif
-            kfkorr_day=kfkorr*(kfkorr_a*1/max(precip(d,i_subbas),0.001)+kfkorr_b)    !compute kfkorr as a function of daily precipitation (use a minimum value of 0.001 for precip to avoid division by zero)
-
+            if (precip(d,i_subbas) == 0.) then
+                kfkorr_day = 1. !should not be important anyway, when there is no rainfall
+            else
+                kfkorr_day=kfkorr*(kfkorr_a*1/precip(d,i_subbas)+kfkorr_b + 1)    !compute kfkorr as a function of daily precipitation (use a minimum value of 0.001 for precip to avoid division by zero)    
+                !kfkorr_day=kfkorr*(kfkorr_a*1/max(precip(d,i_subbas),0.001)+kfkorr_b)    !compute kfkorr as a function of daily precipitation (use a minimum value of 0.001 for precip to avoid division by zero)
+            end if
 
             deepgwrsu=0.
 
@@ -1425,6 +1429,11 @@ SUBROUTINE hymo_all(STATUS)
         !   used in subroutine "routing",incl. water balance of large reservoirs
 
         !   end of loop for all sub-basins
+            
+            !write(*,*)'subbas',i_subbas,' mean manning :',debugcheck(i_subbas,1)/debugcheck(i_subbas,2)
+            !debugcheck(i_subbas,:)=0.
+            
+            
         END DO
 
         if (do_pre_outsed) then        !if water outsed from upstream subbasins is given
