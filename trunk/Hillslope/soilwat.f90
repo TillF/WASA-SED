@@ -2848,6 +2848,9 @@
 
         manning_n=manning_n/r
 
+            
+        !debugcheck(i_subbas2,1)=debugcheck(i_subbas2,1)+manning_n
+        !debugcheck(i_subbas2,2)=debugcheck(i_subbas2,2)+1
 
         r=atan(slope(id_tc_type2)/100.)				!convert slope [%] to radiant, avoid multiple computation
         L_slp=slength(i_lu)*fracterrain(id_tc_type2)	 !absolute slope length of TC [m] (projected length, Haan 1994, p.261) (was:.../ cos(r))
