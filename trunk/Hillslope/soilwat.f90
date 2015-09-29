@@ -2905,7 +2905,7 @@
         !write(*,'(A,f8.4)') "sed_yield: ", r
         !sed_out_tc(:)=r/n_sed_class	!currently, the particle classes are not treated seperately yet
 
-        CALL sedi_yield(prec, i_subbas2, i_lu, id_tc_type2, q_surf_in, q_surf_out2, q_peak, v_ov, sed_in_tc, dt, tcarea2,sed_out_tc)
+        CALL sedi_yield(prec, i_subbas2, i_lu, id_tc_type2, tcid_instance2, q_surf_in, q_surf_out2, q_peak, v_ov, sed_in_tc, dt, tcarea2,sed_out_tc)
     else
         sed_out_tc(:)=0.
     end if !end (do sediment)

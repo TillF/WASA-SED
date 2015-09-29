@@ -111,9 +111,10 @@ DO lu_counter=1,nbr_lu(subbas_id)		!loop over all LUs
 												!ii: convert musle_fac(*,4) to exp(musle_fac(*,4)) at beginning of program
 			mean_particle_tc=mean_particle_tc+soil_particles(svc_soil_veg(svc_id,1),:)*frac_svc_x	!sum up all fractions for particle classes
 			manning_n_tc=manning_n_tc+(svc_n_day(svc_id))*frac_svc_x		!average Manning-factors throughout TC, weighted by fraction
-		end do
-
-
+        end do
+        
+        frac_svc_x_sum=frac_svc_x_sum+rocky(tcid_instance2)  !consider rocky part of TC: effectively decreases K, P and C-factor
+                
 
 		K_tc=K_tc/frac_svc_x_sum		!normalize summed up values -> final values for TC
 		C_tc=C_tc/frac_svc_x_sum

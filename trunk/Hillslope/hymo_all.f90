@@ -1430,7 +1430,7 @@ SUBROUTINE hymo_all(STATUS)
 
         !   end of loop for all sub-basins
             
-            !write(*,*)'subbas',i_subbas,' mean manning :',debugcheck(i_subbas,1)/debugcheck(i_subbas,2)
+            !write(*,*)'subbas',i_subbas,' mean C-fac :',debugcheck(i_subbas,1)/debugcheck(i_subbas,2)
             !debugcheck(i_subbas,:)=0.
             
             

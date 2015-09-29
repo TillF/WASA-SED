@@ -1,4 +1,4 @@
-SUBROUTINE sedi_yield(precip_dt, subbas_id, lu_id, tc_type_id, q_in, q_out, q_peak_in, v_ov_in, sed_in, timestep, tc_area, sed_yield)
+SUBROUTINE sedi_yield(precip_dt, subbas_id, lu_id, tc_type_id, tcid_instance2, q_in, q_out, q_peak_in, v_ov_in, sed_in, timestep, tc_area, sed_yield)
 
     ! hillslope erosion module for WASA
     ! to be called by soilwat.f90, Till Francke (till@comets.de)
@@ -77,6 +77,7 @@ SUBROUTINE sedi_yield(precip_dt, subbas_id, lu_id, tc_type_id, q_in, q_out, q_pe
     INTEGER, INTENT(IN):: subbas_id    !ID of subbasin currently treated (internal numbering scheme)
     INTEGER, INTENT(IN):: lu_id        !ID of LU currently treated TC belongs to (internal numbering scheme)
     INTEGER, INTENT(IN):: tc_type_id        !ID of TC-type that is currently treated (internal numbering scheme)
+    INTEGER, INTENT(IN):: tcid_instance2  !ID of TC-instance that is currently treated 
     REAL, INTENT(IN):: q_in            !overland flow entering the TC from above [m**3]
     REAL, INTENT(IN):: q_out        !overland flow leaving the TC downslope [m**3]
     REAL, INTENT(IN):: q_peak_in    !peak overland flow rate  [m**3/s]
@@ -144,13 +145,17 @@ SUBROUTINE sedi_yield(precip_dt, subbas_id, lu_id, tc_type_id, q_in, q_out, q_pe
         r=r+r2                                !sum up fractions
     end do
 
-
+    r=r+rocky(tcid_instance2)  !consider rocky part of TC: effectively decreases K, P and C-factor
+            
     K_fac=K_fac/r
     C_fac=C_fac/r
     P_fac=P_fac/r
     CFRG_fac=CFRG_fac/r
     mean_particle=mean_particle/r
 
+    !debugcheck(subbas_id,1)=debugcheck(subbas_id,1)+C_fac !for debugging: compute subbasin average
+    !debugcheck(subbas_id,2)=debugcheck(subbas_id,2)+1
+    
     L_cum=0.    !disable cumulated L
     !Pedro - LS factor computed in a cumulative way according to Haan et al., 1994 (p. 262)
     L_cum=L_cum+L_slp        !acumulated slope length for erosion calculations (L_cum set to zero in file hymo_all.f90)
