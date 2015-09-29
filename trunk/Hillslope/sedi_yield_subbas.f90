@@ -47,6 +47,7 @@ INTEGER:: id_tc_type			!ID of TC that is currently treated (internal numbering s
 INTEGER:: tc_counter,lu_counter	!counter for treating all TC in current LU, and LUs in current subbasin
 INTEGER:: svc_id, lu_id,i			!ID of SVC, LU currently treated
 REAL :: r, RE						!temporary real variable
+INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
 
 !REAL :: q_peak,q_ov,v_ov,t_conc,alpha_05,alpha_t_conc  		!variables used for calculation of peak runoff rate
 REAL :: q_surf					!surface runoff [mm H2O]
@@ -86,6 +87,7 @@ DO lu_counter=1,nbr_lu(subbas_id)		!loop over all LUs
 
 	DO tc_counter=1,nbrterrain(lu_id)		!loop over all TCs
 		id_tc_type=id_terrain_intern(tc_counter,lu_id)	!get ID of TC-type
+        tcid_instance=tcallid(subbas_id,lu_counter,tc_counter)
 		frac_tc=fracterrain(id_tc_type)					!get fraction of TC
 		frac_tc_sum=frac_tc_sum+frac_tc					!sum up fractions
 
@@ -113,7 +115,7 @@ DO lu_counter=1,nbr_lu(subbas_id)		!loop over all LUs
 			manning_n_tc=manning_n_tc+(svc_n_day(svc_id))*frac_svc_x		!average Manning-factors throughout TC, weighted by fraction
         end do
         
-        frac_svc_x_sum=frac_svc_x_sum+rocky(tcid_instance2)  !consider rocky part of TC: effectively decreases K, P and C-factor
+        frac_svc_x_sum=frac_svc_x_sum+rocky(tcid_instance)  !consider rocky part of TC: effectively decreases K, P and C-factor
                 
 
 		K_tc=K_tc/frac_svc_x_sum		!normalize summed up values -> final values for TC
