@@ -78,7 +78,7 @@ REAL, INTENT(OUT) :: r_area, p, flow
 
 !REAL :: fps, qq1, tt1, tt2, aa, phi8, phi9, phi11, phi12, sed_con
 REAL :: q_bankful100, dep
-REAL::  d_it !, q_it, percent, error,
+REAL::  d_it, pp, qq !, q_it, percent, error,
 REAL :: vol, s1, s2 
 
 
@@ -149,14 +149,24 @@ IF (STATUS == 1  .OR.STATUS == 2 .OR. STATUS == 3) THEN
 	r_area = vol / (r_length(i) * 1000.)
 
 	!! calculate depth of flow, Equation 23.2.4 or 23.2.5
+    
+    
+    
+    
 	if (vol <= 0.) then
 		r_depth_cur(i) = 0.
-	elseif (r_area <= area_bankful(i)) THEN
-	  r_depth_cur(i) = SQRT( r_area                    / s1 + bottom_width(i) * bottom_width(i) / (4. * s1 * s1)) - bottom_width(i) / (2. * s1) !Till: chose only positive solution of quadratic equation
-	  IF (r_depth_cur(i) < 0.) r_depth_cur(i) = 0.	!Till: this should never occur
-	ELSE
-	  r_depth_cur(i) = SQRT((r_area - area_bankful(i)) / s2 + (r_width_fp(i)*r_width_fp(i))     / (4. * s2 * s2)) - r_width_fp(i)   / (2. * s2) !Till: chose only positive solution of quadratic equation
-	  IF (r_depth_cur(i) < 0.) r_depth_cur(i) = 0.	!Till: this should never occur
+    elseif (r_area <= area_bankful(i)) THEN
+	  pp = bottom_width(i) / s1 !coefficients of quadratic equation
+      qq = - r_area / s1 
+      !r_depth_cur(i) = -pp/2 + sqrt(pp*pp/4-qq)  !Till: choose only positive solution of quadratic equation
+      r_depth_cur(i) = qq / (-pp/2 - sqrt(pp*pp/4-qq)) !identical to line above, but numerically more robust as it eliminates numerical absorption
+      IF (r_depth_cur(i) < 0.) r_depth_cur(i) = 0.	!Till: this should never occur
+    ELSE
+      pp = r_width_fp(i)   /  s2 !coefficients of quadratic equation
+      qq = - (r_area - area_bankful(i)) / s2 
+	  !r_depth_cur(i) = -pp/2 + sqrt(pp*pp/4-qq)  !Till: choose only positive solution of quadratic equation
+      r_depth_cur(i) = qq / (-pp/2 - sqrt(pp*pp/4-qq)) !identical to line above, but numerically more robust as it eliminates numerical absorption
+      IF (r_depth_cur(i) < 0.) r_depth_cur(i) = 0.	!Till: this should never occur
 	  r_depth_cur(i) = r_depth_cur(i) + r_depth(i)	
 	END IF
 END IF
