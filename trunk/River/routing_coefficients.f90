@@ -152,10 +152,10 @@ IF (STATUS == 1  .OR.STATUS == 2 .OR. STATUS == 3) THEN
 	if (vol <= 0.) then
 		r_depth_cur(i) = 0.
 	elseif (r_area <= area_bankful(i)) THEN
-	  r_depth_cur(i) = SQRT( r_area                    / s1 + bottom_width(i) * bottom_width(i) / (4. * s1 * s1)) - bottom_width(i) / (2. * s1) !Till: chose only positve solution of quadratic equation
+	  r_depth_cur(i) = SQRT( r_area                    / s1 + bottom_width(i) * bottom_width(i) / (4. * s1 * s1)) - bottom_width(i) / (2. * s1) !Till: chose only positive solution of quadratic equation
 	  IF (r_depth_cur(i) < 0.) r_depth_cur(i) = 0.	!Till: this should never occur
 	ELSE
-	  r_depth_cur(i) = SQRT((r_area - area_bankful(i)) / s2 + (r_width_fp(i)*r_width_fp(i))     / (4. * s2 * s2)) - r_width_fp(i)   / (2. * s2) !Till: chose only positve solution of quadratic equation
+	  r_depth_cur(i) = SQRT((r_area - area_bankful(i)) / s2 + (r_width_fp(i)*r_width_fp(i))     / (4. * s2 * s2)) - r_width_fp(i)   / (2. * s2) !Till: chose only positive solution of quadratic equation
 	  IF (r_depth_cur(i) < 0.) r_depth_cur(i) = 0.	!Till: this should never occur
 	  r_depth_cur(i) = r_depth_cur(i) + r_depth(i)	
 	END IF
