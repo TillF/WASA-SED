@@ -49,7 +49,7 @@ real ::  rttime, topw, flow, r_evp,r_infil, dummy2 !,vol, c, rh, tbase, s1, s2
 real :: c0, c1, c2, c3, yy !, Fr
 
 !! Initialise water and sediment storage in each reach   
-if (t == tstart.and.d == 1.and.h == 1) then
+if (t == tstart .and. d == 1 .and. h == 1) then
     call routing_coefficients(i,1, dummy2, dummy2, dummy2)
 endif
 !-------------------------------------------------------------
@@ -81,7 +81,8 @@ yy = dt / msk_k(i)
 c0 = yy  + 2. * (1. - msk_x(i))
 c1 = (yy + 2. * msk_x(i))  / c0
 c2 = (yy - 2. * msk_x(i))  / c0
-c3 = (2. * (1. - msk_x(i)) - yy) / c0 
+!c3 = (2. * (1. - msk_x(i)) - yy) / c0 
+c3 = 1 - c1 - c2   !equivalent to line above, but faster and numerically more stable
 
 !! Compute new outflow r_qout2
 IF (t == tstart .AND. d == 1 .and. h == 1) THEN
