@@ -65,7 +65,7 @@ elseif (r_storage(i) == 0. .and. r_qin(2,i) > 1.e-3) then
   if (rttime > dt) then
       r_qout(2,i) = 0.
       r_storage(i)= r_qin(2,i)*3600.*dt
-      !ADD transmission and evaporation losses here
+      !ii ADD transmission and evaporation losses here
 	  return      
   endif
 else
