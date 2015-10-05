@@ -804,9 +804,9 @@ SUBROUTINE readhymo
             DO WHILE (istate==0)
                 j = id_ext2int(i, id_soil_extern)            !convert external to internal ID
                 IF (j==-1) THEN                                        !found unknown subbasin id
-                    WRITE(*,'(a, I4, a, I4, a)') 'soil_particles.dat, line ', loop, ': soil-ID ', i, ' not found in soil.dat, ignored.'
+                    WRITE(*,'(a, I0, a, I0, a)') 'soil_particles.dat, line ', loop, ': soil-ID ', i, ' not found in soil.dat, ignored.'
                 ELSEIF (ii<1 .OR. ii>n_sed_class) THEN
-                    WRITE(*,'(a, I4, a, I4, a)') 'soil_particles.dat, line ', loop, ': particle-class ', ii,&
+                    WRITE(*,'(a, I0, a, I0, a)') 'soil_particles.dat, line ', loop, ': particle-class ', ii,&
                         ' not defined in part_class.dat, ignored.'
                 ELSE
                     soil_particles(j,ii)=temp1                !store read values in proper position
