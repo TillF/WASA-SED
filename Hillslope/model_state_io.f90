@@ -211,7 +211,7 @@ contains
             if (digits<10) then
               write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
             else       
-               fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
+               fmtstr='(I0,A1,E12.5)' !for large numbers, use exponential notation
             end if
             
             if (river_file_hdle/=0) then
