@@ -142,6 +142,26 @@ do j = 1,len(string)
 end do
 end function locase
 
+function fmt_str(max_val, fieldwidth, decimals) result(fstr)	!generate format string
+real, intent(in) :: max_val
+integer, optional :: fieldwidth, decimals
+character(len=5) :: fstr
+integer :: digits, fw_req, fw=11, dec=3
+    if (present(fieldwidth)) fw=fieldwidth !if specified, override defaults
+    if (present(decimals))   dec=decimals
+
+    digits=floor(log10(max(1.0,max_val)))+1    !Till: number of pre-decimal digits required
+    fw_req=digits+1+dec !total fieldwidth required
+
+    if (fw_req <= fw) then
+        write(fstr,'(a,i0,a,i0)') 'f',fw_req,'.',dec        !generate format string
+    else       
+        write(fstr,'(a,i0,a,i0)') 'e',fw,'.5'       !for large numbers, use exponential notation
+    end if         
+
+end function fmt_str
+
+
 
 
 

@@ -595,8 +595,8 @@ endif
 
   if(f_river_deposition) then
 	OPEN(11,FILE=pfadn(1:pfadi)//'River_Deposition.out',STATUS='old' ,POSITION='append'  )
-	write(fmtstr,'(a,i0,a)')'(3i6,',subasin,'f14.3)'		!generate format string
-	WRITE (11,fmtstr)t, d,h, (river_deposition(i,1),i=1,subasin)
+	write(fmtstr,'(a,i0,a,a,a)')'(i0,a,i0,a,i0,',subasin,'(a,',fmt_str(maxval(river_deposition(1:subasin,1))),'))'		!generate format string
+	WRITE (11,fmtstr)t, char(9),d,char(9), h, (char(9),river_deposition(i,1),i=1,subasin)
 	CLOSE (11)
   endif
 
