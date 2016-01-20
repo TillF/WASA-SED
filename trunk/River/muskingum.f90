@@ -63,9 +63,11 @@ elseif (r_storage(i) == 0. .and. r_qin(2,i) > 1.e-3) then
 ! Calculation of flow time [h]
   rttime = r_length(i)*1000./(velocity(i)*3600.)
   if (rttime > dt) then
+      !ii this sharp threshold is critical and can produce oscillations!
       r_qout(2,i) = 0.
       r_storage(i)= r_qin(2,i)*3600.*dt
       !ii ADD transmission and evaporation losses here
+      
 	  return      
   endif
 else

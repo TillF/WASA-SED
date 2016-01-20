@@ -176,6 +176,7 @@ SUBROUTINE hymo_all(STATUS)
     use reservoir_h
     use erosion_h
     use model_state_io
+    use utils_h
 
     IMPLICIT NONE
 
@@ -530,7 +531,7 @@ SUBROUTINE hymo_all(STATUS)
             CLOSE(11,status='delete')
         END IF
 
-
+     
 
         !!     debug Output for checking purposes !remove
         !  OPEN(11,FILE=pfadn(1:pfadi)//'debug.out', STATUS='replace')
@@ -744,7 +745,7 @@ SUBROUTINE hymo_all(STATUS)
             CALL open_subdaily_output(f_river_sediment_storage,     'River_Sediment_Storage.out',     'Deposited sediment storage in river reach t (with MAP IDs as in hymo.dat)')
             CALL open_subdaily_output(f_river_susp_sediment_storage,'River_Susp_Sediment_Storage.out','Suspended sediment storage in river reach t (with MAP IDs as in hymo.dat)')
         end if
-        
+       
     END IF
 
 
@@ -1502,7 +1503,8 @@ SUBROUTINE hymo_all(STATUS)
         !     Output sub-daily sediment production (t)
         IF (f_sediment_production .AND. dosediment .AND. dt<24) THEN    !only do output if file is desired, sediment modelling is enabled and model runs in sub-daily resolution
             OPEN(11,FILE=pfadn(1:pfadi)//'sediment_production.out', STATUS='old',POSITION='append')
-            WRITE(fmtstr,'(a,i0,a,i0,a)')'(i0,a,i0,a,i0,',n_sed_class,'(',subasin,'(a,f13.4)))'    !generate format string
+
+            WRITE(fmtstr,'(a,i0,a,i0,a,a,a)')'(i0,a,i0,a,i0,',n_sed_class,'(',subasin,'(a,',fmt_str(maxval(sediment_subbasin_t(1:dayyear,1:nt,1:subasin, 1:n_sed_class))),')))'    !generate format string
 
             DO d=1,dayyear
                 DO counti=1,nt
@@ -1616,27 +1618,18 @@ contains
 
     SUBROUTINE write_output(f_flag,file_name,value_array,spec_decimals)
         ! Output daily values of given array
+        use utils_h    
         IMPLICIT NONE
         LOGICAL, INTENT(IN)                  :: f_flag
         CHARACTER(len=*), INTENT(IN)         :: file_name
         REAL, INTENT(IN)                  :: value_array(:,:)
         INTEGER, optional ::  spec_decimals
-        INTEGER :: digits, decimals
 
         IF (f_flag) THEN    !if output file is enabled
             OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old',POSITION='append')
 
-            digits=floor(log10(max(1.0,maxval(value_array))))+1    !Till: number of pre-decimal digits required
-
-            if (present(spec_decimals)) then
-                decimals=spec_decimals
-            else
-                decimals=max(0,10-digits)     !default: use 11 digits in total in output
-            end if
-
-            write(fmtstr,'(a,i0,a,i0,a,i0,a)') '(i0,a,i0,',subasin,'(a,f',digits+decimals+1,'.',decimals,'))'        !generate format string (subdaily format)
-
-            !write(fmtstr,'(a,i0,a)') '(i0,a,i0,',subasin,'(a,f14.3))'        !generate format string (daily format)
+            write(fmtstr,'(a,i0,a,a,a)')       '(i0,a,i0,',subasin,'(a,',fmt_str(maxval(value_array)),'))'        !generate format string
+            
             DO d=1,dayyear
                 write(11,trim(fmtstr))t,char(9),d,(char(9),value_array(d,i),i=1,subasin)
             END DO
@@ -1646,18 +1639,18 @@ contains
     END SUBROUTINE write_output
 
     SUBROUTINE write_subdaily_output(f_flag,file_name,value_array)
-        ! Output subdaily values of given array
+    ! Output subdaily values of given array
+        use utils_h    
         IMPLICIT NONE
         LOGICAL, INTENT(IN)                  :: f_flag
         CHARACTER(len=*), INTENT(IN)         :: file_name
         REAL, POINTER             :: value_array(:,:,:)
-        INTEGER :: digits
 
         IF (f_flag) THEN    !if output file is enabled
             OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old',POSITION='append')
 
-            digits=floor(log10(max(1.0,maxval(value_array))))+1    !Till: number of pre-decimal digits required
-            write(fmtstr,'(a,i0,a,i0,a,i0,a)') '(i0,a,i0,a,i0,',subasin,'(a,f',max(11,digits),'.',max(0,11-digits-1),'))'        !generate format string (subdaily format)
+            write(fmtstr,'(a,i0,a,a,a)') '(i0,a,i0,a,i0,',subasin,'(a,',fmt_str(maxval(value_array)),'))'        !generate format string
+            
             DO d=1,dayyear
                 DO j=1,nt
                     WRITE (11,fmtstr)t, char(9), d, char(9), j, (char(9),value_array(d,j,i),i=1,subasin)
