@@ -46,7 +46,7 @@ INTEGER, INTENT(IN) :: h !subdaily timestep
 integer :: dummy
 real ::  r_area,  p !wetted perimeter
 real ::  rttime, topw, flow, r_evp,r_infil, dummy2 !,vol, c, rh, tbase, s1, s2
-real :: c0, c1, c2, c3, yy !, Fr
+real :: c0, c1, c2, c3, yy, total_water, total_losses !, Fr
 
 !! Initialise water and sediment storage in each reach   
 if (t == tstart .and. d == 1 .and. h == 1) then !ii Till: is this necessary (already covered by clause below)? shouldn't it be disabled when initial river conditions have been read? 
@@ -91,7 +91,7 @@ if (r_qout(2,i) == -1.) then !Till: do Muskingum routing unless already treated 
 
     !! Compute new outflow r_qout2
     IF (t == tstart .AND. d == 1 .and. h == 1) THEN
-      r_qout(2,i) = r_qin(2,i)
+      r_qout(2,i) = r_qin(2,i) !ii: is this special treatment really necessary? especially when river conds have been loaded?
     ELSE
       r_qout(2,i) = c1 * r_qin(1,i) + c2 * r_qin(2,i) + c3 * r_qout(1,i)
       r_qout(2,i) = min (r_qout(2,i), r_storage(i)/(3600.*dt) + r_qin(2,i)) !Till: not more than the inflow and the storage can flow out of the reach	
@@ -123,7 +123,6 @@ end if !muskingum
 !else
 !  if (r_qout(2,i) > 1.e-2) then
     r_infil = r_ksat(i)* 1e-3 * dt * (r_length(i)* 1000.) * p ![m3] mm/h * h * km
-    if (f_river_infiltration) river_infiltration_t(d, h, i) = r_infil
     
 !  END IF
 !endif
@@ -141,15 +140,31 @@ IF (r_qout(2,i) > 1.e-3) THEN
 END IF
 
 
-!! Calculate amount of water in channel at end of the time step
-!!new version
-r_storage(i) = r_storage(i) + (r_qin(2,i) - r_qout(2,i))*dt*3600.	!
-r_qout(2,i)=max(0.,r_qout(2,i)- ((r_evp + r_infil)/(dt*3600.)))	!subtract losses by evaporation and infiltration
+total_water =  r_storage(i) + r_qout(2,i) *dt*3600. !total amount of water available in this timestep [m3]
+total_losses = r_infil + r_evp
+if (total_water < total_losses) then !if there is less water in the channel to fulfill seepage and evaporative demand...
+        r_infil = r_infil * total_water / total_losses   !...reduce both proportionally
+        r_evp   = r_evp   * total_water / total_losses  
+        total_losses = total_water                        !reduce total losses
+end if
+if (f_river_infiltration) river_infiltration_t(d, h, i) = r_infil !store for output
+if (f_actetranspiration)       aet_t(d, h, i) = aet_t(d, h, i) + r_evp / (area(i)*1e6) !store for output
+if (f_daily_actetranspiration) aet  (d,    i) = aet(d,      i) + r_evp / (area(i)*1e6) !store for output
 
 
-if (r_storage(i) < 0.) then
- r_storage(i) = 0.
-endif
+!update amount of water in channel at end of the time step
+   r_storage(i) = r_storage(i) + (r_qin(2,i) - r_qout(2,i))*dt*3600.	
+   r_storage(i) = max(0.,r_storage(i))	!shouldn't happen, but sometimes still does due to rounding errors
+
+    
+    
+! distribute losses (infiltration, evap) between storage and outflow
+    r_storage(i) = r_storage(i) - total_losses * r_storage(i)          / total_water ![m3]
+    r_qout(2,i)  = r_qout(2,i)  - total_losses * r_qout(2,i)           / total_water ![m3/s]
+
+     !prevent negative values (rather safe than sorry)
+    r_storage(i) = max(0.,r_storage(i))	
+    r_qout(2,i)  = max(0.,r_qout(2,i))	
 
 
 !!Calculation of Froude Number
