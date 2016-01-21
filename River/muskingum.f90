@@ -49,10 +49,13 @@ real ::  rttime, topw, flow, r_evp,r_infil, dummy2 !,vol, c, rh, tbase, s1, s2
 real :: c0, c1, c2, c3, yy !, Fr
 
 !! Initialise water and sediment storage in each reach   
-if (t == tstart .and. d == 1 .and. h == 1) then
+if (t == tstart .and. d == 1 .and. h == 1) then !ii Till: is this necessary (already covered by clause below)? shouldn't it be disabled when initial river conditions have been read? 
     call routing_coefficients(i,1, dummy2, dummy2, dummy2)
 endif
 !-------------------------------------------------------------
+
+r_qout(2,i) = -1. !flag for "not yet computed"
+
 if (r_storage(i) == 0.) then
     ! Calculation of discharge coefficients for ephemeral rivers
     if (r_qin(2,i) > 1.e-3) then
@@ -65,14 +68,11 @@ if (r_storage(i) == 0.) then
           r_storage(i)= r_qin(2,i)*3600.*dt
           velocity(i) = 0.
           !ii ADD transmission and evaporation losses here
-      
-	      return      
       endif
     else
       r_storage(i) = 0.
       r_qout(2,i) = 0. !!rather set this to r_qin(2,i) or to r_storage to preserve mass balance?
       velocity(i) = 0.
-      return
     endif
 else
     ! Calculation of discharge coefficients for perennial rivers
@@ -80,29 +80,35 @@ else
 end if
 !------------------------------------------------------------
 
-!! Compute coefficients
-yy = dt / msk_k(i)
-c0 = yy  + 2. * (1. - msk_x(i))
-c1 = (yy + 2. * msk_x(i))  / c0
-c2 = (yy - 2. * msk_x(i))  / c0
-!c3 = (2. * (1. - msk_x(i)) - yy) / c0 
-c3 = 1 - c1 - c2   !equivalent to line above, but faster and numerically more stable
+if (r_qout(2,i) == -1.) then !Till: do Muskingum routing unless already treated as ephemeral above
+    !! Compute coefficients
+    yy = dt / msk_k(i)
+    c0 = yy  + 2. * (1. - msk_x(i))
+    c1 = (yy + 2. * msk_x(i))  / c0
+    c2 = (yy - 2. * msk_x(i))  / c0
+    !c3 = (2. * (1. - msk_x(i)) - yy) / c0 
+    c3 = 1 - c1 - c2   !equivalent to line above, but faster and numerically more stable
 
-!! Compute new outflow r_qout2
-IF (t == tstart .AND. d == 1 .and. h == 1) THEN
-  r_qout(2,i) = r_qin(2,i)
-ELSE
-  r_qout(2,i) = c1 * r_qin(1,i) + c2 * r_qin(2,i) + c3 * r_qout(1,i)
-  r_qout(2,i) = min (r_qout(2,i), r_storage(i)/(3600.*dt) + r_qin(2,i)) !Till: not more than the inflow and the storage can flow out of the reach	
-END IF
-IF (r_qout(2,i) < 0.) r_qout(2,i) = 0.
+    !! Compute new outflow r_qout2
+    IF (t == tstart .AND. d == 1 .and. h == 1) THEN
+      r_qout(2,i) = r_qin(2,i)
+    ELSE
+      r_qout(2,i) = c1 * r_qin(1,i) + c2 * r_qin(2,i) + c3 * r_qout(1,i)
+      r_qout(2,i) = min (r_qout(2,i), r_storage(i)/(3600.*dt) + r_qin(2,i)) !Till: not more than the inflow and the storage can flow out of the reach	
+    END IF
+    IF (r_qout(2,i) < 0.) r_qout(2,i) = 0.
 
-!! Calculate flow velocity [m/s]
-if (r_area > 0.) then
-  velocity(i)= flow/ r_area
-else
-    velocity(i)= 0.
-endif
+    !! Calculate flow velocity [m/s]
+    if (r_area > 0.) then
+      velocity(i)= flow/ r_area
+    else
+        velocity(i)= 0.
+    endif
+
+end if !muskingum
+
+
+
 
 !! Calculate travel time in [h]
 !IF (flow > 1.e-4) THEN
@@ -134,13 +140,14 @@ IF (r_qout(2,i) > 1.e-3) THEN
   if (r_evp < 0.) r_evp = 0.
 END IF
 
+
 !! Calculate amount of water in channel at end of the time step
 !!new version
 r_storage(i) = r_storage(i) + (r_qin(2,i) - r_qout(2,i))*dt*3600.	!
 r_qout(2,i)=max(0.,r_qout(2,i)- ((r_evp + r_infil)/(dt*3600.)))	!subtract losses by evaporation and infiltration
 
 
-if (r_storage(i) < 0.)then
+if (r_storage(i) < 0.) then
  r_storage(i) = 0.
 endif
 
