@@ -58,7 +58,6 @@ SOURCES=./Hillslope/erosion_h.f90 \
 ./Hillslope/readhymo.f90 \
 ./Hillslope/sedi_yield.f90 \
 ./Hillslope/sedi_yield_subbas.f90 \
-./Hillslope/soildistr.f90 \
 ./Hillslope/soilwat.f90 \
 ./Reservoir/change_sec.f90 \
 ./Reservoir/eq1_wu.f90 \

@@ -49,7 +49,7 @@
 	 pwpsc(ntcinst,maxsoil,maxhori), &
 	 horiths(ntcinst,maxsoil,maxhori), &
 	 thsprof(ntcinst,maxsoil), &
-	 tctheta_s(5,2,ntcinst,maxsoil), &
+!	 tctheta_s(5,2,ntcinst,maxsoil), & !allocated in soil_distr
 	 laitc(ntcinst), &
 	 soilwater(366,ntcinst), &
 	 horithact(ntcinst,maxsoil,maxhori), &
