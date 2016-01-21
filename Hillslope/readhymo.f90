@@ -420,6 +420,7 @@ SUBROUTINE readhymo
 				if (i-1/=ntcinst) then    !less entities read than expected
 					write(*,'(a,i0,a,i0,a)')'WARNING (soil_vegetation.dat): ',i-1,' instead of the expected ',ntcinst,' TCs read.'
 					ntcinst=i-1 !correct value
+                    !ii: all related arrays should be resized
 				end if
 				exit !enough lines read, abort loop
 			end if
@@ -1498,7 +1499,7 @@ SUBROUTINE readhymo
     !** establish values/arrays of distribution functions
     !** for soil properties for soil components
     !   Saturated water content (corrected for coarse fragments)
-    CALL soildistr(thsprof,tctheta_s)
+    tctheta_s => soildistr()
 
 
     !George read of small_reservoirs.dat was removed

@@ -153,8 +153,8 @@ module hymo_h
     !Allocatable      real thsprof(nmunsutc,maxsoil)
     real, allocatable ::   thsprof(:,:)
     ! saturated soil water content distribution (mm)
-    !Allocatable      real tctheta_s(5,2,nmunsutc,maxsoil)
-    real, allocatable ::   tctheta_s(:,:,:,:)
+    !Allocatable      real tctheta_s(5,2,ntcinst,maxsoil)
+    real, pointer ::   tctheta_s(:,:,:,:)
 
     ! SOIL PARAMETERS
     ! IDs of soil components
@@ -671,6 +671,82 @@ contains
         return
 
     END FUNCTION calc_seasonality2
+
+    FUNCTION soildistr()
+ 
+! Code converted using TO_F90 by Alan Miller
+! Date: 2005-06-30  Time: 13:53:36
+
+use common_h
+use params_h
+
+!** subroutine creates array with
+!** distribution functions of soil parameters
+!**
+!** - one distribution for each soil component (SVC)
+!** - linear interpolation between points of distribution
+
+IMPLICIT NONE
+
+
+!REAL, INTENT(IN)                         :: thsprof(ntcinst,maxsoil)
+!REAL, INTENT(soildistr)                        :: soildistr(5,2,ntcinst,maxsoil)
+!REAL, INTENT(soildistr)                        :: soildistr(:,:,:,:)
+REAL, pointer :: soildistr(:,:,:,:)
+
+!  thsprof:   input soil parameters for SVC (Vol%)
+!  soildistr:     values of distribution function of soil parameter
+!           fraction of SVC versus storage volume (mm)
+
+
+
+REAL :: tempx,var1,var2
+
+INTEGER :: k,i
+
+allocate(soildistr(5,2,size(thsprof, dim=1), size(thsprof, dim=2)),STAT = i)
+if (i/=0) then
+    write(*,'(A,i0,a)')'Memory allocation error (',i,') in soil-distr-module. Try disabling some hourly output.'
+    stop
+end if
+
+!  variability around given value of SVC (first interval)
+!  (reference to soil characteristic in mm)
+var1=0.05
+!  variability around given value of SVC (second interval)
+!  (reference to soil characteristic in mm)
+var2=0.1
+
+!Till: saturated soil water content distribution. For each soil, the maximum water storage is modified by -10,-5,0,5,10 % (5 values). The second dimension just holds these percentages (why?)
+
+!** Loop for each soil component
+DO k=1,ntcinst
+  DO i=1,nbr_svc(k)
+    tempx=thsprof(k,i)
+    
+    if (k==5 .AND. i==3) then
+        var2=0.1
+    end if
+    
+    soildistr(1,1,k,i)=tempx-var2*tempx
+    soildistr(2,1,k,i)=tempx-var1*tempx
+    soildistr(3,1,k,i)=tempx
+    soildistr(4,1,k,i)=tempx+var1*tempx
+    soildistr(5,1,k,i)=tempx+var2*tempx
+    
+    soildistr(1,2,k,i)=0.0
+    soildistr(2,2,k,i)=0.1
+    soildistr(3,2,k,i)=0.5
+    soildistr(4,2,k,i)=0.9
+    soildistr(5,2,k,i)=1.0
+    
+!  end of loop for all soil components
+  END DO
+END DO
+
+RETURN
+END FUNCTION soildistr
+
 
 
 end module hymo_h
