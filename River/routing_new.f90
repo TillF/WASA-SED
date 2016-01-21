@@ -61,16 +61,6 @@ IF (STATUS == 0) THEN
         END IF
   READ (11,*); READ(11,*)
   
-!  DO i=1,subasin
-!   READ (11,*) idummy, r_depth(i),r_width(i), r_sideratio(i),r_width_fp(i),r_sideratio_fp(i), &
-!   r_slope(i), r_length(i),manning(i), manning_fp(i),r_ksat(i),r_efactor(i),r_cover(i),r_rock(i),r_alpha(i), &
-!   msk_x(i), msk_k(i),Q_spring(i)
-!     IF (idummy /= id_subbas_extern(i)) THEN
-!     WRITE(*,*) 'Sub-basin-IDs in file river.dat must have the same ordering scheme as in hymo.dat'
-!     STOP 
-!   END IF
-!  END DO
- 
  r_depth(:)=-1. !for checking completeness
  DO WHILE (.TRUE.)        
             READ(11,'(a)', IOSTAT=istate) fmtstr

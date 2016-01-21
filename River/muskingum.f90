@@ -53,29 +53,31 @@ if (t == tstart .and. d == 1 .and. h == 1) then
     call routing_coefficients(i,1, dummy2, dummy2, dummy2)
 endif
 !-------------------------------------------------------------
-if (r_storage(i) > 0.) then
-! Calculation of discharge coefficients for perennial rivers
-  call routing_coefficients (i,2,flow,r_area,p)
-
-! Calculation of discharge coefficients for ephemeral rivers
-elseif (r_storage(i) == 0. .and. r_qin(2,i) > 1.e-3) then
-  call routing_coefficients (i,3,flow,r_area,p)
-! Calculation of flow time [h]
-  rttime = r_length(i)*1000./(velocity(i)*3600.)
-  if (rttime > dt) then
-      !ii this sharp threshold is critical and can produce oscillations!
-      r_qout(2,i) = 0.
-      r_storage(i)= r_qin(2,i)*3600.*dt
-      !ii ADD transmission and evaporation losses here
+if (r_storage(i) == 0.) then
+    ! Calculation of discharge coefficients for ephemeral rivers
+    if (r_qin(2,i) > 1.e-3) then
+      call routing_coefficients (i,3,flow,r_area,p)
+    ! Calculation of flow time [h]
+      rttime = r_length(i)*1000./(velocity(i)*3600.) !Till: this uses the velocity of the previous timestep (?), ii
+      if (rttime > dt) then
+          !ii this sharp threshold is critical and can produce oscillations!
+          r_qout(2,i) = 0.
+          r_storage(i)= r_qin(2,i)*3600.*dt
+          velocity(i) = 0.
+          !ii ADD transmission and evaporation losses here
       
-	  return      
-  endif
+	      return      
+      endif
+    else
+      r_storage(i) = 0.
+      r_qout(2,i) = 0. !!rather set this to r_qin(2,i) or to r_storage to preserve mass balance?
+      velocity(i) = 0.
+      return
+    endif
 else
-  r_storage(i) = 0.
-  r_qout(2,i) = 0.
-  velocity(i) = 0.
-  return
-endif
+    ! Calculation of discharge coefficients for perennial rivers
+  call routing_coefficients (i,2,flow,r_area,p)
+end if
 !------------------------------------------------------------
 
 !! Compute coefficients
@@ -98,15 +100,17 @@ IF (r_qout(2,i) < 0.) r_qout(2,i) = 0.
 !! Calculate flow velocity [m/s]
 if (r_area > 0.) then
   velocity(i)= flow/ r_area
+else
+    velocity(i)= 0.
 endif
 
 !! Calculate travel time in [h]
-IF (flow > 1.e-4) THEN
-  rttime = r_length(i) * r_area / (3.6 * flow)
-END IF
+!IF (flow > 1.e-4) THEN
+!  rttime = r_length(i) * r_area / (3.6 * flow)
+!END IF
 
 !! Calculate transmission losses via riverbed infiltration
-r_infil = 0.
+!r_infil = 0.
 !! Calculate only if groundwater contributions are zero 
 !if (gw_recharge(d,i) == 0..or.subflow(d,i) == 0.) then
 !  r_infil=0.
@@ -135,20 +139,11 @@ END IF
 r_storage(i) = r_storage(i) + (r_qin(2,i) - r_qout(2,i))*dt*3600.	!
 r_qout(2,i)=max(0.,r_qout(2,i)- ((r_evp + r_infil)/(dt*3600.)))	!subtract losses by evaporation and infiltration
 
-!!mixed version to enable comparability (switch to new version in future)
-!r_storage(i) = r_storage(i) + (r_qin(2,i) - r_qout(2,i))*dt*3600. - r_evp
-!r_qout(2,i)=max(0.,r_qout(2,i)- ((r_evp + r_infil)/(dt*3600.)))	!subtract losses by evaporation and infiltration
-
-!old version
-!r_storage(i) = r_storage(i) + (r_qin(2,i) - r_qout(2,i))*dt*3600. - r_evp - r_infil !Till: original version Eva
 
 if (r_storage(i) < 0.)then
  r_storage(i) = 0.
 endif
 
-!if (r_qout(2,i) == 0.) then
-!	r_storage(i) = 0.	!wieso?
-!end if
 
 !!Calculation of Froude Number
 ! Fr=velocity(i)/(sqrt(9.81 * r_depth_cur(i)))
