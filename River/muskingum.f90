@@ -49,7 +49,7 @@ real ::  rttime, topw, flow, r_evp,r_infil, dummy2 !,vol, c, rh, tbase, s1, s2
 real :: c0, c1, c2, c3, yy, total_water, total_losses !, Fr
 
 !! Initialise water and sediment storage in each reach   
-if (t == tstart .and. d == 1 .and. h == 1) then !ii Till: is this necessary (already covered by clause below)? shouldn't it be disabled when initial river conditions have been read? 
+if (t == tstart .and. d == 1 .and. h == 1) then ! Till: is this necessary (already covered by clause below)? 
     call routing_coefficients(i,1, dummy2, dummy2, dummy2)
 endif
 !-------------------------------------------------------------
@@ -63,16 +63,14 @@ if (r_storage(i) == 0.) then
     ! Calculation of flow time [h]
       rttime = r_length(i)*1000./(velocity(i)*3600.) !Till: this uses the velocity of the previous timestep (?), ii
       if (rttime > dt) then
-          !ii this sharp threshold is critical and can produce oscillations!
-          r_qout(2,i) = 0.
-          r_storage(i)= r_qin(2,i)*3600.*dt
-          velocity(i) = 0.
-          !ii ADD transmission and evaporation losses here
+          r_qout(2,i) =      dt / rttime * r_qin(2,i)      !runoff gets stored instead of passing thru 
+          r_storage(i)= (1- dt / rttime) * r_qin(2,i)*3600.*dt
+          velocity(i) = velocity(i) * dt / rttime !gradually decrease velocity to avoid oscillations
       endif
     else
-      r_storage(i) = 0.
-      r_qout(2,i) = 0. !!rather set this to r_qin(2,i) or to r_storage to preserve mass balance?
-      velocity(i) = 0.
+      r_qout(2,i) = 0. 
+      r_storage(i) = r_qin(2,i)*3600.*dt 
+      velocity(i) = velocity(i) * 0.5 !gradually decrease velocity to avoid oscillations
     endif
 else
     ! Calculation of discharge coefficients for perennial rivers
@@ -91,7 +89,7 @@ if (r_qout(2,i) == -1.) then !Till: do Muskingum routing unless already treated 
 
     !! Compute new outflow r_qout2
     IF (t == tstart .AND. d == 1 .and. h == 1) THEN
-      r_qout(2,i) = r_qin(2,i) !ii: is this special treatment really necessary? especially when river conds have been loaded?
+      r_qout(2,i) = r_qin(2,i) 
     ELSE
       r_qout(2,i) = c1 * r_qin(1,i) + c2 * r_qin(2,i) + c3 * r_qout(1,i)
       r_qout(2,i) = min (r_qout(2,i), r_storage(i)/(3600.*dt) + r_qin(2,i)) !Till: not more than the inflow and the storage can flow out of the reach	
@@ -102,7 +100,7 @@ if (r_qout(2,i) == -1.) then !Till: do Muskingum routing unless already treated 
     if (r_area > 0.) then
       velocity(i)= flow/ r_area
     else
-        velocity(i)= 0.
+        velocity(i) = velocity(i) * 0.5 !gradually decrease velocity to avoid oscillations
     endif
 
 end if !muskingum

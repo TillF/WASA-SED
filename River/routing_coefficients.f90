@@ -5,7 +5,7 @@ SUBROUTINE routing_coefficients(i, STATUS, flow, r_area, p)
 !Till: computationally relevant for very initial phase of simulation: fixed bug in iterative estimation of depth from discharge
 !2009-12-18
 
-!Till: computationally relevant: major changes, bugfixes and optimzation
+!Till: computationally relevant: major changes, bugfixes and optimization
 !2009-12-17
 
 !Till: computationally irrelevant: increased iteration counter for determination of river cross section
@@ -129,8 +129,6 @@ IF (STATUS == 1) THEN
 		sed_storage(i,:) = 0.
 	 endif
  END IF
-	 !IF (doloadstate) CALL init_river_conds(trim(pfadn)//'river_storage.stat')!Jose Miguel: load river storage of previous run of the model
-     !Till: outcommented previous line as initialisation has been done before already
 ENDIF
 
 IF (STATUS == 3) THEN
