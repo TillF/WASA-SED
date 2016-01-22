@@ -112,19 +112,19 @@ module hymo_h
     real, allocatable ::  posterrain(:)
     ! number of Soil-Vegetation components (SVCs) in each TC of each Sub-basin and landscape Unit
     !Allocatable      integer nbr_svc(nmunsutc)
-    integer, allocatable :: nbr_svc(:)
+    integer, pointer :: nbr_svc(:)
     ! IDs of soils of each SVC in each TC of each Sub-basin and landscape Unit
     !Allocatable      integer id_soil_intern(maxsoil,nmunsutc)
-    integer, allocatable :: id_soil_intern(:,:)
+    integer, pointer :: id_soil_intern(:,:)
     ! IDs of landuse units of each SVC in each TC of each Sub-basin and landscape Unit
     !Allocatable      integer id_veg_intern(maxsoil,nmunsutc)
-    integer, allocatable ::  id_veg_intern(:,:)
+    integer, pointer ::  id_veg_intern(:,:)
     ! fractions of SVCs in each TC
     !Allocatable      real frac_scv(maxsoil,nmunsutc)
-    real, allocatable :: frac_svc(:,:)
+    real, pointer :: frac_svc(:,:)
     ! fraction of impermeable (rock) area in each TC
     !Allocatable      real rocky(nmunsutc)
-    real, allocatable :: rocky(:)
+    real, pointer :: rocky(:)
     ! IDs of all Subbasin-LU-TC-combinations
     !Allocatable      real tcallid(subasin,maxsoter,maxterrain)
     integer, allocatable :: tcallid(:,:,:)
@@ -135,23 +135,23 @@ module hymo_h
     ! SOIL-VEGETATION COMPONENT PARAMETERS
     ! Till thickness of horizons (lowest horizon may be different from that of profiles)
     !Allocatable      real horiz_thickness(nmunsutc,maxsoil,maxhori)
-    real, allocatable :: horiz_thickness(:,:,:)
+    real, pointer :: horiz_thickness(:,:,:)
     ! lowest horizon to which roots go down
     !Allocatable      integer svcrooth(nmunsutc,maxsoil)
-    integer, allocatable ::  svcrooth(:,:)
+    integer, pointer ::  svcrooth(:,:)
     ! flag indicating bedrock or no bedrock (1/0)
     !Allocatable      integer svcbedr(nmunsutc,maxsoil)
-    integer, allocatable ::   svcbedr(:,:)
+    integer, pointer ::   svcbedr(:,:)
     ! water content at permanent wilting point (VOL%) (variable depending on
     ! plant characteristics, for each Soil-Vegetation unit)
     !Allocatable      real pwpsc(nmunsutc,maxsoil,maxhori)
-    real, allocatable ::  pwpsc(:,:,:)
+    real, pointer ::  pwpsc(:,:,:)
     ! distribution of saturated soil water among horizons
     !Allocatable      real horiths(nmunsutc,maxsoil,maxhori)
-    real, allocatable ::  horiths(:,:,:)
+    real, pointer ::  horiths(:,:,:)
     ! saturated water content integrated for profile (mm)
     !Allocatable      real thsprof(nmunsutc,maxsoil)
-    real, allocatable ::   thsprof(:,:)
+    real, pointer ::   thsprof(:,:)
     ! saturated soil water content distribution (mm)
     !Allocatable      real tctheta_s(5,2,ntcinst,maxsoil)
     real, pointer ::   tctheta_s(:,:,:,:)
@@ -256,7 +256,7 @@ module hymo_h
     !Allocatable      real lai_c(366,subasin)
     REAL, allocatable :: laisu(:)
     !Allocatable      real laitc(nmunsutc)
-    real, allocatable ::    laitc(:)
+    real, pointer ::    laitc(:)
 
     !-------------------------------------------------------
     ! WATER BALANCE VARIABLES
@@ -364,16 +364,16 @@ module hymo_h
     ! WATER BALANCE VARIABLES      TERRAIN COMPONENT SCALE
     ! average soil moisture of every terrain component (mm)
     !Allocatable      real soilwater(366,nmunsutc)
-    real, allocatable :: soilwater(:,:)
+    real, pointer :: soilwater(:,:)
     ! soil moisture in every horizon of each SVC in each TC in each LU in each subbasin (mm)
     !Allocatable      real horithact(nmunsutc,maxsoil,maxhori)
-    real, allocatable ::  horithact(:,:,:)
+    real, pointer ::  horithact(:,:,:)
     ! lateral subsurface runoff to be redistributed between SVCs (m**3)
     !Allocatable      real latred(nmunsutc,maxhori*3)
     real, allocatable ::   latred(:,:)
     ! interception storage of each SVC in each TC (mm)
     !Allocatable      real intercept(nmunsutc,maxsoil)
-    real, allocatable ::   intercept(:,:)
+    real, pointer ::   intercept(:,:)
     ! interception evaporation daily, proportionally distributed among hours (mm)
     !AllocatableREAL :: intcept_mem(maxterrain,maxsoil,24)
     real, allocatable :: intcept_mem (:,:,:)
@@ -383,25 +383,25 @@ module hymo_h
 
     ! saturated fraction of each SVC in each TC (-)
     !Allocatable      real frac_sat(nmunsutc,maxsoil)
-    real, allocatable ::   frac_sat(:,:)
+    real, pointer ::   frac_sat(:,:)
     ! average real evapotranspiration of every terrain component (mm)
     !Allocatable      real aettc(nmunsutc)
-    real, allocatable :: aettc(:)
+    real, pointer :: aettc(:)
     ! average soil evaporation of each terrain component (mm)
     !Allocatable      real soilettc(nmunsutc)
-    real, allocatable :: soilettc(:)
+    real, pointer :: soilettc(:)
     ! average interception evaporation of every terrain component (mm)
     !Allocatable      real intctc(nmunsutc)
-    real, allocatable :: intctc(:)
+    real, pointer :: intctc(:)
     ! horton overland flow
     !Allocatable      real horttc(nmunsutc)
-    real, allocatable :: horttc(:)
+    real, pointer :: horttc(:)
     ! groundwater recharge (percolation)
     !Allocatable      real gwrtc(nmunsutc)
-    real, allocatable ::  gwrtc(:)
+    real, pointer ::  gwrtc(:)
     ! deep groundwater recharge
     !Allocatable      real deepgwrtc(nmunsutc)
-    real, allocatable ::   deepgwrtc(:)
+    real, pointer ::   deepgwrtc(:)
     ! actual transpiration of each SVC (only plants)
     REAL , allocatable :: aet1sc(:,:)
     ! soil evaporation of each SVC
@@ -674,78 +674,75 @@ contains
 
     FUNCTION soildistr()
  
-! Code converted using TO_F90 by Alan Miller
-! Date: 2005-06-30  Time: 13:53:36
+    use common_h
+    use params_h
 
-use common_h
-use params_h
+    !** subroutine creates array with
+    !** distribution functions of soil parameters
+    !**
+    !** - one distribution for each soil component (SVC)
+    !** - linear interpolation between points of distribution
 
-!** subroutine creates array with
-!** distribution functions of soil parameters
-!**
-!** - one distribution for each soil component (SVC)
-!** - linear interpolation between points of distribution
-
-IMPLICIT NONE
+    IMPLICIT NONE
 
 
-!REAL, INTENT(IN)                         :: thsprof(ntcinst,maxsoil)
-!REAL, INTENT(soildistr)                        :: soildistr(5,2,ntcinst,maxsoil)
-!REAL, INTENT(soildistr)                        :: soildistr(:,:,:,:)
-REAL, pointer :: soildistr(:,:,:,:)
+    !REAL, INTENT(IN)                         :: thsprof(ntcinst,maxsoil)
+    !REAL, INTENT(soildistr)                        :: soildistr(5,2,ntcinst,maxsoil)
+    !REAL, INTENT(soildistr)                        :: soildistr(:,:,:,:)
+    REAL, pointer :: soildistr(:,:,:,:)
 
-!  thsprof:   input soil parameters for SVC (Vol%)
-!  soildistr:     values of distribution function of soil parameter
-!           fraction of SVC versus storage volume (mm)
+    !  thsprof:   input soil parameters for SVC (Vol%)
+    !  soildistr:     values of distribution function of soil parameter
+    !           fraction of SVC versus storage volume (mm)
 
 
 
-REAL :: tempx,var1,var2
+    REAL :: tempx,var1,var2
 
-INTEGER :: k,i
+    INTEGER :: k,i
 
-allocate(soildistr(5,2,size(thsprof, dim=1), size(thsprof, dim=2)),STAT = i)
-if (i/=0) then
-    write(*,'(A,i0,a)')'Memory allocation error (',i,') in soil-distr-module. Try disabling some hourly output.'
-    stop
-end if
-
-!  variability around given value of SVC (first interval)
-!  (reference to soil characteristic in mm)
-var1=0.05
-!  variability around given value of SVC (second interval)
-!  (reference to soil characteristic in mm)
-var2=0.1
-
-!Till: saturated soil water content distribution. For each soil, the maximum water storage is modified by -10,-5,0,5,10 % (5 values). The second dimension just holds these percentages (why?)
-
-!** Loop for each soil component
-DO k=1,ntcinst
-  DO i=1,nbr_svc(k)
-    tempx=thsprof(k,i)
-    
-    if (k==5 .AND. i==3) then
-        var2=0.1
+    allocate(soildistr(5,2,size(thsprof, dim=1), size(thsprof, dim=2)),STAT = i)
+    if (i/=0) then
+        write(*,'(A,i0,a)')'Memory allocation error (',i,') in soil-distr-module. Try disabling some hourly output.'
+        stop
     end if
-    
-    soildistr(1,1,k,i)=tempx-var2*tempx
-    soildistr(2,1,k,i)=tempx-var1*tempx
-    soildistr(3,1,k,i)=tempx
-    soildistr(4,1,k,i)=tempx+var1*tempx
-    soildistr(5,1,k,i)=tempx+var2*tempx
-    
-    soildistr(1,2,k,i)=0.0
-    soildistr(2,2,k,i)=0.1
-    soildistr(3,2,k,i)=0.5
-    soildistr(4,2,k,i)=0.9
-    soildistr(5,2,k,i)=1.0
-    
-!  end of loop for all soil components
-  END DO
-END DO
 
-RETURN
-END FUNCTION soildistr
+    !  variability around given value of SVC (first interval)
+    !  (reference to soil characteristic in mm)
+    var1=0.05
+    !  variability around given value of SVC (second interval)
+    !  (reference to soil characteristic in mm)
+    var2=0.1
+
+    !Till: saturated soil water content distribution. For each soil, the maximum water storage is modified by -10,-5,0,5,10 % (5 values). The second dimension just holds these percentages (why?)
+
+    !** Loop for each soil component
+    DO k=1,ntcinst
+      DO i=1,nbr_svc(k)
+        tempx=thsprof(k,i)
+    
+        if (k==5 .AND. i==3) then
+            var2=0.1
+        end if
+    
+        soildistr(1,1,k,i)=tempx-var2*tempx
+        soildistr(2,1,k,i)=tempx-var1*tempx
+        soildistr(3,1,k,i)=tempx
+        soildistr(4,1,k,i)=tempx+var1*tempx
+        soildistr(5,1,k,i)=tempx+var2*tempx
+    
+        soildistr(1,2,k,i)=0.0
+        soildistr(2,2,k,i)=0.1
+        soildistr(3,2,k,i)=0.5
+        soildistr(4,2,k,i)=0.9
+        soildistr(5,2,k,i)=1.0
+    
+    !  end of loop for all soil components
+      END DO
+    END DO
+
+    RETURN
+    END FUNCTION soildistr
 
 
 
