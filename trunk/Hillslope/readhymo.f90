@@ -212,7 +212,7 @@ SUBROUTINE readhymo
     CLOSE (11)
     if (i/=subasin) then        !Till: correct number of subbasins to be modelled
         write(*,'(A,i0,a,i0,a)')'WARNING: do.dat specifies ',subasin,' subbasins, routing.dat contains ',i,'. Only these will be modelled.'
-        subasin=i
+        subasin=i !ii: check, if unused memory can be freed (see new_real_array3)
         call pause1
     end if
 
@@ -420,7 +420,32 @@ SUBROUTINE readhymo
 				if (i-1/=ntcinst) then    !less entities read than expected
 					write(*,'(a,i0,a,i0,a)')'WARNING (soil_vegetation.dat): ',i-1,' instead of the expected ',ntcinst,' TCs read.'
 					ntcinst=i-1 !correct value
-                    !ii: all related arrays should be resized
+                    ! resize arrays
+                    nbr_svc =>new_int_array1(nbr_svc, ntcinst, 1)
+                    rocky=>     new_real_array1(rocky, ntcinst,1)
+	                laitc=>     new_real_array1(laitc, ntcinst,1)
+	                aettc=>     new_real_array1(aettc, ntcinst,1)
+	                soilettc=>  new_real_array1(soilettc, ntcinst,1)
+	                intctc=>    new_real_array1(intctc, ntcinst,1)
+	                horttc=>    new_real_array1(horttc, ntcinst,1)
+	                gwrtc=>     new_real_array1(gwrtc, ntcinst,1)
+	                deepgwrtc=> new_real_array1(deepgwrtc, ntcinst,1)
+                    
+                    id_soil_intern=> new_int_array2(id_soil_intern, ntcinst,2)
+	                id_veg_intern => new_int_array2(id_veg_intern, ntcinst,2)
+                    svcrooth =>      new_int_array2(svcrooth, ntcinst,1)
+                    svcbedr  =>      new_int_array2(svcbedr, ntcinst,1)
+                    
+                    frac_svc  => new_real_array2(frac_svc, ntcinst,2)
+	                soilwater => new_real_array2(soilwater,ntcinst,2)
+                    
+	                intercept=> new_real_array2(intercept, ntcinst,1)
+	                frac_sat => new_real_array2(frac_sat, ntcinst,1) 
+                    
+                    horiz_thickness=> new_real_array3(horiz_thickness,ntcinst,1)
+                    pwpsc          => new_real_array3(pwpsc          ,ntcinst,1)
+	                horiths        => new_real_array3(horiths        ,ntcinst,1)
+	                horithact      => new_real_array3(horithact      ,ntcinst,1)
 				end if
 				exit !enough lines read, abort loop
 			end if
@@ -700,6 +725,7 @@ SUBROUTINE readhymo
             h=h+1
             IF (istate==-1) THEN    !no further line
                 nsvc=i-1    !correct total number of SVCs that have been read
+                 !ii: check, if unused memory can be freed (see new_real_array3)
                 exit        !exit loop
             END IF
             if (trim(cdummy)=='') cycle    !skip blank lines
@@ -768,6 +794,7 @@ SUBROUTINE readhymo
                 READ(11,*,  IOSTAT=istate) j, temp1
                 IF (istate/=0) THEN            !no further line
                     n_sed_class=i-1        !correct total number of particle size classes that have been read
+                     !ii: check, if unused memory can be freed (see new_real_array3)
                     exit                !exit loop
                 END IF
                 upper_limit(i)=temp1        !store upper limit of particle size class

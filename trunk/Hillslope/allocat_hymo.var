@@ -39,23 +39,9 @@
 	 avail_ac(366,subasin), &
 	 
 	 nbr_svc(ntcinst), &
-	 id_soil_intern(maxsoil,ntcinst), &
-	 id_veg_intern(maxsoil,ntcinst), &
-	 frac_svc(maxsoil,ntcinst), &
+	 
 	 rocky(ntcinst), &
-	 horiz_thickness(ntcinst,maxsoil,maxhori), &
-	 svcrooth(ntcinst,maxsoil), &
-	 svcbedr(ntcinst,maxsoil), &
-	 pwpsc(ntcinst,maxsoil,maxhori), &
-	 horiths(ntcinst,maxsoil,maxhori), &
-	 thsprof(ntcinst,maxsoil), &
-!	 tctheta_s(5,2,ntcinst,maxsoil), & !allocated in soil_distr
 	 laitc(ntcinst), &
-	 soilwater(366,ntcinst), &
-	 horithact(ntcinst,maxsoil,maxhori), &
-!	 latred(ntcinst,maxhori*3), &		!Till: latred is allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
-	 intercept(ntcinst,maxsoil), &
-	 frac_sat(ntcinst,maxsoil), &
 	 aettc(ntcinst), &
 	 soilettc(ntcinst), &
 	 intctc(ntcinst), &
@@ -63,6 +49,27 @@
 	 gwrtc(ntcinst), &
 	 deepgwrtc(ntcinst), &
 
+	 id_soil_intern(maxsoil,ntcinst), &
+	 id_veg_intern(maxsoil,ntcinst), &
+	 svcrooth(ntcinst,maxsoil), &
+	 svcbedr(ntcinst,maxsoil), &
+	 	 
+	 frac_svc(maxsoil,ntcinst), &
+	 soilwater(366,ntcinst), &
+
+	 intercept(ntcinst,maxsoil), &
+	 frac_sat(ntcinst,maxsoil), &
+	 thsprof(ntcinst,maxsoil), &
+
+	 horiz_thickness(ntcinst,maxsoil,maxhori), &
+	 pwpsc(ntcinst,maxsoil,maxhori), &
+	 horiths(ntcinst,maxsoil,maxhori), &
+	 horithact(ntcinst,maxsoil,maxhori), &
+
+	 tctheta_s(5,2,ntcinst,maxsoil), & !allocated in soil_distr
+	 
+!	 latred(ntcinst,maxhori*3), &		!Till: latred is allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
+	 
 	 id_lu_extern(nsoter), &
 	 nbrterrain(nsoter), &
 	 id_terrain_intern(maxterrain,nsoter), &

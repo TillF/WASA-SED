@@ -162,7 +162,160 @@ integer :: digits, fw_req, fw=11, dec=3
 end function fmt_str
 
 
+FUNCTION new_int_array1(old_pointer, newlength, dim_in)
+ !shrinks a given integer array (allocate new memory, copy contents, free old mem)
+    IMPLICIT NONE
+    integer, pointer :: new_int_array1(:)
+    integer, pointer :: old_pointer(:)
+    INTEGER, intent(in) :: newlength
+    INTEGER, optional :: dim_in
+    INTEGER :: change_dim, old_dims(1), i
 
+    change_dim=1
+    if (present(dim_in))   change_dim=dim_in
 
+    DO i=1,size(old_dims)
+        old_dims(i)=size(old_pointer, dim=i)
+    END DO
 
+    old_dims(change_dim)=newlength
+
+    allocate(new_int_array1(old_dims(1)),STAT = i)
+    if (i/=0) then
+        write(*,'(A,i0,a)')'Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
+        stop
+    end if
+
+    new_int_array1(1:newlength)=old_pointer(1:newlength)
+    deallocate(old_pointer) 
+    
+END FUNCTION new_int_array1   
+
+FUNCTION new_real_array1(old_pointer, newlength, dim_in)
+ !shrinks a given integer array (allocate new memory, copy contents, free old mem)
+    IMPLICIT NONE
+    real, pointer :: new_real_array1(:)
+    real, pointer :: old_pointer(:)
+    INTEGER, intent(in) :: newlength
+    INTEGER, optional :: dim_in
+    INTEGER :: change_dim, old_dims(1), i
+
+    change_dim=1
+    if (present(dim_in))   change_dim=dim_in
+
+    DO i=1,size(old_dims)
+        old_dims(i)=size(old_pointer, dim=i)
+    END DO
+
+    old_dims(change_dim)=newlength
+
+    allocate(new_real_array1(old_dims(1)),STAT = i)
+    if (i/=0) then
+        write(*,'(A,i0,a)')'Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
+        stop
+    end if
+
+    new_real_array1(1:newlength)=old_pointer(1:newlength)
+    deallocate(old_pointer) 
+    
+END FUNCTION new_real_array1   
+
+FUNCTION new_int_array2(old_pointer, newlength, dim_in)
+ !shrinks a given integer array (allocate new memory, copy contents, free old mem)
+    IMPLICIT NONE
+    INTEGER, pointer :: new_int_array2(:,:)
+    INTEGER, pointer :: old_pointer(:,:)
+    INTEGER, intent(in) :: newlength
+    INTEGER, optional :: dim_in
+    INTEGER :: change_dim, old_dims(2), i
+
+    change_dim=1
+    if (present(dim_in))   change_dim=dim_in
+
+    DO i=1,size(old_dims)
+        old_dims(i)=size(old_pointer, dim=i)
+    END DO
+
+    old_dims(change_dim)=newlength
+
+    allocate(new_int_array2(old_dims(1),old_dims(2)),STAT = i)
+    if (i/=0) then
+        write(*,'(A,i0,a)')'Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
+        stop
+    end if
+    if (change_dim==1) then
+        new_int_array2(1:newlength,:)=old_pointer(1:newlength,:)
+    else
+        new_int_array2(:,1:newlength)=old_pointer(:,1:newlength)
+    end if
+    
+    deallocate(old_pointer) 
+    
+    END FUNCTION new_int_array2
+    
+FUNCTION new_real_array2(old_pointer, newlength, dim_in)
+ !shrinks a given integer array (allocate new memory, copy contents, free old mem)
+    IMPLICIT NONE
+    real, pointer :: new_real_array2(:,:)
+    real, pointer :: old_pointer(:,:)
+    INTEGER, intent(in) :: newlength
+    INTEGER, optional :: dim_in
+    INTEGER :: change_dim, old_dims(2), i
+
+    change_dim=1
+    if (present(dim_in))   change_dim=dim_in
+
+    DO i=1,size(old_dims)
+        old_dims(i)=size(old_pointer, dim=i)
+    END DO
+
+    old_dims(change_dim)=newlength
+
+    allocate(new_real_array2(old_dims(1),old_dims(2)),STAT = i)
+    if (i/=0) then
+        write(*,'(A,i0,a)')'Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
+        stop
+    end if
+    if (change_dim==1) then
+        new_real_array2(1:newlength,:)=old_pointer(1:newlength,:)
+    else
+        new_real_array2(:,1:newlength)=old_pointer(:,1:newlength)
+    end if
+    
+    deallocate(old_pointer) 
+    
+    END FUNCTION new_real_array2   
+
+FUNCTION new_real_array3(old_pointer, newlength, dim_in)
+ !shrinks a given integer array (allocate new memory, copy contents, free old mem)
+    IMPLICIT NONE
+    real, pointer :: new_real_array3(:,:,:)
+    real, pointer :: old_pointer(:,:,:)
+    INTEGER, intent(in) :: newlength
+    INTEGER, optional :: dim_in
+    INTEGER :: change_dim, old_dims(3), i
+
+    change_dim=1
+    if (present(dim_in))   change_dim=dim_in
+
+    DO i=1,size(old_dims)
+        old_dims(i)=size(old_pointer, dim=i)
+    END DO
+
+    old_dims(change_dim)=newlength
+
+    allocate(new_real_array3(old_dims(1),old_dims(2),old_dims(3)),STAT = i)
+    if (i/=0) then
+        write(*,'(A,i0,a)')'Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
+        stop
+    end if
+    if (change_dim==1) new_real_array3(1:newlength,:,:)=old_pointer(1:newlength,:,:)
+    if (change_dim==2) new_real_array3(:,1:newlength,:)=old_pointer(:,1:newlength,:)
+    if (change_dim==3) new_real_array3(:,:,1:newlength)=old_pointer(:,:,1:newlength)
+    
+    deallocate(old_pointer) 
+    
+END FUNCTION new_real_array3   
+
+    
 END MODULE utils_h
