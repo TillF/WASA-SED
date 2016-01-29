@@ -677,6 +677,7 @@ contains
             i = id_ext2int(i, id_subbas_extern) !convert external to internal id
 			if (i < 1 .OR. i> subasin) then
 				WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in river_storage.stat, ignored.'
+                cycle 
 			end if
        
             r_storage(i)=r_storage(i)+dummy1        !add the previous storage to the river reach additionally to eventual volume from spring or runoff contribution.
@@ -719,7 +720,8 @@ contains
                     ENDIF
                     i = id_ext2int(i, id_subbas_extern) !convert external to internal id
 		    if (i < 1 .OR. i> subasin) then
-		 	WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in sediment_storage.stat, ignored.'
+		 	    WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in sediment_storage.stat, ignored.'
+                cycle
 		    end if
 	      riverbed_storage(i,k)=dummy1
 	      enddo
@@ -762,7 +764,8 @@ contains
                     ENDIF
                     i = id_ext2int(i, id_subbas_extern) !convert external to internal id
 		    if (i < 1 .OR. i> subasin) then
-		 	WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in susp_sediment_storage.stat, ignored.'
+		 	    WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in susp_sediment_storage.stat, ignored.'
+                cycle
 		    end if
 	      sed_storage(i,k)=dummy1
 	      enddo
