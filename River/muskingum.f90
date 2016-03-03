@@ -140,6 +140,13 @@ END IF
 
 total_water =  r_storage(i) + r_qout(2,i) *dt*3600. !total amount of water available in this timestep [m3]
 total_losses = r_infil + r_evp
+
+if (total_water == 0.) then !no water in reach
+        r_infil = 0.
+        r_evp   = 0.
+        total_losses = 0.
+end if
+
 if (total_water < total_losses) then !if there is less water in the channel to fulfill seepage and evaporative demand...
         r_infil = r_infil * total_water / total_losses   !...reduce both proportionally
         r_evp   = r_evp   * total_water / total_losses  
@@ -154,16 +161,16 @@ if (f_daily_actetranspiration) aet  (d,    i) = aet(d,      i) + r_evp / (area(i
    r_storage(i) = r_storage(i) + (r_qin(2,i) - r_qout(2,i))*dt*3600.	
    r_storage(i) = max(0.,r_storage(i))	!shouldn't happen, but sometimes still does due to rounding errors
 
-    
-    
+ 
+if (total_losses > 0) then
 ! distribute losses (infiltration, evap) between storage and outflow
     r_storage(i) = r_storage(i) - total_losses * r_storage(i)          / total_water ![m3]
     r_qout(2,i)  = r_qout(2,i)  - total_losses * r_qout(2,i)           / total_water ![m3/s]
-
      !prevent negative values (rather safe than sorry)
     r_storage(i) = max(0.,r_storage(i))	
     r_qout(2,i)  = max(0.,r_qout(2,i))	
 
+end if !total losses>0    
 
 !!Calculation of Froude Number
 ! Fr=velocity(i)/(sqrt(9.81 * r_depth_cur(i)))
