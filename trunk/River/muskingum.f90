@@ -84,7 +84,8 @@ endif
 
     !! Calculate flow velocity [m/s]
     if (r_area > 0.) then
-      velocity(i)= flow/ r_area !Till: isn't that obsolete, as has already been computed in routing_coefficients?
+      flow = (flow + r_qin(2,i) + r_qout(2,i)) / 2 !update hydraulic estimation of flow with Muskingum results
+      velocity(i)= flow/ r_area !update velocity
     else
         velocity(i) = velocity(i) * 0.5 !gradually decrease velocity to avoid oscillations
     endif
