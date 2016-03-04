@@ -651,7 +651,7 @@ contains
     	use hymo_h
 
         character(len=*),intent(in):: river_conds_file        !file to load from
-        integer :: sb_counter, iostatus, i
+        integer :: subbas_id, iostatus, i
         real :: dummy1
 
         OPEN(11,FILE=river_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
@@ -665,24 +665,30 @@ contains
     
         !read 2 header lines into buffer
         READ(11,*); READ(11,*)
-		r_storage(:)=0.
-        DO sb_counter=1,subasin
+		r_storage(:)=-1. !indicator for "not read"
+        
+        DO WHILE (.TRUE.) 
             READ(11,*,IOSTAT=iostatus) i, dummy1
-			IF (iostatus/=0) THEN
-                WRITE(*,'(a,a,a)') 'WARNING: could not read initial river storage from river_storage.stat, file ignored, assumed 0.',&
-                    ' Check this file, model_state_io.f90 or consider switching off doloadstate in file do.dat'
-                EXIT
-            ENDIF
-
-            i = id_ext2int(i, id_subbas_extern) !convert external to internal id
-			if (i < 1 .OR. i> subasin) then
-				WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in river_storage.stat, ignored.'
+			IF (iostatus /=0) exit 
+            
+            subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
+			if (subbas_id < 1 .OR. subbas_id > subasin) then
+				WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ', i,' in river_storage.stat, ignored.'
                 cycle 
 			end if
        
-            r_storage(i)=r_storage(i)+dummy1        !add the previous storage to the river reach additionally to eventual volume from spring or runoff contribution.
-        ENDDO
+            r_storage(subbas_id)=dummy1        !add the previous storage to the river reach additionally to potential volume from spring or runoff contribution.
+        END DO
         close(11)
+        
+        if (count(r_storage==-1.) > 0) then  
+            WRITE(*,'(A)') 'WARNING: could not read initial river storage from river_storage.stat for the following subbasins, assumed 0:'
+            DO subbas_id=1,subasin
+                if (r_storage(i)==-1.) WRITE(*,'(i0)') subbas_id
+                r_storage(i)=0.
+            END DO
+        end if
+        
     end subroutine init_river_conds
 
     
@@ -694,10 +700,10 @@ contains
         implicit none
 
         character(len=*),intent(in):: sediment_conds_file        !file to load from
-        integer :: sb_counter, iostatus, i,k,class_counter
+        integer :: subbas_id, iostatus, i, k
         real :: dummy1
 
-        riverbed_storage(:,:)=0.    !default value ii: check if all entities have been initialized
+        riverbed_storage(:,:)=-1. !indicator for "not read"
         OPEN(11,FILE=sediment_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
         if (i/=0) then
             write(*,'(a,a,a)')'WARNING: Sediment storage file ''',trim(sediment_conds_file),''' not found, using defaults.'
@@ -709,73 +715,95 @@ contains
     
         !read 2 header lines into buffer
         READ(11,*); READ(11,*)
-        DO sb_counter=1,subasin
-              do class_counter=1,n_sed_class
+        
+        DO WHILE (.TRUE.) 
+	        READ(11,*,IOSTAT=iostatus) i, k, dummy1
+            IF (iostatus == -1) exit !end of file
+		    IF (iostatus /= 0) THEN
+		        WRITE(*,'(a,a,a)') 'WARNING: format error in sediment_storage.stat, line skipped, assumed 0.'
+            ENDIF
 
-	            READ(11,*,IOSTAT=iostatus) i, k, dummy1
-		    IF (iostatus/=0) THEN
-		      WRITE(*,'(a,a,a)') 'WARNING: could not read initial sediment storage from sediment_storage.stat, file ignored, assumed 0.',&
-                      ' Check this file, model_state_io.f90 or consider switching off doloadstate in file do.dat'
-                    EXIT
-                    ENDIF
-                    i = id_ext2int(i, id_subbas_extern) !convert external to internal id
-		    if (i < 1 .OR. i> subasin) then
-		 	    WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in sediment_storage.stat, ignored.'
-                cycle
-		    end if
-	      riverbed_storage(i,k)=dummy1
-	      enddo
+            subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
+			if (subbas_id < 1 .OR. subbas_id > subasin) then
+				WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in sediment_storage.stat, ignored.'
+                cycle 
+            end if
+                
+            if (k < 1 .OR. k > n_sed_class) then
+				WRITE(*,'(a,i0,a)') 'WARNING: unknown particle size class ',k,' in sediment_storage.stat, ignored.'
+                cycle 
+			end if
+	        riverbed_storage(subbas_id,k)=dummy1
         ENDDO
         close(11)
-    end subroutine init_sediment_conds
+        
+        if (count(riverbed_storage==-1.) > 0) then  
+            WRITE(*,'(A)') 'WARNING: could not read initial river sediment storage from sediment_storage.stat for the following subbasins, assumed 0:'
+            DO subbas_id=1,subasin
+                if (count(riverbed_storage(subbas_id,:)==-1)) WRITE(*,'(i0)') subbas_id
+            END DO
+            where(riverbed_storage==-1) riverbed_storage=0.
+        end if
 
-    subroutine init_susp_sediment_conds(susp_sediment_conds_file)
-  
+   end subroutine init_sediment_conds
+
+       
+   subroutine init_susp_sediment_conds(susp_sediment_conds_file)
         use routing_h
-        use time_h
         use params_h
         use utils_h
-    	use hymo_h
+	    use hymo_h
+        implicit none
 
         character(len=*),intent(in):: susp_sediment_conds_file        !file to load from
-        integer :: sb_counter, iostatus, i,k,class_counter
+        integer :: subbas_id, iostatus, i, k
         real :: dummy1
 
-        sed_storage(:,:)=0.    !default value ii: check if all entities have been initialized
+        sed_storage(:,:)=-1. !indicator for "not read"
         OPEN(11,FILE=susp_sediment_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
         if (i/=0) then
-            write(*,'(a,a,a)')'WARNING: Suspended sediment storage file ''',trim(susp_sediment_conds_file),''' not found, using defaults.'
+            write(*,'(a,a,a)')'WARNING: Sediment storage file ''',trim(susp_sediment_conds_file),''' not found, using defaults.'
             CLOSE(11)
 			return
         end if
 
-        write(*,'(a,a,a)')'Initialize suspended sediment storage from file ''',trim(susp_sediment_conds_file),'''.'
+        write(*,'(a,a,a)')'Initialize sediment storage from file ''',trim(susp_sediment_conds_file),'''.'
     
         !read 2 header lines into buffer
         READ(11,*); READ(11,*)
-        DO sb_counter=1,subasin
-              do class_counter=1,n_sed_class
+        
+        DO WHILE (.TRUE.) 
+	        READ(11,*,IOSTAT=iostatus) i, k, dummy1
+            IF (iostatus == -1) exit !end of file
+		    IF (iostatus /= 0) THEN
+		        WRITE(*,'(a,a,a)') 'WARNING: format error in susp_sediment_storage.stat, line skipped, assumed 0.'
+            ENDIF
 
-	            READ(11,*,IOSTAT=iostatus) i, k, dummy1
-		    IF (iostatus/=0) THEN
-		      WRITE(*,'(a,a,a)') 'WARNING: could not read initial suspended sediment storage from susp_sediment_storage.stat, file ignored, assumed 0.',&
-                      ' Check this file, model_state_io.f90 or consider switching off doloadstate in file do.dat'
-                    EXIT
-                    ENDIF
-                    i = id_ext2int(i, id_subbas_extern) !convert external to internal id
-		    if (i < 1 .OR. i> subasin) then
-		 	    WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in susp_sediment_storage.stat, ignored.'
-                cycle
-		    end if
-	      sed_storage(i,k)=dummy1
-	      enddo
+            subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
+			if (subbas_id < 1 .OR. subbas_id > subasin) then
+				WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in susp_sediment_storage.stat, ignored.'
+                cycle 
+            end if
+                
+            if (k < 1 .OR. k > n_sed_class) then
+				WRITE(*,'(a,i0,a)') 'WARNING: unknown particle size class ',k,' in susp_sediment_storage.stat, ignored.'
+                cycle 
+			end if
+	        sed_storage(subbas_id,k)=dummy1
         ENDDO
         close(11)
+        
+        if (count(sed_storage==-1.) > 0) then  
+            WRITE(*,'(A)') 'WARNING: could not read initial river sediment storage from susp_sediment_storage.stat for the following subbasins, assumed 0:'
+            DO subbas_id=1,subasin
+                if (count(sed_storage(subbas_id,:)==-1)) WRITE(*,'(i0)') subbas_id
+            END DO
+            where(sed_storage==-1) sed_storage=0.
+        end if
+
     end subroutine init_susp_sediment_conds
 
-    
-    
-    
+   
     subroutine init_lake_conds(lake_conds_file)
         !the variable that should be initialized here is the lakewater0 which is used in lake.f90 and declared in reservoir_lake_h.f90
         use lake_h
