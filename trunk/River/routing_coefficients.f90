@@ -118,12 +118,16 @@ IF (STATUS == 1) THEN !initialisation, called at start of simulations
 
 	!Calculation of initial water volume for each river stretch [m3]
  IF (.NOT. doloadstate) then
-	 if (r_qin(2,i) == 0.) then
+     if (r_qin(2,i) == 0.) then
 		r_storage(i) = 0. 
 	 else
 		r_storage(i) =   r_area * r_length(i) * 1000.
-		sed_storage(i,:) = 0.
-	 endif
+     endif
+     
+     if (dosediment) then
+        sed_storage(i,:) = 0.
+        riverbed_storage(i,:) = 0.
+    end if
  END IF
 ENDIF
 
