@@ -740,7 +740,7 @@ contains
         if (count(riverbed_storage==-1.) > 0) then  
             WRITE(*,'(A)') 'WARNING: could not read initial river sediment storage from sediment_storage.stat for the following subbasins, assumed 0:'
             DO subbas_id=1,subasin
-                if (count(riverbed_storage(subbas_id,:)==-1)) WRITE(*,'(i0)') subbas_id
+                if (count(riverbed_storage(subbas_id,:)==-1)> 0) WRITE(*,'(i0)') subbas_id
             END DO
             where(riverbed_storage==-1) riverbed_storage=0.
         end if
@@ -796,7 +796,7 @@ contains
         if (count(sed_storage==-1.) > 0) then  
             WRITE(*,'(A)') 'WARNING: could not read initial river sediment storage from susp_sediment_storage.stat for the following subbasins, assumed 0:'
             DO subbas_id=1,subasin
-                if (count(sed_storage(subbas_id,:)==-1)) WRITE(*,'(i0)') subbas_id
+				if (count(sed_storage(subbas_id,:)==-1) > 0) WRITE(*,'(i0)') subbas_id
             END DO
             where(sed_storage==-1) sed_storage=0.
         end if
