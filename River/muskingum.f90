@@ -74,12 +74,9 @@ endif
     c3 = 1 - c1 - c2   !equivalent to line above, but faster and numerically more stable
 
     !! Compute new outflow r_qout2
-    IF (t == tstart .AND. d == 1 .and. h == 1) THEN
-      r_qout(2,i) = r_qin(2,i)  !Till: routing is skipped first timestep -why? ii
-    ELSE
-      r_qout(2,i) = c1 * r_qin(1,i) + c2 * r_qin(2,i) + c3 * r_qout(1,i)
-      r_qout(2,i) = min (r_qout(2,i), r_storage(i)/(3600.*dt) + r_qin(2,i)) !Till: not more than the inflow and the storage can flow out of the reach	
-    END IF
+    r_qout(2,i) = c1 * r_qin(1,i) + c2 * r_qin(2,i) + c3 * r_qout(1,i)
+    r_qout(2,i) = min (r_qout(2,i), r_storage(i)/(3600.*dt) + r_qin(2,i)) !Till: not more than the inflow and the storage can flow out of the reach	
+
     IF (r_qout(2,i) < 0.) r_qout(2,i) = 0.
 
     !! Calculate flow velocity [m/s]
