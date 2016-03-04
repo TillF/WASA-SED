@@ -54,32 +54,18 @@ if (t == tstart .and. d == 1 .and. h == 1) then ! Till: is this necessary (alrea
 endif
 !-------------------------------------------------------------
 
-r_qout(2,i) = -1. !flag for "not yet computed"
-
-if (r_storage(i) == 0.) then
-    ! Calculation of discharge coefficients for ephemeral rivers
-    if (r_qin(2,i) > 1.e-3) then
-      call routing_coefficients (i,3,flow,r_area,p)
-    ! Calculation of flow time [h]
-      rttime = r_length(i)*1000./(velocity(i)*3600.) !Till: this uses the velocity of the previous timestep (?), ii
-      if (rttime > dt) then
-          r_qout(2,i) =      dt / rttime * r_qin(2,i)      !runoff gets stored instead of passing thru 
-          r_storage(i)= (1- dt / rttime) * r_qin(2,i)*3600.*dt
-          velocity(i) = velocity(i) * dt / rttime !gradually decrease velocity to avoid oscillations
-      endif
-    else
-      r_qout(2,i) = 0. 
-      r_storage(i) = r_qin(2,i)*3600.*dt 
-      velocity(i) = velocity(i) * 0.5 !gradually decrease velocity to avoid oscillations
-    endif
-else
-    ! Calculation of discharge coefficients for perennial rivers
+  ! Calculation of discharge coefficients 
   call routing_coefficients (i,2,flow,r_area,p)
-end if
+  
+  if (p==0.) then !Till: even for empty riverbed, admit minimum of wetted perimeter to allow for losses 
+    p=0.1
+  end if
+
 !------------------------------------------------------------
 
-if (r_qout(2,i) == -1.) then !Till: do Muskingum routing unless already treated as ephemeral above
-    !! Compute coefficients
+!Till: do Muskingum routing unless already treated as ephemeral above
+
+  !! Compute coefficients
     yy = dt / msk_k(i)
     c0 = yy  + 2. * (1. - msk_x(i))
     c1 = (yy + 2. * msk_x(i))  / c0
@@ -89,7 +75,7 @@ if (r_qout(2,i) == -1.) then !Till: do Muskingum routing unless already treated 
 
     !! Compute new outflow r_qout2
     IF (t == tstart .AND. d == 1 .and. h == 1) THEN
-      r_qout(2,i) = r_qin(2,i) 
+      r_qout(2,i) = r_qin(2,i)  !Till: routing is skipped first timestep -why? ii
     ELSE
       r_qout(2,i) = c1 * r_qin(1,i) + c2 * r_qin(2,i) + c3 * r_qout(1,i)
       r_qout(2,i) = min (r_qout(2,i), r_storage(i)/(3600.*dt) + r_qin(2,i)) !Till: not more than the inflow and the storage can flow out of the reach	
@@ -98,32 +84,16 @@ if (r_qout(2,i) == -1.) then !Till: do Muskingum routing unless already treated 
 
     !! Calculate flow velocity [m/s]
     if (r_area > 0.) then
-      velocity(i)= flow/ r_area
+      velocity(i)= flow/ r_area !Till: isn't that obsolete, as has already been computed in routing_coefficients?
     else
         velocity(i) = velocity(i) * 0.5 !gradually decrease velocity to avoid oscillations
     endif
 
-end if !muskingum
+!muskingum
 
-
-
-
-!! Calculate travel time in [h]
-!IF (flow > 1.e-4) THEN
-!  rttime = r_length(i) * r_area / (3.6 * flow)
-!END IF
 
 !! Calculate transmission losses via riverbed infiltration
-!r_infil = 0.
-!! Calculate only if groundwater contributions are zero 
-!if (gw_recharge(d,i) == 0..or.subflow(d,i) == 0.) then
-!  r_infil=0.
-!else
-!  if (r_qout(2,i) > 1.e-2) then
     r_infil = r_ksat(i)* 1e-3 * dt * (r_length(i)* 1000.) * p ![m3] mm/h * h * km
-    
-!  END IF
-!endif
 
 !! Calculate evaporation of river stretch (in m3)
 r_evp = 0.
@@ -133,8 +103,9 @@ IF (r_qout(2,i) > 1.e-3) THEN
   ELSE
     topw = r_width_fp(i) + 2. * (r_depth_cur(i) - r_depth(i)) * r_sideratio_fp(i)	! width of channel at water level [m]
   END IF
+  topw = min(p, topw) !Till: for zero waterstage, only the wetted perimeter contributes to evaporation
   r_evp = (pet(d,i)/24.)* 1e-3 * dt * (r_length(i)*1000.) * topw	!river evaporation [m³]
-  if (r_evp < 0.) r_evp = 0.
+  if (r_evp < 0.) r_evp = 0. !Till: this should not happen
 END IF
 
 
@@ -152,6 +123,7 @@ if (total_water < total_losses) then !if there is less water in the channel to f
         r_evp   = r_evp   * total_water / total_losses  
         total_losses = total_water                        !reduce total losses
 end if
+
 if (f_river_infiltration) river_infiltration_t(d, h, i) = r_infil !store for output
 if (f_actetranspiration)       aet_t(d, h, i) = aet_t(d, h, i) + r_evp / (area(i)*1e6) !store for output
 if (f_daily_actetranspiration) aet  (d,    i) = aet(d,      i) + r_evp / (area(i)*1e6) !store for output

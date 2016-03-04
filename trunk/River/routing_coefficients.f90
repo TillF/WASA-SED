@@ -61,10 +61,6 @@ SUBROUTINE routing_coefficients(i, STATUS, flow, r_area, p)
 !!    tt2         |km s/m        |time coefficient for bankfull depth
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-!!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
-!!    Intrinsic: Sqrt
-!!    SWAT: Qman
-
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
 
 use routing_h
@@ -93,14 +89,14 @@ r_depth_cur(i)=-1000.
 
 
 ! -----------------------------------------------------------------------
-IF (STATUS == 1) THEN
+IF (STATUS == 1) THEN !initialisation, called at start of simulations
 
 	! Calculation of bottom width
 	dep = r_depth(i)
 	bottom_width(i) = r_width(i) - 2. * dep * r_sideratio(i)
 
 	!! check if bottom width (bottom_width(i)) is < 0
-	IF (bottom_width(i) <= 0.) THEN
+	IF (bottom_width(i) <= 0.) THEN 
 	  write(*,*)"WARNING: to low river width for depth / side slopes combination at ",i,"th stretch, side slopes adjusted."
 	  bottom_width(i) = .5 * r_width(i)
 	  r_sideratio(i) = (r_width(i) - bottom_width(i)) / (2. * dep)
@@ -131,12 +127,8 @@ IF (STATUS == 1) THEN
  END IF
 ENDIF
 
-IF (STATUS == 3) THEN
-	vol = r_qin(2,i) * dt * 3600. !Till: fill up storage with inflow - just to allow computations when storage was empty
-ELSE
-	vol = r_storage(i)
-END IF
 
+vol = r_storage(i)
 
 
 IF (STATUS == 1  .OR.STATUS == 2 .OR. STATUS == 3) THEN
