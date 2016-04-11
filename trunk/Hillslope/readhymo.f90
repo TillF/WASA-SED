@@ -588,6 +588,14 @@ SUBROUTINE readhymo
     READ(11,*); READ (11,*)
     j=1
     h=3 !line counter
+    id_veg_extern=0
+    resist=0
+    wstressmin=0
+    wstressmax=0
+    height=0
+    rootdep=0
+    lai=0
+    alb=0
     DO WHILE (j <= nveg) 
         READ(11,*, IOSTAT=istate) id_veg_extern(j),resist(j),wstressmin(j),wstressmax(j),  &
             (height(j,i),i=1,4),(rootdep(j,i),i=1,4), (lai(j,i),i=1,4),(alb(j,i),i=1,4)
@@ -605,6 +613,7 @@ SUBROUTINE readhymo
         h=h+1
         if (  size(pack(id_veg_intern, id_veg_extern(j) == id_veg_intern(:,:))) == 0  ) then
 			write(*,'(a,i0,a,i0,a)')'WARNING: unused vegetation-id ',id_veg_extern(j),' in vegetation.dat, line ',h-1
+            cycle
         end if
         
 		if (wstressmin(j) >= wstressmax(j)) then
