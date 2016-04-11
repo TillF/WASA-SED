@@ -73,6 +73,7 @@ use routing_h
 use common_h
 use time_h
 use model_state_io
+use hymo_h
 
 IMPLICIT NONE
 INTEGER, INTENT(IN OUT) :: i
@@ -125,13 +126,13 @@ prf= 1.
 !! Calculation of flow velocity [m/s]
   IF (velocity(i) < .010) THEN
     vel_peak = 0.01
-    write(*,'(A, i0)') 'very low  flow velocity for sediment transport in sub-basin ', i
+    write(*,'(A, i0)') 'very low  flow velocity for sediment transport in sub-basin ', id_subbas_extern(i)
   ELSE
     vel_peak = prf * velocity(i)
   END IF
   IF (vel_peak > 5.) then
     vel_peak = 5.
-    write(*,'(A, i0)') 'very high flow velocity for sediment transport in sub-basin ', i
+    write(*,'(A, i0)') 'very high flow velocity for sediment transport in sub-basin ', id_subbas_extern(i)
   endif
   
 
