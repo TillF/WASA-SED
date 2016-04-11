@@ -407,6 +407,7 @@ SUBROUTINE readhymo
     frac_svc=0.
     nbr_svc=0
     id_soil_intern=0
+    id_veg_intern =0
 
 	i=1
     !DO i=1,ntcinst
@@ -603,7 +604,7 @@ SUBROUTINE readhymo
         
         h=h+1
         if (  size(pack(id_veg_intern, id_veg_extern(j) == id_veg_intern(:,:))) == 0  ) then
-			write(*,'(a,i0,a,i0,a)')'WARNING: unknown vegetation-id ',id_veg_extern(j),' in vegetation.dat, line ',h-1,', skipped'
+			write(*,'(a,i0,a,i0,a)')'WARNING: unused vegetation-id ',id_veg_extern(j),' in vegetation.dat, line ',h-1
             cycle 
         end if
         
