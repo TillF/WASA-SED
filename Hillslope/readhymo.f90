@@ -605,7 +605,6 @@ SUBROUTINE readhymo
         h=h+1
         if (  size(pack(id_veg_intern, id_veg_extern(j) == id_veg_intern(:,:))) == 0  ) then
 			write(*,'(a,i0,a,i0,a)')'WARNING: unused vegetation-id ',id_veg_extern(j),' in vegetation.dat, line ',h-1
-            cycle 
         end if
         
 		if (wstressmin(j) >= wstressmax(j)) then
