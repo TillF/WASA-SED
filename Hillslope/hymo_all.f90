@@ -856,7 +856,7 @@ SUBROUTINE hymo_all(STATUS)
 			WHERE (height_act == .0)
 				height_act=0.01 !prevent 0, which will cause problems in division otherwise
        		END WHERE
-			if (count(lai_act < 0) > 0) then
+			if (count(rootd_act < 0) > 0) then
                 write(*,*)'Negative root depth, check rainy_season.dat and vegetation.dat.'
                 stop
             END IF
@@ -864,12 +864,12 @@ SUBROUTINE hymo_all(STATUS)
                 write(*,*)'Negative LAI, check rainy_season.dat and vegetation.dat.'
                 stop
             END IF
-			if (count(lai_act < 0) > 0) then
+			if (count(alb_act < 0) > 0) then
                 write(*,*)'Negative albedo, check rainy_season.dat and vegetation.dat.'
                 stop
             END IF
-			if (count(lai_act < 0) > 0) then
-                write(*,*)'Negative vegetaton height, check rainy_season.dat and vegetation.dat.'
+			if (count(height_act < 0) > 0) then
+                write(*,*)'Negative vegetation height, check rainy_season.dat and vegetation.dat.'
                 stop
             END IF
 
@@ -1492,7 +1492,9 @@ SUBROUTINE hymo_all(STATUS)
         IF (f_daily_sediment_production .AND. dosediment) THEN
             OPEN(11,FILE=pfadn(1:pfadi)//'daily_sediment_production.out',  &
                 STATUS='old',POSITION='append')
-            write(fmtstr,'(a,i0,a)') '(i0,a,i0,',subasin*n_sed_class,'(a,f13.4))'        !generate format string
+            !write(fmtstr,'(a,i0,a)') '(i0,a,i0,',subasin*n_sed_class,'(a,f13.4))'        !generate format string
+            write(fmtstr,'(a,i0,a)') '(i0,a,i0,',subasin*n_sed_class,'(a,',fmt_str(maxval(sediment_subbasin(1:dayyear,1:subasin, 1:n_sed_class))),'))'        !generate format string
+            
             DO d=1,dayyear
                 WRITE(11,fmtstr)t, char(9),d, ((char(9),sediment_subbasin(d,i,j),j=1,n_sed_class),i=1,subasin)    !tab separated output
             END DO
