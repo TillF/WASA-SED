@@ -677,6 +677,7 @@ SUBROUTINE readhymo
 			allocate(svc_k_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_k_fac,dim=2)
+        svc_k_fac=0.
 
 		if (SIZE(seasonality_c,dim=2) == 1) then
             allocate (svc_c_fac(nsvc, 1))
@@ -687,7 +688,7 @@ SUBROUTINE readhymo
 			allocate(svc_c_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_c_fac,dim=2)
-
+        svc_c_fac=0.
 
 		if (SIZE(seasonality_p,dim=2) == 1) then
             allocate (svc_p_fac(nsvc, 1))
@@ -698,7 +699,8 @@ SUBROUTINE readhymo
 			allocate(svc_p_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_p_fac,dim=2)
-
+        svc_p_fac=0.
+        
         if (SIZE(seasonality_coarse,dim=2) == 1) then
             allocate (svc_coarse_fac(nsvc, 1))
 			svc_coarse_fac_day=>svc_coarse_fac(:,1)        !no dynamics, daily values remain static as read from file
@@ -708,7 +710,8 @@ SUBROUTINE readhymo
 			allocate(svc_coarse_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_coarse_fac,dim=2)
-
+        svc_coarse_fac=0.
+        
         if (SIZE(seasonality_n,dim=2) == 1) then
             allocate (svc_n(nsvc, 1))
 			svc_n_day=>svc_n(:,1)        !no dynamics, daily values remain static as read from file
@@ -718,6 +721,7 @@ SUBROUTINE readhymo
 			allocate(svc_n_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_n,dim=2)
+        svc_n=0.
 
         allocate(svc_soil_veg(nsvc,2))        !allocate memory for SVCs (soil-vegetation relation) to be read
 

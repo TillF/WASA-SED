@@ -856,7 +856,7 @@ SUBROUTINE hymo_all(STATUS)
 			WHERE (height_act == .0)
 				height_act=0.01 !prevent 0, which will cause problems in division otherwise
        		END WHERE
-			if (count(rootd_act < 0) > 0) then
+			if (count(rootd_act < 0) > 0) then !ii: check values beforehand, not every day (checking tiepoints should suffice)
                 write(*,*)'Negative root depth, check rainy_season.dat and vegetation.dat.'
                 stop
             END IF
@@ -881,7 +881,7 @@ SUBROUTINE hymo_all(STATUS)
                 svc_coarse_fac_day= calc_seasonality2(i_subbas, t, julian_day, seasonality_coarse, svc_coarse_fac)    !compute coarse-factors of current day
                 svc_n_day         = calc_seasonality2(i_subbas, t, julian_day, seasonality_n,      svc_n)                !compute n of current day
 
-                if (count(svc_k_fac_day < 0) > 0) then !ii: check values beforehand, not every day
+                if (count(svc_k_fac_day < 0) > 0) then !ii: check values beforehand, not every day (checking tiepoints should suffice)
                     write(*,*)'Negative K-factor, check rainy_season.dat and svc.dat.'
                     stop
                 END IF
@@ -1492,8 +1492,7 @@ SUBROUTINE hymo_all(STATUS)
         IF (f_daily_sediment_production .AND. dosediment) THEN
             OPEN(11,FILE=pfadn(1:pfadi)//'daily_sediment_production.out',  &
                 STATUS='old',POSITION='append')
-            !write(fmtstr,'(a,i0,a)') '(i0,a,i0,',subasin*n_sed_class,'(a,f13.4))'        !generate format string
-            write(fmtstr,'(a,i0,a)') '(i0,a,i0,',subasin*n_sed_class,'(a,',fmt_str(maxval(sediment_subbasin(1:dayyear,1:subasin, 1:n_sed_class))),'))'        !generate format string
+            write(fmtstr,'(a,i0,a,a,a)') '(i0,a,i0,',subasin*n_sed_class,'(a,',fmt_str(maxval(sediment_subbasin(1:dayyear,1:subasin, 1:n_sed_class))),'))'        !generate format string
             
             DO d=1,dayyear
                 WRITE(11,fmtstr)t, char(9),d, ((char(9),sediment_subbasin(d,i,j),j=1,n_sed_class),i=1,subasin)    !tab separated output
