@@ -293,6 +293,7 @@ END SUBROUTINE calc_q_a_p
 REAL FUNCTION calc_d(q)
 !compute depth dep for a given discharge q in the current subreach indexed with i
 !see http://nptel.iitm.ac.in/courses/IIT-MADRAS/Hydraulics/pdfs/Unit12/12_1b.pdf
+!Till: Newton-like approach to find root of delta_q(depth)
 !i:reach_index
 !q: discharge
 implicit none
@@ -301,7 +302,12 @@ real :: dd, df	!differentials
 real :: d_est0, d_est1, q_est0, q_est1, f0, f1, error_tolerance=0.01	!Till: max. relative error indicating convergence
 integer :: j, max_iter=50			!Till: max number of iterations
 
-	q_bankful100 = calc_q(r_depth(i))		!compute bankful discharge	!ii: compute only once and store in array
+	if (q == 0) then
+        calc_d = 0.
+        return
+    end if
+    
+    q_bankful100 = calc_q(r_depth(i))		!compute bankful discharge	!ii: compute only once and store in array
 	q_est0       = q_bankful100
 	d_est0       = r_depth(i)
 	f0 = q_est0 - q
@@ -312,12 +318,11 @@ integer :: j, max_iter=50			!Till: max number of iterations
 		d_est1=r_depth(i)*1.5	!Till: initial estimate	for high discharge
 	end if
 	q_est1 = calc_q(d_est1)
-	!f1 = q_est1 - q
 
 	do j=1,max_iter
-		f1 = q_est1-q
-		df= f1     - f0
-		dd= d_est1 - d_est0  
+		f1 = q_est1-q         !error between current estimate and prescribed q
+		df= f1     - f0       !"progress" in reducing the error (delta_error)
+		dd= d_est1 - d_est0   ! delta_depth
 
 		d_est0 = d_est1		!prepare next iteration step
 		q_est0 = q_est1
