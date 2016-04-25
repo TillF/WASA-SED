@@ -70,7 +70,9 @@ use model_state_io !Jose Miguel: in order to be able to use init_river_conds
 
 implicit none
 INTEGER, INTENT(IN) :: i, STATUS !ID of river reach, flag perennial (2) or ephemeral (1)
-REAL, INTENT(OUT) :: r_area, p, flow
+REAL, INTENT(INOUT) :: flow
+REAL, INTENT(OUT) :: r_area, p
+!also modifies velocity(i) and r_depth_cur(i)
 
 !REAL :: fps, qq1, tt1, tt2, aa, phi8, phi9, phi11, phi12, sed_con
 REAL :: q_bankful100, dep
@@ -82,7 +84,7 @@ s1 = r_sideratio(i)
 s2 = r_sideratio_fp(i)
 
 
-flow =-1000.
+!flow =-1000.
 r_area=-100.
 p=-1000.
 r_depth_cur(i)=-1000.
@@ -148,7 +150,8 @@ IF (STATUS == 1  .OR.STATUS == 2 .OR. STATUS == 3) THEN
     
     
 	if (vol <= 0.) then
-		r_depth_cur(i) = 0.
+		r_depth_cur(i)=calc_d(flow)
+        !r_depth_cur(i) = 0.
     elseif (r_area <= area_bankful(i)) THEN
 	  pp = bottom_width(i) / s1 !coefficients of quadratic equation
       qq = - r_area / s1 
