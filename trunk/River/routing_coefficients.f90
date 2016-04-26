@@ -212,7 +212,7 @@ endif
 
 
 contains    
-SUBROUTINE calc_q_a_p(dep, q, a, p) !ii: could be merged with calc_q
+SUBROUTINE calc_q_a_p(dep, q, a, p) 
 !compute discharge q. cross-section-area a and wetted perimeter p for a given depth dep in the current subreach indexed with i
 !i:reach_index
 !dep: reach_index
@@ -222,7 +222,8 @@ real, intent(in) :: dep	!water depth, for which the discharge is to be calculate
 real, intent(inout) :: q
 real, intent(out) :: a, p
 real :: d_fp = 0.	!depth of water in flood-plain
-real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch
+real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch, bottom_slope
+real, parameter :: bottom_inc=0.1  !bottom incision (depth of triangle at bottom of floodplain)
 
 	if (dep<0.) then
 		write(*,*)"ERROR: negative river depth in routing_coefficients.f90"
@@ -232,12 +233,26 @@ real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch
 	if (dep == 0.) then
 		a = 0.
 		p = 0.
-		q = 0.
+		if (q < 0.) q = 0.
 		return
 	end if
 
-	p_ch = bottom_width(i) + 2. * min(dep,r_depth(i)) * SQRT(1. + s1 * s1)	!wetted perimeter in channel
-	a_ch = (bottom_width(i) + s1 * dep) * dep						!cross-section area (probably extending over floodplain!)
+	!p_ch = bottom_width(i) + 2. * min(dep,r_depth(i)) * SQRT(1. + s1 * s1)	!wetted perimeter in channel
+	!a_ch = (bottom_width(i) + s1 * dep) * dep						!cross-section area (probably extending over floodplain!)
+    
+    !modified version: assuming slope of bottom width (bottom_inc m / bottom_width)
+    bottom_slope = (bottom_width(i) + s1 * bottom_inc)/ bottom_inc
+    
+    d_fp = min(dep, r_depth(i)) !aux variable: depth in channel until bankfull
+    p_fp = min(dep, bottom_inc) !aux variable: depth in bottom triangle
+    
+    p_ch =   (d_fp +  max(0., d_fp - bottom_inc)) * SQRT(1. + s1 * s1) +& !left + right bank
+             + p_fp * SQRT(1. + bottom_slope * bottom_slope) !wetted bottom
+
+    a_ch =    (bottom_width(i) + s1 * dep       ) * dep	&					!cross-section area (probably extending over floodplain!)
+	        - (bottom_width(i) + s1 * bottom_inc) * bottom_inc &     !trapeziod part containing bottom triangle
+            + p_fp*p_fp * bottom_slope / 2.   !bottom triangle
+
     
     if (q < 0.) q_ch = a_ch * (a_ch/p_ch) ** 0.6666 * SQRT(r_slope(i))/manning(i)				!Till: discharge according to Manning's equation
 
@@ -270,11 +285,9 @@ real :: dd, df	!differentials
 real :: d_est0, d_est1, q_est0, q_est1, f0, f1, error_tolerance=0.01, dum	!Till: max. relative error indicating convergence
 integer :: j, max_iter=50			!Till: max number of iterations
 
-	if (q == 0) then
-        calc_d = 0.
-        return
-    end if
-    
+    calc_d = 0.	
+    if (q == 0) return
+        
     q_est0       = q_bankful100(i)
 	d_est0       = r_depth(i)
 	f0 = q_est0 - q
@@ -299,8 +312,11 @@ integer :: j, max_iter=50			!Till: max number of iterations
 
 		d_est1 = max(0.,d_est1 - f1 / (df/dd))
 
+        if (isNaN(d_est1)) d_est1 = 0.  !Till: prevent NaNs when convergence stalls
+
         q_est1 = -1. !request q-calculation
         call calc_q_a_p(d_est1, q_est1, dum, dum)
+
 		if (abs(q-q_est1)/q <= error_tolerance) exit	!Till: converged
 	end do
 
