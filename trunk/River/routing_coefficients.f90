@@ -75,7 +75,7 @@ REAL, INTENT(OUT) :: r_area, p
 !also modifies velocity(i) and r_depth_cur(i)
 
 !REAL :: fps, qq1, tt1, tt2, aa, phi8, phi9, phi11, phi12, sed_con
-REAL :: q_bankful100, dep  !Till: what do we need q_bankful100 for?
+REAL :: dep  
 REAL::  d_it, pp, qq !, q_it, percent, error,
 REAL :: vol, s1, s2 
 
@@ -105,8 +105,8 @@ IF (STATUS == 1) THEN !initialisation, called at start of simulations
     END IF
 
 !! compute flow and travel time at bankfull depth
-	q_bankful100 = 1.
-    CALL calc_q_a_p(r_depth(i), q_bankful100, area_bankful(i), p) !ii: compute this only once
+	q_bankful100(i) = -1.
+    CALL calc_q_a_p(r_depth(i), q_bankful100(i), area_bankful(i), p) !ii: store q_bankfull
 
 	!!determine the correct flow area a for the given input discharge r_qin
 	! for flow in the main channel
@@ -228,7 +228,7 @@ real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch
 		stop
 	end if
 	p_ch = bottom_width(i) + 2. * min(dep,r_depth(i)) * SQRT(1. + s1 * s1)	!wetted perimeter in channel
-	a_ch = (bottom_width(i) + s1(i) * dep) * dep						!cross-section area
+	a_ch = (bottom_width(i) + s1 * dep) * dep						!cross-section area
 	q_ch = a_ch * (a_ch/p_ch) ** 0.6666 * SQRT(r_slope(i))/manning(i)				!Till: discharge according to Manning's equation
 
 	if (dep <= r_depth(i)) then			
@@ -310,12 +310,11 @@ integer :: j, max_iter=50			!Till: max number of iterations
         return
     end if
     
-    q_bankful100 = calc_q(r_depth(i))		!compute bankful discharge	!ii: compute only once and store in array
-	q_est0       = q_bankful100
+    q_est0       = q_bankful100(i)
 	d_est0       = r_depth(i)
 	f0 = q_est0 - q
 
-	if (q < q_bankful100) then
+	if (q < q_bankful100(i)) then
 		d_est1=r_depth(i)/2.	!Till: initial estimate	for small discharge
 	else
 		d_est1=r_depth(i)*1.5	!Till: initial estimate	for high discharge

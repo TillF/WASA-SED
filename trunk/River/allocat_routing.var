@@ -34,6 +34,7 @@
 	 Q_spring(subasin), &
 
 	 area_bankful(subasin), &
+	 q_bankful100(subasin), &
 	 bottom_width(subasin), &
 	 
 
