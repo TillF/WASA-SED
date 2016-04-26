@@ -212,41 +212,6 @@ endif
 
 
 contains    
-REAL FUNCTION calc_q(dep)
-!compute discharge for a given depth dep in the current subreach indexed with i
-!i:reach_index
-!dep: reach_index
-! Calculation of composite Manning factor taking into account the roughness values of the floodplains (for derivation of composite Manning: siehe Wasserbauskriptum)
-implicit none
-
-real, intent(in) :: dep	!water depth, for which the discharge is to be calculated
-real :: d_fp = 0.	!depth of water in flood-plain
-real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch 
-
-	if (dep<0.) then
-		write(*,*)"ERROR: negative river depth in routing_coefficients.f90"
-		stop
-	end if
-	p_ch = bottom_width(i) + 2. * min(dep,r_depth(i)) * SQRT(1. + s1 * s1)	!wetted perimeter in channel
-	a_ch = (bottom_width(i) + s1 * dep) * dep						!cross-section area
-	q_ch = a_ch * (a_ch/p_ch) ** 0.6666 * SQRT(r_slope(i))/manning(i)				!Till: discharge according to Manning's equation
-
-	if (dep <= r_depth(i)) then			
-		a_fp = 0.	!no flow in floodplain
-		p_fp = 0.
-		q_fp = 0.
-	else
-		d_fp = dep - r_depth(i)
-		a_ch = a_ch - d_fp * s1 !Till: correct channel cross section for parts overlapping floodplain
-        a_fp = ((r_width_fp(i)-r_width(i)) + s2 * d_fp) * d_fp
-		p_fp =  (r_width_fp(i)-r_width(i)) + 2. * d_fp * SQRT(1. + s2 * s2)		!flow on floodplains
-		q_fp = a_fp * (a_fp/p_fp) ** 0.6666 * SQRT(r_slope(i))/manning_fp(i)				!Till: discharge according to Manning's equation (flood plain)
-	end if
-		
-	calc_q  = q_ch + q_fp
-	
-END FUNCTION calc_q
-
 SUBROUTINE calc_q_a_p(dep, q, a, p) !ii: could be merged with calc_q
 !compute discharge q. cross-section-area a and wetted perimeter p for a given depth dep in the current subreach indexed with i
 !i:reach_index
@@ -302,7 +267,7 @@ REAL FUNCTION calc_d(q)
 implicit none
 real, intent(in) :: q	!discharge, for which the water depth is to be calculated
 real :: dd, df	!differentials
-real :: d_est0, d_est1, q_est0, q_est1, f0, f1, error_tolerance=0.01	!Till: max. relative error indicating convergence
+real :: d_est0, d_est1, q_est0, q_est1, f0, f1, error_tolerance=0.01, dum	!Till: max. relative error indicating convergence
 integer :: j, max_iter=50			!Till: max number of iterations
 
 	if (q == 0) then
@@ -318,9 +283,11 @@ integer :: j, max_iter=50			!Till: max number of iterations
 		d_est1=r_depth(i)/2.	!Till: initial estimate	for small discharge
 	else
 		d_est1=r_depth(i)*1.5	!Till: initial estimate	for high discharge
-	end if
-	q_est1 = calc_q(d_est1)
-
+    end if
+	
+    q_est1 = -1. !request q-calculation
+    call calc_q_a_p(d_est1, q_est1, dum, dum)
+    
 	do j=1,max_iter
 		f1 = q_est1-q         !error between current estimate and prescribed q
 		df= f1     - f0       !"progress" in reducing the error (delta_error)
@@ -331,7 +298,9 @@ integer :: j, max_iter=50			!Till: max number of iterations
 		f0	   = f1
 
 		d_est1 = max(0.,d_est1 - f1 / (df/dd))
-		q_est1 = calc_q(d_est1)
+
+        q_est1 = -1. !request q-calculation
+        call calc_q_a_p(d_est1, q_est1, dum, dum)
 		if (abs(q-q_est1)/q <= error_tolerance) exit	!Till: converged
 	end do
 
