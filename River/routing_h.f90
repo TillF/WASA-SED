@@ -68,8 +68,9 @@ real, allocatable :: Q_spring(:)
 
 
 !MUSKINGUM variables
-!!  cross-sectional area of flow at bankfull (m^2)
+!!  cross-sectional area and flow at bankfull (m^2)
 real, allocatable :: area_bankful(:)
+real, allocatable :: q_bankful100(:)
 !!  bottom width of main channel depth (m)
 real, allocatable :: bottom_width(:)
 !!    phi5(i)    |m^3/s         |flow rate when reach is at bankfull depth
