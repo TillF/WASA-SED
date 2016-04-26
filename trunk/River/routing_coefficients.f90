@@ -95,7 +95,7 @@ IF (STATUS == 1) THEN !initialisation, called at start of simulations
 
 	! Calculation of bottom width
 	dep = r_depth(i)
-	bottom_width(i) = r_width(i) - 2. * dep * r_sideratio(i)
+	bottom_width(i) = r_width(i) - 2. * dep * s1
 
 	!! check if bottom width (bottom_width(i)) is < 0
 	IF (bottom_width(i) <= 0.) THEN 
@@ -228,7 +228,7 @@ real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch
 		stop
 	end if
 	p_ch = bottom_width(i) + 2. * min(dep,r_depth(i)) * SQRT(1. + s1 * s1)	!wetted perimeter in channel
-	a_ch = (bottom_width(i) + r_sideratio(i) * dep) * dep						!cross-section area
+	a_ch = (bottom_width(i) + s1(i) * dep) * dep						!cross-section area
 	q_ch = a_ch * (a_ch/p_ch) ** 0.6666 * SQRT(r_slope(i))/manning(i)				!Till: discharge according to Manning's equation
 
 	if (dep <= r_depth(i)) then			
@@ -237,7 +237,8 @@ real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch
 		q_fp = 0.
 	else
 		d_fp = dep - r_depth(i)
-		a_fp = ((r_width_fp(i)-r_width(i)) + s2 * d_fp) * d_fp
+		a_ch = a_ch - d_fp * s1 !Till: correct channel cross section for parts overlapping floodplain
+        a_fp = ((r_width_fp(i)-r_width(i)) + s2 * d_fp) * d_fp
 		p_fp =  (r_width_fp(i)-r_width(i)) + 2. * d_fp * SQRT(1. + s2 * s2)		!flow on floodplains
 		q_fp = a_fp * (a_fp/p_fp) ** 0.6666 * SQRT(r_slope(i))/manning_fp(i)				!Till: discharge according to Manning's equation (flood plain)
 	end if
@@ -246,7 +247,7 @@ real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch
 	
 END FUNCTION calc_q
 
-SUBROUTINE calc_q_a_p(dep, q, a, p)
+SUBROUTINE calc_q_a_p(dep, q, a, p) !ii: could be merged with calc_q
 !compute discharge q. cross-section-area a and wetted perimeter p for a given depth dep in the current subreach indexed with i
 !i:reach_index
 !dep: reach_index
@@ -271,16 +272,18 @@ real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch
 	end if
 
 	p_ch = bottom_width(i) + 2. * min(dep,r_depth(i)) * SQRT(1. + s1 * s1)	!wetted perimeter in channel
-	a_ch = (bottom_width(i) + r_sideratio(i) * dep) * dep						!cross-section area
-	if (q < 0.) q_ch = a_ch * (a_ch/p_ch) ** 0.6666 * SQRT(r_slope(i))/manning(i)				!Till: discharge according to Manning's equation
+	a_ch = (bottom_width(i) + s1 * dep) * dep						!cross-section area (probably extending over floodplain!)
+    
+    if (q < 0.) q_ch = a_ch * (a_ch/p_ch) ** 0.6666 * SQRT(r_slope(i))/manning(i)				!Till: discharge according to Manning's equation
 
 	if (dep <= r_depth(i)) then			
 		a_fp = 0.	!no flow in floodplain
 		p_fp = 0.
 		q_fp = 0.
-	else
-		d_fp = dep - r_depth(i)
-		a_fp = ((r_width_fp(i)-r_width(i)) + s2 * d_fp) * d_fp
+    else
+        d_fp = dep - r_depth(i)
+		a_ch = a_ch - d_fp * s1 !Till: correct channel cross section for parts overlapping floodplain
+        a_fp = ((r_width_fp(i)-r_width(i)) + s2 * d_fp) * d_fp
 		p_fp =  (r_width_fp(i)-r_width(i)) + 2. * d_fp * SQRT(1. + s2 * s2)		!flow on floodplains
 		if (q < 0.) q_fp = a_fp * (a_fp/p_fp) ** 0.6666 * SQRT(r_slope(i))/manning_fp(i)				!Till: discharge according to Manning's equation (flood plain)
 	end if
