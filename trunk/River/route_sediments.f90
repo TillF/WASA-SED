@@ -83,16 +83,6 @@ REAL :: volume, sed_mass !flow, r_area
 REAL ::   r_storage_previous !depdeg,dot,
 
 
-!if no or only very little water flow in reach, no sediment calculation is performed
-IF ((r_storage(i) == 0.) .OR. &
- (r_storage(i) == 0. .and. r_qin(2,i) < 1.e-1) ) then
-    river_deposition(i,:) = sed_storage(i,:) + sediment_in(i,:) !incoming and suspended sediment is deposited
-    riverbed_storage(i,:) = riverbed_storage(i,:) + river_deposition(i,:)
-    sediment_out(i,:) = 0.
-    sed_storage(i,:) = 0.
-    return
-ENDIF
-
 !! initialize water in reach during time step [m3]
 r_storage_previous=r_storage(i)+(r_qout(2,i)-r_qin(2,i))*dt*3600.
 volume = r_storage_previous+r_qin(2,i)*3600.*dt
@@ -107,13 +97,13 @@ if (r_qout(1,i) == 0. .and. r_storage(i) == (r_qin(2,i)+3600.*dt)) then
     return
 endif
 !! do not perform sediment routing if no water in reach
-IF (volume <= 0.01) then 
- river_deposition(i,:) = sed_storage(i,:) + sediment_in(i,:) !incoming and suspended sediment is deposited
- riverbed_storage(i,:) = riverbed_storage(i,:) + river_deposition(i,:)
- sediment_out(i,:) = 0.
- sed_storage(i,:) = 0.
- RETURN
-ENDIF
+!IF (volume <= 0.01) then 
+! river_deposition(i,:) = sed_storage(i,:) + sediment_in(i,:) !incoming and suspended sediment is deposited
+! riverbed_storage(i,:) = riverbed_storage(i,:) + river_deposition(i,:)
+! sediment_out(i,:) = 0.
+! sed_storage(i,:) = 0.
+! RETURN
+!ENDIF
 !! initialize sediment mass in reach during time step [tons]
 
 prf= 1.
