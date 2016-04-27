@@ -159,13 +159,14 @@
 		stop
 	end if
 
-	aet_t              => allocate_hourly_array(f_actetranspiration)
-	hortflow_t         => allocate_hourly_array(f_qhorton)
-	deep_gw_discharge_t=> allocate_hourly_array(f_gw_discharge)
-	pet_t              => allocate_hourly_array(f_potetranspiration)
-	deep_gw_recharge_t => allocate_hourly_array(f_gw_recharge)
-	gw_loss_t          => allocate_hourly_array(f_gw_loss)
+	aet_t               => allocate_hourly_array(f_actetranspiration)
+	hortflow_t          => allocate_hourly_array(f_qhorton)
+	deep_gw_discharge_t => allocate_hourly_array(f_gw_discharge)
+	pet_t               => allocate_hourly_array(f_potetranspiration)
+	deep_gw_recharge_t  => allocate_hourly_array(f_gw_recharge)
+	gw_loss_t           => allocate_hourly_array(f_gw_loss)
 	river_infiltration_t=> allocate_hourly_array(f_river_infiltration)
+	riverflow_t         => allocate_hourly_array(f_river_flow)
 
     subflow_t          => allocate_hourly_array(f_subsurface_runoff .OR. .TRUE.)	!Till: currently, these are needed in any case
 	ovflow_t           => allocate_hourly_array(f_total_overlandflow .OR. .TRUE.)

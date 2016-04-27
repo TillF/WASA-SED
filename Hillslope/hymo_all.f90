@@ -744,6 +744,7 @@ SUBROUTINE hymo_all(STATUS)
         if ((river_transport == 2)) then
             CALL open_subdaily_output(f_river_sediment_storage,     'River_Sediment_Storage.out',     'Deposited sediment storage in river reach t (with MAP IDs as in hymo.dat)')
             CALL open_subdaily_output(f_river_susp_sediment_storage,'River_Susp_Sediment_Storage.out','Suspended sediment storage in river reach t (with MAP IDs as in hymo.dat)')
+            CALL open_subdaily_output(f_river_flow,'River_Flow.out','Output file for river discharge q_out (m3/s) (with MAP IDs as in hymo.dat)')
         end if
        
     END IF
@@ -1469,6 +1470,8 @@ SUBROUTINE hymo_all(STATUS)
         CALL write_subdaily_output(f_gw_loss,           'gw_loss.out',            gw_loss_t)
         CALL write_subdaily_output(f_river_infiltration,'River_Infiltration.out', river_infiltration_t)
  
+        if (river_transport /= 1) CALL write_subdaily_output(f_river_flow,'River_Flow.out', riverflow_t)
+                
         CALL write_subdaily_output(f_river_sediment_total,'River_Sediment_total.out', qsediment2_t)        !     Output total sediment flux (t/d) 
         CALL write_subdaily_output(f_river_sediment_storage,     'River_Sediment_Storage.out'     , river_sediment_storage_t)
         CALL write_subdaily_output(f_river_susp_sediment_storage,'River_Susp_Sediment_Storage.out', river_susp_sediment_storage_t)

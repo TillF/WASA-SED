@@ -57,19 +57,14 @@ INTEGER :: nveg
 INTEGER :: ntcinst
 ! MAXIMUM NUMBER OF SOTER UNITS IN CELLS (7)
 INTEGER :: maxsoter
-!PARAMETER (maxsoter=7)
 ! MAXIMUM NUMBER OF TERRAIN COMPONENTS IN SOTER UNIT (3)
 INTEGER :: maxterrain
-!PARAMETER (maxterrain=3)
 ! MAXIMUM NUMBER OF SOIL COMPONENTS IN TERRAIN COMPONENTS (28)
 INTEGER :: maxsoil
-!PARAMETER (maxsoil=28)
 ! MAXIMUM NUMBER OF HORIZONS IN SOIL COMPONENTS (8)
 INTEGER :: maxhori
-!PARAMETER (maxhori=8)
 ! TOTAL NUMBER OF TRANSPOSITIONS BETWEEN Sub-basins
-
 INTEGER :: ntrans
-!PARAMETER (ntrans=2)
-!common / basin_parameter / subasin, ntcinst, nsoter, nterrain, nsoil, nveg
+
+INTEGER, parameter :: output_int=366 !interval of file output [days] (still to be implemented fully)
 end module params_h
