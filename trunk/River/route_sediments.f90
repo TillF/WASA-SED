@@ -81,6 +81,8 @@ INTEGER :: k !, det
 REAL ::  vel_peak,  conc_in, conc_max, depnet !peakr,peakflow,
 REAL :: volume, sed_mass !flow, r_area
 REAL ::   r_storage_previous !depdeg,dot,
+real,parameter :: vel_peak_thresh=3 !Till: threshold for peak velocity estimation reduction [m/s]
+real,parameter :: vel_peak_thresh2=5 !Till: upper threshold to correct peak velocity to [m/s]
 
 
 !! initialize water in reach during time step [m3]
@@ -120,9 +122,11 @@ prf= 1.
   ELSE
     vel_peak = prf * velocity(i)
   END IF
-  IF (vel_peak > 5.) then
-    vel_peak = 5.
+  IF (vel_peak > vel_peak_thresh) then
+    !vel_peak = 5.
+    vel_peak =vel_peak_thresh+(vel_peak_thresh2-vel_peak_thresh)*(-sqrt(velocity(i)**2+4)/2+velocity(i)/2+1) !smoothly reduce implausibly high velocity values to upper threshold
     write(*,'(A, i0)') 'very high flow velocity for sediment transport in sub-basin ', id_subbas_extern(i)
+    
   endif
   
 
