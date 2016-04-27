@@ -488,36 +488,5 @@ END SUBROUTINE climo
 
 
 
-SUBROUTINE set_corr_column2(index_array,input_header,inputfile_name)
-!provide "pointer" to to match order of subbasins to that in hymo.dat
-use params_h
-use hymo_h
-
-implicit none
-	INTEGER, INTENT(IN)                  :: input_header(subasin)	!order of subbasins in input file
-	character(len=*), INTENT(IN)                  :: inputfile_name	!name of input file
-	integer	:: i,j
-	integer, intent(OUT) :: index_array(subasin)
-
-	DO i=1,subasin
-		 DO j=1,subasin
-			IF(input_header(j) == id_subbas_extern(i)) THEN
-				index_array(i)= j	!Till: for each subbasin, find position of corresponding column in input file
-				exit
-			END IF
-
-			if  (j==subasin) then
-				WRITE(*,'(a,i0,a,a,a)') 'ERROR: Sub-basin-ID ',id_subbas_extern(i),' not found in ',inputfile_name,', quitting.'
-				stop
-			end if
-			
-		END DO
-	END DO
-END SUBROUTINE set_corr_column2
-
-
-
-
-
 
 
