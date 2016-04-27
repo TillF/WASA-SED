@@ -178,9 +178,7 @@ else !revised routing
         
         call routing_coefficients (i, 2, dummy2, r_area, p) 
         
-        if (flow > 0.) p=max(p, 0.1)  !if there is flow, we still assume at least 0.1 m channel (to avoid perimeter of 0)
-        
-           !! Calculate transmission losses via riverbed infiltration
+        !! Calculate transmission losses via riverbed infiltration
         r_infil = r_ksat(i)* 1e-3 * dt * (r_length(i)* 1000.) * p ![m3] mm/h * h * km
 
         !! Calculate evaporation of river stretch (in m3)
