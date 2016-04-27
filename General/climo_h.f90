@@ -60,6 +60,7 @@ real, allocatable :: wind(:,:)
 ! climate variables for hourly model version
 real, allocatable :: preciph(:,:)
 
+INTEGER :: store_day, store_timestep	!Till: day and timestep for which ETP-values were stored
 
 end module climo_h
 
