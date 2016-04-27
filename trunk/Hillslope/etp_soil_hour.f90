@@ -52,7 +52,7 @@ REAL, INTENT(OUT)                        :: rsfinal
 
 REAL :: seconds_of_daylight,nst
 REAL :: tempval,f2
-REAL :: dumv,dums,dumbs
+REAL :: dumv,dums
 
 ! subscripts of current subbasin, Soter unit and vegetation unit
 
@@ -414,7 +414,7 @@ IF (.NOT. domean) THEN
       dums=acts
       acts  = fcov*transn*  &
           (s*anettos+roh*heatc*d0/ras)/ (s+gamma*(1.+rss/ras))/(nst/2.)
-      dumbs=actbs
+      
       actbs = (1.-fcov)*transn*  &
           (s*anettobs+roh*heatc*d0/rabs)/ (s+gamma*(1.+rsbs/rabs))/(nst/2.)
       

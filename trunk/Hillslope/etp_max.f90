@@ -44,7 +44,7 @@ INTEGER, INTENT(IN)                  :: day, hh
 
 
 REAL,allocatable,save :: etpmax_stored(:,:) !Till: this serves to store values that have been calculated for a given subbasin and day. Later calls can be accelelated this way
-INTEGER :: store_day, store_timestep	!Till: day and timestep for which the stored values are valid
+
 
 REAL :: seconds_of_daylight
 REAL :: tempval
