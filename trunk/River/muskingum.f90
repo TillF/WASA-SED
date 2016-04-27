@@ -184,26 +184,25 @@ else !revised routing
         r_infil = r_ksat(i)* 1e-3 * dt * (r_length(i)* 1000.) * p ![m3] mm/h * h * km
 
         !! Calculate evaporation of river stretch (in m3)
-        r_evp = 0.
-        IF (r_qout(2,i) > 1.e-3) THEN
-          IF (r_depth_cur(i) <= r_depth(i)) THEN
+        
+        IF (r_depth_cur(i) <= r_depth(i)) THEN
             topw = bottom_width(i) + 2. * r_depth_cur(i) * r_sideratio(i)	! width of channel at water level [m]
-          ELSE
+        ELSE
             topw = r_width_fp(i) + 2. * (r_depth_cur(i) - r_depth(i)) * r_sideratio_fp(i)	! width of channel at water level [m]
-          END IF
-          topw = min(p, topw) !Till: for zero waterstage, only the wetted perimeter contributes to evaporation
-          r_evp = (pet(d,i)/24.)* 1e-3 * dt * (r_length(i)*1000.) * topw	!river evaporation [m³]
-          if (r_evp < 0.) r_evp = 0. !Till: this should not happen
         END IF
-
+        topw = min(p, topw) !Till: for zero waterstage, at least the wetted perimeter contributes to evaporation
+        r_evp = (pet(d,i)/24.)* 1e-3 * dt * (r_length(i)*1000.) * topw	!river evaporation [m³]
+        if (r_evp < 0.) r_evp = 0. !Till: this should not happen
+        
 
         total_water =  r_storage(i) + r_qout(2,i) *dt*3600. !total amount of water available in this timestep [m3]
-        total_losses = r_infil + r_evp
-
+        
         if (total_water == 0.) then !no water in reach
-                r_infil = 0.
-                r_evp   = 0.
-                total_losses = 0.
+            r_infil = 0.
+            r_evp   = 0.
+            total_losses = 0.
+        else
+            total_losses = r_infil + r_evp
         end if
 
         if (total_water < total_losses) then !if there is less water in the channel to fulfill seepage and evaporative demand...
