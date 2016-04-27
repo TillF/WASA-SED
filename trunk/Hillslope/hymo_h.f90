@@ -281,6 +281,7 @@ module hymo_h
     real, pointer ::  deep_gw_recharge_t(:,:,:)		!groundwater rescharge for each day and timestep(366,nt,subasin)
     real, pointer ::  gw_loss_t(:,:,:)				!ground water loss (deep percolation in LUs with no ground water flag) for each day and timestep(366,nt,subasin)
     real, pointer ::  river_infiltration_t(:,:,:)	!infiltration into riverbed, loss from model domain
+    real, pointer ::  riverflow_t(:,:,:)	!Till: flow in the river in m3/s for each day and timestep(366,nt,subasin)
    
 
     ! daily soil evaporation (mm/day)
@@ -316,7 +317,7 @@ module hymo_h
     real, allocatable ::  water_subbasin(:,:)
     !Till: contribution of each subbasin to the river in m3/s for each day and timestep(366,nt,subasin)
     real, allocatable ::  water_subbasin_t(:,:,:)
-
+    
     ! losses in river network by evaporation
     !Allocatable       real qloss(366,subasin)
     real, allocatable ::   qloss(:,:)

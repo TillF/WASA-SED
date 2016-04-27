@@ -167,22 +167,7 @@ qin (:,:)=0.
  
 
 ! INITIALISATION OF OUTPUT FILES
-  OPEN(111,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
-  if (f_river_flow) then
-    WRITE (111,*) 'Output file for river discharge q_out (m3/s) (with MAP IDs as in hymo.dat)'
-	    
-	if (dohour) then
-		write(fmtstr,'(a,i0,a)')'(3a6,',subasin,'i14)'		!generate format string
-		WRITE (111,fmtstr)' Year ', ' Day  ','  dt  ', (id_subbas_extern(i), i=1,subasin)
-	else
-   		write(fmtstr,'(a,i0,a)')'(2a6,',subasin,'i14)'		!generate format string
-		WRITE (111,fmtstr)' Year ', ' Day  ', (id_subbas_extern(i), i=1,subasin)
-		Close (111)		!Till: hourly version leaves the file open to save time
-	endif
-	
-  else
-    close(111, status='delete') !delete any existing file, if no output is desired
-  endif
+
 
 
 if ((river_transport == 2)) then
@@ -510,8 +495,12 @@ if (dohour) then
 endif
 
 
+
 	
   END DO ! i=1,subasin
+
+
+  if (f_river_flow) riverflow_t(d,h,:) = r_qout(2,:) !collect riverflow for later output
 
 	r_sediment_storage=sum(sed_storage,dim=2)  !Till: sum up suspended sediment storage over all particle classes for all subbasins
 
@@ -529,14 +518,7 @@ endif
      endif
   enddo
  
- if (dohour) then
-	if (f_river_flow) then	!daily output in routing_new(3) to decrease simulation time
-!		OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='old' ,POSITION='append'  )
-		write(fmtstr,'(a,i0,a)')'(3i6,',subasin,'f14.3)'		!generate format string
-		WRITE (111,fmtstr)t,d,h, (r_qout(2,i),i=1,subasin)
-!		CLOSE (11)
-	endif
- endif
+
 
 if (river_transport.eq.2) then !ii: modify arrays to collect data of more timesteps (as e.g. qsediment2_t) to avoid file access in each single timestep (slow!)
   if (f_river_sediment_concentration) then
@@ -650,7 +632,7 @@ IF (STATUS == 3) THEN
 
 
 ! output of daily water and discharge in the river for entire year
-	if (.not.dohour) then
+	if (.not.dohour .and. (river_transport == 1)) then
 		if (f_river_flow) then
 			OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='old' ,POSITION='append'  )
 			write(fmtstr,'(a,i0,a)')'(2i6,',subasin,'f14.3)'		!generate format string
