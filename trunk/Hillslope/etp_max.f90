@@ -226,7 +226,12 @@ ras=height_act(vegi)*EXP(n)/(n*kh)* (EXP(-1.*n*z0s/height_act(vegi))-  &
 raa=(1./(k*ustern))* LOG((zr-dp)/(height_act(vegi)-dp))+  &
     (height_act(vegi)/(n*kh))* (EXP(n*(1.-zm/height_act(vegi)))-1.)
 
-rap=25./(2.*lai_act(vegi))
+if (lai_act(vegi)/=0) then
+    rap=25./(2.*lai_act(vegi))
+else
+    rap=1e10   !Till: no leaves, huge resistance
+end if
+
 
 rabs=((LOG(zm/z0s))**2)/ ((k**2)*wind(d,isubbas)*  &
     LOG(zm/z0)/LOG(zr/z0))
