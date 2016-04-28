@@ -158,7 +158,6 @@ SUBROUTINE readhymo
     REAL :: temp1,temp2, maxthickness
     REAL :: sortier(maxterrain),tauschr
     CHARACTER (LEN=8000) :: cdummy
-    CHARACTER (LEN=100) :: cdummy2
 
     INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
     INTEGER :: soilid            !internal id of current soil
@@ -178,7 +177,7 @@ SUBROUTINE readhymo
     ! Subbasin-LandscapeUnit-TerrainComponent-combinations
     INTEGER :: luse_subbas(ntcinst),luse_lu(ntcinst),luse_tc(ntcinst)
 
-    INTEGER :: i_svc,i_soil,i_veg        ! ids of components in work
+    INTEGER :: i_soil,i_veg        ! ids of components in work
     
 
     !Till: Read routing.dat, which determines which of the given subbasins are to be modelled

@@ -28,7 +28,6 @@ SUBROUTINE muskingum (i, flow, r_area,h)
 !! r_area           |m^2         |cross-sectional area of flow
 !! c                |none        |change in horizontal distance per unit change in vertical distance on channel side slopes; always set to 2 (slope=1/2)
 !! r_depth_cur(i)   |m           |depth of flow on day
-!! rttime           |hr          |reach travel time
 !! tbase            |none        |flow duration (fraction of 24 hr)
 !! topw             |m           |top width of main channel
 !! r_evp            |m^3 H2O     |evaporation from reach per timestep
@@ -43,12 +42,12 @@ use climo_h
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: i !internal subbasin-ID
 INTEGER, INTENT(IN) :: h !subdaily timestep
-integer :: dummy
 real ::  r_area,  p !wetted perimeter
-real ::  rttime, topw, flow, r_evp,r_infil, dummy2 !,vol, c, rh, tbase, s1, s2
+real ::  topw, flow, r_evp,r_infil, dummy2 !,vol, c, rh, tbase, s1, s2
 real :: c0, c1, c2, c3, yy, total_water, total_losses !, Fr
 
 flow = r_qout(1,i) !previous outflow
+velocity(i)=1000. !debug
 
 if (.FALSE.) then !Eva's routing
     !! Initialise water and sediment storage in each reach   
@@ -221,8 +220,9 @@ else !revised routing
  
         if (total_losses > 0) then
         ! distribute losses (infiltration, evap) between storage and outflow
-            r_storage(i) = r_storage(i) - total_losses * r_storage(i)          / total_water ![m3]
-            r_qout(2,i)  = r_qout(2,i)  - total_losses * r_qout(2,i)           / total_water ![m3/s]
+            dummy2 = total_losses / total_water !reduction factor for losses 
+            r_storage(i) = r_storage(i) - dummy2 * r_storage(i)   ![m3]
+            r_qout(2,i)  = r_qout(2,i)  - dummy2 * r_qout(2,i)    ![m3/s]
              !prevent negative values (rather safe than sorry)
             r_storage(i) = max(0.,r_storage(i))	
             r_qout(2,i)  = max(0.,r_qout(2,i))	
