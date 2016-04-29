@@ -43,7 +43,6 @@ INTEGER :: idummy !,imun,imunx,irout,irout2,irout_d,id,imeso,istate ! id: additi
 INTEGER :: upstream, downstream
 INTEGER :: i, j, h,k, istate !itl, itr, ih, mm, imunout, iout,  make
 !REAL :: xdum(48),check,temp2,qtemp, storcapact, con_sed
-REAL :: flow, r_area !, sediment_temp(24), temp_rain(366), dummy
 Real :: temp_water(subasin), temp_sediment(subasin)
 character(len=1000) :: fmtstr	!string for formatting file output
 Real :: r_sediment_storage(subasin)		!(suspended) sediment storage in reach [t] (for output only)
@@ -348,12 +347,12 @@ DO h=1,nt
    if (log_temp) then		!Till: if water outflow from upstream subbasins is given
      r_qout(2,upstream)=water_subbasin_t(d,h,upstream)
    else
-     call muskingum (upstream, flow, r_area,h)								!normal routing
+     call muskingum (upstream, h)								!normal routing !ii:neither flow nor r_area is used further
    end if 
 
    log_temp = .FALSE.
    if (do_pre_outsed) then
-        if (associated(corr_column_pre_subbas_outsed)) then   !Till: succesive evaluation is necessary to adhere to Fortran standard (no short-circuit-evaluation guaranteed)
+        if (associated(corr_column_pre_subbas_outsed)) then   !Till: successive evaluation is necessary to adhere to Fortran standard (no short-circuit-evaluation guaranteed)
             if (corr_column_pre_subbas_outsed(i)>0) log_temp = .TRUE.		!Till: if water outsed from upstream subbasins is given and if outsed of subbasin is prespecified
         end if
     end if

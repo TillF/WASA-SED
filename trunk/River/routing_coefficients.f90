@@ -74,18 +74,16 @@ REAL, INTENT(INOUT) :: flow
 REAL, INTENT(OUT) :: r_area, p
 !also modifies velocity(i) and r_depth_cur(i)
 
-!REAL :: fps, qq1, tt1, tt2, aa, phi8, phi9, phi11, phi12, sed_con
 REAL :: dep  
 REAL::  d_it, pp, qq !, q_it, percent, error,
-REAL :: vol, s1, s2 
-
+REAL :: vol, s1, s2, ttt 
+real, parameter :: bottom_inc=0.1  !bottom incision (depth of triangle at bottom of floodplain)
 
 s1 = r_sideratio(i)	
 s2 = r_sideratio_fp(i)
 
+r_area=-100. 
 
-!flow =-1000.
-r_area=-100.
 p=-1000.
 r_depth_cur(i)=-1000.
 
@@ -96,7 +94,8 @@ IF (STATUS == 1) THEN !initialisation, called at start of simulations
 	! Calculation of bottom width
 	dep = r_depth(i)
 	bottom_width(i) = r_width(i) - 2. * dep * s1
-
+    area_loflo(i)=bottom_inc/2*(bottom_width(i)+2*s1*bottom_inc) !low-flow area (bottom-triangle)
+    
 	!! check if bottom width (bottom_width(i)) is < 0
 	IF (bottom_width(i) <= 0.) THEN 
 	  write(*,*)"WARNING: to low river width for depth / side slopes combination at ",i,"th stretch, side slopes adjusted."
@@ -105,8 +104,8 @@ IF (STATUS == 1) THEN !initialisation, called at start of simulations
     END IF
 
 !! compute flow and travel time at bankfull depth
-	q_bankful100(i) = -1.
-    CALL calc_q_a_p(r_depth(i), q_bankful100(i), area_bankful(i), p) !ii: store q_bankfull
+	q_bankful100(i) = -1. !request q-values to be computed
+    CALL calc_q_a_p(r_depth(i), q_bankful100(i), area_bankful(i), p) 
 
 	!!determine the correct flow area a for the given input discharge r_qin
 	! for flow in the main channel
@@ -114,10 +113,10 @@ IF (STATUS == 1) THEN !initialisation, called at start of simulations
 		d_it =calc_d(r_qin(2,i))
 		CALL calc_q_a_p(d_it, flow, r_area, p)
 	else
-		r_area=0.
+		r_area=0. 
 	endif
 
-	if (flow <= 0.) r_area=0.
+	if (flow <= 0.) r_area=0. 
 
 	!Calculation of initial water volume for each river stretch [m3]
  IF (.NOT. doloadstate) then
@@ -139,40 +138,43 @@ vol = r_storage(i)
 
 
 IF (STATUS == 1  .OR. STATUS == 2 .OR. STATUS == 3) THEN
-! adjust water depth to current volume in reach
+! compute water depth from current volume in reach
 	!! calculate volume of water in reach
 
 	!! calculate cross-sectional area of flow, Equation 23.2.3
-	r_area = vol / (r_length(i) * 1000.)
+	r_area = vol / (r_length(i) * 1000.) 
+!    r_depth_cur(i) = sqrt(r_area*bottom_inc**2/area_loflo(i)) !coarse initial estimate of depth
 
-	!! calculate depth of flow, Equation 23.2.4 or 23.2.5
-    
-    
-    
-    
-	if (vol <= 0.) then
-		r_depth_cur(i)=calc_d(flow)
-        !r_depth_cur(i) = 0.
-    elseif (r_area <= area_bankful(i)) THEN
-	  pp = bottom_width(i) / s1 !coefficients of quadratic equation
-      qq = - r_area / s1 
+    !! calculate depth of flow, Equation 23.2.4 or 23.2.5
+     if (r_area <= area_loflo(i)) THEN     !flow within low-flow area
+        r_depth_cur(i) = sqrt(r_area*bottom_inc**2/area_loflo(i))
+    elseif (r_area <= area_bankful(i)) THEN   !flow within channel
+	  pp = (bottom_width(i)+2*bottom_inc*s1)/ s1 !coefficients of quadratic equation
+      qq = - (r_area-area_loflo(i)) / s1 
       !r_depth_cur(i) = -pp/2 + sqrt(pp*pp/4-qq)  !Till: choose only positive solution of quadratic equation
       r_depth_cur(i) = qq / (-pp/2 - sqrt(pp*pp/4-qq)) !identical to line above, but numerically more robust as it eliminates numerical absorption
-      IF (r_depth_cur(i) < 0.) r_depth_cur(i) = 0.	!Till: this should never occur
-    ELSE
+      r_depth_cur(i) = r_depth_cur(i) + bottom_inc
+    
+      IF ((isNaN(r_depth_cur(i))) .OR. (r_depth_cur(i) < 0.)) r_depth_cur(i) = 0.	!Till: this should never occur, but sometime does due to numerical issues
+    ELSE                                      !overbank flow
       pp = r_width_fp(i)   /  s2 !coefficients of quadratic equation
-      qq = - (r_area - area_bankful(i)) / s2 
+      qq = - (r_area - area_bankful(i) +area_loflo(i)) / s2 
 	  !r_depth_cur(i) = -pp/2 + sqrt(pp*pp/4-qq)  !Till: choose only positive solution of quadratic equation
       r_depth_cur(i) = qq / (-pp/2 - sqrt(pp*pp/4-qq)) !identical to line above, but numerically more robust as it eliminates numerical absorption
       IF (r_depth_cur(i) < 0.) r_depth_cur(i) = 0.	!Till: this should never occur
 	  r_depth_cur(i) = r_depth_cur(i) + r_depth(i)	
-	END IF
+    END IF
 END IF
 
 ! -----------------------------------------------------------------------
 IF (STATUS >= 2) THEN
 	!CALCULATION OF FLOW PARAMETERS FOR CONTINUOUS, PERENNIAL FLOW
-	call calc_q_a_p(r_depth_cur(i), flow, r_area, p)
+	ttt=-1.
+    call calc_q_a_p(r_depth_cur(i), ttt, r_area, p)
+    if (ttt < flow) then !Manning-based flow is smaller than Muskingum based (happens with strange Muskingum parameters and/or low reach storage)
+        r_depth_cur(i)=calc_d(flow)
+		call calc_q_a_p(r_depth_cur(i), ttt, r_area, p) !update flow parameters using Manning equation
+    end if
 ENDIF
 
 
@@ -197,7 +199,6 @@ IF (STATUS == 33) THEN	!obsolete
 
 
 	flow = r_qin(2,i)			!Till: then why is q_it computed above?
-	
 
 ENDIF
 
@@ -206,9 +207,8 @@ ENDIF
 if (r_area == 0.) then
 	velocity(i)=0.
 else
-  velocity(i)= flow/r_area
+    velocity(i)= flow/r_area
 endif
-
 
 
 contains    
@@ -223,7 +223,6 @@ real, intent(inout) :: q
 real, intent(out) :: a, p
 real :: d_fp = 0.	!depth of water in flood-plain
 real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch, bottom_slope
-real, parameter :: bottom_inc=0.1  !bottom incision (depth of triangle at bottom of floodplain)
 
 	if (dep<0.) then
 		write(*,*)"ERROR: negative river depth in routing_coefficients.f90"
@@ -249,13 +248,14 @@ real, parameter :: bottom_inc=0.1  !bottom incision (depth of triangle at bottom
     p_ch =   (d_fp +  max(0., d_fp - bottom_inc)) * SQRT(1. + s1 * s1) +& !left + right bank
              + p_fp * SQRT(1. + bottom_slope * bottom_slope) !wetted bottom
 
-    a_ch =    (bottom_width(i) + s1 * dep       ) * dep	&					!cross-section area (probably extending over floodplain!)
-	        - (bottom_width(i) + s1 * bottom_inc) * bottom_inc &     !trapeziod part containing bottom triangle
-            + p_fp*p_fp * bottom_slope / 2.   !bottom triangle
+   if (dep > bottom_inc) then
+            a_ch =    (bottom_width(i) + s1 * dep ) * dep &	   	!cross-section area (probably extending over floodplain!)
+            - p_fp * bottom_width(i) / 2.   !bottom triangle
+    else
+            a_ch = p_fp*p_fp * bottom_slope / 2.   !bottom triangle
+    end if            
 
-    
-    if (q < 0.) q_ch = a_ch * (a_ch/p_ch) ** 0.6666 * SQRT(r_slope(i))/manning(i)				!Till: discharge according to Manning's equation
-
+            
 	if (dep <= r_depth(i)) then			
 		a_fp = 0.	!no flow in floodplain
 		p_fp = 0.
@@ -266,11 +266,15 @@ real, parameter :: bottom_inc=0.1  !bottom incision (depth of triangle at bottom
         a_fp = ((r_width_fp(i)-r_width(i)) + s2 * d_fp) * d_fp
 		p_fp =  (r_width_fp(i)-r_width(i)) + 2. * d_fp * SQRT(1. + s2 * s2)		!flow on floodplains
 		if (q < 0.) q_fp = a_fp * (a_fp/p_fp) ** 0.6666 * SQRT(r_slope(i))/manning_fp(i)				!Till: discharge according to Manning's equation (flood plain)
-	end if
-		
-	a = a_ch + a_fp		!simple summation of components
+    end if
+	
+    a = a_ch + a_fp		!simple summation of components 
 	p = p_ch + p_fp
-	if (q < 0.) q = q_ch + q_fp !Till: only compute q when requested
+    
+    if (q < 0.) then
+        q_ch = a_ch * (a_ch/p_ch) ** 0.6666 * SQRT(r_slope(i))/manning(i)				!Till: discharge according to Manning's equation
+		q = q_ch + q_fp !Till: only compute q when requested
+    end if
 END SUBROUTINE calc_q_a_p
 
 REAL FUNCTION calc_d(q)
@@ -286,8 +290,8 @@ real :: d_est0, d_est1, q_est0, q_est1, f0, f1, error_tolerance=0.01, dum	!Till:
 integer :: j, max_iter=50			!Till: max number of iterations
 
     calc_d = 0.	
-    if (q == 0) return
-        
+    if (q <= 0.) return
+     
     q_est0       = q_bankful100(i)
 	d_est0       = r_depth(i)
 	f0 = q_est0 - q
