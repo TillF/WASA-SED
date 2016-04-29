@@ -246,7 +246,7 @@ real :: q_ch, q_fp, a_ch, a_fp, p_fp, p_ch, bottom_slope
     p_fp = min(dep, bottom_inc) !aux variable: depth in bottom triangle
     
     p_ch =   (d_fp +  max(0., d_fp - bottom_inc)) * SQRT(1. + s1 * s1) +& !left + right bank
-             + p_fp * SQRT(1. + bottom_slope * bottom_slope) !wetted bottom
+              p_fp * SQRT(1. + bottom_slope * bottom_slope) !wetted bottom
 
    if (dep > bottom_inc) then
             a_ch =    (bottom_width(i) + s1 * dep ) * dep &	   	!cross-section area (probably extending over floodplain!)
