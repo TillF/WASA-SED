@@ -1,4 +1,4 @@
-SUBROUTINE muskingum (i, flow, r_area,h)
+SUBROUTINE muskingum (i, h)
 
 ! Till: computationally irrelevant: minor changes to improve compiler compatibility
 ! 2011-04-29
@@ -42,19 +42,23 @@ use climo_h
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: i !internal subbasin-ID
 INTEGER, INTENT(IN) :: h !subdaily timestep
-real ::  r_area,  p !wetted perimeter
-real ::  topw, flow, r_evp,r_infil, dummy2 !,vol, c, rh, tbase, s1, s2
+real ::  r_area !cross section area
+real ::  flow !discharge
+real ::  p !wetted perimeter
+real ::  topw, r_evp,r_infil, dummy2, dummy3 !,vol, c, rh, tbase, s1, s2
 real :: c0, c1, c2, c3, yy, total_water, total_losses !, Fr
 
 flow = r_qout(1,i) !previous outflow
+
 velocity(i)=1000. !debug
 
+!! Initialise water and sediment storage in each reach   
+if (t == tstart .and. d == 1 .and. h == 1) then 
+    call routing_coefficients(i,1, dummy2, dummy2, dummy2)
+endif
+
 if (.FALSE.) then !Eva's routing
-    !! Initialise water and sediment storage in each reach   
-    if (t == tstart .and. d == 1 .and. h == 1) then ! Till: is this necessary (already covered by clause below)? 
-        call routing_coefficients(i,1, dummy2, dummy2, dummy2)
-    endif
-    !-------------------------------------------------------------
+        !-------------------------------------------------------------
 
       ! Calculation of discharge coefficients 
       call routing_coefficients (i,2,flow,r_area,p)
@@ -171,9 +175,9 @@ else !revised routing
         IF (r_qout(2,i) < 0.) r_qout(2,i) = 0.
 
         
-        flow = (r_qin(2,i) + r_qout(2,i)) / 2 !mean flow in timestep
+        flow = (r_qin(2,i) + r_qout(2,i)) / 2  !mean flow in timestep
         ! Calculation of discharge coefficients 
-        dummy2=flow !flow is passed to routing_coefficients to estimated flow properties when r_storage is 0 
+        dummy2=flow !flow is passed to routing_coefficients to allow estimation of flow properties when r_storage is 0 
         
         call routing_coefficients (i, 2, dummy2, r_area, p) 
         

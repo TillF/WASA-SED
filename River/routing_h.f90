@@ -69,7 +69,7 @@ real, allocatable :: Q_spring(:)
 
 !MUSKINGUM variables
 !!  cross-sectional area and flow at bankfull (m^2)
-real, allocatable :: area_bankful(:)
+real, allocatable :: area_bankful(:), area_loflo(:)
 real, allocatable :: q_bankful100(:)
 !!  bottom width of main channel depth (m)
 real, allocatable :: bottom_width(:)
