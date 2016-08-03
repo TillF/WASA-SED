@@ -644,7 +644,7 @@ SUBROUTINE readhymo
         !** read SVC information (numbering scheme, erosion properties)
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/svc.dat', IOSTAT=istate,STATUS='old')
         IF (istate/=0) THEN
-            write(*,*)pfadp(1:pfadj)// 'Hillslope/svc.dat could not be opened. Aborting.'
+            write(*,*)pfadp(1:pfadj)// 'Hillslope/svc.dat could not be opened. Supply this file or disable sediment modelling or loading/saving states. Aborting.'
             stop
         END IF
         READ(11,*)
@@ -1144,26 +1144,29 @@ SUBROUTINE readhymo
         tcallid(id_sub_int,i,j) = n
     END DO
 
-  DO sb_counter=1,subasin            !check, if all relevant SVCs have been specified
-       DO lu_counter=1,nbr_lu(sb_counter)
-         i_lu=id_lu_intern(lu_counter,sb_counter)
-             DO tc_counter=1,nbrterrain(i_lu)
-                 tcid_instance=tcallid(sb_counter,lu_counter,tc_counter) !id of TC instance
-                 id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
-                    if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
-                    DO svc_counter=1,nbr_svc(tcid_instance)
-                        i_soil=id_soil_intern(svc_counter,tcid_instance)        !internal id of soil type
-                        i_veg=  id_veg_intern(svc_counter,tcid_instance)
-                        i=which1(svc_soil_veg(:,1)==i_soil .AND. svc_soil_veg(:,2)==i_veg) 
-                        IF (i==0) THEN    !soil-vegetation combination not specified as an SVC
-                            write(*,'(a,i0,a,i0)')'ERROR in svc.dat: could not find soil-vegetation combination ', id_soil_extern(i_soil),' :', id_veg_extern(i_veg)
-                            write(*,'(a,i0,a,i0,a,i0,a,i0,a)')' found for subbasin ', id_subbas_extern(sb_counter),', LU ', id_lu_extern(i_lu), ', TC ', id_terrain_extern(id_tc_type), ' (position ', tc_counter,')'
-                            stop
-                        END IF
-                    END DO
-             END DO
-       END DO
-    END DO
+  if (allocated(svc_soil_veg)) then  
+      DO sb_counter=1,subasin            !check, if all relevant SVCs have been specified
+           DO lu_counter=1,nbr_lu(sb_counter)
+             i_lu=id_lu_intern(lu_counter,sb_counter)
+                 DO tc_counter=1,nbrterrain(i_lu)
+                     tcid_instance=tcallid(sb_counter,lu_counter,tc_counter) !id of TC instance
+                     id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
+                        if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
+                        DO svc_counter=1,nbr_svc(tcid_instance)
+                            i_soil=id_soil_intern(svc_counter,tcid_instance)        !internal id of soil type
+                            i_veg=  id_veg_intern(svc_counter,tcid_instance)
+                            i=which1(svc_soil_veg(:,1)==i_soil .AND. svc_soil_veg(:,2)==i_veg) 
+                            IF (i==0) THEN    !soil-vegetation combination not specified as an SVC
+                                write(*,'(a,i0,a,i0)')'ERROR in svc.dat: could not find soil-vegetation combination ', id_soil_extern(i_soil),' :', id_veg_extern(i_veg)
+                                write(*,'(a,i0,a,i0,a,i0,a,i0,a)')' found for subbasin ', id_subbas_extern(sb_counter),', LU ', id_lu_extern(i_lu), ', TC ', id_terrain_extern(id_tc_type), ' (position ', tc_counter,')'
+                                stop
+                            END IF
+                        END DO
+                 END DO
+           END DO
+      END DO
+  end if
+  
 
     
     
