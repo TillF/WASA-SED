@@ -8,7 +8,7 @@
 ! 2011-04-29
 
 SUBROUTINE routing(STATUS)
- 
+
 use lake_h
 use climo_h
 use common_h
@@ -77,7 +77,7 @@ DO WHILE (i<subasin)
   END IF
 
   j=which1(idummy == id_subbas_extern) !relate to external IDs from routing.dat
-  
+
   if (j==0) then
 	write(*,'(a, i0, a)')'Warning (routing.dat): Unknown subbasin ',idummy,', skipped.'
   else
@@ -85,7 +85,7 @@ DO WHILE (i<subasin)
 	prout(j,2)=temp3
 	i=i+1
   end if
-  
+
 END DO
 CLOSE (11)
 
@@ -97,18 +97,18 @@ CLOSE (11)
 DO i=1,subasin
   !upstream basin referencing
   ih=which1(id_subbas_extern == upbasin(i))
-  
+
   IF (ih==0) THEN
       WRITE (*,'(A,I0,A)') 'unknown upstream subbasin ID ', upbasin(i),' in routing.dat'
       STOP
   else
 	upbasin(i)=ih
   END IF
-  
+
   !downstream basin referencing
   IF (downbasin(i) == 999 .OR. downbasin(i) == 9999) cycle 	!999 and 9999 mark outlet
   ih=which1(id_subbas_extern == downbasin(i))
-  
+
   IF (ih==0) THEN
       WRITE (*,'(A,I0,A)') 'unknown downstream subbasin ID ', downbasin(i),' in routing.dat'
       STOP
@@ -118,7 +118,7 @@ DO i=1,subasin
 END DO
 
 
- 
+
 ! INITIALISATION OF OUTPUT FILES
 
 OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
@@ -138,22 +138,22 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 !      [m**3/s](with MAP IDs as in hymo.dat)'
 !  WRITE (11,'(2a4,<subasin>i14)')'Year' ,' Day', (id_subbas_extern(i), i=1,subasin)
 !  CLOSE (11)
-  
+
 ! calculate routing response function for each sub-basin
 ! (given parameter lag-time tL and retention-time tR)
-  allocate( hrout(ceiling(maxval(sum(prout, dim=2))) ,subasin)) !allocate memory for triangular unit hydrograph
+  allocate( hrout(maxval(sum(nint(prout), dim=2)) ,subasin)) !allocate memory for triangular unit hydrograph
   hrout(:,:)=0.
 
   !allocate arrays for in- and outflow into/out of subbasins, as their length needs to accomodate hrout, too
   allocate( qout(366 + size(hrout,dim=1), subasin))
-  allocate( qin (366 + size(hrout,dim=1), subasin)) 
+  allocate( qin (366 + size(hrout,dim=1), subasin))
 	qout(:,:)=0.
 	qin (:,:)=0.
 
   OPEN(11,FILE=pfadn(1:pfadi)//'routing_response.out' ,STATUS='replace')
   WRITE(11,'(a)') 'Output of linear response function'
   WRITE(11,'(a,i0,a)')'Subasin-ID,translation [days], retention [days], uh(1,',size(hrout,dim=1),') [-]'
-  
+
   DO i=1,subasin
     itl = nint (prout(i,1))
     itr = nint (prout(i,2))
@@ -161,25 +161,25 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 ! Calculation of the linear response function for runoff routing in the river network
         hrout(ih,i)=1./REAL(itr*itr)* (2.*REAL(itr)-2.*REAL(ih-itl)+1.)
     END DO
-    
+
     write(fmtstr,'(a,i0,a)')'(I5,2f10.2,2x,',size(hrout,dim=1),'f5.2)'		!generate format string
 	WRITE (11,fmtstr)  &
         id_subbas_extern(i),prout(i,1),prout(i,2),(hrout(ih,i),ih=1, size(hrout,dim=1))
   END DO
-  
+
 ! CALL Reservoir Sedimentation and Management Modules
   IF (doreservoir) THEN
     CALL reservoir (0,upstream,idummy)
   END IF
-  
+
 END IF
 
 ! ------------------------------------------------------------------------
 IF (STATUS == 1) THEN
-  
+
 ! initialize ...
 ! ... and take qout and volact from the last nn days of last year (nn:length of unit hydrograph)
-  
+
   IF (t > tstart) THEN
     DO i=1,subasin
       DO id=1,size(hrout,dim=1)-1
@@ -190,25 +190,25 @@ IF (STATUS == 1) THEN
   ELSE IF (t == tstart) THEN
     qout(1,1:subasin)=0.
   END IF
-  
+
 ! ... and initialize remaining values
   qout((dayyear+1):size(qout,dim=1),1:subasin)=0.
-  
+
 ! CALL Reservoir Sedimentation and Management Modules
   IF (doreservoir) THEN
     CALL reservoir (1, upstream,idummy)
   END IF
-  
+
 END IF
 
 ! ------------------------------------------------------------------------
 IF (STATUS == 2) THEN
-  
+
 ! ..........................................................................
 !**  Transfer of water between sub-basins
 !    assumption: time delay = 1 day
 !    transfer variable qtemp in [m3/day]
-  
+
   IF (dotrans) THEN
 ! ntrans=4 defined in params.fi
     DO i=1,ntrans
@@ -237,7 +237,7 @@ IF (STATUS == 2) THEN
       END IF
     END DO
   END IF
-  
+
 !  water_subbasin(d,i): runoff of each sub-basin (after small reservoirs)
 !  (in m**3/d), assumpiton: leaving sub-basin with time delay = 1 day
 !Latest version: water_subbasin already comes in m3/s from hymo_all.f
@@ -250,7 +250,7 @@ IF (STATUS == 2) THEN
       qin(d+ih-1,1:subasin)=0.
     END DO
 
-  
+
 !cccccccccccccccccccccccccccc
 ! MAIN ROUTING LOOP
 !cccccccccccccccccccccccccccc
@@ -258,7 +258,7 @@ IF (STATUS == 2) THEN
   DO i=1,subasin
     upstream=upbasin(i)  !internal code-ID for most upstream sub-basin
     downstream=downbasin(i) !internal code-ID for receiving sub-basin
-    
+
 ! Route inflow from upstream sub-basins (qin) through actual sub-basin within nn days
     DO ih=1,size(hrout,dim=1)
       qout(d+ih-1,upstream)=qin(d,upstream)*hrout(ih,upstream)  &
@@ -283,7 +283,7 @@ IF (STATUS == 2) THEN
       END IF
     END DO
 ! end of do-loop for summying up flows within seven days
-    
+
 ! Assign outflow as inflow into the next downstream sub-basin
 ! and add possible inflow from other upstream sub-basins
     IF (doreservoir) THEN
@@ -296,16 +296,16 @@ IF (STATUS == 2) THEN
 
   END DO
 !  END OF MAIN ROUTING LOOP
-  
-  
-  
+
+
+
 
 END IF
 
 
 ! -----------------------------------------------------------------------
 IF (STATUS == 3) THEN
-  
+
 
 ! daily output of water discharge in the river for the entire year
 if (f_river_flow) then
@@ -317,7 +317,7 @@ if (f_river_flow) then
   enddo
   CLOSE (11)
 endif
-  
+
   IF (doreservoir) THEN
     CALL  reservoir (3,idummy,idummy)
   END IF
