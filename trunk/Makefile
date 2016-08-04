@@ -1,14 +1,19 @@
 # ATTENTION:
 # at first run 'update_revision_no.sh' in your svn directory and copy General/svn_rev.var into your actual working tree
 
-CC=gfortran
+FC=gfortran
 #release settings
-CFLAGS=-c -ggdb -g
-FLAGS= -ffree-line-length-none -ggdb -Wtabs 
+#compiler flags
+#CFLAGS=-c -g
+#linker flags
+#LFLAGS= -ffree-line-length-none -Wtabs 
 
 #debug setting
-#CFLAGS=-c -ggdb -g -fcheck=all -fbacktrace -Og
-#FLAGS= -ffree-line-length-none -ggdb -Wtabs -g -fbacktrace
+#compiler flags
+CFLAGS=-c -ggdb -g -fcheck=all -fbacktrace -Og -fimplicit-none
+#linker flags
+LFLAGS= -ffree-line-length-none -ggdb -Wtabs -g -fbacktrace -fimplicit-none
+ 
 
 # compiler flag explanations
 # COMMON
@@ -30,17 +35,17 @@ FLAGS= -ffree-line-length-none -ggdb -Wtabs
 # -O1 [-O2, -O3]: optimize for speed
 # -Os: optimize for size of compiled executable
 
-# CC=pgfortran
+# FC=pgfortran
 # CFLAGS=-c -Mfree
 
 
 SOURCES=./Hillslope/erosion_h.f90 \
+./General/time_h.f90 \
+./General/utils_h.f90 \
 ./General/common_h.f90 \
 ./General/params_h.f90 \
 ./Hillslope/hymo_h.f90 \
 ./River/routing_h.f90 \
-./General/time_h.f90 \
-./General/utils_h.f90 \
 ./General/calcyear.f90 \
 ./General/climo_h.f90 \
 ./General/climo.f90 \
@@ -83,14 +88,17 @@ SOURCES=./Hillslope/erosion_h.f90 \
 
 EXECUTABLE=wasa.exe
 
-# top-level rule to compile the whole program.
-.o:
-	$(CC) $(CFLAGS) $< -o $@
-all: $(SOURCES) $(EXECUTABLE)
-# program is made of several source files.
-$(EXECUTABLE): $(SOURCES)
-	#./update_revision_no.sh
-	$(CC) $(FLAGS) $(SOURCES) -o $(EXECUTABLE)
 
+all: $(EXECUTABLE)
+$(EXECUTABLE): $(SOURCES)
+	$(FC) $(LFLAGS) -o $@ $^
+
+%.o: %.f90
+	$(FC) $(CFLAGS) -o $@ $^
+
+%.mod: %.f90
+	$(FC) $(CFLAGS) -o $@ $<
+	
 clean:
-	rm *.mod *.o $(EXECUTABLE) 2> /dev/null
+	rm -f *.o *.mod $(EXECUTABLE) 2> /dev/null
+
