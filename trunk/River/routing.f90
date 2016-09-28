@@ -155,8 +155,8 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
   WRITE(11,'(a,i0,a)')'Subasin-ID,translation [days], retention [days], uh(1,',size(hrout,dim=1),') [-]'
 
   DO i=1,subasin
-    itl = nint (prout(i,1))
-    itr = nint (prout(i,2))
+    itl = nint (prout(i,1)) !lag time rounded to integer
+    itr = max(1, nint (prout(i,2))) !retention time rounded to integer (but at least 1)
     DO ih =itl+1,itl+itr
 ! Calculation of the linear response function for runoff routing in the river network
         hrout(ih,i)=1./REAL(itr*itr)* (2.*REAL(itr)-2.*REAL(ih-itl)+1.)
