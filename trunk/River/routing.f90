@@ -32,7 +32,7 @@ INTEGER, INTENT(IN)                  :: STATUS
 INTEGER :: irout,idummy,id !,imun,imunx,irout2,irout_d,imeso,istate
 INTEGER :: upstream, downstream
 INTEGER :: itl, itr, ih, i, j, istate, h !, mm, imunout, iout, make
-REAL :: temp2,temp3,qtemp  !,xdum(48),storcapact
+REAL :: temp2, temp3, temp4, qtemp  !,xdum(48),storcapact
 character(len=1000) :: fmtstr	!string for formatting file output
 
 
@@ -141,7 +141,7 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 
 ! calculate routing response function for each sub-basin
 ! (given parameter lag-time tL and retention-time tR)
-  allocate( hrout(maxval(sum(nint(prout), dim=2)) ,subasin)) !allocate memory for triangular unit hydrograph
+  allocate( hrout(maxval(sum(ceiling(prout), dim=2)) ,subasin)) !allocate memory for triangular unit hydrograph
   hrout(:,:)=0.
 
   !allocate arrays for in- and outflow into/out of subbasins, as their length needs to accomodate hrout, too
@@ -150,23 +150,44 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 	qout(:,:)=0.
 	qin (:,:)=0.
 
+  DO i=1,subasin
+    itl = ceiling (prout(i,1)) !lag time rounded up to integer
+    temp3 = ceiling(prout(i,1)) - prout(i,1)  !difference between lag time and next integer 
+    qtemp = prout(i,2) - temp3/2.   !time difference between point of interest and end-of-retention triangle
+    temp2 = qtemp / prout(i,2)     !mean non-zero value of response function within first integer interval after lag time
+    if (temp2 < 0.) then !happens when t_ret falls completely into a single interval
+        hrout(itl,i) = 1.
+        cycle
+    else
+        hrout(itl,i) = temp2 * temp3       !value of response function for whole interval ("resampled" to integer resolution)    
+    end if    
+    
+    ! Calculation of the linear response function for runoff routing in the river network
+    DO ih = itl+1, size(hrout,dim=1)
+        qtemp = prout(i,2) - temp3 - 0.5 - (ih - (itl+1))   !time difference between point of interest and end-of-retention triangle
+        temp2 = qtemp / prout(i,2)    !mean value of response function center of current interval
+        temp4 = 0.5 + qtemp           !fraction of current interval that is covered by response function
+        if (temp4 < 1) then !happens when t_ret ends within current interval
+            hrout(ih,i) = (temp4 / prout(i,2) ) * temp4
+            exit 
+        else    
+            hrout(ih,i) = temp2        !value of response function for whole interval ("resampled" to integer resolution)    
+        end if    
+    END DO
+    hrout(:,i) = hrout(:,i) / sum(hrout(:,i))   !normalize response function
+  END DO
+  
+  
   OPEN(11,FILE=pfadn(1:pfadi)//'routing_response.out' ,STATUS='replace')
   WRITE(11,'(a)') 'Output of linear response function'
   WRITE(11,'(a,i0,a)')'Subasin-ID,translation [days], retention [days], uh(1,',size(hrout,dim=1),') [-]'
-
   DO i=1,subasin
-    itl = nint (prout(i,1)) !lag time rounded to integer
-    itr = max(1, nint (prout(i,2))) !retention time rounded to integer (but at least 1)
-    DO ih =itl+1,itl+itr
-! Calculation of the linear response function for runoff routing in the river network
-        hrout(ih,i)=1./REAL(itr*itr)* (2.*REAL(itr)-2.*REAL(ih-itl)+1.)
-    END DO
-
-    write(fmtstr,'(a,i0,a)')'(I5,2f10.2,2x,',size(hrout,dim=1),'f5.2)'		!generate format string
-	WRITE (11,fmtstr)  &
+      write(fmtstr,'(a,i0,a)')'(I5,2f10.2,2x,',size(hrout,dim=1),'f5.2)'		!generate format string
+	    WRITE (11,fmtstr)  &
         id_subbas_extern(i),prout(i,1),prout(i,2),(hrout(ih,i),ih=1, size(hrout,dim=1))
   END DO
 
+  
 ! CALL Reservoir Sedimentation and Management Modules
   IF (doreservoir) THEN
     CALL reservoir (0,upstream,idummy)
