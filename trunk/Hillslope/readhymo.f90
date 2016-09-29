@@ -947,8 +947,8 @@ SUBROUTINE readhymo
 				end if
 				i=id_ext2int(dummy1,id_subbas_extern)    !convert external to internal ID
 				if (i==-1) then
-					write(*,'(a,i0,a)')'Unknown subbasin-ID ',dummy1,' in scaling_factor.dat'
-					stop
+					write(*,'(a,i0,a)')'Unknown subbasin-ID ',dummy1,' in scaling_factor.dat, ignored.'
+					cycle
 				end if
 				kfkorrc(i) = temp1                !modify kfkorrc of specified subbasin
 				intcfc(i)  =intcf/(0.340+0.647*kfkorrc(i)) !Till: as in the original code: interception capacity is also modified. I dunno why.
