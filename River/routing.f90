@@ -31,7 +31,7 @@ INTEGER, INTENT(IN)                  :: STATUS
 !    id           : additional loop variable of days (total 7 days)
 INTEGER :: irout,idummy,id !,imun,imunx,irout2,irout_d,imeso,istate
 INTEGER :: upstream, downstream
-INTEGER :: itl, itr, ih, i, j, istate, h !, mm, imunout, iout, make
+INTEGER :: itl, ih, i, j, istate, h !, mm, imunout, iout, make
 REAL :: temp2, temp3, temp4, qtemp  !,xdum(48),storcapact
 character(len=1000) :: fmtstr	!string for formatting file output
 
@@ -152,32 +152,34 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 
   DO i=1,subasin
     itl = ceiling (prout(i,1)) !lag time rounded up to integer
-    temp3 = ceiling(prout(i,1)) - prout(i,1)  !difference between lag time and next integer 
+    temp3 = itl - prout(i,1)  !difference between lag time and next integer
     qtemp = prout(i,2) - temp3/2.   !time difference between point of interest and end-of-retention triangle
     temp2 = qtemp / prout(i,2)     !mean non-zero value of response function within first integer interval after lag time
     if (temp2 < 0.) then !happens when t_ret falls completely into a single interval
         hrout(itl,i) = 1.
         cycle
     else
-        hrout(itl,i) = temp2 * temp3       !value of response function for whole interval ("resampled" to integer resolution)    
-    end if    
-    
+        hrout(itl,i) = temp2 * temp3       !value of response function for whole interval ("resampled" to integer resolution)
+    end if
+
     ! Calculation of the linear response function for runoff routing in the river network
-    DO ih = itl+1, size(hrout,dim=1)
-        qtemp = prout(i,2) - temp3 - 0.5 - (ih - (itl+1))   !time difference between point of interest and end-of-retention triangle
-        temp2 = qtemp / prout(i,2)    !mean value of response function center of current interval
-        temp4 = 0.5 + qtemp           !fraction of current interval that is covered by response function
-        if (temp4 < 1) then !happens when t_ret ends within current interval
-            hrout(ih,i) = (temp4 / prout(i,2) ) * temp4
-            exit 
-        else    
-            hrout(ih,i) = temp2        !value of response function for whole interval ("resampled" to integer resolution)    
-        end if    
-    END DO
+    if (itl <  (ceiling(prout(i,1) + prout(i,2)))) then
+        DO ih = itl+1, size(hrout,dim=1)
+            qtemp = prout(i,2) - temp3 - 0.5 - (ih - (itl+1))   !time difference between point of interest and end-of-retention triangle
+            temp2 = qtemp / prout(i,2)    !mean value of response function center of current interval
+            temp4 = 0.5 + qtemp           !fraction of current interval that is covered by response function
+            if (temp4 < 1) then !happens when t_ret ends within current interval
+                hrout(ih,i) = (temp4 / prout(i,2) ) * temp4
+                exit
+            else
+                hrout(ih,i) = temp2        !value of response function for whole interval ("resampled" to integer resolution)
+            end if
+        END DO
+    end if
     hrout(:,i) = hrout(:,i) / sum(hrout(:,i))   !normalize response function
   END DO
-  
-  
+
+
   OPEN(11,FILE=pfadn(1:pfadi)//'routing_response.out' ,STATUS='replace')
   WRITE(11,'(a)') 'Output of linear response function'
   WRITE(11,'(a,i0,a)')'Subasin-ID,translation [days], retention [days], uh(1,',size(hrout,dim=1),') [-]'
@@ -187,7 +189,7 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
         id_subbas_extern(i),prout(i,1),prout(i,2),(hrout(ih,i),ih=1, size(hrout,dim=1))
   END DO
 
-  
+
 ! CALL Reservoir Sedimentation and Management Modules
   IF (doreservoir) THEN
     CALL reservoir (0,upstream,idummy)
