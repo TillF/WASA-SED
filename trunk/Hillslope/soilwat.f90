@@ -266,7 +266,7 @@
     REAL :: hfrac(maxsoil),merkalluv(maxsoil)
 
     REAL :: allalluv
-    
+
 
     INTEGER :: nbrrooth(maxsoil)
     INTEGER :: i,it,j,h,soilid,n_iter
@@ -351,25 +351,25 @@
     !		- saturated fraction of each SVC in each TC (-) (frac_sat)
 
 
-    
+
     IF (dolatscsub) THEN										!Till: if lateral subsurface runoff is to be computed...
         templat=sum(latred(tcid_instance2,:))					!lateral subsurface runoff to be redistributed between SVCs (m**3)
-    ELSE    
+    ELSE
         templat=0.
     END IF
 
     IF (templat > 0.) THEN					!Till: is there subsurface runoff to be redistributed?
-    
+
         !return flow from rocky areas...
         !...onto other SVCs
-        IF (dolatsc .AND. rocky(tcid_instance2)>0. ) THEN			 
+        IF (dolatsc .AND. rocky(tcid_instance2)>0. ) THEN
             DO i=1,nbr_svc(tcid_instance2)
                 qsurf(i)=qsurf(i)+templat*rocky(tcid_instance2)*frac_svc(i,tcid_instance2)
             END DO
-        
+
             !fix 2
             tempx = templat*rocky(tcid_instance2)*(1-rocky(tcid_instance2)) !amount of subsurface flow to convert to return flow
-            latred(tcid_instance2,:) = latred(tcid_instance2,:) * (1-tempx/templat) !Till: reduce pending lateral inflow 
+            latred(tcid_instance2,:) = latred(tcid_instance2,:) * (1-tempx/templat) !Till: reduce pending lateral inflow
             templat = templat - tempx
         END IF
 
@@ -386,7 +386,7 @@
         !fix 1
         latred(tcid_instance2,:) = latred(tcid_instance2,:) * (1-tempx) !Till: reduce pending lateral inflow !debugadded - remove?!
         templat = templat * (1-tempx)
-        
+
         IF (tc_counter2 == nbrterrain(i_lu)) THEN	!Till: treat the very lowest TC in a different way: treat alluvial soils
             merkalluv(:)=0. !fraction of SVC covered by alluvial soil (i.e. 0 for non-alluvials, otherwise fraction of SVC)
             ! check if alluvial soils exist and sum up their fractions !ii: this is a static property and could be computed only once
@@ -450,8 +450,8 @@
                         ! may then be distributed also in higher horizons which are below river bed
                         ! repeat procedure for all deeper horizons
                         ! remaining latflow is river runoff
-                        temp2=sum(remainlat(:)) 
-						IF (temp2 > 0.) THEN 
+                        temp2=sum(remainlat(:))
+						IF (temp2 > 0.) THEN
                             lath=maxhori !default: use all horizons
                             DO h=1,maxhori !reduce number of exchange horizons according to depth of riverbed !ii: use "nbrhori(soilid)" instead?
                                 IF (sum(horiz_thickness(tcid_instance2,i,1:h)) > riverbed(i_lu)) THEN
@@ -459,7 +459,7 @@
                                     exit
                                 END IF
                             END DO
-                            
+
 							DO h=lath,nbrhori(soilid)
                                 temp2=sum(remainlat(:))
                                 !  update soil moisture of this horizon
@@ -473,11 +473,11 @@
                                         /  slength(i_lu) / fracterrain(id_tc_type2)/1000.
 
                                     temp3=MIN(temp3,temp2)
-                                    
+
                                     horithact(tcid_instance2,i,h)=horithact(tcid_instance2,i,h)+temp3
-							
+
                                     remainlat(:)=0.
-								
+
 									IF (temp3 < temp2) THEN
                                         remainlat(1)=temp2-temp3
                                     END IF
@@ -490,7 +490,7 @@
                                         remainlat(1)=remainlat(1)+ (horithact(tcid_instance2,i,h)- temp5)
                                         horithact(tcid_instance2,i,h)=temp5
                                     END IF
-							
+
                                 END IF
 
                                 ! enddo for all horizons
@@ -512,7 +512,7 @@
                         !  Calculate new fraction of saturation of current SVC
                         !  frac_sat value is relative to TC, not to SVC !!
                         tempth=sum(horithact(tcid_instance2,i,:)) !sum up total water content in entire profile [mm]
-                        IF (tempth <= tctheta_s(1,1,tcid_instance2,i)) THEN 
+                        IF (tempth <= tctheta_s(1,1,tcid_instance2,i)) THEN
                         ! no part of SVC is saturated
                             frac_sat(tcid_instance2,i)=0.
                         ELSE
@@ -624,7 +624,7 @@
                            !  if horizon is saturated, remaining lateral inflow may be added to
                            !  lower horizon
                             temp5=thetas(soilid,h)*horiz_thickness(tcid_instance2,i,h)	!Till: compute saturated water content [mm]
-                            
+
                             IF (horithact(tcid_instance2,i,h) > temp5) THEN !Till: if water content exceeds saturation...
                                 remainlat(lath)=remainlat(lath)+ (horithact(tcid_instance2,i,h)- temp5)
                                 horithact(tcid_instance2,i,h)=temp5
@@ -866,7 +866,7 @@
     !
 
     !thsc(tc_counter2,day,1:nbr_svc(tcid_instance2))=sum(horithact(tcid_instance2,1:nbr_svc(tcid_instance2),:))
-    thact=sum(sum(horithact(tcid_instance2,1:nbr_svc(tcid_instance2),:))*frac_svc(1:nbr_svc(tcid_instance2),tcid_instance2)	)
+    thact=sum(sum(horithact(tcid_instance2,1:nbr_svc(tcid_instance2),:), dim=2)*frac_svc(1:nbr_svc(tcid_instance2),tcid_instance2)	)
 
 
 
@@ -1522,8 +1522,8 @@
                                                 DO j=1,nbr_svc(tcid_instance2)
                                                     IF (j /= i) THEN
                                                         temp3=remain*tcarea2*1.e3*frac_svc(i,tcid_instance2)*frac_svc(j,tcid_instance2)
-                                                        qmerk(j)=qmerk(j)+temp3	!Till: assign this part of the excess runoff to other SVCs for the next iteration [m³]
-                                                        qmerk2(i)=qmerk2(i)+temp3 !Till: sum up the redistributed amount [m³]
+                                                        qmerk(j)=qmerk(j)+temp3	!Till: assign this part of the excess runoff to other SVCs for the next iteration [mÂ³]
+                                                        qmerk2(i)=qmerk2(i)+temp3 !Till: sum up the redistributed amount [mÂ³]
                                                     END IF
                                                 END DO
                                             ELSE !Till: second iteration
@@ -1839,7 +1839,7 @@
 
     !1:nbr_svc(tcid_instance2)
     !thsc(tc_counter2,day,1:nbr_svc(tcid_instance2))=thsc(tc_counter2,day,1:nbr_svc(tcid_instance2))+sum(horithact(tcid_instance2,1:nbr_svc(tcid_instance2),:))/dt_per_day
-    thact=sum( sum(horithact(tcid_instance2,1:nbr_svc(tcid_instance2),:)) * frac_svc(1:nbr_svc(tcid_instance2),tcid_instance2) )
+    thact=sum( sum(horithact(tcid_instance2,1:nbr_svc(tcid_instance2),:), dim=2) * frac_svc(1:nbr_svc(tcid_instance2),tcid_instance2) )
 
 
 
@@ -2646,7 +2646,7 @@
 
     !only for output
     !thsc(tc_counter2,day,1:nbr_svc(tcid_instance2))=sum(horithact(tcid_instance2,1:nbr_svc(tcid_instance2),:))
-    thact=sum(sum(horithact(tcid_instance2,1:nbr_svc(tcid_instance2),:))*frac_svc(1:nbr_svc(tcid_instance2),tcid_instance2))
+    thact=sum(sum(horithact(tcid_instance2,1:nbr_svc(tcid_instance2),:), dim=2)*frac_svc(1:nbr_svc(tcid_instance2),tcid_instance2))
 
 
 
@@ -2736,7 +2736,7 @@
 
     !only for output
     !thsc(tc_counter2,day,1:nbr_svc(tcid_instance2))=sum(horithact(tcid_instance2,1:nbr_svc(tcid_instance2),:))
-    thact=sum(sum(horithact(tcid_instance2,1:nbr_svc(tcid_instance2),:))*frac_svc(1:nbr_svc(tcid_instance2),tcid_instance2))
+    thact=sum(sum(horithact(tcid_instance2,1:nbr_svc(tcid_instance2),:), dim=2)*frac_svc(1:nbr_svc(tcid_instance2),tcid_instance2))
 
 
 
@@ -2848,7 +2848,7 @@
 
         manning_n=manning_n/r
 
-            
+
         !debugcheck(i_subbas2,1)=debugcheck(i_subbas2,1)+manning_n
         !debugcheck(i_subbas2,2)=debugcheck(i_subbas2,2)+1
 
@@ -2872,20 +2872,20 @@
         if (dt<=1) then	!if high resolution precipitation is available
             if (precday==0) then
                 alpha_05=1. !overland flow without rain: may happen in small amounts, thus alpha_05 is not really important
-            else    
+            else
                 alpha_05=(maxval(prechall2)/precday)/(dt*2)	!estimate the maximum rainfall rate based on given precipitation data
             end if
         else
             if (kfkorr_a==0.) then
                 alpha_05=0.5*kfkorr/24.	!time invariant kfkorr
             else
-                !based on kfcorr: time variant kfkorr: only the the precipitation-dependent part of the term is used 
-                !(the "constant" part of kfkorr factor is considered a calibration factor for Ksat and not 
+                !based on kfcorr: time variant kfkorr: only the the precipitation-dependent part of the term is used
+                !(the "constant" part of kfkorr factor is considered a calibration factor for Ksat and not
                 ! not representing sub-daily rainfall dynamics )
                 alpha_05=min(1.0,0.5*(kfkorr_day/kfkorr)/24.)
-                
-                !based on USLE Ri50-coefficients - doubles sediment yield in Isábena
-                !alpha_05=0.5*a_i30*(precday**(b_i30-1))		
+
+                !based on USLE Ri50-coefficients - doubles sediment yield in IsÃ¡bena
+                !alpha_05=0.5*a_i30*(precday**(b_i30-1))
             end if
             alpha_05=min(alpha_05,1.0)	!at maximum, all daily rainfall fell within 30 min
 
