@@ -1,5 +1,5 @@
-* Copyright (c) 2009-2012, SESAM-Project
-* All rights reserved.
+* Copyright (c) 2009-2017, SESAM-Project et al.
+* Creative Commons Attribution 4.0 International License
 *
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions are met:
@@ -16,7 +16,7 @@
 *       publications describing the model:
 *       - Güntner, A. (2002): Large-scale hydrological modelling in the semi-arid North-East of Brazil. PIK-Report No. 77 Potsdam Institute for Climate Research, Germany
 *       - Güntner, A., Bronstert, A. (2004): Representation of landscape variability and lateral redistribution processes for large-scale hydrological modelling in semi-arid areas. Journal of Hydrology, 297(1-4):136-161
-*       - Mueller, E. N., Güntner, A., Francke, T., Mamede, G. (2008): Modelling water availability and sediment export from drylands with the WASA-SED Model. Geosci. Model Dev. Dicuss. 1, 285-314
+*       - Mueller, E. N., Güntner, A., Francke, T., Mamede, G. (2010): Modelling water availability and sediment export from drylands with the WASA-SED Model. Geosci. Model Dev., 3, 275-291, 2010, doi:10.5194/gmd-3-275-2010
 *
 *
 * THIS SOFTWARE IS PROVIDED BY THE SESAM-Project ''AS IS'' AND ANY
