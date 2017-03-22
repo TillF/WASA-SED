@@ -1,20 +1,21 @@
 # ATTENTION:
 # at first run 'update_revision_no.sh' in your svn directory and copy General/svn_rev.var into your actual working tree
 
+#******gfortran*********
 FC=gfortran
-#release settings
+#*****release settings*********
 #compiler flags
 #CFLAGS=-c -g
 #linker flags
 #LFLAGS= -ffree-line-length-none -Wtabs 
-
-#debug setting
+#
+#*******debug settings*********
 #compiler flags
 CFLAGS=-c -ggdb -g -fcheck=all -fbacktrace -Og -fimplicit-none
 #linker flags
 LFLAGS= -ffree-line-length-none -ggdb -Wtabs -g -fbacktrace -fimplicit-none
- 
-
+# 
+#
 # compiler flag explanations
 # COMMON
 # -ffree-line-length-none: free line length in source code
@@ -34,11 +35,16 @@ LFLAGS= -ffree-line-length-none -ggdb -Wtabs -g -fbacktrace -fimplicit-none
 # RELEASE only (fast execution but warnings and errors omitted as far as possible)
 # -O1 [-O2, -O3]: optimize for speed
 # -Os: optimize for size of compiled executable
-
+#
+#******PGI*********
 # FC=pgfortran
 # CFLAGS=-c -Mfree
-
-
+#select script for updating revision number according to platform
+ifeq ($(OS),Windows_NT)
+    UPDATE_SCRIPT="./update_revision_no.bat"
+else
+    UPDATE_SCRIPT="./update_revision_no.sh"
+endif
 SOURCES=./Hillslope/erosion_h.f90 \
 ./General/time_h.f90 \
 ./General/utils_h.f90 \
@@ -89,7 +95,7 @@ SOURCES=./Hillslope/erosion_h.f90 \
 EXECUTABLE=wasa.exe
 
 
-all: $(EXECUTABLE)
+all: update_rev $(EXECUTABLE)
 $(EXECUTABLE): $(SOURCES)
 	$(FC) $(LFLAGS) -o $@ $^
 
@@ -102,3 +108,5 @@ $(EXECUTABLE): $(SOURCES)
 clean:
 	rm -f *.o *.mod $(EXECUTABLE) 2> /dev/null
 
+update_rev:
+	$(UPDATE_SCRIPT)

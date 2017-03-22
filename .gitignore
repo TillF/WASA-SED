@@ -1,1 +1,12 @@
 /General/svn_rev.var
+/climo_h.mod
+/common_h.mod
+/erosion_h.mod
+/hymo_h.mod
+/lake_h.mod
+/model_state_io.mod
+/params_h.mod
+/reservoir_h.mod
+/routing_h.mod
+/time_h.mod
+/utils_h.mod
