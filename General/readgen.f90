@@ -532,7 +532,7 @@ SUBROUTINE readgen(path2do_dat)
 ! save summary of settings to output directory
     OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='unknown', IOSTAT=istate)
     IF (istate/=0) THEN
-        write(*,*)'Error: Output path ',pfadn(1:pfadi),' not found, trying to create...'
+        write(*,*)'Warning: Output path ',pfadn(1:pfadi),' not found, trying to create...'
         dummy=pfadn(1:pfadi)
         do i=1,pfadi
             if (dummy(i:i)=="\") dummy(i:i)="/" !using slashes as delimiter (*nix)
