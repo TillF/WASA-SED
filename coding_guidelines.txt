@@ -1,4 +1,4 @@
-Guideline for further development of WASA-SED
+Guidelines for further development of WASA-SED
 ---------------------------------------------
 These suggestions concern general recommendations for future enhancements. They are intended to enhance portability, preserve performance and facilitate the recycling of input/output routines. They are not mandatory, but should be complied with as often as possible, especially when creating new modules or files.
 
@@ -21,12 +21,14 @@ These suggestions concern general recommendations for future enhancements. They 
 •	Preserve downward compatibility
 	•	Accept old model input file formats, if possible. If not, provide detailed information or a script to convert old input to new format
 	•	Make new features optional, if possible
-	•	Any modifications should be tested on the tutorial datasets for side effects: They should be able to reproduce the output. If not, document why your version behaves differently. 
 •	Documentation
-	•	Sufficiently comment your code in English adding your name
-	•	Add a short summary of your modifications at the beginning of the file
-	•	Use this summary when uploading your changes to the SVN-repository
+	•	fork the github-repository to your repository
+	•	sufficiently comment your code in English
+	•	provide short summary of your modifications when uploading your changes to the git-repository, especially noting if and where any changes in the model output are to be expected
+	•	Any modifications should be tested on test / tutorial datasets for side effects: They should be able to reproduce the output. If not, document why your version behaves differently. 
 	•	update the WASA-SED documentation file, if necessary
+	•	issue pull-request to the original repository, if you want your contribution to be merged into the main branch
+	
 
 2.	input / output files
 •	file header
