@@ -186,8 +186,8 @@ storcap(:)=0.
       i=which1(id_subbas_extern == dummy1)
 
 	  IF (i==0) THEN
-		  WRITE (*,'(A,I0,A)') 'unknown upstream subbasin ID ', dummy1,' in reservoir.dat'
-		  STOP
+		  WRITE (*,'(A,I0,A)') 'WARNING: unknown upstream subbasin ID ', dummy1,' in reservoir.dat, ignored.'
+		  cycle
 	  END IF
 
 	  READ (fmtstr,*,IOSTAT=istate) dummy1, minlevel(i), maxlevel(i),vol0(i),storcap(i), &
@@ -196,7 +196,7 @@ storcap(:)=0.
 			fvol_over(i),damc(i),damd(i),elevbottom(i)
 
 	  IF (istate/=0) THEN
-		  WRITE (*,'(A,i0,A,A)') 'Format error in reservoir.dat, line',j,':', fmtstr
+		  WRITE (*,'(A,i0,A,A)') 'ERROR: Format error in reservoir.dat, line',j,':', fmtstr
 		  STOP
 	  END IF
 
@@ -387,8 +387,11 @@ storcap(:)=0.
 	  i=which1(id_subbas_extern == dummy1)
 
 	  IF (i==0) THEN
-		  WRITE (*,'(A,I0,A)') 'unknown upstream subbasin ID ', dummy1,' in cav.dat'
-		  STOP
+		  WRITE (*,'(A,I0,A)') 'WARNING: unknown upstream subbasin ID ', dummy1,' in cav.dat, ignored.'
+		  READ(11,*,IOSTAT=istate) !skip next tow lines
+          READ(11,*,IOSTAT=istate)
+          j=j+2
+          cycle
 	  END IF
 
 	  READ(fmtstr,*, IOSTAT=istate) dummy1,dummy2,(elev_bat0(ka,i),ka=1,dummy2)
