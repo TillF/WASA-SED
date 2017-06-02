@@ -80,8 +80,8 @@ IF (STATUS == 0) THEN
 
 		imun=which1(dummy1==id_subbas_extern) !search corresponding internal ID of subbasin
 		if (imun==0) then	!Till: the current subbasin was not contained in hymo.dat - error
-			WRITE(*,'(a, I0, a, I0, a)') 'ERROR in lake_maxvol.dat: Subbasin ',dummy,' not listed in hymo.dat.'
-			stop
+			WRITE(*,'(a, I0, a)') 'WARNING (lake_maxvol.dat): Subbasin ',dummy1,' not listed in hymo.dat, ignored.'
+			continue
 		else
 			maxlake(imun,1:5)=dummy6(1:5)				!assign values of line read above
 			dummy5(imun)=dummy1
@@ -147,9 +147,9 @@ IF (STATUS == 0) THEN
 		READ(11,*,IOSTAT=ka) dummy1,(dummy6(k),k=1,5) !Till: read single line
 
 		imun=which1(dummy1==id_subbas_extern) !search corresponding internal ID of subbasin
-		if (imun==0) then	!Till: the current subbasin was not contained in hymo.dat - error
-			WRITE(*,'(a, I0, a, I0, a)') 'ERROR in lake_maxvol.dat: Subbasin ',dummy,' not listed in hymo.dat.'
-			stop
+		if (imun==0) then	!Till: the current subbasin was not contained in hymo.dat - warning
+            WRITE(*,'(a, I0, a)') 'WARNING (lake_number.dat): Subbasin ',dummy1,' not listed in hymo.dat, ignored.'
+			continue
 		else
 			acud(imun,1:5)=dummy6(1:5)			!assign values of line read above
 			dummy5(imun)=dummy1
@@ -181,9 +181,9 @@ IF (STATUS == 0) THEN
 			READ(11,*,IOSTAT=ka) dummy1,(dummy6(k),k=1,5) !Till: read single line
 
 			imun=which1(dummy1==id_subbas_extern) !search corresponding internal ID of subbasin
-			if (imun==0) then	!Till: the current subbasin was not contained in hymo.dat - error
-				WRITE(*,'(a, I0, a, I0, a)') 'ERROR in lake_maxvol.dat: Subbasin ',dummy,' not listed in hymo.dat.'
-				stop
+			if (imun==0) then	!Till: the current subbasin was not contained in hymo.dat - warning
+				WRITE(*,'(a, I0, a)') 'WARNING (lake_frarea.dat): Subbasin ',dummy1,' not listed in hymo.dat, ignored.'
+			    continue
 			else
 				lakefrarea(imun,1:5)=dummy6(1:5)			!assign values of line read above
 				dummy5(imun)=dummy1
