@@ -198,7 +198,7 @@ SUBROUTINE readhymo
         if (trim(cdummy)=='' .OR. istate/=0) cycle
         i=i+1
         if (i > subasin) then
-            write(*,'(A,i0,a,i0,a)')'ERROR: do.dat specifies ',subasin,' subbasins, routing.dat contains ',i,'. Correct this in do.dat.'
+            write(*,'(A,i0,a,i0,a)')'ERROR: do.dat specifies ',subasin,' subbasins, routing.dat contains more. Correct this.'
             stop
         end if
         READ (cdummy,*,IOSTAT=istate)  idummy, upbasin(i),downbasin(i)
@@ -210,7 +210,7 @@ SUBROUTINE readhymo
 
     CLOSE (11)
     if (i/=subasin) then        !Till: correct number of subbasins to be modelled
-        write(*,'(A,i0,a,i0,a)')'WARNING: do.dat specifies ',subasin,' subbasins, routing.dat contains ',i,'. Only these will be modelled.'
+        write(*,'(A,i0,a,i0,a)')'WARNING: do.dat specifies ',subasin,' subbasins, routing.dat contains only ',i,'. Only these will be modelled.'
         subasin=i !ii: check, if unused memory can be freed (see new_real_array3)
         call pause1
     end if
@@ -414,7 +414,7 @@ SUBROUTINE readhymo
         READ(11,'(a)',IOSTAT=istate) cdummy
         if (istate/=0) then
 			if ((h-4<ntcinst)  ) then    !premature end of file
-				write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' x 3 lines (#SVC-LU-SUBBAS-combinations) expected'
+				write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' x 3 lines (#TC-LU-SUBBAS-combinations) expected'
 				stop
 			else
 				if (i-1/=ntcinst) then    !less entities read than expected
@@ -452,7 +452,7 @@ SUBROUTINE readhymo
         end if
         
         if (i > ntcinst  ) then    !more lines than expected
-			write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' x 3 lines (#SVC-LU-SUBBAS-combinations) expected'
+			write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' x 3 lines (#TC-LU-SUBBAS-combinations) expected'
 			stop
         end if
         
