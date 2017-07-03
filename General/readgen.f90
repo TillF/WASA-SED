@@ -80,7 +80,8 @@ SUBROUTINE readgen(path2do_dat)
 
     INTEGER :: i,istate !,imun,imicro,imeso
     CHARACTER (LEN=150) :: custompath
-    CHARACTER (LEN=150) :: dummy, dummy2
+    CHARACTER (LEN=250) :: dummy
+    CHARACTER (LEN=150) :: dummy2
 
 
     if (trim(path2do_dat)=='') then
@@ -127,14 +128,24 @@ SUBROUTINE readgen(path2do_dat)
         dstop=31
     END IF
 
-    if (dstart<1 .OR. dstart>31 .OR. dstop<1 .OR. dstop>31 .OR. (mstart==mstop .AND. dstart>dstop) ) then
-        write(*,*)'ERROR: Invalid specification of start/stop day.'
+!check time specifications    
+    dummy = ""
+    if (mstart<1 .OR. mstart>12) dummy=       ' ERROR: Invalid specification of start month.'
+    if (mstop <1 .OR. mstop >12) dummy=trim(dummy)//' ERROR: Invalid specification of end month.'
+    if (dstart<1 .OR. dstart>31) dummy=trim(dummy)//' ERROR: Invalid specification of start day.' 
+    if (dstop<1  .OR. dstop >31) dummy=trim(dummy)//' ERROR: Invalid specification of end day.'
+    if ( (tstart  > tstop) .OR. &
+        ((tstart == tstop) .AND. (mstart  > mstop)) .OR. &
+        ((tstart == tstop) .AND. (mstart == mstop) .and. (dstart > dstop) )) dummy = trim(dummy)//' ERROR: Simulation start must be before simulation end.'
+    
+    if (dummy /="") then
+        write(*,*)trim(dummy)
         stop
     end if
 
     READ(11,*) subasin  !total no. of sub-basins
     READ(11,*) ntcinst  !total no. of sub-basin / SO / TC combinations
-    READ(11,*) nsoter  !total no. of SOTER units in study area
+    READ(11,*) nsoter  !total no. of SOTER units / LUs in study area
     READ(11,*) nterrain  !total no. of terrain components in study area
     READ(11,*) nsoil  !total no. of soil components in study area
     READ(11,*) nveg   !total no. of vegetation units in study area
