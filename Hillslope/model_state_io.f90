@@ -205,15 +205,14 @@ contains
         endif
         
 !write file contents        
-        DO sb_counter=1,subasin !we wrap subbasin loop around each single entitity to save time in generating format string
-            !Jose Miguel: write river storage state to .stat file .
-            digits=floor(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
-            if (digits<10) then
-              write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
-            else       
-               fmtstr='(I0,A1,E12.5)' !for large numbers, use exponential notation
-            end if
-            
+        !Jose Miguel: write river storage state to .stat file .
+        digits=floor(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
+        if (digits<10) then
+            write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
+        else       
+            fmtstr='(I0,A1,E12.5)' !for large numbers, use exponential notation
+        end if
+        DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
             if (river_file_hdle/=0) then
                 WRITE(river_file_hdle,trim(fmtstr))id_subbas_extern(sb_counter), char(9),r_storage(sb_counter) !tab separated output
             endif
@@ -231,7 +230,7 @@ contains
                     fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
                 end if
             END IF    
-            DO sb_counter=1,subasin !we wrap subbasin loop around each single entitity to save time in generating format string
+            DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
                 if (sediment_file_hdle/=0) then
                     do k=1, n_sed_class
                             WRITE(sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9) ,riverbed_storage(sb_counter,k) !print each sediment class
@@ -249,7 +248,7 @@ contains
                    fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
                 end if
             end if
-            DO sb_counter=1,subasin !we wrap subbasin loop around each single entitity to save time in generating format string
+            DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
                 if (susp_sediment_file_hdle/=0) then
                     do k=1, n_sed_class
                          WRITE(susp_sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9), sed_storage(sb_counter,k) !print each sediment class
