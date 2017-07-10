@@ -168,7 +168,7 @@ contains
                 'storage_[mm]', char(9),'area_[m²]'        !tab separated output
         end if
 
-        if (trim(river_conds_file)=='') then        !don't do anything if an empty filename is specified
+        if (trim(river_conds_file)=='' .OR. (river_transport == 1)) then        !don't do anything if an empty filename is specified
             river_file_hdle=0
         else
             river_file_hdle=14
@@ -658,40 +658,49 @@ contains
         integer :: subbas_id, iostatus, i
         real :: dummy1
 
-        OPEN(11,FILE=river_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
-        if (i/=0) then
-            write(*,'(a,a,a)')'WARNING: River storage file ''',trim(river_conds_file),''' not found, using defaults.'
-            CLOSE(11)
-			return
-        end if
+        if (river_transport == 2) then
+            OPEN(11,FILE=river_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
+            if (i/=0) then
+                write(*,'(a,a,a)')'WARNING: River storage file ''',trim(river_conds_file),''' not found, using defaults.'
+                CLOSE(11)
+			    return
+            end if
 
-        write(*,'(a,a,a)')'Initialize river storage from file ''',trim(river_conds_file),'''.'
+            write(*,'(a,a,a)')'Initialize river storage from file ''',trim(river_conds_file),'''.'
     
-        !read 2 header lines into buffer
-        READ(11,*); READ(11,*)
-		r_storage(:)=-1. !indicator for "not read"
+            !read 2 header lines into buffer
+            READ(11,*); READ(11,*)
+		    r_storage(:)=-1. !indicator for "not read"
         
-        DO WHILE (.TRUE.) 
-            READ(11,*,IOSTAT=iostatus) i, dummy1
-			IF (iostatus /=0) exit 
+            DO WHILE (.TRUE.) 
+                READ(11,*,IOSTAT=iostatus) i, dummy1
+			    IF (iostatus /=0) exit 
             
-            subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
-			if (subbas_id < 1 .OR. subbas_id > subasin) then
-				WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ', i,' in river_storage.stat, ignored.'
-                cycle 
-			end if
+                subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
+			    if (subbas_id < 1 .OR. subbas_id > subasin) then
+				    WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ', i,' in river_storage.stat, ignored.'
+                    cycle 
+                end if
+            
+                if (dummy1 < 0.) then
+				    WRITE(*,'(a,i0,a)') 'Error: negative value for subbasin ', i,' in river_storage.stat.'
+                    stop 
+			    end if
        
-            r_storage(subbas_id)=dummy1        !add the previous storage to the river reach additionally to potential volume from spring or runoff contribution.
-        END DO
-        close(11)
-        
-        if (count(r_storage==-1.) > 0) then  
-            WRITE(*,'(A)') 'WARNING: could not read initial river storage from river_storage.stat for the following subbasins, assumed 0:'
-            DO subbas_id=1,subasin
-                if (r_storage(i)==-1.) WRITE(*,'(i0)') subbas_id
-                r_storage(i)=0.
+                r_storage(subbas_id)=dummy1        !add the previous storage to the river reach additionally to potential volume from spring or runoff contribution.
             END DO
-        end if
+            close(11)
+        
+            if (count(r_storage==-1.) > 0) then  
+                WRITE(*,'(A)') 'WARNING: could not read initial river storage from river_storage.stat for the following subbasins, assumed 0:'
+                DO subbas_id=1,subasin
+                    if (r_storage(i)==-1.) WRITE(*,'(i0)') subbas_id
+                    r_storage(i)=0.
+                END DO
+            end if
+        else
+           r_storage(:)=0.  !old unit-hydrograph routing, set Muskingum storages to 0
+        end if !river_transport == 2    
         
     end subroutine init_river_conds
 
