@@ -14,6 +14,7 @@ use hymo_h
 use params_h
 use time_h
 use routing_h
+use model_state_io
 
 IMPLICIT NONE
 
@@ -41,6 +42,7 @@ CALL climo(0)
 if (river_transport.eq.1) CALL routing(0)
 if (river_transport.ne.1) CALL routing_new(0)
 
+CALL save_model_state(doloadstate, .TRUE.) !Till: do backups of state files if loaded from them, and save only summary on initial storage
 
 !!! MAIN LOOP FOR EACH YEAR
 DO t=tstart, tstop

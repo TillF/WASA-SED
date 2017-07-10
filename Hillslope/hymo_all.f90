@@ -353,8 +353,6 @@ SUBROUTINE hymo_all(STATUS)
 
         if (doacud)  CALL lake(0,dummy)
         
-        CALL save_model_state(doloadstate, .TRUE.) !Till: do backups of state files if loaded from them, and save only summary on initial storage
-        
         ! create and open output files
         ! Output daily water contribution to river (m**3/s)
         OPEN(11,FILE=pfadn(1:pfadi)// 'daily_water_subbasin.out', STATUS='replace')
