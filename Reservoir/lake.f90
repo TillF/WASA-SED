@@ -270,12 +270,14 @@ IF (STATUS == 0) THEN
 
 !** Modelling unit Initialisierung
   
-  if (.NOT. doloadstate .OR. lakewater0(1,1) == -1.) then !check, if not initialized before from files
+  if (.NOT. doloadstate .OR. lakewater_hrr(1,1,1) == -1.) then !check, if not initialized before from files
       DO imun=1,subasin !Till: initialize fraction of total volume according to lake.dat 
-        lakewater0(imun,:)=lake_vol0_factor(:)*maxlake(imun,:)
-        where (acud(imun,:) /= 0.)
-            lakewater_hrr(1,imun,:) = lakewater0(imun,:)/acud(imun,:)
-        end where
+        !lakewater0(imun,:)=lake_vol0_factor(:)*maxlake(imun,:)
+        lakewater_hrr(1,imun,:)=lake_vol0_factor(:)*maxlake(imun,:)
+        where (acud(imun,:) == 0.)
+            lakewater_hrr(1,imun,:) = 0. !no water when there are no reservoirs
+        end where    
+        
       END DO
   end if    
   
@@ -288,7 +290,7 @@ IF (STATUS == 0) THEN
   lakearea(:,:) = 0.
   DO imun=1,subasin
     DO k=1,5
-      lakearea(imun,k)=(alpha_Molle(k)*damk_Molle(k)*((lakewater0(imun,k)  &
+      lakearea(imun,k)=(alpha_Molle(k)*damk_Molle(k)*((lakewater_hrr(1,imun,k)  &
 			/damk_Molle(k))**((alpha_Molle(k)-1.)/alpha_Molle(k))))/1.e6
 	ENDDO
 !write(*,'(I4,5F15.3)')imun,(lakearea(imun,k)*acud(imun,k)*1.e6,k=1,5)
@@ -308,7 +310,7 @@ IF (STATUS == 0) THEN
 
   DO imun=1,subasin
     hmax_hrr(imun,1:5)=((maxlake(imun,1:5))/damk_Molle(1:5))**(1./alpha_Molle(1:5))
-    lakewater(1,imun,1:5) = lakewater0(imun,1:5)*acud(imun,1:5)
+    lakewater(1,imun,1:5) = lakewater_hrr(1,imun,1:5)*acud(imun,1:5)
   END DO
 
   if (dosediment) cumsedimentation=0.

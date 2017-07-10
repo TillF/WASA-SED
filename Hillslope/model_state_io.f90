@@ -273,7 +273,7 @@ contains
 					    WRITE(lake_file_hdle,'(I0,A1,I0,A1,F8.2)') id_subbas_extern(sb_counter), char(9),acud_class,char(9),&
 						    lakewater_hrr(tt,sb_counter,acud_class)
 				    endif
-				    total_storage_lake(acud_class)=total_storage_lake(acud_class)+lakewater_hrr(tt,sb_counter,acud_class) !sum up total storage
+				    total_storage_lake(acud_class) = total_storage_lake(acud_class)+lakewater_hrr(tt,sb_counter,acud_class) * acud(sb_counter,acud_class) !sum up total storage
                 ENDDO
             END DO
         END IF !small reservoirs
@@ -826,8 +826,8 @@ contains
             return
         end if
 
-        lakewater0 = -1. !for detecting uninitialized values later
-                
+        lakewater_hrr(1,:,:) = -1 !for detecting uninitialized values later
+        
         OPEN(11,FILE=lake_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
         if (i/=0) then
             write(*,'(a,a,a)')'WARNING: Lake storage file ''',trim(lake_conds_file),''' not found, using defaults.'
@@ -857,20 +857,18 @@ contains
 				WRITE(*,'(a,i0,a)') 'WARNING: unknown reservoir class ',k,' in '//trim(lake_conds_file)//', ignored.'
                 cycle 
 			end if
-	        lakewater0(subbas_id,k) = dummy1
+            lakewater_hrr(1,subbas_id,k) = dummy1
         ENDDO
         close(11)
         
         DO sb_counter=1,subasin
             DO acud_class=1,5
-                IF (lakewater0(sb_counter,acud_class) < 0.) then
+                IF (lakewater_hrr(1,sb_counter,acud_class) < 0.) then
                     WRITE(*,'(a,a,a)') 'WARNING: Problem with state variable file ''',trim(lake_conds_file),&
                     '''. No specification for subbasin ', id_subbas_extern(sb_counter),&
                     ', reservoir size class ',acud_class,' found. Using fraction specified in lake.dat'
-                    lakewater0(sb_counter,acud_class) = 0.
                 END IF    
             ENDDO
-!            where (acud(sb_counter,:) /= 0.) lakewater_hrr(1,sb_counter,:) = lakewater0(sb_counter,acud_class)/acud(sb_counter,:)
         END DO  
         
         
