@@ -261,10 +261,10 @@ contains
                 
         
         IF (doacud) THEN
-		    DO sb_counter=1,subasin
+            tt = (d-2)*nt+hour !index to last valid value
+            if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. José, please check this
+            DO sb_counter=1,subasin
                 DO acud_class=1,5
-				    tt = (d-2)*nt+hour
-				    if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. José, please check this
 				    if (lake_file_hdle/=0) then
 					    WRITE(lake_file_hdle,'(I0,A1,I0,A1,F8.2)') id_subbas_extern(sb_counter), char(9),acud_class,char(9),&
 						    lakewater_hrr(tt,sb_counter,acud_class)
@@ -810,13 +810,15 @@ contains
         use time_h
         use params_h
         use utils_h
+	    use hymo_h
+        
+        implicit none
 
         character(len=*),intent(in):: lake_conds_file        !file to load from
-        integer :: sb_counter,acud_class,iostatus,i
+        integer :: sb_counter, acud_class, iostatus, i, k, subbas_id
         real :: dummy1
     
         if (.not. doacud) then !don't try to load file if reservoirs have been disabled anyway
-            !lakewater0=0.
             return
         end if
                 
@@ -833,16 +835,40 @@ contains
    
         READ(11,*); READ(11,*)!read 2 header lines into buffer
     
-        DO sb_counter=1,subasin
-            DO acud_class=1,5
-                READ(11,IOSTAT=iostatus) dummy1,dummy1,lakewater0(sb_counter,acud_class)
-                IF (iostatus<0) WRITE(*,'(a,a,a)') 'WARNING: Problem with state variable file ''',trim(lake_conds_file),&
-                    '''. Not enough lake classes or subbasins or the file does not exist.',&
-                    ' Consider running the model with doloadstate switched off (in do.dat file)'
-          
-            ENDDO
+        lakewater0 = -1. !for detecting uninitialized values later
+        DO WHILE (.TRUE.) 
+	        READ(11, *, IOSTAT=iostatus) i, k, dummy1
+            
+            IF (iostatus == -1) exit !end of file
+		    IF (iostatus /= 0) THEN
+		        WRITE(*,'(a,a,a)') 'WARNING: format error in '//trim(lake_conds_file)//', line skipped.'
+            ENDIF
+        
+            subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
+			if (subbas_id < 1 .OR. subbas_id > subasin) then
+				WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in '//trim(lake_conds_file)//', ignored.'
+                cycle 
+            end if
+                
+            if (k < 1 .OR. k > 5) then
+				WRITE(*,'(a,i0,a)') 'WARNING: unknown reservoir class ',k,' in '//trim(lake_conds_file)//', ignored.'
+                cycle 
+			end if
+	        lakewater0(subbas_id,k) = dummy1
         ENDDO
         close(11)
+        
+        DO sb_counter=1,subasin
+            DO acud_class=1,5
+                IF (lakewater0(sb_counter,acud_class) < 0.) then
+                    WRITE(*,'(a,a,a)') 'WARNING: Problem with state variable file ''',trim(lake_conds_file),&
+                    '''. No specification for subbasin ', id_subbas_extern(sb_counter),&
+                    ', reservoir size class ',acud_class,' found. Defaulting to 0.'
+                    lakewater0(sb_counter,acud_class) = 0.
+                END IF    
+            ENDDO
+        END DO    
+        
     end subroutine init_lake_conds
 
 end module model_state_io
