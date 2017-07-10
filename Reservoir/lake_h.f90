@@ -47,7 +47,7 @@ real, allocatable ::  maxlakewater(:,:)
 real, allocatable :: acudfraction(:,:) 
 ! fraction of generated river runoff being routed through small acudes
 real :: intercepted
-! water stored (m3)
+! water stored in small reservoirs (m3)
 !Allocatable      real lakewater(366*nt,nmun,5)
 real, allocatable :: lakewater(:,:,:)
 ! water stored (m3)

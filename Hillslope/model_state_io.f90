@@ -270,6 +270,7 @@ contains
 						    lakewater_hrr(tt,sb_counter,acud_class)
 				    endif
 				    total_storage_lake(acud_class)=total_storage_lake(acud_class)+lakewater_hrr(tt,sb_counter,acud_class) !sum up total storage
+                    !ii: Till: why is this lakewater_hrr, not lakewater?
                 ENDDO
             END DO
         END IF !small reservoirs
@@ -821,6 +822,8 @@ contains
         if (.not. doacud) then !don't try to load file if reservoirs have been disabled anyway
             return
         end if
+
+        lakewater0 = -1. !for detecting uninitialized values later
                 
         OPEN(11,FILE=lake_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
         if (i/=0) then
@@ -829,13 +832,10 @@ contains
             return
         end if
 
-
         write(*,'(a,a,a)')'Initialize lake storage from file ''',trim(lake_conds_file),'''.'
     
-   
         READ(11,*); READ(11,*)!read 2 header lines into buffer
-    
-        lakewater0 = -1. !for detecting uninitialized values later
+
         DO WHILE (.TRUE.) 
 	        READ(11, *, IOSTAT=iostatus) i, k, dummy1
             

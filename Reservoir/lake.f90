@@ -140,7 +140,7 @@ IF (STATUS == 0) THEN
   IF (.NOT. doacudyear) THEN					!lake_number.dat not found
    OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lake_number.dat',STATUS='old')
     READ(11,*);READ(11,*)
-	acud(1:subasin,1:5)=0.
+	acud(:,:)=0.
 
 	ka = 0
 	DO WHILE (ka==0)
@@ -269,16 +269,20 @@ IF (STATUS == 0) THEN
 !George  maxlake(1:5) = (/5.e4,5.e5,2.e6,6.5E6,25.e6/)
 
 !** Modelling unit Initalisierung
+  
+  if (lakewater0(1,1) == -1.) then !check, if not initialized before from files
+      DO imun=1,subasin !Till: initialize fraction of total volume according to lake.dat 
+        lakewater0(imun,1:5)=lake_vol0_factor(1:5)*maxlake(imun,1:5)
+      END DO
+  end if    
+  
   DO imun=1,subasin
-    lakewater0(imun,1:5)=lake_vol0_factor(1:5)*maxlake(imun,1:5)
     totalacud(imun)=sum(maxlake(imun,1:5)*acud(imun,1:5))
     acudfraction(imun,1:5)=(maxlake(imun,1:5)*acud(imun,1:5))/totalacud(imun)
-!write(*,*)imun,(lakewater0(imun,k),k=1,5)
-!write(*,*)imun,totalacud(imun)
-!George    laketrend(imun,1:5)=(/0.,0.,0.,0.,0./)
   END DO
 
 !George  Estimation of small reservoirs' areas depending on volume (km**2)
+  lakearea(:,:) = 0.
   DO imun=1,subasin
     DO k=1,5
       lakearea(imun,k)=(alpha_Molle(k)*damk_Molle(k)*((lakewater0(imun,k)  &
@@ -302,16 +306,7 @@ IF (STATUS == 0) THEN
   DO imun=1,subasin
     hmax_hrr(imun,1:5)=((maxlake(imun,1:5))/damk_Molle(1:5))**(1./alpha_Molle(1:5))
     lakewater(1,imun,1:5) = lakewater0(imun,1:5)*acud(imun,1:5)
-!write(*,'(I4,5F15.3)')imun,(lakewater0(imun,k),k=1,5)
-!write(*,'(I4,5F15.3)')imun,(lakewater(1,imun,k),k=1,5)
-!write(*,'(I4,5F15.3)')imun,(acud(imun,k),k=1,5)
-!dummy7=0.
-!do k=1,5
-!dummy7=dummy7+lakewater(1,imun,k)
-!enddo
-!write(*,'(I4,6F12.3)')imun,dummy7,(lakewater(1,imun,k),k=1,5)
   END DO
-!stop
 
   if (dosediment) cumsedimentation=0.
   totalrunoff2=0.
