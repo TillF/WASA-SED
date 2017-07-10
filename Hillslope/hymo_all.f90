@@ -271,7 +271,7 @@ SUBROUTINE hymo_all(STATUS)
             call read_pre_subbas_outflow        !read
         end if
 
-        !** Additional intializations
+        !** Additional initializations
 
         !George    lakeoutflow(dprev,1:subasin)=0.
         water_subbasin(dprev,1:subasin)=0.
@@ -290,7 +290,7 @@ SUBROUTINE hymo_all(STATUS)
         !cum_deposition_TC(:,:)=0.
 
         if (doloadstate) then
-            call init_model_state        !load initital conditions from file
+            call init_model_state        !load initial conditions from file
         else
             !** Initialise soil moisture of each horizon (horithact)
             !   and soil moisture of each terrain component (soilwater) with fixed values ii: put this into init_soil_conds
@@ -342,7 +342,7 @@ SUBROUTINE hymo_all(STATUS)
                 END DO
             END DO
 
-            if (dosavestate) CALL save_all_conds('','','','','','','',trim(pfadn)//'storage.stats_start')        !Till: save summary on initial storage
+!            if (dosavestate) CALL save_all_conds('','','','','','','',trim(pfadn)//'storage.stats_start')        !Till: save summary on initial storage
 
         end if
 
@@ -352,8 +352,9 @@ SUBROUTINE hymo_all(STATUS)
         frac_sat(:,:)=0.0
 
         if (doacud)  CALL lake(0,dummy)
-
-
+        
+        CALL save_model_state(doloadstate, .TRUE.) !Till: do backups of state files if loaded from them, and save only summary on initial storage
+        
         ! create and open output files
         ! Output daily water contribution to river (m**3/s)
         OPEN(11,FILE=pfadn(1:pfadi)// 'daily_water_subbasin.out', STATUS='replace')
@@ -1590,7 +1591,7 @@ SUBROUTINE hymo_all(STATUS)
 
 
         if (doacud) CALL lake(3,dummy)
-        if (dosavestate) call save_model_state(.FALSE.) !Till: saves model state (soil moisture, ground water, etc.) to file, if specified)
+        call save_model_state(.FALSE., .FALSE.) !Till: saves model state (soil moisture, ground water, etc.) to files. Don't do backups, use standard file names
 
 
     END IF

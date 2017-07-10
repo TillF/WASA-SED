@@ -65,14 +65,13 @@ contains
                call init_sediment_conds(trim(pfadn)//'sediment_storage.stat')    !Jose Miguel: load initial status of sediment storage
                call init_susp_sediment_conds(trim(pfadn)//'susp_sediment_storage.stat')    !Jose Miguel: load initial status of sediment storage
             endif
-
-            CALL save_model_state(.TRUE.) !Till: do backups of state files and save only summary on initial storage
-            !CALL save_all_conds('','','','','','','',trim(pfadn)//'storage.stats_start')        !Till: save only summary on initial storage
     end subroutine init_model_state
 
-    subroutine save_model_state(backup_files)        !save model state variables, optionally backup older files
+    subroutine save_model_state(backup_files, start)        !save all model state variables, optionally backup older files
     implicit none
     logical, intent(in) :: backup_files
+    logical, intent(in) :: start
+    
         if (.not. dosavestate) return    
         if (backup_files) then
             !keep files with initial conditions, save only summary on initial storages
@@ -85,23 +84,23 @@ contains
                 call rename(trim(pfadn)//'sediment_storage.stat'     ,trim(pfadn)//'sediment_storage.stat_start')
                 call rename(trim(pfadn)//'susp_sediment_storage.stat',trim(pfadn)//'susp_sediment_storage.stat_start')
             end if    
-            CALL save_all_conds('','','','','','','',trim(pfadn)//'storage.stats_start')        !Till: save only summary on initial storage
+            CALL save_all_conds('','','','','','','',trim(pfadn)//'storage.stats', start)        !Till: save only summary on initial storage
         else    
             if (dosediment) then
                 call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',&
                 trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',&
-                trim(pfadn)//'sediment_storage.stat',trim(pfadn)//'susp_sediment_storage.stat',trim(pfadn)//'storage.stats')    !Till: save status
+                trim(pfadn)//'sediment_storage.stat',trim(pfadn)//'susp_sediment_storage.stat',trim(pfadn)//'storage.stats', start)    !Till: save status
             else
                call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',&
                 trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',&
-                '','',trim(pfadn)//'storage.stats')
+                '','',trim(pfadn)//'storage.stats', start)
             endif
         end if    
     end subroutine save_model_state
 
 
 
-    subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, lake_conds_file, river_conds_file, sediment_conds_file, susp_sediment_conds_file, summary_file)
+    subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, lake_conds_file, river_conds_file, sediment_conds_file, susp_sediment_conds_file, summary_file, start)
         !store current conditions of soil moisture, ground water and interception in the specified files
         use hymo_h
         use params_h
@@ -117,6 +116,7 @@ contains
         implicit none
 
         character(len=*),intent(in):: soil_conds_file, gw_conds_file, ic_conds_file,lake_conds_file,river_conds_file,sediment_conds_file,susp_sediment_conds_file,summary_file        !files to save to
+        logical,intent(in), optional:: start
 
         INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter,h,acud_class, k, tt, digits    ! counters
         INTEGER :: i_lu,id_tc_type,i_svc,i_soil,i_veg        ! ids of components in work
@@ -125,7 +125,12 @@ contains
         REAL    :: lu_area, svc_area    !area of current lu/svc [m3]
         INTEGER    ::    soil_file_hdle, gw_file_hdle, intercept_file_hdle, lake_file_hdle, river_file_hdle,sediment_file_hdle,susp_sediment_file_hdle    !file handles to output files
 		character(len=1000) :: fmtstr    !string for formatting file output
+        character(len=6) :: suffix
 
+        suffix=""
+        if (present(start)) then
+            if (start) suffix="_start"
+        end if
         total_storage_soil=0.
         total_storage_gw=0.
         total_storage_intercept=0.
@@ -138,7 +143,7 @@ contains
             soil_file_hdle=0
         else
             soil_file_hdle=11
-            OPEN(soil_file_hdle,FILE=soil_conds_file, STATUS='replace')
+            OPEN(soil_file_hdle,FILE=soil_conds_file//trim(suffix), STATUS='replace')
             WRITE(soil_file_hdle,'(a)') 'soil moisture status (for analysis or model re-start)'
             WRITE(soil_file_hdle,*)'Subbasin', char(9),'LU', char(9),'TC' , char(9),'SVC' , char(9),'horizon', char(9),&
                 'watercontent_[mm]', char(9),'area_[m²]'        !tab separated output
@@ -148,7 +153,7 @@ contains
             gw_file_hdle=0
         else
             gw_file_hdle=12
-            OPEN(gw_file_hdle,FILE=gw_conds_file, STATUS='replace')
+            OPEN(gw_file_hdle,FILE=gw_conds_file//trim(suffix), STATUS='replace')
             WRITE(gw_file_hdle,'(a)') 'ground water storage (for analysis or model re-start)'
             WRITE(gw_file_hdle,*)'Subbasin', char(9),'LU', char(9),'volume_[mm]', char(9),'area_[m²]'        !tab separated output
         end if
@@ -157,7 +162,7 @@ contains
             intercept_file_hdle=0
         else
             intercept_file_hdle=13
-            OPEN(intercept_file_hdle,FILE=ic_conds_file, STATUS='replace')
+            OPEN(intercept_file_hdle,FILE=ic_conds_file//trim(suffix), STATUS='replace')
             WRITE(intercept_file_hdle,'(a)') 'interception storage (for analysis or model re-start)'
             WRITE(intercept_file_hdle,*)'Subbasin', char(9),'LU', char(9),'TC' , char(9),'SVC' , char(9),&
                 'storage_[mm]', char(9),'area_[m²]'        !tab separated output
@@ -167,7 +172,7 @@ contains
             river_file_hdle=0
         else
             river_file_hdle=14
-            OPEN(river_file_hdle,FILE=river_conds_file, STATUS='replace')
+            OPEN(river_file_hdle,FILE=river_conds_file//trim(suffix), STATUS='replace')
             WRITE(river_file_hdle,'(a)') 'river reach volume status (for analysis or model re-start)'
             WRITE(river_file_hdle,*)'Subbasin', char(9),'volume[m^3]' !tab separated output
         endif
@@ -176,10 +181,10 @@ contains
             lake_file_hdle=0
         else
             lake_file_hdle=15
-            OPEN(lake_file_hdle,FILE=lake_conds_file, STATUS='replace')
+            OPEN(lake_file_hdle,FILE=lake_conds_file//trim(suffix), STATUS='replace')
             if (doacud) then
                 WRITE(lake_file_hdle,'(a)') 'Lake volume status (for analysis or model re-start)'
-                WRITE(lake_file_hdle,*)'Subbasin', char(9),'Lake_order',char(9),'volume[m^3]' !tab separated output
+                WRITE(lake_file_hdle,*)'Subbasin', char(9),'reservoir_size_class',char(9),'volume[m^3]' !tab separated output
             else
                 CLOSE(lake_file_hdle,status='delete')
             end if
@@ -190,7 +195,7 @@ contains
             sediment_file_hdle=0
         else
             sediment_file_hdle=16
-            OPEN(sediment_file_hdle,FILE=sediment_conds_file, STATUS='replace')
+            OPEN(sediment_file_hdle,FILE=sediment_conds_file//trim(suffix), STATUS='replace')
             WRITE(sediment_file_hdle,'(a)') 'river reach deposition sediment weight status (for analysis or model re-start)'
             WRITE(sediment_file_hdle,'(A)')'Subbasin'//char(9)//'particle_size_class'//char(9)//'mass[t]' !tab separated output
         endif
@@ -199,7 +204,7 @@ contains
             susp_sediment_file_hdle=0
         else
             susp_sediment_file_hdle=17
-            OPEN(susp_sediment_file_hdle,FILE=susp_sediment_conds_file, STATUS='replace')
+            OPEN(susp_sediment_file_hdle,FILE=susp_sediment_conds_file//trim(suffix), STATUS='replace')
             WRITE(susp_sediment_file_hdle,'(a)') 'river reach suspended sediment weight status (for analysis or model re-start)'
             WRITE(susp_sediment_file_hdle,'(A)')'Subbasin'//char(9)//'particle_size_class'//char(9)//'mass[t]' !tab separated output
         endif
@@ -269,7 +274,6 @@ contains
 						    lakewater_hrr(tt,sb_counter,acud_class)
 				    endif
 				    total_storage_lake(acud_class)=total_storage_lake(acud_class)+lakewater_hrr(tt,sb_counter,acud_class) !sum up total storage
-                    !ii: Till: why is this lakewater_hrr, not lakewater?
                 ENDDO
             END DO
         END IF !small reservoirs
@@ -331,7 +335,7 @@ contains
         CLOSE(susp_sediment_file_hdle, iostat=i_lu)    !close output files
         
 
-        OPEN(11,FILE=summary_file, STATUS='replace')        !write to summary file
+        OPEN(11,FILE=summary_file//trim(suffix), STATUS='replace')        !write to summary file
         WRITE(11,*)'total water storage in catchment after model run [m3]'
         WRITE(11,*)'soil_storage', char(9),total_storage_soil
         WRITE(11,*)'gw_storage', char(9),total_storage_gw
@@ -862,11 +866,14 @@ contains
                 IF (lakewater0(sb_counter,acud_class) < 0.) then
                     WRITE(*,'(a,a,a)') 'WARNING: Problem with state variable file ''',trim(lake_conds_file),&
                     '''. No specification for subbasin ', id_subbas_extern(sb_counter),&
-                    ', reservoir size class ',acud_class,' found. Defaulting to 0.'
+                    ', reservoir size class ',acud_class,' found. Using fraction specified in lake.dat'
                     lakewater0(sb_counter,acud_class) = 0.
                 END IF    
             ENDDO
-        END DO    
+!            where (acud(sb_counter,:) /= 0.) lakewater_hrr(1,sb_counter,:) = lakewater0(sb_counter,acud_class)/acud(sb_counter,:)
+        END DO  
+        
+        
         
     end subroutine init_lake_conds
 

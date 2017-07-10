@@ -268,11 +268,14 @@ IF (STATUS == 0) THEN
 !** Acudes Initalisierung (focus area or sub-basins)
 !George  maxlake(1:5) = (/5.e4,5.e5,2.e6,6.5E6,25.e6/)
 
-!** Modelling unit Initalisierung
+!** Modelling unit Initialisierung
   
-  if (lakewater0(1,1) == -1.) then !check, if not initialized before from files
+  if (.NOT. doloadstate .OR. lakewater0(1,1) == -1.) then !check, if not initialized before from files
       DO imun=1,subasin !Till: initialize fraction of total volume according to lake.dat 
-        lakewater0(imun,1:5)=lake_vol0_factor(1:5)*maxlake(imun,1:5)
+        lakewater0(imun,:)=lake_vol0_factor(:)*maxlake(imun,:)
+        where (acud(imun,:) /= 0.)
+            lakewater_hrr(1,imun,:) = lakewater0(imun,:)/acud(imun,:)
+        end where
       END DO
   end if    
   
