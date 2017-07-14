@@ -58,6 +58,7 @@ module model_state_io
 contains
     subroutine init_model_state        !load initial conditions
             call init_soil_conds(trim(pfadn)//'soil_moisture.stat')    !Till: load initial status of soil moisture
+            call init_intercept_conds(trim(pfadn)//'intercept_storage.stat')    !Till: load initial status of gw storage
             call init_gw_conds(trim(pfadn)//'gw_storage.stat')    !Till: load initial status of gw storage
             call init_lake_conds(trim(pfadn)//'lake_volume.stat')    !Jose Miguel: load initial status of lake storage
             call init_river_conds(trim(pfadn)//'river_storage.stat')    !Jose Miguel: load initial status of river storage
@@ -279,7 +280,7 @@ contains
         END IF !small reservoirs
        
         DO sb_counter=1,subasin
-            DO lu_counter=1,nbr_lu(sb_counter) !groundwater, intercept and soil storages inside
+            DO lu_counter=1,nbr_lu(sb_counter) !sum up groundwater, intercept and soil storages inside
                 i_lu=id_lu_intern(lu_counter,sb_counter)
                 lu_area=area(sb_counter)*frac_lu(lu_counter,sb_counter)*1e6
                 if (gw_file_hdle/=0) then
@@ -459,7 +460,7 @@ contains
 
 
                 if (horithact_temp > thetas(id_soil_intern(svc_counter,tcid_instance),h)*&
-                    horiz_thickness(tcid_instance,svc_counter,h)*1.01) then            !exceeds sotrage capacity
+                    horiz_thickness(tcid_instance,svc_counter,h)*1.01) then            !exceeds storage capacity
                     if (errors==0) then    !produce header before first warning only
                         write(*,'(A,/,5a12)')' water content of following horizons exceed porosity. Corrected to thetaS.',&
                             'subbasin','LU','TC','SVC','horizon'
@@ -527,6 +528,167 @@ contains
 
     end subroutine init_soil_conds
 
+  subroutine init_intercept_conds(intercept_conds_file)
+
+        !load intercept state from file intercept_conds_file
+        use hymo_h
+        use params_h
+        use utils_h
+        use erosion_h
+        implicit none
+        !
+        character(len=*), intent(in):: intercept_conds_file        !file to load from
+        INTEGER :: i,line,errors,sb_counter,lu_counter,tc_counter,svc_counter !    ! counters
+        INTEGER :: i_subbasx,i_lux,i_tcx,i_svcx         ! external ids of components in work
+        INTEGER :: i_subbas,i_lu,i_tc,i_svc, i_soil, i_veg,id_tc_type        ! internal ids of components in work
+        INTEGER :: tcid_instance    !(internal) id of LU,TC,soil-instance (unique subbas-LU-TC-soil-combination)
+        REAL    :: int_temp, x
+        INTEGER    :: file_read=0
+        character(len=160) :: error_msg='', linestr=''
+
+
+        i=0
+        OPEN(11,FILE=intercept_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
+        if (i/=0) then
+            write(*,'(a,a,a)')'WARNING: Interception state file ''',trim(intercept_conds_file),''' not found, using defaults.'
+            CLOSE(11)
+			return
+        end if
+
+
+        intercept(:,:)=-9999.                    !mark all SVC-int-storages as "not (yet) initialised"
+        if (trim(intercept_conds_file)/='' .AND. i==0) then        !load values from file
+            write(*,'(a,a,a)')'Initialize interception from file ''',trim(intercept_conds_file),''''
+
+            READ(11,*); READ (11,*)    !skip header lines
+            line=2
+            errors=0
+
+            do while (.TRUE.)        !read whole file
+                IF (len(trim(error_msg))/=0) THEN    !print error message, if occured
+                    if (errors==0) then !print heading at before first error
+                        write(*,'(A,/,5a12)')' Entities not found in current domain (ignored):','Line','subbasin','LU','TC','SVC'
+                    end if
+                    write(*,*)trim(error_msg)
+                    error_msg='' !reset error message
+                    errors=errors+1
+                END IF
+
+                READ(11,'(A)',  IOSTAT=i) linestr
+
+                IF (i==24 .OR. i==-1) THEN    !end of file
+                    exit        !exit loop
+                END IF
+                line=line+1
+
+                READ(linestr,*,  IOSTAT=i) i_subbasx,i_lux,i_tcx,i_svcx,int_temp, x
+                IF (i/=0) THEN    !format error
+                    write(error_msg,'(i12,1a12,a)')line,'-',trim(linestr)
+                    cycle    !proceed with next line
+                END IF
+
+                i_subbas=id_ext2int(i_subbasx,id_subbas_extern)    !convert to internal subbas id
+                if (i_subbas==-1) then
+                    write(error_msg,'(2i12)')line,i_subbasx
+                    cycle    !proceed with next line
+                end if
+                i_lu=id_ext2int(i_lux,id_lu_extern)    !convert to internal lu id
+                if (i_lu==-1) then
+                    write(error_msg,'(i12,1a12,i12)')line,'-',i_lux
+                    cycle    !proceed with next line
+                end if
+                i_tc=id_ext2int(i_tcx,id_terrain_extern)    !convert to internal tc-type id
+                if (i_tc==-1) then
+                    write(error_msg,'(i12,2a12,i12)')line,'-','-',i_tcx
+                    cycle    !proceed with next line
+                end if
+                i_svc=id_ext2int(i_svcx,id_svc_extern)    !convert to internal svc-type id
+                if (i_svc==-1) then
+                    write(error_msg,'(i12,3a12,i12)')line,'-','-','-',i_svcx
+                    cycle    !proceed with next line
+                end if
+                lu_counter=id_ext2int(i_lu,id_lu_intern(:,i_subbas))    !convert to position/index of lu instance in current subbasin
+                if (lu_counter==-1) then
+                    write(error_msg,'(3i12)')line,i_subbasx,i_lux
+                    cycle    !proceed with next line
+                end if
+
+                tc_counter=id_ext2int(i_tc,id_terrain_intern(:,i_lu))    !convert to position/index of tc instance in current lu
+                if (tc_counter==-1) then
+                    write(error_msg,'(4i12)')line,i_subbasx,i_lux,i_tcx
+                    cycle    !proceed with next line
+                end if
+
+                tcid_instance=tcallid(i_subbas,lu_counter,tc_counter)    !get the ID of the TC instance
+                if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
+
+                svc_counter=which1(id_soil_intern(:,tcid_instance)==svc_soil_veg(i_svc,1) .AND. &
+                    id_veg_intern(:,tcid_instance)==svc_soil_veg(i_svc,2)) !convert to position/index of svc instance in current tc
+
+                !svc_counter=id_ext2int(i_tc,id_terrain_intern(:,i_tc))    !convert to position/index of svc instance in current tc
+                if (svc_counter==-1 .OR. svc_counter==0) then
+                    write(error_msg,'(5i12)')line,i_subbasx,i_lux,i_tcx,i_svcx
+                    cycle    !proceed with next line
+                end if
+
+
+                if (int_temp < 0.) then            !negative interception
+                    if (errors==0) then    !produce header before first warning only
+                        write(*,'(A,/,4a12)')' Interception of following SVCs is negative. Corrected to 0.',&
+                            'subbasin','LU','TC','SVC'
+                    end if
+                    errors=errors+1
+                    write(*,'(4i12)')i_subbasx, i_lux, i_tcx,i_svcx            !issue warning
+                    int_temp = 0.
+                end if
+
+                intercept(tcid_instance,svc_counter)=int_temp            !set interception value
+
+
+            END DO
+            file_read=1
+            CLOSE(11)
+        end if
+
+        !check, if all relevant SVCs have been initialized, if not, use default values
+        errors=0
+        DO sb_counter=1,subasin            
+            DO lu_counter=1,nbr_lu(sb_counter)
+                i_lu=id_lu_intern(lu_counter,sb_counter)
+                DO tc_counter=1,nbrterrain(i_lu)
+                    tcid_instance=tcallid(sb_counter,lu_counter,tc_counter) !id of TC instance
+                    if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
+                    id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
+                    DO svc_counter=1,nbr_svc(tcid_instance)
+                        i_soil=id_soil_intern(svc_counter,tcid_instance)        !internal id of soil type
+                        i_veg=  id_veg_intern(svc_counter,tcid_instance)
+                        i_svc=which1(svc_soil_veg(:,1)==i_soil .AND. svc_soil_veg(:,2)==i_veg)            !get internal id of svc-type
+                       
+                        if (intercept(tcid_instance,svc_counter)==-9999.) then            !not yet set?
+                            if (file_read==1) then                        !but this should have been done before
+                                if (errors==0) then    !produce header before first warning only
+                                    write(*,'(A,f4.2,a,/,4a12)')' Following entities not initialised, using defaults '// &
+                                        '(intercept=', 0.,'):','subbasin','LU','TC','SVC'
+                                end if
+                                errors=errors+1
+                                write(*,'(4i12)')id_subbas_extern(sb_counter), id_lu_extern(i_lu),&
+                                    id_terrain_extern(id_tc_type), id_svc_extern(i_svc)            !issue warning
+                            end if
+
+                            intercept(tcid_instance,svc_counter)=0.        !set to default 
+                        end if
+                       
+                        intercept(tcid_instance, (nbr_svc(tcid_instance)+1):maxsoil)=0.        !set water content of irrelevant horizons values to 0
+                    END DO
+                END DO
+            END DO
+        END DO
+
+        if (errors>0) then
+            return
+        end if
+
+    end subroutine init_intercept_conds
 
 
 
