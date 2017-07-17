@@ -170,6 +170,7 @@
     use hymo_h
     use erosion_h
     use utils_h
+    use snow_h
 
 
     IMPLICIT NONE
@@ -900,15 +901,17 @@
     out (modifizierte Globale Variablen, ZV)
     snowEnergyCont
     snowWaterEquiv
-    albedo
+    snowAlbedo
     
     optionale outputs OV:
     ...
     
-    CALL snow_prepare_input() !--> bereitet Randbedingungen RB (meteo) vor (aus momentaner Lage in Zeit in Raum)
+    CALL snow_prepare_input(hh, day, i_subbas2, lu_counter2, tc_counter2,
+        prec_mod, temp_mod, rad_mod)
+    ) !--> bereitet Randbedingungen RB (meteo) vor (aus momentaner Lage in Zeit in Raum)
     CALL snow_compute(RB [in],
                    ZV(t-1) [in],
-                   ZV(t) [out],
+                   ZV(t) [out], z.B. snowEnergyCont(day, hh, tcid_instance2)
                    ZV(t) [out],
                    OV(t) [out]
     )
