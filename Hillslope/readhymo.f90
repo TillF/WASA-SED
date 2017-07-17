@@ -243,8 +243,7 @@ SUBROUTINE readhymo
             write(*,'(a,i0,a)')'ERROR (hymo.dat): At least ',subasin,' lines (#subbasins) expected'
             stop
         end if
-        h=h+1 !count lines
-
+        
         dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
         if (dummy1-3 > 2*maxsoter) then    !too many fields in line
             write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (hymo.dat): line ',h,' contains more (',dummy1,') than the expected 3 + 2 * ',maxsoter,' fields (maxdim.dat).'
@@ -268,6 +267,7 @@ SUBROUTINE readhymo
             id_subbas_intern(i)=id_subbas_extern(i)
             c=c+1 !count successfully read subbasins
         end if
+        h=h+1 !count lines
     END DO
     CLOSE(11)
 
