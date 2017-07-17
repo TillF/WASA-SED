@@ -243,8 +243,7 @@ SUBROUTINE readhymo
             write(*,'(a,i0,a)')'ERROR (hymo.dat): At least ',subasin,' lines (#subbasins) expected'
             stop
         end if
-        h=h+1 !count lines
-
+        
         dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
         if (dummy1-3 > 2*maxsoter) then    !too many fields in line
             write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (hymo.dat): line ',h,' contains more (',dummy1,') than the expected 3 + 2 * ',maxsoter,' fields (maxdim.dat).'
@@ -268,6 +267,7 @@ SUBROUTINE readhymo
             id_subbas_intern(i)=id_subbas_extern(i)
             c=c+1 !count successfully read subbasins
         end if
+        h=h+1 !count lines
     END DO
     CLOSE(11)
 
@@ -612,7 +612,7 @@ SUBROUTINE readhymo
         h=h+1
         if (  size(pack(id_veg_intern, id_veg_extern(j) == id_veg_intern(:,:))) == 0  ) then
 			write(*,'(a,i0,a,i0,a)')'WARNING: unused vegetation-id ',id_veg_extern(j),' in vegetation.dat, line ',h-1
-            cycle
+            !cycle !Till: we should not cycle this here, otherwise later errors in reading SVCs may occur
         end if
         
 		if (wstressmin(j) >= wstressmax(j)) then
