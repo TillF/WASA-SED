@@ -72,38 +72,31 @@ contains
     implicit none
     logical, intent(in) :: backup_files
     logical, intent(in) :: start
-        
+    
         if (.not. dosavestate) return    
-            !keep files with initial conditions (if existing), save new summary on initial storages
-        CALL save_all_conds(&
-        rename_or_return('soil_moisture.stat'        , backup_files),&
-        rename_or_return('gw_storage.stat'           , backup_files),&
-        rename_or_return('intercept_storage.stat'    , backup_files),&
-        rename_or_return('lake_volume.stat'          , backup_files),&
-        rename_or_return('river_storage.stat'        , backup_files),&
-        rename_or_return('sediment_storage.stat'     , backup_files),&
-        rename_or_return('susp_sediment_storage.stat', backup_files),&
-        trim(pfadn)//'storage.stats', start)        !Till: save only summary on initial storage
-        
-    contains
-    function rename_or_return(src, backup)
-    !creates a backup of the existing file, if backup=TRUE and the file exists and returns '' (so save_all_conds doesn't treat this file).
-    !Otherwise, returns file src
-        implicit none
-        character(*), intent(in) :: src
-        LOGICAL, intent(in) :: backup
-        character(len=len(src)+len(trim(pfadn))) :: rename_or_return
-        LOGICAL :: file_exists
-        
-        rename_or_return = trim(pfadn)//src !default: return name of file
-        if (.not. backup) return !no backup requested
-        
-        INQUIRE(FILE=src, EXIST=file_exists)   
-        if (.not. file_exists) return !file to backup not found, so return its name
-        
-        call rename(trim(pfadn)//src     , trim(pfadn)//src//'_start') !rename file
-        rename_or_return = '' !no further wrting of this file is required
-    end function
+        if (backup_files) then
+            !keep files with initial conditions, save only summary on initial storages
+            call rename(trim(pfadn)//'soil_moisture.stat'     , trim(pfadn)//'soil_moisture.stat_start')
+            call rename(trim(pfadn)//'gw_storage.stat'        ,trim(pfadn)//'gw_storage.stat_start')
+            call rename(trim(pfadn)//'intercept_storage.stat' ,trim(pfadn)//'intercept_storage.stat_start')
+            call rename(trim(pfadn)//'lake_volume.stat'       ,trim(pfadn)//'lake_volume.stat_start')
+            call rename(trim(pfadn)//'river_storage.stat'     ,trim(pfadn)//'river_storage.stat_start')
+            if (dosediment) then
+                call rename(trim(pfadn)//'sediment_storage.stat'     ,trim(pfadn)//'sediment_storage.stat_start')
+                call rename(trim(pfadn)//'susp_sediment_storage.stat',trim(pfadn)//'susp_sediment_storage.stat_start')
+            end if    
+            CALL save_all_conds('','','','','','','',trim(pfadn)//'storage.stats', start)        !Till: save only summary on initial storage
+        else    
+            if (dosediment) then
+                call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',&
+                trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',&
+                trim(pfadn)//'sediment_storage.stat',trim(pfadn)//'susp_sediment_storage.stat',trim(pfadn)//'storage.stats', start)    !Till: save status
+            else
+               call save_all_conds(trim(pfadn)//'soil_moisture.stat',trim(pfadn)//'gw_storage.stat',trim(pfadn)//'intercept_storage.stat',&
+                trim(pfadn)//'lake_volume.stat',trim(pfadn)//'river_storage.stat',&
+                '','',trim(pfadn)//'storage.stats', start)
+            endif
+        end if    
     end subroutine save_model_state
 
 
@@ -199,7 +192,7 @@ contains
         end if
 
 
-        if (trim(sediment_conds_file)=='' .or. .not. dosediment) then        !don't do anything if an empty filename is specified
+        if (trim(sediment_conds_file)=='') then        !don't do anything if an empty filename is specified
             sediment_file_hdle=0
         else
             sediment_file_hdle=16
@@ -208,7 +201,7 @@ contains
             WRITE(sediment_file_hdle,'(A)')'Subbasin'//char(9)//'particle_size_class'//char(9)//'mass[t]' !tab separated output
         endif
         
-        if (trim(susp_sediment_conds_file)=='' .or. .not. dosediment) then        !don't do anything if an empty filename is specified
+        if (trim(susp_sediment_conds_file)=='') then        !don't do anything if an empty filename is specified
             susp_sediment_file_hdle=0
         else
             susp_sediment_file_hdle=17
@@ -822,8 +815,7 @@ contains
         use params_h
         use utils_h
     	use hymo_h
-        implicit none
-        
+
         character(len=*),intent(in):: river_conds_file        !file to load from
         integer :: subbas_id, iostatus, i
         real :: dummy1
@@ -840,7 +832,7 @@ contains
     
             !read 2 header lines into buffer
             READ(11,*); READ(11,*)
-		    r_storage(1:subasin)=-1. !indicator for "not read"
+		    r_storage(:)=-1. !indicator for "not read"
         
             DO WHILE (.TRUE.) 
                 READ(11,*,IOSTAT=iostatus) i, dummy1
@@ -864,10 +856,8 @@ contains
             if (count(r_storage==-1.) > 0) then  
                 WRITE(*,'(A)') 'WARNING: could not read initial river storage from river_storage.stat for the following subbasins, assumed 0:'
                 DO subbas_id=1,subasin
-                    if (r_storage(i)==-1.) then
-                        WRITE(*,'(i0)') subbas_id
-                        r_storage(i)=0.
-                    end if
+                    if (r_storage(i)==-1.) WRITE(*,'(i0)') subbas_id
+                    r_storage(i)=0.
                 END DO
             end if
         else

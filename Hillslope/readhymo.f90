@@ -243,7 +243,8 @@ SUBROUTINE readhymo
             write(*,'(a,i0,a)')'ERROR (hymo.dat): At least ',subasin,' lines (#subbasins) expected'
             stop
         end if
-        
+        h=h+1 !count lines
+
         dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
         if (dummy1-3 > 2*maxsoter) then    !too many fields in line
             write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (hymo.dat): line ',h,' contains more (',dummy1,') than the expected 3 + 2 * ',maxsoter,' fields (maxdim.dat).'
@@ -267,7 +268,6 @@ SUBROUTINE readhymo
             id_subbas_intern(i)=id_subbas_extern(i)
             c=c+1 !count successfully read subbasins
         end if
-        h=h+1 !count lines
     END DO
     CLOSE(11)
 
@@ -612,7 +612,7 @@ SUBROUTINE readhymo
         h=h+1
         if (  size(pack(id_veg_intern, id_veg_extern(j) == id_veg_intern(:,:))) == 0  ) then
 			write(*,'(a,i0,a,i0,a)')'WARNING: unused vegetation-id ',id_veg_extern(j),' in vegetation.dat, line ',h-1
-            !cycle !Till: we should not cycle this here, otherwise later errors in reading SVCs may occur
+            cycle
         end if
         
 		if (wstressmin(j) >= wstressmax(j)) then
@@ -1686,7 +1686,7 @@ if (dosediment) then
 
 
 
-    !Till: allocation part - these variable are allocated here, because their dimension is not known before
+    !Till: allocation part - these variables are allocated here, because their dimension is not known before
      !!Print hydrologic variable on TC scale. If not used, DISABLE
      !!************************************************************************
     !    allocate (runoff_TC(subasin,nterrain))
@@ -1703,6 +1703,7 @@ if (dosediment) then
 !    allocate (cum_erosion_TC(subasin,nterrain))
 !    allocate (cum_deposition_TC(subasin,nterrain))
 
+    if (do_snow /= 0) INCLUDE '../allocat_erosion.var'
 
 
 contains

@@ -326,6 +326,8 @@ SUBROUTINE readgen(path2do_dat)
     f_gw_loss=.FALSE.
     f_gw_recharge=.FALSE.
 
+    f_snowtemperature=.FALSE.
+    
     f_res_watbal=.FALSE.
     f_res_vollost=.FALSE.
     f_res_cav=.FALSE.
@@ -398,6 +400,10 @@ SUBROUTINE readgen(path2do_dat)
                     f_daily_gw_loss=.TRUE.
                 CASE ('tc_theta')
                     f_tc_theta=.TRUE.
+                CASE ('snowtemperature')
+                    f_snowtemperature=.TRUE.
+                    
+                    
                 CASE ('river_degradation')
                     f_river_degradation=dosediment
                 CASE ('river_deposition')

@@ -170,6 +170,7 @@
     use hymo_h
     use erosion_h
     use utils_h
+    use snow_h
 
 
     IMPLICIT NONE
@@ -882,7 +883,56 @@
     !END DO
     !!for debugging - remove end
 
-
+!** -------------------------------------------------------------------------
+    !** (11) SNOW
+    !        energy-budget approach after Kneis(...)
+    
+!Erfordernisse seitens Bodenmodul
+    in:
+    hh,day,month,i_subbas2,i_lu,lu_counter2,tcid_instance2,id_tc_type2,tc_counter2, dt 
+    
+    inout:
+    prec NS im Zeitschritt
+    
+    out
+    bal Bilanzgröße
+    snow_covered_area
+    
+    out (modifizierte Globale Variablen, ZV)
+    snowEnergyCont
+    snowWaterEquiv
+    snowAlbedo
+    
+    optionale outputs OV:
+    ...
+    
+    CALL snow_prepare_input(hh, day, i_subbas2, lu_counter2, tc_counter2,
+        prec_mod, temp_mod, rad_mod)
+    ) !--> bereitet Randbedingungen RB (meteo) vor (aus momentaner Lage in Zeit in Raum)
+    CALL snow_compute(RB [in],
+                   ZV(t-1) [in],
+                   ZV(t) [out], z.B. snowEnergyCont(day, hh, tcid_instance2)
+                   ZV(t) [out],
+                   OV(t) [out]
+    )
+    
+    
+!erfordernisse Schneemodul    
+    precipSumMM(:) !
+    tempAir(:) !Air 
+    shortRad(:) !Inc
+    pressAir(:) !Air
+    relHumid(:) !Rel
+    windSpeed(:) !Wi
+    cloudCoverage(:)
+    
+    
+    
+    
+    
+    
+    
+    
 
     !** -------------------------------------------------------------------------
     !** (11) INTERCEPTION
