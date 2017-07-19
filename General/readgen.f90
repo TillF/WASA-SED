@@ -326,8 +326,24 @@ SUBROUTINE readgen(path2do_dat)
     f_gw_loss=.FALSE.
     f_gw_recharge=.FALSE.
 
-    f_snowtemperature=.FALSE.
-    
+    f_snowEnergyCont=.FALSE.
+    f_snowWaterEquiv=.FALSE.
+    f_snowAlbedo=.FALSE.
+    f_snowTemp=.FALSE.
+    f_surfTemp=.FALSE.
+    f_liquFrac=.FALSE.
+    f_fluxPrec=.FALSE.
+    f_fluxSubl=.FALSE.
+    f_fluxFlow=.FALSE.
+    f_fluxNetS=.FALSE.
+    f_fluxNetL=.FALSE.
+    f_fluxSoil=.FALSE.
+    f_fluxSens=.FALSE.
+    f_stoiPrec=.FALSE.
+    f_stoiSubl=.FALSE.
+    f_stoiFlow=.FALSE.
+    f_rateAlbe=.FALSE.
+
     f_res_watbal=.FALSE.
     f_res_vollost=.FALSE.
     f_res_cav=.FALSE.
@@ -400,10 +416,42 @@ SUBROUTINE readgen(path2do_dat)
                     f_daily_gw_loss=.TRUE.
                 CASE ('tc_theta')
                     f_tc_theta=.TRUE.
-                CASE ('snowtemperature')
-                    f_snowtemperature=.TRUE.
-                    
-                    
+
+                CASE ('snowEnergyCont')
+                    f_snowEnergyCont=.TRUE.
+                CASE ('snowWaterEquiv')
+                    f_snowWaterEquiv=.TRUE.
+                CASE ('snowAlbedo')
+                    f_snowAlbedo=.TRUE.
+                CASE ('snowTemp')
+                    f_snowTemp=.TRUE.
+                CASE ('surfTemp')
+                    f_surfTemp=.TRUE.
+                CASE ('liquFrac')
+                    f_liquFrac=.TRUE.
+                CASE ('fluxPrec')
+                    f_fluxPrec=.TRUE.
+                CASE ('fluxSubl')
+                    f_fluxSubl=.TRUE.
+                CASE ('fluxFlow')
+                    f_fluxFlow=.TRUE.
+                CASE ('fluxNetS')
+                    f_fluxNetS=.TRUE.
+                CASE ('fluxNetL')
+                    f_fluxNetL=.TRUE.
+                CASE ('fluxSoil')
+                    f_fluxSoil=.TRUE.
+                CASE ('fluxSens')
+                    f_fluxSens=.TRUE.
+                CASE ('stoiPrec')
+                    f_stoiPrec=.TRUE.
+                CASE ('stoiSubl')
+                    f_stoiSubl=.TRUE.
+                CASE ('stoiFlow')
+                    f_stoiFlow=.TRUE.
+                CASE ('rateAlbe')
+                    f_rateAlbe=.TRUE.
+
                 CASE ('river_degradation')
                     f_river_degradation=dosediment
                 CASE ('river_deposition')
