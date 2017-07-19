@@ -1,0 +1,57 @@
+Guidelines for further development of WASA-SED
+---------------------------------------------
+These suggestions concern general recommendations for future enhancements. They are intended to enhance portability, preserve performance and facilitate the recycling of input/output routines. They are not mandatory, but should be complied with as often as possible, especially when creating new modules or files.
+
+1.	code
+•	platform independence
+	•	avoid platform specific libs and system calls
+	•	adhere to Fortran95 standard (gfortran). This includes:
+	•	don’t use dynamic format specifiers (eg “’I A0 <number>F’”), generate this string by yourself instead.
+	•	No lines longer than 80 characters
+	•	No tabs, use spaces instead
+	•	Address fields of structs using the “%”, not the “.”
+	•	Be strict about the difference between logical .TRUE. and integer 1
+	•	Use “/” instead of “\” when specifying path strings
+	•	Use “3**(-3)” instead of “3**-3”
+•	Performance
+	•	Use vectorised operations and implicit loops whenever possible
+	•	Keep file operations to a minimum, output should be optional
+	•	Dynamic allocation of all larger arrays
+	•	Avoid using power, exp and log
+•	Preserve downward compatibility
+	•	Accept old model input file formats, if possible. If not, provide detailed information or a script to convert old input to new format
+	•	Make new features optional, if possible
+•	Documentation
+	•	fork the github-repository to your repository
+	•	sufficiently comment your code in English
+	•	provide short summary of your modifications when uploading your changes to the git-repository, especially noting if and where any changes in the model output are to be expected
+	•	Any modifications should be tested on test / tutorial datasets for side effects: They should be able to reproduce the output. If not, document why your version behaves differently. 
+	•	update the WASA-SED documentation file, if necessary
+	•	issue pull-request to the original repository, if you want your contribution to be merged into the main branch
+	
+
+2.	input / output files
+•	file header
+	•	All header lines start with a #, two header lines are recommended
+	•	The first line starts with a version number of the routine that created the output. 
+	The version number is given as xx.yy where xx is the version number of the official WASA version, yy is a version number of the output routine that produced the file.
+	•	The first line continues with a brief comment what the file contains. If all units (except in the date and the timestep field) are identical, the unit is given here in square brackets [m/s].
+	•	The last (usually the second) header line contains the field names
+	•	Field names consist of an identifier and its unit in square brackets [m/s] without a separating space if it differs between the fields. Exponents are written like m^3 rather than m**3. The field names do not contain spaces, use underscore (_) instead. Example: “subsurf_runoff[m^3/s]”
+	•	Wherever applicable, use this order of fieldnames
+	Date	(Timestep_number) Model_unit1_class1 (Model_unit1_class2 ….) Model_unit2_class1 ….
+	Line numbers are obsolete.
+•	data
+	•	data uses a dot “.” for real values (not a comma “,”)
+	•	data is Tab delimited
+•	time and dates
+	•	dates are printed as  yyyymmdd
+	•	If a subdaily timestep must be included, it is counted starting from 1 to the number of timesteps per day
+
+•	example
+#3.1 sediment contribution of subbasins for each particle size class [m^3/timestep]
+#date		timestep	subbas1_clay	subbas1_silt	subbas1_sand	subbas2_clay	subbas2_silt	subbas2_sand
+20010101	1	1.1	1.2	1.3	2.1	2.2	2.3
+20010101	2	1.2	2.2	1.4	3.1	2.3	3.3
+20010102	1	1.3	3.2	1.5	4.1	2.4	4.3
+20010102	2	1.4	4.2	1.6	5.1	2.5	5.3
