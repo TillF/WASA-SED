@@ -1686,7 +1686,7 @@ if (dosediment) then
 
 
 
-    !Till: allocation part - these variable are allocated here, because their dimension is not known before
+    !Till: allocation part - these variables are allocated here, because their dimension is not known before
      !!Print hydrologic variable on TC scale. If not used, DISABLE
      !!************************************************************************
     !    allocate (runoff_TC(subasin,nterrain))
@@ -1703,6 +1703,7 @@ if (dosediment) then
 !    allocate (cum_erosion_TC(subasin,nterrain))
 !    allocate (cum_deposition_TC(subasin,nterrain))
 
+    if (do_snow /= 0) INCLUDE '../allocat_erosion.var'
 
 
 contains
