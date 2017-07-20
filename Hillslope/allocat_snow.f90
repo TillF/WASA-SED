@@ -10,9 +10,9 @@
        idummy = istate + idummy
 
     !Initial values states
-    snowEnergyCont(1,1,)     =     0.
-    snowWaterEquiv(1,1,)     =     0.
-    albedo(1,1,)             =     albedoMax
+    snowEnergyCont(1,1,:)     =     0.
+    snowWaterEquiv(1,1,:)     =     0.
+    albedo(1,1,:)             =     albedoMax
 
     allocate(rel_elevation(nterrain), STAT = istate)
        idummy = istate + idummy
@@ -53,16 +53,19 @@
 
 
 
+    !Computation relative elevation of TC centre above foot of toposequence/LU (i.e. river) [m]
 
-
-    !compute relative elevation of TC centre above foot of toposequence/LU (i.e. river) [m]
     DO i_lu=1,nsoter
         temp2 = 0. !cumulative elevation of downslope TCs
         DO tc_counter=1,nbrterrain(i_lu) 
-           rel_elevation(id_terrain_intern(tc_counter,i_lu) = fracterrain(tc_counter)*slope(tc_counter)*slope(tc_counter)/2 + &   !centre of TC plus ...
+           rel_elevation(id_terrain_intern(tc_counter,i_lu)) = fracterrain(tc_counter)*slope(tc_counter)*slope(tc_counter)/2 + &   !centre of TC plus ...
                                                             temp2  ! cumulative downslope elevation
-           !temp1 = temp1 + slength(i_lu)*fracterrain(tc_counter) ! cumulate downslope x-extent
-           temp2 = temp2 + slength(i_lu)*fracterrain(tc_counter)*slope(tc_counter) ! cumulate downslope x-extent
+           !temp1 = temp1 + slength(i_lu)*fracterrain(tc_counter)  ! cumulate downslope x-extent
+           temp2 = temp2 + slength(i_lu)*fracterrain(tc_counter)*slope(tc_counter) ! cumulate downslope y-extent
        END DO
+        DO tc_counter=1,nbrterrain(i_lu)
+           rel_elevation(id_terrain_intern(tc_counter,i_lu)) = temp2 / 2. !"normalize" to 0 as the mean elevation of the LU
+       END DO
+
     END DO
        

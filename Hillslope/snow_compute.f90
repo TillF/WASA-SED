@@ -8,7 +8,7 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
 
     implicit none
 
-    REAL, INTENT(IN)      ::      precipSumMM             !Precipitation sum (mm/referenceInterval)
+    REAL, INTENT(IN OUT)  ::      precipSumMM             !Precipitation sum (mm/referenceInterval)
     REAL, INTENT(IN)      ::      tempAir                 !Air temperature (°C)
     REAL, INTENT(IN)      ::      shortRad                !Incoming short wave radiation (W/m2)
     REAL, INTENT(IN)      ::      pressAir                !Air pressure (hPa)
@@ -30,20 +30,20 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
 
     REAL, DIMENSION(1:14) ::      debug                   !array to collect output for debugging purposes and in-depth analyses of the behaviour
 
-    REAL, INTENT(OUT)     ::      TEMP_MEAN
-    REAL, INTENT(OUT)     ::      TEMP_SURF
-    REAL, INTENT(OUT)     ::      LIQU_FRAC
-    REAL, INTENT(OUT)     ::      flux_M_prec
-    REAL, INTENT(OUT)     ::      flux_M_subl
-    REAL, INTENT(OUT)     ::      flux_M_flow
-    REAL, INTENT(OUT)     ::      flux_R_netS
-    REAL, INTENT(OUT)     ::      flux_R_netL
-    REAL, INTENT(OUT)     ::      flux_R_soil
-    REAL, INTENT(OUT)     ::      flux_R_sens
-    REAL, INTENT(OUT)     ::      stoi_f_prec
-    REAL, INTENT(OUT)     ::      stoi_f_subl
-    REAL, INTENT(OUT)     ::      stoi_f_flow
-    REAL, INTENT(OUT)     ::      rate_G_alb
+    REAL, INTENT(OUT)     ::      TEMP_MEAN               !Mean temperatur of the snow pack [°C]
+    REAL, INTENT(OUT)     ::      TEMP_SURF               !Snow surface temperature [°C]
+    REAL, INTENT(OUT)     ::      LIQU_FRAC               !Fraction of liquid water (mass water / (mass water + mass ice)); Unit: Dimensionless, range 0...1
+    REAL, INTENT(OUT)     ::      flux_M_prec             !Precipitation mass flux [m/s]
+    REAL, INTENT(OUT)     ::      flux_M_subl             !Sublimation mass flux [m/s]
+    REAL, INTENT(OUT)     ::      flux_M_flow             !Meltwater flux [m/s]
+    REAL, INTENT(OUT)     ::      flux_R_netS             !Short-wave radiation balance [W/m²]
+    REAL, INTENT(OUT)     ::      flux_R_netL             !Long-wave radiation balance [W/m²]
+    REAL, INTENT(OUT)     ::      flux_R_soil             !Soil heat flux [W/m²]
+    REAL, INTENT(OUT)     ::      flux_R_sens             !Sensible heat flux [W/m²]
+    REAL, INTENT(OUT)     ::      stoi_f_prec             !Conversion of precipitaion mass flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3
+    REAL, INTENT(OUT)     ::      stoi_f_subl             !Conversion of sublimation mass flux (m/s) to energy flux (kJ/kg/K); Unit of result: kJ/m3
+    REAL, INTENT(OUT)     ::      stoi_f_flow             !Conversion of meltwater loss mass flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3
+    REAL, INTENT(OUT)     ::      rate_G_alb              !Change rate of albedo [1/s]
 
     !Integrate and update states
     ddt_states(1:5) = snowModel_derivs(precipSumMM, shortRad, tempAir, pressAir, relHumid, windSpeed, cloudCoverage, &
@@ -80,14 +80,13 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
 
     if(ddt_states(4)*precipSeconds > snowWaterEquiv) then
 
-       precip_new = snowWaterEquiv + precipSumMM ! mm/referenceInterval
+       precip_new = snowWaterEquiv + precipSumMM     ! mm/referenceInterval
 
     else
 
        precip_new = ddt_states(4)*1000*precipSeconds ! mm/referenceInterval
 
     end if
-
 
       TEMP_MEAN       =     debug(1)
       TEMP_SURF       =     debug(2)

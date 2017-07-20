@@ -744,7 +744,20 @@ SUBROUTINE hymo_all(STATUS)
         end if
         
         !TC-wise output
-        CALL open_subdaily_output_TC(f_snowtemperature,'snowtemperature.out','Output file TC-wise snow temperature (°C)')
+        CALL open_subdaily_output_TC(f_snowTemp,'snowTemp.out','Output file TC-wise snow temperature (°C)')
+        CALL open_subdaily_output_TC(f_surfTemp,'surfTemp.out','Output file TC-wise snow surface temperature (°C)')
+        CALL open_subdaily_output_TC(f_liquFrac,'liquFrac.out','Output file TC-wise fraction of liquid water (-)')
+        CALL open_subdaily_output_TC(f_fluxPrec,'fluxPrec.out','Output file TC-wise precipitation mass flux (m/s)')
+        CALL open_subdaily_output_TC(f_fluxSubl,'fluxSubl.out','Output file TC-wise sublimation mass flux (m/s)')
+        CALL open_subdaily_output_TC(f_fluxFlow,'fluxFlow.out','Output file TC-wise meltwater flux (m/s)')
+        CALL open_subdaily_output_TC(f_fluxNetS,'fluxNetS.out','Output file TC-wise shortwave radiation balance (W/m2)')
+        CALL open_subdaily_output_TC(f_fluxNetL,'fluxNetL.out','Output file TC-wise longwave radiation balance (W/m2)')
+        CALL open_subdaily_output_TC(f_fluxSoil,'fluxSoil.out','Output file TC-wise soil heat flux (W/m2)')
+        CALL open_subdaily_output_TC(f_fluxSens,'fluxSens.out','Output file TC-wise sensible heat flux (W/m2)')
+        CALL open_subdaily_output_TC(f_stoiPrec,'stoiPrec.out','Output file TC-wise conversion precipitation mass flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3')
+        CALL open_subdaily_output_TC(f_stoiSubl,'stoiSubl.out','Output file TC-wise conversion of sublimation flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3')
+        CALL open_subdaily_output_TC(f_stoiFlow,'stoiFlow.out','Output file TC-wise conversion of meltwater flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3')
+        CALL open_subdaily_output_TC(f_rateAlbe,'rateAlbe.out','Output file TC-wise change rate of albedo (1/s')
 
     END IF
 
@@ -1532,7 +1545,21 @@ SUBROUTINE hymo_all(STATUS)
         !    CLOSE(11)
 
 
-        CALL write_subdaily_output_TC(f_snowtemperature,'snowtemperature.out', snowTemperature)
+        CALL write_subdaily_output_TC(f_snowTemp,'snowTemp.out', snowTemp)
+        CALL write_subdaily_output_TC(f_surfTemp,'surfTemp.out', surfTemp)
+        CALL write_subdaily_output_TC(f_liquFrac,'liquFrac.out', liquFrac)
+        CALL write_subdaily_output_TC(f_fluxPrec,'fluxPrec.out', fluxPrec)
+        CALL write_subdaily_output_TC(f_fluxSubl,'fluxSubl.out', fluxSubl)
+        CALL write_subdaily_output_TC(f_fluxFlow,'fluxFlow.out', fluxFlow)
+        CALL write_subdaily_output_TC(f_fluxNetS,'fluxNetS.out', fluxNetS)
+        CALL write_subdaily_output_TC(f_fluxNetL,'fluxNetL.out', fluxNetL)
+        CALL write_subdaily_output_TC(f_fluxSoil,'fluxSoil.out', fluxSoil)
+        CALL write_subdaily_output_TC(f_fluxSens,'fluxSens.out', fluxSens)
+        CALL write_subdaily_output_TC(f_stoiPrec,'stoiPrec.out', stoiPrec)
+        CALL write_subdaily_output_TC(f_stoiSubl,'stoiSubl.out', stoiSubl)
+        CALL write_subdaily_output_TC(f_stoiFlow,'stoiFlow.out', stoiFlow)
+        CALL write_subdaily_output_TC(f_rateAlbe,'rateAlbe.out', rateAlbe)
+
                 
         !conrad: output of theta [%] for each tc from theta_tc
         IF (f_tc_theta ) THEN
