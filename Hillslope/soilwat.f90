@@ -911,7 +911,7 @@
     !Air pressure for now set to 10000 hPa
     !Cloud cover set to 0.5 for now; still to calculate (see also etp_max.f90)
 
-    call snow_compute(prec, temp(day,i_subbas2), radiation, 1000, rhum(day,i_subbas2), wind(day,i_subbas2), 0.5, &
+    call snow_compute(prec, temperature, radiation, 1000, rhum(day,i_subbas2), wind(day,i_subbas2), 0.5, &
                       snowEnergyCont(day, max(1,hh-1), tcid_instance2), snowWaterEquiv(day,  max(1,hh-1), tcid_instance2), &
                       snowAlbedo(day,  max(1,hh-1), tcid_instance2), snowEnergyCont(day, hh, tcid_instance2), snowWaterEquiv(day, hh, tcid_instance2), &
                       snowAlbedo(day, hh, tcid_instance2), prec, snowTemp(day, hh, tcid_instance2), surfTemp(day, hh, tcid_instance2), &
