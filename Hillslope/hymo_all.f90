@@ -177,6 +177,7 @@ SUBROUTINE hymo_all(STATUS)
     use erosion_h
     use model_state_io
     use utils_h
+    use snow_h
 
     IMPLICIT NONE
 
@@ -744,6 +745,12 @@ SUBROUTINE hymo_all(STATUS)
         end if
         
         !TC-wise output
+        CALL open_subdaily_output_TC(f_snowEnergyCont,'snowEnergyCont.out','Output file TC-wise snow temperature (°C)')
+        CALL open_subdaily_output_TC(f_snowWaterEquiv,'snowWaterEquiv.out','Output file TC-wise snow surface temperature (°C)')
+        CALL open_subdaily_output_TC(f_snowAlbedo,'snowAlbedo.out','Output file TC-wise fraction of liquid water (-)')
+
+
+
         CALL open_subdaily_output_TC(f_snowTemp,'snowTemp.out','Output file TC-wise snow temperature (°C)')
         CALL open_subdaily_output_TC(f_surfTemp,'surfTemp.out','Output file TC-wise snow surface temperature (°C)')
         CALL open_subdaily_output_TC(f_liquFrac,'liquFrac.out','Output file TC-wise fraction of liquid water (-)')
@@ -1544,7 +1551,9 @@ SUBROUTINE hymo_all(STATUS)
         !        END DO
         !    CLOSE(11)
 
-
+        CALL write_subdaily_output_TC(f_snowEnergyCont,'snowEnergyCont.out', snowEnergyCont)
+        CALL write_subdaily_output_TC(f_snowWaterEquiv,'snowWaterEquiv.out', snowWaterEquiv)
+        CALL write_subdaily_output_TC(f_snowAlbedo,'snowAlbedo.out', snowAlbedo)
         CALL write_subdaily_output_TC(f_snowTemp,'snowTemp.out', snowTemp)
         CALL write_subdaily_output_TC(f_surfTemp,'surfTemp.out', surfTemp)
         CALL write_subdaily_output_TC(f_liquFrac,'liquFrac.out', liquFrac)
@@ -1719,8 +1728,8 @@ contains
         IF (f_flag) THEN    !if output file is enabled
             OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old',POSITION='append')
 
-            fmtstr ='(a,i0,a,i0,a,i0,a,i0,a,i0,a,i0,',fmt_str(maxval(value_array))        !generate format string
-                   hier
+            fmtstr ='(6(i0,a),'//fmt_str(maxval(value_array))//')'        !generate format string
+
             DO d=1,dayyear
                 DO j=1,nt
                     DO sb_counter=1,subasin
@@ -1730,8 +1739,8 @@ contains
                                WRITE (11,fmtstr)t, char(9), d, char(9), j, &
                                     char(9), id_subbas_extern(sb_counter), &
                                     char(9), id_lu_extern(lu_counter), &
-                                    char(9), id_lu_extern(tc_counter), 
-                                char(9),value_array(d,j,tcallid(sb_counter, lu_counter, tcallid(sb_counter, lu_counter, tc_counter))
+                                    char(9), id_lu_extern(tc_counter), &
+                                char(9),value_array(d,j,tcallid(sb_counter, lu_counter,tc_counter))
                             END DO
                         END DO
                     END DO

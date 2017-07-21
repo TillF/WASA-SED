@@ -85,7 +85,7 @@ SUBROUTINE readgen(path2do_dat)
 
 
     if (trim(path2do_dat)=='') then
-        path2do_dat='./Input/do.dat'			!Till: use default, if no command line argument was specified
+        path2do_dat='U:/testBase/Input/do_testBase.dat'			!Till: use default, if no command line argument was specified
         custompath=''
     else
         write(*,*)'reading runtime parameters from ',path2do_dat
@@ -182,6 +182,7 @@ SUBROUTINE readgen(path2do_dat)
     READ(11,*) reservoir_transport
     READ(11,*, IOSTAT=i) doloadstate
     READ(11,*, IOSTAT=i) dosavestate
+    READ(11,*) dosnow
 
     CLOSE(11)
 
@@ -417,40 +418,40 @@ SUBROUTINE readgen(path2do_dat)
                 CASE ('tc_theta')
                     f_tc_theta=.TRUE.
 
-                CASE ('snowEnergyCont')
-                    f_snowEnergyCont=.TRUE.
-                CASE ('snowWaterEquiv')
-                    f_snowWaterEquiv=.TRUE.
-                CASE ('snowAlbedo')
-                    f_snowAlbedo=.TRUE.
-                CASE ('snowTemp')
-                    f_snowTemp=.TRUE.
-                CASE ('surfTemp')
-                    f_surfTemp=.TRUE.
-                CASE ('liquFrac')
-                    f_liquFrac=.TRUE.
-                CASE ('fluxPrec')
-                    f_fluxPrec=.TRUE.
-                CASE ('fluxSubl')
-                    f_fluxSubl=.TRUE.
-                CASE ('fluxFlow')
-                    f_fluxFlow=.TRUE.
-                CASE ('fluxNetS')
-                    f_fluxNetS=.TRUE.
-                CASE ('fluxNetL')
-                    f_fluxNetL=.TRUE.
-                CASE ('fluxSoil')
-                    f_fluxSoil=.TRUE.
-                CASE ('fluxSens')
-                    f_fluxSens=.TRUE.
-                CASE ('stoiPrec')
-                    f_stoiPrec=.TRUE.
-                CASE ('stoiSubl')
-                    f_stoiSubl=.TRUE.
-                CASE ('stoiFlow')
-                    f_stoiFlow=.TRUE.
-                CASE ('rateAlbe')
-                    f_rateAlbe=.TRUE.
+                CASE ('snowenergycont')
+                    f_snowEnergyCont=.TRUE. .AND. (dosnow /= 0)
+                CASE ('snowwaterequiv')
+                    f_snowWaterEquiv=.TRUE. .AND. (dosnow /= 0)
+                CASE ('snowalbedo')
+                    f_snowAlbedo=.TRUE. .AND. (dosnow /= 0)
+                CASE ('snowtemp')
+                    f_snowTemp=.TRUE. .AND. (dosnow /= 0)
+                CASE ('surftemp')
+                    f_surfTemp=.TRUE. .AND. (dosnow /= 0)
+                CASE ('liqufrac')
+                    f_liquFrac=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxprec')
+                    f_fluxPrec=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxsubl')
+                    f_fluxSubl=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxflow')
+                    f_fluxFlow=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxnetS')
+                    f_fluxNetS=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxnetL')
+                    f_fluxNetL=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxsoil')
+                    f_fluxSoil=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxsens')
+                    f_fluxSens=.TRUE. .AND. (dosnow /= 0)
+                CASE ('stoiprec')
+                    f_stoiPrec=.TRUE. .AND. (dosnow /= 0)
+                CASE ('stoisubl')
+                    f_stoiSubl=.TRUE. .AND. (dosnow /= 0)
+                CASE ('stoiflow')
+                    f_stoiFlow=.TRUE. .AND. (dosnow /= 0)
+                CASE ('ratealbe')
+                    f_rateAlbe=.TRUE. .AND. (dosnow /= 0)
 
                 CASE ('river_degradation')
                     f_river_degradation=dosediment

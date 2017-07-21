@@ -13,7 +13,7 @@ FC=gfortran
 #compiler flags
 CFLAGS=-c -ggdb -g -fcheck=all -fbacktrace -Og -fimplicit-none
 #linker flags
-LFLAGS= -ffree-line-length-none -ggdb -Wtabs -g -fbacktrace -fimplicit-none
+LFLAGS= -ffree-line-length-none -ggdb -Wno-tabs -g -fbacktrace -fimplicit-none
 # 
 #
 # compiler flag explanations
@@ -41,7 +41,7 @@ LFLAGS= -ffree-line-length-none -ggdb -Wtabs -g -fbacktrace -fimplicit-none
 # CFLAGS=-c -Mfree
 #select script for updating revision number according to platform
 ifeq ($(OS),Windows_NT)
-    UPDATE_SCRIPT="./update_revision_no.bat"
+    UPDATE_SCRIPT="update_revision_no.bat"
 else
     UPDATE_SCRIPT="./update_revision_no.sh"
 endif
@@ -52,6 +52,7 @@ SOURCES=./Hillslope/erosion_h.f90 \
 ./General/params_h.f90 \
 ./Hillslope/hymo_h.f90 \
 ./River/routing_h.f90 \
+./Hillslope/snow_h.f90 \
 ./General/calcyear.f90 \
 ./General/climo_h.f90 \
 ./General/climo.f90 \
@@ -70,6 +71,8 @@ SOURCES=./Hillslope/erosion_h.f90 \
 ./Hillslope/sedi_yield.f90 \
 ./Hillslope/sedi_yield_subbas.f90 \
 ./Hillslope/soilwat.f90 \
+./Hillslope/snow_compute.f90 \
+./Hillslope/snow_params.f90 \
 ./Reservoir/change_sec.f90 \
 ./Reservoir/eq1_wu.f90 \
 ./Reservoir/eq2_ashida.f90 \

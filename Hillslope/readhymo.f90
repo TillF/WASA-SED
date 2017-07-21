@@ -140,6 +140,7 @@ SUBROUTINE readhymo
     use utils_h
     use erosion_h
     use climo_h
+    use snow_h
 
     IMPLICIT NONE
 
@@ -1703,7 +1704,9 @@ if (dosediment) then
 !    allocate (cum_erosion_TC(subasin,nterrain))
 !    allocate (cum_deposition_TC(subasin,nterrain))
 
-    if (do_snow /= 0) INCLUDE '../allocat_erosion.var'
+    if (dosnow /= 0) then
+    INCLUDE '../Hillslope/allocat_snow.var'
+    end if
 
 
 contains
