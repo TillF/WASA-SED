@@ -45,13 +45,6 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
     REAL, INTENT(OUT)     ::      stoi_f_flow             !Conversion of meltwater loss mass flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3
     REAL, INTENT(OUT)     ::      rate_G_alb              !Change rate of albedo [1/s]
 
-   if(snowWaterEquiv /= 0) then
-
-   write(*,*) 'Error. Write.'
-   write(*,*) 'Error. second line.'
-
-   end if
-
 
     !Integrate and update states
     ddt_states(1:5) = snowModel_derivs(precipSumMM, shortRad, tempAir, pressAir, relHumid, windSpeed, cloudCoverage, &
@@ -67,6 +60,8 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
                                   emissivitySnowMax, tempAir_crit, albedoMin, albedoMax, agingRate_tAirPos, &
                                   agingRate_tAirNeg, soilDepth, soilDens, soilSpecHeat, weightAirTemp, &
                                   snowEnergyCont, snowWaterEquiv, albedo)
+
+
 
     !Correct if SWE would become < 0
     !M_flow states what possible to melt, not what actually melting; M_FLow > SWE possible
@@ -85,16 +80,20 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
     end if
 
 
+    !!!!Zuweisung precip_new noch nicht korrekt!!!
+    !if(ddt_states(4)*precipSeconds > snowWaterEquiv) then
 
-    if(ddt_states(4)*precipSeconds > snowWaterEquiv) then
+       !precip_new = snowWaterEquiv/1000 + precipSumMM     ! mm/referenceInterval
 
-       precip_new = snowWaterEquiv + precipSumMM     ! mm/referenceInterval
+    !else
 
-    else
+       !precip_new = ddt_states(4)*1000*precipSeconds ! mm/referenceInterval
 
-       precip_new = ddt_states(4)*1000*precipSeconds ! mm/referenceInterval
+    !end if
 
-    end if
+    precip_new = precipSumMM
+
+
 
       TEMP_MEAN       =     debug(1)
       TEMP_SURF       =     debug(2)
@@ -601,7 +600,7 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
         real :: ddt_alb
         real :: flux_melt
         real :: flux_subl
-        real, dimension(:), allocatable :: res
+        real, dimension(5) :: res
 
         !Derived variables
         TEMP_MEAN = snowTemp_mean(snowEnergyCont, snowWaterEquiv, soilDepth, soilDens, soilSpecHeat)
@@ -626,13 +625,6 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
         ddt_alb = G_alb(albedo, precipSumMM, precipSeconds, tempAir, tempAir_crit, albedoMin, albedoMax, &
                         agingRate_tAirPos, agingRate_tAirNeg, snowWaterEquiv)
 
-        if(ddt_swe /= 0) then
-
-         ddt_swe = ddt_swe
-         write(*,*) 'Error. Write.'
-
-        end if
-
 
         flux_melt = M_F
         flux_subl = M_S
@@ -640,7 +632,6 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
         res = (/ ddt_sec, ddt_swe, ddt_alb, flux_melt, flux_subl/)
 
      end function snowModel_derivs
-
 
 
      !--------------------------------------------------------------------------------------------
@@ -702,7 +693,7 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
         real :: flux_M_subl
         real :: flux_M_flow
         real :: rate_G_alb
-        real, dimension(:), allocatable :: res
+        real, dimension(14) :: res
 
         !Derived variables
         TEMP_MEAN= snowTemp_mean(snowEnergyCont, snowWaterEquiv, soilDepth, soilDens, soilSpecHeat)
