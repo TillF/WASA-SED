@@ -45,6 +45,14 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
     REAL, INTENT(OUT)     ::      stoi_f_flow             !Conversion of meltwater loss mass flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3
     REAL, INTENT(OUT)     ::      rate_G_alb              !Change rate of albedo [1/s]
 
+   if(snowWaterEquiv /= 0) then
+
+   write(*,*) 'Error. Write.'
+   write(*,*) 'Error. second line.'
+
+   end if
+
+
     !Integrate and update states
     ddt_states(1:5) = snowModel_derivs(precipSumMM, shortRad, tempAir, pressAir, relHumid, windSpeed, cloudCoverage, &
                                        precipSeconds, a0, a1, kSatSnow, densDrySnow, SpecCapRet, emissivitySnowMin, &
@@ -617,6 +625,15 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
         ddt_swe = M_P - M_S - M_F
         ddt_alb = G_alb(albedo, precipSumMM, precipSeconds, tempAir, tempAir_crit, albedoMin, albedoMax, &
                         agingRate_tAirPos, agingRate_tAirNeg, snowWaterEquiv)
+
+        if(ddt_swe /= 0) then
+
+         ddt_swe = ddt_swe
+         write(*,*) 'Error. Write.'
+
+        end if
+
+
         flux_melt = M_F
         flux_subl = M_S
 

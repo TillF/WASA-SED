@@ -30,6 +30,7 @@ module snow_h
     real, pointer :: rateAlbe(:,:,:)               !Change rate of albedo [1/s]
 
 
+
 contains
 
     !Modification of meteo-drivers according to time and location

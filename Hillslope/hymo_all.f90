@@ -1739,7 +1739,7 @@ contains
                                WRITE (11,fmtstr)t, char(9), d, char(9), j, &
                                     char(9), id_subbas_extern(sb_counter), &
                                     char(9), id_lu_extern(lu_counter), &
-                                    char(9), id_lu_extern(tc_counter), &
+                                    char(9), id_terrain_extern(tc_counter), &
                                 char(9),value_array(d,j,tcallid(sb_counter, lu_counter,tc_counter))
                             END DO
                         END DO
