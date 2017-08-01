@@ -1,4 +1,4 @@
-!!!The executables (wasa.lin, WASA.exe) are updated only infrequently, if at all.
+!!!The executable (WASA.exe) are updated only infrequently, if at all.
 To use the latest version, you need to compile from source code. !!!
 
 
@@ -11,21 +11,39 @@ All rights under the stated license (see license.txt) of the WASA-SED code are w
 ******************************
 WASA-SED is a large and complex hydrological and sediment transport model. It is not a polished point-and-click GUI tool. Extensive knowledge of its design, purpose, and limitations is required in order to apply it properly. See license.txt for terms of use.
 ******************************
-The source-code (SVN-rev. 134) has successfully been compiled with Compaq Visual Fortran 6.6, Intel Fortran XE 14.0, gfortran 4.4 and pgfortran 10.9-0.
-Please see Makefile* for necessary flags.
 
 Contents
 --------
-coding_guidelines.txt	guidelines for modifying the code
+* doc/: Directory containg the documentation
+  * coding_guidelines.txt: Guidelines for modifying the code
+  * Wasa_Documentation.doc: Model technical documentation
+  * variables.ods: List of variables used (incomplete)
+  * tutorial_wasa_input.zip: Example input to run the model
 
-license.txt				terms of use
+* src/: Contains the model's Fortran 90 source code structures in sub-directories
+  * update_revision_no.\*: Script to add the revision number into the model executable when compiling the source code
+  
+* license.txt: terms of use
 
-variables.ods			list of variables used (incomplete)
+* Makefile: GNU Makefile with rules for compiling the source code and installing the model
 
-Wasa_Documentation.doc	model documentation
+* README.md: THIS readme in markdown language
 
-wishlist_wasa.txt		desirable features, future ideas
+* WASA.exe: Model executable for Windows (**only infrequently updated!**)
 
+* .gitignore: List of files / directories git shall ignore (only needed for model development)
+
+
+Installation
+--------
+To run the model, use the WASA.exe executable (Windows; **only infrequently updated!**) or compile the source code on your own (suggested). To do so, a Makefile (adjusted to _GNU make_) is provided.
+
+For more information on how to compile and install the model, in a command line within the WASA-SED main directory type `make help`.
+
+To specify your desired compiler or adjust the compiler flags, you have to alter the Makefile. By default, it runs with the _GNU fortran_ compiler. The compiler flags are adapted to version 5.x. For more information, see comments in the Makefile.
+
+Reference
+---------
 
 E. Mueller, A. Güntner, T. Francke (2010): Modelling sediment export, retention and reservoir sedimentation in drylands with the WASA-SED model Geosci. Model Dev., 275-291, 3(1) , url: http://www.geosci-model-dev.net/3/275/2010/, doi:10.5194/gmd-3-275-2010
 
