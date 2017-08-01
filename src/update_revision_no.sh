@@ -19,4 +19,4 @@ REP_DATE=`git show -s --format=%ci`
 DATE=` date +%Y-%m-%d" "%H:%M`
 echo "!this file is updated on calling update_revision_no.sh/.bat to create svn_rev.txt which is linked to the source code
 rev_string1='$gitstr $cmmt'
-rev_string2='repository date $REP_DATE, built $DATE'" > General/svn_rev.var
+rev_string2='repository date $REP_DATE, built $DATE'" > $1/General/svn_rev.var
