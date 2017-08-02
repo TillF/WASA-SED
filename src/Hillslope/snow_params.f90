@@ -21,3 +21,4 @@ module snow_params
     real :: weightAirTemp=0.5              !Weighting param. for air temp. (-) in 0...1
 
 end module snow_params
+

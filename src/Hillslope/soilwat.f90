@@ -929,15 +929,6 @@
          snowAlbedo    (day+1, 1, tcid_instance2) = snowAlbedo    (day, 24, tcid_instance2)
       end if
 
-
-   if(prec /= 0) then
-
-   write(*,*) 'Precipitation new not 0.'
-
-   end if
-
-       !How to get into the next year? Value 31st Dez for 1 Jan
-
     end if
 
     !** -------------------------------------------------------------------------
