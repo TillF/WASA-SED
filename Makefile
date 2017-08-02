@@ -123,7 +123,7 @@ OBJ=$(OBJ_FILES:%.f90=$(OBJDIR)/%.o)
 # -Os: optimize for size of compiled executable
 
 FC=gfortran
-CDFLAGS=-g -fcheck=all -Wall -Wextra -ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -fbacktrace -Wnocompare-reals
+CDFLAGS=-g -fcheck=all -Wall -Wextra -ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -fbacktrace -Wno-compare-reals
 CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s
 LFLAGS=
 
