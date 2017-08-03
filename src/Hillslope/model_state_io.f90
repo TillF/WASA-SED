@@ -845,7 +845,7 @@ contains
                 end if
             
                 if (dummy1 < 0.) then
-				    WRITE(*,'(a,i0,a)') 'Error: negative value for subbasin ', i,' in river_storage.stat.'
+				    WRITE(*,'(a,i0,a)') 'Error: negative value for subbasin ', id_subbas_extern(i),' in river_storage.stat.'
                     stop 
 			    end if
        
@@ -856,8 +856,10 @@ contains
             if (count(r_storage==-1.) > 0) then  
                 WRITE(*,'(A)') 'WARNING: could not read initial river storage from river_storage.stat for the following subbasins, assumed 0:'
                 DO subbas_id=1,subasin
-                    if (r_storage(i)==-1.) WRITE(*,'(i0)') subbas_id
-                    r_storage(i)=0.
+                    if (r_storage(subbas_id)==-1.) then
+                        WRITE(*,'(i0)') id_subbas_extern(subbas_id)
+                        r_storage(subbas_id)=0.
+                    end if
                 END DO
             end if
         else
