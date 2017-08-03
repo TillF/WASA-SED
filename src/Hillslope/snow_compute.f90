@@ -80,18 +80,17 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
     end if
 
 
-    !!!!Zuweisung precip_new noch nicht korrekt!!!
-    !if(ddt_states(4)*precipSeconds > snowWaterEquiv) then
+    !!!!Zuweisung precip_new noch nicht korrekt???!!!
 
-       !precip_new = snowWaterEquiv/1000 + precipSumMM     ! mm/referenceInterval
+    if(ddt_states(4)*precipSeconds > snowWaterEquiv) then
 
-    !else
+       precip_new = snowWaterEquiv + precipSumMM     ! mm/referenceInterval
 
-       !precip_new = ddt_states(4)*1000*precipSeconds ! mm/referenceInterval
+    else
 
-    !end if
+       precip_new = ddt_states(4)*1000*precipSeconds ! mm/referenceInterval
 
-    precip_new = precipSumMM
+    end if
 
 
 
