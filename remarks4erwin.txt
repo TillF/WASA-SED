@@ -1,0 +1,26 @@
+[alle Code-Änderungen sind bisher noch ungetestet; bitte erwarte also eininge Fehlermeldungen]
+
+- cloudiness is computed in etp_max.f90 and could be re-used
+
+- Neue Dateien besser unter "Hillslope", nicht "Snow", da die Verzeichnisstruktur räumich, nicht prozessmäßig aufgeteilt ist
+- neue (oder bisher undokumentierte) Variablen in "variables.ods" eintragen. Am besten im separaten Block am Ende, damit wir dies am ende besser verschmelzen können.
+
+- Die zentralen Variablen heißen
+* snowEnergyCont
+* snowWaterEquiv
+* snowAlbedo
+Sie werden für jede TC-Instanz gebraucht. Bitte ergänze die korrekten Einheiten und Beschreibungen in variables.ods und snow_h.f90
+
+- optionale Schneevariablen habe ich beispielhaft für 
+snowTemperature
+angelegt. 
+Sie werden auch in snow_h.f90 deklariert und in allocat_snow.f90 alloziert.
+Sie benötigt eine begleitene Flag-Variable (f_snowtemperature), die in common_h.f90 anglegt und in readgen.f90 initialisiert und eingelesen wird. 
+Der Output selbst wird in hymo_all.f90 mittels besagtem Flag angelegt (open_subdaily_output_TC) und ausgelöst (write_subdaily_output_TC).
+
+- die Modifizierung der Meteo-Inputs habe ich in snow_prepare_input (snow_h.f90) mit einem einfachen Ansatz (Höhengradient) angelegt. das kann man auch erstmal abschalten, später aktivieren oder ggf. noch ausbauen.
+
+- Initialisierung/Laden und Speichern der Zustandsvariablen steht noch aus; muss dann später in model_state_io.f90 gemacht werden
+
+
+

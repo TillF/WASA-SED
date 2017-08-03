@@ -85,7 +85,7 @@ SUBROUTINE readgen(path2do_dat)
 
 
     if (trim(path2do_dat)=='') then
-        path2do_dat='./Input/do.dat'			!Till: use default, if no command line argument was specified
+        path2do_dat='U:/testBase/Input/do_testBaseMin.dat'			!Till: use default, if no command line argument was specified
         custompath=''
     else
         write(*,*)'reading runtime parameters from ',path2do_dat
@@ -182,6 +182,7 @@ SUBROUTINE readgen(path2do_dat)
     READ(11,*) reservoir_transport
     READ(11,*, IOSTAT=i) doloadstate
     READ(11,*, IOSTAT=i) dosavestate
+    READ(11,*) dosnow
 
     CLOSE(11)
 
@@ -326,6 +327,24 @@ SUBROUTINE readgen(path2do_dat)
     f_gw_loss=.FALSE.
     f_gw_recharge=.FALSE.
 
+    f_snowEnergyCont=.FALSE.
+    f_snowWaterEquiv=.FALSE.
+    f_snowAlbedo=.FALSE.
+    f_snowTemp=.FALSE.
+    f_surfTemp=.FALSE.
+    f_liquFrac=.FALSE.
+    f_fluxPrec=.FALSE.
+    f_fluxSubl=.FALSE.
+    f_fluxFlow=.FALSE.
+    f_fluxNetS=.FALSE.
+    f_fluxNetL=.FALSE.
+    f_fluxSoil=.FALSE.
+    f_fluxSens=.FALSE.
+    f_stoiPrec=.FALSE.
+    f_stoiSubl=.FALSE.
+    f_stoiFlow=.FALSE.
+    f_rateAlbe=.FALSE.
+
     f_res_watbal=.FALSE.
     f_res_vollost=.FALSE.
     f_res_cav=.FALSE.
@@ -398,6 +417,42 @@ SUBROUTINE readgen(path2do_dat)
                     f_daily_gw_loss=.TRUE.
                 CASE ('tc_theta')
                     f_tc_theta=.TRUE.
+
+                CASE ('snowenergycont')
+                    f_snowEnergyCont=.TRUE. .AND. (dosnow /= 0)
+                CASE ('snowwaterequiv')
+                    f_snowWaterEquiv=.TRUE. .AND. (dosnow /= 0)
+                CASE ('snowalbedo')
+                    f_snowAlbedo=.TRUE. .AND. (dosnow /= 0)
+                CASE ('snowtemp')
+                    f_snowTemp=.TRUE. .AND. (dosnow /= 0)
+                CASE ('surftemp')
+                    f_surfTemp=.TRUE. .AND. (dosnow /= 0)
+                CASE ('liqufrac')
+                    f_liquFrac=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxprec')
+                    f_fluxPrec=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxsubl')
+                    f_fluxSubl=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxflow')
+                    f_fluxFlow=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxnetS')
+                    f_fluxNetS=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxnetL')
+                    f_fluxNetL=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxsoil')
+                    f_fluxSoil=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxsens')
+                    f_fluxSens=.TRUE. .AND. (dosnow /= 0)
+                CASE ('stoiprec')
+                    f_stoiPrec=.TRUE. .AND. (dosnow /= 0)
+                CASE ('stoisubl')
+                    f_stoiSubl=.TRUE. .AND. (dosnow /= 0)
+                CASE ('stoiflow')
+                    f_stoiFlow=.TRUE. .AND. (dosnow /= 0)
+                CASE ('ratealbe')
+                    f_rateAlbe=.TRUE. .AND. (dosnow /= 0)
+
                 CASE ('river_degradation')
                     f_river_degradation=dosediment
                 CASE ('river_deposition')

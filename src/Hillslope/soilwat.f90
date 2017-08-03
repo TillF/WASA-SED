@@ -1,7 +1,7 @@
     SUBROUTINE soilwat(hh,day,month,i_subbas2,i_ce,i_lu,lu_counter2,tcid_instance2,id_tc_type2,tc_counter2,  &
         thact,thactroot,q_surf_in,q_surf_out,q_sub_in,q_sub_out,qgw,deepqgw,  &
         hortf,tcaet,tclai,  &
-        tcsoilet,tcintc,prec,precday,prechall2,petday,  &
+        tcsoilet,tcintc,prec_in,precday,prechall2,petday,  &
         tcarea2,bal, rootd_act,height_act,lai_act,alb_act,sed_in_tc,sed_out_tc, q_rill_in)
 
     !Till: computationally irrelevant: disabled pause and debugging parts
@@ -170,6 +170,8 @@
     use hymo_h
     use erosion_h
     use utils_h
+    use climo_h
+    use snow_h
 
 
     IMPLICIT NONE
@@ -177,43 +179,47 @@
 
     !real :: sedi_yield						!Till: declared function
 
-    INTEGER, INTENT(IN)                      :: hh
-    INTEGER, INTENT(IN)                     :: day
+    INTEGER, INTENT(IN)                  :: hh
+    INTEGER, INTENT(IN)                  :: day
     INTEGER, INTENT(IN)                  :: month
     INTEGER, INTENT(IN)                  :: i_subbas2		!internal representation of i_subbas2in (id of subbasin)
     INTEGER, INTENT(IN)                  :: i_ce			!internal representation of i_subbas2in (id of subbasin)
     INTEGER, INTENT(IN)                  :: i_lu			!internal representation of isot (id of LU)
     INTEGER, INTENT(IN)                  :: lu_counter2	    !internal representation of lu_counter
-    INTEGER, INTENT(IN)                      :: tcid_instance2		!(internal) id of TC-instance (unique subbas-LU-TC-combination)
+    INTEGER, INTENT(IN)                  :: tcid_instance2		!(internal) id of TC-instance (unique subbas-LU-TC-combination)
     INTEGER, INTENT(IN)                  :: id_tc_type2			!ID of TC type
-    INTEGER, INTENT(IN)                      :: tc_counter2
-    REAL, INTENT(IN OUT)                     :: thact			!internal representation of thact ((average) actual water content of TC [mm])
-    REAL, INTENT(OUT)                        :: thactroot
-    REAL, INTENT(IN)                         :: q_surf_in !sheet flow entering TC from uphill
-    REAL, INTENT(OUT)                        :: q_surf_out
-    REAL, INTENT(IN)                         :: q_sub_in			!internal representation of sublat_in
-    REAL, INTENT(OUT)                        :: q_sub_out			!internal representation of sublat_out
-    REAL, INTENT(OUT)                        :: qgw
-    REAL, INTENT(OUT)                        :: deepqgw
-    REAL, INTENT(OUT)                        :: hortf
-    REAL, INTENT(OUT)                        :: tcaet
-    REAL, INTENT(OUT)                        :: tclai
-    REAL, INTENT(OUT)                        :: tcsoilet
-    REAL, INTENT(OUT)                        :: tcintc
-    REAL, INTENT(IN)                         :: prec
-    REAL, INTENT(IN)                         :: precday
+    INTEGER, INTENT(IN)                  :: tc_counter2
+    REAL, INTENT(IN OUT)                 :: thact			!internal representation of thact ((average) actual water content of TC [mm])
+    REAL, INTENT(OUT)                    :: thactroot
+    REAL, INTENT(IN)                     :: q_surf_in !sheet flow entering TC from uphill
+    REAL, INTENT(OUT)                    :: q_surf_out
+    REAL, INTENT(IN)                     :: q_sub_in			!internal representation of sublat_in
+    REAL, INTENT(OUT)                    :: q_sub_out			!internal representation of sublat_out
+    REAL, INTENT(OUT)                    :: qgw
+    REAL, INTENT(OUT)                    :: deepqgw
+    REAL, INTENT(OUT)                    :: hortf
+    REAL, INTENT(OUT)                    :: tcaet
+    REAL, INTENT(OUT)                    :: tclai
+    REAL, INTENT(OUT)                    :: tcsoilet
+    REAL, INTENT(OUT)                    :: tcintc
+    REAL, INTENT(IN)                     :: prec_in  !precipitation input
+    REAL, INTENT(IN)                     :: precday
     REAL, INTENT(IN)                     :: prechall2(24)
-    REAL, INTENT(IN)                         :: petday
-    REAL, INTENT(IN)                         :: tcarea2
-    REAL, INTENT(OUT)                        :: bal		!Till: water balance of current TC
-    REAL, INTENT(IN)                         :: rootd_act(nveg)
+    REAL, INTENT(IN)                     :: petday
+    REAL, INTENT(IN)                     :: tcarea2
+    REAL, INTENT(OUT)                    :: bal		!Till: water balance of current TC
+    REAL, INTENT(IN)                     :: rootd_act(nveg)
     REAL, INTENT(IN)                     :: height_act(nveg)
-    REAL, INTENT(IN)                         :: lai_act(nveg)
+    REAL, INTENT(IN)                     :: lai_act(nveg)
     REAL, INTENT(IN)                     :: alb_act(nveg)
-    REAL, INTENT(IN)					:: sed_in_tc(n_sed_class)
-    REAL, INTENT(OUT)					:: sed_out_tc(n_sed_class)
-    REAL, INTENT(IN)                         :: q_rill_in !rill flow entering TC from uphill
+    REAL, INTENT(IN)			         :: sed_in_tc(n_sed_class)
+    REAL, INTENT(OUT)				     :: sed_out_tc(n_sed_class)
+    REAL, INTENT(IN)                     :: q_rill_in !rill flow entering TC from uphill
 
+    INTEGER                              :: hh2 !internal copy of hh
+    REAL                                 :: prec       !precipitation potentially modified in snow module
+    REAL                                 :: temperature !temperature of current time step
+    REAL                                 :: radiation !temperature of current time step
 
     logical :: isnan
     !** Soil water model for terrain component (TC)
@@ -881,8 +887,49 @@
     !	END DO
     !END DO
     !!for debugging - remove end
+    
 
 
+    !** -------------------------------------------------------------------------
+    !SNOW MODULE
+    !Physically-based simulations based on energy balance method (see ECHSE David Kneis...)
+
+    prec          =   prec_in !this assignment necessary even if snow module not active; in steps after snow module usage of prec
+    temperature   =   temp(day,i_subbas2)
+    radiation     =   rad(day, i_subbas2)
+
+
+    if(dosnow > 0) then
+
+    hh2 = max(1, hh) !temproary fix for hh=0 in daily mode
+
+    !Subroutine to modify meteo-drivers according to location
+    !Preparation before feeding the snow model
+
+    call snow_prepare_input(hh2, day, i_subbas2, lu_counter2, tc_counter2, prec, temperature, rad(day,i_subbas2))
+
+
+    !Subroutine calculating the dynamics of the snow cover
+    !(Wind currently not read from input file; assumed constant wind = 1; see climo.f90)
+    !Air pressure for now set to 10000 hPa
+    !Cloud cover set to 0.5 for now; still to calculate (see also etp_max.f90)
+
+    call snow_compute(prec_in, temperature, radiation, 1000, rhum(day,i_subbas2), wind(day,i_subbas2), 0.5, &
+                      snowEnergyCont(day, max(1,hh2-1), tcid_instance2), snowWaterEquiv(day,  max(1,hh2-1), tcid_instance2), &
+                      snowAlbedo(day,  max(1,hh2-1), tcid_instance2), snowEnergyCont(day, hh2, tcid_instance2), snowWaterEquiv(day, hh2, tcid_instance2), &
+                      snowAlbedo(day, hh2, tcid_instance2), prec, snowTemp(day, hh2, tcid_instance2), surfTemp(day, hh2, tcid_instance2), &
+                      liquFrac(day, hh2, tcid_instance2), fluxPrec(day, hh2, tcid_instance2), fluxSubl(day, hh2, tcid_instance2), &
+                      fluxFlow(day, hh2, tcid_instance2), fluxNetS(day, hh2, tcid_instance2), fluxNetL(day, hh2, tcid_instance2), &
+                      fluxSoil(day, hh2, tcid_instance2), fluxSens(day, hh2, tcid_instance2), stoiPrec(day, hh2, tcid_instance2), &
+                      stoiSubl(day, hh2, tcid_instance2), stoiFlow(day, hh2, tcid_instance2), rateAlbe(day, hh2, tcid_instance2))
+
+      if(hh2 ==24) then !to get into the next day; have start value
+         snowEnergyCont(day+1, 1, tcid_instance2) = snowEnergyCont(day, 24, tcid_instance2)
+         snowWaterEquiv(day+1, 1, tcid_instance2) = snowWaterEquiv(day, 24, tcid_instance2)
+         snowAlbedo    (day+1, 1, tcid_instance2) = snowAlbedo    (day, 24, tcid_instance2)
+      end if
+
+    end if
 
     !** -------------------------------------------------------------------------
     !** (11) INTERCEPTION

@@ -4,7 +4,7 @@
 #-------------------------------------------------------------------------
 
 ifndef DEBUG
-DEBUG=0
+DEBUG=1
 endif
 
 # installation path
@@ -17,15 +17,15 @@ OUTDIR=build
 # adjust according to DEBUG
 ifeq ($(DEBUG),1)
 EXEC=wasa_dbg
-OBJDIR=$(OUTDIR)/obj/debug
+OBJDIR=$(OUTDIR)\obj\debug
 else
 EXEC=wasa
-OBJDIR=$(OUTDIR)/obj/release
+OBJDIR=$(OUTDIR)\obj\release
 endif
 
 # script for updating revision number according to platform
 ifeq ($(OS),Windows_NT)
-    UPDATE_SCRIPT=$(SRCDIR)/update_revision_no.bat
+    UPDATE_SCRIPT=$(SRCDIR)\update_revision_no.bat
 else
     UPDATE_SCRIPT=$(SRCDIR)/update_revision_no.sh
 endif
@@ -41,6 +41,8 @@ General/common_h.f90 \
 General/params_h.f90 \
 Hillslope/hymo_h.f90 \
 River/routing_h.f90 \
+Hillslope/snow_params.f90 \
+Hillslope/snow_h.f90 \
 General/calcyear.f90 \
 General/climo_h.f90 \
 General/climo.f90 \
@@ -59,6 +61,7 @@ Hillslope/readhymo.f90 \
 Hillslope/sedi_yield.f90 \
 Hillslope/sedi_yield_subbas.f90 \
 Hillslope/soilwat.f90 \
+Hillslope/snow_compute.f90 \
 Reservoir/change_sec.f90 \
 Reservoir/eq1_wu.f90 \
 Reservoir/eq2_ashida.f90 \
@@ -120,7 +123,7 @@ OBJ=$(OBJ_FILES:%.f90=$(OBJDIR)/%.o)
 # -Os: optimize for size of compiled executable
 
 FC=gfortran
-CDFLAGS=-g -fcheck=all -Wall -Wextra -ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -fbacktrace
+CDFLAGS=-g -fcheck=all -Wall -Wextra -ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -fbacktrace -Wno-compare-reals
 CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s
 LFLAGS=
 
@@ -203,11 +206,13 @@ distclean:
 
 prepare:
 	@echo "Output directories will be created (if they do not exist) ..."
-	-@mkdir -p $(OUTDIR) $(OBJDIR) $(OUTDIR)/bin
-
+	-@mkdir $(OUTDIR) 
+	-@mkdir $(OBJDIR)
+	-@mkdir $(OUTDIR)\bin
+	
 update_rev:
 	@echo "Updating revision number ..."
-	@./$(UPDATE_SCRIPT) $(SRCDIR)
+	@$(UPDATE_SCRIPT) $(SRCDIR)
 	@echo "Compiling model source code ..."
 
 $(OUTDIR)/bin/$(EXEC): $(OBJ)

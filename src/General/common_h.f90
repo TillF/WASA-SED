@@ -87,6 +87,7 @@ module common_h
     INTEGER :: river_transport      !type of river sediment transport
     INTEGER :: reservoir_transport   !type of reservoir sediment transport
     INTEGER :: nt               !number of timesteps per day (computed as 24/dt)
+    INTEGER :: dosnow               !snow module to be used: 0 => NO; 1 => YES
 
     real, allocatable :: upper_limit(:)         !upper limits of particle size class intervalls (mm)
     real, allocatable :: particle_classes(:)   !upper limits of particle size classes [mm]
@@ -100,7 +101,8 @@ module common_h
     LOGICAL :: f_res_watbal,f_res_vollost,f_res_cav,f_res_hydraul,f_res_bedchange,f_res_sedbal,f_res_longitudunal,f_res_sedcomposition
     LOGICAL :: f_lake_inflow_r,f_lake_outflow_r,f_lake_retention_r,f_lake_volume_r,f_lake_sedinflow_r,f_lake_sedoutflow_r,f_lake_sedretention_r,f_lake_sedimentation_r
     LOGICAL :: f_lake_watbal,f_lake_sedbal,f_lake_inflow,f_lake_outflow,f_lake_volume,f_lake_retention,f_lake_vollost,f_lake_sedinflow,f_lake_sedoutflow,f_lake_sizedistoutflow
-
+    LOGICAL :: f_snowEnergyCont, f_snowWaterEquiv, f_snowAlbedo, f_snowTemp, f_surfTemp, f_liquFrac, f_fluxPrec, f_fluxSubl, f_fluxFlow, f_fluxNetS, f_fluxNetL, f_fluxSoil, f_fluxSens, f_stoiPrec, f_stoiSubl, f_stoiFlow, f_rateAlbe
+    
     LOGICAL :: doloadstate=.FALSE.         !load initial values before model run
     LOGICAL :: dosavestate=.FALSE.         !save state of model after execution
     REAL   :: default_rel_sat=1.0      !default relative saturation (initial value for all horizons, if not specified otherwise)
