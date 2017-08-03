@@ -43,7 +43,7 @@ REAL, INTENT(IN)                         :: alb_act(nveg)
 INTEGER, INTENT(IN)                  :: day, hh
 
 
-REAL,allocatable,save :: etpmax_stored(:,:) !Till: this serves to store values that have been calculated for a given subbasin and day. Later calls can be accelelated this way
+REAL,allocatable,save :: etpmax_stored(:,:) !Till: this serves to store values that have been calculated for a given subbasin and day. Later calls can be accelerated this way
 
 
 REAL :: seconds_of_daylight
