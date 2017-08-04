@@ -344,7 +344,6 @@ IF (STATUS == 1) THEN
 
 wind=1.0	!Till: currently not read from input file (assumed constant)
 
-
 CALL check_climate	!check validity of climate data
 
 CALL petcalc		!Till: compute potential evaporation for each day and subbasin

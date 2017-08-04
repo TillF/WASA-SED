@@ -8,8 +8,8 @@ module snow_params
     real :: kSatSnow = 0.00004             !Saturated hydraulic conductivity of snow (m/s)
     real :: densDrySnow=450                !Density of dry snow (kg/m3)
     real :: specCapRet=0.05                !Capill. retent. vol as fraction of solid SWE (-)
-    real :: emissivitySnowMin=0.7          !Minimum snow emissivity used for old snow (-)
-    real :: emissivitySnowMax=0.8          !Maximum snow emissivity used for new snow (-)
+    real :: emissivitySnowMin=0.84          !Minimum snow emissivity used for old snow (-)
+    real :: emissivitySnowMax=0.99          !Maximum snow emissivity used for new snow (-)
     real :: tempAir_crit=0.2               !Threshold temp. for rain-/snowfall (°C)
     real :: albedoMin=0.55                 !Minimum albedo used for old snow (-)
     real :: albedoMax=0.88                 !Maximum albedo used for new snow (-)
@@ -21,4 +21,3 @@ module snow_params
     real :: weightAirTemp=0.5              !Weighting param. for air temp. (-) in 0...1
 
 end module snow_params
-

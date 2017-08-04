@@ -901,8 +901,6 @@
 
     if(dosnow > 0) then
 
-    !hh2 = max(1, hh) !temproary fix for hh=0 in daily mode
-
     !Subroutine to modify meteo-drivers according to location
     !Preparation before feeding the snow model
 
@@ -914,7 +912,8 @@
     !Air pressure for now set to 10000 hPa
     !Cloud cover set to 0.5 for now; still to calculate (see also etp_max.f90)
 
-    call snow_compute(prec_in, temperature, radiation, 1000, rhum(day,i_subbas2), wind(day,i_subbas2), 0.5, &
+    if(dohour) then
+      call snow_compute(prec_in, temperature, radiation, 1000., rhum(day,i_subbas2), wind(day,i_subbas2), 0.5, &
                       snowEnergyCont(day, max(1,hh-1), tcid_instance2), snowWaterEquiv(day,  max(1,hh-1), tcid_instance2), &
                       snowAlbedo(day,  max(1,hh-1), tcid_instance2), snowEnergyCont(day, hh, tcid_instance2), snowWaterEquiv(day, hh, tcid_instance2), &
                       snowAlbedo(day, hh, tcid_instance2), prec, snowTemp(day, hh, tcid_instance2), surfTemp(day, hh, tcid_instance2), &
@@ -923,11 +922,29 @@
                       fluxSoil(day, hh, tcid_instance2), fluxSens(day, hh, tcid_instance2), stoiPrec(day, hh, tcid_instance2), &
                       stoiSubl(day, hh, tcid_instance2), stoiFlow(day, hh, tcid_instance2), rateAlbe(day, hh, tcid_instance2))
 
-      if(hh ==24) then !to get into the next day; have start value
-         snowEnergyCont(day+1, 1, tcid_instance2) = snowEnergyCont(day, 24, tcid_instance2)
-         snowWaterEquiv(day+1, 1, tcid_instance2) = snowWaterEquiv(day, 24, tcid_instance2)
-         snowAlbedo    (day+1, 1, tcid_instance2) = snowAlbedo    (day, 24, tcid_instance2)
-      end if
+         if(hh ==24) then !to get into the next day; have start value
+            snowEnergyCont(day+1, 1, tcid_instance2) = snowEnergyCont(day, 24, tcid_instance2)
+            snowWaterEquiv(day+1, 1, tcid_instance2) = snowWaterEquiv(day, 24, tcid_instance2)
+            snowAlbedo    (day+1, 1, tcid_instance2) = snowAlbedo    (day, 24, tcid_instance2)
+         end if
+
+     else
+
+     !daily
+     call snow_compute(prec_in, temperature, radiation, 1000., rhum(day,i_subbas2), wind(day,i_subbas2), 0.5, &
+                      snowEnergyCont(max(1,day-1), max(1,hh-1), tcid_instance2), snowWaterEquiv(max(1,day-1),  max(1,hh-1), tcid_instance2), &
+                      snowAlbedo(max(1,day-1),  max(1,hh-1), tcid_instance2), snowEnergyCont(day, hh, tcid_instance2), snowWaterEquiv(day, hh, tcid_instance2), &
+                      snowAlbedo(day, hh, tcid_instance2), prec, snowTemp(day, hh, tcid_instance2), surfTemp(day, hh, tcid_instance2), &
+                      liquFrac(day, hh, tcid_instance2), fluxPrec(day, hh, tcid_instance2), fluxSubl(day, hh, tcid_instance2), &
+                      fluxFlow(day, hh, tcid_instance2), fluxNetS(day, hh, tcid_instance2), fluxNetL(day, hh, tcid_instance2), &
+                      fluxSoil(day, hh, tcid_instance2), fluxSens(day, hh, tcid_instance2), stoiPrec(day, hh, tcid_instance2), &
+                      stoiSubl(day, hh, tcid_instance2), stoiFlow(day, hh, tcid_instance2), rateAlbe(day, hh, tcid_instance2))
+    end if
+
+
+   !How to get into the next year???!!!
+   !Snow 'lost' at turn of the year
+
 
     end if
 
