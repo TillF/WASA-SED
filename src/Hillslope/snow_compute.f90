@@ -69,16 +69,13 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
 
     !Correct if SWE would become < 0
     if(ddt_states(2) < 0 .and. ABS(ddt_states(2))*precipSeconds > snowWaterEquiv)   then
-       snowWaterEquiv_new = 0.
+      snowWaterEquiv_new = 0.
        snowEnergyCont_new = 0.
        albedo_new         = albedoMax
     end if
 
-    !Calculation modified precipitation
-    !if(snowWaterEquiv < 0.0001 .and. tempAir > tempAir_crit) then !if snow cover/fall
-    !precip_new = precipSumMM
-    !end if
 
+    !Special case rain on snow
     if(snowWaterEquiv_new > 0. .or. tempAir < tempAir_crit) then !if snow cover/fall
 
        if(tempAir > tempAir_crit) then !case rain on snow; to include energy input due to rainfall re-run with sec-new
@@ -102,14 +99,9 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
 
        end if
 
-       !precipSumMM = precipSumMM + snowWaterEquiv*1000      ! mm/referenceInterval
-       !print*, 'In rain on snow',snowWaterEquiv, precipSumMM
-       !end if
 
-       !if(ddt_states(4)*precipSeconds < snowWaterEquiv_new) then
-       precipSumMM = min((ddt_states(4) * 1000 * precipSeconds), (snowWaterEquiv*1000+precipSumMM)) ! mm/referenceInterval
-       !print*, 'In normal snow melt'
-       !end if
+       precipSumMM = min((ddt_states(4) * 1000 * precipSeconds), (snowWaterEquiv*1000 + precipSumMM)) ! mm/referenceInterval
+       !in case rain on snow rain is swe melted + precipitation current time step
 
     end if
 
