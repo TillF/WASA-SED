@@ -11,6 +11,7 @@ module snow_h
     real, pointer :: snowEnergyCont(:,:,:)         !Snow energy content (kJ/m2)
     real, pointer :: snowWaterEquiv(:,:,:)         !Snow water equivalent (m)
     real, pointer :: snowAlbedo(:,:,:)             !Albedo (-)
+    real, pointer :: snowCover(:,:,:)              !Snow cover (-)
 
     real, pointer :: rel_elevation(:)              !Relative elevation of TC above foot of toposequence/LU (i.e. river) [m]
 

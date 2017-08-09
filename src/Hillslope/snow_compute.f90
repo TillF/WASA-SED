@@ -1,7 +1,7 @@
 
 subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, windSpeed, cloudCoverage, &
                         snowEnergyCont, snowWaterEquiv, albedo, snowEnergyCont_new, snowWaterEquiv_new, albedo_new, &
-                        TEMP_MEAN, TEMP_SURF, LIQU_FRAC, flux_M_prec, flux_M_subl, flux_M_flow, flux_R_netS, &
+                        snowCover, TEMP_MEAN, TEMP_SURF, LIQU_FRAC, flux_M_prec, flux_M_subl, flux_M_flow, flux_R_netS, &
                         flux_R_netL, flux_R_soil, flux_R_sens, stoi_f_prec, stoi_f_subl, stoi_f_flow, rate_G_alb)
 
     use snow_params
@@ -23,12 +23,9 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
     REAL, INTENT(OUT)     ::      snowEnergyCont_new      !Snow energy content (kJ/m2)
     REAL, INTENT(OUT)     ::      snowWaterEquiv_new      !Snow water equivalent (m)
     REAL, INTENT(OUT)     ::      albedo_new              !Albedo (-)
+    REAL, INTENT(OUT)     ::      snowCover               !Snow cover (-)
 
-    !REAL, INTENT(OUT)     ::      precip_new              !Precipitation modified by snow accumulation and snow melt [mm/referenceInterval]
-
-    REAL, DIMENSION(1:5)  ::      ddt_states              !array to collect results of calculations
-
-    REAL, DIMENSION(1:14) ::      debug                   !array to collect output for debugging purposes and in-depth analyses of the behaviour
+    REAL, DIMENSION(1:18) ::      snowResults             !array to collect results of calculations
 
     REAL, INTENT(OUT)     ::      TEMP_MEAN               !Mean temperatur of the snow pack [°C]
     REAL, INTENT(OUT)     ::      TEMP_SURF               !Snow surface temperature [°C]
@@ -45,31 +42,20 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
     REAL, INTENT(OUT)     ::      stoi_f_flow             !Conversion of meltwater loss mass flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3
     REAL, INTENT(OUT)     ::      rate_G_alb              !Change rate of albedo [1/s]
 
-    !Integrate and update states
-    ddt_states(1:5) = snowModel_derivs(precipSumMM, shortRad, tempAir, pressAir, relHumid, windSpeed, cloudCoverage, &
-                                       precipSeconds, a0, a1, kSatSnow, densDrySnow, SpecCapRet, emissivitySnowMin, &
-                                       emissivitySnowMax, tempAir_crit, albedoMin, albedoMax, agingRate_tAirPos, &
-                                       agingRate_tAirNeg, soilDepth, soilDens, soilSpecHeat, weightAirTemp, &
-                                       snowEnergyCont, snowWaterEquiv, albedo)
 
+    snowResults(1:18) = f_snowModel(precipSumMM, shortRad, tempAir, pressAir, relHumid, windSpeed, cloudCoverage, &
+                                    precipSeconds, a0, a1, kSatSnow, densDrySnow, SpecCapRet, emissivitySnowMin, &
+                                    emissivitySnowMax, tempAir_crit, albedoMin, albedoMax, agingRate_tAirPos, &
+                                    agingRate_tAirNeg, soilDepth, soilDens, soilSpecHeat, weightAirTemp, &
+                                    snowEnergyCont, snowWaterEquiv, albedo)
 
-    !Debug function for in-depth analyses of model behaviour
-    debug(1:14) = snowModel_debug(precipSumMM, shortRad, tempAir, pressAir, relHumid, windSpeed, cloudCoverage, &
-                                  precipSeconds, a0, a1, kSatSnow, densDrySnow, SpecCapRet, emissivitySnowMin, &
-                                  emissivitySnowMax, tempAir_crit, albedoMin, albedoMax, agingRate_tAirPos, &
-                                  agingRate_tAirNeg, soilDepth, soilDens, soilSpecHeat, weightAirTemp, &
-                                  snowEnergyCont, snowWaterEquiv, albedo)
-
-
-       snowEnergyCont_new     =     snowEnergyCont   +   ddt_states(1) * precipSeconds
-       snowWaterEquiv_new     =     snowWaterEquiv   +   ddt_states(2) * precipSeconds
-       albedo_new             =     albedo           +   ddt_states(3) * precipSeconds
-
-
+       snowEnergyCont_new     =     snowEnergyCont   +   snowResults(1) * precipSeconds
+       snowWaterEquiv_new     =     snowWaterEquiv   +   snowResults(2) * precipSeconds
+       albedo_new             =     albedo           +   snowResults(3) * precipSeconds
 
     !Correct if SWE would become < 0
-    if(ddt_states(2) < 0 .and. ABS(ddt_states(2))*precipSeconds > snowWaterEquiv)   then
-      snowWaterEquiv_new = 0.
+    if(snowResults(2) < 0 .and. ABS(snowResults(2))*precipSeconds > snowWaterEquiv)   then
+       snowWaterEquiv_new = 0.
        snowEnergyCont_new = 0.
        albedo_new         = albedoMax
     end if
@@ -80,18 +66,18 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
 
        if(tempAir > tempAir_crit) then !case rain on snow; to include energy input due to rainfall re-run with sec-new
 
-       ddt_states(1:5) = snowModel_derivs(precipSumMM, shortRad, tempAir, pressAir, relHumid, windSpeed, cloudCoverage, &
-                                          precipSeconds, a0, a1, kSatSnow, densDrySnow, SpecCapRet, emissivitySnowMin, &
-                                          emissivitySnowMax, tempAir_crit, albedoMin, albedoMax, agingRate_tAirPos, &
-                                          agingRate_tAirNeg, soilDepth, soilDens, soilSpecHeat, weightAirTemp, &
-                                          snowEnergyCont_new, snowWaterEquiv, albedo)
+       snowResults(1:17) = f_snowModel(precipSumMM, shortRad, tempAir, pressAir, relHumid, windSpeed, cloudCoverage, &
+                                       precipSeconds, a0, a1, kSatSnow, densDrySnow, SpecCapRet, emissivitySnowMin, &
+                                       emissivitySnowMax, tempAir_crit, albedoMin, albedoMax, agingRate_tAirPos, &
+                                       agingRate_tAirNeg, soilDepth, soilDens, soilSpecHeat, weightAirTemp, &
+                                       snowEnergyCont_new, snowWaterEquiv, albedo)
 
-       snowEnergyCont_new     =     snowEnergyCont   +   ddt_states(1) * precipSeconds
-       snowWaterEquiv_new     =     snowWaterEquiv   +   ddt_states(2) * precipSeconds
-       albedo_new             =     albedo           +   ddt_states(3) * precipSeconds
+       snowEnergyCont_new     =     snowEnergyCont   +   snowResults(1) * precipSeconds
+       snowWaterEquiv_new     =     snowWaterEquiv   +   snowResults(2) * precipSeconds
+       albedo_new             =     albedo           +   snowResults(3) * precipSeconds
 
           !Correct if SWE would become < 0
-          if(ddt_states(2) < 0 .and. ABS(ddt_states(2))*precipSeconds > snowWaterEquiv)   then
+          if(snowResults(2) < 0 .and. ABS(snowResults(2))*precipSeconds > snowWaterEquiv)   then
              snowWaterEquiv_new = 0.
              snowEnergyCont_new = 0.
              albedo_new         = albedoMax
@@ -99,27 +85,29 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
 
        end if
 
+       !Calculation snow cover
+       snowCover  = snowDepl(snowWaterEquiv_new)
 
-       precipSumMM = min((ddt_states(4) * 1000 * precipSeconds), (snowWaterEquiv*1000 + precipSumMM)) ! mm/referenceInterval
-       !in case rain on snow rain is swe melted + precipitation current time step
+       precipSumMM = min((snowResults(4) * 1000 * precipSeconds), (snowWaterEquiv*1000 + precipSumMM)) ! mm/referenceInterval
+       !in case rain on snow: rain is swe melted + precipitation current time step
 
     end if
 
-
-      TEMP_MEAN       =     debug(1)
-      TEMP_SURF       =     debug(2)
-      LIQU_FRAC       =     debug(3)
-      flux_M_prec     =     debug(4)
-      flux_M_subl     =     debug(5)
-      flux_M_flow     =     debug(6)
-      flux_R_netS     =     debug(7)
-      flux_R_netL     =     debug(8)
-      flux_R_soil     =     debug(9)
-      flux_R_sens     =     debug(10)
-      stoi_f_prec     =     debug(11)
-      stoi_f_subl     =     debug(12)
-      stoi_f_flow     =     debug(13)
-      rate_G_alb      =     debug(14)
+      flux_M_flow     =     snowResults(4)
+      flux_M_subl     =     snowResults(5)
+      flux_M_prec     =     snowResults(6)
+      TEMP_MEAN       =     snowResults(7)
+      TEMP_SURF       =     snowResults(8)
+      LIQU_FRAC       =     snowResults(9)
+      flux_R_netS     =     snowResults(10)
+      flux_R_netL     =     snowResults(11)
+      flux_R_soil     =     snowResults(12)
+      flux_R_sens     =     snowResults(13)
+      stoi_f_prec     =     snowResults(14)
+      stoi_f_subl     =     snowResults(15)
+      stoi_f_flow     =     snowResults(16)
+      rate_G_alb      =     snowResults(17)
+      !snowCover       =     snowResults(18)
 
     contains
 
@@ -458,6 +446,21 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
     end function G_alb
 
 
+    !Snow depletion curve
+    !Function to describe the variability of snow water equivalent within a TC
+
+    function snowDepl(snowWaterEquiv)
+        !no depeltion curve included yet; for now all or nothing
+        real :: snowWaterEquiv
+        real :: snowDepl
+
+        if(snowWaterEquiv > 0.) then
+           snowDepl = 1.
+        else
+           snowDepl = 0.
+        end if
+    end function snowDepl
+
 
     !--------------------------------------------------------------------------------------------
     !Meteorological basics
@@ -551,17 +554,17 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
         specificHumidity = 0.622 * vapPress / (pressAir - 0.378 * vapPress)
     end function specificHumidity
 
-
-
     !--------------------------------------------------------------------------------------------
-    !Derivates of the snow model´s state varibles with respect to time
+    !Function to calculate derivates of the snow model´s state variables with respect to time
+    !and to optionally return fundamental variables of the snow model (for debugging purposes and
+    !in depth analysis of model behaviour
     !--------------------------------------------------------------------------------------------
 
-    function snowModel_derivs(precipSumMM, shortRad, tempAir, pressAir, relHumid, windSpeed, cloudCoverage, &
+    function f_snowModel(precipSumMM, shortRad, tempAir, pressAir, relHumid, windSpeed, cloudCoverage, &
                               precipSeconds, a0, a1, kSatSnow, densDrySnow, SpecCapRet, emissivitySnowMin, &
                               emissivitySnowMax, tempAir_crit, albedoMin, albedoMax, agingRate_tAirPos, &
                               agingRate_tAirNeg, soilDepth, soilDens, soilSpecHeat, weightAirTemp, &
-                              snowEnergyCont, snowWaterEquiv, albedo) result(res)
+                              snowEnergyCont, snowWaterEquiv, albedo) result(snowModelRes)
         !Inputs
         !Part 1: Forcings
         real :: precipSumMM
@@ -596,36 +599,61 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
         real :: snowWaterEquiv
         real :: albedo
 
-        !Derived Variables and rate expressions
+
+        !Outputs
         real :: TEMP_MEAN
         real :: TEMP_SURF
         real :: LIQU_FRAC
-        real :: M_P
-        real :: M_S
-        real :: M_F
 
-        !Outputs
+        real :: flux_M_prec
+        real :: flux_M_subl
+        real :: flux_M_flow
+
+        real :: flux_R_netS
+        real :: flux_R_netL
+        real :: flux_R_soil
+        real :: flux_R_sens
+
+        real :: stoi_f_prec
+        real :: stoi_f_subl
+        real :: stoi_f_flow
+
+        real :: rate_G_alb
         real :: ddt_sec
         real :: ddt_swe
         real :: ddt_alb
-        real :: flux_melt
-        real :: flux_subl
-        real, dimension(:), allocatable :: res
+        real, dimension(:), allocatable :: snowModelRes
 
         !Derived variables
         TEMP_MEAN = snowTemp_mean(snowEnergyCont, snowWaterEquiv, soilDepth, soilDens, soilSpecHeat)
         TEMP_SURF = snowTemp_surf(TEMP_MEAN, tempAir, weightAirTemp)
         LIQU_FRAC = snowLiquidFrac(snowEnergyCont, snowWaterEquiv)
 
-        !Rate expressions used multiple times
-        M_P = M_prec(precipSumMM, precipSeconds)
-
-        if(snowWaterEquiv < 0.0001 .and. tempAir > tempAir_crit) then !if no snow cover present and precipitation liquid, no addition to swe
-        M_P = 0.
+        !Mass fluxes
+        flux_M_prec = M_prec(precipSumMM, precipSeconds)
+        !if no snow cover present (<0.1mm) and precipitation liquid, no addition to swe
+        if(snowWaterEquiv < 0.0001 .and. tempAir > tempAir_crit) then
+        flux_M_prec = 0.
         end if
+        flux_M_subl = M_subl(TEMP_SURF, tempAir, pressAir, relHumid, windSpeed, a0, a1, snowWaterEquiv)
+        flux_M_flow = M_flow(LIQU_FRAC, kSatSnow, densDrySnow, specCapRet, snowWaterEquiv)
 
-        M_S = M_subl(TEMP_SURF, tempAir, pressAir, relHumid, windSpeed, a0, a1, snowWaterEquiv)
-        M_F = M_flow(LIQU_FRAC, kSatSnow, densDrySnow, specCapRet, snowWaterEquiv)
+        !Radiation fluxes
+        flux_R_netS = R_netS(shortRad, albedo, snowWaterEquiv)
+        flux_R_netL = R_netL(TEMP_SURF, emissivitySnowMin, emissivitySnowMax, tempAir, relHumid, &
+                            cloudCoverage, albedo, albedoMin, albedoMax, snowWaterEquiv)
+        flux_R_soil = R_soil()
+        flux_R_sens = R_sens(TEMP_SURF, tempAir, pressAir, windSpeed, a0, a1, snowWaterEquiv)
+
+        !Stochiometry factors
+        stoi_f_prec = f_prec(tempAir, tempAir_crit)
+        stoi_f_subl = f_subl()
+        stoi_f_flow = f_flow()
+
+        !Other rates
+        rate_G_alb = G_alb(albedo, precipSumMM, precipSeconds, tempAir, tempAir_crit, albedoMin, &
+                          albedoMax, agingRate_tAirPos, agingRate_tAirNeg, snowWaterEquiv)
+        !snowCover  = snowDepl(snowWaterEquiv)
 
         !Computation of derivatives
         ddt_sec = 0.001 * (R_netS(snowWaterEquiv, shortRad, albedo) + &
@@ -633,112 +661,21 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
                            cloudCoverage, albedo, albedoMin, albedoMax, snowWaterEquiv) + &
                            R_soil() + &
                            R_sens(TEMP_SURF, tempAir, pressAir, windSpeed, a0, a1, snowWaterEquiv)) + &
-                           f_prec(tempAir,tempAir_crit) * M_P - &
-                           f_subl() * M_S - &
-                           f_flow() * M_F
-        ddt_swe = M_P - M_S - M_F
+                           f_prec(tempAir,tempAir_crit) * flux_M_prec - &
+                           f_subl() * flux_M_subl - &
+                           f_flow() * flux_M_flow
+
+        ddt_swe = flux_M_prec - flux_M_subl - flux_M_flow
+
         ddt_alb = G_alb(albedo, precipSumMM, precipSeconds, tempAir, tempAir_crit, albedoMin, albedoMax, &
                         agingRate_tAirPos, agingRate_tAirNeg, snowWaterEquiv)
-        flux_melt = M_F
-        flux_subl = M_S
 
-        res = (/ ddt_sec, ddt_swe, ddt_alb, flux_melt, flux_subl/)
+        !Collect output
+        snowModelRes = (/ ddt_sec,     ddt_swe,     ddt_alb,     flux_M_flow, flux_M_subl, flux_M_prec, &
+                          TEMP_MEAN,   TEMP_SURF,   LIQU_FRAC,   flux_R_netS, flux_R_netL, flux_R_soil, &
+                          flux_R_sens, stoi_f_prec, stoi_f_subl, stoi_f_flow, rate_G_alb/)
 
-     end function snowModel_derivs
+     end function f_snowModel
 
-
-
-     !--------------------------------------------------------------------------------------------
-     !Function to return the fundamental variables of the snow model
-     !(for debugging purposes and in-depth analyses of the behaviour)
-     !--------------------------------------------------------------------------------------------
-
-     function snowModel_debug(precipSumMM, shortRad, tempAir, pressAir, relHumid, windSpeed, cloudCoverage, &
-                              precipSeconds, a0, a1, kSatSnow, densDrySnow, SpecCapRet, emissivitySnowMin, &
-                              emissivitySnowMax, tempAir_crit, albedoMin, albedoMax, agingRate_tAirPos, &
-                              agingRate_tAirNeg, soilDepth, soilDens, soilSpecHeat, weightAirTemp, &
-                              snowEnergyCont, snowWaterEquiv, albedo) result(res)
-        !Inputs
-        !Part 1: Forcings
-        real :: precipSumMM
-        real :: shortRad
-        real :: tempAir
-        real :: pressAir
-        real :: relHumid
-        real :: windSpeed
-        real :: cloudCoverage
-
-        !Part 2: Parameters
-        real :: precipSeconds
-        real :: a0
-        real :: a1
-        real :: kSatSnow
-        real :: densDrySnow
-        real :: SpecCapRet
-        real :: emissivitySnowMin
-        real :: emissivitySnowMax
-        real :: tempAir_crit
-        real :: albedoMin
-        real :: albedoMax
-        real :: agingRate_tAirPos
-        real :: agingRate_tAirNeg
-        real :: soilDepth
-        real :: soilDens
-        real :: soilSpecHeat
-        real :: weightAirTemp
-
-        !Part 3: States
-        real :: snowEnergyCont
-        real :: snowWaterEquiv
-        real :: albedo
-
-        !Outputs
-        real :: TEMP_MEAN
-        real :: TEMP_SURF
-        real :: LIQU_FRAC
-        real :: flux_R_netS
-        real :: flux_R_netL
-        real :: flux_R_soil
-        real :: flux_R_sens
-        real :: stoi_f_prec
-        real :: stoi_f_subl
-        real :: stoi_f_flow
-        real :: flux_M_prec
-        real :: flux_M_subl
-        real :: flux_M_flow
-        real :: rate_G_alb
-        real, dimension(:), allocatable :: res
-
-        !Derived variables
-        TEMP_MEAN= snowTemp_mean(snowEnergyCont, snowWaterEquiv, soilDepth, soilDens, soilSpecHeat)
-        TEMP_SURF= snowTemp_surf(TEMP_MEAN, tempAir, weightAirTemp)
-        LIQU_FRAC= snowLiquidFrac(snowEnergyCont, snowWaterEquiv)
-
-        !Mass fluxes
-        flux_M_prec= M_prec(precipSumMM, precipSeconds)
-        flux_M_subl= M_subl(TEMP_SURF, tempAir, pressAir, relHumid, windSpeed, a0, a1, snowWaterEquiv)
-        flux_M_flow= M_flow(LIQU_FRAC, kSatSnow, densDrySnow, specCapRet, snowWaterEquiv)
-
-        !Radiation fluxes
-        flux_R_netS= R_netS(shortRad, albedo, snowWaterEquiv)
-        flux_R_netL= R_netL(TEMP_SURF, emissivitySnowMin, emissivitySnowMax, tempAir, relHumid, &
-                            cloudCoverage, albedo, albedoMin, albedoMax, snowWaterEquiv)
-        flux_R_soil= R_soil()
-        flux_R_sens= R_sens(TEMP_SURF, tempAir, pressAir, windSpeed, a0, a1, snowWaterEquiv)
-
-        !Stochiometry factors
-        stoi_f_prec= f_prec(tempAir, tempAir_crit)
-        stoi_f_subl= f_subl()
-        stoi_f_flow= f_flow()
-
-        !Other rates
-        rate_G_alb= G_alb(albedo, precipSumMM, precipSeconds, tempAir, tempAir_crit, albedoMin, &
-                          albedoMax, agingRate_tAirPos, agingRate_tAirNeg, snowWaterEquiv)
-
-        res = (/TEMP_MEAN, TEMP_SURF, LIQU_FRAC, flux_M_prec, flux_M_subl, flux_M_flow, &
-                flux_R_netS, flux_R_netL, flux_R_soil, flux_R_sens, &
-                stoi_f_prec, stoi_f_subl, stoi_f_flow, rate_G_alb/)
-
-     end function snowModel_debug
 
 end subroutine snow_compute

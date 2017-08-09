@@ -85,7 +85,7 @@ SUBROUTINE readgen(path2do_dat)
 
 
     if (trim(path2do_dat)=='') then
-        path2do_dat='U:/testBase/Input/do_testBaseMin.dat'			!Till: use default, if no command line argument was specified
+        path2do_dat='U:/dataBase/Input/do_testBaseMin.dat'			!Till: use default, if no command line argument was specified
         custompath=''
     else
         write(*,*)'reading runtime parameters from ',path2do_dat
@@ -330,6 +330,7 @@ SUBROUTINE readgen(path2do_dat)
     f_snowEnergyCont=.FALSE.
     f_snowWaterEquiv=.FALSE.
     f_snowAlbedo=.FALSE.
+    f_snowCover=.FALSE.
     f_snowTemp=.FALSE.
     f_surfTemp=.FALSE.
     f_liquFrac=.FALSE.
@@ -424,6 +425,8 @@ SUBROUTINE readgen(path2do_dat)
                     f_snowWaterEquiv=.TRUE. .AND. (dosnow /= 0)
                 CASE ('snowalbedo')
                     f_snowAlbedo=.TRUE. .AND. (dosnow /= 0)
+                CASE ('snowcover')
+                    f_snowCover=.TRUE. .AND. (dosnow /= 0)
                 CASE ('snowtemp')
                     f_snowTemp=.TRUE. .AND. (dosnow /= 0)
                 CASE ('surftemp')
@@ -436,9 +439,9 @@ SUBROUTINE readgen(path2do_dat)
                     f_fluxSubl=.TRUE. .AND. (dosnow /= 0)
                 CASE ('fluxflow')
                     f_fluxFlow=.TRUE. .AND. (dosnow /= 0)
-                CASE ('fluxnetS')
+                CASE ('fluxnets')
                     f_fluxNetS=.TRUE. .AND. (dosnow /= 0)
-                CASE ('fluxnetL')
+                CASE ('fluxnetl')
                     f_fluxNetL=.TRUE. .AND. (dosnow /= 0)
                 CASE ('fluxsoil')
                     f_fluxSoil=.TRUE. .AND. (dosnow /= 0)

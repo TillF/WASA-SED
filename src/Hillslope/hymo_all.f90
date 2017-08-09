@@ -585,8 +585,7 @@ SUBROUTINE hymo_all(STATUS)
         CALL open_subdaily_output_TC(f_snowEnergyCont,'snowEnergyCont.out','Output file TC-wise snow temperature (°C)')
         CALL open_subdaily_output_TC(f_snowWaterEquiv,'snowWaterEquiv.out','Output file TC-wise snow surface temperature (°C)')
         CALL open_subdaily_output_TC(f_snowAlbedo,'snowAlbedo.out','Output file TC-wise fraction of liquid water (-)')
-
-
+        CALL open_subdaily_output_TC(f_snowCover,'snowCover.out','Output file TC-wise fraction of liquid water (-)')
 
         CALL open_subdaily_output_TC(f_snowTemp,'snowTemp.out','Output file TC-wise snow temperature (°C)')
         CALL open_subdaily_output_TC(f_surfTemp,'surfTemp.out','Output file TC-wise snow surface temperature (°C)')
@@ -656,6 +655,14 @@ SUBROUTINE hymo_all(STATUS)
 
         if (do_pre_outflow) then        !if water outflow from upstream subbasins is given
             call read_pre_subbas_outflow        !read
+        end if
+
+        if(dprev >= 365) then
+
+        snowEnergyCont(1, 1, : ) = snowEnergyCont(dprev, nt, : )
+        snowWaterEquiv(1, 1, : ) = snowWaterEquiv(dprev, nt, : )
+        snowAlbedo    (1, 1, : ) = snowAlbedo    (dprev, nt, : )
+
         end if
 
     END IF
@@ -1391,6 +1398,7 @@ SUBROUTINE hymo_all(STATUS)
         CALL write_subdaily_output_TC(f_snowEnergyCont,'snowEnergyCont.out', snowEnergyCont)
         CALL write_subdaily_output_TC(f_snowWaterEquiv,'snowWaterEquiv.out', snowWaterEquiv)
         CALL write_subdaily_output_TC(f_snowAlbedo,'snowAlbedo.out', snowAlbedo)
+        CALL write_subdaily_output_TC(f_snowCover,'snowCover.out', snowCover)
         CALL write_subdaily_output_TC(f_snowTemp,'snowTemp.out', snowTemp)
         CALL write_subdaily_output_TC(f_surfTemp,'surfTemp.out', surfTemp)
         CALL write_subdaily_output_TC(f_liquFrac,'liquFrac.out', liquFrac)
