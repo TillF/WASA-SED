@@ -173,7 +173,6 @@
     use climo_h
     use snow_h
 
-
     IMPLICIT NONE
 
 
@@ -216,10 +215,10 @@
     REAL, INTENT(OUT)				     :: sed_out_tc(n_sed_class)
     REAL, INTENT(IN)                     :: q_rill_in !rill flow entering TC from uphill
 
-    !INTEGER                              :: hh2 !internal copy of hh
-    REAL                                 :: prec       !precipitation potentially modified in snow module
+    REAL                                 :: prec        !precipitation potentially modified in snow module
     REAL                                 :: temperature !temperature of current time step
-    REAL                                 :: radiation !temperature of current time step
+    REAL                                 :: radiation   !temperature of current time step
+    REAL                                 :: cloudFrac   !cloudiness fraction
 
     logical :: isnan
     !** Soil water model for terrain component (TC)
@@ -904,7 +903,7 @@
     !Subroutine to modify meteo-drivers according to location
     !Preparation before feeding the snow model
 
-    call snow_prepare_input(hh, day, i_subbas2, lu_counter2, tc_counter2, prec, temperature, rad(day,i_subbas2))
+    call snow_prepare_input(hh, day, i_subbas2, lu_counter2, tc_counter2, prec, temperature, radiation, cloudFrac)
 
 
     !Subroutine calculating the dynamics of the snow cover
@@ -913,7 +912,7 @@
     !Cloud cover set to 0.5 for now; still to calculate (see also etp_max.f90)
 
     if(dohour) then
-      call snow_compute(prec, temperature, radiation, 1000., rhum(day,i_subbas2), wind(day,i_subbas2), 0.5, &
+      call snow_compute(prec, temperature, radiation, 1000., rhum(day,i_subbas2), wind(day,i_subbas2), cloudFrac, &
                       snowEnergyCont(day, max(1,hh-1), tcid_instance2), snowWaterEquiv(day,  max(1,hh-1), tcid_instance2), &
                       snowAlbedo(day,  max(1,hh-1), tcid_instance2), snowEnergyCont(day, hh, tcid_instance2), snowWaterEquiv(day, hh, tcid_instance2), &
                       snowAlbedo(day, hh, tcid_instance2), snowCover(day, hh-1, tcid_instance2), snowTemp(day, hh, tcid_instance2), &
@@ -931,7 +930,7 @@
      else
 
      !daily
-     call snow_compute(prec, temperature, radiation, 1000., rhum(day,i_subbas2), wind(day,i_subbas2), 0.5, &
+     call snow_compute(prec, temperature, radiation, 1000., rhum(day,i_subbas2), wind(day,i_subbas2), cloudFrac, &
                       snowEnergyCont(max(1,day-1), max(1,hh-1), tcid_instance2), snowWaterEquiv(max(1,day-1),  max(1,hh-1), tcid_instance2), &
                       snowAlbedo(max(1,day-1),  max(1,hh-1), tcid_instance2), snowEnergyCont(day, hh, tcid_instance2), snowWaterEquiv(day, hh, tcid_instance2), &
                       snowAlbedo(day, hh, tcid_instance2), snowCover(day, hh, tcid_instance2), snowTemp(day, hh, tcid_instance2), &

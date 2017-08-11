@@ -3,6 +3,7 @@ module snow_h
     use common_h
     use snow_params
     use hymo_h
+    use climo_h
 
     save
 
@@ -35,22 +36,37 @@ module snow_h
 contains
 
     !Modification of meteo-drivers according to time and location
-    SUBROUTINE snow_prepare_input(hh, day, sb_counter, lu_counter2, tc_counter2, prec_mod, temp_mod, rad_mod)
+    SUBROUTINE snow_prepare_input(hh, day, sb_counter, lu_counter2, tc_counter2, prec_mod, temp_mod, rad_mod, cloudFrac)
         
         implicit none
 
         integer, intent(IN)                  :: hh, day, sb_counter, lu_counter2, tc_counter2
         real,    intent(INOUT)               :: prec_mod, temp_mod, rad_mod
+        real,    intent(INOUT)               :: cloudFrac !cloudiness fraction
 
         real                                 :: lapse_prec = 0.
         real                                 :: lapse_temp = 0.
         real                                 :: lapse_rad  = 0.
 
+        !Calculations based on approach included by developer Andreas Güntner (see etp_max.f90)
+        !Calculations according to Shuttleworth (1992) Handbook of Hydrology, Chapter 4
+        !IMPORTANT: nn does not equal cloudFrac => nn = 1-cloudFrac
+        cloudFrac = 1 - (rad_mod/radex(day)/0.55-0.18/0.55)
+        cloudFrac = MAX(0.0,cloudFrac)
+        cloudFrac = MIN(1.0,cloudFrac)
+        !Angstrom coefficients:
+        !0.18 (fraction of extratesetrial radiation on overcast day)
+        !0.55+0.18 (fraction of extraterestrial radiation on clear days)
+
         !simple, lapse-rate-based modification of meteo-drivers
         prec_mod = prec_mod + lapse_prec * rel_elevation(tcallid(sb_counter, lu_counter2, tc_counter2))
         temp_mod = temp_mod + lapse_temp * rel_elevation(tcallid(sb_counter, lu_counter2, tc_counter2))
         rad_mod  = rad_mod  + lapse_rad  * rel_elevation(tcallid(sb_counter, lu_counter2, tc_counter2))
+
         !Here modification radiation with time, aspect,...
+        !...
+
+
     END SUBROUTINE snow_prepare_input
 
 end module snow_h
