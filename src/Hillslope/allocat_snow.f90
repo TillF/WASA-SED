@@ -17,6 +17,16 @@
     allocate(rel_elevation(nterrain), STAT = istate)
     idummy = istate + idummy
 
+    if (f_precipMod) then
+    allocate(precipMod(366,nt,ntcinst), STAT = istate)
+    end if
+    idummy = istate + idummy
+
+    if (f_cloudFrac) then
+    allocate(cloudFrac(366,nt,ntcinst), STAT = istate)
+    end if
+    idummy = istate + idummy
+
     if (f_snowTemp) then
     allocate(snowTemp(366,nt,ntcinst), STAT = istate)
     end if
@@ -103,14 +113,24 @@
 
     DO i_lu=1,nsoter
         temp2 = 0. !cumulative elevation of downslope TCs
-        DO tc_counter=1,nbrterrain(i_lu) 
-           rel_elevation(id_terrain_intern(tc_counter,i_lu)) = fracterrain(tc_counter)*slope(tc_counter)*slope(tc_counter)/2 + &   !centre of TC plus ...
-                                                            temp2  ! cumulative downslope elevation
+
+       DO tc_counter=1,nbrterrain(i_lu)
+           !Relative elevation of center TC
+           !Note: slope(tc_counter) in %
+           rel_elevation(id_terrain_intern(tc_counter,i_lu)) = temp2 + slength(i_lu)*fracterrain(tc_counter)*slope(tc_counter)/100/2
+
+           temp2 = temp2 + slength(i_lu)*fracterrain(tc_counter)*slope(tc_counter)/100 !cumulate y-extent TCs
+
+           !rel_elevation(id_terrain_intern(tc_counter,i_lu)) = fracterrain(tc_counter)*slope(tc_counter)*slope(tc_counter)/2 + &   !centre of TC plus ...
+           !                                                 temp2  ! cumulative downslope elevation
            !temp1 = temp1 + slength(i_lu)*fracterrain(tc_counter)  ! cumulate downslope x-extent
-           temp2 = temp2 + slength(i_lu)*fracterrain(tc_counter)*slope(tc_counter) ! cumulate downslope y-extent
+           !temp2 = temp2 + slength(i_lu)*fracterrain(tc_counter)*slope(tc_counter) ! cumulate downslope y-extent
        END DO
-        DO tc_counter=1,nbrterrain(i_lu)
-           rel_elevation(id_terrain_intern(tc_counter,i_lu)) = temp2 / 2. !"normalize" to 0 as the mean elevation of the LU
+
+       DO tc_counter=1,nbrterrain(i_lu)
+
+           rel_elevation(id_terrain_intern(tc_counter,i_lu)) = rel_elevation(id_terrain_intern(tc_counter,i_lu)) - (temp2 / 2.) !"normalize" to middle elevation of the LU
+
        END DO
 
     END DO

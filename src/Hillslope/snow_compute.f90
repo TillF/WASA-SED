@@ -2,7 +2,8 @@
 subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, windSpeed, cloudCoverage, &
                         snowEnergyCont, snowWaterEquiv, albedo, snowEnergyCont_new, snowWaterEquiv_new, albedo_new, &
                         snowCover, TEMP_MEAN, TEMP_SURF, LIQU_FRAC, flux_M_prec, flux_M_subl, flux_M_flow, flux_R_netS, &
-                        flux_R_netL, flux_R_soil, flux_R_sens, stoi_f_prec, stoi_f_subl, stoi_f_flow, rate_G_alb)
+                        flux_R_netL, flux_R_soil, flux_R_sens, stoi_f_prec, stoi_f_subl, stoi_f_flow, rate_G_alb, &
+                        precipMod, cloudFrac)
 
     use snow_params
 
@@ -23,7 +24,10 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
     REAL, INTENT(OUT)     ::      snowEnergyCont_new      !Snow energy content (kJ/m2)
     REAL, INTENT(OUT)     ::      snowWaterEquiv_new      !Snow water equivalent (m)
     REAL, INTENT(OUT)     ::      albedo_new              !Albedo (-)
+
     REAL, INTENT(OUT)     ::      snowCover               !Snow cover (-)
+    REAL, INTENT(OUT)     ::      precipMod               !Precipitation modified by snow module [mm] (collect for debugging purposes)
+    REAL, INTENT(OUT)     ::      cloudFrac               !cloud fraction caclulated based on radiation [-] (collect for debugging purposes)
 
     REAL, DIMENSION(1:18) ::      snowResults             !array to collect results of calculations
 
@@ -74,6 +78,10 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
     stoi_f_subl     =     snowResults(15)
     stoi_f_flow     =     snowResults(16)
     rate_G_alb      =     snowResults(17)
+
+    if(tempAir > 4.5) then
+    print*, 'tempAir > 4.5'
+    end if
 
 
        !Case rain on snow
@@ -129,7 +137,9 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
       precipSumMM = snowWaterEquiv*1000 +precipSumMM
     end if
 
-    snowCover  = snowDepl(snowWaterEquiv_new)
+    snowCover  =  snowDepl(snowWaterEquiv_new)
+    precipMod  =  precipSumMM
+    cloudFrac  =  cloudCoverage
 
     contains
 

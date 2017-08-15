@@ -582,8 +582,8 @@ SUBROUTINE hymo_all(STATUS)
         end if
         
         !TC-wise output
-        CALL open_subdaily_output_TC(f_snowEnergyCont,'snowEnergyCont.out','Output file TC-wise snow temperature (°C)')
-        CALL open_subdaily_output_TC(f_snowWaterEquiv,'snowWaterEquiv.out','Output file TC-wise snow surface temperature (°C)')
+        CALL open_subdaily_output_TC(f_snowEnergyCont,'snowEnergyCont.out','Output file TC-wise snow energy content (kJ/m2)')
+        CALL open_subdaily_output_TC(f_snowWaterEquiv,'snowWaterEquiv.out','Output file TC-wise snow water equivalent (m)')
         CALL open_subdaily_output_TC(f_snowAlbedo,'snowAlbedo.out','Output file TC-wise fraction of liquid water (-)')
         CALL open_subdaily_output_TC(f_snowCover,'snowCover.out','Output file TC-wise fraction of liquid water (-)')
 
@@ -600,7 +600,9 @@ SUBROUTINE hymo_all(STATUS)
         CALL open_subdaily_output_TC(f_stoiPrec,'stoiPrec.out','Output file TC-wise conversion precipitation mass flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3')
         CALL open_subdaily_output_TC(f_stoiSubl,'stoiSubl.out','Output file TC-wise conversion of sublimation flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3')
         CALL open_subdaily_output_TC(f_stoiFlow,'stoiFlow.out','Output file TC-wise conversion of meltwater flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3')
-        CALL open_subdaily_output_TC(f_rateAlbe,'rateAlbe.out','Output file TC-wise change rate of albedo (1/s')
+        CALL open_subdaily_output_TC(f_rateAlbe,'rateAlbe.out','Output file TC-wise change rate of albedo (1/s)')
+        CALL open_subdaily_output_TC(f_precipMod,'precipMod.out','Output file TC-wise precipitation modified by snow module (mm)')
+        CALL open_subdaily_output_TC(f_cloudFrac,'cloudFrac.out','Output file TC-wise cloud fraction (-)')
 
     END IF
 
@@ -1413,6 +1415,8 @@ SUBROUTINE hymo_all(STATUS)
         CALL write_subdaily_output_TC(f_stoiSubl,'stoiSubl.out', stoiSubl)
         CALL write_subdaily_output_TC(f_stoiFlow,'stoiFlow.out', stoiFlow)
         CALL write_subdaily_output_TC(f_rateAlbe,'rateAlbe.out', rateAlbe)
+        CALL write_subdaily_output_TC(f_precipMod,'precipMod.out', precipMod)
+        CALL write_subdaily_output_TC(f_cloudFrac,'cloudFrac.out', cloudFrac)
 
                 
         !conrad: output of theta [%] for each tc from theta_tc

@@ -345,6 +345,8 @@ SUBROUTINE readgen(path2do_dat)
     f_stoiSubl=.FALSE.
     f_stoiFlow=.FALSE.
     f_rateAlbe=.FALSE.
+    f_precipMod=.FALSE.
+    f_cloudFrac=.FALSE.
 
     f_res_watbal=.FALSE.
     f_res_vollost=.FALSE.
@@ -455,6 +457,10 @@ SUBROUTINE readgen(path2do_dat)
                     f_stoiFlow=.TRUE. .AND. (dosnow /= 0)
                 CASE ('ratealbe')
                     f_rateAlbe=.TRUE. .AND. (dosnow /= 0)
+                CASE ('precipmod')
+                    f_precipMod=.TRUE. .AND. (dosnow /= 0)
+                CASE ('cloudfrac')
+                    f_cloudFrac=.TRUE. .AND. (dosnow /= 0)
 
                 CASE ('river_degradation')
                     f_river_degradation=dosediment

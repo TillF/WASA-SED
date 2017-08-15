@@ -1705,7 +1705,7 @@ if (dosediment) then
 !    allocate (cum_deposition_TC(subasin,nterrain))
 
     if (dosnow /= 0) then
-    INCLUDE '../Hillslope/allocat_snow.var'
+    INCLUDE '../Hillslope/allocat_snow.f90'
     end if
 
 

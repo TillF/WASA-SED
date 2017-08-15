@@ -9,8 +9,8 @@ module snow_h
 
     !SNOW MODULE
 
-    real, pointer :: snowEnergyCont(:,:,:)         !Snow energy content [-]
-    real, pointer :: snowWaterEquiv(:,:,:)         !Snow water equivalent [-]
+    real, pointer :: snowEnergyCont(:,:,:)         !Snow energy content [kJ/m²]
+    real, pointer :: snowWaterEquiv(:,:,:)         !Snow water equivalent [m]
     real, pointer :: snowAlbedo(:,:,:)             !Albedo [-]
 
     real, pointer :: snowCover(:,:,:)              !Snow cover [-]
@@ -38,27 +38,28 @@ module snow_h
 contains
 
     !Modification of meteo-drivers according to time and location
-    SUBROUTINE snow_prepare_input(hh, day, sb_counter, lu_counter2, tc_counter2, prec_mod, temp_mod, rad_mod, cloudFrac)
+    SUBROUTINE snow_prepare_input(hh, day, sb_counter, lu_counter2, tc_counter2, prec_mod, temp_mod, rad_mod, cloudFraction)
         
         implicit none
 
         integer, intent(IN)                  :: hh, day, sb_counter, lu_counter2, tc_counter2
         real,    intent(INOUT)               :: prec_mod, temp_mod, rad_mod
-        real,    intent(INOUT)               :: cloudFrac !cloudiness fraction
+        real,    intent(INOUT)               :: cloudFraction !cloudiness fraction
 
         real                                 :: lapse_prec = 0.
-        real                                 :: lapse_temp = 0.
+        real                                 :: lapse_temp = -0.65/100
         real                                 :: lapse_rad  = 0.
 
         !Calculations based on approach included by developer Andreas Güntner (see etp_max.f90)
         !Calculations according to Shuttleworth (1992) Handbook of Hydrology, Chapter 4
         !IMPORTANT: nn does not equal cloudFrac => nn = 1-cloudFrac
-        cloudFrac = 1 - (rad_mod/radex(day)/0.55-0.18/0.55)
-        cloudFrac = MAX(0.0,cloudFrac)
-        cloudFrac = MIN(1.0,cloudFrac)
+        cloudFraction = 1 - (rad_mod/radex(day)/0.55-0.18/0.55)
+        cloudFraction = MAX(0.0,cloudFraction)
+        cloudFraction = MIN(1.0,cloudFraction)
 
-!!!CLOUD FRACTION SET TO 0.5!!!
-        cloudFrac = 0.5
+        !!!CLOUD FRACTION SET TO 0.5!!!
+        cloudFraction = 0.5
+
         !Angstrom coefficients:
         !0.18 (fraction of extratesetrial radiation on overcast day)
         !0.55+0.18 (fraction of extraterestrial radiation on clear days)
