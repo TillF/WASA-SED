@@ -85,7 +85,7 @@ SUBROUTINE readgen(path2do_dat)
 
 
     if (trim(path2do_dat)=='') then
-        path2do_dat='U:/dataBase/Input/do_testBaseMin.dat'			!Till: use default, if no command line argument was specified
+        path2do_dat='U:/dataBase/Input/do_Cabecera.dat'			!Till: use default, if no command line argument was specified
         custompath=''
     else
         write(*,*)'reading runtime parameters from ',path2do_dat

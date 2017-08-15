@@ -909,7 +909,7 @@
     !Subroutine calculating the dynamics of the snow cover
     !(Wind currently not read from input file; assumed constant wind = 1; see climo.f90)
     !Air pressure for now set to 10000 hPa
-    !Cloud cover set to 0.5 for now; still to calculate (see also etp_max.f90)
+    !!!CLOUD FRACTION SET TO 0.5; see snow_h.f90 subroutine snow_prepare_input()!!!
 
     if(dohour) then
       call snow_compute(prec, temperature, radiation, 1000., rhum(day,i_subbas2), wind(day,i_subbas2), cloudFrac, &
@@ -939,11 +939,6 @@
                       fluxSoil(day, hh, tcid_instance2), fluxSens(day, hh, tcid_instance2), stoiPrec(day, hh, tcid_instance2), &
                       stoiSubl(day, hh, tcid_instance2), stoiFlow(day, hh, tcid_instance2), rateAlbe(day, hh, tcid_instance2))
     end if
-
-
-   !How to get into the next year???!!!
-   !Snow 'lost' at turn of the year
-
 
     end if
 

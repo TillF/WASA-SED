@@ -9,11 +9,13 @@ module snow_h
 
     !SNOW MODULE
 
-    real, pointer :: snowEnergyCont(:,:,:)         !Snow energy content (kJ/m2)
-    real, pointer :: snowWaterEquiv(:,:,:)         !Snow water equivalent (m)
-    real, pointer :: snowAlbedo(:,:,:)             !Albedo (-)
-    real, pointer :: snowCover(:,:,:)              !Snow cover (-)
+    real, pointer :: snowEnergyCont(:,:,:)         !Snow energy content [-]
+    real, pointer :: snowWaterEquiv(:,:,:)         !Snow water equivalent [-]
+    real, pointer :: snowAlbedo(:,:,:)             !Albedo [-]
 
+    real, pointer :: snowCover(:,:,:)              !Snow cover [-]
+    real, pointer :: precipMod(:,:,:)              !Precipitation signal modified by snow module [mm]
+    real, pointer :: cloudFrac(:,:,:)              !Cloud fraction [-]
     real, pointer :: rel_elevation(:)              !Relative elevation of TC above foot of toposequence/LU (i.e. river) [m]
 
     real, pointer :: snowTemp(:,:,:)               !Mean temperatur of the snow pack [°C]
@@ -54,6 +56,9 @@ contains
         cloudFrac = 1 - (rad_mod/radex(day)/0.55-0.18/0.55)
         cloudFrac = MAX(0.0,cloudFrac)
         cloudFrac = MIN(1.0,cloudFrac)
+
+!!!CLOUD FRACTION SET TO 0.5!!!
+        cloudFrac = 0.5
         !Angstrom coefficients:
         !0.18 (fraction of extratesetrial radiation on overcast day)
         !0.55+0.18 (fraction of extraterestrial radiation on clear days)

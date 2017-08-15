@@ -1573,7 +1573,8 @@ contains
         IF (f_flag) THEN    !if output file is enabled
             OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old',POSITION='append')
 
-            fmtstr ='(6(i0,a),'//fmt_str(maxval(value_array))//')'        !generate format string
+            !fmtstr ='(6(i0,a),'//fmt_str(maxval(value_array)*10)//')'        !generate format string
+             fmtstr ='(6(i0,a),E12.5)'        !generate format string
 
             DO d=1,dayyear
                 DO j=1,nt
@@ -1584,8 +1585,9 @@ contains
                                WRITE (11,fmtstr)t, char(9), d, char(9), j, &
                                     char(9), id_subbas_extern(sb_counter), &
                                     char(9), id_lu_extern(lu_counter), &
-                                    char(9), id_terrain_extern(tc_counter), &
-                                char(9),value_array(d,j,tcallid(sb_counter, lu_counter,tc_counter))
+                                    !char(9), id_terrain_extern(tc_counter), &
+                                    char(9), id_terrain_extern(id_terrain_intern(tc_counter,i_lu)), &
+                                char(9),value_array(d,j,tcallid(sb_counter, lu_counter, tc_counter))
                             END DO
                         END DO
                     END DO
@@ -1594,7 +1596,6 @@ contains
             CLOSE(11)
         END IF
     END SUBROUTINE write_subdaily_output_TC
-
 
 
 END SUBROUTINE hymo_all
