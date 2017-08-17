@@ -6,6 +6,8 @@
              snowWaterEquiv(366,nt,ntcinst), &
              snowAlbedo    (366,nt,ntcinst), &
              snowCover     (366,nt,ntcinst), &
+             precipMod     (366,nt,ntcinst), &
+             precipBal     (366,nt,ntcinst), &
              STAT = istate)
     idummy = istate + idummy
 
@@ -17,10 +19,10 @@
     allocate(rel_elevation(nterrain), STAT = istate)
     idummy = istate + idummy
 
-    if (f_precipMod) then
-    allocate(precipMod(366,nt,ntcinst), STAT = istate)
-    end if
-    idummy = istate + idummy
+    !if (f_precipMod) then
+    !allocate(precipMod(366,nt,ntcinst), STAT = istate)
+    !end if
+    !idummy = istate + idummy
 
     if (f_cloudFrac) then
     allocate(cloudFrac(366,nt,ntcinst), STAT = istate)

@@ -219,6 +219,7 @@
     REAL                                 :: temperature !temperature of current time step
     REAL                                 :: radiation   !temperature of current time step
     REAL                                 :: cloudFraction   !cloudiness fraction
+    REAL                                 :: precipBalance   !Precipitation input into snow model for balance check; after prepare input!
 
     logical :: isnan
     !** Soil water model for terrain component (TC)
@@ -895,7 +896,7 @@
 
     prec          =   prec_in !this assignment necessary even if snow module not active; in steps after snow module usage of prec
     temperature   =   temp(day,i_subbas2)
-    radiation     =   rad(day, i_subbas2)
+    radiation     =   rad( day,i_subbas2)
 
 
     if(dosnow > 0) then
@@ -903,7 +904,7 @@
     !Subroutine to modify meteo-drivers according to location
     !Preparation before feeding the snow model
 
-    call snow_prepare_input(hh, day, i_subbas2, lu_counter2, tc_counter2, prec, temperature, radiation, cloudFraction)
+    call snow_prepare_input(hh, day, i_subbas2, lu_counter2, tc_counter2, prec, temperature, radiation, cloudFraction, precipBalance)
 
 
     !Subroutine calculating the dynamics of the snow cover
@@ -920,13 +921,27 @@
                       fluxFlow(day, hh, tcid_instance2), fluxNetS(day, hh, tcid_instance2), fluxNetL(day, hh, tcid_instance2), &
                       fluxSoil(day, hh, tcid_instance2), fluxSens(day, hh, tcid_instance2), stoiPrec(day, hh, tcid_instance2), &
                       stoiSubl(day, hh, tcid_instance2), stoiFlow(day, hh, tcid_instance2), rateAlbe(day, hh, tcid_instance2), &
-                      precipMod(day, hh, tcid_instance2), cloudFrac(day, hh, tcid_instance2))
+                      precipMod(day, hh, tcid_instance2), cloudFrac(day, hh, tcid_instance2), precipBal(day, hh, tcid_instance2))
 
-         if(hh ==24) then !to get into the next day; have start value
-            snowEnergyCont(day+1, 1, tcid_instance2) = snowEnergyCont(day, 24, tcid_instance2)
-            snowWaterEquiv(day+1, 1, tcid_instance2) = snowWaterEquiv(day, 24, tcid_instance2)
-            snowAlbedo    (day+1, 1, tcid_instance2) = snowAlbedo    (day, 24, tcid_instance2)
-         end if
+            !Correction via balance
+            !Precipitation in must equal precipitation out + sublimation flux + snow water equivalent
+            !probably truncation causes slight deviations
+            if( SUM(precipBal(1:day,1:hh,tcid_instance2)) /= &
+                SUM(precipMod(1:day,1:hh,tcid_instance2)) + &
+                SUM(fluxSubl(1:day,1:hh,tcid_instance2))*1000.*precipSeconds + &
+                snowWaterEquiv(day,hh,tcid_instance2)*1000. ) then
+
+                snowWaterEquiv(day,hh,tcid_instance2)  = ( SUM(precipBal(1:day,1:hh,tcid_instance2))/1000. - &
+                                                           SUM(precipMod(1:day,1:hh,tcid_instance2))/1000 - &
+                                                           SUM(fluxSubl(1:day,1:hh,tcid_instance2))*precipSeconds )
+            end if
+
+
+            if(hh ==24) then !to get into the next day; have start value
+               snowEnergyCont(day+1, 1, tcid_instance2) = snowEnergyCont(day, 24, tcid_instance2)
+               snowWaterEquiv(day+1, 1, tcid_instance2) = snowWaterEquiv(day, 24, tcid_instance2)
+               snowAlbedo    (day+1, 1, tcid_instance2) = snowAlbedo    (day, 24, tcid_instance2)
+            end if
 
      else
 
@@ -939,10 +954,26 @@
                       fluxFlow(day, hh, tcid_instance2), fluxNetS(day, hh, tcid_instance2), fluxNetL(day, hh, tcid_instance2), &
                       fluxSoil(day, hh, tcid_instance2), fluxSens(day, hh, tcid_instance2), stoiPrec(day, hh, tcid_instance2), &
                       stoiSubl(day, hh, tcid_instance2), stoiFlow(day, hh, tcid_instance2), rateAlbe(day, hh, tcid_instance2), &
-                      precipMod(day, hh, tcid_instance2), cloudFrac(day, hh, tcid_instance2))
+                      precipMod(day, hh, tcid_instance2), cloudFrac(day, hh, tcid_instance2), precipBal(day, hh, tcid_instance2))
+
+
+            !Correction via balance
+            !Precipitation in must equal precipitation out + sublimation flux + snow water equivalent
+            !probably truncation causes slight deviations
+            if( SUM(precipBal(1:day,hh,tcid_instance2)) /= &
+                SUM(precipMod(1:day,hh,tcid_instance2)) + &
+                SUM(fluxSubl(1:day,hh,tcid_instance2))*1000.*precipSeconds + &
+                snowWaterEquiv(day,hh,tcid_instance2)*1000. ) then
+
+                snowWaterEquiv(day,hh,tcid_instance2)  = ( SUM(precipBal(1:day,hh,tcid_instance2))/1000. - &
+                                                           SUM(precipMod(1:day,hh,tcid_instance2))/1000 - &
+                                                           SUM(fluxSubl(1:day,hh,tcid_instance2))*precipSeconds )
+            end if
+
     end if
 
     end if
+
 
     !** -------------------------------------------------------------------------
     !** (11) INTERCEPTION

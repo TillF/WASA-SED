@@ -16,6 +16,7 @@ module snow_h
     real, pointer :: snowCover(:,:,:)              !Snow cover [-]
     real, pointer :: precipMod(:,:,:)              !Precipitation signal modified by snow module [mm]
     real, pointer :: cloudFrac(:,:,:)              !Cloud fraction [-]
+    real, pointer :: precipBal(:,:,:)              !Precipitation input signal TC-wise for balance correction
     real, pointer :: rel_elevation(:)              !Relative elevation of TC above foot of toposequence/LU (i.e. river) [m]
 
     real, pointer :: snowTemp(:,:,:)               !Mean temperatur of the snow pack [°C]
@@ -38,13 +39,14 @@ module snow_h
 contains
 
     !Modification of meteo-drivers according to time and location
-    SUBROUTINE snow_prepare_input(hh, day, sb_counter, lu_counter2, tc_counter2, prec_mod, temp_mod, rad_mod, cloudFraction)
+    SUBROUTINE snow_prepare_input(hh, day, sb_counter, lu_counter2, tc_counter2, prec_mod, temp_mod, rad_mod, cloudFraction, precipBalance)
         
         implicit none
 
         integer, intent(IN)                  :: hh, day, sb_counter, lu_counter2, tc_counter2
         real,    intent(INOUT)               :: prec_mod, temp_mod, rad_mod
         real,    intent(INOUT)               :: cloudFraction !cloudiness fraction
+        real,    intent(INOUT)               :: precipBalance !Precipiation input signal for balance check
 
         real                                 :: lapse_prec = 0.
         real                                 :: lapse_temp = -0.65/100
@@ -68,6 +70,8 @@ contains
         prec_mod = prec_mod + lapse_prec * rel_elevation(tcallid(sb_counter, lu_counter2, tc_counter2))
         temp_mod = temp_mod + lapse_temp * rel_elevation(tcallid(sb_counter, lu_counter2, tc_counter2))
         rad_mod  = rad_mod  + lapse_rad  * rel_elevation(tcallid(sb_counter, lu_counter2, tc_counter2))
+
+        precipBalance = prec_mod
 
         !Here modification radiation with time, aspect,...
         !...
