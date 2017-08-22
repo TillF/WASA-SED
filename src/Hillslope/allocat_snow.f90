@@ -12,17 +12,12 @@
     idummy = istate + idummy
 
     !Initial values states
-    snowEnergyCont(:,:,:)     =     0.
-    snowWaterEquiv(:,:,:)     =     0.
-    snowAlbedo(:,:,:)         =     albedoMax
+    snowEnergyCont(1:366,1:nt,:)     =     0.
+    snowWaterEquiv(1:366,1:nt,:)     =     0.
+    snowAlbedo(1:366,1:nt,:)         =     albedoMax
 
     allocate(rel_elevation(nterrain), STAT = istate)
     idummy = istate + idummy
-
-    !if (f_precipMod) then
-    !allocate(precipMod(366,nt,ntcinst), STAT = istate)
-    !end if
-    !idummy = istate + idummy
 
     if (f_cloudFrac) then
     allocate(cloudFrac(366,nt,ntcinst), STAT = istate)
