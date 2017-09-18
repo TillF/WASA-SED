@@ -74,6 +74,7 @@ SUBROUTINE readgen(path2do_dat)
     use reservoir_h
     use erosion_h
     use utils_h
+    use snow_h
 
     IMPLICIT NONE
     CHARACTER (LEN=160) :: path2do_dat		!Till: path to central control file (do.dat)
@@ -279,6 +280,82 @@ SUBROUTINE readgen(path2do_dat)
             end if
         end if
     END IF !dosediments
+
+
+
+    !Parameter for snow routine
+    !Read, if present. Else using default values.
+    if (dosnow /= 0) THEN
+
+    precipSeconds     =    84600. !make dependent from time step length dt??
+    !Read parameters for snow routine
+     OPEN(12, file=pfadp(1:pfadj)// 'Hillslope\snow_params.ctl',IOSTAT=istate, STATUS='old')
+         IF (istate==0) THEN
+            READ(12,'(a)',IOSTAT=istate)dummy
+            do while (istate==0)
+                READ(12,'(a)',IOSTAT=istate)dummy
+                READ(dummy,*)dummy2
+                SELECT CASE (trim(dummy2))
+                    CASE ('a0')
+                        READ(dummy,*) dummy2, a0
+                    CASE ('a1')
+                        READ(dummy,*) dummy2, a1
+                    CASE ('kSatSnow')
+                        READ(dummy,*) dummy2, kSatSnow
+                    CASE ('densDrySnow')
+                        READ(dummy,*) dummy2, densDrySnow
+                    CASE ('specCapRet')
+                        READ(dummy,*) dummy2, specCapRet
+                    CASE ('emissivitySnowMin')
+                        READ(dummy,*) dummy2, emissivitySnowMin
+                    CASE ('emissivitySnowMax')
+                        READ(dummy,*) dummy2, emissivitySnowMax
+                    CASE ('tempAir_crit')
+                        READ(dummy,*) dummy2, tempAir_crit
+                    CASE ('albedoMin')
+                        READ(dummy,*) dummy2, albedoMin
+                    CASE ('albedoMax')
+                        READ(dummy,*) dummy2, albedoMax
+                    CASE ('agingRate_tAirPos')
+                        READ(dummy,*) dummy2, agingRate_tAirPos
+                    CASE ('agingRate_tAirNeg')
+                        READ(dummy,*) dummy2, agingRate_tAirNeg
+                    CASE ('soilDepth')
+                        READ(dummy,*) dummy2, soilDepth
+                    CASE ('soilDens')
+                        READ(dummy,*) dummy2, soilDens
+                    CASE ('soilSpecHeat')
+                        READ(dummy,*) dummy2, soilSpecHeat
+                    CASE ('weightAirTemp')
+                        READ(dummy,*) dummy2, weightAirTemp
+                END SELECT
+            end do
+     CLOSE(12)
+
+        ELSE        !snow.ctl not found
+            write(*,*)'WARNING: snow_params.ctl not found, using defaults.'
+
+                !Default values parameters for snow routine
+                a0=0.002                       !Empirical coeff. (m/s)
+                a1=0.0008                      !Empirical coeff. (-)
+                kSatSnow = 0.00004             !Saturated hydraulic conductivity of snow (m/s)
+                densDrySnow=450                !Density of dry snow (kg/m3)
+                specCapRet=0.05                !Capill. retent. vol as fraction of solid SWE (-)
+                emissivitySnowMin=0.84         !Minimum snow emissivity used for old snow (-)
+                emissivitySnowMax=0.99         !Maximum snow emissivity used for new snow (-)
+                tempAir_crit=0.2               !Threshold temp. for rain-/snowfall (°C)
+                albedoMin=0.55                 !Minimum albedo used for old snow (-)
+                albedoMax=0.88                 !Maximum albedo used for new snow (-)
+                agingRate_tAirPos=0.00000111   !Aging rate for air temperatures > 0 (1/s)
+                agingRate_tAirNeg=0.000000462  !Aging rate for air temperatures < 0 (1/s)
+                soilDepth=0.1                  !Depth of interacting soil layer (m)
+                soilDens=1300.                 !Density of soil (kg/m3)
+                soilSpecHeat=2.18              !Spec. heat capacity of soil (kJ/kg/K)
+                weightAirTemp=0.5              !Weighting param. for air temp. (-) in 0...1
+        END IF
+
+    END IF !dosnow
+
 
 !Till: read list of desired output files
     f_daily_actetranspiration=.FALSE.	!disable all output files

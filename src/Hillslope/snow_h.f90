@@ -1,13 +1,30 @@
 module snow_h
 
     use common_h
-    use snow_params
     use hymo_h
     use climo_h
 
     save
 
     !SNOW MODULE
+
+    real :: precipSeconds                          !Length of referenceInterval (seconds)
+    real :: a0                                     !Empirical coeff. (m/s)
+    real :: a1                                     !Empirical coeff. (-)
+    real :: kSatSnow                               !Saturated hydraulic conductivity of snow (m/s)
+    real :: densDrySnow                            !Density of dry snow (kg/m3)
+    real :: specCapRet                             !Capill. retent. vol as fraction of solid SWE (-)
+    real :: emissivitySnowMin                      !Minimum snow emissivity used for old snow (-)
+    real :: emissivitySnowMax                      !Maximum snow emissivity used for new snow (-)
+    real :: tempAir_crit                           !Threshold temp. for rain-/snowfall (°C)
+    real :: albedoMin                              !Minimum albedo used for old snow (-)
+    real :: albedoMax                              !Maximum albedo used for new snow (-)
+    real :: agingRate_tAirPos                      !Aging rate for air temperatures > 0 (1/s)
+    real :: agingRate_tAirNeg                      !Aging rate for air temperatures < 0 (1/s)
+    real :: soilDepth                              !Depth of interacting soil layer (m)
+    real :: soilDens                               !Density of soil (kg/m3)
+    real :: soilSpecHeat                           !Spec. heat capacity of soil (kJ/kg/K)
+    real :: weightAirTemp                          !Weighting param. for air temp. (-) in 0...1
 
     real, pointer :: snowEnergyCont(:,:,:)         !Snow energy content [kJ/m²]
     real, pointer :: snowWaterEquiv(:,:,:)         !Snow water equivalent [m]
@@ -49,15 +66,15 @@ contains
         real,    intent(INOUT)               :: precipBalance !Precipiation input signal for balance check
 
         real                                 :: lapse_prec = 0.
-        real                                 :: lapse_temp = -0.65/100
+        real                                 :: lapse_temp = -0.8/100
         real                                 :: lapse_rad  = 0.
 
         !Calculations based on approach included by developer Andreas Güntner (see etp_max.f90)
         !Calculations according to Shuttleworth (1992) Handbook of Hydrology, Chapter 4
         !IMPORTANT: nn does not equal cloudFrac => nn = 1-cloudFrac
-        cloudFraction = 1 - (rad_mod/radex(day)/0.55-0.18/0.55)
-        cloudFraction = MAX(0.0,cloudFraction)
-        cloudFraction = MIN(1.0,cloudFraction)
+        !cloudFraction = 1 - (rad_mod/radex(day)/0.55-0.18/0.55)
+        !cloudFraction = MAX(0.0,cloudFraction)
+        !cloudFraction = MIN(1.0,cloudFraction)
 
         !!!CLOUD FRACTION SET TO 0.5!!!
         cloudFraction = 0.5

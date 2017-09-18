@@ -659,14 +659,6 @@ SUBROUTINE hymo_all(STATUS)
             call read_pre_subbas_outflow        !read
         end if
 
-        if(dprev >= 365) then
-
-        snowEnergyCont(1, 1, : ) = snowEnergyCont(dprev, nt, : )
-        snowWaterEquiv(1, 1, : ) = snowWaterEquiv(dprev, nt, : )
-        snowAlbedo    (1, 1, : ) = snowAlbedo    (dprev, nt, : )
-
-        end if
-
     END IF
 
 
@@ -1417,6 +1409,17 @@ SUBROUTINE hymo_all(STATUS)
         CALL write_subdaily_output_TC(f_rateAlbe,'rateAlbe.out', rateAlbe)
         CALL write_subdaily_output_TC(f_precipMod,'precipMod.out', precipMod)
         CALL write_subdaily_output_TC(f_cloudFrac,'cloudFrac.out', cloudFrac)
+
+
+        if(dosnow >= 1 .AND. dprev >= dayyear) then
+
+        snowEnergyCont(1, 1, : ) = snowEnergyCont(dprev, nt, : )
+        snowWaterEquiv(1, 1, : ) = snowWaterEquiv(dprev, nt, : )
+        snowAlbedo    (1, 1, : ) = snowAlbedo    (dprev, nt, : )
+
+        end if
+
+
 
                 
         !conrad: output of theta [%] for each tc from theta_tc
