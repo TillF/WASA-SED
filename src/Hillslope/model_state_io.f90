@@ -10,7 +10,7 @@ module model_state_io
 
     !Jose Miguel: added the initialization of river_storage from the river_storage.stat file.
     !2013-01-14
- 
+
     !Jose Miguel: added code to save additional state variable r_storage, which represents the volume stored in the river chanel at the end of the model run. It is stored in river_storage.stat
     !2012-12-05
 
@@ -72,8 +72,8 @@ contains
     implicit none
     logical, intent(in) :: backup_files
     logical, intent(in) :: start
-        
-        if (.not. dosavestate) return    
+
+        if (.not. dosavestate) return
             !keep files with initial conditions (if existing), save new summary on initial storages
         CALL save_all_conds(&
         rename_or_return('soil_moisture.stat'        , backup_files),&
@@ -84,7 +84,7 @@ contains
         rename_or_return('sediment_storage.stat'     , backup_files),&
         rename_or_return('susp_sediment_storage.stat', backup_files),&
         trim(pfadn)//'storage.stats', start)        !Till: save only summary on initial storage
-        
+
     contains
     function rename_or_return(src, backup)
     !creates a backup of the existing file, if backup=TRUE and the file exists and returns '' (so save_all_conds doesn't treat this file).
@@ -94,13 +94,13 @@ contains
         LOGICAL, intent(in) :: backup
         character(len=len(src)+len(trim(pfadn))) :: rename_or_return
         LOGICAL :: file_exists
-        
+
         rename_or_return = trim(pfadn)//src !default: return name of file
         if (.not. backup) return !no backup requested
-        
-        INQUIRE(FILE=src, EXIST=file_exists)   
+
+        INQUIRE(FILE=src, EXIST=file_exists)
         if (.not. file_exists) return !file to backup not found, so return its name
-        
+
         call rename(trim(pfadn)//src     , trim(pfadn)//src//'_start') !rename file
         rename_or_return = '' !no further wrting of this file is required
     end function
@@ -207,7 +207,7 @@ contains
             WRITE(sediment_file_hdle,'(a)') 'river reach deposition sediment weight status (for analysis or model re-start)'
             WRITE(sediment_file_hdle,'(A)')'Subbasin'//char(9)//'particle_size_class'//char(9)//'mass[t]' !tab separated output
         endif
-        
+
         if (trim(susp_sediment_conds_file)=='' .or. .not. dosediment) then        !don't do anything if an empty filename is specified
             susp_sediment_file_hdle=0
         else
@@ -216,13 +216,13 @@ contains
             WRITE(susp_sediment_file_hdle,'(a)') 'river reach suspended sediment weight status (for analysis or model re-start)'
             WRITE(susp_sediment_file_hdle,'(A)')'Subbasin'//char(9)//'particle_size_class'//char(9)//'mass[t]' !tab separated output
         endif
-        
-!write file contents        
+
+!write file contents
         !Jose Miguel: write river storage state to .stat file .
         digits=floor(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
         if (digits<10) then
             write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
-        else       
+        else
             fmtstr='(I0,A1,E12.5)' !for large numbers, use exponential notation
         end if
         DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
@@ -231,7 +231,7 @@ contains
             endif
             total_storage_river=total_storage_river+r_storage(sb_counter) !sum up total storage
         END DO
-        
+
         if (dosediment) then
             !write riverbed sediment storage
             !generate format string
@@ -239,10 +239,10 @@ contains
                 digits=floor(log10(max(1.0,maxval(riverbed_storage))))+1    !Till: number of pre-decimal digits required
                 if (digits<10) then
                     write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
-                else       
+                else
                     fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
                 end if
-            END IF    
+            END IF
             DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
                 if (sediment_file_hdle/=0) then
                     do k=1, n_sed_class
@@ -251,13 +251,13 @@ contains
                 endif
                 !total_storage_sediment=total_storage_sediment+sum(riverbed_storage(sb_counter,:)) !sum up total storage
             END DO
-        
+
             !write suspended sediment storage
             if (susp_sediment_file_hdle/=0) then
                 digits=floor(log10(max(1.0,maxval(sed_storage))))+1    !Till: number of pre-decimal digits required
                 if (digits<10) then
                   write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
-                else       
+                else
                    fmtstr='(I0,A1,I0,A1,E12.5)' !for large numbers, use exponential notation
                 end if
             end if
@@ -267,25 +267,25 @@ contains
                          WRITE(susp_sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9), sed_storage(sb_counter,k) !print each sediment class
                     enddo
                 endif
-                !total_storage_suspsediment=total_storage_suspsediment+sum(sed_storage(sb_counter,:)) !sum up total storage            
-            END DO    
+                !total_storage_suspsediment=total_storage_suspsediment+sum(sed_storage(sb_counter,:)) !sum up total storage
+            END DO
         end if !dosediment
-                
-        
+
+
         IF (doacud) THEN
             tt = (d-2)*nt+hour !index to last valid value
             if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. José, please check this
             DO sb_counter=1,subasin
                 DO acud_class=1,5
 				    if (lake_file_hdle/=0) then
-					    WRITE(lake_file_hdle,'(I0,A1,I0,A1,F8.2)') id_subbas_extern(sb_counter), char(9),acud_class,char(9),&
+					    WRITE(lake_file_hdle,'(I0,A1,I0,A1,F11.2)') id_subbas_extern(sb_counter), char(9),acud_class,char(9),&
 						    lakewater_hrr(tt,sb_counter,acud_class)
 				    endif
 				    total_storage_lake(acud_class) = total_storage_lake(acud_class)+lakewater_hrr(tt,sb_counter,acud_class) * acud(sb_counter,acud_class) !sum up total storage
                 ENDDO
             END DO
         END IF !small reservoirs
-       
+
         DO sb_counter=1,subasin
             DO lu_counter=1,nbr_lu(sb_counter) !sum up groundwater, intercept and soil storages inside
                 i_lu=id_lu_intern(lu_counter,sb_counter)
@@ -332,8 +332,8 @@ contains
                 ENDDO    !loop TCs
             ENDDO    !loop LUs
         ENDDO    !loop subbasins
-        
-    
+
+
         CLOSE(soil_file_hdle, iostat=i_lu)    !close output files
         CLOSE(gw_file_hdle, iostat=i_lu)
         CLOSE(intercept_file_hdle, iostat=i_lu)
@@ -341,7 +341,7 @@ contains
         CLOSE(river_file_hdle, iostat=i_lu)    !close output files
         CLOSE(sediment_file_hdle, iostat=i_lu)    !close output files
         CLOSE(susp_sediment_file_hdle, iostat=i_lu)    !close output files
-        
+
 
         OPEN(11,FILE=summary_file//trim(suffix), STATUS='replace')        !write to summary file
         WRITE(11,*)'total water storage in catchment after model run [m3]'
@@ -659,7 +659,7 @@ contains
 
         !check, if all relevant SVCs have been initialized, if not, use default values
         errors=0
-        DO sb_counter=1,subasin            
+        DO sb_counter=1,subasin
             DO lu_counter=1,nbr_lu(sb_counter)
                 i_lu=id_lu_intern(lu_counter,sb_counter)
                 DO tc_counter=1,nbrterrain(i_lu)
@@ -670,7 +670,7 @@ contains
                         i_soil=id_soil_intern(svc_counter,tcid_instance)        !internal id of soil type
                         i_veg=  id_veg_intern(svc_counter,tcid_instance)
                         i_svc=which1(svc_soil_veg(:,1)==i_soil .AND. svc_soil_veg(:,2)==i_veg)            !get internal id of svc-type
-                       
+
                         if (intercept(tcid_instance,svc_counter)==-9999.) then            !not yet set?
                             if (file_read==1) then                        !but this should have been done before
                                 if (errors==0) then    !produce header before first warning only
@@ -682,9 +682,9 @@ contains
                                     id_terrain_extern(id_tc_type), id_svc_extern(i_svc)            !issue warning
                             end if
 
-                            intercept(tcid_instance,svc_counter)=0.        !set to default 
+                            intercept(tcid_instance,svc_counter)=0.        !set to default
                         end if
-                       
+
                         intercept(tcid_instance, (nbr_svc(tcid_instance)+1):maxsoil)=0.        !set water content of irrelevant horizons values to 0
                     END DO
                 END DO
@@ -823,7 +823,7 @@ contains
         use utils_h
     	use hymo_h
         implicit none
-        
+
         character(len=*),intent(in):: river_conds_file        !file to load from
         integer :: subbas_id, iostatus, i
         real :: dummy1
@@ -837,31 +837,31 @@ contains
             end if
 
             write(*,'(a,a,a)')'Initialize river storage from file ''',trim(river_conds_file),'''.'
-    
+
             !read 2 header lines into buffer
             READ(11,*); READ(11,*)
 		    r_storage(1:subasin)=-1. !indicator for "not read"
-        
-            DO WHILE (.TRUE.) 
+
+            DO WHILE (.TRUE.)
                 READ(11,*,IOSTAT=iostatus) i, dummy1
-			    IF (iostatus /=0) exit 
-            
+			    IF (iostatus /=0) exit
+
                 subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
 			    if (subbas_id < 1 .OR. subbas_id > subasin) then
 				    WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ', i,' in river_storage.stat, ignored.'
-                    cycle 
+                    cycle
                 end if
-            
+
                 if (dummy1 < 0.) then
 				    WRITE(*,'(a,i0,a)') 'Error: negative value for subbasin ', id_subbas_extern(i),' in river_storage.stat.'
-                    stop 
+                    stop
 			    end if
-       
+
                 r_storage(subbas_id)=dummy1        !add the previous storage to the river reach additionally to potential volume from spring or runoff contribution.
             END DO
             close(11)
-        
-            if (count(r_storage==-1.) > 0) then  
+
+            if (count(r_storage==-1.) > 0) then
                 WRITE(*,'(A)') 'WARNING: could not read initial river storage from river_storage.stat for the following subbasins, assumed 0:'
                 DO subbas_id=1,subasin
                     if (r_storage(subbas_id)==-1.) then
@@ -872,11 +872,11 @@ contains
             end if
         else
            r_storage(:)=0.  !old unit-hydrograph routing, set Muskingum storages to 0
-        end if !river_transport == 2    
-        
+        end if !river_transport == 2
+
     end subroutine init_river_conds
 
-    
+
    subroutine init_sediment_conds(sediment_conds_file)
         use routing_h
         use params_h
@@ -897,11 +897,11 @@ contains
         end if
 
         write(*,'(a,a,a)')'Initialize sediment storage from file ''',trim(sediment_conds_file),'''.'
-    
+
         !read 2 header lines into buffer
         READ(11,*); READ(11,*)
-        
-        DO WHILE (.TRUE.) 
+
+        DO WHILE (.TRUE.)
 	        READ(11,*,IOSTAT=iostatus) i, k, dummy1
             IF (iostatus == -1) exit !end of file
 		    IF (iostatus /= 0) THEN
@@ -911,18 +911,18 @@ contains
             subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
 			if (subbas_id < 1 .OR. subbas_id > subasin) then
 				WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in sediment_storage.stat, ignored.'
-                cycle 
+                cycle
             end if
-                
+
             if (k < 1 .OR. k > n_sed_class) then
 				WRITE(*,'(a,i0,a)') 'WARNING: unknown particle size class ',k,' in sediment_storage.stat, ignored.'
-                cycle 
+                cycle
 			end if
 	        riverbed_storage(subbas_id,k)=dummy1
         ENDDO
         close(11)
-        
-        if (count(riverbed_storage==-1.) > 0) then  
+
+        if (count(riverbed_storage==-1.) > 0) then
             WRITE(*,'(A)') 'WARNING: could not read initial river sediment storage from sediment_storage.stat for the following subbasins, assumed 0:'
             DO subbas_id=1,subasin
                 if (count(riverbed_storage(subbas_id,:)==-1)> 0) WRITE(*,'(i0)') subbas_id
@@ -932,7 +932,7 @@ contains
 
    end subroutine init_sediment_conds
 
-       
+
    subroutine init_susp_sediment_conds(susp_sediment_conds_file)
         use routing_h
         use params_h
@@ -953,11 +953,11 @@ contains
         end if
 
         write(*,'(a,a,a)')'Initialize sediment storage from file ''',trim(susp_sediment_conds_file),'''.'
-    
+
         !read 2 header lines into buffer
         READ(11,*); READ(11,*)
-        
-        DO WHILE (.TRUE.) 
+
+        DO WHILE (.TRUE.)
 	        READ(11,*,IOSTAT=iostatus) i, k, dummy1
             IF (iostatus == -1) exit !end of file
 		    IF (iostatus /= 0) THEN
@@ -967,18 +967,18 @@ contains
             subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
 			if (subbas_id < 1 .OR. subbas_id > subasin) then
 				WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in susp_sediment_storage.stat, ignored.'
-                cycle 
+                cycle
             end if
-                
+
             if (k < 1 .OR. k > n_sed_class) then
 				WRITE(*,'(a,i0,a)') 'WARNING: unknown particle size class ',k,' in susp_sediment_storage.stat, ignored.'
-                cycle 
+                cycle
 			end if
 	        sed_storage(subbas_id,k)=dummy1
         ENDDO
         close(11)
-        
-        if (count(sed_storage==-1.) > 0) then  
+
+        if (count(sed_storage==-1.) > 0) then
             WRITE(*,'(A)') 'WARNING: could not read initial river sediment storage from susp_sediment_storage.stat for the following subbasins, assumed 0:'
             DO subbas_id=1,subasin
 				if (count(sed_storage(subbas_id,:)==-1) > 0) WRITE(*,'(i0)') subbas_id
@@ -988,7 +988,7 @@ contains
 
     end subroutine init_susp_sediment_conds
 
-   
+
     subroutine init_lake_conds(lake_conds_file)
         !the variable that should be initialized here is the lakewater0 which is used in lake.f90 and declared in reservoir_lake_h.f90
         use lake_h
@@ -996,19 +996,19 @@ contains
         use params_h
         use utils_h
 	    use hymo_h
-        
+
         implicit none
 
         character(len=*),intent(in):: lake_conds_file        !file to load from
         integer :: sb_counter, acud_class, iostatus, i, k, subbas_id
         real :: dummy1
-    
+
         if (.not. doacud) then !don't try to load file if reservoirs have been disabled anyway
             return
         end if
 
         lakewater_hrr(1,:,:) = -1 !for detecting uninitialized values later
-        
+
         OPEN(11,FILE=lake_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
         if (i/=0) then
             write(*,'(a,a,a)')'WARNING: Lake storage file ''',trim(lake_conds_file),''' not found, using defaults.'
@@ -1017,43 +1017,43 @@ contains
         end if
 
         write(*,'(a,a,a)')'Initialize lake storage from file ''',trim(lake_conds_file),'''.'
-    
+
         READ(11,*); READ(11,*)!read 2 header lines into buffer
 
-        DO WHILE (.TRUE.) 
+        DO WHILE (.TRUE.)
 	        READ(11, *, IOSTAT=iostatus) i, k, dummy1
-            
+
             IF (iostatus == -1) exit !end of file
 		    IF (iostatus /= 0) THEN
 		        WRITE(*,'(a,a,a)') 'WARNING: format error in '//trim(lake_conds_file)//', line skipped.'
             ENDIF
-        
+
             subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
 			if (subbas_id < 1 .OR. subbas_id > subasin) then
 				WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in '//trim(lake_conds_file)//', ignored.'
-                cycle 
+                cycle
             end if
-                
+
             if (k < 1 .OR. k > 5) then
 				WRITE(*,'(a,i0,a)') 'WARNING: unknown reservoir class ',k,' in '//trim(lake_conds_file)//', ignored.'
-                cycle 
+                cycle
 			end if
             lakewater_hrr(1,subbas_id,k) = dummy1
         ENDDO
         close(11)
-        
+
         DO sb_counter=1,subasin
             DO acud_class=1,5
                 IF (lakewater_hrr(1,sb_counter,acud_class) < 0.) then
                     WRITE(*,'(a,a,a)') 'WARNING: Problem with state variable file ''',trim(lake_conds_file),&
                     '''. No specification for subbasin ', id_subbas_extern(sb_counter),&
                     ', reservoir size class ',acud_class,' found. Using fraction specified in lake.dat'
-                END IF    
+                END IF
             ENDDO
-        END DO  
-        
-        
-        
+        END DO
+
+
+
     end subroutine init_lake_conds
 
 end module model_state_io
