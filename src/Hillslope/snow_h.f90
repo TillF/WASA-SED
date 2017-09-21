@@ -72,12 +72,9 @@ contains
         !Calculations based on approach included by developer Andreas Güntner (see etp_max.f90)
         !Calculations according to Shuttleworth (1992) Handbook of Hydrology, Chapter 4
         !IMPORTANT: nn does not equal cloudFrac => nn = 1-cloudFrac
-        !cloudFraction = 1 - (rad_mod/radex(day)/0.55-0.18/0.55)
-        !cloudFraction = MAX(0.0,cloudFraction)
-        !cloudFraction = MIN(1.0,cloudFraction)
-
-        !!!CLOUD FRACTION SET TO 0.5!!!
-        cloudFraction = 0.5
+        cloudFraction = 1 - (rad_mod/radex(day)/0.55-0.18/0.55)
+        cloudFraction = MAX(0.0,cloudFraction)
+        cloudFraction = MIN(1.0,cloudFraction)
 
         !Angstrom coefficients:
         !0.18 (fraction of extratesetrial radiation on overcast day)

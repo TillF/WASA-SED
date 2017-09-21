@@ -4,7 +4,7 @@
 #-------------------------------------------------------------------------
 
 ifndef DEBUG
-DEBUG=1
+DEBUG=0
 endif
 
 # installation path
@@ -15,7 +15,7 @@ SRCDIR=src
 OUTDIR=build
 
 # adjust according to DEBUG
-ifeq ($(DEBUG),0)
+ifeq ($(DEBUG),1)
 EXEC=wasa_dbg
 OBJDIR=$(OUTDIR)\obj\debug
 else
@@ -41,7 +41,6 @@ General/common_h.f90 \
 General/params_h.f90 \
 Hillslope/hymo_h.f90 \
 River/routing_h.f90 \
-Hillslope/snow_params.f90 \
 General/climo_h.f90 \
 Hillslope/snow_h.f90 \
 General/calcyear.f90 \

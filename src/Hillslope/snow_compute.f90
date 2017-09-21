@@ -504,7 +504,7 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
         real :: snowWaterEquivalent
         real :: snowDepl
 
-        if(snowWaterEquivalent > 0.) then
+        if(snowWaterEquivalent > 0.05) then
            snowDepl = 1.
         else
            snowDepl = 0.
