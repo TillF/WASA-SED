@@ -289,7 +289,7 @@ SUBROUTINE readgen(path2do_dat)
 
     precipSeconds     =    84600. !make dependent from time step length dt??
     !Read parameters for snow routine
-     OPEN(12, file=pfadp(1:pfadj)// 'Hillslope\snow_params.ctl',IOSTAT=istate, STATUS='old')
+     OPEN(12, file=pfadp(1:pfadj)// 'Hillslope/snow_params.ctl',IOSTAT=istate, STATUS='old')
          IF (istate==0) THEN
             READ(12,'(a)',IOSTAT=istate)dummy
             do while (istate==0)
