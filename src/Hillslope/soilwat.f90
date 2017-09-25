@@ -275,6 +275,7 @@
     REAL :: q_surf								!surface runoff [mm H2O]
     REAL :: q_rill_out, q_surf_out2				!modified surface fluxes to pass to sedi_yield
     REAL :: r
+    REAL :: exp_x !temporary variable to check argument for exp() for reasonable value range (within -15...15 to avoid Inf als result)
 
     ! REAL :: dsi, Aq, Q_li, l2_test1   !these variables are only needed for derivation of lateral subsurface flow equations
 
@@ -2352,10 +2353,25 @@
                     (1.-(1.-(vangen(h)** (1./porem(soilid,h)))  &
                     )**porem(soilid,h))**2)* (1.-coarse(soilid,h))
 
+                ! catch unrealistic conduns value due to possibly unrealistic soil parameters
+                ! would lead to floating point exception during percolation calculation
+                if(conduns(h) < 1e-12) then
+                    write(*,*) 'ERROR: Calculated unsaturated conductivity is zero!'
+                    write(*,*) 'Check your soil parameters for soil id ', soilid, ', horizon ', h
+                    stop
+                end if
+
+                exp_x = -1./(thfree(i,h)/conduns(h))
+
 
                 IF (h < nbrhori(soilid)) THEN
                     !          percol(h)=k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))
-                    percol(h)=thfree(i,h)*(1.-EXP(-1./(thfree(i,h)/conduns(h))))	!Till: compute percolation [mm]
+
+                    IF (exp_x < -15) THEN !Avoid floating point exception
+                        percol(h) = thfree(i,h)
+                    ELSE
+                        percol(h)=thfree(i,h)*(1.-EXP(exp_x))	!Till: compute percolation [mm]
+                    END IF
 
                     !  if thact is greater than field capacity and lower horizons
                     !  have skrinkages or macropores, than rapid percolation
@@ -2396,7 +2412,11 @@
 
                 ELSE IF (h == nbrhori(soilid)) THEN				!Till: deepest horizon
                     IF (gw_flag(i_lu) == 0 .OR. gw_flag(i_lu) == 1) THEN
-                        percol(h)=thfree(i,h)*(1.-EXP(-1./(thfree(i,h)/conduns(h))))	!Till: compute percolation [mm], ii: same as above, relocate to outside branch, prone to numeric underflow, catch this
+                        IF (exp_x < -15) THEN !Avoid floating point exception
+                            percol(h) = thfree(i,h)
+                        ELSE
+                            percol(h)=thfree(i,h)*(1.-EXP(exp_x))	!Till: compute percolation [mm]
+                        END IF
                         IF (svcbedr(tcid_instance2,i) == 1) THEN		!Till: if there is bedrock...
                             percol(h)=MIN(percol(h),kfsu(i_lu)/dt_per_day) !Till: ...percolation is limited by bedrock conductivity
                         END IF
@@ -2696,8 +2716,12 @@
             IF (thfree(i,h) < 0.) THEN
                 IF (thfree(i,h+1) > 0.) THEN
 
-                    percol(h)=-1.*thfree(i,h+1)*  &
-                        (1.-EXP(-1./(thfree(i,h+1)/conduns(h+1))))
+                    exp_x = -1./(thfree(i,h+1)/conduns(h+1))
+                    IF (exp_x < -15) THEN !Avoid floating point exception
+                        percol(h)=-1.*thfree(i,h+1)
+                    ELSE
+                        percol(h)=-1.*thfree(i,h+1) * (1.-EXP(exp_x))
+                    END IF
 
                     !   maximum inflow rate is defined by remaining deficit until FC
                     percol(h)=MAX(percol(h),thfree(i,h))
