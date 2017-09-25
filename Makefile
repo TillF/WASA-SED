@@ -115,12 +115,13 @@ OBJ=$(OBJ_FILES:%.f90=$(OBJDIR)/%.o)
 # 	- -Wall turns on -Wmaybe-uninitialized: detects variables that are potentially used uninitialized
 # 	- may cause spurious warnings, so turn it off with -Wno-maybe-uninitialized
 # -Og: optimizations that do/should not interfere with debugging, gfortran 4.8+
+# -ffpe-trap=list: enable certain floeating poinbt exception traps with list a comma separated list with: invalid, zero, overflow, underflow, inexact, and/or denormal
 # RELEASE only (fast execution but warnings and errors omitted as far as possible)
 # -O1 [-O2, -O3]: optimize for speed
 # -Os: optimize for size of compiled executable
 
 FC=gfortran
-CDFLAGS=-g -fcheck=all -Wall -Wextra -ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -fbacktrace
+CDFLAGS=-g -fcheck=all -Wall -Wextra -ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -fbacktrace -ffpe-trap=invalid,zero,overflow,underflow
 CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s
 LFLAGS=
 
