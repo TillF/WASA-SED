@@ -10,17 +10,17 @@
 module lake_h
 save
 
-! Logical for reading or calculation ofthe number of reservoir per size class per year 
+! Logical for reading or calculation ofthe number of reservoir per size class per year
 LOGICAL :: doacudyear
 ! number of small reservoirs per volume class (5 volume classes)
 ! rounded to nearest integer
 !Allocatable      real acud(nmun,5)
-real, allocatable :: acud(:,:) 
+real, allocatable :: acud(:,:)
 ! number of acudes per volume class (5 volume classes)
 ! not rounded, for calculation of growth per year
 !Allocatable       real acudfloat(nmun,5)
 real, allocatable :: acudfloat(:,:)
-! Andreas 
+! Andreas
 ! number of acudes per volume class (5 volume classes) and year
 ! specific values for each year, read from small_rservoirs_year.dat
 ! calculation of growth per year is not used if data are in the file
@@ -33,15 +33,9 @@ real, allocatable :: maxlakesub0(:,:)
 ! trend in number of acudes for each volume class (+-nbr/year)
 !Allocatable       real laketrend(nmun,5)
 real, allocatable :: laketrend(:,:)
-! total storage capacity of sub-basin in small acudes
-!Allocatable       real totalacud(nmun)
-real, allocatable :: totalacud(:)
 ! maximum capacity of water storage (m3)
 !Allocatable       real maxlakewater(nmun,5)
 real, allocatable ::  maxlakewater(:,:)
-! fraction of storage capacity per volume class on total storage
-!Allocatable       real acudfraction(nmun,5)
-real, allocatable :: acudfraction(:,:) 
 ! fraction of generated river runoff being routed through small acudes
 real :: intercepted
 ! water stored in small reservoirs (m3)
@@ -65,7 +59,7 @@ real, allocatable :: lakeex(:,:,:)
 ! area of water storages (km2)
 !Allocatable      real lakearea(nmun,5)
 real, allocatable :: lakearea(:,:)
-! Percentage  of upper limit of reservoir size class that represents the maximum storage capacity 
+! Percentage  of upper limit of reservoir size class that represents the maximum storage capacity
 ! of the hypothetical representative reservoir of each class in subbasin(-)
 real, allocatable :: maxlake_factor(:,:)
 ! Percentage  of maximum volume per reservoir size class (-)
