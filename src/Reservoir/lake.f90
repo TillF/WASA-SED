@@ -269,22 +269,18 @@ IF (STATUS == 0) THEN
 !George  maxlake(1:5) = (/5.e4,5.e5,2.e6,6.5E6,25.e6/)
 
 !** Modelling unit Initialisierung
-  
+
   if (.NOT. doloadstate .OR. lakewater_hrr(1,1,1) == -1.) then !check, if not initialized before from files
-      DO imun=1,subasin !Till: initialize fraction of total volume according to lake.dat 
+      DO imun=1,subasin !Till: initialize fraction of total volume according to lake.dat
         !lakewater0(imun,:)=lake_vol0_factor(:)*maxlake(imun,:)
         lakewater_hrr(1,imun,:)=lake_vol0_factor(:)*maxlake(imun,:)
         where (acud(imun,:) == 0.)
             lakewater_hrr(1,imun,:) = 0. !no water when there are no reservoirs
-        end where    
-        
+        end where
+
       END DO
-  end if    
-  
-  DO imun=1,subasin
-    totalacud(imun)=sum(maxlake(imun,1:5)*acud(imun,1:5))
-    acudfraction(imun,1:5)=(maxlake(imun,1:5)*acud(imun,1:5))/totalacud(imun)
-  END DO
+  end if
+
 
 !George  Estimation of small reservoirs' areas depending on volume (km**2)
   lakearea(:,:) = 0.
@@ -1109,14 +1105,6 @@ endif
 	 ENDDO
 	ENDIF
 
-
-! The lake module returns values of water outflow and sediment outflow of each sub-basin
-! after the passage of the cascade routing scheme
-    totalacud(muni)=sum(maxlake(muni,1:5)*acud(muni,1:5))
-    acudfraction(muni,1:5)=(maxlake(muni,1:5)*acud(muni,1:5))/totalacud(muni)
-
-!	water_subbasin_t(d,ih,muni)=water_subbasin_t(d,ih,muni)+ &
-!			lakeoutflow(step,muni)
 	water_subbasin_t(d,ih,muni)=water_subbasin_t(d,ih,muni)*subfrarea(muni)+ &
 			lakeoutflow(step,muni)
 !*******************************************************
