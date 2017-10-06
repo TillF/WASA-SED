@@ -25,6 +25,8 @@ module snow_h
     real :: soilDens                               !Density of soil (kg/m3)
     real :: soilSpecHeat                           !Spec. heat capacity of soil (kJ/kg/K)
     real :: weightAirTemp                          !Weighting param. for air temp. (-) in 0...1
+    real :: lat,lon                                !Latitude / Longitude of centre of study area
+    real :: radiation_tc(24)                              !hourly radiation for current TC corrected for slope and aspect
 
     real, pointer :: snowEnergyCont(:,:,:)         !Snow energy content [kJ/m²]
     real, pointer :: snowWaterEquiv(:,:,:)         !Snow water equivalent [m]
@@ -50,7 +52,9 @@ module snow_h
     real, pointer :: stoiSubl(:,:,:)               !Conversion of sublimation mass flux (m/s) to energy flux (kJ/kg/K); Unit of result: kJ/m3
     real, pointer :: stoiFlow(:,:,:)               !Conversion of meltwater loss mass flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3
     real, pointer :: rateAlbe(:,:,:)               !Change rate of albedo [1/s]
+    real, pointer :: lu_aspect(:), lu_alt(:)               !mean aspect of a LU in radiants (south=0°, north=180° and west=90°, east=-90); mean LU altitude over subbasin outlet
 
+    
 
 
 contains
@@ -68,8 +72,14 @@ contains
         real                                 :: lapse_prec = 0.
         real                                 :: lapse_temp = -0.8/100
         real                                 :: lapse_rad  = 0.
-
-        !Calculations based on approach included by developer Andreas Güntner (see etp_max.f90)
+        
+        real                                 :: slope_rad, aspect  !slope, aspect of TC [rad]
+        integer                              :: lu_id,i
+        real,parameter                       :: S_C = 1366.944 !solar constant [W/(m^2)]
+        real :: E_0, Gamma, delta, omega_s, H0, K_t, K_r, f_beta !various sun-related variables
+        real, DIMENSION(1:24) :: omega1, i_hor, i_slope, I0, G_h, G_B, G_D
+        
+        !Calculations based on approach included by developed Andreas Güntner (see etp_max.f90)
         !Calculations according to Shuttleworth (1992) Handbook of Hydrology, Chapter 4
         !IMPORTANT: nn does not equal cloudFrac => nn = 1-cloudFrac
         cloudFraction = 1 - (rad_mod/radex(day)/0.55-0.18/0.55)
@@ -83,13 +93,114 @@ contains
         !simple, lapse-rate-based modification of meteo-drivers
         prec_mod = prec_mod + lapse_prec * rel_elevation(tcallid(sb_counter, lu_counter2, tc_counter2))
         temp_mod = temp_mod + lapse_temp * rel_elevation(tcallid(sb_counter, lu_counter2, tc_counter2))
-        rad_mod  = rad_mod  + lapse_rad  * rel_elevation(tcallid(sb_counter, lu_counter2, tc_counter2))
+        
 
         precipBalance = prec_mod
 
-        !Here modification radiation with time, aspect,...
-        !...
+    if (.not. do_rad_corr) then
+        rad_mod  = rad_mod  + lapse_rad  * rel_elevation(tcallid(sb_counter, lu_counter2, tc_counter2))
+    else   
+        !modification of radiation with aspect and slope
+        !Refs:
+        !Tian at al, 2001, https://doi.org/10.1016/S0168-1923(01)00245-3
+        !Maleki et al., 2017,  doi:10.3390/en10010134 
 
+        !ii: many of these caculations include computationally-demanding trigonometric functions
+        !wherever possible, these should be done once at the start of the model run, or once per day and stored for re-use
+        
+        if (hh==1) then !if this is the first hour, compute values for the entire day (speedup)
+            lu_id = id_lu_intern(lu_counter2, sb_counter) !get LU-id
+
+            slope_rad = atan(slope(id_terrain_intern(tc_counter2, lu_id))) !slope angle [radiant]
+            aspect = lu_aspect(lu_id) !aspect [degree]; (south=0°, north=180° and west=90°, east=-90)
+  
+            E_0 = 1+0.033*cos(2.*julian_day/365) !eccentricity of Earth orbit, Tian, A.2, Beckman in Maleki et al, 2017
+            Gamma = (2*pi*(julian_day-1)) / 365 !day angle [rad], Tian A.4 
+    
+            ! [rad] declination (the angular position of the sun at solar noon with respect to the plane of the equator
+            delta = (0.006918-0.399912*cos(Gamma)+0.070257*sin(Gamma)-0.002697*cos(2*Gamma) +0.000907*sin(2*Gamma)-0.002697*cos(3*Gamma)+0.00148*sin(3*Gamma))  !Tian, A.3
+ 
+            omega_s = acos(-tan(lat)*tan(delta)) !local sunrise hour angle for a horizontal surface [rad], (Tian, A.5)
+
+            !!daily extraterrestrial radiation [MJ/m2/d] (Maleki 2017), p.20 
+            H0 =  (24*3.6/pi) * S_C * E_0 * (sin(lat)*sin(delta)*omega_s + cos(lat)*cos(delta)*sin(omega_s))/1000  
+
+
+            !hourly extraterrestrial radiation [W/m²] (Maleki 2017, p.4)
+
+            !computation of solar time - omitted here, assuming that this is sufficiently presented by local time    
+            !lt1 = 1:24 !begin of hourly time step
+            !B = 2*pi* (julian_day-81)/365
+            !et = 9.87*sin(2*B)-7.53*cos(B)-1.5*sin(B) !equation of time (Tasdemiroglu 1988, wrong in Maleki (2017), taken from Bakirci, 2009 (eq.8) or Jamil & Khan, 2014(eq. 8)
+            !L_s = 0 !standard meridian for local zone
+            !L_l = 0 !longitude of location
+            !st1 = lt1 + et/60+4/60*(L_s-L_l) !local solar time
+            !omega1 = 15*(12-st1) * pi/180   !hour angle [rad]; angular distance between the observer’s meridian and the meridian whose plane contains the sun (Maleki 2017, p.3)  
+
+           do i=0,23
+            omega1(i+1) = 15*(12-i) * pi/180   !hour angle [rad]; angular distance between the observer’s meridian and the meridian whose plane contains the sun (Maleki 2017, p.3)  
+            end do
+    
+           !angle of incidence onto horizontal surface [rad], Allen, 2006, eq.3
+           !ii: should only be computed once per day for whole catchment
+            i_hor = acos( &
+              sin(delta)*sin(lat)*1 &
+              - 0 &
+              + cos(delta)*cos(lat)*1*cos(omega1) &
+              +0 &
+              +0 &
+            )  
+      
+           !angle of incidence onto inclinated surface [rad], Allen, 2006, eq.3. Gamma changed into -Gamma (otherwise, the daily cycle was reversed)
+            !ii: should re-use terms of i_hor
+             i_slope = acos( &
+                sin(delta)*sin(lat)*cos(slope_rad) &
+              - sin(delta)*cos(lat)*sin(slope_rad)*cos(-aspect) &
+              + cos(delta)*cos(lat)*cos(slope_rad)*cos(omega1) &
+              + cos(delta)*sin(lat)*sin(slope_rad)*cos(aspect)*cos(omega1) &
+              + cos(delta)*sin(aspect)*sin(slope_rad)*sin(omega1) &
+              )  
+  
+            I0 = S_C * E_0 * cos (i_hor) !hourly extraterrestrial radiation [W/m²] 
+            where(abs(i_hor)>= pi/2) I0 = 0     !no radiation before/after sunrise/sunset
+  
+            !H0 = sum(I0) *3600/1e6  !daily extraterrestrial radiation [MJ/m²/d] 
+  
+            K_t = rad_mod*3600/1e6 / H0 !ratio of global to extraterrestrial radiation (an inverse index of cloudiness)
+            ! "clearness index" M_t in Maleki et al, 2017
+            if (K_t >= 1) then
+                write(*,'(A,i0,a)')'Warning: Radiation for subbasin ', id_subbas_extern(sb_counter),' is higher than the computed extraterrestrial radiation. Truncated.'
+                K_t = 0.99
+            end if
+  
+            G_h = I0 * K_t     !hourly global radiation onto horizontal plane, rescaled from daily measurement [W/m²]
+  
+    
+              !K_r = a*K_t +aspect !ratio of diffuse radiation to global radiation for a horizontal surface [-], eq. 1 in Tian
+  
+              !Tian et al give no values for the coefficents. We consulted Maleki et al and selected Reindl et al, because it was linear and covered whole range of K_t
+              if(K_t<=0.3) then
+                  K_r = 1.02-0.248*K_t 
+              else
+                if (K_t < 0.78) then 
+                    K_r = 1.45-1.67 * K_t 
+                else
+                  K_r = 0.147
+                end if  
+            end if
+              K_r = min(1., max(0., K_r)) !restrain to 0..1
+  
+ 
+          G_B     = S_C * E_0 * K_t * (1-K_r)*cos (i_slope) !direct radiation onto inclinated plane [W/m²] Hay & McKay, eq. 1 [W/m²]
+          where ((abs(i_slope)>= pi/2 .OR. abs(i_hor)>= pi/2 )) G_B = 0.     !no direct radiation before/after sunrise/sunset
+   
+          f_beta = 1-slope_rad/pi !slope reduction factor [-], Tian
+          G_D = G_h * (f_beta*K_r + 0.2 * (1-f_beta)) !diffuse irradiance on inclinated surface
+          radiation_tc(:) = G_B + G_D  !total irradiance onto inclinated surface
+          rad_mod = sum(radiation_tc)
+        end if !end first hour
+      
+        end if !do_radCorr (radiation correction)
 
     END SUBROUTINE snow_prepare_input
 

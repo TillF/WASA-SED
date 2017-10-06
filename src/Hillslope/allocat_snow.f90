@@ -99,6 +99,12 @@
     end if
     idummy = istate + idummy
 
+    if (do_rad_corr .OR. do_alt_corr) then
+        allocate(lu_aspect(nsoter), STAT = istate)
+        allocate(lu_alt(nsoter), STAT = istate)
+    end if
+    idummy = istate + idummy
+    
     if (idummy/=0) then
         write(*,'(A,i0,i0,a)')'Memory allocation error (',istate,'/',idummy,') in hymo-module (snow): '
         stop
