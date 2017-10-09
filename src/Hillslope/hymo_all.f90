@@ -36,8 +36,6 @@ SUBROUTINE hymo_all(STATUS)
     ! ids of components in work
     INTEGER :: i_subbas,i_lu,id_tc_type,isoil
 
-    ! julian day
-    INTEGER :: julian_day
     ! actual soil water content of terrain component
     REAL :: thact, thactroot, temp2, temp3, prec
     REAL :: precday, prechall(24)

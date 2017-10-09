@@ -328,6 +328,16 @@ SUBROUTINE readgen(path2do_dat)
                         READ(dummy,*) dummy2, soilSpecHeat
                     CASE ('weightAirTemp')
                         READ(dummy,*) dummy2, weightAirTemp
+                    CASE ('lat')
+                        READ(dummy,*) dummy2, lat
+                        lat = lat *pi/180
+                    CASE ('lon')
+                        READ(dummy,*) dummy2, lon
+                        lon = lon *pi/180
+                    CASE ('do_rad_corr')
+                        READ(dummy,*) dummy2, do_rad_corr
+                    CASE ('do_alt_corr')
+                        READ(dummy,*) dummy2, do_alt_corr
                 END SELECT
             end do
      CLOSE(12)
@@ -353,7 +363,6 @@ SUBROUTINE readgen(path2do_dat)
                 soilSpecHeat=2.18              !Spec. heat capacity of soil (kJ/kg/K)
                 weightAirTemp=0.5              !Weighting param. for air temp. (-) in 0...1
         END IF
-
     END IF !dosnow
 
 
@@ -538,7 +547,7 @@ SUBROUTINE readgen(path2do_dat)
                     f_precipMod=.TRUE. .AND. (dosnow /= 0)
                 CASE ('cloudfrac')
                     f_cloudFrac=.TRUE. .AND. (dosnow /= 0)
-
+ 
                 CASE ('river_degradation')
                     f_river_degradation=dosediment
                 CASE ('river_deposition')

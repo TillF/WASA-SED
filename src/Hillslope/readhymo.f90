@@ -1052,7 +1052,7 @@ SUBROUTINE readhymo
             temp1 = temp1 + fracterrain(id_tc_type) !current sum of fractions
         END DO
         if (temp1>1.05 .OR. temp1<0.95) then !correct fractions
-            write(*,'(A,i0,a,f4.2,a)')'WARNING: Sum of TC-fractions for LU ', id_lu_extern(i_lu),' was ',temp1,', now normalized to 1.'
+            write(*,'(A,i0,a,f5.2,a)')'WARNING: Sum of TC-fractions for LU ', id_lu_extern(i_lu),' was ',temp1,', now normalized to 1.'
             DO tc_counter=1,nbrterrain(i_lu)
                 id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
                 fracterrain(id_tc_type) = fracterrain(id_tc_type) /temp1   !correct fractions
@@ -1320,7 +1320,7 @@ SUBROUTINE readhymo
                 do svc_counter=1,nbr_svc(tcid_instance)    !check all SVCs of the current TC
                     temp1= sum(frac_svc(:,tcid_instance)) + rocky(tcid_instance) !current sum of fractions
                     if (temp1>1.05 .OR. temp1<0.95) then
-                        write(*,'(A,f4.2,a,i0)')'WARNING: Sum of SVC- and rocky fraction was ',temp1,', now normalized to 1. (TC ',&
+                        write(*,'(A,f5.2,a,i0)')'WARNING: Sum of SVC- and rocky fraction was ',temp1,', now normalized to 1. (TC ',&
                             id_terrain_extern(id_tc_type),')'
                     end if
                     rocky(tcid_instance)     = rocky(tcid_instance)     / temp1    !correct fractions
@@ -1684,9 +1684,50 @@ if (dosediment) then
             end if
             CLOSE(11)
         END IF
-    END IF !dosediments
+END IF !dosediments
 
+    if (dosnow /= 0) then
+        INCLUDE '../Hillslope/allocat_snow.f90'
+    end if
 
+if (dosnow) then
+     !** read Landscape units parameters related to snow
+        OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/lu2.dat',STATUS='old')
+        READ(11,*,IOSTAT=istate); READ (11,*,IOSTAT=istate)
+        h=2
+
+        lu_aspect(:)=-999.
+        lu_alt(:)   =-999. 
+    
+        do while (istate==0)
+            READ(11,'(a)',IOSTAT=istate) cdummy
+            h=h+1 !count lines
+            IF (istate/=-0) exit
+            READ(cdummy,*,IOSTAT=istate) j !read subbasin ID only
+            h=h+1 !count lines
+		    k=id_ext2int(j, id_lu_extern)    !get internal id of this LU
+                IF (k==-1) THEN    !specified LU not found
+                    write(*,'(a,i0,a,i0,a)')'ERROR in lu2.dat, line ',h,': Unknown LU ', j,' (not in soter.dat).'
+                    cycle
+                END IF
+    
+            READ(cdummy,*,IOSTAT=istate) lu_aspect(k),lu_alt(k)
+            if (istate/=0) then    !format error
+                write(*,'(a,i0)')'ERROR (lu2.dat): Format error in line ',h
+                stop
+            end if
+        END DO
+        CLOSE(11)
+
+        DO i=1,nsoter !check completeness
+            if (lu_aspect(i)==-999 .OR. lu_alt(i)==-999) then
+                WRITE(*,'(a, I3, a)') 'lu2.dat: LU ', id_lu_extern(i), ' is data for aspect or altitude.'
+                STOP
+            END IF
+        END DO    
+      
+        lu_aspect = lu_aspect * pi/180 !convert degree to radiants
+    end if ! do_snow
 
     !Till: allocation part - these variables are allocated here, because their dimension is not known before
      !!Print hydrologic variable on TC scale. If not used, DISABLE
@@ -1704,11 +1745,7 @@ if (dosediment) then
 !    allocate (deposition_TC(subasin,nterrain))
 !    allocate (cum_erosion_TC(subasin,nterrain))
 !    allocate (cum_deposition_TC(subasin,nterrain))
-
-    if (dosnow /= 0) then
-    INCLUDE '../Hillslope/allocat_snow.f90'
-    end if
-
+    
 
 contains
 
