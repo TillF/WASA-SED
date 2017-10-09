@@ -33,7 +33,7 @@ module snow_h
     real, pointer :: snowCover(:,:,:)              !Snow cover [-]
     real, pointer :: precipMod(:,:,:)              !Precipitation signal modified by snow module [mm]
     real, pointer :: cloudFrac(:,:,:)              !Cloud fraction [-]
-    real, pointer :: precipBal(:,:,:)              !Precipitation input signal TC-wise for balance correction
+    real, pointer :: precipBal(:,:,:)              !Precipitation input signal TC-wise
     real, pointer :: rel_elevation(:)              !Relative elevation of TC above foot of toposequence/LU (i.e. river) [m]
 
     real, pointer :: snowTemp(:,:,:)               !Mean temperatur of the snow pack [°C]
@@ -63,7 +63,7 @@ contains
         integer, intent(IN)                  :: hh, day, sb_counter, lu_counter2, tc_counter2
         real,    intent(INOUT)               :: prec_mod, temp_mod, rad_mod
         real,    intent(INOUT)               :: cloudFraction !cloudiness fraction
-        real,    intent(INOUT)               :: precipBalance !Precipiation input signal for balance check
+        real,    intent(INOUT)               :: precipBalance !Precipiation input signal
 
         real                                 :: lapse_prec = 0.
         real                                 :: lapse_temp = -0.8/100

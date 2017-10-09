@@ -1,7 +1,7 @@
     SUBROUTINE soilwat(hh,day,month,i_subbas2,i_ce,i_lu,lu_counter2,tcid_instance2,id_tc_type2,tc_counter2,  &
         thact,thactroot,q_surf_in,q_surf_out,q_sub_in,q_sub_out,qgw,deepqgw,  &
         hortf,tcaet,tclai,  &
-        tcsoilet,tcintc,prec_in,precday,prechall2,petday,  &
+        tcsoilet,tcintc,prec_in,precday_in,prechall2_in,petday,  &
         tcarea2,bal, rootd_act,height_act,lai_act,alb_act,sed_in_tc,sed_out_tc, q_rill_in)
 
     !Till: computationally irrelevant: disabled pause and debugging parts
@@ -201,9 +201,9 @@
     REAL, INTENT(OUT)                    :: tclai
     REAL, INTENT(OUT)                    :: tcsoilet
     REAL, INTENT(OUT)                    :: tcintc
-    REAL, INTENT(IN)                     :: prec_in  !precipitation input
-    REAL, INTENT(IN)                     :: precday
-    REAL, INTENT(IN)                     :: prechall2(24)
+    REAL, INTENT(IN)                     :: prec_in     !input precipitation of current time step
+    REAL, INTENT(IN)                     :: precday_in  !input daily precipitation
+    REAL, INTENT(IN)                     :: prechall2_in(24) !input excerpt of preciph (rainfall) valid for 24 hours of the current subbas
     REAL, INTENT(IN)                     :: petday
     REAL, INTENT(IN)                     :: tcarea2
     REAL, INTENT(OUT)                    :: bal		!Till: water balance of current TC
@@ -215,11 +215,14 @@
     REAL, INTENT(OUT)				     :: sed_out_tc(n_sed_class)
     REAL, INTENT(IN)                     :: q_rill_in !rill flow entering TC from uphill
 
-    REAL                                 :: prec            !precipitation potentially modified in snow module
+    REAL                                 :: prec            !precipitation current time step potentially modified in snow module
+    REAL                                 :: precday         !daily precipitation potentially modified in snow module
+    REAL                                 :: prechall2(24)   !excerpt of preciph (24h of current subbas) potentially modified in snow module
     REAL                                 :: temperature     !temperature of current time step
     REAL                                 :: radiation       !radiation of current time step
     REAL                                 :: cloudFraction   !cloudiness fraction
     REAL                                 :: precipBalance   !Precipitation input into snow model for balance check; after prepare input!
+    REAL                                 :: airPress        !Air pressure of current time step
 
     logical :: isnan
     !** Soil water model for terrain component (TC)
@@ -897,7 +900,7 @@
     prec          =   prec_in !this assignment necessary even if snow module not active; in steps after snow module usage of prec
     temperature   =   temp(day,i_subbas2)
     radiation     =   rad( day,i_subbas2)
-
+    airPress      =   1000.
 
     if(dosnow > 0) then
 
@@ -910,10 +913,9 @@
        !Subroutine calculating the dynamics of the snow cover
           !(Wind currently not read from input file; assumed constant wind = 1; see climo.f90)
           !Air pressure constant; for now set to 1000 hPa
-          !!!CLOUD FRACTION SET TO 0.5; see snow_h.f90 subroutine snow_prepare_input()!!!
 
        if(dohour) then
-         call snow_compute(prec, temperature, radiation, 1000., rhum(day,i_subbas2), wind(day,i_subbas2), cloudFraction, &
+         call snow_compute(prec, temperature, radiation, airPress, rhum(day,i_subbas2), wind(day,i_subbas2), cloudFraction, &
                            snowEnergyCont(day, max(1,hh-1), tcid_instance2), snowWaterEquiv(day,  max(1,hh-1), tcid_instance2), &
                            snowAlbedo(day,  max(1,hh-1), tcid_instance2), snowEnergyCont(day, hh, tcid_instance2), snowWaterEquiv(day, hh, tcid_instance2), &
                            snowAlbedo(day, hh, tcid_instance2), snowCover(day, hh-1, tcid_instance2), snowTemp(day, hh, tcid_instance2), &
@@ -937,7 +939,8 @@
 !                                                           SUM(fluxSubl(1:day,1:hh,tcid_instance2))*precipSeconds )
 !         end if
 
-         prec = precipMod(day, hh, tcid_instance2) !Further calculations with modified precipitation signal
+         prec           = precipMod(day, hh, tcid_instance2) !Further calculations with modified precipitation signal
+         prechall2(hh)  = precipMod(day, hh, tcid_instance2) !Further calculations with modified precipitation signal
 
          if(hh ==24) then !to get into the next day; have start value
             snowEnergyCont(day+1, 1, tcid_instance2) = snowEnergyCont(day, 24, tcid_instance2)
@@ -947,7 +950,7 @@
 
        else !daily
 
-         call snow_compute(prec, temperature, radiation, 1000., rhum(day,i_subbas2), wind(day,i_subbas2), cloudFraction, &
+         call snow_compute(prec, temperature, radiation, airPress, rhum(day,i_subbas2), wind(day,i_subbas2), cloudFraction, &
                          snowEnergyCont(max(1,day-1), max(1,hh-1), tcid_instance2), snowWaterEquiv(max(1,day-1),  max(1,hh-1), tcid_instance2), &
                          snowAlbedo(max(1,day-1),  max(1,hh-1), tcid_instance2), snowEnergyCont(day, hh, tcid_instance2), snowWaterEquiv(day, hh, tcid_instance2), &
                          snowAlbedo(day, hh, tcid_instance2), snowCover(day, hh, tcid_instance2), snowTemp(day, hh, tcid_instance2), &
@@ -958,23 +961,23 @@
                          precipMod(day, hh, tcid_instance2), cloudFrac(day, hh, tcid_instance2), precipBal(day, hh, tcid_instance2))
 
 
-         !Correction via balance
-         !Precipitation in must equal precipitation out + sublimation flux + snow water equivalent
-         !probably truncation causes slight deviations
-          if( snowWaterEquiv(day,hh,tcid_instance2) > 0. .AND. &
-              SUM(precipBal(1:day,hh,tcid_instance2)) /= &
-              SUM(precipMod(1:day,hh,tcid_instance2)) + &
-              SUM(fluxSubl(1:day,hh,tcid_instance2))*1000.*precipSeconds + &
-              snowWaterEquiv(day,hh,tcid_instance2)*1000. - &
-              max(0. , snowWaterEquiv(1,1,tcid_instance2)*1000 - SUM(precipMod(1:day,hh,tcid_instance2)) &
-                                                               - SUM(fluxSubl(1:day,hh,tcid_instance2))*1000.*precipSeconds) ) then !snow from previous year not melted yet
-
-                snowWaterEquiv(day,hh,tcid_instance2)  = ( SUM(precipBal(1:day,hh,tcid_instance2))/1000. - &
-                                                           SUM(precipMod(1:day,hh,tcid_instance2))/1000. - &
-                                                           SUM(fluxSubl(1:day,hh,tcid_instance2))*precipSeconds + &
-                                                           max(0. , snowWaterEquiv(1,1,tcid_instance2) - SUM(precipMod(1:day,hh,tcid_instance2))/1000. &
-                                                                                                       - SUM(fluxSubl(1:day,hh,tcid_instance2))*precipSeconds) )
-          end if
+!         !Correction via balance
+!         !Precipitation in must equal precipitation out + sublimation flux + snow water equivalent
+!         !probably truncation causes slight deviations
+!          if( snowWaterEquiv(day,hh,tcid_instance2) > 0. .AND. &
+!              SUM(precipBal(1:day,hh,tcid_instance2)) /= &
+!              SUM(precipMod(1:day,hh,tcid_instance2)) + &
+!              SUM(fluxSubl(1:day,hh,tcid_instance2))*1000.*precipSeconds + &
+!              snowWaterEquiv(day,hh,tcid_instance2)*1000. - &
+!              max(0. , snowWaterEquiv(1,1,tcid_instance2)*1000 - SUM(precipMod(1:day,hh,tcid_instance2)) &
+!                                                               - SUM(fluxSubl(1:day,hh,tcid_instance2))*1000.*precipSeconds) ) then !snow from previous year not melted yet
+!
+!                snowWaterEquiv(day,hh,tcid_instance2)  = ( SUM(precipBal(1:day,hh,tcid_instance2))/1000. - &
+!                                                           SUM(precipMod(1:day,hh,tcid_instance2))/1000. - &
+!                                                           SUM(fluxSubl(1:day,hh,tcid_instance2))*precipSeconds + &
+!                                                           max(0. , snowWaterEquiv(1,1,tcid_instance2) - SUM(precipMod(1:day,hh,tcid_instance2))/1000. &
+!                                                                                                       - SUM(fluxSubl(1:day,hh,tcid_instance2))*precipSeconds) )
+!          end if
 
           !Correct if SWE is 0
           if(snowWaterEquiv(day,hh,tcid_instance2) <=  0.)   then
@@ -983,7 +986,8 @@
              snowAlbedo(day,hh,tcid_instance2)      =  albedoMax
           end if
 
-          prec = precipMod(day, hh, tcid_instance2) !Further calculations with modified precipitation signal
+          prec    = precipMod(day, hh, tcid_instance2) !Further calculations with modified precipitation signal
+          precday = precipMod(day, hh, tcid_instance2) !Further calculations with modified precipitation signal
 
        end if
 

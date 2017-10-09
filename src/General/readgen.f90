@@ -287,7 +287,7 @@ SUBROUTINE readgen(path2do_dat)
     !Read, if present. Else using default values.
     if (dosnow /= 0) THEN
 
-    precipSeconds     =    84600. !make dependent from time step length dt??
+    precipSeconds     =    dt * 3600.
     !Read parameters for snow routine
      OPEN(12, file=pfadp(1:pfadj)// 'Hillslope/snow_params.ctl',IOSTAT=istate, STATUS='old')
          IF (istate==0) THEN

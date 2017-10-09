@@ -672,7 +672,7 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
         real :: ddt_sec
         real :: ddt_swe
         real :: ddt_alb
-        real, dimension(:), allocatable :: snowModelRes
+        real, dimension(1:17) :: snowModelRes
 
         !Derived variables
         TEMP_MEAN = snowTemp_mean(snowEnergyContent, snowWaterEquivalent, soilDepth, soilDens, soilSpecHeat)
