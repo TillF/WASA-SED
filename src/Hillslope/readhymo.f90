@@ -292,7 +292,8 @@ SUBROUTINE readhymo
     id_terrain_intern=0
     id_terrain_extern=0
 
-    DO i=1,nsoter
+    i=1
+    DO WHILE (i<=nsoter)
 
         READ(11,'(a)',IOSTAT=istate) cdummy
         if (istate/=0 .AND. i<nsoter) then    !premature end of file
@@ -307,11 +308,23 @@ SUBROUTINE readhymo
             stop
         end if
 
-
+        READ(cdummy,*,IOSTAT=istate) dummy1
+        if (istate/=0) then    !format error
+            write(*,'(a,i0)')'ERROR (soter.dat): Format error in line ',h
+            stop
+        end if
+        
+        j=which1(lu_temp==dummy1)
+        if (j==0) then    
+            !WRITE(*,'(a, I0, a, I0, a)') 'LU ',dummy1,' not listed in hymo.dat, ignored.'
+            cycle
+        end if
+        
         ! IDs are read into id_terrain_intern - conversion to internal id is done later
         READ(cdummy,*,IOSTAT=istate) id_lu_extern(i),nbrterrain(i), (id_terrain_intern(j,i),j=1,nbrterrain(i)),  &
             kfsu(i),slength(i), meandep(i),maxdep(i),riverbed(i),  &
             gw_flag(i),gw_dist(i),gw_delay(i)
+            i=i+1
         if (istate/=0) then    !format error
             write(*,'(a,i0)')'ERROR (soter.dat): Format error in line ',h
             stop
