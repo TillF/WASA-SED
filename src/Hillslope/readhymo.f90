@@ -1686,11 +1686,11 @@ if (dosediment) then
         END IF
 END IF !dosediments
 
-    if (dosnow /= 0) then
-        INCLUDE '../Hillslope/allocat_snow.f90'
-    end if
+if (dosnow /= 0) then
+    INCLUDE '../Hillslope/allocat_snow.f90'
+end if
 
-if (dosnow) then
+if (dosnow /= 0) then
      !** read Landscape units parameters related to snow
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/lu2.dat',STATUS='old')
         READ(11,*,IOSTAT=istate); READ (11,*,IOSTAT=istate)
@@ -1711,7 +1711,7 @@ if (dosnow) then
                     cycle
                 END IF
     
-            READ(cdummy,*,IOSTAT=istate) lu_aspect(k),lu_alt(k)
+            READ(cdummy,*,IOSTAT=istate) j, lu_aspect(k), lu_alt(k)
             if (istate/=0) then    !format error
                 write(*,'(a,i0)')'ERROR (lu2.dat): Format error in line ',h
                 stop
@@ -1727,7 +1727,15 @@ if (dosnow) then
         END DO    
       
         lu_aspect = lu_aspect * pi/180 !convert degree to radiants
-    end if ! do_snow
+
+        DO i_lu=1,nsoter  !Add relative LU elevation to rel_elevation() for all TCs of all LUs
+           DO tc_counter=1,nbrterrain(i_lu)
+              rel_elevation(id_terrain_intern(tc_counter,i_lu)) = rel_elevation(id_terrain_intern(tc_counter,i_lu)) + lu_alt(i_lu)
+           END DO
+        END DO
+
+end if ! do_snow
+
 
     !Till: allocation part - these variables are allocated here, because their dimension is not known before
      !!Print hydrologic variable on TC scale. If not used, DISABLE

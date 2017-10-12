@@ -218,10 +218,9 @@
     REAL                                 :: prec            !precipitation current time step potentially modified in snow module
     REAL                                 :: precday         !daily precipitation potentially modified in snow module
     REAL                                 :: prechall2(24)   !excerpt of preciph (24h of current subbas) potentially modified in snow module
-    REAL                                 :: temperature     !temperature of current time step
-    REAL                                 :: radiation       !radiation of current time step
+    REAL                                 :: temperature     !temperature of current time step potentially modified in snow module
+    REAL                                 :: radiation       !radiation of current time step potentially modified in snow module
     REAL                                 :: cloudFraction   !cloudiness fraction
-    REAL                                 :: precipBalance   !Precipitation input into snow model for balance check; after prepare input!
     REAL                                 :: airPress        !Air pressure of current time step
 
     logical :: isnan
@@ -902,42 +901,55 @@
     radiation     =   rad( day,i_subbas2)
     airPress      =   1000.
 
+    !Determination indices for optional arrays
+    !When optional output not activated array only with dimensions (1,1,1) allocated
+    !Check whether activated using logical factor read in from outfiles.dat
+    !Function fLog() in snow_h.f90
+    radiModIndices(:)    = fLog(f_snowTemp,  day, hh, tcid_instance2)
+    temperaModIndices(:) = fLog(f_surfTemp,  day, hh, tcid_instance2)
+    cloudFracIndices(:)  = fLog(f_cloudFrac, day, hh, tcid_instance2)
+    snowTempIndices(:)   = fLog(f_snowTemp,  day, hh, tcid_instance2)
+    surfTempIndices(:)   = fLog(f_surfTemp,  day, hh, tcid_instance2)
+    liquFracIndices(:)   = fLog(f_liquFrac,  day, hh, tcid_instance2)
+    fluxPrecIndices(:)   = fLog(f_fluxPrec,  day, hh, tcid_instance2)
+    fluxSublIndices(:)   = fLog(f_fluxSubl,  day, hh, tcid_instance2)
+    fluxFlowIndices(:)   = fLog(f_fluxFlow,  day, hh, tcid_instance2)
+    fluxNetSIndices(:)   = fLog(f_fluxNetS,  day, hh, tcid_instance2)
+    fluxNetLIndices(:)   = fLog(f_fluxNetL,  day, hh, tcid_instance2)
+    fluxSoilIndices(:)   = fLog(f_fluxSoil,  day, hh, tcid_instance2)
+    fluxSensIndices(:)   = fLog(f_fluxSens,  day, hh, tcid_instance2)
+    stoiPrecIndices(:)   = fLog(f_stoiPrec,  day, hh, tcid_instance2)
+    stoiSublIndices(:)   = fLog(f_stoiSubl,  day, hh, tcid_instance2)
+    stoiFlowIndices(:)   = fLog(f_stoiFlow,  day, hh, tcid_instance2)
+    rateAlbeIndices(:)   = fLog(f_rateAlbe,  day, hh, tcid_instance2)
+
     if(dosnow > 0) then
 
        !Subroutine to modify meteo-drivers according to location
        !Preparation before feeding the snow model
 
-       call snow_prepare_input(hh, day, i_subbas2, lu_counter2, tc_counter2, prec, temperature, radiation, cloudFraction, precipBalance)
+       call snow_prepare_input(hh, day, i_subbas2, lu_counter2, tc_counter2, prec, temperature, radiation, &
+                               cloudFraction, tempLaps, tempAmplitude, tempMaxOffset)
 
+       !Collect modified radiation(aspect, slope) and temperature (elevation) signal
+       radiMod(radiModIndices(1),radiModIndices(2),radiModIndices(3))             = radiation
+       temperaMod(temperaModIndices(1),temperaModIndices(2),temperaModIndices(3)) = temperature
 
-       !Subroutine calculating the dynamics of the snow cover
-          !(Wind currently not read from input file; assumed constant wind = 1; see climo.f90)
-          !Air pressure constant; for now set to 1000 hPa
-
+       !Wind currently not read from input file; assumed constant wind = 1; see climo.f90
+       !Air pressure constant; for now set to 1000 hPa
        if(dohour) then
-         call snow_compute(prec, temperature, radiation, airPress, rhum(day,i_subbas2), wind(day,i_subbas2), cloudFraction, &
-                           snowEnergyCont(day, max(1,hh-1), tcid_instance2), snowWaterEquiv(day,  max(1,hh-1), tcid_instance2), &
-                           snowAlbedo(day,  max(1,hh-1), tcid_instance2), snowEnergyCont(day, hh, tcid_instance2), snowWaterEquiv(day, hh, tcid_instance2), &
-                           snowAlbedo(day, hh, tcid_instance2), snowCover(day, hh-1, tcid_instance2), snowTemp(day, hh, tcid_instance2), &
-                           surfTemp(day, hh, tcid_instance2), liquFrac(day, hh, tcid_instance2), fluxPrec(day, hh, tcid_instance2), fluxSubl(day, hh, tcid_instance2), &
-                           fluxFlow(day, hh, tcid_instance2), fluxNetS(day, hh, tcid_instance2), fluxNetL(day, hh, tcid_instance2), &
-                           fluxSoil(day, hh, tcid_instance2), fluxSens(day, hh, tcid_instance2), stoiPrec(day, hh, tcid_instance2), &
-                           stoiSubl(day, hh, tcid_instance2), stoiFlow(day, hh, tcid_instance2), rateAlbe(day, hh, tcid_instance2), &
-                           precipMod(day, hh, tcid_instance2), cloudFrac(day, hh, tcid_instance2), precipBal(day, hh, tcid_instance2))
-
-!         !Correction via balance
-!         !Precipitation in must equal precipitation out + sublimation flux + snow water equivalent
-!         !probably truncation causes slight deviations
-!         if( snowWaterEquiv(day,hh,tcid_instance2) > 0.  .AND. &
-!             SUM(precipBal(1:day,1:hh,tcid_instance2)) /= &
-!             SUM(precipMod(1:day,1:hh,tcid_instance2)) + &
-!             SUM(fluxSubl(1:day,1:hh,tcid_instance2))*1000.*precipSeconds + &
-!             snowWaterEquiv(day,hh,tcid_instance2)*1000. ) then
-!
-!                snowWaterEquiv(day,hh,tcid_instance2)  = ( SUM(precipBal(1:day,1:hh,tcid_instance2))/1000. - &
-!                                                           SUM(precipMod(1:day,1:hh,tcid_instance2))/1000 - &
-!                                                           SUM(fluxSubl(1:day,1:hh,tcid_instance2))*precipSeconds )
-!         end if
+         call snow_compute(prec, temperature_tc, radiation_tc, airPress, rhum(day,i_subbas2), wind(day,i_subbas2), cloudFraction, &
+                         snowEnergyCont(max(1,day-1),max(1,hh-1),tcid_instance2), snowWaterEquiv(max(1,day-1), max(1,hh-1),tcid_instance2), &
+                         snowAlbedo(max(1,day-1),max(1,hh-1),tcid_instance2), snowEnergyCont(day, hh, tcid_instance2), snowWaterEquiv(day, hh, tcid_instance2), &
+                         snowAlbedo(day, hh, tcid_instance2), snowCover(day, hh, tcid_instance2), &
+                         snowTemp(snowTempIndices(1),snowTempIndices(2),snowTempIndices(3)), surfTemp(surfTempIndices(1),surfTempIndices(2),surfTempIndices(3)), &
+                         liquFrac(liquFracIndices(1),liquFracIndices(2),liquFracIndices(3)), fluxPrec(fluxPrecIndices(1),fluxPrecIndices(2),fluxPrecIndices(3)), &
+                         fluxSubl(fluxSublIndices(1),fluxSublIndices(2),fluxSublIndices(3)), fluxFlow(fluxFlowIndices(1),fluxFlowIndices(2),fluxFlowIndices(3)), &
+                         fluxNetS(fluxNetSIndices(1),fluxNetSIndices(2),fluxNetSIndices(3)), fluxNetL(fluxNetLIndices(1),fluxNetLIndices(2),fluxNetLIndices(3)), &
+                         fluxSoil(fluxSoilIndices(1),fluxSoilIndices(2),fluxSoilIndices(3)), fluxSens(fluxSensIndices(1),fluxSensIndices(2),fluxSensIndices(3)), &
+                         stoiPrec(stoiPrecIndices(1),stoiPrecIndices(2),stoiPrecIndices(3)), stoiSubl(stoiSublIndices(1),stoiSublIndices(2),stoiSublIndices(3)), &
+                         stoiFlow(stoiFlowIndices(1),stoiFlowIndices(2),stoiFlowIndices(3)), rateAlbe(rateAlbeIndices(1),rateAlbeIndices(2),rateAlbeIndices(3)), &
+                         precipMod(day, hh, tcid_instance2), cloudFrac(cloudFracIndices(1),cloudFracIndices(2),cloudFracIndices(3)))
 
          prec           = precipMod(day, hh, tcid_instance2) !Further calculations with modified precipitation signal
          prechall2(hh)  = precipMod(day, hh, tcid_instance2) !Further calculations with modified precipitation signal
@@ -950,34 +962,18 @@
 
        else !daily
 
-         call snow_compute(prec, temperature, radiation, airPress, rhum(day,i_subbas2), wind(day,i_subbas2), cloudFraction, &
-                         snowEnergyCont(max(1,day-1), max(1,hh-1), tcid_instance2), snowWaterEquiv(max(1,day-1),  max(1,hh-1), tcid_instance2), &
-                         snowAlbedo(max(1,day-1),  max(1,hh-1), tcid_instance2), snowEnergyCont(day, hh, tcid_instance2), snowWaterEquiv(day, hh, tcid_instance2), &
-                         snowAlbedo(day, hh, tcid_instance2), snowCover(day, hh, tcid_instance2), snowTemp(day, hh, tcid_instance2), &
-                         surfTemp(day, hh, tcid_instance2), liquFrac(day, hh, tcid_instance2), fluxPrec(day, hh, tcid_instance2), fluxSubl(day, hh, tcid_instance2), &
-                         fluxFlow(day, hh, tcid_instance2), fluxNetS(day, hh, tcid_instance2), fluxNetL(day, hh, tcid_instance2), &
-                         fluxSoil(day, hh, tcid_instance2), fluxSens(day, hh, tcid_instance2), stoiPrec(day, hh, tcid_instance2), &
-                         stoiSubl(day, hh, tcid_instance2), stoiFlow(day, hh, tcid_instance2), rateAlbe(day, hh, tcid_instance2), &
-                         precipMod(day, hh, tcid_instance2), cloudFrac(day, hh, tcid_instance2), precipBal(day, hh, tcid_instance2))
-
-
-!         !Correction via balance
-!         !Precipitation in must equal precipitation out + sublimation flux + snow water equivalent
-!         !probably truncation causes slight deviations
-!          if( snowWaterEquiv(day,hh,tcid_instance2) > 0. .AND. &
-!              SUM(precipBal(1:day,hh,tcid_instance2)) /= &
-!              SUM(precipMod(1:day,hh,tcid_instance2)) + &
-!              SUM(fluxSubl(1:day,hh,tcid_instance2))*1000.*precipSeconds + &
-!              snowWaterEquiv(day,hh,tcid_instance2)*1000. - &
-!              max(0. , snowWaterEquiv(1,1,tcid_instance2)*1000 - SUM(precipMod(1:day,hh,tcid_instance2)) &
-!                                                               - SUM(fluxSubl(1:day,hh,tcid_instance2))*1000.*precipSeconds) ) then !snow from previous year not melted yet
-!
-!                snowWaterEquiv(day,hh,tcid_instance2)  = ( SUM(precipBal(1:day,hh,tcid_instance2))/1000. - &
-!                                                           SUM(precipMod(1:day,hh,tcid_instance2))/1000. - &
-!                                                           SUM(fluxSubl(1:day,hh,tcid_instance2))*precipSeconds + &
-!                                                           max(0. , snowWaterEquiv(1,1,tcid_instance2) - SUM(precipMod(1:day,hh,tcid_instance2))/1000. &
-!                                                                                                       - SUM(fluxSubl(1:day,hh,tcid_instance2))*precipSeconds) )
-!          end if
+         call snow_compute(prec, temperature_tc, radiation_tc, airPress, rhum(day,i_subbas2), wind(day,i_subbas2), cloudFraction, &
+                         snowEnergyCont(max(1,day-1),max(1,hh-1),tcid_instance2), snowWaterEquiv(max(1,day-1), max(1,hh-1),tcid_instance2), &
+                         snowAlbedo(max(1,day-1),max(1,hh-1),tcid_instance2), snowEnergyCont(day, hh, tcid_instance2), snowWaterEquiv(day, hh, tcid_instance2), &
+                         snowAlbedo(day, hh, tcid_instance2), snowCover(day, hh, tcid_instance2), &
+                         snowTemp(snowTempIndices(1),snowTempIndices(2),snowTempIndices(3)), surfTemp(surfTempIndices(1),surfTempIndices(2),surfTempIndices(3)), &
+                         liquFrac(liquFracIndices(1),liquFracIndices(2),liquFracIndices(3)), fluxPrec(fluxPrecIndices(1),fluxPrecIndices(2),fluxPrecIndices(3)), &
+                         fluxSubl(fluxSublIndices(1),fluxSublIndices(2),fluxSublIndices(3)), fluxFlow(fluxFlowIndices(1),fluxFlowIndices(2),fluxFlowIndices(3)), &
+                         fluxNetS(fluxNetSIndices(1),fluxNetSIndices(2),fluxNetSIndices(3)), fluxNetL(fluxNetLIndices(1),fluxNetLIndices(2),fluxNetLIndices(3)), &
+                         fluxSoil(fluxSoilIndices(1),fluxSoilIndices(2),fluxSoilIndices(3)), fluxSens(fluxSensIndices(1),fluxSensIndices(2),fluxSensIndices(3)), &
+                         stoiPrec(stoiPrecIndices(1),stoiPrecIndices(2),stoiPrecIndices(3)), stoiSubl(stoiSublIndices(1),stoiSublIndices(2),stoiSublIndices(3)), &
+                         stoiFlow(stoiFlowIndices(1),stoiFlowIndices(2),stoiFlowIndices(3)), rateAlbe(rateAlbeIndices(1),rateAlbeIndices(2),rateAlbeIndices(3)), &
+                         precipMod(day, hh, tcid_instance2), cloudFrac(cloudFracIndices(1),cloudFracIndices(2),cloudFracIndices(3)))
 
           !Correct if SWE is 0
           if(snowWaterEquiv(day,hh,tcid_instance2) <=  0.)   then

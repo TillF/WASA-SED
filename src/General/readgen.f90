@@ -338,6 +338,13 @@ SUBROUTINE readgen(path2do_dat)
                         READ(dummy,*) dummy2, do_rad_corr
                     CASE ('do_alt_corr')
                         READ(dummy,*) dummy2, do_alt_corr
+                    CASE ('tempLaps')
+                        READ(dummy,*) dummy2, tempLaps
+                    CASE ('tempAmplitude')
+                        READ(dummy,*) dummy2, tempAmplitude
+                    CASE ('tempMaxOffset')
+                        READ(dummy,*) dummy2, tempMaxOffset
+
                 END SELECT
             end do
      CLOSE(12)
@@ -362,6 +369,14 @@ SUBROUTINE readgen(path2do_dat)
                 soilDens=1300.                 !Density of soil (kg/m3)
                 soilSpecHeat=2.18              !Spec. heat capacity of soil (kJ/kg/K)
                 weightAirTemp=0.5              !Weighting param. for air temp. (-) in 0...1
+                lat = 42.4                     !Latitude of centre of study area
+                lon = 0.55                     !Longitude of centre of study area
+                do_rad_corr = .TRUE.           !modification of radiation with aspect and slope
+                do_alt_corr = .TRUE.           !modification of temperature with altitude of LU
+                tempLaps = -0.006              !Temperature lapse rate for modification depending on elevation of TC (°C/m)
+                tempAmplitude = 8              !Temperature amplitude to simulate daily cycle (°C])
+                tempMaxOffset = 2              !Offset of daily temperature maximum from 12:00 (h)
+
         END IF
     END IF !dosnow
 
@@ -547,7 +562,13 @@ SUBROUTINE readgen(path2do_dat)
                     f_precipMod=.TRUE. .AND. (dosnow /= 0)
                 CASE ('cloudfrac')
                     f_cloudFrac=.TRUE. .AND. (dosnow /= 0)
- 
+                CASE ('radimod')
+                    f_radiMod=.TRUE. .AND. (dosnow /= 0)
+                CASE ('temperamod')
+                    f_temperaMod=.TRUE. .AND. (dosnow /= 0)
+                CASE ('rel_elevation')
+                    f_rel_elevation=.TRUE. .AND. (dosnow /= 0)
+
                 CASE ('river_degradation')
                     f_river_degradation=dosediment
                 CASE ('river_deposition')

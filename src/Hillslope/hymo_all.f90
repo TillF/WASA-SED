@@ -601,6 +601,8 @@ SUBROUTINE hymo_all(STATUS)
         CALL open_subdaily_output_TC(f_rateAlbe,'rateAlbe.out','Output file TC-wise change rate of albedo (1/s)')
         CALL open_subdaily_output_TC(f_precipMod,'precipMod.out','Output file TC-wise precipitation modified by snow module (mm)')
         CALL open_subdaily_output_TC(f_cloudFrac,'cloudFrac.out','Output file TC-wise cloud fraction (-)')
+        CALL open_subdaily_output_TC(f_radiMod,'radiMod.out','Output file TC-wise radiation modified for slope and aspect (-)')
+        CALL open_subdaily_output_TC(f_temperaMod,'temperaMod.out','Output file TC-wise temperature corrected for elevation (-)')
 
     END IF
 
@@ -1407,7 +1409,8 @@ SUBROUTINE hymo_all(STATUS)
         CALL write_subdaily_output_TC(f_rateAlbe,'rateAlbe.out', rateAlbe)
         CALL write_subdaily_output_TC(f_precipMod,'precipMod.out', precipMod)
         CALL write_subdaily_output_TC(f_cloudFrac,'cloudFrac.out', cloudFrac)
-
+        CALL write_subdaily_output_TC(f_radiMod,'radiMod.out', radiMod)
+        CALL write_subdaily_output_TC(f_temperaMod,'temperaMod.out', temperaMod)
 
         if(dosnow >= 1 .AND. dprev >= dayyear) then
 
@@ -1417,6 +1420,32 @@ SUBROUTINE hymo_all(STATUS)
 
         end if
 
+
+
+        !Output relative elevation for each TC
+        if(f_rel_elevation)then
+            OPEN(11,FILE=pfadn(1:pfadi)//'rel_elevation.out', STATUS='replace')
+            WRITE(11,'(a)')    'Oufile relative elevation TC center'
+            WRITE(11,'(a)')    'Subbasin LU TC rel_elevation'
+
+            fmtstr ='(3(i0,a),E12.5)' !generate format string
+
+            DO sb_counter=1,subasin !for all subbasins
+               DO lu_counter=1,nbr_lu(sb_counter)!for all LUs
+                  i_lu=id_lu_intern(lu_counter,sb_counter)
+                    DO tc_counter=1,nbrterrain(i_lu)!for all TCs
+                       WRITE(11,fmtstr) &
+                            id_subbas_extern(sb_counter), char(9), &
+                            id_lu_extern(lu_counter), char(9), &
+                            id_terrain_extern(id_terrain_intern(tc_counter,i_lu)), char(9), &
+                            rel_elevation(tcallid(sb_counter, lu_counter, tc_counter))
+                    END DO
+               END DO
+           END DO
+
+
+            CLOSE(11)
+        end if
 
 
                 

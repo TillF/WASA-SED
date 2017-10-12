@@ -4,7 +4,7 @@
 #-------------------------------------------------------------------------
 
 ifndef DEBUG
-DEBUG=0
+DEBUG=1
 endif
 
 # installation path

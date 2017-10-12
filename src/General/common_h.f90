@@ -102,9 +102,9 @@ module common_h
     LOGICAL :: f_res_watbal,f_res_vollost,f_res_cav,f_res_hydraul,f_res_bedchange,f_res_sedbal,f_res_longitudunal,f_res_sedcomposition
     LOGICAL :: f_lake_inflow_r,f_lake_outflow_r,f_lake_retention_r,f_lake_volume_r,f_lake_sedinflow_r,f_lake_sedoutflow_r,f_lake_sedretention_r,f_lake_sedimentation_r
     LOGICAL :: f_lake_watbal,f_lake_sedbal,f_lake_inflow,f_lake_outflow,f_lake_volume,f_lake_retention,f_lake_vollost,f_lake_sedinflow,f_lake_sedoutflow,f_lake_sizedistoutflow
-    LOGICAL :: f_snowEnergyCont, f_snowWaterEquiv, f_snowAlbedo, f_snowCover, f_snowTemp, f_surfTemp, f_liquFrac, f_fluxPrec, f_fluxSubl, f_fluxFlow, f_fluxNetS, f_fluxNetL, f_fluxSoil, f_fluxSens, f_stoiPrec, f_stoiSubl, f_stoiFlow, f_rateAlbe, f_precipMod, f_cloudFrac
-    logical :: do_rad_corr=.FALSE.   ! modification of radiation with aspect and slope
-    logical :: do_alt_corr=.FALSE.   ! modification of temperature with altitude of LU
+    LOGICAL :: f_snowEnergyCont, f_snowWaterEquiv, f_snowAlbedo, f_snowCover, f_snowTemp, f_surfTemp, f_liquFrac, f_fluxPrec, f_fluxSubl, f_fluxFlow, f_fluxNetS, f_fluxNetL, f_fluxSoil, f_fluxSens, f_stoiPrec, f_stoiSubl, f_stoiFlow, f_rateAlbe, f_precipMod, f_cloudFrac,f_radiMod,f_temperaMod,f_rel_elevation
+    LOGICAL :: do_rad_corr=.FALSE.   ! modification of radiation with aspect and slope
+    LOGICAL :: do_alt_corr=.FALSE.   ! modification of temperature with altitude of LU
     
     
     LOGICAL :: doloadstate=.FALSE.         !load initial values before model run
