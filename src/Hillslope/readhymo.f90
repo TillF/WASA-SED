@@ -414,7 +414,7 @@ SUBROUTINE readhymo
         'Hillslope/soil_vegetation.dat',STATUS='old')
     READ(11,*); READ(11,*);READ(11,*)
     h=4
-    luse_subbas=0    !initital values
+    luse_subbas=0    !initial values
     luse_lu=0
     luse_tc=0
     rocky=0.
@@ -425,7 +425,6 @@ SUBROUTINE readhymo
     id_veg_intern =0
 
 	i=1
-    !DO i=1,ntcinst
 	DO WHILE (.TRUE.) !read till end of file
         READ(11,'(a)',IOSTAT=istate) cdummy
         if (istate/=0) then
@@ -611,14 +610,22 @@ SUBROUTINE readhymo
     rootdep=0
     lai=0
     alb=0
-    DO WHILE (j <= nveg) 
-        READ(11,*, IOSTAT=istate) id_veg_extern(j),resist(j),wstressmin(j),wstressmax(j),  &
-            (height(j,i),i=1,4),(rootdep(j,i),i=1,4), (lai(j,i),i=1,4),(alb(j,i),i=1,4)
-		
-		if (istate == -1) then
-			write(*,'(a,i0,a,i0)')'WARNING: vegetation.dat, expected ', nveg, ' valid entries, found ',j
-            exit
+    DO WHILE (.TRUE.) 
+        
+        cdummy=''
+        READ(11,'(a)',IOSTAT=istate) cdummy
+        
+        if (istate == -1 ) then
+            if ((trim(cdummy)=='') .and. j < nveg) then
+                write(*,'(a,i0,a,i0)')'WARNING: vegetation.dat, expected ', nveg, ' valid entries, found ',j
+                stop
+            else
+                exit
+            end if
         end if
+        
+        READ(cdummy,*, IOSTAT=istate) id_veg_extern(j),resist(j),wstressmin(j),wstressmax(j),  &
+            (height(j,i),i=1,4),(rootdep(j,i),i=1,4), (lai(j,i),i=1,4),(alb(j,i),i=1,4)
         
         if (istate /= 0) then
 			write(*,'(a,i0)')'ERROR: vegetation.dat, format error in line ',h
@@ -626,9 +633,12 @@ SUBROUTINE readhymo
         end if
         
         h=h+1
-        if (  size(pack(id_veg_intern, id_veg_extern(j) == id_veg_intern(:,:))) == 0  ) then
+
+            
+        if (.not. (any (id_veg_intern == id_veg_extern(j)))) then
+        !if (  size(pack(id_veg_intern, id_veg_extern(j) == id_veg_intern(:,:))) == 0  ) then
 			write(*,'(a,i0,a,i0,a)')'WARNING: unused vegetation-id ',id_veg_extern(j),' in vegetation.dat, line ',h-1
-            !cycle !Till: we should not cycle this here, otherwise later errors in reading SVCs may occur
+            cycle !ii: we should not cycle this here, otherwise later errors in reading SVCs may occur (?)
         end if
         
 		if (wstressmin(j) >= wstressmax(j)) then
