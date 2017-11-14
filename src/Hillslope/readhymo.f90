@@ -250,6 +250,7 @@ SUBROUTINE readhymo
             stop
         end if
 
+        lu_temp = 0
         READ(cdummy,*,IOSTAT=istate) n,temp1, k,  (lu_temp(j),j=1,k), (frac_lu_temp(j),j=1,k)
         if (istate/=0) then    !format error
             write(*,'(a,i0)')'ERROR (hymo.dat): Format error in line ',h
@@ -293,12 +294,15 @@ SUBROUTINE readhymo
     id_terrain_extern=0
 
     i=1
-    DO WHILE (i<=nsoter)
-
+    DO WHILE (.TRUE.)
+        cdummy=''
         READ(11,'(a)',IOSTAT=istate) cdummy
-        if (istate/=0 .AND. i<nsoter) then    !premature end of file
-            write(*,'(a,i0,a)')'ERROR (soter.dat): At least ',nsoter,' lines (#LUs) expected'
-            stop
+        if (istate/=0 .AND. len(trim(cdummy))==0) then
+            if (h<nsoter+2) then    !premature end of file
+                write(*,'(a,i0,a)')'ERROR (soter.dat): At least ',nsoter,' lines (#LUs) expected'
+                stop
+            end if
+            exit
         end if
         h=h+1 !count lines
 
@@ -314,8 +318,7 @@ SUBROUTINE readhymo
             stop
         end if
         
-        j=which1(lu_temp==dummy1)
-        if (j==0) then    
+        if (.NOT. any(id_lu_intern==dummy1)) then    
             !WRITE(*,'(a, I0, a, I0, a)') 'LU ',dummy1,' not listed in hymo.dat, ignored.'
             cycle
         end if
@@ -324,7 +327,6 @@ SUBROUTINE readhymo
         READ(cdummy,*,IOSTAT=istate) id_lu_extern(i),nbrterrain(i), (id_terrain_intern(j,i),j=1,nbrterrain(i)),  &
             kfsu(i),slength(i), meandep(i),maxdep(i),riverbed(i),  &
             gw_flag(i),gw_dist(i),gw_delay(i)
-            i=i+1
         if (istate/=0) then    !format error
             write(*,'(a,i0)')'ERROR (soter.dat): Format error in line ',h
             stop
@@ -344,6 +346,7 @@ SUBROUTINE readhymo
         if (gw_flag(i)/=99) then        !Till: gw_dist is only used if gw_flag is 99. To avoid side effects, gw_dist is et to 0
             gw_dist(i)=0.
         end if
+        i=i+1
     END DO
     CLOSE(11)
     gw_delay=max(1.,gw_delay)    !Till: gw_delay cannot be less than 1 (=all GW leaves LU immediately)
