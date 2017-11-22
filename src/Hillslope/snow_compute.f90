@@ -59,20 +59,20 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
        snowEnergyCont_new     =     snowEnergyContent
        snowWaterEquiv_new     =     snowWaterEquivalent
        albedo_new             =     albedo
-       flux_M_flow            =     0
-       flux_M_subl            =     0
-       flux_M_prec            =     0
-       TEMP_MEAN              =     0
-       TEMP_SURF              =     0
-       LIQU_FRAC              =     0
-       flux_R_netS            =     0
-       flux_R_netL            =     0
-       flux_R_soil            =     0
-       flux_R_sens            =     0
-       stoi_f_prec            =     0
-       stoi_f_subl            =     0
-       stoi_f_flow            =     0
-       rate_G_alb             =     0
+       flux_M_flow            =     0.
+       flux_M_subl            =     0.
+       flux_M_prec            =     0.
+       TEMP_MEAN              =     0.
+       TEMP_SURF              =     0.
+       LIQU_FRAC              =     0.
+       flux_R_netS            =     0.
+       flux_R_netL            =     0.
+       flux_R_soil            =     0.
+       flux_R_sens            =     0.
+       stoi_f_prec            =     0.
+       stoi_f_subl            =     0.
+       stoi_f_flow            =     0.
+       rate_G_alb             =     0.
 
        if(precipSeconds >= 84600.)then
           n = 24
@@ -156,6 +156,8 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
 
        snowCov                =     0.
        cloudFraction          =     cloudCoverage
+
+       precipModif = precipSumMM !No snow cover present; rain not modified; when executing this line precipSumMM always 0. Necessary to  overwrite value of previous year of this time step
 
     end if
 
@@ -503,7 +505,7 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
         real :: snowWaterEquivalent
         real :: snowDepl
 
-        if(snowWaterEquivalent > 0.05) then
+        if(snowWaterEquivalent > snowFracThresh) then
            snowDepl = 1.
         else
            snowDepl = 0.
@@ -683,16 +685,19 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
         flux_M_subl = M_subl(TEMP_SURF, tempAir, pressAir, relHumid, windSpeed, a0, a1, snowWaterEquivalent)
         flux_M_flow = M_flow(LIQU_FRAC, kSatSnow, densDrySnow, specCapRet, snowWaterEquivalent)
 
-        !flux_M_flow = 0.0000000000003564321654651654651654651654651!0.1/1000./precipSeconds
-        flux_M_subl = 0.
-
         !if no snow cover present and precipitation liquid, no addition to swe
         if(snowWaterEquivalent <= 0.0 .and. tempAir > tempAir_crit) then
-        flux_M_prec = 0.
+           flux_M_prec = 0.
         end if
 
+        !no more melt outflow than in snow cover
+        if(flux_M_flow*precipSeconds > snowWaterEquivalent)then
+           flux_M_flow = snowWaterEquivalent / precipSeconds
+        endif
+
+
         !Radiation fluxes
-        flux_R_netS = R_netS(shortRad, albedo, snowWaterEquivalent)
+        flux_R_netS = R_netS(snowWaterEquivalent, shortRad, albedo)
         flux_R_netL = R_netL(TEMP_SURF, emissivitySnowMin, emissivitySnowMax, tempAir, relHumid, &
                             cloudCoverage, albedo, albedoMin, albedoMax, snowWaterEquivalent)
         flux_R_soil = R_soil()

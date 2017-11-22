@@ -1423,8 +1423,8 @@ SUBROUTINE hymo_all(STATUS)
 
 
         !Output relative elevation for each TC
+        OPEN(11,FILE=pfadn(1:pfadi)//'rel_elevation.out', STATUS='replace')
         if(f_rel_elevation)then
-            OPEN(11,FILE=pfadn(1:pfadi)//'rel_elevation.out', STATUS='replace')
             WRITE(11,'(a)')    'Oufile relative elevation TC center'
             WRITE(11,'(a)')    'Subbasin LU TC rel_elevation'
 
@@ -1440,11 +1440,11 @@ SUBROUTINE hymo_all(STATUS)
                             id_terrain_extern(id_terrain_intern(tc_counter,i_lu)), char(9), &
                             rel_elevation(tcallid(sb_counter, lu_counter, tc_counter))
                     END DO
-               END DO
-           END DO
-
-
+                END DO
+            END DO
             CLOSE(11)
+         ELSE                !delete any existing file, if no output is desired
+            CLOSE(11,status='delete')
         end if
 
 

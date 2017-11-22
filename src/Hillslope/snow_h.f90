@@ -31,6 +31,7 @@ module snow_h
     real :: tempLaps                               !Temperature lapse rate for modification depending on elevation of TC (°C/m)
     real :: tempAmplitude                          !Temperature amplitude to simulate daily cycle (°C)
     real :: tempMaxOffset                          !Offset of daily temperature maximum from 12:00 (h)
+    real :: snowFracThresh                          !Threshold to determine when TC snow covered (m)
 
     real, pointer :: snowEnergyCont(:,:,:)         !Snow energy content [kJ/m²]
     real, pointer :: snowWaterEquiv(:,:,:)         !Snow water equivalent [m]
@@ -41,7 +42,7 @@ module snow_h
     real, pointer :: radiMod(:,:,:)                !Radiation signal corrected for aspect and slope [W/m²]
     real, pointer :: temperaMod(:,:,:)             !Height-modified temperature signal [°C]
     real, pointer :: cloudFrac(:,:,:)              !Cloud fraction [-]
-    real, pointer :: rel_elevation(:)              !Relative elevation of TC above foot of toposequence/LU (i.e. river) [m]
+    real, pointer :: rel_elevation(:)              !Relative elevation of TC to mean subbasin [m]
 
     real, pointer :: snowTemp(:,:,:)               !Mean temperatur of the snow pack [°C]
     real, pointer :: surfTemp(:,:,:)               !Snow surface temperature [°C]
@@ -91,29 +92,31 @@ contains
 
         integer, intent(IN)                  :: hh, day, sb_counter, lu_counter2, tc_counter2
         real,    intent(INOUT)               :: prec_mod, temp_mod, rad_mod
-        real,    intent(INOUT)               :: cloudFraction !cloudiness fraction
-        real,    intent(IN)                  :: lapse_temp !Temperature lapse rate (°C/m)
-        real,    intent(IN)                  :: tempAmpli  !Daily temperature amplitude (°C)
-        real,    intent(IN)                  :: tempMaxOff !Offset daily temperature maximum from 12:00 (h)
+        real,    intent(INOUT)               :: cloudFraction   !cloudiness fraction
+        real,    intent(IN)                  :: lapse_temp      !Temperature lapse rate (°C/m)
+        real,    intent(IN)                  :: tempAmpli       !Daily temperature amplitude (°C)
+        real,    intent(IN)                  :: tempMaxOff      !Offset daily temperature maximum from 12:00 (h)
         real                                 :: lapse_prec = 0. !Lapse rate for precipitation modification according to elevation
         
         real                                 :: slope_rad, aspect  !slope, aspect of TC [rad]
         integer                              :: lu_id,i
-        real,parameter                       :: S_C = 1366.944 !solar constant [W/(m^2)]
-        real :: E_0, Gamma, delta, omega_s, H0, K_t, K_r, f_beta !various sun-related variables
-        real, DIMENSION(1:24) :: omega1, i_hor, i_slope, I0, G_h, G_B, G_D !variables  radiation correction aspect slope
+        real,parameter                       :: S_C = 1366.944 !Solar constant [W/(m^2)]
+        real                                 :: E_0     !Eccentricity of Earth orbit
+        real                                 :: Gamma   !day angle [rad]
+        real                                 :: delta   !Declination [rad] (the angular position of the sun at solar noon with respect to the plane of the equator
+        real                                 :: omega_s !Local sunrise hour angle for a horizontal surface [rad]
+        real                                 :: H0      !Daily extraterrestrial radiation [MJ/m2/d]
+        real                                 :: K_t     !Ratio of global to extraterrestrial radiation [-]
+        real                                 :: K_r     !Ratio of diffuse radiation to global radiation for a horizontal surface [-]
+        real                                 :: f_beta  !Slope reduction factor [-]
+        real, DIMENSION(1:24)                :: omega1  !Hour angle [rad]
+        real, DIMENSION(1:24)                :: i_hor   !Angle of incidence onto horizontal surface [rad]
+        real, DIMENSION(1:24)                :: i_slope !Angle of incidence onto inclinated surface [rad]
+        real, DIMENSION(1:24)                :: I0      !Hourly extraterrestrial radiation [W/m²]
+        real, DIMENSION(1:24)                :: G_h     !Hourly global radiation onto horizontal plane, rescaled from daily measurement [W/m²]
+        real, DIMENSION(1:24)                :: G_B     !Direct radiation onto inclinated plane [W/m²]
+        real, DIMENSION(1:24)                :: G_D     !Diffuse irradiance on inclinated surface [W/m²]
 
-
-        !Calculations cloud fraction
-        !Based on approach included Andreas Güntner (see etp_max.f90)
-        !According to Shuttleworth (1992) Handbook of Hydrology, Chapter 4
-        !IMPORTANT: nn does not equal cloudFrac => nn = 1-cloudFrac
-           cloudFraction = 1 - (rad_mod/radex(day)/0.55-0.18/0.55)
-           cloudFraction = MAX(0.0,cloudFraction)
-           cloudFraction = MIN(1.0,cloudFraction)
-           !Angstrom coefficients:
-           !0.18 (fraction of extratesetrial radiation on overcast day)
-           !0.55+0.18 (fraction of extraterestrial radiation on clear days)
 
         !Modification precipitaion using simple, lapse-rate-based approach
            prec_mod = prec_mod + lapse_prec * rel_elevation(tcallid(sb_counter, lu_counter2, tc_counter2))
@@ -137,7 +140,6 @@ contains
         end if
         
         !Modification of radiation according to aspect and slope if activated
-        if (do_rad_corr) then
            !References:
            !Tian et al. 2001: Estimating solar radiation on slopes of arbitrary aspec (https://doi.org/10.1016/S0168-1923(01)00245-3)
            !Maleki et al. 2017:Estimation of Hourly, Daily and Monthly Global Solar Radiation on Inclined Surfaces: Models Re-Visited  (doi:10.3390/en10010134)
@@ -145,11 +147,16 @@ contains
            !ii: many of these caculations include computationally-demanding trigonometric functions
            !wherever possible, these should be done once at the start of the model run, or once per day and stored for re-use
         
+           if (dohour)then
+              write(*,*)'Radiation modification for aspect and slope for hourly resolution runs not yet integrated!'
+           end if
+
+
            if (hh==1) then !if this is the first hour, compute values for the entire day (speedup)
               lu_id = id_lu_intern(lu_counter2, sb_counter) !get LU-id
 
               slope_rad = atan(slope(id_terrain_intern(tc_counter2, lu_id))) !slope angle [radiant]
-              aspect = lu_aspect(lu_id) !aspect [degree]; (south=0°, north=180° and west=90°, east=-90)
+              aspect = lu_aspect(lu_id) !aspect [rad]; (south=0, north=+/-pi and west=pi/2, east=-pi/2); in lu2.dat given in [°], converted to [rad] during read in
   
               E_0 = 1+0.033*cos(2.*julian_day/365) !eccentricity of Earth orbit; Tian, A.2, Beckman in Maleki et al. 2017
               Gamma = (2*pi*(julian_day-1)) / 365  !day angle [rad], Tian A.4
@@ -183,33 +190,35 @@ contains
               i_hor = acos( &
                  sin(delta)*sin(lat)*1 &
                  - 0 &
-                 + cos(delta)*cos(lat)*1*cos(omega1) &
+                 + cos(delta)*cos(lat)*1*cos(-omega1) &
                  +0 &
                  +0 &
                 )
       
-              !angle of incidence onto inclinated surface [rad], Allen, 2006, eq.3. Gamma changed into -Gamma (otherwise, the daily cycle was reversed)
+              !angle of incidence onto inclinated surface [rad], Allen, 2006, eq.3. (hourly angle omega1 with minus, as calculations base on approach from Maleki with moring/afternoon angle defined with opposite sign
               !ii: should re-use terms of i_hor
                i_slope = acos( &
                  sin(delta)*sin(lat)*cos(slope_rad) &
-               - sin(delta)*cos(lat)*sin(slope_rad)*cos(-aspect) &
-               + cos(delta)*cos(lat)*cos(slope_rad)*cos(omega1) &
-               + cos(delta)*sin(lat)*sin(slope_rad)*cos(aspect)*cos(omega1) &
-               + cos(delta)*sin(aspect)*sin(slope_rad)*sin(omega1) &
+               - sin(delta)*cos(lat)*sin(slope_rad)*cos(aspect) &
+               + cos(delta)*cos(lat)*cos(slope_rad)*cos(-omega1) &
+               + cos(delta)*sin(lat)*sin(slope_rad)*cos(aspect)*cos(-omega1) &
+               + cos(delta)*sin(aspect)*sin(slope_rad)*sin(-omega1) &
                )
   
               I0 = S_C * E_0 * cos (i_hor)    !hourly extraterrestrial radiation [W/m²]
               where(abs(i_hor)>= pi/2) I0 = 0 !no radiation before/after sunrise/sunset
   
               !H0 = sum(I0) *3600/1e6  !daily extraterrestrial radiation [MJ/m²/d]
-  
-              K_t = rad_mod*3600/1e6 / H0 !ratio of global to extraterrestrial radiation (an inverse index of cloudiness)
+
+              K_t = rad_mod*3600*24/1e6 / H0 !ratio of global to extraterrestrial radiation (an inverse index of cloudiness)
               ! "clearness index" M_t in Maleki et al, 2017
               if (K_t >= 1) then
                   write(*,'(A,i0,a)')'Warning: Radiation for subbasin ', id_subbas_extern(sb_counter),' is higher than the computed extraterrestrial radiation. Truncated.'
                   K_t = 0.99
               end if
-  
+
+         if (do_rad_corr) then !Calculations needed before, as K_t used as measure for cloudiness
+
               G_h = I0 * K_t     !hourly global radiation onto horizontal plane, rescaled from daily measurement [W/m²]
   
     
@@ -234,7 +243,7 @@ contains
               f_beta = 1-slope_rad/pi !slope reduction factor [-], Tian
               G_D = G_h * (f_beta*K_r + 0.2 * (1-f_beta)) !diffuse irradiance on inclinated surface
               radiation_tc(:) = G_B + G_D  !total irradiance onto inclinated surface
-              rad_mod = sum(radiation_tc)
+              rad_mod = sum(radiation_tc)/24
 
            end if !end first hour
 
@@ -243,6 +252,21 @@ contains
            radiation_tc(:)=rad_mod/24
       
         end if !do_radCorr (radiation correction)
+
+
+        !Calculations cloud fraction
+        !Old method based on approach included Andreas Güntner (see etp_max.f90)
+        !According to Shuttleworth (1992) Handbook of Hydrology, Chapter 4
+        !IMPORTANT: nn does not equal cloudFrac => nn = 1-cloudFrac
+           !cloudFraction = 1 - (rad_mod/radex(day)/0.55-0.18/0.55)
+           !cloudFraction = MAX(0.0,cloudFraction)
+           !cloudFraction = MIN(1.0,cloudFraction)
+           !Angstrom coefficients:
+           !0.18 (fraction of extratesetrial radiation on overcast day)
+           !0.55+0.18 (fraction of extraterestrial radiation on clear days)
+        !New approach using calculated daily extratesetrial radiation
+          cloudFraction = 1 - K_t
+
 
 
     END SUBROUTINE snow_prepare_input

@@ -86,7 +86,7 @@ SUBROUTINE readgen(path2do_dat)
 
 
     if (trim(path2do_dat)=='') then
-        path2do_dat='U:/dataBase/Input/Cabecera/do.dat'			!Till: use default, if no command line argument was specified
+        path2do_dat='U:/dataBase/Input/Villacarli/do.dat'			!Till: use default, if no command line argument was specified
         custompath=''
     else
         write(*,*)'reading runtime parameters from ',path2do_dat
@@ -344,6 +344,8 @@ SUBROUTINE readgen(path2do_dat)
                         READ(dummy,*) dummy2, tempAmplitude
                     CASE ('tempMaxOffset')
                         READ(dummy,*) dummy2, tempMaxOffset
+                    CASE ('snowFracThresh')
+                        READ(dummy,*) dummy2, snowFracThresh
 
                 END SELECT
             end do
@@ -376,6 +378,7 @@ SUBROUTINE readgen(path2do_dat)
                 tempLaps = -0.006              !Temperature lapse rate for modification depending on elevation of TC (°C/m)
                 tempAmplitude = 8              !Temperature amplitude to simulate daily cycle (°C])
                 tempMaxOffset = 2              !Offset of daily temperature maximum from 12:00 (h)
+                snowFracThresh = 0.02          !Threshold to determine when TC snow covered (m)
 
         END IF
     END IF !dosnow
