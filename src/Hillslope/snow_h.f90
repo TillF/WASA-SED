@@ -253,7 +253,6 @@ contains
       
         end if !do_radCorr (radiation correction)
 
-
         !Calculations cloud fraction
         !Old method based on approach included Andreas Güntner (see etp_max.f90)
         !According to Shuttleworth (1992) Handbook of Hydrology, Chapter 4
