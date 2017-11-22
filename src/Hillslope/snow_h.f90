@@ -31,7 +31,7 @@ module snow_h
     real :: tempLaps                               !Temperature lapse rate for modification depending on elevation of TC (°C/m)
     real :: tempAmplitude                          !Temperature amplitude to simulate daily cycle (°C)
     real :: tempMaxOffset                          !Offset of daily temperature maximum from 12:00 (h)
-    real :: snowFracThresh                          !Threshold to determine when TC snow covered (m)
+    real :: snowFracThresh                         !Threshold to determine when TC snow covered (m)
 
     real, pointer :: snowEnergyCont(:,:,:)         !Snow energy content [kJ/m²]
     real, pointer :: snowWaterEquiv(:,:,:)         !Snow water equivalent [m]
@@ -59,7 +59,7 @@ module snow_h
     real, pointer :: stoiFlow(:,:,:)               !Conversion of meltwater loss mass flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3
     real, pointer :: rateAlbe(:,:,:)               !Change rate of albedo [1/s]
     real, pointer :: lu_aspect(:)                  !mean aspect of a LU in radiants (south=0°, north=180° and west=90°, east=-90)
-    real, pointer :: lu_alt(:)                     !mean LU altitude over subbasin outlet
+    real, pointer :: lu_alt(:)                     !mean LU altitude over subbasin outlet (m)
     
     !Indices for optional output arrays
     !When output activated only with dimensions (1,1,1) allocated
