@@ -1,4 +1,4 @@
-SUBROUTINE readhymo
+    SUBROUTINE readhymo
     !Till: computationally irrelevant: added options for LU-wise sediment output
     !2014-05-15
 
@@ -153,7 +153,7 @@ SUBROUTINE readhymo
 
     INTEGER :: idummy,i,j,c,k,i_min,n,h,ii
     INTEGER :: dummy1, loop
-    INTEGER ::id_sub_int,id_lu_int,id_lu_ext,id_tc_int,id_soil_int,test 
+    INTEGER ::id_sub_int,id_lu_int,id_lu_ext,id_tc_int,id_soil_int,test
     INTEGER :: idummy2(20),tausch,istate
     REAL :: temp1,temp2, maxthickness
     REAL :: sortier(maxterrain),tauschr
@@ -178,7 +178,7 @@ SUBROUTINE readhymo
     INTEGER :: luse_subbas(ntcinst),luse_lu(ntcinst),luse_tc(ntcinst)
 
     INTEGER :: i_soil,i_veg        ! ids of components in work
-    
+
 
     !Till: Read routing.dat, which determines which of the given subbasins are to be modelled
     OPEN(11,FILE=pfadp(1:pfadj)// 'River/routing.dat',STATUS='old',IOSTAT=istate)    ! upbasin: MAP ID of upstream sub-basin (MAP IDs);! downbasin: MAP ID of downstream sub-basin (MAP IDs)
@@ -215,6 +215,27 @@ SUBROUTINE readhymo
         call pause1
     end if
 
+    !check integrity of routing order
+    IF (downbasin(subasin)/=999 .AND. downbasin(subasin)/=9999)  THEN
+        WRITE (*,'(A,I0,A)') 'ERROR in routing.dat: Last line must contain the outlet (downstream ID must be 999)'
+        STOP
+    end if
+    DO i=1,subasin
+        idummy=which1(upbasin(i)==upbasin(i+1:subasin))
+        IF (idummy/=0) THEN
+            WRITE (*,'(A,I0,A)') 'ERROR in routing.dat: subbasin ', upbasin(i),' cannot drain to more than one basin.'
+            STOP
+        end if
+    
+        if (i==subasin) exit !don't do the next check for the last line
+        idummy=which1(upbasin(i)==downbasin(i+1:subasin))
+        IF (idummy/=0) THEN
+            WRITE (*,'(A,I0,A,I0,A)') 'ERROR in routing.dat: subbasin ', upbasin(i),' receives input from ', upbasin(i+idummy), ". Relocate the former to after the latter in the routing scheme."
+            STOP
+        end if
+    END DO
+
+
     INCLUDE '../General/allocat_general.var'
 
 
@@ -243,7 +264,7 @@ SUBROUTINE readhymo
             write(*,'(a,i0,a)')'ERROR (hymo.dat): At least ',subasin,' lines (#subbasins) expected'
             stop
         end if
-        
+
         dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
         if (dummy1-3 > 2*maxsoter) then    !too many fields in line
             write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (hymo.dat): line ',h,' contains more (',dummy1,') than the expected 3 + 2 * ',maxsoter,' fields (maxdim.dat).'
@@ -276,7 +297,7 @@ SUBROUTINE readhymo
         write(*,*)'ERROR: hymo.dat: expected ',subasin,' subbasins, found ',c
         stop
     end if
- 
+
     if (size(whichn(id_subbas_intern(1:subasin)==0,0))>0) then    !check if there are subbasins read from routing.dat that were not found in hymo.dat
         write(*,*)'ERROR: The following subbasins have been listed in routing.dat, but are missing in hymo.dat:'
         write(*,*)id_subbas_extern(whichn(id_subbas_intern(1:subasin)==0,0))
@@ -317,12 +338,12 @@ SUBROUTINE readhymo
             write(*,'(a,i0)')'ERROR (soter.dat): Format error in line ',h
             stop
         end if
-        
-        if (.NOT. any(id_lu_intern==dummy1)) then    
+
+        if (.NOT. any(id_lu_intern==dummy1)) then
             !WRITE(*,'(a, I0, a, I0, a)') 'LU ',dummy1,' not listed in hymo.dat, ignored.'
             cycle
         end if
-        
+
         ! IDs are read into id_terrain_intern - conversion to internal id is done later
         READ(cdummy,*,IOSTAT=istate) id_lu_extern(i),nbrterrain(i), (id_terrain_intern(j,i),j=1,nbrterrain(i)),  &
             kfsu(i),slength(i), meandep(i),maxdep(i),riverbed(i),  &
@@ -373,7 +394,7 @@ SUBROUTINE readhymo
         allocate(frac_diff2conc(nterrain))
         allocate(frac_conc2diff(nterrain))
         frac_diff2conc = 0. !default values, same as dolattc = doalllattc = TRUE
-        frac_conc2diff = 0.        
+        frac_conc2diff = 0.
     end if
 
 
@@ -388,22 +409,22 @@ SUBROUTINE readhymo
     end if
 
     if (istate/=0) then    !format error
-            write(*,'(a,i0,a)')'ERROR (terrain.dat): Format error in line ',i+2,". Check formatting and number of TCs specified in do.dat"
-            stop
+        write(*,'(a,i0,a)')'ERROR (terrain.dat): Format error in line ',i+2,". Check formatting and number of TCs specified in do.dat"
+        stop
     end if
-    
+
     READ(11,'(a)',IOSTAT=istate) cdummy
     if (istate==0 .AND. cdummy/="") then    !excess lines
-            write(*,'(a,i0,a)')'WARNING (terrain.dat): Found more than the expected ',nterrain," data lines. File truncated. Check number of TCs specified in do.dat"
+        write(*,'(a,i0,a)')'WARNING (terrain.dat): Found more than the expected ',nterrain," data lines. File truncated. Check number of TCs specified in do.dat"
     end if
-    
+
     !free memory containing correction factors, if sediment is disabled or all set to 1
     if (allocated(beta_fac_tc)) then
         if ((.NOT. dosediment) .OR. all(beta_fac_tc==1.)) deallocate(beta_fac_tc)
-    end if    
+    end if
     if ( allocated(sdr_tc))     then
         if ((.NOT. dosediment) .OR. all(sdr_tc==1.))       deallocate(sdr_tc)
-    end if 
+    end if
 
     CLOSE(11)
 
@@ -424,53 +445,53 @@ SUBROUTINE readhymo
     id_soil_intern=0
     id_veg_intern =0
 
-	i=1
-	DO WHILE (.TRUE.) !read till end of file
+    i=1
+    DO WHILE (.TRUE.) !read till end of file
         READ(11,'(a)',IOSTAT=istate) cdummy
         if (istate/=0) then
-			if ((h-4<ntcinst)  ) then    !premature end of file
-				write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' x 3 lines (#TC-LU-SUBBAS-combinations) expected'
-				stop
-			else
-				if (i-1/=ntcinst) then    !less entities read than expected
-					write(*,'(a,i0,a,i0,a)')'WARNING (soil_vegetation.dat): ',i-1,' instead of the expected ',ntcinst,' TCs read.'
-					ntcinst=i-1 !correct value
+            if ((h-4<ntcinst)  ) then    !premature end of file
+                write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' x 3 lines (#TC-LU-SUBBAS-combinations) expected'
+                stop
+            else
+                if (i-1/=ntcinst) then    !less entities read than expected
+                    write(*,'(a,i0,a,i0,a)')'WARNING (soil_vegetation.dat): ',i-1,' instead of the expected ',ntcinst,' TCs read.'
+                    ntcinst=i-1 !correct value
                     ! resize arrays
                     nbr_svc =>new_int_array1(nbr_svc, ntcinst, 1)
                     rocky=>     new_real_array1(rocky, ntcinst,1)
-	                laitc=>     new_real_array1(laitc, ntcinst,1)
-	                aettc=>     new_real_array1(aettc, ntcinst,1)
-	                soilettc=>  new_real_array1(soilettc, ntcinst,1)
-	                intctc=>    new_real_array1(intctc, ntcinst,1)
-	                horttc=>    new_real_array1(horttc, ntcinst,1)
-	                gwrtc=>     new_real_array1(gwrtc, ntcinst,1)
-	                deepgwrtc=> new_real_array1(deepgwrtc, ntcinst,1)
-                    
+                    laitc=>     new_real_array1(laitc, ntcinst,1)
+                    aettc=>     new_real_array1(aettc, ntcinst,1)
+                    soilettc=>  new_real_array1(soilettc, ntcinst,1)
+                    intctc=>    new_real_array1(intctc, ntcinst,1)
+                    horttc=>    new_real_array1(horttc, ntcinst,1)
+                    gwrtc=>     new_real_array1(gwrtc, ntcinst,1)
+                    deepgwrtc=> new_real_array1(deepgwrtc, ntcinst,1)
+
                     id_soil_intern=> new_int_array2(id_soil_intern, ntcinst,2)
-	                id_veg_intern => new_int_array2(id_veg_intern, ntcinst,2)
+                    id_veg_intern => new_int_array2(id_veg_intern, ntcinst,2)
                     svcrooth =>      new_int_array2(svcrooth, ntcinst,1)
                     svcbedr  =>      new_int_array2(svcbedr, ntcinst,1)
-                    
+
                     frac_svc  => new_real_array2(frac_svc, ntcinst,2)
-	                soilwater => new_real_array2(soilwater,ntcinst,2)
-                    
-	                intercept=> new_real_array2(intercept, ntcinst,1)
-	                frac_sat => new_real_array2(frac_sat, ntcinst,1) 
-                    
+                    soilwater => new_real_array2(soilwater,ntcinst,2)
+
+                    intercept=> new_real_array2(intercept, ntcinst,1)
+                    frac_sat => new_real_array2(frac_sat, ntcinst,1)
+
                     horiz_thickness=> new_real_array3(horiz_thickness,ntcinst,1)
                     pwpsc          => new_real_array3(pwpsc          ,ntcinst,1)
-	                horiths        => new_real_array3(horiths        ,ntcinst,1)
-	                horithact      => new_real_array3(horithact      ,ntcinst,1)
-				end if
-				exit !enough lines read, abort loop
-			end if
+                    horiths        => new_real_array3(horiths        ,ntcinst,1)
+                    horithact      => new_real_array3(horithact      ,ntcinst,1)
+                end if
+                exit !enough lines read, abort loop
+            end if
         end if
-        
+
         if (i > ntcinst  ) then    !more lines than expected
-			write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' x 3 lines (#TC-LU-SUBBAS-combinations) expected'
-			stop
+            write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' x 3 lines (#TC-LU-SUBBAS-combinations) expected'
+            stop
         end if
-        
+
 
         dummy1=GetNumberOfSubstrings(cdummy)-5 !Till: count number of fields (ie SVCs) specified for this combination
         if (dummy1 > maxsoil) then
@@ -480,25 +501,25 @@ SUBROUTINE readhymo
         k=0
         READ(cdummy,*,IOSTAT=istate) luse_subbas(i) !read subbasin ID only
         h=h+1 !count lines
-		if (which1(luse_subbas(i) == id_subbas_extern) == 0) then
-			!write(*,'(a,i0)')'WARNING (soil_vegetation.dat): Unknown subbasin ',luse_subbas(i),' in line ',h,', ignored.'
-			READ(11,'(a)',IOSTAT=istate) cdummy !skip next two lines
-			READ(11,'(a)',IOSTAT=istate) cdummy
-			h=h+2 !count lines
-		else
-			READ(cdummy,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
-				rocky(i),nbr_svc(i),(id_soil_intern(c,i),c=1,dummy1)    !!ii: nbr_svc, rocky, id_soil_intern sind feststehende Parameter für einen TC-Typ und sollten nur einmal pro TC-typ gespeichert werden
-			k=k+istate
-			READ(11,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
-				rocky(i),nbr_svc(i),(id_veg_intern(c,i),c=1,dummy1)
-			k=k+istate
-			h=h+1 !count lines
-			READ(11,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
-				rocky(i),nbr_svc(i),(frac_svc(c,i),c=1,dummy1)
-			k=k+istate
-			h=h+1 !count lines
-			i=i+1 !count instances that have been read
-		end if
+        if (which1(luse_subbas(i) == id_subbas_extern) == 0) then
+            !write(*,'(a,i0)')'WARNING (soil_vegetation.dat): Unknown subbasin ',luse_subbas(i),' in line ',h,', ignored.'
+            READ(11,'(a)',IOSTAT=istate) cdummy !skip next two lines
+            READ(11,'(a)',IOSTAT=istate) cdummy
+            h=h+2 !count lines
+        else
+            READ(cdummy,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
+                rocky(i),nbr_svc(i),(id_soil_intern(c,i),c=1,dummy1)    !!ii: nbr_svc, rocky, id_soil_intern sind feststehende Parameter für einen TC-Typ und sollten nur einmal pro TC-typ gespeichert werden
+            k=k+istate
+            READ(11,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
+                rocky(i),nbr_svc(i),(id_veg_intern(c,i),c=1,dummy1)
+            k=k+istate
+            h=h+1 !count lines
+            READ(11,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
+                rocky(i),nbr_svc(i),(frac_svc(c,i),c=1,dummy1)
+            k=k+istate
+            h=h+1 !count lines
+            i=i+1 !count instances that have been read
+        end if
 
         if (istate/=0) then    !premature end of file
             write(*,'(a,i0)')'ERROR (soil_vegetation.dat): Format error or unexpected end in line ',h
@@ -610,11 +631,11 @@ SUBROUTINE readhymo
     rootdep=0
     lai=0
     alb=0
-    DO WHILE (.TRUE.) 
-        
+    DO WHILE (.TRUE.)
+
         cdummy=''
         READ(11,'(a)',IOSTAT=istate) cdummy
-        
+
         if (istate == -1 ) then
             if ((trim(cdummy)=='') .and. j < nveg) then
                 write(*,'(a,i0,a,i0)')'WARNING: vegetation.dat, expected ', nveg, ' valid entries, found ',j
@@ -623,44 +644,44 @@ SUBROUTINE readhymo
                 exit
             end if
         end if
-        
+
         READ(cdummy,*, IOSTAT=istate) id_veg_extern(j),resist(j),wstressmin(j),wstressmax(j),  &
             (height(j,i),i=1,4),(rootdep(j,i),i=1,4), (lai(j,i),i=1,4),(alb(j,i),i=1,4)
-        
+
         if (istate /= 0) then
-			write(*,'(a,i0)')'ERROR: vegetation.dat, format error in line ',h
+            write(*,'(a,i0)')'ERROR: vegetation.dat, format error in line ',h
             stop
         end if
-        
+
         h=h+1
 
-            
+
         if (.not. (any (id_veg_intern == id_veg_extern(j)))) then
-        !if (  size(pack(id_veg_intern, id_veg_extern(j) == id_veg_intern(:,:))) == 0  ) then
-			write(*,'(a,i0,a,i0,a)')'WARNING: unused vegetation-id ',id_veg_extern(j),' in vegetation.dat, line ',h-1
+            !if (  size(pack(id_veg_intern, id_veg_extern(j) == id_veg_intern(:,:))) == 0  ) then
+            write(*,'(a,i0,a,i0,a)')'WARNING: unused vegetation-id ',id_veg_extern(j),' in vegetation.dat, line ',h-1
             cycle !ii: we should not cycle this here, otherwise later errors in reading SVCs may occur (?)
         end if
-        
-		if (wstressmin(j) >= wstressmax(j)) then
-			write(*,'(a,i0,a)')'ERROR: vegetation.dat, line ', h,': wstressmin must be < wstressmax'
+
+        if (wstressmin(j) >= wstressmax(j)) then
+            write(*,'(a,i0,a)')'ERROR: vegetation.dat, line ', h,': wstressmin must be < wstressmax'
             stop
         end if
-        
+
         j=j+1
-        
+
     END DO
     CLOSE(11)
     rootdep(:,:)=rootdep(:,:)*1000.
 
-   	!!** read key points for temporal distribution of vegetation
+    !!** read key points for temporal distribution of vegetation
     !!   characteristics within year (end/begin of rainy season)
     period => seasonality_array2('rainy_season.dat')
-	CALL check_seasonality(period, "rainy_season.dat", id_veg_extern)  !check completeness of seasonality file
+    CALL check_seasonality(period, "rainy_season.dat", id_veg_extern)  !check completeness of seasonality file
 
 
     if (doloadstate .OR. dosavestate .OR. dosediment) then
         seasonality_k     => seasonality_array2('k_seasons.dat')    !read seasonality of K-factor
-		seasonality_c     => seasonality_array2('c_seasons.dat')    !read seasonality of C-factor
+        seasonality_c     => seasonality_array2('c_seasons.dat')    !read seasonality of C-factor
 
         seasonality_p     => seasonality_array2('p_seasons.dat'     )    !read seasonality of P-factor
         seasonality_coarse=> seasonality_array2('coarse_seasons.dat')    !read seasonality of coarse fraction factor
@@ -695,55 +716,55 @@ SUBROUTINE readhymo
 
         if (SIZE(seasonality_k,dim=2) == 1) then
             allocate (svc_k_fac(nsvc, 1))
-			svc_k_fac_day=>svc_k_fac(:,1)        !no dynamics, daily values remain static as read from file
+            svc_k_fac_day=>svc_k_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_k_fac(nsvc, 4))
-			CALL check_seasonality(seasonality_k, "k_seasons.dat", id_svc_extern)  !check completeness of seasonality file
-			allocate(svc_k_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
+            CALL check_seasonality(seasonality_k, "k_seasons.dat", id_svc_extern)  !check completeness of seasonality file
+            allocate(svc_k_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_k_fac,dim=2)
         svc_k_fac=0.
 
-		if (SIZE(seasonality_c,dim=2) == 1) then
+        if (SIZE(seasonality_c,dim=2) == 1) then
             allocate (svc_c_fac(nsvc, 1))
-			svc_c_fac_day=>svc_c_fac(:,1)        !no dynamics, daily values remain static as read from file
+            svc_c_fac_day=>svc_c_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_c_fac(nsvc, 4))
-			CALL check_seasonality(seasonality_c, "c_seasons.dat", id_svc_extern)  !check completeness of seasonality file
-			allocate(svc_c_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
+            CALL check_seasonality(seasonality_c, "c_seasons.dat", id_svc_extern)  !check completeness of seasonality file
+            allocate(svc_c_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_c_fac,dim=2)
         svc_c_fac=0.
 
-		if (SIZE(seasonality_p,dim=2) == 1) then
+        if (SIZE(seasonality_p,dim=2) == 1) then
             allocate (svc_p_fac(nsvc, 1))
-			svc_p_fac_day=>svc_p_fac(:,1)        !no dynamics, daily values remain static as read from file
+            svc_p_fac_day=>svc_p_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_p_fac(nsvc, 4))
-			CALL check_seasonality(seasonality_p, "p_seasons.dat", id_svc_extern)  !check completeness of seasonality file
-			allocate(svc_p_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
+            CALL check_seasonality(seasonality_p, "p_seasons.dat", id_svc_extern)  !check completeness of seasonality file
+            allocate(svc_p_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_p_fac,dim=2)
         svc_p_fac=0.
-        
+
         if (SIZE(seasonality_coarse,dim=2) == 1) then
             allocate (svc_coarse_fac(nsvc, 1))
-			svc_coarse_fac_day=>svc_coarse_fac(:,1)        !no dynamics, daily values remain static as read from file
+            svc_coarse_fac_day=>svc_coarse_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_coarse_fac(nsvc, 4))
-			CALL check_seasonality(seasonality_coarse, "coarse_seasons.dat", id_svc_extern)  !check completeness of seasonality file
-			allocate(svc_coarse_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
+            CALL check_seasonality(seasonality_coarse, "coarse_seasons.dat", id_svc_extern)  !check completeness of seasonality file
+            allocate(svc_coarse_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_coarse_fac,dim=2)
         svc_coarse_fac=0.
-        
+
         if (SIZE(seasonality_n,dim=2) == 1) then
             allocate (svc_n(nsvc, 1))
-			svc_n_day=>svc_n(:,1)        !no dynamics, daily values remain static as read from file
+            svc_n_day=>svc_n(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_n(nsvc, 4))
-			CALL check_seasonality(seasonality_n, "n_seasons.dat", id_svc_extern)  !check completeness of seasonality file
-			allocate(svc_n_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
+            CALL check_seasonality(seasonality_n, "n_seasons.dat", id_svc_extern)  !check completeness of seasonality file
+            allocate(svc_n_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_n,dim=2)
         svc_n=0.
@@ -754,16 +775,16 @@ SUBROUTINE readhymo
         READ(11,*)
         READ(11,*)
 
-        k=k+3    !number of fields plus columns for 3 IDs 
+        k=k+3    !number of fields plus columns for 3 IDs
         h=2 !for counting lines
         i=1
         write(fmtstr,*)'(3i, ', SIZE(seasonality_k,dim=2),'F, ',SIZE(seasonality_c,dim=2),'F, ',SIZE(seasonality_p,dim=2),'F, ',SIZE(seasonality_coarse,dim=2),'F, ',SIZE(seasonality_n,dim=2),'F)'    !generate format string according to number of columns to be expected
-        DO WHILE (.TRUE.)  
+        DO WHILE (.TRUE.)
             READ(11,'(a)', IOSTAT=istate) cdummy
             h=h+1
             IF (istate==-1) THEN    !no further line
                 nsvc=i-1    !correct total number of SVCs that have been read
-                 !ii: check, if unused memory can be freed (see new_real_array3)
+                !ii: check, if unused memory can be freed (see new_real_array3)
                 exit        !exit loop
             END IF
             if (trim(cdummy)=='') cycle    !skip blank lines
@@ -779,7 +800,7 @@ SUBROUTINE readhymo
                 cycle
                 !stop
             END IF
-            
+
             svc_soil_veg(i,2)=id_ext2int(n, id_veg_extern)     !store internal vegetation id of this SVC
             IF (svc_soil_veg(i,2)==-1) THEN    !specified vegetation not found
                 write(*,'(a,i0,a,i0,a)')'ERROR in svc.dat, line ',h,': could not find vegetation ', n,' in vegetation.dat'
@@ -790,14 +811,14 @@ SUBROUTINE readhymo
         END DO
         CLOSE(11)
     end if
-    
+
     CALL check_seasonality_superfluous(seasonality_k,      "k_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
     CALL check_seasonality_superfluous(seasonality_c,      "c_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
     CALL check_seasonality_superfluous(seasonality_p,      "p_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
     CALL check_seasonality_superfluous(seasonality_coarse, "coarse_seasons.dat", id_svc_extern)  !check for obsolete entries in seasonality file
     CALL check_seasonality_superfluous(seasonality_n,      "n_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
-			
-    
+
+
     if (dosediment)    then                !Till: if erosion is to be modelled, read these files
 
         !** read particle size classes
@@ -832,7 +853,7 @@ SUBROUTINE readhymo
                 READ(11,*,  IOSTAT=istate) j, temp1
                 IF (istate/=0) THEN            !no further line
                     n_sed_class=i-1        !correct total number of particle size classes that have been read
-                     !ii: check, if unused memory can be freed (see new_real_array3)
+                    !ii: check, if unused memory can be freed (see new_real_array3)
                     exit                !exit loop
                 END IF
                 upper_limit(i)=temp1        !store upper limit of particle size class
@@ -937,7 +958,7 @@ SUBROUTINE readhymo
             END IF
             k=id_ext2int(i, id_terrain_extern)    !convert to internal id
             IF (k==-1) cycle!ID not found
-            
+
             n=id_ext2int(j, id_svc_extern)    !convert to internal id
 
             nbr_svc2(k)=nbr_svc2(k)+1
@@ -951,37 +972,37 @@ SUBROUTINE readhymo
 
     END IF
 
-	
 
 
-    ! ** read cell-based scaling factor, see Guentner (2002), p. 67 
-	!Till: the scaling factor described there refers to Kfkorr, 
-	! but this here affects both Kfkorr and interception capacity
-	IF (doscale) THEN
-		OPEN(11,FILE=pfadp(1:pfadj)// 'Others/scaling_factor.dat', IOSTAT=istate, STATUS='old')
-		IF (istate==0) THEN                    !scaling_factor.dat found
-			READ(11,*)
-			DO WHILE (.TRUE.)
-				READ(11,'(a)',IOSTAT=istate)cdummy    !try to read next line
-				if (istate/=0) exit
 
-				READ(cdummy,*)dummy1,temp1
-				if (dummy1==-1) then
-					kfkorrc(:) = temp1 !universal calibration factor for all subbasins
-					intcfc(:)  = intcf/(0.340+0.647*kfkorrc(:))  !Till: as in the original code: interception capacity is also modified. I dunno why.
-					cycle                         !go to next line
-				end if
-				i=id_ext2int(dummy1,id_subbas_extern)    !convert external to internal ID
-				if (i==-1) then
-					write(*,'(a,i0,a)')'Unknown subbasin-ID ',dummy1,' in scaling_factor.dat, ignored.'
-					cycle
-				end if
-				kfkorrc(i) = temp1                !modify kfkorrc of specified subbasin
-				intcfc(i)  =intcf/(0.340+0.647*kfkorrc(i)) !Till: as in the original code: interception capacity is also modified. I dunno why.
-			END DO
-		  CLOSE(11)
-		END IF
-	ELSE 
+    ! ** read cell-based scaling factor, see Guentner (2002), p. 67
+    !Till: the scaling factor described there refers to Kfkorr,
+    ! but this here affects both Kfkorr and interception capacity
+    IF (doscale) THEN
+        OPEN(11,FILE=pfadp(1:pfadj)// 'Others/scaling_factor.dat', IOSTAT=istate, STATUS='old')
+        IF (istate==0) THEN                    !scaling_factor.dat found
+            READ(11,*)
+            DO WHILE (.TRUE.)
+                READ(11,'(a)',IOSTAT=istate)cdummy    !try to read next line
+                if (istate/=0) exit
+
+                READ(cdummy,*)dummy1,temp1
+                if (dummy1==-1) then
+                    kfkorrc(:) = temp1 !universal calibration factor for all subbasins
+                    intcfc(:)  = intcf/(0.340+0.647*kfkorrc(:))  !Till: as in the original code: interception capacity is also modified. I dunno why.
+                    cycle                         !go to next line
+                end if
+                i=id_ext2int(dummy1,id_subbas_extern)    !convert external to internal ID
+                if (i==-1) then
+                    write(*,'(a,i0,a)')'Unknown subbasin-ID ',dummy1,' in scaling_factor.dat, ignored.'
+                    cycle
+                end if
+                kfkorrc(i) = temp1                !modify kfkorrc of specified subbasin
+                intcfc(i)  =intcf/(0.340+0.647*kfkorrc(i)) !Till: as in the original code: interception capacity is also modified. I dunno why.
+            END DO
+            CLOSE(11)
+        END IF
+    ELSE
         kfkorrc(:)=1.
         intcfc(:)=intcf
     END IF
@@ -1069,7 +1090,7 @@ SUBROUTINE readhymo
 
     !check fractions of TCs in LUs and normalize, if necessary
     DO i_lu = 1,nsoter
-        temp1 = 0. 
+        temp1 = 0.
         DO tc_counter=1,nbrterrain(i_lu)
             !tcid_instance=tcallid(sb_counter,lu_counter,tc_counter)    !id of TC instance
             id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
@@ -1083,8 +1104,8 @@ SUBROUTINE readhymo
             END DO
         end if
     END DO
-    
-    
+
+
     ! insert internal numbers of soils into
     ! Soil-Vegetation component arrays
     DO i=1,ntcinst
@@ -1170,33 +1191,33 @@ SUBROUTINE readhymo
         tcallid(id_sub_int,i,j) = n
     END DO
 
-  if (allocated(svc_soil_veg)) then  
-      DO sb_counter=1,subasin            !check, if all relevant SVCs have been specified
-           DO lu_counter=1,nbr_lu(sb_counter)
-             i_lu=id_lu_intern(lu_counter,sb_counter)
-                 DO tc_counter=1,nbrterrain(i_lu)
-                     tcid_instance=tcallid(sb_counter,lu_counter,tc_counter) !id of TC instance
-                     id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
-                        if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
-                        DO svc_counter=1,nbr_svc(tcid_instance)
-                            i_soil=id_soil_intern(svc_counter,tcid_instance)        !internal id of soil type
-                            i_veg=  id_veg_intern(svc_counter,tcid_instance)
-                            i=which1(svc_soil_veg(:,1)==i_soil .AND. svc_soil_veg(:,2)==i_veg) 
-                            IF (i==0) THEN    !soil-vegetation combination not specified as an SVC
-                                write(*,'(a,i0,a,i0)')'ERROR in svc.dat: could not find soil-vegetation combination ', id_soil_extern(i_soil),' :', id_veg_extern(i_veg)
-                                write(*,'(a,i0,a,i0,a,i0,a,i0,a)')' found for subbasin ', id_subbas_extern(sb_counter),', LU ', id_lu_extern(i_lu), ', TC ', id_terrain_extern(id_tc_type), ' (position ', tc_counter,')'
-                                stop
-                            END IF
-                        END DO
-                 END DO
-           END DO
-      END DO
-  end if
-  
+    if (allocated(svc_soil_veg)) then
+        DO sb_counter=1,subasin            !check, if all relevant SVCs have been specified
+            DO lu_counter=1,nbr_lu(sb_counter)
+                i_lu=id_lu_intern(lu_counter,sb_counter)
+                DO tc_counter=1,nbrterrain(i_lu)
+                    tcid_instance=tcallid(sb_counter,lu_counter,tc_counter) !id of TC instance
+                    id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
+                    if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
+                    DO svc_counter=1,nbr_svc(tcid_instance)
+                        i_soil=id_soil_intern(svc_counter,tcid_instance)        !internal id of soil type
+                        i_veg=  id_veg_intern(svc_counter,tcid_instance)
+                        i=which1(svc_soil_veg(:,1)==i_soil .AND. svc_soil_veg(:,2)==i_veg)
+                        IF (i==0) THEN    !soil-vegetation combination not specified as an SVC
+                            write(*,'(a,i0,a,i0)')'ERROR in svc.dat: could not find soil-vegetation combination ', id_soil_extern(i_soil),' :', id_veg_extern(i_veg)
+                            write(*,'(a,i0,a,i0,a,i0,a,i0,a)')' found for subbasin ', id_subbas_extern(sb_counter),', LU ', id_lu_extern(i_lu), ', TC ', id_terrain_extern(id_tc_type), ' (position ', tc_counter,')'
+                            stop
+                        END IF
+                    END DO
+                END DO
+            END DO
+        END DO
+    end if
 
-    
-    
-    
+
+
+
+
     DO id_sub_int=1,subasin !check contents of soil_vegation.dat and for missing entries
         k = count(tcallid(id_sub_int,:,1)/=-1)
         if (k /= nbr_lu(id_sub_int)) then
@@ -1291,41 +1312,41 @@ SUBROUTINE readhymo
         END DO
 
 
-    !    do id_tc_type=1,size(tc_contains_svc2)    !loop over all TC-types
-    !        i=size(tc_contains_svc2(id_tc_type)%p)        !number of SVCs in current TC
-    !        temp1=0
-    !        DO svc_counter=1,i    !loop over all SVCs in TC
-    !            svc_id=tc_contains_svc2(id_tc_type)%p(svc_counter)%svc_id                !get id of current SVC to be treated
-    !
-    !            tc_instance=0
-    !
-    !            DO tc_counter=1,maxterrain
-    !                do i_lu=1:nsoter
-    !                    if (id_terrain_intern(tc_counter,i_lu)==id_tc_type) then
-    !                        tcid_instance=tcallid(i_subbas,lu_counter,tc_counter)
-    !          id_tc_type=id_terrain_intern(tc_counter,i_lu)
-    !
-    !
-    !
-    !                        exit
-    !                    end if
-    !                end do
-    !            end do
-    !
-    !            soilid=id_soil_intern(svc_counter,tc_instance)        !get soil-ID of current SVC
-    !            if (soilid==0 ) then                        !check if the topmost horizon consists of coarse fragments only
-    !                soilid=-1
-    !            end if
-    !
-    !            if (soilid==-1 .OR. coarse(soilid,1)==1) then                        !check if the topmost horizon consists of coarse fragments only
-    !                tc_contains_svc2(id_tc_type)%p(svc_counter:i-1)=tc_contains_svc2(id_tc_type)%p(svc_counter+1:i)    !remove entry
-    !                tc_contains_svc2(id_tc_type)%p(svc_counter)%fraction=0.    !just to make sure is further disregarded
-    !            end if
-    !            temp1=temp1+ tc_contains_svc2(id_tc_type)%p(svc_counter)%fraction                    !sum up fraction of remaining SVCs
-    !        END DO !loop SVCs
-    !        tc_contains_svc2(id_tc_type)%p(:)%fraction=tc_contains_svc2(id_tc_type)%p(:)%fraction/temp1    !normalize fractions
-    !    end do
-    !
+        !    do id_tc_type=1,size(tc_contains_svc2)    !loop over all TC-types
+        !        i=size(tc_contains_svc2(id_tc_type)%p)        !number of SVCs in current TC
+        !        temp1=0
+        !        DO svc_counter=1,i    !loop over all SVCs in TC
+        !            svc_id=tc_contains_svc2(id_tc_type)%p(svc_counter)%svc_id                !get id of current SVC to be treated
+        !
+        !            tc_instance=0
+        !
+        !            DO tc_counter=1,maxterrain
+        !                do i_lu=1:nsoter
+        !                    if (id_terrain_intern(tc_counter,i_lu)==id_tc_type) then
+        !                        tcid_instance=tcallid(i_subbas,lu_counter,tc_counter)
+        !          id_tc_type=id_terrain_intern(tc_counter,i_lu)
+        !
+        !
+        !
+        !                        exit
+        !                    end if
+        !                end do
+        !            end do
+        !
+        !            soilid=id_soil_intern(svc_counter,tc_instance)        !get soil-ID of current SVC
+        !            if (soilid==0 ) then                        !check if the topmost horizon consists of coarse fragments only
+        !                soilid=-1
+        !            end if
+        !
+        !            if (soilid==-1 .OR. coarse(soilid,1)==1) then                        !check if the topmost horizon consists of coarse fragments only
+        !                tc_contains_svc2(id_tc_type)%p(svc_counter:i-1)=tc_contains_svc2(id_tc_type)%p(svc_counter+1:i)    !remove entry
+        !                tc_contains_svc2(id_tc_type)%p(svc_counter)%fraction=0.    !just to make sure is further disregarded
+        !            end if
+        !            temp1=temp1+ tc_contains_svc2(id_tc_type)%p(svc_counter)%fraction                    !sum up fraction of remaining SVCs
+        !        END DO !loop SVCs
+        !        tc_contains_svc2(id_tc_type)%p(:)%fraction=tc_contains_svc2(id_tc_type)%p(:)%fraction/temp1    !normalize fractions
+        !    end do
+        !
     end if
 
 
@@ -1423,7 +1444,7 @@ SUBROUTINE readhymo
                 !  no bedrock is given for soil profile or this is an alluvial soil (is always extended to maxdepth, regardless of bedrock flag)
                 IF (bedrock(id_soil_int) == 0 .OR. (alluvial_flag(id_soil_int)==1)) THEN
 
-                      !id_soil_extern(id_soil_int)
+                    !id_soil_extern(id_soil_int)
                     IF (alluvial_flag(id_soil_int)==1) THEN
                         temp1=maxdep(id_lu_int)    !Till: alluvial soils reach at least to maxdepth of LU
                     ELSE
@@ -1447,7 +1468,7 @@ SUBROUTINE readhymo
                                 horiz_thickness(n,j,h)=temp1
                             END IF
                         END IF
-                    !  no bedrock (nor for profile nor for LU) given
+                        !  no bedrock (nor for profile nor for LU) given
                     ELSE
                         svcbedr(n,j)=0                                !Till: expand deepest horizon to rooting depth, if necessary
                         temp1=maxval(rootdep(id_veg_intern(j,n),:))    !get maximum rooting depth
@@ -1462,8 +1483,8 @@ SUBROUTINE readhymo
                     END IF
                 END IF
 
-            !  landscape unit with permanent groundwater table
-            !  extend lowest horizon to the depth of the riverbed if this is deeper
+                !  landscape unit with permanent groundwater table
+                !  extend lowest horizon to the depth of the riverbed if this is deeper
             ELSE IF (gw_flag(id_lu_int) == 99) THEN
                 IF (h > 1) THEN
                     temp1=riverbed(id_lu_int)-sum(temp_hori_thick(id_soil_int,1:h))
@@ -1605,7 +1626,7 @@ SUBROUTINE readhymo
         READ(11,*);READ(11,*)
         DO i=1,ntrans
             READ(11,*) trans_start(1,i),trans_start(2,i), q_trans(i),loss_trans(i), trans_end(1,i),trans_end(2,i),y_trans(i)
-        ! Use Map IDs in the previous expressions
+            ! Use Map IDs in the previous expressions
         END DO
         CLOSE(11)
 
@@ -1649,8 +1670,8 @@ SUBROUTINE readhymo
         frac_direct_gw=1.
     END IF
 
-       
-if (dosediment) then
+
+    if (dosediment) then
         !Till: eg for scenanario with badland remediation
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/sdr_lu.dat',IOSTAT=istate,STATUS='old')
         IF (istate==0) THEN
@@ -1713,8 +1734,8 @@ if (dosediment) then
 
 
     !Till: allocation part - these variable are allocated here, because their dimension is not known before
-     !!Print hydrologic variable on TC scale. If not used, DISABLE
-     !!************************************************************************
+    !!Print hydrologic variable on TC scale. If not used, DISABLE
+    !!************************************************************************
     !    allocate (runoff_TC(subasin,nterrain))
     !    allocate (area_TC(subasin,nterrain))
 
@@ -1722,187 +1743,187 @@ if (dosediment) then
     allocate (sedsu(maxsoter,n_sed_class))
     allocate (sediment_subbasin(366,subasin,n_sed_class))
     allocate (sediment_subbasin_t(366,nt,subasin,n_sed_class))
-!!Print hydrologic variable on TC scale. If not used, DISABLE
-!!***********************************************************
-!    allocate (sed_yield_TC(subasin,nterrain))
-!    allocate (deposition_TC(subasin,nterrain))
-!    allocate (cum_erosion_TC(subasin,nterrain))
-!    allocate (cum_deposition_TC(subasin,nterrain))
+    !!Print hydrologic variable on TC scale. If not used, DISABLE
+    !!***********************************************************
+    !    allocate (sed_yield_TC(subasin,nterrain))
+    !    allocate (deposition_TC(subasin,nterrain))
+    !    allocate (cum_erosion_TC(subasin,nterrain))
+    !    allocate (cum_deposition_TC(subasin,nterrain))
 
 
 
-contains
+    contains
 
 
     FUNCTION seasonality_array2(inputfile_name) result(node_days)        !read seasonality information (replaces seasonality_array)
-        use params_h
-        use hymo_h
+    use params_h
+    use hymo_h
 
-        implicit none
-        character(len=*), INTENT(IN)                  :: inputfile_name    !name of input file
-        
-        integer, pointer :: node_days(:,:), n2(:,:)
-        integer :: i,j,k, dummy1, dummy2, dummy3, fields, irow 
+    implicit none
+    character(len=*), INTENT(IN)                  :: inputfile_name    !name of input file
 
-        OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/'//inputfile_name,STATUS='old',IOSTAT=istate)
+    integer, pointer :: node_days(:,:), n2(:,:)
+    integer :: i,j,k, dummy1, dummy2, dummy3, fields, irow
 
-        if (istate/=0) then        !no seasonality file found
-            allocate(node_days(1,1))
-            write(*,*) 'WARNING: ',inputfile_name,' not found, using defaults'
-            return
-        else
-            i = 0
-            k = 0
-            DO WHILE (k==0) !count lines in file (maximum of memory required)
-				READ(11,*,IOSTAT=k)
-				i=i+1
-			END DO
-			rewind(11) !back to start of file
-			i=i-3-1 !substract headerlines and last unsuccessful line
-			
-			allocate(node_days(i, 3+4)) !accomodate all lines; per line: subbasin-id, (veg-id/SVC-id,), year, 4 doys      !!, last_line indicator (for calc_seasonality)
-            node_days(:,:)=0
-            READ(11,*); READ(11,*); READ(11,*)    !read headerlines
-			READ(11,'(a)') cdummy
-			fields = GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
-             
-			BACKSPACE (11)		!rewind line just read   
-				
-            loop = 3 !line position in file
-			irow = 0 !counter for valid lines that have been read
- 			
-			DO WHILE (.TRUE.)
+    OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/'//inputfile_name,STATUS='old',IOSTAT=istate)
 
-				dummy2 = -1 !default for "all vegetation/SVC classes"
-				if (fields == 6) then
-					READ(11,*,IOSTAT=k) dummy1,         dummy3,(idummy2(i),i=1,4) !old format without veg/SVC-id
-				else
-					READ(11,*,IOSTAT=k) dummy1, dummy2, dummy3,(idummy2(i),i=1,4)
-				end if
-				if (k /=0) exit !no more lines
-				
-				loop = loop + 1 !increase line counter
-            
-                IF (dummy3 /= -1 .AND. ((dummy3 > tstop) .OR. (dummy3 < tstart))) cycle        !found specification for a year that is out of the simulation range
-                  
-                if (dummy1 /=-1) then !wildcard for "all subbasins"
-					j = id_ext2int(dummy1, id_subbas_extern)            !convert external to internal ID
-					IF (j == -1) THEN                                        !found unknown subbasin id
-                        WRITE(*,'(a, I0, a, I0, a)') inputfile_name//', line ', loop, ': Sub-basin-ID ', dummy1, ' not found in hymo.dat, ignored.'
-						cycle
-					end if
-					dummy1 = j
+    if (istate/=0) then        !no seasonality file found
+        allocate(node_days(1,1))
+        write(*,*) 'WARNING: ',inputfile_name,' not found, using defaults'
+        return
+    else
+        i = 0
+        k = 0
+        DO WHILE (k==0) !count lines in file (maximum of memory required)
+            READ(11,*,IOSTAT=k)
+            i=i+1
+        END DO
+        rewind(11) !back to start of file
+        i=i-3-1 !substract headerlines and last unsuccessful line
+
+        allocate(node_days(i, 3+4)) !accomodate all lines; per line: subbasin-id, (veg-id/SVC-id,), year, 4 doys      !!, last_line indicator (for calc_seasonality)
+        node_days(:,:)=0
+        READ(11,*); READ(11,*); READ(11,*)    !read headerlines
+        READ(11,'(a)') cdummy
+        fields = GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
+
+        BACKSPACE (11)		!rewind line just read
+
+        loop = 3 !line position in file
+        irow = 0 !counter for valid lines that have been read
+
+        DO WHILE (.TRUE.)
+
+            dummy2 = -1 !default for "all vegetation/SVC classes"
+            if (fields == 6) then
+                READ(11,*,IOSTAT=k) dummy1,         dummy3,(idummy2(i),i=1,4) !old format without veg/SVC-id
+            else
+                READ(11,*,IOSTAT=k) dummy1, dummy2, dummy3,(idummy2(i),i=1,4)
+            end if
+            if (k /=0) exit !no more lines
+
+            loop = loop + 1 !increase line counter
+
+            IF (dummy3 /= -1 .AND. ((dummy3 > tstop) .OR. (dummy3 < tstart))) cycle        !found specification for a year that is out of the simulation range
+
+            if (dummy1 /=-1) then !wildcard for "all subbasins"
+                j = id_ext2int(dummy1, id_subbas_extern)            !convert external to internal ID
+                IF (j == -1) THEN                                        !found unknown subbasin id
+                    WRITE(*,'(a, I0, a, I0, a)') inputfile_name//', line ', loop, ': Sub-basin-ID ', dummy1, ' not found in hymo.dat, ignored.'
+                    cycle
                 end if
+                dummy1 = j
+            end if
 
-                !validity of veg/SVC-dis cannot be checked here yet, because they are not yet available                
-				irow = irow + 1 !increase counter for valid rows
-				node_days(irow, :) = [dummy1, dummy2, dummy3, idummy2(1:4)]        !store read values in proper position
-            END DO
+            !validity of veg/SVC-dis cannot be checked here yet, because they are not yet available
+            irow = irow + 1 !increase counter for valid rows
+            node_days(irow, :) = [dummy1, dummy2, dummy3, idummy2(1:4)]        !store read values in proper position
+        END DO
 
-            CLOSE(11)
+        CLOSE(11)
 
-			if (size(node_days,1) > irow) then         !less memory needed than expected, free it
-				if (irow == 0) then
-					allocate(n2(1, 1))   !no valid seasonality found
-                    write(*,*) 'WARNING: no valid seasonal data found in ',inputfile_name,', using defaults.'
-				else
-					allocate(n2(irow, 3+4))   !accomodate all lines; per line: subbasin-id, (veg-id,), year, 4 doys, last_line indicator (for calc_seasonality)
-				end if
-				n2 = node_days(1:irow,:)
-				deallocate(node_days)
-				node_days => n2           !set return value to adjusted array
-			end if	 
+        if (size(node_days,1) > irow) then         !less memory needed than expected, free it
+            if (irow == 0) then
+                allocate(n2(1, 1))   !no valid seasonality found
+                write(*,*) 'WARNING: no valid seasonal data found in ',inputfile_name,', using defaults.'
+            else
+                allocate(n2(irow, 3+4))   !accomodate all lines; per line: subbasin-id, (veg-id,), year, 4 doys, last_line indicator (for calc_seasonality)
+            end if
+            n2 = node_days(1:irow,:)
+            deallocate(node_days)
+            node_days => n2           !set return value to adjusted array
+        end if
 
-        end if !end if file present
-        
+    end if !end if file present
+
 
     END FUNCTION seasonality_array2
 
 
-	SUBROUTINE check_seasonality(seasonality_array, inputfile_name, external_ids)        !check completeness in seasonality data
+    SUBROUTINE check_seasonality(seasonality_array, inputfile_name, external_ids)        !check completeness in seasonality data
 
-        use hymo_h
-		implicit none
-        character(len=*), INTENT(IN)                  :: inputfile_name    !name of input file
-        integer, pointer :: seasonality_array(:,:)
-        integer, INTENT(IN) :: external_ids(:) !array holding external IDs of entities to check (e.g. SVCs, vegetation classes, ...)
-        integer  :: missing(size(external_ids, dim=1)), n_missing = 0, k
-        real  :: dummy(size(external_ids, dim=1), 4) 
-        real, pointer :: test_ar(:)
-        
-        
-        dummy = .0
-	
-            DO i = tstart, tstop !check completeness
-                DO j=1,subasin
-		            test_ar => calc_seasonality2(j, i, 1, seasonality_array, dummy)            !compute rootdep of first day (actual values are not important, therefore we simply use dummy)
-                    
-                    IF (any(test_ar == tiny(test_ar))) then
-					    IF (all(test_ar == tiny(test_ar))) then
-						    WRITE(*,'(a, I0, a, I0)') ' '//inputfile_name//': Sub-basin ', id_subbas_extern(j), &
-							    ' lacks seasonality data for begin of simulation year ', i
-						    STOP
-                        END IF
-					    missing = 0   
-					    
-                        DO k=1, size(test_ar)
-                            IF (test_ar(k) == tiny(test_ar)) then
-                                n_missing = n_missing+1
-                                missing(n_missing) = k
-                            end if
-                        END DO
-                    
-					    !missing = whichn(test_ar==tiny(test_ar), 1) !caused crashes in gfortran, not sure why
-					
-					    IF (missing(1) /= 0) then        !found subbasin/veg_id for which no seasonality data has been read
-                            write(fmtstr,*)'(a, I0, a, ', n_missing,'(I0,A), a, I0)' !generate format string
-                            WRITE(*,fmtstr) inputfile_name//': Sub-basin ', id_subbas_extern(j),', SVC/vegetation-ID(s) ', (external_ids(missing(k)),", ", k=1, n_missing),&
-							    ' lack(s) seasonality data for for start of simulation year ', i
-						    STOP
-                        END IF
-                    END IF       
+    use hymo_h
+    implicit none
+    character(len=*), INTENT(IN)                  :: inputfile_name    !name of input file
+    integer, pointer :: seasonality_array(:,:)
+    integer, INTENT(IN) :: external_ids(:) !array holding external IDs of entities to check (e.g. SVCs, vegetation classes, ...)
+    integer  :: missing(size(external_ids, dim=1)), n_missing = 0, k
+    real  :: dummy(size(external_ids, dim=1), 4)
+    real, pointer :: test_ar(:)
+
+
+    dummy = .0
+
+    DO i = tstart, tstop !check completeness
+        DO j=1,subasin
+            test_ar => calc_seasonality2(j, i, 1, seasonality_array, dummy)            !compute rootdep of first day (actual values are not important, therefore we simply use dummy)
+
+            IF (any(test_ar == tiny(test_ar))) then
+                IF (all(test_ar == tiny(test_ar))) then
+                    WRITE(*,'(a, I0, a, I0)') ' '//inputfile_name//': Sub-basin ', id_subbas_extern(j), &
+                        ' lacks seasonality data for begin of simulation year ', i
+                    STOP
+                END IF
+                missing = 0
+
+                DO k=1, size(test_ar)
+                    IF (test_ar(k) == tiny(test_ar)) then
+                        n_missing = n_missing+1
+                        missing(n_missing) = k
+                    end if
                 END DO
-            END DO
+
+                !missing = whichn(test_ar==tiny(test_ar), 1) !caused crashes in gfortran, not sure why
+
+                IF (missing(1) /= 0) then        !found subbasin/veg_id for which no seasonality data has been read
+                    write(fmtstr,*)'(a, I0, a, ', n_missing,'(I0,A), a, I0)' !generate format string
+                    WRITE(*,fmtstr) inputfile_name//': Sub-basin ', id_subbas_extern(j),', SVC/vegetation-ID(s) ', (external_ids(missing(k)),", ", k=1, n_missing),&
+                        ' lack(s) seasonality data for for start of simulation year ', i
+                    STOP
+                END IF
+            END IF
+        END DO
+    END DO
     END SUBROUTINE check_seasonality
 
     SUBROUTINE check_seasonality_superfluous(seasonality_array, inputfile_name, external_ids)        !check for superfluous entries in seasonality data
-     use hymo_h
-		    implicit none
-            character(len=*), INTENT(IN)                  :: inputfile_name    !name of input file
-            integer, pointer :: seasonality_array(:,:), s2(:,:)
-            integer, INTENT(IN) :: external_ids(:) !array holding external IDs of entities to check (e.g. SVCs, vegetation classes, ...)
-            integer :: i, j, dummy2
-            integer :: obsolete_lines(size(seasonality_array, dim=1)) 
-  
-            if (size(seasonality_array, dim=2) == 1) return !no seasonality to check
-            obsolete_lines = 0
-            do i=1, size(seasonality_array, dim=1) !through all "lines" of seasonality file
-                dummy2 = seasonality_array(i, 2)
-                if (dummy2 /=-1) then !wildcard for "all vegetation" / SVCs
-				    j = id_ext2int(dummy2, external_ids)            !convert external to internal ID
-				    IF (j == -1) THEN                                        !found unknown id
-                        WRITE(*,'(a, I0, a, I0, a)') inputfile_name//': vegetation/SVC-ID ', dummy2, ' not found in vegetation/svc.dat, ignored.'
-					    obsolete_lines(i) = 1 !mark line as "obsolete"
-				    end if
-                end if
-            end do !through all "lines" of seasonality file
+    use hymo_h
+    implicit none
+    character(len=*), INTENT(IN)                  :: inputfile_name    !name of input file
+    integer, pointer :: seasonality_array(:,:), s2(:,:)
+    integer, INTENT(IN) :: external_ids(:) !array holding external IDs of entities to check (e.g. SVCs, vegetation classes, ...)
+    integer :: i, j, dummy2
+    integer :: obsolete_lines(size(seasonality_array, dim=1))
 
-            if (sum(obsolete_lines) > 0) then         !some obsolete lines: remove and free memory
-			    allocate(s2(  size(seasonality_array, dim=1) - sum(obsolete_lines), &
-                                size(seasonality_array, dim=2)))    !allocate new space for cleansed seasonality
+    if (size(seasonality_array, dim=2) == 1) return !no seasonality to check
+    obsolete_lines = 0
+    do i=1, size(seasonality_array, dim=1) !through all "lines" of seasonality file
+        dummy2 = seasonality_array(i, 2)
+        if (dummy2 /=-1) then !wildcard for "all vegetation" / SVCs
+            j = id_ext2int(dummy2, external_ids)            !convert external to internal ID
+            IF (j == -1) THEN                                        !found unknown id
+                WRITE(*,'(a, I0, a, I0, a)') inputfile_name//': vegetation/SVC-ID ', dummy2, ' not found in vegetation/svc.dat, ignored.'
+                obsolete_lines(i) = 1 !mark line as "obsolete"
+            end if
+        end if
+    end do !through all "lines" of seasonality file
 
-            
-			
-            			
-                s2 = seasonality_array(whichn(obsolete_lines == 0, 0), :)
-			    deallocate(seasonality_array)
-			    seasonality_array => s2           !point to cleansed array
-            end if	      
-                
+    if (sum(obsolete_lines) > 0) then         !some obsolete lines: remove and free memory
+        allocate(s2(  size(seasonality_array, dim=1) - sum(obsolete_lines), &
+            size(seasonality_array, dim=2)))    !allocate new space for cleansed seasonality
+
+
+
+
+        s2 = seasonality_array(whichn(obsolete_lines == 0, 0), :)
+        deallocate(seasonality_array)
+        seasonality_array => s2           !point to cleansed array
+    end if
+
     END SUBROUTINE check_seasonality_superfluous
-    
-    
-END SUBROUTINE readhymo
+
+
+    END SUBROUTINE readhymo
 
 
 
@@ -1918,7 +1939,7 @@ END SUBROUTINE readhymo
 
 
 
-SUBROUTINE read_pre_subbas_outflow    !Till: reads predefined subbasin outflow (water and sediment)
+    SUBROUTINE read_pre_subbas_outflow    !Till: reads predefined subbasin outflow (water and sediment)
     ! status of call (0=initialization, 1=start of year)
     use common_h
     use hymo_h
@@ -2047,41 +2068,41 @@ SUBROUTINE read_pre_subbas_outflow    !Till: reads predefined subbasin outflow (
 
 
 
-contains
+    contains
     FUNCTION set_corr_column(input_header,inputfile_name)
-        !provide "pointer" to to match order of subbasins to that in hymo.dat
-        use params_h
-        use hymo_h
+    !provide "pointer" to to match order of subbasins to that in hymo.dat
+    use params_h
+    use hymo_h
 
-        implicit none
-        integer, pointer :: set_corr_column(:)
-        INTEGER, INTENT(IN)                  :: input_header(:)    !order of subbasins in input file
-        character(len=*), INTENT(IN)                  :: inputfile_name    !name of input file
-        integer    :: i,j
+    implicit none
+    integer, pointer :: set_corr_column(:)
+    INTEGER, INTENT(IN)                  :: input_header(:)    !order of subbasins in input file
+    character(len=*), INTENT(IN)                  :: inputfile_name    !name of input file
+    integer    :: i,j
 
-        allocate(set_corr_column(subasin))
-        set_corr_column=0
+    allocate(set_corr_column(subasin))
+    set_corr_column=0
 
-        DO i=1,subasin
-            DO j=1,size(input_header)
-                IF(input_header(j) == id_subbas_extern(i)) THEN
-                    set_corr_column(i)= j    !Till: for each subbasin, find position of corresponding column in input file
-                    exit
-                END IF
+    DO i=1,subasin
+        DO j=1,size(input_header)
+            IF(input_header(j) == id_subbas_extern(i)) THEN
+                set_corr_column(i)= j    !Till: for each subbasin, find position of corresponding column in input file
+                exit
+            END IF
 
-                if  (set_corr_column(i) ==0) then
-                    WRITE(*,'(a,i0,a,a,a)') 'ERROR: Sub-basin-ID ',id_subbas_extern(i),' not found in ',inputfile_name,', quitting.'
-                    stop
-                end if
-
-            END DO
+            if  (set_corr_column(i) ==0) then
+                WRITE(*,'(a,i0,a,a,a)') 'ERROR: Sub-basin-ID ',id_subbas_extern(i),' not found in ',inputfile_name,', quitting.'
+                stop
+            end if
 
         END DO
+
+    END DO
     END FUNCTION set_corr_column
 
 
 
-END SUBROUTINE read_pre_subbas_outflow
+    END SUBROUTINE read_pre_subbas_outflow
 
 
 

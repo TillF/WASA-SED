@@ -172,7 +172,7 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 END IF
 
 ! ------------------------------------------------------------------------
-IF (STATUS == 1) THEN
+IF (STATUS == 1) THEN   !beginning of a new simulation year
 
 ! initialize ...
 ! ... and take qout and volact from the last nn days of last year (nn:length of unit hydrograph)
@@ -181,14 +181,12 @@ IF (STATUS == 1) THEN
       DO id=1,size(hrout,dim=1)-1   !shift routed riverflow that reaches beyond boundary of year to the beginning of new year
         qout(id,1:subasin)  =qout(daylastyear+id,1:subasin)
       END DO
-      qout(size(hrout,dim=1):dayyear,1:subasin)=0. !reset the rest of the year to 0
-  ELSE IF (t == tstart) THEN
-    qout(1,1:subasin)=0.
   END IF
 
 ! ... and initialize remaining values
-  qout((dayyear+1):size(qout,dim=1),1:subasin)=0.
-
+  qout(size(hrout,dim=1):size(qout,dim=1),1:subasin)=0. !reset the rest of the year to 0
+  
+  
 ! CALL Reservoir Sedimentation and Management Modules
   IF (doreservoir) THEN
     CALL reservoir (1, upstream,idummy)
@@ -234,11 +232,9 @@ IF (STATUS == 2) THEN
   END IF
 
 !  water_subbasin(d,i): runoff of each sub-basin (after small reservoirs)
-!  (in m**3/d), assumption: leaving sub-basin with time delay = 1 day
-!Latest version: water_subbasin already comes in m3/s from hymo_all.f
+!  (in m**3/s), assumption: leaving sub-basin with time delay = 1 day (?)
   DO i=1,subasin
-!    water_subbasin(d,i)=water_subbasin(d,i)/(3600*24)
-    qout(d+1,i)=water_subbasin(d,i)+qout(d+1,i)
+    qout(d+1,i)=water_subbasin(d,i)+qout(d+1,i) !m3/s
   END DO
 ! set inflow qin = zero for all sub-basin
     DO ih=1,size(hrout,dim=1)
@@ -249,7 +245,7 @@ IF (STATUS == 2) THEN
 !cccccccccccccccccccccccccccc
 ! MAIN ROUTING LOOP
 !cccccccccccccccccccccccccccc
-! Calculate qin and qout in Fliessbaum order (as was read in and transformed in routing.dat)
+! Calculate qin and qout in order of routing scheme (as was read in and transformed from routing.dat)
   DO i=1,subasin
     upstream=upbasin(i)  !internal code-ID for most upstream sub-basin
     downstream=downbasin(i) !internal code-ID for receiving sub-basin
@@ -289,7 +285,7 @@ IF (STATUS == 2) THEN
       qin(d,downstream)=qin(d,downstream) + qout(d,upstream)
     END IF
 
-  END DO
+  END DO !1,subasin
 !  END OF MAIN ROUTING LOOP
 
 
