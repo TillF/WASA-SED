@@ -1,12 +1,3 @@
-! Till: computationally irrelevant: improved error checking of input files
-! 2012-06-20
-
-! Till: computationally irrelevant: streamlined code and improved error message with routing.dat
-! 2011-07-05
-
-! Till: computationally irrelevant: minor changes to improve compiler compatibility
-! 2011-04-29
-
 SUBROUTINE routing(STATUS)
 
 use lake_h
@@ -28,7 +19,7 @@ INTEGER, INTENT(IN)                  :: STATUS
 !                 2=calculation day,    3=finalization year)
 
 !INTEGER :: bat
-!    id           : additional loop variable of days (total 7 days)
+
 INTEGER :: irout,idummy,id !,imun,imunx,irout2,irout_d,imeso,istate
 INTEGER :: upstream, downstream
 INTEGER :: itl, ih, i, j, istate, h !, mm, imunout, iout, make
@@ -38,21 +29,6 @@ character(len=1000) :: fmtstr	!string for formatting file output
 
 ! -----------------------------------------------------------------------
 IF (STATUS == 0) THEN
-!Till: already read in readhymo.f90, removed
-!	!**  Read routing paramter
-!	OPEN(11,FILE=pfadp(1:pfadj)// 'River/routing.dat',STATUS='old')
-!	! upbasin: MAP ID of upstream sub-basin (MAP IDs)
-!	! downbasin: MAP ID of downstream sub-basin (MAP IDs)
-!	READ (11,*, IOSTAT=istate); READ(11,*, IOSTAT=istate)
-!	DO irout=1,subasin
-!	  READ (11,*, IOSTAT=istate)  idummy, upbasin(irout),downbasin(irout)
-!	  IF (istate/=0) THEN
-!		write(*,*)'Error (routing.dat): Format error'
-!		stop
-!	  END IF
-!
-!	END DO
-!	CLOSE (11)
 
 !**  Read hydrological response and reservoir paramter
 OPEN(11,FILE=pfadp(1:pfadj)// 'River/response.dat', STATUS='old', IOSTAT=istate)
@@ -61,8 +37,6 @@ IF (istate/=0) THEN
 		stop
  END IF
 
-! prout(i,1): lag time [d]
-! prout(i,2): retention storage [d]
 prout=0.
 READ (11,*, IOSTAT=istate); READ(11,*, IOSTAT=istate)
 h=3
@@ -204,12 +178,10 @@ IF (STATUS == 1) THEN
 ! ... and take qout and volact from the last nn days of last year (nn:length of unit hydrograph)
 
   IF (t > tstart) THEN
-    DO i=1,subasin
-      DO id=1,size(hrout,dim=1)-1
-        qout(id,1:subasin)  =qout(daylastyear+id,i)
+      DO id=1,size(hrout,dim=1)-1   !shift routed riverflow that reaches beyond boundary of year to the beginning of new year
+        qout(id,1:subasin)  =qout(daylastyear+id,1:subasin)
       END DO
-    END DO
-    qout(size(hrout,dim=1):dayyear,1:subasin)=0.
+      qout(size(hrout,dim=1):dayyear,1:subasin)=0. !reset the rest of the year to 0
   ELSE IF (t == tstart) THEN
     qout(1,1:subasin)=0.
   END IF
@@ -262,7 +234,7 @@ IF (STATUS == 2) THEN
   END IF
 
 !  water_subbasin(d,i): runoff of each sub-basin (after small reservoirs)
-!  (in m**3/d), assumpiton: leaving sub-basin with time delay = 1 day
+!  (in m**3/d), assumption: leaving sub-basin with time delay = 1 day
 !Latest version: water_subbasin already comes in m3/s from hymo_all.f
   DO i=1,subasin
 !    water_subbasin(d,i)=water_subbasin(d,i)/(3600*24)
@@ -305,7 +277,7 @@ IF (STATUS == 2) THEN
         qout(d+ih-1,upstream)=MAX(0.,qout(d+ih-1,upstream))
       END IF
     END DO
-! end of do-loop for summying up flows within seven days
+! end of do-loop for summing up flows within nn days
 
 ! Assign outflow as inflow into the next downstream sub-basin
 ! and add possible inflow from other upstream sub-basins
