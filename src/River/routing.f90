@@ -113,9 +113,9 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 !  WRITE (11,'(2a4,<subasin>i14)')'Year' ,' Day', (id_subbas_extern(i), i=1,subasin)
 !  CLOSE (11)
 
-! calculate routing response function for each sub-basin
+! calculate routing response function for each sub-basin (triangular like this: _|\_ )
 ! (given parameter lag-time tL and retention-time tR)
-  allocate( hrout(maxval(sum(ceiling(prout), dim=2)) ,subasin)) !allocate memory for triangular unit hydrograph
+  allocate( hrout(maxval(ceiling(0.5+sum(prout, dim=2))) ,subasin)) !allocate memory for triangular unit hydrograph
   hrout(:,:)=0.
 
   !allocate arrays for in- and outflow into/out of subbasins, as their length needs to accomodate hrout, too
@@ -124,33 +124,38 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 	qout(:,:)=0.
 	qin (:,:)=0.
 
-  DO i=1,subasin
-    itl = ceiling (prout(i,1)) !lag time rounded up to integer
-    temp3 = itl - prout(i,1)  !difference between lag time and next integer
-    qtemp = prout(i,2) - temp3/2.   !time difference between point of interest and end-of-retention triangle
-    temp2 = qtemp / prout(i,2)     !mean non-zero value of response function within first integer interval after lag time
-    if (temp2 < 0.) then !happens when t_ret falls completely into a single interval
-        hrout(itl,i) = 1.
-        cycle
-    else
-        hrout(itl,i) = temp2 * temp3       !value of response function for whole interval ("resampled" to integer resolution)
-    end if
-
-    ! Calculation of the linear response function for runoff routing in the river network
-    if (itl <  (ceiling(prout(i,1) + prout(i,2)))) then
-        DO ih = itl+1, size(hrout,dim=1)
-            qtemp = prout(i,2) - temp3 - 0.5 - (ih - (itl+1))   !time difference between point of interest and end-of-retention triangle
-            temp2 = qtemp / prout(i,2)    !mean value of response function center of current interval
-            temp4 = 0.5 + qtemp           !fraction of current interval that is covered by response function
-            if (temp4 < 1) then !happens when t_ret ends within current interval
-                hrout(ih,i) = (temp4 / prout(i,2) ) * temp4
-                exit
-            else
-                hrout(ih,i) = temp2        !value of response function for whole interval ("resampled" to integer resolution)
-            end if
-        END DO
-    end if
-    hrout(:,i) = hrout(:,i) / sum(hrout(:,i))   !normalize response function
+  hrout=0.
+    DO i=1,subasin
+        !compute values of triangular function at full integer points (0.5 is added because we assume the pulse to be routed centered at mid-day)
+        itl = ceiling (0.5 + prout(i,1)) !lag time rounded up to integer (integer start of triangle)
+        j   = floor   (0.5 + prout(i,1)+prout(i,2) ) !                   (integer end of triangle) 
+        
+        if (itl > j) then !triangle fits completely into single interval
+            hrout(itl,i)=1.
+            cycle
+        end if
+        
+        !compute y-values of traingular function AT full integer points
+        DO ih = itl, j
+            hrout(ih,i) =  1. -  (ih - (prout(i,1)+0.5))/prout(i,2)
+        END DO    
+       
+        temp2=hrout(itl,i) !keep first and last valid value of triangle - they'll be overwritten in the next steps
+        temp3=hrout(j,i)
+       ! considering that the value of response function changes during the time step, we want its mean:
+       !compute MEAN values of traingular function BETWEEN full integer points
+           DO ih = j,itl+1,-1   !do this backwards to avoid overwriting values that will still be needed
+                hrout(ih,i) =  ( hrout(ih-1,i) + hrout(ih,i)) / 2
+           END DO    
+           
+           !interval containing start of triangle, only covered by a fraction (mean value of two first and last valid point in interval, mutiplied by the fraction covered)
+           hrout(itl,i) =  (1+temp2)/2 * (itl - (0.5 + prout(i,1) ))
+           !interval containing end of triangle, only covered by a fraction
+           hrout(j+1,i) =  (0+temp3)/2 * ((0.5 + prout(i,1)+prout(i,2) ) - j )
+        
+       hrout(:,i) = hrout(:,i) / sum(hrout(:,i))   !normalize response function 
+      
+    
   END DO
 
 
@@ -195,15 +200,14 @@ IF (STATUS == 1) THEN   !beginning of a new simulation year
 END IF
 
 ! ------------------------------------------------------------------------
-IF (STATUS == 2) THEN
+IF (STATUS == 2) THEN !regular call during timestep
 
 ! ..........................................................................
 !**  Transfer of water between sub-basins
-!    assumption: time delay = 1 day
+!    assumption: time delay = 1 day (?)
 !    transfer variable qtemp in [m3/day]
 
   IF (dotrans) THEN
-! ntrans=4 defined in params.fi
     DO i=1,ntrans
       IF (t >= y_trans(i)) THEN
 !    from river
@@ -232,9 +236,12 @@ IF (STATUS == 2) THEN
   END IF
 
 !  water_subbasin(d,i): runoff of each sub-basin (after small reservoirs)
+!  the water generated in the current subbasin is not subjected to the retention effects!
 !  (in m**3/s), assumption: leaving sub-basin with time delay = 1 day (?)
   DO i=1,subasin
     qout(d+1,i)=water_subbasin(d,i)+qout(d+1,i) !m3/s
+!        qout(d,i)=water_subbasin(d,i)+qout(d,i) !m3/s
+
   END DO
 ! set inflow qin = zero for all sub-basin
     DO ih=1,size(hrout,dim=1)
@@ -247,10 +254,10 @@ IF (STATUS == 2) THEN
 !cccccccccccccccccccccccccccc
 ! Calculate qin and qout in order of routing scheme (as was read in and transformed from routing.dat)
   DO i=1,subasin
-    upstream=upbasin(i)  !internal code-ID for most upstream sub-basin
+    upstream=upbasin(i)  !internal code-ID for most upstream sub-basin (should usually just be i)
     downstream=downbasin(i) !internal code-ID for receiving sub-basin
 
-! Route inflow from upstream sub-basins (qin) through actual sub-basin within nn days
+! Route inflow from upstream sub-basins (qin) through current sub-basin within nn days
     DO ih=1,size(hrout,dim=1)
       qout(d+ih-1,upstream)=qin(d,upstream)*hrout(ih,upstream)  &
           + qout(d+ih-1,upstream)
@@ -282,7 +289,7 @@ IF (STATUS == 2) THEN
     END IF
 
 	IF (downstream /= 9999 .AND. downstream /= 999) THEN
-      qin(d,downstream)=qin(d,downstream) + qout(d,upstream)
+      qin(d,downstream)=qin(d,downstream) + qout(d,upstream) !the downstream subbasin receives what has been computed for the upstream basin
     END IF
 
   END DO !1,subasin
