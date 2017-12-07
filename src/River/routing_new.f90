@@ -155,9 +155,7 @@ END DO
 
 !allocate memory for subbasin in- and outflow
 allocate( qout(366 + size(hrout,dim=1) , subasin)) !
-allocate( qin (366 + size(hrout,dim=1) , subasin)) 
 qout(:,:)=0.
-qin (:,:)=0.
 
 
 ! INITIALISATION OF RESERVOIR MODULE

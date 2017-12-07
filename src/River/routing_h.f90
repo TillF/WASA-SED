@@ -4,9 +4,8 @@ save
 !ROUTING ARRAYS
 ! Arrays used for the routing of q
 integer, allocatable :: upbasin(:), downbasin(:)
-! qin: runoff into the Sub-basin [m**3/s]
-!Allocatable      real qin (372,nmun)
-real, allocatable :: qin(:,:)
+! qin: river inflow into the Sub-basins [m**3/s]
+real, allocatable :: qin(:)
 ! qout: runoff out of the Sub-basin [m**3/s]
 !Allocatable      real qout (372,nmun)
 real, allocatable :: qout(:,:)

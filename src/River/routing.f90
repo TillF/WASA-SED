@@ -120,9 +120,9 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 
   !allocate arrays for in- and outflow into/out of subbasins, as their length needs to accomodate hrout, too
   allocate( qout(366 + size(hrout,dim=1), subasin))
-  allocate( qin (366 + size(hrout,dim=1), subasin))
+  allocate( qin (subasin))
 	qout(:,:)=0.
-	qin (:,:)=0.
+	qin (:)=0.
 
   hrout=0.
     DO i=1,subasin
@@ -239,15 +239,19 @@ IF (STATUS == 2) THEN !regular call during timestep
 !  the water generated in the current subbasin is not subjected to the retention effects!
 !  (in m**3/s), assumption: leaving sub-basin with time delay = 1 day (?)
   DO i=1,subasin
-    qout(d+1,i)=water_subbasin(d,i)+qout(d+1,i) !m3/s
+    qout(d+1,i)=water_subbasin(d,i)+qout(d+1,i) !m3/s !ii: this already shifts the generated water to the next timestep
+    !first: eliminate qin by using qout throughout
+    !better: put into current timestep:
 !        qout(d,i)=water_subbasin(d,i)+qout(d,i) !m3/s
+    !even better: distribute according response function
+!        qout(d,i)=water_subbasin(d,i)* hrout(...) +qout(d,i) !m3/s
+!still better    : "shrink" response function, so internal runoff is delayed only half as much as upstream riverflow
+    
 
   END DO
 ! set inflow qin = zero for all sub-basin
-    DO ih=1,size(hrout,dim=1)
-      qin(d+ih-1,1:subasin)=0.
-    END DO
-
+  qin=0.  
+  
 
 !cccccccccccccccccccccccccccc
 ! MAIN ROUTING LOOP
@@ -259,7 +263,7 @@ IF (STATUS == 2) THEN !regular call during timestep
 
 ! Route inflow from upstream sub-basins (qin) through current sub-basin within nn days
     DO ih=1,size(hrout,dim=1)
-      qout(d+ih-1,upstream)=qin(d,upstream)*hrout(ih,upstream)  &
+      qout(d+ih-1,upstream)=qin(upstream)*hrout(ih,upstream)  &
           + qout(d+ih-1,upstream)
 ! Transmission losses by evaporation in river
 ! river width for given discharge (estimated according to global
@@ -289,7 +293,7 @@ IF (STATUS == 2) THEN !regular call during timestep
     END IF
 
 	IF (downstream /= 9999 .AND. downstream /= 999) THEN
-      qin(d,downstream)=qin(d,downstream) + qout(d,upstream) !the downstream subbasin receives what has been computed for the upstream basin
+      qin(downstream)=qin(downstream) + qout(d,upstream) !the downstream subbasin receives what has been computed for the upstream basin
     END IF
 
   END DO !1,subasin
