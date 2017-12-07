@@ -239,9 +239,9 @@ IF (STATUS == 2) THEN !regular call during timestep
 !  the water generated in the current subbasin is not subjected to the retention effects!
 !  This autochtonous water leaves the subbasin in the same timestep
   DO i=1,subasin
-        qout(d,i)=water_subbasin(d,i)+qout(d,i) !m3/s
-    !even better: distribute according response function
-!        qout(d,i)=water_subbasin(d,i)* hrout(...) +qout(d,i) !m3/s
+     !distribute autochtonous according to response function
+     qout(d:d+size(hrout,dim=1)-1,i) = qout(d:d+size(hrout,dim=1)-1,i) + water_subbasin(d,i)*hrout(:,i)   
+     
 !still better    : "shrink" response function, so internal runoff is delayed only half as much as upstream riverflow
   END DO
  
