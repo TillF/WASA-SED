@@ -23,9 +23,10 @@ real, allocatable :: r_storage (:)
 ! routing parameter (lag time and retention time) (days)
 !Allocatable      real prout(nmun,2)
 real, allocatable :: prout (:,:)
-! hrout(imun,7): unit hydr. ordinate [1/d] of routing function
-!Allocatable     real hrout(7,nmun)
+! hrout(imun,[required length of response function]): unit hydr. ordinate [1/d] of routing function
 real, allocatable :: hrout(:,:)
+
+real, allocatable :: hrout_intern(:,:)
 
 ! RIVER CHARACTERISTICS
 ! river channel width (bankful width) (m)

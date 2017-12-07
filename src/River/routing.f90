@@ -106,56 +106,81 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
     close(11, status='delete') !delete any existing file, if no output is desired
   endif
 
-
-!  OPEN(11,FILE=pfadn(1:pfadi)//'daily_qin_m3s.out',STATUS='replace')
-!  WRITE (11,*) 'Output files for qin water_subbasin into the sub-basins  &
-!      [m**3/s](with MAP IDs as in hymo.dat)'
-!  WRITE (11,'(2a4,<subasin>i14)')'Year' ,' Day', (id_subbas_extern(i), i=1,subasin)
-!  CLOSE (11)
-
-! calculate routing response function for each sub-basin (triangular like this: _|\_ )
-! (given parameter lag-time tL and retention-time tR)
-  allocate( hrout(maxval(ceiling(0.5+sum(prout, dim=2))) ,subasin)) !allocate memory for triangular unit hydrograph
-  hrout(:,:)=0.
-
-  !allocate arrays for in- and outflow into/out of subbasins, as their length needs to accomodate hrout, too
+    !allocate arrays for in- and outflow into/out of subbasins, as their length needs to accomodate hrout, too
   allocate( qout(366 + size(hrout,dim=1), subasin))
   allocate( qin (subasin))
 	qout(:,:)=0.
 	qin (:)=0.
 
+! calculate external routing response function for each sub-basin (triangular like this: _|\_ ) - used for riverflow entering the subbasin from upstream
+! (given parameter lag-time tL and retention-time tR)
+  allocate( hrout       (maxval(ceiling(0.5+sum(prout, dim=2))) ,subasin)) !allocate memory for triangular unit hydrograph
+! routing of autochtonous runoff  (triangular like this: /\_ ) - used for riverflow generated within the basin (tL*=0, tR*=tL+tR)
+  allocate( hrout_intern(maxval(ceiling(0.5+sum(prout, dim=2))) ,subasin)) !allocate memory for triangular unit hydrograph
+  
   hrout=0.
+  hrout_intern=0.
+  
     DO i=1,subasin
         !compute values of triangular function at full integer points (0.5 is added because we assume the pulse to be routed centered at mid-day)
         itl = ceiling (0.5 + prout(i,1)) !lag time rounded up to integer (integer start of triangle)
         j   = floor   (0.5 + prout(i,1)+prout(i,2) ) !                   (integer end of triangle) 
+
+!internal response function (hrout_intern)
+        !compute y-values of triangular function AT full integer points (ih=1 denotes t=0)
+        if (prout(i,1) > 0) then 
+            DO ih = 1, floor(prout(i,1))+1 !rising limb
+                hrout_intern(ih,i) =  (ih-1)*1/prout(i,1)
+            END DO    
+        end if    
+        !use falling limb of hrout, which is identical
+        !DO ih = floor(prout(i,1))+1,j+1  !falling limb
+        !    hrout_intern(ih,i) =  (ih-1 - (prout(i,1)+0.5))/prout(i,2)
+        !END DO    
+
+        temp2=hrout_intern(itl,i) !keep first and last valid value of triangle - they'll be overwritten in the next steps
+        temp3=hrout_intern(itl+1,i) 
+             
+        !compute MEAN values of triangular function BETWEEN full integer points
+        DO ih = itl-1,1,-1   !do this backwards to not overwrite values that will still be needed   
+            hrout_intern(ih,i) =  ( hrout_intern(ih,i) + hrout_intern(ih+1,i)) / 2
+        END DO    
+        temp4 = 1- (itl  - (0.5 + prout(i,1))) !fraction of rising limb in interval of peak
+        hrout_intern(itl,i) =  ( (temp2 + 1) * temp4       +&
+                                 (temp3 + 1) * (1-temp4 ) ) / 2
         
+        
+!external response function (hrout)
         if (itl > j) then !triangle fits completely into single interval
             hrout(itl,i)=1.
-            cycle
+        else
+            !compute y-values of triangular function AT full integer points (ih=1 denotes t=1)
+            DO ih = itl, j
+                hrout(ih,i) =  1. -  (ih - (prout(i,1)+0.5))/prout(i,2)
+            END DO    
+       
+            temp2=hrout(itl,i) !keep first and last valid value of triangle - they'll be overwritten in the next steps
+            temp3=hrout(j,i)
+           ! considering that the value of response function changes during the time step, we want its mean:
+           !compute MEAN values of traingular function BETWEEN full integer points
+               DO ih = j,itl+1,-1   !do this backwards to avoid overwriting values that will still be needed
+                    hrout(ih,i) =  ( hrout(ih-1,i) + hrout(ih,i)) / 2
+               END DO    
+           
+               !interval containing start of triangle, only covered by a fraction (mean value of two first and last valid point in interval, mutiplied by the fraction covered)
+               hrout(itl,i) =  (1+temp2)/2 * (itl - (0.5 + prout(i,1) ))
+               !interval containing end of triangle, only covered by a fraction
+               hrout(j+1,i) =  (0+temp3)/2 * ((0.5 + prout(i,1)+prout(i,2) ) - j )
         end if
         
-        !compute y-values of traingular function AT full integer points
-        DO ih = itl, j
-            hrout(ih,i) =  1. -  (ih - (prout(i,1)+0.5))/prout(i,2)
-        END DO    
-       
-        temp2=hrout(itl,i) !keep first and last valid value of triangle - they'll be overwritten in the next steps
-        temp3=hrout(j,i)
-       ! considering that the value of response function changes during the time step, we want its mean:
-       !compute MEAN values of traingular function BETWEEN full integer points
-           DO ih = j,itl+1,-1   !do this backwards to avoid overwriting values that will still be needed
-                hrout(ih,i) =  ( hrout(ih-1,i) + hrout(ih,i)) / 2
-           END DO    
-           
-           !interval containing start of triangle, only covered by a fraction (mean value of two first and last valid point in interval, mutiplied by the fraction covered)
-           hrout(itl,i) =  (1+temp2)/2 * (itl - (0.5 + prout(i,1) ))
-           !interval containing end of triangle, only covered by a fraction
-           hrout(j+1,i) =  (0+temp3)/2 * ((0.5 + prout(i,1)+prout(i,2) ) - j )
-        
-       hrout(:,i) = hrout(:,i) / sum(hrout(:,i))   !normalize response function 
-      
-    
+        hrout_intern(itl+1:j+1,i) = hrout(itl+1:j+1,i) !the falling limbs of the hydrographs should be identical 
+        hrout(:,i)        = hrout(:,i)        / sum(hrout(:,i))          !normalize response function 
+        hrout_intern(:,i) = hrout_intern(:,i) / sum(hrout_intern(:,i))   !normalize response function 
+        if (sum(hrout(:,i))==0 .OR. sum(hrout_intern(:,i))==0) then
+            write(*,*) "Error when computing response functions: Please send response.dat to the developers."
+            stop
+        end if
+   
   END DO
 
 
@@ -239,9 +264,9 @@ IF (STATUS == 2) THEN !regular call during timestep
   !distribute autochtonous runoff according to "reduced" response function, because it doesn't travel all the way through the subbasin but only half the distance on average
   ! Effectively, the unit hydrograph (hrout) is shrunk by half to account for less translation and retention of the autochtonous runoff compared to the runoff entering from upstream ("ishft" equals division by two, but is faster)
   DO i=1,subasin
-     DO ih=1,size(hrout,dim=1)
-         j =  d+ishft(ih+1, -1)-1 !index for qout to write to. 
-         qout(j,i)=qout(j,i) + water_subbasin(d,i)*hrout(ih,i)    !m3/s
+     DO ih=1,size(hrout_intern,dim=1)
+         j =  d+ih-1 !index for qout to write to. 
+         qout(j,i)=qout(j,i) + water_subbasin(d,i)*hrout_intern(ih,i)    !m3/s
      END Do     
   END DO
  
