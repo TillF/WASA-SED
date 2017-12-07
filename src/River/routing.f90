@@ -237,26 +237,21 @@ IF (STATUS == 2) THEN !regular call during timestep
 
 !  water_subbasin(d,i): runoff of each sub-basin (after small reservoirs)
 !  the water generated in the current subbasin is not subjected to the retention effects!
-!  (in m**3/s), assumption: leaving sub-basin with time delay = 1 day (?)
+!  This autochtonous water leaves the subbasin in the same timestep
   DO i=1,subasin
-    qout(d+1,i)=water_subbasin(d,i)+qout(d+1,i) !m3/s !ii: this already shifts the generated water to the next timestep
-    !first: eliminate qin by using qout throughout
-    !better: put into current timestep:
-!        qout(d,i)=water_subbasin(d,i)+qout(d,i) !m3/s
+        qout(d,i)=water_subbasin(d,i)+qout(d,i) !m3/s
     !even better: distribute according response function
 !        qout(d,i)=water_subbasin(d,i)* hrout(...) +qout(d,i) !m3/s
 !still better    : "shrink" response function, so internal runoff is delayed only half as much as upstream riverflow
-    
-
   END DO
-! set inflow qin = zero for all sub-basin
-  qin=0.  
-  
+ 
 
 !cccccccccccccccccccccccccccc
 ! MAIN ROUTING LOOP
 !cccccccccccccccccccccccccccc
 ! Calculate qin and qout in order of routing scheme (as was read in and transformed from routing.dat)
+  qin=0.  ! set inflow qin = zero for all sub-basin
+  
   DO i=1,subasin
     upstream=upbasin(i)  !internal code-ID for most upstream sub-basin (should usually just be i)
     downstream=downbasin(i) !internal code-ID for receiving sub-basin
