@@ -235,14 +235,14 @@ IF (STATUS == 2) THEN !regular call during timestep
     END DO
   END IF
 
-!  water_subbasin(d,i): runoff of each sub-basin (after small reservoirs)
-!  the water generated in the current subbasin is not subjected to the retention effects!
-!  This autochtonous water leaves the subbasin in the same timestep
+!  water_subbasin(d,i): autochtonous runoff of each sub-basin (after small reservoirs)
+  !distribute autochtonous runoff according to "reduced" response function, because it doesn't travel all the way through the subbasin but only half the distance on average
+  ! Effectively, the unit hydrograph (hrout) is shrunk by half to account for less translation and retention of the autochtonous runoff compared to the runoff entering from upstream ("ishft" equals division by two, but is faster)
   DO i=1,subasin
-     !distribute autochtonous according to response function
-     qout(d:d+size(hrout,dim=1)-1,i) = qout(d:d+size(hrout,dim=1)-1,i) + water_subbasin(d,i)*hrout(:,i)   
-     
-!still better    : "shrink" response function, so internal runoff is delayed only half as much as upstream riverflow
+     DO ih=1,size(hrout,dim=1)
+         j =  d+ishft(ih+1, -1)-1 !index for qout to write to. 
+         qout(j,i)=qout(j,i) + water_subbasin(d,i)*hrout(ih,i)    !m3/s
+     END Do     
   END DO
  
 
