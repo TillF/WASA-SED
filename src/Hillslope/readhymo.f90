@@ -179,6 +179,8 @@
 
     INTEGER :: i_soil,i_veg        ! ids of components in work
 
+    REAL    :: wind_t
+
 
     !Till: Read routing.dat, which determines which of the given subbasins are to be modelled
     OPEN(11,FILE=pfadp(1:pfadj)// 'River/routing.dat',STATUS='old',IOSTAT=istate)    ! upbasin: MAP ID of upstream sub-basin (MAP IDs);! downbasin: MAP ID of downstream sub-basin (MAP IDs)
@@ -226,7 +228,7 @@
             WRITE (*,'(A,I0,A)') 'ERROR in routing.dat: subbasin ', upbasin(i),' cannot drain to more than one basin.'
             STOP
         end if
-    
+
         if (i==subasin) exit !don't do the next check for the last line
         idummy=which1(upbasin(i)==downbasin(i+1:subasin))
         IF (idummy/=0) THEN
@@ -1669,6 +1671,21 @@
     ELSE
         frac_direct_gw=1.
     END IF
+
+
+
+
+    ! Calibration factor for static wind
+    OPEN(11,FILE=pfadp(1:pfadj)// 'Others/calib_wind.dat',IOSTAT=istate,STATUS='old')
+    IF (istate==0) THEN
+        READ(11,*,IOSTAT=istate) wind_t
+        wind = wind_t
+        CLOSE(11)
+    ELSE
+        wind = 1.
+    END IF
+
+
 
 
     if (dosediment) then
