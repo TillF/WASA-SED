@@ -62,7 +62,7 @@ implicit none
 	CHARACTER(LEN=*),  INTENT(IN)                  :: filename	!name of file to produce meaningful error message
 
 	INTEGER                  :: date_num, dum,iostat, linecount	!dummy values. line counter
-	CHARACTER                  :: temp2	!dummy 
+	CHARACTER                  :: temp2	!dummy
 
 	linecount=4
 	READ(fid,*,IOSTAT=iostat) date_num,dum,temp2
@@ -72,12 +72,12 @@ implicit none
 		READ(fid,*,IOSTAT=iostat) date_num,dum,temp2		!advance until start month and day is reached
 		linecount = linecount+1
 	end do
-	
+
 	if (iostat==-1) then	!reached end of file
 		write(*,'(A,i0,a,i0,a,i0)')'ABORTED: input file '//trim(filename)//' does not contain simulation start ',dstart,'/',mstart,'/',tstart,' (d/m/y)'
 		stop
 	end if
-	
+
 	if (iostat/=0) then	!format error
 		write(*,'(A,i0)')'ABORTED: format error in '//trim(filename)//' in line ',linecount
 		stop
@@ -106,7 +106,7 @@ INTEGER, INTENT(IN)                  :: STATUS
 !                 2=daily step,     3=end of year)
 
 ! counters
-INTEGER :: i,j,k,id,n,iostat !,imun,imeso,istate,z,mm,bat,make,testi,dall ,idummy 
+INTEGER :: i,j,k,id,n,iostat !,imun,imeso,istate,z,mm,bat,make,testi,dall ,idummy
 REAL :: dummy !,dif,difc
 
 
@@ -124,10 +124,10 @@ CHARACTER (len=50) :: dumstr
 INTEGER   :: columnheader(1000)	!Till: for storing column headings of input files
 !INTEGER :: nbrezgmun(subasin),idezgmun(50,subasin)
 CHARACTER (LEN=8000) :: linedummy	!Till: dummy for reading input header	!ii: allocate dynamically
-integer, pointer, save :: corr_column_temp(:),corr_column_rhum(:),corr_column_rad(:),corr_column_precip(:) !Till: hold corresponding columns of input files to be related to internal numbering of subbasins 
+integer, pointer, save :: corr_column_temp(:),corr_column_rhum(:),corr_column_rad(:),corr_column_precip(:) !Till: hold corresponding columns of input files to be related to internal numbering of subbasins
 INTEGER,save  :: no_columns(5)=0		!number of columns of input files for the 5 climate input files
-REAL,allocatable,save :: inputbuffer(:,:)				!Till: for buffering input data 
-!REAL,allocatable,save :: inputbuffer2(:,:)				!Till: for buffering input data 
+REAL,allocatable,save :: inputbuffer(:,:)				!Till: for buffering input data
+!REAL,allocatable,save :: inputbuffer2(:,:)				!Till: for buffering input data
 
 
 !CCCCCCCCCCCCCCCCCCCC MODULE CODE CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -138,7 +138,7 @@ IF (STATUS == 0) THEN
   else
 	dumstr='rain_daily.dat'	!Till: load daily rainfall
  END IF
-  
+
 
 !reads in daily temperature, humiditiy, short wave radiation and precipitation for simulation period
 !  OPEN(81,FILE=pfadp(1:pfadj)// '/Time_series/temperature.dat',STATUS='old',action='read',readonly,shared)
@@ -147,22 +147,22 @@ IF (STATUS == 0) THEN
 !  OPEN(84,FILE=pfadp(1:pfadj)// dumstr,STATUS='old',action='read',readonly,shared)
 
   OPEN(81,FILE=pfadp(1:pfadj)// '/Time_series/temperature.dat',STATUS='old',action='read', IOSTAT=iostat)
-  if (iostat/=0) then	
+  if (iostat/=0) then
 		write(*,*)'ERROR:',pfadp(1:pfadj)// '/Time_series/temperature.dat not found.'
 		stop
   end if
   OPEN(82,FILE=pfadp(1:pfadj)// '/Time_series/humidity.dat',STATUS='old',action='read', IOSTAT=iostat)
-  if (iostat/=0) then	
+  if (iostat/=0) then
 		write(*,*)'ERROR:',pfadp(1:pfadj)// '/Time_series/humidity.dat not found.'
 		stop
   end if
   OPEN(83,FILE=pfadp(1:pfadj)// '/Time_series/radiation.dat',STATUS='old',action='read', IOSTAT=iostat)
-  if (iostat/=0) then	
+  if (iostat/=0) then
 		write(*,*)'ERROR:',pfadp(1:pfadj)// '/Time_series/radiation.dat not found.'
 		stop
   end if
   OPEN(84,FILE=pfadp(1:pfadj)// '/Time_series/'//dumstr,STATUS='old',action='read', IOSTAT=iostat)
-  if (iostat/=0) then	
+  if (iostat/=0) then
 		write(*,*)'ERROR:',pfadp(1:pfadj)// '/Time_series/'//trim(dumstr)//' not found.'
 		stop
   end if
@@ -177,18 +177,18 @@ IF (STATUS == 0) THEN
   columnheader=0
   no_columns(1)=GetNumberOfSubstrings(linedummy)-2	!Till: count number of columns
   READ (linedummy,*, IOSTAT=iostat) dummy, dummy, (columnheader(i), i=1,no_columns(1))	!Till: extract column headers
-  if (iostat/=0) then	
+  if (iostat/=0) then
 		write(*,*)'Format error in temperature.dat'
 		stop
   end if
   corr_column_temp=>set_corr_column(columnheader, 'temperature.dat')
-  
-  
+
+
   READ(82,'(a)') linedummy
   columnheader=0
   no_columns(2)=GetNumberOfSubstrings(linedummy)-2	!Till: count number of columns
   READ (linedummy,*, IOSTAT=iostat) dummy, dummy, (columnheader(i), i=1,no_columns(2))	!Till: extract column headers
-  if (iostat/=0) then	
+  if (iostat/=0) then
 		write(*,*)'Format error in humidity.dat'
 		stop
   end if
@@ -199,25 +199,25 @@ IF (STATUS == 0) THEN
   columnheader=0
   no_columns(3)=GetNumberOfSubstrings(linedummy)-2	!Till: count number of columns
   READ (linedummy,*, IOSTAT=iostat) dummy, dummy, (columnheader(i), i=1,no_columns(3))	!Till: extract column headers
-  if (iostat/=0) then	
+  if (iostat/=0) then
 		write(*,*)'Format error in radiation.dat'
 		stop
   end if
   corr_column_rad=> set_corr_column(columnheader,'radiation.dat')
 
- 
+
   !rainfall data
   READ(84,'(a)') linedummy
   columnheader=0
   no_columns(4)=GetNumberOfSubstrings(linedummy)-2	!Till: count number of columns
   READ (linedummy,*, IOSTAT=iostat) dummy, dummy, (columnheader(i), i=1,no_columns(4))	!Till: extract column headers
-  if (iostat/=0) then	
+  if (iostat/=0) then
 		write(*,*)'Format error in '//trim(dumstr)
 		stop
   end if
   corr_column_precip=>set_corr_column(columnheader,dumstr)
-	
-	
+
+
   do i=1,subasin
 	if (associated(corr_column_pre_subbas_outflow) ) then
 		if (corr_column_pre_subbas_outflow(i)>0) then		!Till: assign dummy climate data for those subbasins that are prespecified
@@ -227,7 +227,7 @@ IF (STATUS == 0) THEN
 			corr_column_precip(i)=1
 		end if
 	end if
-	
+
 	if (1.0*corr_column_temp(i)*corr_column_rhum(i)*corr_column_rad(i)*corr_column_precip(i)==0) then	!check completeness
 		write(*,*)'climate data is incomplete for subbasin',id_subbas_extern(i)
 	end if
@@ -235,14 +235,14 @@ IF (STATUS == 0) THEN
 
 
   allocate(inputbuffer(366*nt,maxval(no_columns)))		!Till: prepare input buffer to fit the data
-  
+
  !set internal filepointers to correct line (simulation start)
   call date_seek(81,tstart,mstart, dstart, 'temperature.dat')
   call date_seek(82,tstart,mstart, dstart, 'humidity.dat')
   call date_seek(83,tstart,mstart, dstart, 'radiation.dat')
-  call date_seek(84,tstart,mstart, dstart, dumstr)	
-  
-  
+  call date_seek(84,tstart,mstart, dstart, dumstr)
+
+
 END IF
 
 ! -------------------------------------------------------------
@@ -262,8 +262,8 @@ IF (STATUS == 1) THEN
  rhum=5.0
  rad=30.0
  precip=50.0
- 
- 
+
+
  READ(81,*,IOSTAT=iostat, END=200) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(1)),id=1,dayyear)		!Till: faster than using loop
  if (iostat/=0) then	!
 		write(*,*)'ERROR: input file format error in temperature.dat'
@@ -271,11 +271,11 @@ IF (STATUS == 1) THEN
  200    write(*,*)'ERROR: premature end in temperature.dat'
 		stop
  end if
- 
- 
+
+
 
  temp(1:dayyear,1:subasin)= inputbuffer(1:dayyear,corr_column_temp)	!Till: rearrange column order to match order of hymo.dat
- 
+
  READ(82,*,IOSTAT=iostat, END=201) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(2)),id=1,dayyear)		!Till: faster than using loop
  if (iostat/=0) then	!
 		write(*,*)'ERROR: input file format error in humidity.dat'
@@ -284,8 +284,8 @@ IF (STATUS == 1) THEN
 		stop
  end if
  rhum(1:dayyear,1:subasin)= inputbuffer (1:dayyear,corr_column_rhum)	!Till: rearrange column order to match order of hymo.dat
- 
- 
+
+
  READ(83,*,IOSTAT=iostat, END=202) (dummy,dummy,(inputbuffer (id,i),i=1,no_columns(3)),id=1,dayyear)		!Till: faster than using loop
  if (iostat/=0) then	!
 		write(*,*)'ERROR: input file format error in radiation.dat'
@@ -293,8 +293,8 @@ IF (STATUS == 1) THEN
  202    write(*,*)'ERROR: premature end in radiation.dat'
 		stop
  end if
- rad(1:dayyear,1:subasin)= inputbuffer (1:dayyear,corr_column_rad)	!Till: rearrange column order to match order of hymo.dat 
- 
+ rad(1:dayyear,1:subasin)= inputbuffer (1:dayyear,corr_column_rad)	!Till: rearrange column order to match order of hymo.dat
+
 
 
 	IF (.NOT. dohour) THEN
@@ -305,8 +305,8 @@ IF (STATUS == 1) THEN
 		203    write(*,*)'ERROR: premature end in ',trim(dumstr)
 			stop
 		end if
-		precip(:,1:subasin)= inputbuffer (:,corr_column_precip)	!Till: rearrange column order to match order of hymo.dat	 
-	else 
+		precip(:,1:subasin)= inputbuffer (:,corr_column_precip)	!Till: rearrange column order to match order of hymo.dat
+	else
 		!read hourly rainfall data
 		!for hourly version - program still needs the daily data as well, but this is computed internally below
 
@@ -320,29 +320,29 @@ IF (STATUS == 1) THEN
 			stop
 		end if
 
-		preciph(:,1:subasin)= inputbuffer (:,corr_column_precip)	!Till: rearrange column order to match order of hymo.dat	 
+		preciph(:,1:subasin)= inputbuffer (:,corr_column_precip)	!Till: rearrange column order to match order of hymo.dat
 
 
 		if (t/=tstop) then	!Till: lookup the day of month that should have been read last
 			j=daymon(12)
 		else
-			j=daymon(mstop) 
+			j=daymon(mstop)
 			IF (mstop==2 .AND. MOD(t,4) == 0) j=29	!leap year
 		end if
 		if (n/1000000/=j) then
 			write(*,'(a,i0)')'Error in date numbering/formatting of rain_hourly.dat, year ',t
 			stop
 		end if
-			 
+
 		!loop over all days of year and sum up daily precip
-		DO i=1,dayyear		
-			precip(i,:)=sum(preciph((i-1)*nt+1:i*nt,:),dim=1) 
+		DO i=1,dayyear
+			precip(i,:)=sum(preciph((i-1)*nt+1:i*nt,:),dim=1)
 		END DO
 
 	END IF
-	
 
-wind=1.0	!Till: currently not read from input file (assumed constant)
+
+!wind=1.0	!Till: currently not read from input file (assumed constant)
 
 
 CALL check_climate	!check validity of climate data
@@ -356,9 +356,9 @@ END IF
 ! --------------------------------------------------------------------
 !** At the end of the year
 IF (STATUS == 3) THEN
-  
+
 !** Obtain monthly and annual values
-  
+
 !        call total  (precip,annprc ,monprc ,1.)
 !        call total  (pet   ,annpet ,monpet ,1.)
 !        call total  (petm   ,annpetm ,monpetm ,1.)
@@ -366,12 +366,12 @@ IF (STATUS == 3) THEN
 !        call average(rhum  ,annrhum,monrhum,1.)
 !        call average(rad   ,annrad ,monrad ,1.)
 !        call average(wind  ,annwind,monwind,1.)
-  
+
 !        make=1
 !        if (make.eq.1) then
 !        open(11,file=pfadn(1:pfadi)//'monprc.out',status='old'
 !     .       ,position='append')
-  
+
 !        do mm=1,subasin
 !        do j=1,12
 !          write(11,'(f7.1)') monprc(j,mm)
@@ -379,21 +379,21 @@ IF (STATUS == 3) THEN
 !        enddo
 !        close(11)
 !        endif
-  
-  
-  
+
+
+
 !        make=1
 !        if (make.eq.1) then
 !        open(11,file=pfadn(1:pfadi)//'monpet.out',status='old'
 !     .       ,position='append'  )
-  
+
 !        do mm=1,subasin
 !        do j=1,12
 !          write(11,'(f7.1)') monpet(j,mm)
 !        enddo
 !        enddo
 !        close(11)
-  
+
 !        open(11,file=pfadn(1:pfadi)//'monpetm.out',status='old'
 !     .       ,position='append'  )
 !        do mm=1,nmunalt
@@ -403,17 +403,17 @@ IF (STATUS == 3) THEN
 !        enddo
 !        close(11)
 !        endif
-  
+
 !        make=1
 !        if (make.eq.1) then
 !        open(11,file=pfadn(1:pfadi)//'annprc.out',status='old'
 !     .       ,position='append'  )
-  
+
 !        do mm=1,subasin
 !          write(11,'(f7.1)') annprc(mm)
 !        enddo
 !        close(11)
-  
+
 !        open(11,file=pfadn(1:pfadi)//'annpet.out',status='old'
 !     .       ,position='append'  )
 !        do mm=1,subasin
@@ -421,14 +421,14 @@ IF (STATUS == 3) THEN
 !        enddo
 !        close(11)
 !        endif
-  
+
 !        do imun=1,subasin
 !          aveprc(imun) = aveprc(imun) + annprc(imun)/years
 !          avetmp(imun) = avetmp(imun) + anntmp(imun)/years
 !          avepet(imun) = avepet(imun) + annpet(imun)/years
 !          averhum(imun) = averhum(imun) + annrhum(imun)/years
 !        enddo
-  
+
 !        if (t .eq. tstop) then
 !          open(11,file=pfadn(1:pfadi)//'climave.dat',status='replace')
 !          do imun=1,subasin
@@ -437,7 +437,7 @@ IF (STATUS == 3) THEN
 !          enddo
 !          close(11)
 !        endif
-  
+
 END IF
 
 RETURN
@@ -455,10 +455,10 @@ contains
 		INTEGER, INTENT(IN)                  :: input_header(:)	!order of subbasins in input file
 		character(len=*), INTENT(IN)                  :: inputfile_name	!name of input file
 		integer	:: i,j,k
-		
-		allocate(set_corr_column(subasin))	
+
+		allocate(set_corr_column(subasin))
 		set_corr_column=0
-		
+
 		DO i=1,subasin
 			 DO j=1,size(input_header)
 				IF(input_header(j) == id_subbas_extern(i)) THEN
@@ -476,7 +476,7 @@ contains
 					WRITE(*,'(a,i0,a,a,a)') 'ERROR: Sub-basin-ID ',id_subbas_extern(i),' not found in ',inputfile_name,', quitting.'
 					stop
 				end if
-				
+
 			END DO
 
 		END DO

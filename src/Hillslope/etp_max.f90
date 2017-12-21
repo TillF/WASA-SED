@@ -3,7 +3,7 @@ SUBROUTINE etp_max(isubbas,vegi,etpmax,  &
 
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29
- 
+
 !Till: optimized speed by re-using already calculated values
 !2008-08-14
 
@@ -169,7 +169,7 @@ transn=(86400.-seconds_of_daylight)/2.45E6
 ! check wind
 ! program is not defined for windspeed=0.
 !wind velocity (m/s) is set constant for all sub-basins
-wind(d,isubbas)=1.0
+!wind(d,isubbas)=1.0
 
 ! measurement height of wind speed
 zr=6.0
@@ -256,29 +256,29 @@ IF (domean .eqv. .FALSE.) THEN
 ! ............................................................
 
 ! daytime values
-  
+
   tempd=temp(d,isubbas)+daily_delta_temp
   es = 6.11*EXP(17.62*tempd/(243.12+tempd))
   s  = es*4284./((243.12+tempd)**2)
   gfracd=0.2
-  
+
 ! minimum surface resistance
   rs=0.
-  
+
   grs =(s+gamma)*ras +gamma*rss
   grp =(s+gamma)*rap +gamma*rsp
   grbs=(s+gamma)*rabs+gamma*rsbs
   gra =(s+gamma)*raa
-  
+
   tempval=grs*grp*grbs+ (1.-fcov)*grs*grp*gra+&
 	    fcov*grbs*grs*gra+ fcov*grbs*grp*gra
   cs =grbs*grp*(grs +gra)/tempval
   cp =grbs*grs*(grp +gra)/tempval
   cbs=grs *grp*(grbs+gra)/tempval
-  
+
 ! daytime time mean of short wave radiation = daily mean * 24/hours_of_daylight
 ! Rnetto=Rkurz+Rlang
-  
+
   rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(tempd+273.2)**4&
 	+(1.-alpha)*rad(d,isubbas)*24./hours_of_daylight
   rnettos =rnetto*EXP(-1.*ext*lai_act(vegi))
@@ -287,28 +287,28 @@ IF (domean .eqv. .FALSE.) THEN
 !      Anettos =Rnettos-Gstream
 !      Anettobs=Rnetto-Gstream
 !      Anettop =Anetto-Anettos
-  
+
   gstream  =gfracd*rnettos
   gstreambs=gfracd*rnetto
   anetto   =rnetto-(gstream*fcov+gstreambs*(1.-fcov))
   anettos  =rnettos-gstream
   anettobs =rnetto-gstreambs
   anettop  =anetto-anettos
-  
-  
+
+
   pmp=(s*anetto+((roh*heatc*(es-emean)-s*rap*anettos)/ (raa+rap)))/  &
       (s+gamma*(1.+rsp/(raa+rap)))*transd
   pms=(s*anetto+((roh*heatc*(es-emean)-s*ras*anettop)/ (raa+ras)))/  &
       (s+gamma*(1.+rss/(raa+ras)))*transd
   pmbs=(s*anettobs+roh*heatc*(es-emean)/(raa+rabs))/  &
       (s+gamma*(1.+rsbs/(raa+rabs)))*transd
-  
+
   actd=fcov*(cp*pmp+cs*pms)+(1.-fcov)*cbs*pmbs
-  
+
 ! water vapour saturation deficit at exchange height
   d0=(es-emean)+(s*anetto-(s+gamma)*(actd/transd))* raa/(roh*heatc)
-  
-  
+
+
 ! evaporation of different sources (mm)
   actveg=fcov*transd* (s*anettop+roh*heatc*d0/rap)/  &
       (s+gamma*(1.+rsp/rap))
@@ -316,36 +316,36 @@ IF (domean .eqv. .FALSE.) THEN
       (s+gamma*(1.+rss/ras))
   actbs =(1.-fcov)*transd* (s*anettobs+roh*heatc*d0/rabs)/  &
       (s+gamma*(1.+rsbs/rabs))
-  
+
   !etpmax=actd
   etpmax=MAX(0.,actd)	!Till: prevented actual transpiration during day from getting negative
 
 !      write(*,*) 'ETP,day, cov',actd,fcov
 !      write(*,*) 'ETP,day,check',actveg+acts+actbs
 !      write(*,*) 'ETP,day,veg,s,bs',actveg,acts,actbs
-  
-  
+
+
 ! ............................................................
   IF (donight) THEN
 ! night values
-    
-    
+
+
     tempn=temp(d,isubbas)-daily_delta_temp
     es = 6.11*EXP(17.62*tempn/(243.12+tempn))
     s  = es*4284./((243.12+tempn)**2)
     gfracn=0.7
-    
+
     grs =(s+gamma)*ras +gamma*rss
     grp =(s+gamma)*rap +gamma*rsp
     grbs=(s+gamma)*rabs+gamma*rsbs
     gra =(s+gamma)*raa
-    
+
     tempval=grs*grp*grbs+ (1.-fcov)*grs*grp*gra+  &
         fcov*grbs*grs*gra+ fcov*grbs*grp*gra
     cs =grbs*grp*(grs +gra)/tempval
     cp =grbs*grs*(grp +gra)/tempval
     cbs=grs *grp*(grbs+gra)/tempval
-    
+
 ! night short wave radiation = 0.
 ! Rnetto=Rlang
     rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(tempn+273.2)**4
@@ -355,28 +355,28 @@ IF (domean .eqv. .FALSE.) THEN
 !      Anettos =Rnettos-Gstream
 !      Anettobs=Rnetto-Gstream
 !      Anettop =Anetto-Anettos
-    
+
     gstream  =gfracn*rnettos
     gstreambs=gfracn*rnetto
     anetto   =rnetto-(gstream*fcov+gstreambs*(1.-fcov))
     anettos  =rnettos-gstream
     anettobs =rnetto-gstreambs
     anettop  =anetto-anettos
-    
-    
+
+
     pmp=(s*anetto+((roh*heatc*(es-emean)-s*rap*anettos)/ (raa+rap)))/  &
         (s+gamma*(1.+rsp/(raa+rap)))*transn
     pms=(s*anetto+((roh*heatc*(es-emean)-s*ras*anettop)/ (raa+ras)))/  &
         (s+gamma*(1.+rss/(raa+ras)))*transn
     pmbs=(s*anettobs+roh*heatc*(es-emean)/(raa+rabs))/  &
         (s+gamma*(1.+rsbs/(raa+rabs)))*transn
-    
+
     actn=fcov*(cp*pmp+cs*pms)+(1.-fcov)*cbs*pmbs
-    
+
 ! water vapour saturation deficit at exchange height
     d0=(es-emean)+(s*anetto-(s+gamma)*(actn/transn))* raa/(roh*heatc)
 !      write(*,*) 'def',es-emean,d0
-    
+
 ! evaporation of different sources (mm)
     dumv=actveg
     actveg=actveg+ fcov*transn*  &
@@ -387,7 +387,7 @@ IF (domean .eqv. .FALSE.) THEN
     dumbs=actbs
     actbs =actbs+ (1.-fcov)*transn*  &
         (s*anettobs+roh*heatc*d0/rabs)/ (s+gamma*(1.+rsbs/rabs))
-    
+
     etpmax=etpmax+MAX(0.,actn)	!Till: negative values are discarded
 
 !      write(*,*) 'ETP, night',actn
@@ -396,39 +396,39 @@ IF (domean .eqv. .FALSE.) THEN
 !      write(*,*) 'ETP,night,veg,s,bs',actveg-dumv,acts-dums,actbs-dumbs
 ! End of night calculation
   END IF
-  
+
 ! .........................................................................
 ! End of day/night separate calculations, do daily mean calculations
 ELSE
-  
+
 ! length of day (seconds)
   seconds_of_daylight=hours_of_daylight*60.*60.
 ! conversion factor for latent heat flux W/m2 -> mm
   transd=seconds_of_daylight/2.45E6
-  
+
   es = 6.11*EXP(17.62*temp(d,isubbas)/(243.12+temp(d,isubbas)))
   s  = es*4284./((243.12+temp(d,isubbas))**2)
-  
+
 ! soil heat flux assumed to be negligable
   gfracd=0.
-  
+
 ! minimum surface resistiance
   rs=0.
-  
+
   grs =(s+gamma)*ras +gamma*rss
   grp =(s+gamma)*rap +gamma*rsp
   grbs=(s+gamma)*rabs+gamma*rsbs
   gra =(s+gamma)*raa
-  
+
   tempval=grs*grp*grbs+ (1.-fcov)*grs*grp*gra+  &
       fcov*grbs*grs*gra+ fcov*grbs*grp*gra
   cs =grbs*grp*(grs +gra)/tempval
   cp =grbs*grs*(grp +gra)/tempval
   cbs=grs *grp*(grbs+gra)/tempval
-  
+
 ! daytime time mean of short wave radiation = daily mean * 24/hours_of_daylight
 ! Rnetto=Rkurz+Rlang
-  
+
   rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(temp(d,isubbas)+273.2)**4 +&
        (1.-alpha)*rad(d,isubbas)*24./hours_of_daylight
   rnettos =rnetto*EXP(-1.*ext*lai_act(vegi))
@@ -437,28 +437,28 @@ ELSE
 !      Anettos  =Rnettos-Gstream
 !      Anettobs =Rnetto-Gstream
 !      Anettop  =Anetto-Anettos
-  
+
   gstream  =gfracd*rnettos
   gstreambs=gfracd*rnetto
   anetto   =rnetto-(gstream*fcov+gstreambs*(1.-fcov))
   anettos  =rnettos-gstream
   anettobs =rnetto-gstreambs
   anettop  =anetto-anettos
-  
-  
+
+
   pmp=(s*anetto+((roh*heatc*(es-emean)-s*rap*anettos)/ (raa+rap)))/  &
       (s+gamma*(1.+rsp/(raa+rap)))*transd
   pms=(s*anetto+((roh*heatc*(es-emean)-s*ras*anettop)/ (raa+ras)))/  &
       (s+gamma*(1.+rss/(raa+ras)))*transd
   pmbs=(s*anettobs+roh*heatc*(es-emean)/(raa+rabs))/  &
       (s+gamma*(1.+rsbs/(raa+rabs)))*transd
-  
+
   actd=fcov*(cp*pmp+cs*pms)+(1.-fcov)*cbs*pmbs
-  
+
 ! water vapour saturation deficit at exchange height
   d0=(es-emean)+(s*anetto-(s+gamma)*(actd/transd))* raa/(roh*heatc)
-  
-  
+
+
 ! evaporation of different sources (mm)
   actveg=fcov*transd* (s*anettop+roh*heatc*d0/rap)/  &
       (s+gamma*(1.+rsp/rap))
@@ -466,13 +466,13 @@ ELSE
       (s+gamma*(1.+rss/ras))
   actbs =(1.-fcov)*transd* (s*anettobs+roh*heatc*d0/rabs)/  &
       (s+gamma*(1.+rsbs/rabs))
-  
+
    !etpmax=actd
   etpmax=MAX(0.,actd)	!Till: prevented actual transpiration during day from getting negative
 
 !      write(*,*) 'ETP,daymean, cov',actd,fcov
 !      write(*,*) 'ETP,daymean,check',actveg+acts+actbs
-  
+
 END IF
 
 etpmax_stored(isubbas,vegi)=etpmax	!save value for possible reuse

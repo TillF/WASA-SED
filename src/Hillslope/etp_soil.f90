@@ -1,9 +1,9 @@
 SUBROUTINE etp_soil(i_subbas3,vegi,defi,facwi,act,actveg,acts,  &
         height_act,lai_act,alb_act,rsfinal)
 
-!Jose: an upper theshold for soil surface resistance "rss" was introduced. For very high values of "rss" a divi! jose miguel: for very low soil water content, the rss tends to infinity. This is not accepted by the computations, so the maximum of surface resistance of bare soil is limited to 1.0e6 (arbitrary huge number beyond maximum value obtained by Domingo et al. 1999) in order to prevent errors. See Domingo et al./Agricultural and Forest Meteorology 95 (1999) 76-77 
+!Jose: an upper theshold for soil surface resistance "rss" was introduced. For very high values of "rss" a divi! jose miguel: for very low soil water content, the rss tends to infinity. This is not accepted by the computations, so the maximum of surface resistance of bare soil is limited to 1.0e6 (arbitrary huge number beyond maximum value obtained by Domingo et al. 1999) in order to prevent errors. See Domingo et al./Agricultural and Forest Meteorology 95 (1999) 76-77
 !2012-12-05
- 
+
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29
 
@@ -158,7 +158,7 @@ transn=(86400.-seconds_of_daylight)/2.45E6
 ! check wind
 ! program is not defined for windspeed=0.
 !average wind velocity (m/s) is set constant
-wind(d,i_subbas3)=1.0
+!wind(d,i_subbas3)=1.0
 
 ! measurement height of wind speed
 zr=6.0
@@ -232,7 +232,7 @@ rabs=rabs+(ras-rabs)*fcov
 !      write(*,*) 'ras,rap,rabs,raa',ras,rap,rabs,raa
 
 ! surface resistance of bare soil
-! jose miguel: for very low soil water content, the rss tends to infinity. This is not accepted by the computations, so the maximum of surface resistance of bare soil is limited to 1.0e6 (arbitrary huge number beyond maximum value obtained by Domingo et al. 1999) in order to prevent errors. See Domingo et al./Agricultural and Forest Meteorology 95 (1999) 76-77 
+! jose miguel: for very low soil water content, the rss tends to infinity. This is not accepted by the computations, so the maximum of surface resistance of bare soil is limited to 1.0e6 (arbitrary huge number beyond maximum value obtained by Domingo et al. 1999) in order to prevent errors. See Domingo et al./Agricultural and Forest Meteorology 95 (1999) 76-77
 if (facwi<1.0e6) then
    rss=facwi
 else
@@ -251,24 +251,24 @@ emean  = rhum(d,i_subbas3)*es/100.
 IF (.NOT. domean) THEN
 ! ............................................................
 ! daytime values
-  
+
   tempd=temp(d,i_subbas3)+daily_delta_temp
   es = 6.11*EXP(17.62*tempd/(243.12+tempd))
   s  = es*4284./((243.12+tempd)**2)
   gfracd=0.2
-  
+
 !  stomata/canopy resistance
 !  given in data file is minimum leaf resistance based on unit LAI
 !  for no stress conditions and light saturation
 !  (according to Körner (1994))
   rs=resist(vegi)
-  
+
 ! stomata resistance modification by soil water stress (defi) and
 ! water vapour pressure deficit (f2) (Hanan & Prince, 1997)
 ! (based on a multiplicative Jarvis-type model)
   f2=1./(1.+0.03*(es-emean))
   rs=1./((1./rs)*defi*f2)
-  
+
 !  mean leaf resistance in canopy depends on extinction of
 !  photosnthetically active radiation within canopy
 !  as function of LAI (Brenner & Lincoln, 1997, p.190).
@@ -284,23 +284,23 @@ IF (.NOT. domean) THEN
 !      rsp=1./((1./rs)*lai_act(vegi))
   rsp=rs
   rsfinal=rs
-  
-  
-  
+
+
+
   grs =(s+gamma)*ras +gamma*rss
   grp =(s+gamma)*rap +gamma*rsp
   grbs=(s+gamma)*rabs+gamma*rsbs
   gra =(s+gamma)*raa
-  
+
   tempval=grs*grp*grbs+ (1.-fcov)*grs*grp*gra+  &
       fcov*grbs*grs*gra+ fcov*grbs*grp*gra
   cs =grbs*grp*(grs +gra)/tempval
   cp =grbs*grs*(grp +gra)/tempval
   cbs=grs *grp*(grbs+gra)/tempval
-  
+
 ! daytime time mean of short wave radiation = daily mean * 24/hours_of_daylight
 ! Rnetto=Rkurz+Rlang
-  
+
   rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(tempd+273.2)**4 +&
 	   (1.-alpha)*rad(d,i_subbas3)*24./hours_of_daylight
   rnettos =rnetto*EXP(-1.*ext*lai_act(vegi))
@@ -309,28 +309,28 @@ IF (.NOT. domean) THEN
 !      Anettos =Rnettos-Gstream
 !      Anettobs=Rnetto-Gstream
 !      Anettop =Anetto-Anettos
-  
+
   gstream  =gfracd*rnettos
   gstreambs=gfracd*rnetto
   anetto   =rnetto-(gstream*fcov+gstreambs*(1.-fcov))
   anettos  =rnettos-gstream
   anettobs =rnetto-gstreambs
   anettop  =anetto-anettos
-  
-  
+
+
   pmp=(s*anetto+((roh*heatc*(es-emean)-s*rap*anettos)/ (raa+rap)))/  &
       (s+gamma*(1.+rsp/(raa+rap)))*transd
   pms=(s*anetto+((roh*heatc*(es-emean)-s*ras*anettop)/ (raa+ras)))/  &
       (s+gamma*(1.+rss/(raa+ras)))*transd
   pmbs=(s*anettobs+roh*heatc*(es-emean)/(raa+rabs))/  &
       (s+gamma*(1.+rsbs/(raa+rabs)))*transd
-  
+
   actd=fcov*(cp*pmp+cs*pms)+(1.-fcov)*cbs*pmbs
-  
+
 ! water vapour saturation deficit at exchange height
   d0=(es-emean)+(s*anetto-(s+gamma)*(actd/transd))* raa/(roh*heatc)
-  
-  
+
+
 ! evaporation of different sources (mm)
   actveg=fcov*transd* (s*anettop+roh*heatc*d0/rap)/  &
       (s+gamma*(1.+rsp/rap))
@@ -338,40 +338,40 @@ IF (.NOT. domean) THEN
       (s+gamma*(1.+rss/ras))
   actbs =(1.-fcov)*transd* (s*anettobs+roh*heatc*d0/rabs)/  &
       (s+gamma*(1.+rsbs/rabs))
-  
+
   act=actd
 !      write(*,*) 'ETP,day, cov',actd,fcov
 !      write(*,*) 'ETP,day,check',actveg+acts+actbs
 !      write(*,*) 'ETP,day,veg,s,bs',actveg,acts,actbs
-  
-  
+
+
 ! ............................................................
 ! if specific calculation for night hours
   IF (donight) THEN
 
-    
+
 ! canopy resistance as function of nFK deficit (Hough, 1997)
     rsp=2500.
-    
+
     tempn=temp(d,i_subbas3)-daily_delta_temp
     es = 6.11*EXP(17.62*tempn/(243.12+tempn))
     s  = es*4284./((243.12+tempn)**2)
     gfracn=0.7
-    
+
     grs =(s+gamma)*ras +gamma*rss
     grp =(s+gamma)*rap +gamma*rsp
     grbs=(s+gamma)*rabs+gamma*rsbs
     gra =(s+gamma)*raa
-    
+
     tempval=grs*grp*grbs+ (1.-fcov)*grs*grp*gra+  &
         fcov*grbs*grs*gra+ fcov*grbs*grp*gra
     cs =grbs*grp*(grs +gra)/tempval
     cp =grbs*grs*(grp +gra)/tempval
     cbs=grs *grp*(grbs+gra)/tempval
-    
+
 ! night short wave radiation = 0.
 ! Rnetto=Rlang
-    
+
     rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(tempn+273.2)**4
     rnettos =rnetto*EXP(-1.*ext*lai_act(vegi))
 !      Gstream =gfracn*Rnettos
@@ -379,28 +379,28 @@ IF (.NOT. domean) THEN
 !      Anettos =Rnettos-Gstream
 !      Anettobs=Rnetto-Gstream
 !      Anettop =Anetto-Anettos
-    
+
     gstream  =gfracn*rnettos
     gstreambs=gfracn*rnetto
     anetto   =rnetto-(gstream*fcov+gstreambs*(1.-fcov))
     anettos  =rnettos-gstream
     anettobs =rnetto-gstreambs
     anettop  =anetto-anettos
-    
-    
+
+
     pmp=(s*anetto+((roh*heatc*(es-emean)-s*rap*anettos)/ (raa+rap)))/  &
         (s+gamma*(1.+rsp/(raa+rap)))*transn
     pms=(s*anetto+((roh*heatc*(es-emean)-s*ras*anettop)/ (raa+ras)))/  &
         (s+gamma*(1.+rss/(raa+ras)))*transn
     pmbs=(s*anettobs+roh*heatc*(es-emean)/(raa+rabs))/  &
         (s+gamma*(1.+rsbs/(raa+rabs)))*transn
-    
+
     actn=fcov*(cp*pmp+cs*pms)+(1.-fcov)*cbs*pmbs
-    
+
 ! water vapour saturation deficit at exchange height
     d0=(es-emean)+(s*anetto-(s+gamma)*(actn/transn))* raa/(roh*heatc)
 !      write(*,*) 'def',es-emean,d0
-    
+
 ! evaporation of different sources (mm)
     dumv=actveg
     actveg=actveg+ fcov*transn*  &
@@ -411,7 +411,7 @@ IF (.NOT. domean) THEN
     dumbs=actbs
     actbs =actbs+ (1.-fcov)*transn*  &
         (s*anettobs+roh*heatc*d0/rabs)/ (s+gamma*(1.+rsbs/rabs))
-    
+
     act=act+actn
 !      write(*,*) 'ETP, night',actn
 !      write(*,*) 'ETP total',act
@@ -419,38 +419,38 @@ IF (.NOT. domean) THEN
 !      write(*,*) 'ETP,night,veg,s,bs',actveg-dumv,acts-dums,actbs-dumbs
 ! End of specific night calculation
   END IF
-  
+
 
 ! aggregate soil evaporation from bare soil and soil under canopy
   acts=acts+actbs
-  
+
 ! .........................................................................
 ! End of day/night separate calculations, do daily mean calculations
 ELSE
-  
+
 ! length of day (seconds)
   seconds_of_daylight=hours_of_daylight*60.*60.
 ! conversion factor for latent heat flux W/m2 -> mm
   transd=seconds_of_daylight/2.45E6
-  
+
   es = 6.11*EXP(17.62*temp(d,i_subbas3)/(243.12+temp(d,i_subbas3)))
   s  = es*4284./((243.12+temp(d,i_subbas3))**2)
-  
+
 ! soil heat flux assumed to be negligable
   gfracd=0.
-  
+
 !  stomata/canopy resistance
 !  given in data file is minimum leaf resistance based on unit LAI
 !  for no stress conditions and light saturation
 !  (according to Körner (1994)
   rs=resist(vegi)
-  
+
 ! stomata resistance modification by soil water stress (defi) and
 ! water vapour pressure deficit (f2) (Hanan & Prince, 1997)
 ! (based on a multiplicative Jarvis-type model)
   f2=1./(1.+0.03*(es-emean))
   rs=1./((1./rs)*defi*f2)
-  
+
 !  mean leaf resistance in canopy depends on extinction of
 !  photosnthetically active radiation within canopy
 !  as function of LAI (Brenner & Lincoln, 1997, p.190).
@@ -458,29 +458,29 @@ ELSE
 !   total short-wave radiation)
   rs=1./(((1./rs)/extpar)* LOG((bq+extpar*rad(d,i_subbas3)*24./hours_of_daylight)/  &
       (bq+extpar*rad(d,i_subbas3)*24./hours_of_daylight* EXP(-1.*3.1416*lai_act(vegi)))))
-  
+
 ! canopy conductance is mean leaf conductance (per unit LAI)
 ! multiplied by LAI
 ! integration is already done by above equation
 !      rsp=1./((1./rs)*lai_act(vegi))
   rsp=rs
   rsfinal=rs
-  
+
   grs =(s+gamma)*ras +gamma*rss
   grp =(s+gamma)*rap +gamma*rsp
   grbs=(s+gamma)*rabs+gamma*rsbs
   gra =(s+gamma)*raa
-  
+
   tempval=grs*grp*grbs+ (1.-fcov)*grs*grp*gra+  &
       fcov*grbs*grs*gra+ fcov*grbs*grp*gra
   cs =grbs*grp*(grs +gra)/tempval
   cp =grbs*grs*(grp +gra)/tempval
   cbs=grs *grp*(grbs+gra)/tempval
-  
+
 ! daytime time mean of short wave radiation = daily mean * 24/hours_of_daylight
 ! Rnetto=Rkurz+Rlang
-  
-  rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(temp(d,i_subbas3)+273.2)**4 +&  
+
+  rnetto = -f*(0.52-0.065*SQRT(emean))* 5.67E-8*(temp(d,i_subbas3)+273.2)**4 +&
       (1.-alpha)*rad(d,i_subbas3)*24./hours_of_daylight
   rnettos =rnetto*EXP(-1.*ext*lai_act(vegi))
 !      Gstream  =gfracd*Rnettos
@@ -488,28 +488,28 @@ ELSE
 !      Anettos  =Rnettos-Gstream
 !      Anettobs =Rnetto-Gstream
 !      Anettop  =Anetto-Anettos
-  
+
   gstream  =gfracd*rnettos
   gstreambs=gfracd*rnetto
   anetto   =rnetto-(gstream*fcov+gstreambs*(1.-fcov))
   anettos  =rnettos-gstream
   anettobs =rnetto-gstreambs
   anettop  =anetto-anettos
-  
-  
+
+
   pmp=(s*anetto+((roh*heatc*(es-emean)-s*rap*anettos)/ (raa+rap)))/  &
       (s+gamma*(1.+rsp/(raa+rap)))*transd
   pms=(s*anetto+((roh*heatc*(es-emean)-s*ras*anettop)/ (raa+ras)))/  &
       (s+gamma*(1.+rss/(raa+ras)))*transd
   pmbs=(s*anettobs+roh*heatc*(es-emean)/(raa+rabs))/  &
       (s+gamma*(1.+rsbs/(raa+rabs)))*transd
-  
+
   actd=fcov*(cp*pmp+cs*pms)+(1.-fcov)*cbs*pmbs
-  
+
 ! water vapour saturation deficit at exchange height
   d0=(es-emean)+(s*anetto-(s+gamma)*(actd/transd))* raa/(roh*heatc)
-  
-  
+
+
 ! evaporation of different sources (mm)
   actveg=fcov*transd* (s*anettop+roh*heatc*d0/rap)/  &
       (s+gamma*(1.+rsp/rap))
@@ -517,14 +517,14 @@ ELSE
       (s+gamma*(1.+rss/ras))
   actbs =(1.-fcov)*transd* (s*anettobs+roh*heatc*d0/rabs)/  &
       (s+gamma*(1.+rsbs/rabs))
-  
+
   act=actd
 !      write(*,*) 'ETP,daymean, cov',actd,fcov
 !      write(*,*) 'ETP,daymean,check',actveg+acts+actbs
-  
+
 ! aggregate soil evaporation from bare soil and soil under canopy
   acts=acts+actbs
-  
+
 END IF
 
 
