@@ -466,6 +466,7 @@ contains
 					exit
 				END IF
 
+				! check if subbasin in time series file is specified in hymo.dat
 				if (associated(corr_column_pre_subbas_outflow)) then
 					k=which1(corr_column_pre_subbas_outflow==id_subbas_extern(i))
 				else

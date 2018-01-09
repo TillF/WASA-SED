@@ -186,7 +186,7 @@ SUBROUTINE hymo_all(STATUS)
         frac_sat(:,:)=0.0
 
         if (doacud)  CALL lake(0,dummy)
-        
+
         ! create and open output files
         ! Output daily water contribution to river (m**3/s)
         OPEN(11,FILE=pfadn(1:pfadi)// 'daily_water_subbasin.out', STATUS='replace')
@@ -646,7 +646,7 @@ SUBROUTINE hymo_all(STATUS)
 
             j=0    !Till: temporary indicator if this subbasin can be skipped because of prespecified values
 
-            if (do_pre_outflow) then        !if water outflow from upstream subbasins is given
+            if (do_pre_outflow) then        !if water outflow from subbasins is given
                 if (corr_column_pre_subbas_outflow(i_subbas)>0) then            !if outflow of subbasin is prespecified
                     water_subbasin (d,i_subbas) = sum(pre_subbas_outflow(d,1:nt,corr_column_pre_subbas_outflow(i_subbas)))
                     water_subbasin_t(d,1:nt,i_subbas)=pre_subbas_outflow(d,1:nt,corr_column_pre_subbas_outflow(i_subbas))
@@ -658,7 +658,7 @@ SUBROUTINE hymo_all(STATUS)
                 end if
             end if !do outflow
 
-            if (do_pre_outsed) then        !if water outsed from upstream subbasins is given
+            if (do_pre_outsed) then        !if water outsed from subbasins is given
                 if (corr_column_pre_subbas_outsed(i_subbas)>0) then            !if outsed of subbasin is prespecified
                     sediment_subbasin(d,i_subbas,:) = sum(pre_subbas_outsed(d,1:nt,corr_column_pre_subbas_outsed(i_subbas)))*pre_psd
                     do i=1,n_sed_class
