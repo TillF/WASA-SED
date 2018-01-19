@@ -1996,12 +1996,11 @@
             ENDWHERE
             if (sum(corr_column_pre_subbas_outflow)==0) then
                 write(*,*)'   File subbasin_out.dat does not contain relevant subbasins, omitted.' !ii: free pre_subbas_outflow, as it is not needed
-                return
-            end if
-
-            do_pre_outflow=.TRUE.
-
-            call date_seek(91,tstart,mstart, dstart, 'subbasin_out.dat')    !set internal filepointer to correct line in file
+                deallocate(pre_subbas_outflow)
+            else
+                do_pre_outflow=.TRUE.
+                call date_seek(91,tstart,mstart, dstart, 'subbasin_out.dat')    !set internal filepointer to correct line in file
+            end if    
         END IF
     END IF
 
@@ -2041,13 +2040,12 @@
                 READ (linedummy,*) dstr, dstr, (columnheader(i), i=1,no_columns(2))    !Till: extract column headers
                 corr_column_pre_subbas_outsed=>set_corr_column(columnheader, 'subbasin_outsed.dat')
                 if (sum(corr_column_pre_subbas_outsed)==0) then
-                    write(*,*)'   File subbasin_out.dat does not contain relevant subbasins, omitted.'
-                    return
+                    write(*,*)'   File subbasin_outsed.dat does not contain relevant subbasins, omitted.'
+                    deallocate(pre_subbas_outsed)
+                else
+                    do_pre_outsed=.TRUE.
+                    call date_seek(92,tstart,mstart,dstart, 'subbasin_outsed.dat')    !set internal filepointer to correct line in file
                 end if
-
-                do_pre_outsed=.TRUE.
-
-                call date_seek(92,tstart,mstart,dstart, 'subbasin_outsed.dat')    !set internal filepointer to correct line in file
             END IF
         END IF
     END IF
