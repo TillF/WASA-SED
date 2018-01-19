@@ -2107,11 +2107,6 @@
                 exit
             END IF
 
-            if  (set_corr_column(i) ==0) then
-                WRITE(*,'(a,i0,a,a,a)') 'ERROR: Sub-basin-ID ',id_subbas_extern(i),' not found in ',inputfile_name,', quitting.'
-                stop
-            end if
-
         END DO
 
     END DO
