@@ -1,53 +1,3 @@
-!Till: computationally irrelevant: improved input file error handling
-!2012-05-14
-
-!Till: computationally irrelevant: minor changes to improve compiler compatibility
-!2011-04-29
-
-!Till: modified allocation of input buffer that led to problem when input files contained different number of columns
-!2010-04-26
-
-!Till: modified allocation of input buffer that led to problem under linux
-!2008-08-15
-
-!Till: corrrected error messaging and loading in loading rain_hourly.dat when obsolete subbasins were present
-!2008-08-11
-
-!Till: removed reference to unallocated vars that led to crash in linux
-!2008-04-09
-
-!Till: positioning of file pointer within rain_hourly.dat may have been faulty
-!rain_daily.dat is no longer needed in hourly version
-!2008-10-1
-
-!Till: improved error checking and messaging
-!2008-10-1
-
-!Till: improved error checking and messaging
-!2008-08-12
-
-!Till: corrected imprecision in positioning the file pointer within input files, if the column number was less than number of subbasins (data_seek)
-!2008-07-03
-
-!Till: reads inputfiles regardless of column order, excess columns are ignored (hourly version still pending)
-! 2008-02-06
-
-!Till: open input files as shared and read-only (enables run if still opened by Excel)
-! 2008-01-25
-
-!Till: handle climate input files with the subbasins not in the order of hymo.dat
-! 2008-01-23
-
-! Till: open files when STATUS==0
-!	seek  correct file position when startmonth /= 1
-! 2007-05-07
-
-! Till: initialized temp, rhum, rad, precip with plausible values to allow check_climate
-! 2006-08-02
-
-! Till: added CALL to check_climate	(simple check of validity of climate data)
-! 2006-03-16
-
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-06-30  Time: 13:45:46
 
@@ -322,15 +272,14 @@ IF (STATUS == 1) THEN
 
 		preciph(:,1:subasin)= inputbuffer (:,corr_column_precip)	!Till: rearrange column order to match order of hymo.dat
 
-
-		if (t/=tstop) then	!Till: lookup the day of month that should have been read last
-			j=daymon(12)
-		else
-			j=daymon(mstop)
-			IF (mstop==2 .AND. MOD(t,4) == 0) j=29	!leap year
+        !Till: check: lookup the day of month that should have been read last
+		if (t/=tstop) then	!intermediate year: last day should have been 31 (December)
+			j=31
+		else      !end year
+			j=dstop   !designated end day
 		end if
-		if (n/1000000/=j) then
-			write(*,'(a,i0)')'Error in date numbering/formatting of rain_hourly.dat, year ',t
+		if (n/1000000 /= j) then
+			write(*,'(a,i0,a,i0,a,i0,a)')'Error in date numbering/formatting of rain_hourly.dat, year ',t,'. Expecting day ',j,', found ', n/1000000, '.'
 			stop
 		end if
 
