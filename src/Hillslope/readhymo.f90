@@ -1970,7 +1970,8 @@
     INTEGER :: i,j,dc
     REAL :: dummy
     INTEGER   :: columnheader(1000)    !Till: for storing column headings of input files
-    CHARACTER (LEN=1000) :: linedummy    !Till: dummy for reading input header
+    CHARACTER(len=1000) :: linedummy
+    CHARACTER(len=30) :: dstr    !Till: dummies for reading input header
     INTEGER,save  :: no_columns(2)        !number of columns of input files for the input file
 
     IF (do_pre_outflow .AND. .NOT. allocated(pre_subbas_outflow)) THEN    !first call of function
@@ -1988,7 +1989,7 @@
             allocate (pre_subbas_outflow(366,nt,no_columns(1)))
             pre_subbas_outflow(:,:,:)=-2.
 
-            READ (linedummy,*) dummy, dummy, (columnheader(i), i=1,no_columns(1))    !Till: extract column headers
+            READ (linedummy,*) dstr, dstr, (columnheader(i), i=1,no_columns(1))    !Till: extract column headers
             corr_column_pre_subbas_outflow=>set_corr_column(columnheader, 'subbasin_out.dat')
             WHERE(corr_column_pre_subbas_outflow/=0)
                 nbr_lu=0        !Till: set number of LUs for prespecified subbasins to 0
@@ -2037,7 +2038,7 @@
                 allocate (pre_subbas_outsed(366,nt,no_columns(2)))
                 pre_subbas_outsed(:,:,:)=-2.
 
-                READ (linedummy,*) dummy, dummy, (columnheader(i), i=1,no_columns(2))    !Till: extract column headers
+                READ (linedummy,*) dstr, dstr, (columnheader(i), i=1,no_columns(2))    !Till: extract column headers
                 corr_column_pre_subbas_outsed=>set_corr_column(columnheader, 'subbasin_outsed.dat')
                 if (sum(corr_column_pre_subbas_outsed)==0) then
                     write(*,*)'   File subbasin_out.dat does not contain relevant subbasins, omitted.'
