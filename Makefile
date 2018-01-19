@@ -208,7 +208,7 @@ prepare:
 
 update_rev:
 	@echo "Updating revision number ..."
-#	@./$(UPDATE_SCRIPT) $(SRCDIR)
+	@./$(UPDATE_SCRIPT) $(SRCDIR)
 	@echo "Compiling model source code ..."
 
 $(OUTDIR)/bin/$(EXEC): $(OBJ)

@@ -1,132 +1,5 @@
     SUBROUTINE readhymo
-    !Till: computationally irrelevant: added options for LU-wise sediment output
-    !2014-05-15
-
-    !Till: read optional specifyable sdr for LUs and TCs
-    !2013-10-02
-
-    !Till: consistency checks for soil_vegetation.dat
-    !added missing initialisiation for id_terrain*
-    !2012-08-28
-
-    !Till: multiple safety checks to detect faulty input files
-    !2012-06-20
-
-    !Till: latred allocation did not consider soils that were extended downwards because of no bedrock - fixed
-    !2012-05-15
-
-    !Till: latred is now allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
-    !2011-07-07
-
-    !Till: computationally irrelevant: minor changes to improve compiler compatibility
-    !2011-04-29
-
-    !Till: skip reading of erosion control files if erosion is disabled
-    !2009-06-17
-
-    !Till: removed assignment to unallocated vars that led to crash in linux
-    !2008-04-09
-
-    !Till: introduced calibration.dat that contains calibration factors for Ksat of specified soils
-    !2008-04-02
-
-    !Till: include optional specification for LU-based correction of beta/m (exponent for L-factor calculation)
-    !2008-10-22
-
-    !Till: minor optimizations
-    !2008-10-15
-
-    !Till: cleanup of storage structure for SVCs
-    !2008-09-11
-
-    !Till: added specifyable SDR
-    !2008-09-09
-
-    !Till: bugfix in pre-specified sediment outflow of selected subbasins
-    !2008-08-28
-
-    !Till: fixed problems with dummy basins (prespecified outflow)
-    !2008-08-27
-
-    !Till: improved error checking and messaging
-    !2008-08-12
-
-    !Till: improved handling of prespecified time series
-    !2008-07-29
-
-    !Till: implemented optional pre-specified sediment outflow of selected subbasins
-    !2008-07-11
-
-    !Till: implemented optional pre-specified outflow of selected subbasins
-    !2008-07-03
-
-    ! Till: determine number of subbasin from routing.dat, all not listed there are ignored
-    ! 2008-06-03
-
-    ! Till: prevent gw_delay from getting less than 1
-    ! 2008-05-23
-
-    ! Till: if rocky_fraction (in soil_vegetation.dat) is 0 for all TCs, the rocky fraction is determined by soils with a coarse fraction of 1. in their topsoil
-    ! these soils are internally considered as rocks and not treated as soils
-    ! the fraction of all SVCs + rocky is normalized to unity (inconsistencies before)
-    ! 2008-05-15
-
-    ! Till: read of svc.dat also if state-saving/loading options are enabled
-    ! 2008-01-31
-
-    ! Till: intercepted is no longer used
-    ! mean particle size of lowest class is estimated differently
-    ! 2007-10-16
-
-    ! Till:  depth of alluvial soils is extended to max_dep (if specified for LU) regardless of bedrock flag
-    ! bedrock flag for alluvial soils is preserved as is regardless of possible extension
-    ! 2007-09-03
-
-    ! Till:  frac_direct_gw read from separate file (to be included in one of the input files)
-    ! error message for wrong maxsoil
-    ! error message for undefined vegetation class
-    ! 2007-08-20
-
-    ! Till:  gw_dist is set to zero, if gw_flag/=99 (ie gw_flag is usually ignored)
-    ! 2007-06-04
-
-    ! Till:  removed (faulty) relict that expanded lowermost horizons according to scaling factor
-    !    supposedly computationally relevant !!
-    ! intercepted=0. when doacud=false otherwise intercepted=0.83
-    ! 2006-08-24
-
-    ! Till:  minor check of input "coarse_frag"
-    ! 2006-02-20
-
-    ! Till:  set "intercepted=0."
-    ! 2006-02-14
-
-    ! Eva:  removed "intercepted=0.83"
-    ! 2006-02-xx
-
-    ! Till:  fixed bug in reading of rainy_season.dat
-    ! changed addressing scheme of sediment_subbasin_t from (366*nt,subasin,n_sed_class) to (366,nt,subasin,n_sed_class)
-    ! 2005-12-20
-
-    ! Till:  reads old and new version of soil.dat (w/wo alluvial flag)
-    ! 2005-12-1
-
-    ! Till: convert class limits (particle_class from part_class.dat) to "mean" diameter for internal use
-    ! 2005-10-10
-
-    ! Till: reading of soil_particles.dat; independent of ordering scheme in file
-    ! erosion-variables are allocated in the end of readhymo, when all dimensions are known
-    ! 2005-09-29
-
-    ! Till: reading of rainy_season.dat modified to be independent of ordering scheme in file
-    ! 2005-09-26
-
-    ! Till: allow variable line length in soter.dat (no dummy columns for non-existent TCs)
-    ! 2005-08-08
-
-    ! Till: read soil_vegetation.dat more flexible (number of SVCs determined from number of columns)
-    ! 2005-07-11
-
+    
     ! Code converted using TO_F90 by Alan Miller
     ! Date: 2005-06-30  Time: 13:47:20
 
@@ -1967,14 +1840,15 @@
 
 
 
-    INTEGER :: i,j,dc
+    INTEGER :: i,j,dc,istate
     REAL :: dummy
     INTEGER   :: columnheader(1000)    !Till: for storing column headings of input files
     CHARACTER(len=1000) :: linedummy
     CHARACTER(len=30) :: dstr    !Till: dummies for reading input header
     INTEGER,save  :: no_columns(2)        !number of columns of input files for the input file
 
-    IF (do_pre_outflow .AND. .NOT. allocated(pre_subbas_outflow)) THEN    !first call of function
+    !first call of function: memory allocation and seeking the required file position
+    IF (do_pre_outflow .AND. .NOT. allocated(pre_subbas_outflow)) THEN    
         do_pre_outflow=.FALSE.
         OPEN(91,FILE=pfadp(1:pfadj)// '/Time_series/subbasin_out.dat',IOSTAT=i,STATUS='old')
         IF (i==0) THEN
@@ -2051,12 +1925,17 @@
     END IF
 
 
-    ! -------------------------------------------------------------
+    !subsequent calls of function: actual reading of data
     IF (allocated(pre_subbas_outflow)) THEN
         IF (do_pre_outflow .AND. (t/=tstart .OR. pre_subbas_outflow(1,1,1)==-2.)) THEN    !this clumsy check ensures that we do not read further when this function is called twice before the actual simulation starts
             !read outflow
             pre_subbas_outflow(:,:,:)=-1.
-            READ(91,*) (dummy,dummy,((pre_subbas_outflow(dc,j,i),i=1,no_columns(1)),j=1,nt),dc=1,dayyear)        !Reads in daily time series for pre-specified outflow from upstream basins
+            READ(91, *, IOSTAT=istate) ((dstr,dstr,(pre_subbas_outflow(dc,j,i),i=1,no_columns(1)),j=1,nt),dc=1,dayyear)        !Reads in daily time series for pre-specified outflow from upstream basins
+            IF (istate/=0) THEN
+                write(*,*)'ERROR: Premature end of file subbasin_out.dat.'
+                stop
+            END IF
+            
             WHERE(pre_subbas_outflow < 0.)
                 pre_subbas_outflow=-1.        !Till: mask negative values
             ENDWHERE
@@ -2070,7 +1949,11 @@
             !read sediment outflow
             pre_subbas_outsed(:,:,:)=-1.
             if (do_pre_outsed) then
-                READ(92,*) (dummy,dummy,((pre_subbas_outsed(dc,j,i),i=1,no_columns(2)),j=1,nt),dc=1,dayyear)        !Reads in daily time series for pre-specified outflow from upstream basins
+                READ(92, *, IOSTAT=istate) ((dstr,dstr,(pre_subbas_outsed(dc,j,i),i=1,no_columns(2)),j=1,nt),dc=1,dayyear)        !Reads in daily time series for pre-specified outflow from upstream basins
+                IF (istate/=0) THEN
+                    write(*,*)'ERROR: Premature end of file subbasin_outsed.dat.'
+                    stop
+                END IF
 
                 WHERE(pre_subbas_outsed < 0.)
                     pre_subbas_outsed=-1000.        !Till: mask negative values
