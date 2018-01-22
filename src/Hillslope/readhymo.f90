@@ -16,14 +16,6 @@
 
     IMPLICIT NONE
 
-
-    !     loop variable imun:  municipio list from integrated model
-    !                          (codigo list)
-    !     loop variable irout: municipio list from routing model (flow tree)
-    !                          municipios with smaller irout are more
-    !                          upstream than municipios with larger irout
-    !                          (order as in routend.dat)
-
     INTEGER :: idummy,i,j,c,k,i_min,n,h,ii
     INTEGER :: dummy1, loop
     INTEGER ::id_sub_int,id_lu_int,id_lu_ext,id_tc_int,id_soil_int,test
@@ -1838,8 +1830,6 @@
     use erosion_h
     IMPLICIT NONE
 
-
-
     INTEGER :: i,j,dc,istate
     REAL :: dummy
     INTEGER   :: columnheader(1000)    !Till: for storing column headings of input files
@@ -1876,6 +1866,10 @@
                 call date_seek(91,tstart,mstart, dstart, 'subbasin_out.dat')    !set internal filepointer to correct line in file
             end if    
         END IF
+        
+        OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='old',POSITION='append', IOSTAT=istate) !write to log file
+        write(11,*) "using prespecified outflow:",       allocated(pre_subbas_outflow)
+        close(11)
     END IF
 
     IF (.NOT. dosediment) THEN
@@ -1921,8 +1915,11 @@
                     call date_seek(92,tstart,mstart,dstart, 'subbasin_outsed.dat')    !set internal filepointer to correct line in file
                 end if
             END IF
-        END IF
-    END IF
+            OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='old', POSITION='append', IOSTAT=istate) !write to log file
+            write(11,*) "using prespecified sediment flux:", allocated(pre_subbas_outsed)
+            close(11)
+        END IF !do_pre_outsed
+    END IF !dosediment
 
 
     !subsequent calls of function: actual reading of data
@@ -1944,7 +1941,7 @@
     END IF
 
 
-    IF (allocated(pre_subbas_outflow)) THEN
+    IF (allocated(pre_subbas_outsed)) THEN
         IF (do_pre_outsed .AND. (t/=tstart .OR. pre_subbas_outsed(1,1,1)==-2.)) THEN    !this clumsy check ensures that we do not read further when this function is called twice before the actual simulation starts
             !read sediment outflow
             pre_subbas_outsed(:,:,:)=-1.

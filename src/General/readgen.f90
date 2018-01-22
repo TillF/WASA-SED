@@ -542,17 +542,18 @@ SUBROUTINE readgen(path2do_dat)
     
 ! save summary of settings to output directory
     OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='unknown', IOSTAT=istate)
-    IF (istate/=0) THEN
+    IF (istate/=0) THEN !output dir not found, try creating using system command
         write(*,*)'Warning: Output path ',pfadn(1:pfadi),' not found, trying to create...'
         dummy=pfadn(1:pfadi)
-        do i=1,pfadi
-            if (dummy(i:i)=="\") dummy(i:i)="/" !using slashes as delimiter (*nix)
-        end do
+        !try create with *nix command
+            do i=1,pfadi
+                if (dummy(i:i)=="\") dummy(i:i)="/" !using slashes as delimiter (*nix)
+            end do
 
-        CALL system('mkdir '//dummy)
+        CALL system('mkdir '//dummy, istate)
 	
-        OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='unknown',IOSTAT=istate)
-        if (istate/=0) then
+        OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='unknown',IOSTAT=istate) !try again to open
+        if (istate/=0) then !try create with Windows command
             do i=1,pfadi
                 if (dummy(i:i)=="/") dummy(i:i)="\" !using backslashes as delimiter (windows)
             end do
@@ -564,50 +565,49 @@ SUBROUTINE readgen(path2do_dat)
                 stop
             end if
         end if
-    else
+    end if
+    
+    WRITE(11,*)
+    WRITE(11,'(a)') pfadp
+    WRITE(11,'(a)') pfadn
+    WRITE(11,*) 'start year of simulation: ', tstart
+    WRITE(11,*) 'end year of simulation: ', tstop
+    WRITE(11,*) 'start of simulation (month, day): ',mstart, dstart
+    WRITE(11,*) 'end of simulation (month, day): ',mstop, dstop
+    WRITE(11,*) 'no. of sub-basin: ',subasin
+    WRITE(11,*) 'no. of combinations: ',ntcinst
+    WRITE(11,*) 'total no. of SOTER units: ',nsoter
+    WRITE(11,*) 'total no. of terrain components: ',nterrain
+    WRITE(11,*) 'total no. of soil components: ',nsoil
+    WRITE(11,*) 'total no. of vegetation units: ',nveg
+    WRITE(11,*) 'do reservoir calculations: ',doacud
+    WRITE(11,*) dolattc
+    WRITE(11,*) doalllattc
+    WRITE(11,*) dolatsc
+    WRITE(11,*) dolatscsub
+    WRITE(11,*) dotrans
+    WRITE(11,*) dohour
+    WRITE(11,*) scenario
+    WRITE(11,*) krig
+    WRITE(11,*) kfkorr,kfkorr_a,kfkorr_b
+    WRITE(11,*) intcf
+    WRITE(11,*) dointc
+    WRITE(11,*) doscale
+    WRITE(11,*) domuncell
+    WRITE(11,*) sensfactor
+    write(11,*) dosediment
+    write(11,*) n_sed_class
+    write(11,*) "[not used]"
+    write(11,*) river_transport
+    write(11,*) reservoir_transport
+    if (dosediment) then
         WRITE(11,*)
-        WRITE(11,'(a)') pfadp
-        WRITE(11,'(a)') pfadn
-        WRITE(11,*) 'start year of simulation: ', tstart
-        WRITE(11,*) 'end year of simulation: ', tstop
-        WRITE(11,*) 'start of simulation (month, day): ',mstart, dstart
-        WRITE(11,*) 'end of simulation (month, day): ',mstop, dstop
-        WRITE(11,*) 'no. of sub-basin: ',subasin
-        WRITE(11,*) 'no. of combinations: ',ntcinst
-        WRITE(11,*) 'total no. of SOTER units: ',nsoter
-        WRITE(11,*) 'total no. of terrain components: ',nterrain
-        WRITE(11,*) 'total no. of soil components: ',nsoil
-        WRITE(11,*) 'total no. of vegetation units: ',nveg
-        WRITE(11,*) 'do reservoir calculations: ',doacud
-        WRITE(11,*) dolattc
-        WRITE(11,*) doalllattc
-        WRITE(11,*) dolatsc
-        WRITE(11,*) dolatscsub
-        WRITE(11,*) dotrans
-        WRITE(11,*) dohour
-        WRITE(11,*) scenario
-        WRITE(11,*) krig
-        WRITE(11,*) kfkorr,kfkorr_a,kfkorr_b
-        WRITE(11,*) intcf
-        WRITE(11,*) dointc
-        WRITE(11,*) doscale
-        WRITE(11,*) domuncell
-        WRITE(11,*) sensfactor
-        write(11,*) dosediment
-        write(11,*) n_sed_class
-        write(11,*) "[not used]"
-        write(11,*) river_transport
-        write(11,*) reservoir_transport
-        if (dosediment) then
-            WRITE(11,*)
-            WRITE(11,*) 'spatial scale for application of erosion eq : ',do_musle_subbasin
-            WRITE(11,*) 'erosion eq : ',erosion_equation
-        end if
-        WRITE(11,*) 'WASA model, ',trim(rev_string1),'; ',trim(rev_string2)
-        CLOSE(11)
-    END IF
-
-
+        WRITE(11,*) 'spatial scale for application of erosion eq : ',do_musle_subbasin
+        WRITE(11,*) 'erosion eq : ',erosion_equation
+    end if
+    WRITE(11,*) 'WASA model, ',trim(rev_string1),'; ',trim(rev_string2)
+    CLOSE(11)
+    
 
     RETURN
 
