@@ -1,7 +1,7 @@
     SUBROUTINE soilwat(hh,day,month,i_subbas2,i_ce,i_lu,lu_counter2,tcid_instance2,id_tc_type2,tc_counter2,  &
         thact,thactroot,q_surf_in,q_surf_out,q_sub_in,q_sub_out,qgw,deepqgw,  &
         hortf,tcaet,tclai,  &
-        tcsoilet,tcintc,prec,precday,prechall2,petday,  &
+        tcsoilet,tcintc,prec_in,precday_in,prechall2_in,petday,  &
         tcarea2,bal, rootd_act,height_act,lai_act,alb_act,sed_in_tc,sed_out_tc, q_rill_in)
 
     !Till: computationally irrelevant: disabled pause and debugging parts
@@ -170,50 +170,58 @@
     use hymo_h
     use erosion_h
     use utils_h
-
+    use climo_h
+    use snow_h
 
     IMPLICIT NONE
 
 
     !real :: sedi_yield						!Till: declared function
 
-    INTEGER, INTENT(IN)                      :: hh
-    INTEGER, INTENT(IN)                     :: day
+    INTEGER, INTENT(IN)                  :: hh
+    INTEGER, INTENT(IN)                  :: day
     INTEGER, INTENT(IN)                  :: month
     INTEGER, INTENT(IN)                  :: i_subbas2		!internal representation of i_subbas2in (id of subbasin)
     INTEGER, INTENT(IN)                  :: i_ce			!internal representation of i_subbas2in (id of subbasin)
     INTEGER, INTENT(IN)                  :: i_lu			!internal representation of isot (id of LU)
     INTEGER, INTENT(IN)                  :: lu_counter2	    !internal representation of lu_counter
-    INTEGER, INTENT(IN)                      :: tcid_instance2		!(internal) id of TC-instance (unique subbas-LU-TC-combination)
+    INTEGER, INTENT(IN)                  :: tcid_instance2		!(internal) id of TC-instance (unique subbas-LU-TC-combination)
     INTEGER, INTENT(IN)                  :: id_tc_type2			!ID of TC type
-    INTEGER, INTENT(IN)                      :: tc_counter2
-    REAL, INTENT(IN OUT)                     :: thact			!internal representation of thact ((average) actual water content of TC [mm])
-    REAL, INTENT(OUT)                        :: thactroot
-    REAL, INTENT(IN)                         :: q_surf_in !sheet flow entering TC from uphill
-    REAL, INTENT(OUT)                        :: q_surf_out
-    REAL, INTENT(IN)                         :: q_sub_in			!internal representation of sublat_in
-    REAL, INTENT(OUT)                        :: q_sub_out			!internal representation of sublat_out
-    REAL, INTENT(OUT)                        :: qgw
-    REAL, INTENT(OUT)                        :: deepqgw
-    REAL, INTENT(OUT)                        :: hortf
-    REAL, INTENT(OUT)                        :: tcaet
-    REAL, INTENT(OUT)                        :: tclai
-    REAL, INTENT(OUT)                        :: tcsoilet
-    REAL, INTENT(OUT)                        :: tcintc
-    REAL, INTENT(IN)                         :: prec
-    REAL, INTENT(IN)                         :: precday
-    REAL, INTENT(IN)                     :: prechall2(24)
-    REAL, INTENT(IN)                         :: petday
-    REAL, INTENT(IN)                         :: tcarea2
-    REAL, INTENT(OUT)                        :: bal		!Till: water balance of current TC
-    REAL, INTENT(IN)                         :: rootd_act(nveg)
+    INTEGER, INTENT(IN)                  :: tc_counter2
+    REAL, INTENT(IN OUT)                 :: thact			!internal representation of thact ((average) actual water content of TC [mm])
+    REAL, INTENT(OUT)                    :: thactroot
+    REAL, INTENT(IN)                     :: q_surf_in !sheet flow entering TC from uphill
+    REAL, INTENT(OUT)                    :: q_surf_out
+    REAL, INTENT(IN)                     :: q_sub_in			!internal representation of sublat_in
+    REAL, INTENT(OUT)                    :: q_sub_out			!internal representation of sublat_out
+    REAL, INTENT(OUT)                    :: qgw
+    REAL, INTENT(OUT)                    :: deepqgw
+    REAL, INTENT(OUT)                    :: hortf
+    REAL, INTENT(OUT)                    :: tcaet
+    REAL, INTENT(OUT)                    :: tclai
+    REAL, INTENT(OUT)                    :: tcsoilet
+    REAL, INTENT(OUT)                    :: tcintc
+    REAL, INTENT(IN)                     :: prec_in     !input precipitation of current time step
+    REAL, INTENT(IN)                     :: precday_in  !input daily precipitation
+    REAL, INTENT(IN)                     :: prechall2_in(24) !input excerpt of preciph (rainfall) valid for 24 hours of the current subbas
+    REAL, INTENT(IN)                     :: petday
+    REAL, INTENT(IN)                     :: tcarea2
+    REAL, INTENT(OUT)                    :: bal		!Till: water balance of current TC
+    REAL, INTENT(IN)                     :: rootd_act(nveg)
     REAL, INTENT(IN)                     :: height_act(nveg)
-    REAL, INTENT(IN)                         :: lai_act(nveg)
+    REAL, INTENT(IN)                     :: lai_act(nveg)
     REAL, INTENT(IN)                     :: alb_act(nveg)
-    REAL, INTENT(IN)					:: sed_in_tc(n_sed_class)
-    REAL, INTENT(OUT)					:: sed_out_tc(n_sed_class)
-    REAL, INTENT(IN)                         :: q_rill_in !rill flow entering TC from uphill
+    REAL, INTENT(IN)			         :: sed_in_tc(n_sed_class)
+    REAL, INTENT(OUT)				     :: sed_out_tc(n_sed_class)
+    REAL, INTENT(IN)                     :: q_rill_in !rill flow entering TC from uphill
 
+    REAL                                 :: prec            !precipitation current time step potentially modified in snow module
+    REAL                                 :: precday         !daily precipitation potentially modified in snow module
+    REAL                                 :: prechall2(24)   !excerpt of preciph (24h of current subbas) potentially modified in snow module
+    REAL                                 :: temperature     !temperature of current time step potentially modified in snow module
+    REAL                                 :: radiation       !radiation of current time step potentially modified in snow module
+    REAL                                 :: cloudFraction   !cloudiness fraction
+    REAL                                 :: airPress        !Air pressure of current time step
 
     logical :: isnan
     !** Soil water model for terrain component (TC)
@@ -882,7 +890,105 @@
     !	END DO
     !END DO
     !!for debugging - remove end
+    
 
+
+    !** -------------------------------------------------------------------------
+    !SNOW MODULE
+    !Physically-based simulations based on energy balance method of ECHSE (Eco-hydrological Simulation Environment)
+
+    prec          =   prec_in !this assignment necessary even if snow module not active; in steps after snow module usage of prec
+    temperature   =   temp(day,i_subbas2)
+    radiation     =   rad( day,i_subbas2)
+    airPress      =   1000.
+
+    !Determination indices for optional arrays
+    !When optional output not activated array only with dimensions (1,1,1) allocated
+    !Check whether activated using logical factor read in from outfiles.dat
+    !Function fLog() in snow_h.f90
+    radiModIndices(:)    = fLog(f_snowTemp,  day, hh, tcid_instance2)
+    temperaModIndices(:) = fLog(f_surfTemp,  day, hh, tcid_instance2)
+    cloudFracIndices(:)  = fLog(f_cloudFrac, day, hh, tcid_instance2)
+    snowTempIndices(:)   = fLog(f_snowTemp,  day, hh, tcid_instance2)
+    surfTempIndices(:)   = fLog(f_surfTemp,  day, hh, tcid_instance2)
+    liquFracIndices(:)   = fLog(f_liquFrac,  day, hh, tcid_instance2)
+    fluxPrecIndices(:)   = fLog(f_fluxPrec,  day, hh, tcid_instance2)
+    fluxSublIndices(:)   = fLog(f_fluxSubl,  day, hh, tcid_instance2)
+    fluxFlowIndices(:)   = fLog(f_fluxFlow,  day, hh, tcid_instance2)
+    fluxNetSIndices(:)   = fLog(f_fluxNetS,  day, hh, tcid_instance2)
+    fluxNetLIndices(:)   = fLog(f_fluxNetL,  day, hh, tcid_instance2)
+    fluxSoilIndices(:)   = fLog(f_fluxSoil,  day, hh, tcid_instance2)
+    fluxSensIndices(:)   = fLog(f_fluxSens,  day, hh, tcid_instance2)
+    stoiPrecIndices(:)   = fLog(f_stoiPrec,  day, hh, tcid_instance2)
+    stoiSublIndices(:)   = fLog(f_stoiSubl,  day, hh, tcid_instance2)
+    stoiFlowIndices(:)   = fLog(f_stoiFlow,  day, hh, tcid_instance2)
+    rateAlbeIndices(:)   = fLog(f_rateAlbe,  day, hh, tcid_instance2)
+
+    if(dosnow > 0) then
+
+       !Subroutine to modify meteo-drivers according to location
+       !Preparation before feeding the snow model
+
+       call snow_prepare_input(hh, day, i_subbas2, lu_counter2, tc_counter2, prec, temperature, radiation, &
+                               cloudFraction, tempLaps, tempAmplitude, tempMaxOffset)
+
+       !Collect modified radiation(aspect, slope) and temperature (elevation) signal
+       radiMod(radiModIndices(1),radiModIndices(2),radiModIndices(3))             = radiation
+       temperaMod(temperaModIndices(1),temperaModIndices(2),temperaModIndices(3)) = temperature
+
+       !Wind currently not read from input file; assumed constant wind = 1; see climo.f90
+       !Air pressure constant; for now set to 1000 hPa
+       if(dohour) then
+         call snow_compute(prec, temperature_tc, radiation_tc, airPress, rhum(day,i_subbas2), wind(day,i_subbas2), cloudFraction, &
+                         snowEnergyCont(max(1,day-1),max(1,hh-1),tcid_instance2), snowWaterEquiv(max(1,day-1), max(1,hh-1),tcid_instance2), &
+                         snowAlbedo(max(1,day-1),max(1,hh-1),tcid_instance2), snowEnergyCont(day, hh, tcid_instance2), snowWaterEquiv(day, hh, tcid_instance2), &
+                         snowAlbedo(day, hh, tcid_instance2), snowCover(day, hh, tcid_instance2), &
+                         snowTemp(snowTempIndices(1),snowTempIndices(2),snowTempIndices(3)), surfTemp(surfTempIndices(1),surfTempIndices(2),surfTempIndices(3)), &
+                         liquFrac(liquFracIndices(1),liquFracIndices(2),liquFracIndices(3)), fluxPrec(fluxPrecIndices(1),fluxPrecIndices(2),fluxPrecIndices(3)), &
+                         fluxSubl(fluxSublIndices(1),fluxSublIndices(2),fluxSublIndices(3)), fluxFlow(fluxFlowIndices(1),fluxFlowIndices(2),fluxFlowIndices(3)), &
+                         fluxNetS(fluxNetSIndices(1),fluxNetSIndices(2),fluxNetSIndices(3)), fluxNetL(fluxNetLIndices(1),fluxNetLIndices(2),fluxNetLIndices(3)), &
+                         fluxSoil(fluxSoilIndices(1),fluxSoilIndices(2),fluxSoilIndices(3)), fluxSens(fluxSensIndices(1),fluxSensIndices(2),fluxSensIndices(3)), &
+                         stoiPrec(stoiPrecIndices(1),stoiPrecIndices(2),stoiPrecIndices(3)), stoiSubl(stoiSublIndices(1),stoiSublIndices(2),stoiSublIndices(3)), &
+                         stoiFlow(stoiFlowIndices(1),stoiFlowIndices(2),stoiFlowIndices(3)), rateAlbe(rateAlbeIndices(1),rateAlbeIndices(2),rateAlbeIndices(3)), &
+                         precipMod(day, hh, tcid_instance2), cloudFrac(cloudFracIndices(1),cloudFracIndices(2),cloudFracIndices(3)))
+
+         prec           = precipMod(day, hh, tcid_instance2) !Further calculations with modified precipitation signal
+         prechall2(hh)  = precipMod(day, hh, tcid_instance2) !Further calculations with modified precipitation signal
+
+         if(hh ==24) then !to get into the next day; have start value
+            snowEnergyCont(day+1, 1, tcid_instance2) = snowEnergyCont(day, 24, tcid_instance2)
+            snowWaterEquiv(day+1, 1, tcid_instance2) = snowWaterEquiv(day, 24, tcid_instance2)
+            snowAlbedo    (day+1, 1, tcid_instance2) = snowAlbedo    (day, 24, tcid_instance2)
+         end if
+
+       else !daily
+
+         call snow_compute(prec, temperature_tc, radiation_tc, airPress, rhum(day,i_subbas2), wind(day,i_subbas2), cloudFraction, &
+                         snowEnergyCont(max(1,day-1),max(1,hh-1),tcid_instance2), snowWaterEquiv(max(1,day-1), max(1,hh-1),tcid_instance2), &
+                         snowAlbedo(max(1,day-1),max(1,hh-1),tcid_instance2), snowEnergyCont(day, hh, tcid_instance2), snowWaterEquiv(day, hh, tcid_instance2), &
+                         snowAlbedo(day, hh, tcid_instance2), snowCover(day, hh, tcid_instance2), &
+                         snowTemp(snowTempIndices(1),snowTempIndices(2),snowTempIndices(3)), surfTemp(surfTempIndices(1),surfTempIndices(2),surfTempIndices(3)), &
+                         liquFrac(liquFracIndices(1),liquFracIndices(2),liquFracIndices(3)), fluxPrec(fluxPrecIndices(1),fluxPrecIndices(2),fluxPrecIndices(3)), &
+                         fluxSubl(fluxSublIndices(1),fluxSublIndices(2),fluxSublIndices(3)), fluxFlow(fluxFlowIndices(1),fluxFlowIndices(2),fluxFlowIndices(3)), &
+                         fluxNetS(fluxNetSIndices(1),fluxNetSIndices(2),fluxNetSIndices(3)), fluxNetL(fluxNetLIndices(1),fluxNetLIndices(2),fluxNetLIndices(3)), &
+                         fluxSoil(fluxSoilIndices(1),fluxSoilIndices(2),fluxSoilIndices(3)), fluxSens(fluxSensIndices(1),fluxSensIndices(2),fluxSensIndices(3)), &
+                         stoiPrec(stoiPrecIndices(1),stoiPrecIndices(2),stoiPrecIndices(3)), stoiSubl(stoiSublIndices(1),stoiSublIndices(2),stoiSublIndices(3)), &
+                         stoiFlow(stoiFlowIndices(1),stoiFlowIndices(2),stoiFlowIndices(3)), rateAlbe(rateAlbeIndices(1),rateAlbeIndices(2),rateAlbeIndices(3)), &
+                         precipMod(day, hh, tcid_instance2), cloudFrac(cloudFracIndices(1),cloudFracIndices(2),cloudFracIndices(3)))
+
+          !Correct if SWE is 0
+          if(snowWaterEquiv(day,hh,tcid_instance2) <=  0.)   then
+             snowWaterEquiv(day,hh,tcid_instance2)  =  0.
+             snowEnergyCont(day,hh,tcid_instance2)  =  0.
+             snowAlbedo(day,hh,tcid_instance2)      =  albedoMax
+          end if
+
+          prec    = precipMod(day, hh, tcid_instance2) !Further calculations with modified precipitation signal
+          precday = precipMod(day, hh, tcid_instance2) !Further calculations with modified precipitation signal
+
+       end if
+
+    end if
 
 
     !** -------------------------------------------------------------------------

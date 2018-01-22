@@ -476,7 +476,6 @@ ELSE
 END IF
 
 etpmax_stored(isubbas,vegi)=etpmax	!save value for possible reuse
-!dbremove
 
 RETURN
 END SUBROUTINE etp_max

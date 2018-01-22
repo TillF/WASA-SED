@@ -14,6 +14,7 @@ SUBROUTINE hymo_all(STATUS)
     use erosion_h
     use model_state_io
     use utils_h
+    use snow_h
 
     IMPLICIT NONE
 
@@ -35,8 +36,6 @@ SUBROUTINE hymo_all(STATUS)
     ! ids of components in work
     INTEGER :: i_subbas,i_lu,id_tc_type,isoil
 
-    ! julian day
-    INTEGER :: julian_day
     ! actual soil water content of terrain component
     REAL :: thact, thactroot, temp2, temp3, prec
     REAL :: precday, prechall(24)
@@ -579,6 +578,31 @@ SUBROUTINE hymo_all(STATUS)
             CALL open_subdaily_output(f_river_susp_sediment_storage,'River_Susp_Sediment_Storage.out','Suspended sediment storage in river reach t (with MAP IDs as in hymo.dat)')
             CALL open_subdaily_output(f_river_flow,'River_Flow.out','Output file for river discharge q_out (m3/s) (with MAP IDs as in hymo.dat)')
         end if
+        
+        !TC-wise output
+        CALL open_subdaily_output_TC(f_snowEnergyCont,'snowEnergyCont.out','Output file TC-wise snow energy content (kJ/m2)')
+        CALL open_subdaily_output_TC(f_snowWaterEquiv,'snowWaterEquiv.out','Output file TC-wise snow water equivalent (m)')
+        CALL open_subdaily_output_TC(f_snowAlbedo,'snowAlbedo.out','Output file TC-wise fraction of liquid water (-)')
+        CALL open_subdaily_output_TC(f_snowCover,'snowCover.out','Output file TC-wise fraction of liquid water (-)')
+
+        CALL open_subdaily_output_TC(f_snowTemp,'snowTemp.out','Output file TC-wise snow temperature (°C)')
+        CALL open_subdaily_output_TC(f_surfTemp,'surfTemp.out','Output file TC-wise snow surface temperature (°C)')
+        CALL open_subdaily_output_TC(f_liquFrac,'liquFrac.out','Output file TC-wise fraction of liquid water (-)')
+        CALL open_subdaily_output_TC(f_fluxPrec,'fluxPrec.out','Output file TC-wise precipitation mass flux (m/s)')
+        CALL open_subdaily_output_TC(f_fluxSubl,'fluxSubl.out','Output file TC-wise sublimation mass flux (m/s)')
+        CALL open_subdaily_output_TC(f_fluxFlow,'fluxFlow.out','Output file TC-wise meltwater flux (m/s)')
+        CALL open_subdaily_output_TC(f_fluxNetS,'fluxNetS.out','Output file TC-wise shortwave radiation balance (W/m2)')
+        CALL open_subdaily_output_TC(f_fluxNetL,'fluxNetL.out','Output file TC-wise longwave radiation balance (W/m2)')
+        CALL open_subdaily_output_TC(f_fluxSoil,'fluxSoil.out','Output file TC-wise soil heat flux (W/m2)')
+        CALL open_subdaily_output_TC(f_fluxSens,'fluxSens.out','Output file TC-wise sensible heat flux (W/m2)')
+        CALL open_subdaily_output_TC(f_stoiPrec,'stoiPrec.out','Output file TC-wise conversion precipitation mass flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3')
+        CALL open_subdaily_output_TC(f_stoiSubl,'stoiSubl.out','Output file TC-wise conversion of sublimation flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3')
+        CALL open_subdaily_output_TC(f_stoiFlow,'stoiFlow.out','Output file TC-wise conversion of meltwater flux (m/s) to energy flux (kJ/m2/s); Unit of result: kJ/m3')
+        CALL open_subdaily_output_TC(f_rateAlbe,'rateAlbe.out','Output file TC-wise change rate of albedo (1/s)')
+        CALL open_subdaily_output_TC(f_precipMod,'precipMod.out','Output file TC-wise precipitation modified by snow module (mm)')
+        CALL open_subdaily_output_TC(f_cloudFrac,'cloudFrac.out','Output file TC-wise cloud fraction (-)')
+        CALL open_subdaily_output_TC(f_radiMod,'radiMod.out','Output file TC-wise radiation modified for slope and aspect (-)')
+        CALL open_subdaily_output_TC(f_temperaMod,'temperaMod.out','Output file TC-wise temperature corrected for elevation (-)')
 
     END IF
 
@@ -1365,7 +1389,66 @@ SUBROUTINE hymo_all(STATUS)
         !        END DO
         !    CLOSE(11)
 
+        CALL write_subdaily_output_TC(f_snowEnergyCont,'snowEnergyCont.out', snowEnergyCont)
+        CALL write_subdaily_output_TC(f_snowWaterEquiv,'snowWaterEquiv.out', snowWaterEquiv)
+        CALL write_subdaily_output_TC(f_snowAlbedo,'snowAlbedo.out', snowAlbedo)
+        CALL write_subdaily_output_TC(f_snowCover,'snowCover.out', snowCover)
+        CALL write_subdaily_output_TC(f_snowTemp,'snowTemp.out', snowTemp)
+        CALL write_subdaily_output_TC(f_surfTemp,'surfTemp.out', surfTemp)
+        CALL write_subdaily_output_TC(f_liquFrac,'liquFrac.out', liquFrac)
+        CALL write_subdaily_output_TC(f_fluxPrec,'fluxPrec.out', fluxPrec)
+        CALL write_subdaily_output_TC(f_fluxSubl,'fluxSubl.out', fluxSubl)
+        CALL write_subdaily_output_TC(f_fluxFlow,'fluxFlow.out', fluxFlow)
+        CALL write_subdaily_output_TC(f_fluxNetS,'fluxNetS.out', fluxNetS)
+        CALL write_subdaily_output_TC(f_fluxNetL,'fluxNetL.out', fluxNetL)
+        CALL write_subdaily_output_TC(f_fluxSoil,'fluxSoil.out', fluxSoil)
+        CALL write_subdaily_output_TC(f_fluxSens,'fluxSens.out', fluxSens)
+        CALL write_subdaily_output_TC(f_stoiPrec,'stoiPrec.out', stoiPrec)
+        CALL write_subdaily_output_TC(f_stoiSubl,'stoiSubl.out', stoiSubl)
+        CALL write_subdaily_output_TC(f_stoiFlow,'stoiFlow.out', stoiFlow)
+        CALL write_subdaily_output_TC(f_rateAlbe,'rateAlbe.out', rateAlbe)
+        CALL write_subdaily_output_TC(f_precipMod,'precipMod.out', precipMod)
+        CALL write_subdaily_output_TC(f_cloudFrac,'cloudFrac.out', cloudFrac)
+        CALL write_subdaily_output_TC(f_radiMod,'radiMod.out', radiMod)
+        CALL write_subdaily_output_TC(f_temperaMod,'temperaMod.out', temperaMod)
 
+        if(dosnow >= 1 .AND. dprev >= dayyear) then
+
+        snowEnergyCont(1, 1, : ) = snowEnergyCont(dprev, nt, : )
+        snowWaterEquiv(1, 1, : ) = snowWaterEquiv(dprev, nt, : )
+        snowAlbedo    (1, 1, : ) = snowAlbedo    (dprev, nt, : )
+
+        end if
+
+
+
+        !Output relative elevation for each TC
+        OPEN(11,FILE=pfadn(1:pfadi)//'rel_elevation.out', STATUS='replace')
+        if(f_rel_elevation)then
+            WRITE(11,'(a)')    'Oufile relative elevation TC center'
+            WRITE(11,'(a)')    'Subbasin LU TC rel_elevation'
+
+            fmtstr ='(3(i0,a),E12.5)' !generate format string
+
+            DO sb_counter=1,subasin !for all subbasins
+               DO lu_counter=1,nbr_lu(sb_counter)!for all LUs
+                  i_lu=id_lu_intern(lu_counter,sb_counter)
+                    DO tc_counter=1,nbrterrain(i_lu)!for all TCs
+                       WRITE(11,fmtstr) &
+                            id_subbas_extern(sb_counter), char(9), &
+                            id_lu_extern(lu_counter), char(9), &
+                            id_terrain_extern(id_terrain_intern(tc_counter,i_lu)), char(9), &
+                            rel_elevation(tcallid(sb_counter, lu_counter, tc_counter))
+                    END DO
+                END DO
+            END DO
+            CLOSE(11)
+         ELSE                !delete any existing file, if no output is desired
+            CLOSE(11,status='delete')
+        end if
+
+
+                
         !conrad: output of theta [%] for each tc from theta_tc
         IF (f_tc_theta ) THEN
             OPEN(11,FILE=pfadn(1:pfadi)//'tc_theta.out', STATUS='old',POSITION='append')
@@ -1451,6 +1534,21 @@ contains
         END IF
     END SUBROUTINE open_subdaily_output
 
+ SUBROUTINE open_subdaily_output_TC(f_flag,file_name,headerline)
+        ! open file Output on TC-scale for subdaily values or delete any existing files
+        IMPLICIT NONE
+        LOGICAL, INTENT(IN)                  :: f_flag
+        CHARACTER(len=*), INTENT(IN)         :: file_name,headerline
+
+        OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='replace')
+        IF (f_flag) THEN    !if output file is enabled
+            WRITE(11,'(a)') headerline
+            WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep'//char(9)//'Subbasin'//char(9)//'LU'//char(9)//'TC'
+            CLOSE(11)
+        ELSE                !delete any existing file, if no output is desired
+            CLOSE(11,status='delete')
+        END IF
+    END SUBROUTINE open_subdaily_output_TC
 
 
     SUBROUTINE write_output(f_flag,file_name,value_array,spec_decimals)
@@ -1496,7 +1594,42 @@ contains
             CLOSE(11)
         END IF
     END SUBROUTINE write_subdaily_output
+  
+    SUBROUTINE write_subdaily_output_TC(f_flag,file_name,value_array)
+    ! Output subdaily values of given array on TC-scale
+        use utils_h
+        IMPLICIT NONE
+        LOGICAL, INTENT(IN)                  :: f_flag
+        CHARACTER(len=*), INTENT(IN)         :: file_name
+        REAL, POINTER             :: value_array(:,:,:)
+        INTEGER :: sb_counter, lu_counter, tc_counter, i_lu
 
+        IF (f_flag) THEN    !if output file is enabled
+            OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old',POSITION='append')
+
+            !fmtstr ='(6(i0,a),'//fmt_str(maxval(value_array)*10)//')'        !generate format string
+             fmtstr ='(6(i0,a),E12.5)'        !generate format string
+
+            DO d=1,dayyear
+                DO j=1,nt
+                    DO sb_counter=1,subasin
+                        DO lu_counter=1,nbr_lu(sb_counter)
+                            i_lu=id_lu_intern(lu_counter,sb_counter)
+                            DO tc_counter=1,nbrterrain(i_lu)
+                               WRITE (11,fmtstr)t, char(9), d, char(9), j, &
+                                    char(9), id_subbas_extern(sb_counter), &
+                                    char(9), id_lu_extern(lu_counter), &
+                                    !char(9), id_terrain_extern(tc_counter), &
+                                    char(9), id_terrain_extern(id_terrain_intern(tc_counter,i_lu)), &
+                                char(9),value_array(d,j,tcallid(sb_counter, lu_counter, tc_counter))
+                            END DO
+                        END DO
+                    END DO
+                END DO
+            END DO
+            CLOSE(11)
+        END IF
+    END SUBROUTINE write_subdaily_output_TC
 
 
 END SUBROUTINE hymo_all

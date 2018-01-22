@@ -74,6 +74,7 @@ SUBROUTINE readgen(path2do_dat)
     use reservoir_h
     use erosion_h
     use utils_h
+    use snow_h
 
     IMPLICIT NONE
     CHARACTER (LEN=160) :: path2do_dat		!Till: path to central control file (do.dat)
@@ -85,7 +86,7 @@ SUBROUTINE readgen(path2do_dat)
 
 
     if (trim(path2do_dat)=='') then
-        path2do_dat='./Input/do.dat'			!Till: use default, if no command line argument was specified
+        path2do_dat='./Input/do.dat'    !Till: use default, if no command line argument was specified
         custompath=''
     else
         write(*,*)'reading runtime parameters from ',path2do_dat
@@ -182,6 +183,7 @@ SUBROUTINE readgen(path2do_dat)
     READ(11,*) reservoir_transport
     READ(11,*, IOSTAT=i) doloadstate
     READ(11,*, IOSTAT=i) dosavestate
+    READ(11,*) dosnow
 
     CLOSE(11)
 
@@ -279,6 +281,109 @@ SUBROUTINE readgen(path2do_dat)
         end if
     END IF !dosediments
 
+
+
+    !Parameter for snow routine
+    !Read, if present. Else using default values.
+    if (dosnow /= 0) THEN
+
+    precipSeconds     =    dt * 3600.
+    !Read parameters for snow routine
+     OPEN(12, file=pfadp(1:pfadj)// 'Hillslope/snow_params.ctl',IOSTAT=istate, STATUS='old')
+         IF (istate==0) THEN
+            READ(12,'(a)',IOSTAT=istate)dummy
+            do while (istate==0)
+                READ(12,'(a)',IOSTAT=istate)dummy
+                READ(dummy,*)dummy2
+                SELECT CASE (trim(dummy2))
+                    CASE ('a0')
+                        READ(dummy,*) dummy2, a0
+                    CASE ('a1')
+                        READ(dummy,*) dummy2, a1
+                    CASE ('kSatSnow')
+                        READ(dummy,*) dummy2, kSatSnow
+                    CASE ('densDrySnow')
+                        READ(dummy,*) dummy2, densDrySnow
+                    CASE ('specCapRet')
+                        READ(dummy,*) dummy2, specCapRet
+                    CASE ('emissivitySnowMin')
+                        READ(dummy,*) dummy2, emissivitySnowMin
+                    CASE ('emissivitySnowMax')
+                        READ(dummy,*) dummy2, emissivitySnowMax
+                    CASE ('tempAir_crit')
+                        READ(dummy,*) dummy2, tempAir_crit
+                    CASE ('albedoMin')
+                        READ(dummy,*) dummy2, albedoMin
+                    CASE ('albedoMax')
+                        READ(dummy,*) dummy2, albedoMax
+                    CASE ('agingRate_tAirPos')
+                        READ(dummy,*) dummy2, agingRate_tAirPos
+                    CASE ('agingRate_tAirNeg')
+                        READ(dummy,*) dummy2, agingRate_tAirNeg
+                    CASE ('soilDepth')
+                        READ(dummy,*) dummy2, soilDepth
+                    CASE ('soilDens')
+                        READ(dummy,*) dummy2, soilDens
+                    CASE ('soilSpecHeat')
+                        READ(dummy,*) dummy2, soilSpecHeat
+                    CASE ('weightAirTemp')
+                        READ(dummy,*) dummy2, weightAirTemp
+                    CASE ('lat')
+                        READ(dummy,*) dummy2, lat
+                        lat = lat *pi/180
+                    CASE ('lon')
+                        READ(dummy,*) dummy2, lon
+                        lon = lon *pi/180
+                    CASE ('do_rad_corr')
+                        READ(dummy,*) dummy2, do_rad_corr
+                    CASE ('do_alt_corr')
+                        READ(dummy,*) dummy2, do_alt_corr
+                    CASE ('tempLaps')
+                        READ(dummy,*) dummy2, tempLaps
+                    CASE ('tempAmplitude')
+                        READ(dummy,*) dummy2, tempAmplitude
+                    CASE ('tempMaxOffset')
+                        READ(dummy,*) dummy2, tempMaxOffset
+                    CASE ('snowFracThresh')
+                        READ(dummy,*) dummy2, snowFracThresh
+
+                END SELECT
+            end do
+     CLOSE(12)
+
+        ELSE        !snow.ctl not found
+            write(*,*)'WARNING: snow_params.ctl not found, using defaults.'
+
+                !Default values parameters for snow routine
+                a0=0.002                       !Empirical coeff. (m/s)
+                a1=0.0008                      !Empirical coeff. (-)
+                kSatSnow = 0.00004             !Saturated hydraulic conductivity of snow (m/s)
+                densDrySnow=450                !Density of dry snow (kg/m3)
+                specCapRet=0.05                !Capill. retent. vol as fraction of solid SWE (-)
+                emissivitySnowMin=0.84         !Minimum snow emissivity used for old snow (-)
+                emissivitySnowMax=0.99         !Maximum snow emissivity used for new snow (-)
+                tempAir_crit=0.2               !Threshold temp. for rain-/snowfall (°C)
+                albedoMin=0.55                 !Minimum albedo used for old snow (-)
+                albedoMax=0.88                 !Maximum albedo used for new snow (-)
+                agingRate_tAirPos=0.00000111   !Aging rate for air temperatures > 0 (1/s)
+                agingRate_tAirNeg=0.000000462  !Aging rate for air temperatures < 0 (1/s)
+                soilDepth=0.1                  !Depth of interacting soil layer (m)
+                soilDens=1300.                 !Density of soil (kg/m3)
+                soilSpecHeat=2.18              !Spec. heat capacity of soil (kJ/kg/K)
+                weightAirTemp=0.5              !Weighting param. for air temp. (-) in 0...1
+                lat = 42.4                     !Latitude of centre of study area
+                lon = 0.55                     !Longitude of centre of study area
+                do_rad_corr = .TRUE.           !modification of radiation with aspect and slope
+                do_alt_corr = .TRUE.           !modification of temperature with altitude of LU
+                tempLaps = -0.006              !Temperature lapse rate for modification depending on elevation of TC (°C/m)
+                tempAmplitude = 8              !Temperature amplitude to simulate daily cycle (°C])
+                tempMaxOffset = 2              !Offset of daily temperature maximum from 12:00 (h)
+                snowFracThresh = 0.02          !Threshold to determine when TC snow covered (m)
+
+        END IF
+    END IF !dosnow
+
+
 !Till: read list of desired output files
     f_daily_actetranspiration=.FALSE.	!disable all output files
     f_daily_potetranspiration=.FALSE.
@@ -325,6 +430,27 @@ SUBROUTINE readgen(path2do_dat)
     f_potetranspiration=.FALSE.
     f_gw_loss=.FALSE.
     f_gw_recharge=.FALSE.
+
+    f_snowEnergyCont=.FALSE.
+    f_snowWaterEquiv=.FALSE.
+    f_snowAlbedo=.FALSE.
+    f_snowCover=.FALSE.
+    f_snowTemp=.FALSE.
+    f_surfTemp=.FALSE.
+    f_liquFrac=.FALSE.
+    f_fluxPrec=.FALSE.
+    f_fluxSubl=.FALSE.
+    f_fluxFlow=.FALSE.
+    f_fluxNetS=.FALSE.
+    f_fluxNetL=.FALSE.
+    f_fluxSoil=.FALSE.
+    f_fluxSens=.FALSE.
+    f_stoiPrec=.FALSE.
+    f_stoiSubl=.FALSE.
+    f_stoiFlow=.FALSE.
+    f_rateAlbe=.FALSE.
+    f_precipMod=.FALSE.
+    f_cloudFrac=.FALSE.
 
     f_res_watbal=.FALSE.
     f_res_vollost=.FALSE.
@@ -398,6 +524,54 @@ SUBROUTINE readgen(path2do_dat)
                     f_daily_gw_loss=.TRUE.
                 CASE ('tc_theta')
                     f_tc_theta=.TRUE.
+
+                CASE ('snowenergycont')
+                    f_snowEnergyCont=.TRUE. .AND. (dosnow /= 0)
+                CASE ('snowwaterequiv')
+                    f_snowWaterEquiv=.TRUE. .AND. (dosnow /= 0)
+                CASE ('snowalbedo')
+                    f_snowAlbedo=.TRUE. .AND. (dosnow /= 0)
+                CASE ('snowcover')
+                    f_snowCover=.TRUE. .AND. (dosnow /= 0)
+                CASE ('snowtemp')
+                    f_snowTemp=.TRUE. .AND. (dosnow /= 0)
+                CASE ('surftemp')
+                    f_surfTemp=.TRUE. .AND. (dosnow /= 0)
+                CASE ('liqufrac')
+                    f_liquFrac=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxprec')
+                    f_fluxPrec=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxsubl')
+                    f_fluxSubl=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxflow')
+                    f_fluxFlow=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxnets')
+                    f_fluxNetS=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxnetl')
+                    f_fluxNetL=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxsoil')
+                    f_fluxSoil=.TRUE. .AND. (dosnow /= 0)
+                CASE ('fluxsens')
+                    f_fluxSens=.TRUE. .AND. (dosnow /= 0)
+                CASE ('stoiprec')
+                    f_stoiPrec=.TRUE. .AND. (dosnow /= 0)
+                CASE ('stoisubl')
+                    f_stoiSubl=.TRUE. .AND. (dosnow /= 0)
+                CASE ('stoiflow')
+                    f_stoiFlow=.TRUE. .AND. (dosnow /= 0)
+                CASE ('ratealbe')
+                    f_rateAlbe=.TRUE. .AND. (dosnow /= 0)
+                CASE ('precipmod')
+                    f_precipMod=.TRUE. .AND. (dosnow /= 0)
+                CASE ('cloudfrac')
+                    f_cloudFrac=.TRUE. .AND. (dosnow /= 0)
+                CASE ('radimod')
+                    f_radiMod=.TRUE. .AND. (dosnow /= 0)
+                CASE ('temperamod')
+                    f_temperaMod=.TRUE. .AND. (dosnow /= 0)
+                CASE ('rel_elevation')
+                    f_rel_elevation=.TRUE. .AND. (dosnow /= 0)
+
                 CASE ('river_degradation')
                     f_river_degradation=dosediment
                 CASE ('river_deposition')
