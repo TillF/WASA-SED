@@ -183,7 +183,7 @@ SUBROUTINE readgen(path2do_dat)
     READ(11,*) reservoir_transport
     READ(11,*, IOSTAT=i) doloadstate
     READ(11,*, IOSTAT=i) dosavestate
-    READ(11,*) dosnow
+    READ(11,*, IOSTAT=i) dosnow !ii: rather use existence of snow input files as indicator
 
     CLOSE(11)
 
