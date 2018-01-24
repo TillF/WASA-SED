@@ -70,4 +70,3 @@
 	if (f_river_susp_sediment_storage) allocate (river_susp_sediment_storage_t(366,nt,subasin),  STAT = istate)
 	if (istate/=0) write(*,'(A,i0,a)')'Memory allocation error (',istate,') in river-module.' 
 
-	r_storage(1:subasin)=-0.03 !debug test for initialization, remove

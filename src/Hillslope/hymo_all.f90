@@ -112,22 +112,30 @@ SUBROUTINE hymo_all(STATUS)
         !George    lakeoutflow(dprev,1:subasin)=0.
         water_subbasin(dprev,1:subasin)=0.
         soilwater(dprev,:)=0.
-        deepgw(1:subasin,:)=0.
+        
 
 
         allocate(sed_in(maxval(nbrterrain),n_sed_class),sed_out(maxval(nbrterrain),n_sed_class))
 
 
         latred=0.                !set lateral subsurface runof between SVCs to zero
+
+        !default initial values of storages ii relocate to model_state_io
         horithact(:,:,:)=0.    !set soil moisture of each horizon to 0
         intercept(:,:)=0.        !set interception storage to 0
+        deepgw(1:subasin,:)=0.
+        r_storage(:)=0.0 
+        sed_storage = 0.0
+        riverbed_storage = 0.0
+        sed_storage = 0.0
 
         !cum_erosion_TC(:,:)=0.
         !cum_deposition_TC(:,:)=0.
 
         if (doloadstate) then
             call init_model_state        !load initial conditions from file
-        else
+        else !do default initialisations
+            
             !** Initialise soil moisture of each horizon (horithact)
             !   and soil moisture of each terrain component (soilwater) with fixed values ii: put this into init_soil_conds
             DO sb_counter=1,subasin

@@ -171,5 +171,3 @@
     subflow_t          => allocate_hourly_array(f_subsurface_runoff .OR. .TRUE.)	!Till: currently, these are needed in any case
 	ovflow_t           => allocate_hourly_array(f_total_overlandflow .OR. .TRUE.)
 
-
-	horithact=-0.03 !debug test for initialization, remove
