@@ -758,33 +758,33 @@
     !SNOW MODULE
     !Physically-based simulations based on energy balance method of ECHSE (Eco-hydrological Simulation Environment)
     
-    temperature   =   temp(day,i_subbas2)
-    radiation     =   rad( day,i_subbas2)
-    airPress      =   1000.
-
-    !Determination indices for optional arrays
-    !When optional output not activated array only with dimensions (1,1,1) allocated
-    !Check whether activated using logical factor read in from outfiles.dat
-    !Function fLog() in snow_h.f90
-    radiModIndices(:)    = fLog(f_snowTemp,  day, hh, tcid_instance2)
-    temperaModIndices(:) = fLog(f_surfTemp,  day, hh, tcid_instance2)
-    cloudFracIndices(:)  = fLog(f_cloudFrac, day, hh, tcid_instance2)
-    snowTempIndices(:)   = fLog(f_snowTemp,  day, hh, tcid_instance2)
-    surfTempIndices(:)   = fLog(f_surfTemp,  day, hh, tcid_instance2)
-    liquFracIndices(:)   = fLog(f_liquFrac,  day, hh, tcid_instance2)
-    fluxPrecIndices(:)   = fLog(f_fluxPrec,  day, hh, tcid_instance2)
-    fluxSublIndices(:)   = fLog(f_fluxSubl,  day, hh, tcid_instance2)
-    fluxFlowIndices(:)   = fLog(f_fluxFlow,  day, hh, tcid_instance2)
-    fluxNetSIndices(:)   = fLog(f_fluxNetS,  day, hh, tcid_instance2)
-    fluxNetLIndices(:)   = fLog(f_fluxNetL,  day, hh, tcid_instance2)
-    fluxSoilIndices(:)   = fLog(f_fluxSoil,  day, hh, tcid_instance2)
-    fluxSensIndices(:)   = fLog(f_fluxSens,  day, hh, tcid_instance2)
-    stoiPrecIndices(:)   = fLog(f_stoiPrec,  day, hh, tcid_instance2)
-    stoiSublIndices(:)   = fLog(f_stoiSubl,  day, hh, tcid_instance2)
-    stoiFlowIndices(:)   = fLog(f_stoiFlow,  day, hh, tcid_instance2)
-    rateAlbeIndices(:)   = fLog(f_rateAlbe,  day, hh, tcid_instance2)
-
     if(dosnow > 0) then
+
+        temperature   =   temp(day,i_subbas2)
+        radiation     =   rad( day,i_subbas2)
+        airPress      =   1000.
+
+        !Determination indices for optional arrays
+        !When optional output not activated array only with dimensions (1,1,1) allocated
+        !Check whether activated using logical factor read in from outfiles.dat
+        !Function fLog() in snow_h.f90
+        radiModIndices(:)    = fLog(f_snowTemp,  day, hh, tcid_instance2)
+        temperaModIndices(:) = fLog(f_surfTemp,  day, hh, tcid_instance2)
+        cloudFracIndices(:)  = fLog(f_cloudFrac, day, hh, tcid_instance2)
+        snowTempIndices(:)   = fLog(f_snowTemp,  day, hh, tcid_instance2)
+        surfTempIndices(:)   = fLog(f_surfTemp,  day, hh, tcid_instance2)
+        liquFracIndices(:)   = fLog(f_liquFrac,  day, hh, tcid_instance2)
+        fluxPrecIndices(:)   = fLog(f_fluxPrec,  day, hh, tcid_instance2)
+        fluxSublIndices(:)   = fLog(f_fluxSubl,  day, hh, tcid_instance2)
+        fluxFlowIndices(:)   = fLog(f_fluxFlow,  day, hh, tcid_instance2)
+        fluxNetSIndices(:)   = fLog(f_fluxNetS,  day, hh, tcid_instance2)
+        fluxNetLIndices(:)   = fLog(f_fluxNetL,  day, hh, tcid_instance2)
+        fluxSoilIndices(:)   = fLog(f_fluxSoil,  day, hh, tcid_instance2)
+        fluxSensIndices(:)   = fLog(f_fluxSens,  day, hh, tcid_instance2)
+        stoiPrecIndices(:)   = fLog(f_stoiPrec,  day, hh, tcid_instance2)
+        stoiSublIndices(:)   = fLog(f_stoiSubl,  day, hh, tcid_instance2)
+        stoiFlowIndices(:)   = fLog(f_stoiFlow,  day, hh, tcid_instance2)
+        rateAlbeIndices(:)   = fLog(f_rateAlbe,  day, hh, tcid_instance2)
 
        !Subroutine to modify meteo-drivers according to location
        !Preparation before feeding the snow model
