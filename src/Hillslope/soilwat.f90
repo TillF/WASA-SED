@@ -4,149 +4,6 @@
         tcsoilet,tcintc,prec_in,precday_in,prechall2_in,petday,  &
         tcarea2,bal, rootd_act,height_act,lai_act,alb_act,sed_in_tc,sed_out_tc, q_rill_in)
 
-    !Till: computationally irrelevant: disabled pause and debugging parts
-    !2012-06-20
-
-    !Till: computationally irrelevant: disabled TC-wise erosion when calcualtion on subbasin-scale was enabled
-    !2012-05-30
-
-    !Till: dimensions of remainlat are taken from latred - produced crashes with single-layered soils before
-    !computationally irrelevant: modified summation of latred that lead to crash when only single soil horizons  were present
-    !2012-05-15
-
-    !Till: computationally irrelevant: removed unused parameter h
-    !2011-05-05
-
-    !Till: computationally irrelevant: minor changes to improve compiler compatibility
-    !2011-04-29
-
-    !Andreas: a similar problem with the units of lateral flow (see changes from 2010-08-15) has also been found at three places, where the maximum
-    ! possible lateral inflow to an SVC is calculated.
-    !2011-03-01
-
-    !Andreas, Till: redistribution of lateral flow between SVCs of one TC has been corrected. Previously there was no redistribution
-    ! if there was groundwater. Additional code for specific tests in Brazil has been deleted.
-    !2011-03-01
-
-    !Andreas, Doris: interflow is now calculated for all TCs. Previously the calculation of interflow from other TCs than lowermost TC was missing.
-    !2011-03-01
-
-    !Doris: added initialisation of macro in line 1344. Without this initialisation the refillable porosity is not calcultated correctly (na(i,h) and namic),
-    !This affects infiltration and now stops the error messages from the infiltration routine coming up.
-    !2010-12-10
-
-    !Doris: some long lines have been splitted into two: max. length of lines in free format is 132 (comments too!)
-    ! and the pgi compiler is sensitive to this
-    ! a function isNaN has been added as this is not a built-in function under the fortran compiler
-    !2010-08-24
-
-
-    !Doris, Till, Andreas: the units in the equation for the calculation of interflow did not match, l2 should be in mm. The equation has been corrected to
-    ! 	l2(h)= k_sat(soilid,h)/dt_per_day*(1.-coarse(soilid,h))  &
-    !	      * temp3*temp2 /  slength(i_lu) / fracterrain(id_tc_type2)/1000	* slope(id_tc_type2)/100
-    !!2010-08-15
-
-    ! Pedro: computationally relevant correction on q_ov by kfkorrday (overland flow with duration according to rainfall, and not during 24 h)
-    ! 2009-06-03
-
-    !Till: fixed bug in iterations of infiltration that probably was introduce in the changes of 2008-07-28 (produced waterbalance mismatch in certain cases)
-    !2009-03-27
-
-    !Till: use projected slope length for USLE (was real slope length)
-    !2008-10-14
-
-    !Till: cleanup of storage structure for SVCs
-    !2008-09-11
-
-    !Till: optimized speed
-    !2008-08-14
-
-    !Till: inluded wrapper for pause command
-    !2008-08-08
-
-    !Till: the two iterations of the infiltration routine have been coerced into one loop
-    ! 2008-07-28
-
-    !Till: computation of bal is now exclusively for the TC (computationally irrelevant)
-    ! fixed subsurface flow bug: if no alluvials where in lowermost TC, there was a deficit
-    !2008-06-24
-
-    !Till: prevented NaNs when etpmax=0
-    !2008-02-07
-
-    !Pedro
-    !corrected calculation of overland flow
-    !2008-02-07
-
-    !Till: renamed n_hours to dt_per_day
-    !corrected subsurface flow to river calculation (analogous to change 2007-11-6 for latflow)
-    !2008-02-07
-
-    !Till: corrected inflow limitation by hydraulic conductivity
-    !2007-11-6
-
-    !Till: corrected calculation of flow velocity for erosion computation
-    !2007-11-5
-
-    !Till: subsurfacce flow not infiltrated into alluvial soils is now also allowed to infiltrate in the other SVCs afterwards
-    !2007-11-1
-
-    !Till: time-variate kfcorr
-    !2007-10-29
-
-    !Till: lateral subsurface flow to alluvial soils was not correctly distributed among all horizons, fixed
-    !2007-10-26
-
-    !Till: number of "exchange horizons" for lateral subsurface flow is limited to number of horizons in remainlat
-    ! 2007-08-22
-
-    !Till: modified handling of interception on hourly basis without rainfall during that day
-    ! 2006-11-08
-
-    ! Till: "numeric overflow test" of suction check replaced by faster method below
-    ! 2006-08-24
-
-    ! Till: fixed missing initialisation for interception computation (hourly)
-    ! 2006-05-24
-
-    ! Till: added error messages when calculation of evapotranspiration goes wrong.
-    ! Reason lies in imperfect treatment of LAI, rootdepth or vegetationheight=0. Still to be fixed.
-    ! 2006-16-03
-
-    ! Till: modified computation of suction at wetting front, which produced NaN at complete saturation
-    ! 2006-28-02
-
-    ! Till: alluvial soils are no longer recognized by their index (1,2,3) but by a flag in alluvial_flag
-    ! 2005-12-01
-
-    ! Till: fixed bug below ("nenner darf nicht Null werden") (subsurface drainage to river)
-    ! comments added
-    ! outcommented unnecesary vars
-    ! 2005-11-03
-
-    ! Eva: temporary bugfix of "nenner darf nicht Null werden"
-    ! 2005-10-11
-
-    ! Till: call of sedi_yield changed from FUNCTION to SUBROUTINE
-    ! allows multiple particle class sediments
-    ! 2005-09-29
-
-    ! Till: variable names clarified, comments
-    ! severe bug concerning confusion of IDs of TC-type and TC-instance fixed (hopefully)
-    ! 2005-09-26
-
-    ! 2005-08-10
-    ! Till: calculation of peak runoff added
-
-    ! 2005-08-08
-    ! Till: minor clarifying changes
-
-    ! 2005-07-07
-    ! Till: clarified variable names
-
-    ! 2005-06-23
-    ! Till: comments and suggestions added
-
 
     ! Code converted using TO_F90 by Alan Miller
     ! Date: 2005-06-22  Time: 14:51:47
@@ -893,11 +750,14 @@
     
 
 
+    prec          =   prec_in !these assignments are necessary even if snow module not active; in steps after snow module usage of prec
+    prechall2     =   prechall2_in 
+    precday       =   precday_in 
+
     !** -------------------------------------------------------------------------
     !SNOW MODULE
     !Physically-based simulations based on energy balance method of ECHSE (Eco-hydrological Simulation Environment)
-
-    prec          =   prec_in !this assignment necessary even if snow module not active; in steps after snow module usage of prec
+    
     temperature   =   temp(day,i_subbas2)
     radiation     =   rad( day,i_subbas2)
     airPress      =   1000.

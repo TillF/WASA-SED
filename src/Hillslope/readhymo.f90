@@ -158,6 +158,7 @@
             id_subbas_intern(i)=id_subbas_extern(i)
             c=c+1 !count successfully read subbasins
         end if
+        h=h+1 !count lines
     END DO
     CLOSE(11)
 
