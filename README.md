@@ -1,3 +1,11 @@
+
+******************************
+This WASA-SED model fork has been used during the implementation of a physically-based snow routine into the model.
+Since the completion of this task end of 2017 this fork is inactive and does not receive updates from the main repository.
+For usage of the up-to-date WASA-SED model, including the physically-based snow routine, please go to: https://github.com/TillF/WASA-SED
+******************************
+
+
 !!!The executable (WASA.exe) are updated only infrequently, if at all.
 To use the latest version, you need to compile from source code. !!!
 
