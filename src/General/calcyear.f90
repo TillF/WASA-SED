@@ -34,14 +34,17 @@ END DO
 
 
 
-! Calculates no. of days of previous year (as a function of leap years)
-IF ( is_leapyear(t-1) .AND. t-1 /= tstart) THEN
-  daylastyear = 366
-ELSE IF ( (.NOT. is_leapyear(t-1)) .AND. t-1 /= tstart) THEN
-  daylastyear = 365
-END IF
+! Calculates no. of days of simulated days in previous year (as a function of leap years)
 IF (t == tstart) THEN
   daylastyear = sum(daymon(mstart:12))
+else
+    IF (t-1 /= tstart) THEN
+        IF ( is_leapyear(t-1) ) THEN
+          daylastyear = 366
+        ELSE 
+          daylastyear = 365
+        END IF 
+    END IF      
 END IF
 
 

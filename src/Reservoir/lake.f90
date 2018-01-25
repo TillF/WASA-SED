@@ -697,10 +697,22 @@ endif
 !George calculation of actual water volume and outflow discharges
   DO ih=1,nt
     hour=ih
-    step=(d-1)*nt+hour
-	if (step == 1 .and. t==tstart) d_laststep=1
-	if (step == 1 .and. t/=tstart) d_laststep=(daylastyear)*nt
-	if (step /= 1) d_laststep=step-1
+    step=(d-1)*nt+hour !Till: timestep in current simulation year
+	if (step /= 1) then
+        d_laststep=step-1 !regular case    
+    else
+        if (t==tstart) then 
+            d_laststep=1 !this is the very beginning
+        else    
+	      !  if (t==tstart+1) then
+          !      d_laststep= dtot !first new year after simulation start 
+                !dayoutsim number of days in start year before start month
+           ! else
+                d_laststep=(daylastyear)*nt !this is when a new year has begun
+           ! end if
+        end if            
+    end if    
+	
 
 !**********************************************************************************
 !if(step<5)water_subbasin_t(d,ih,muni)=1500000.
