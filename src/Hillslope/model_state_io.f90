@@ -1,59 +1,7 @@
 module model_state_io
     !contains subroutines for saving and loading model state (soil water, ground water, interception)#
 
-    !Till: dirty temporary fix to prevent crash at startup
-    ! code formatting fro increased compatibility (long lines, indent, removed tabs)
-    !2013-10-02
-
-    !Jose Miguel: replaced "call pause1" for "return", which takes the execution of the subprogram to the program of an upper level
-    !2013-01-14
-
-    !Jose Miguel: added the initialization of river_storage from the river_storage.stat file.
-    !2013-01-14
-
-    !Jose Miguel: added code to save additional state variable r_storage, which represents the volume stored in the river chanel at the end of the model run. It is stored in river_storage.stat
-    !2012-12-05
-
-    !Jose Miguel: added code to save additional state variable lakewater_hrr, which represents the volume stored in the lake classes at the end of the model run. It is stored in lake_volume.stat
-    !2012-12-05
-
-    !Till: computationally irrelevant: minor changes in output details, improved error handling
-    !2012-06-14
-
-    !Till: computationally irrelevant: minor changes to improve compiler compatibility
-    !2011-04-29
-
-    !Till: computationally irrelevant: removed subroutine arguments for init_soil_conds and init_gw_conds that were global anyway (created confusion with gfortran 4.4)
-    !2011-03-23
-
-    !Till: computationally irrelevant: added missing CLOSE for ic_conds_file (caused error in linux); variable renaming
-    !2009-06-22
-
-    !Till: save summary on storage contents on start of model in storage.stats_start
-    !2009-03-27
-
-    !Till: fixed more init problems with dummy basins (prespecified outflow)
-    !2008-10-09
-
-    !Till: fixed problems with dummy basins (prespecified outflow)
-    !2008-08-27
-
-    !Till: fixed faulty initialisation whith default values that could lead to saturation >1
-    ! check for invalidly high soil moisture contents and correct these, if necessary
-    !2008-07-28
-
-    !Till: storage values were summed up incorrectly in storage.stats
-    !2008-06-26
-
-    !Till: when initial condition files are missing, throw warning but continue with default values
-    !2008-05-30
-
-    !Till: fixed bugs in saving and loading concerning confusion of tc_instance and id_tc_type
-    !2008-02-11
-
-    !Till: created
-    !2008-02-01
-
+ 
     use common_h
 contains
     subroutine init_model_state        !load initial conditions
@@ -176,15 +124,6 @@ contains
                 'storage_[mm]', char(9),'area_[m²]'        !tab separated output
         end if
 
-        if (trim(river_conds_file)=='' .OR. (river_transport == 1)) then        !don't do anything if an empty filename is specified
-            river_file_hdle=0
-        else
-            river_file_hdle=14
-            OPEN(river_file_hdle,FILE=river_conds_file//trim(suffix), STATUS='replace')
-            WRITE(river_file_hdle,'(a)') 'river reach volume status (for analysis or model re-start)'
-            WRITE(river_file_hdle,*)'Subbasin', char(9),'volume[m^3]' !tab separated output
-        endif
-
         if (trim(lake_conds_file)=='') then        !don't do anything if an empty filename is specified
             lake_file_hdle=0
         else
@@ -218,20 +157,38 @@ contains
         endif
 
 !write file contents
-        !Jose Miguel: write river storage state to .stat file .
-        digits=floor(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
-        if (digits<10) then
-            write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
+        !write river storage state to .stat file .
+        if (trim(river_conds_file)=='' .OR. (river_transport == 1)) then        !don't do anything if an empty filename is specified
+            river_file_hdle=0
         else
-            fmtstr='(I0,A1,E12.5)' !for large numbers, use exponential notation
-        end if
-        DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
-            if (river_file_hdle/=0) then
-                WRITE(river_file_hdle,trim(fmtstr))id_subbas_extern(sb_counter), char(9),r_storage(sb_counter) !tab separated output
-            endif
-            total_storage_river=total_storage_river+r_storage(sb_counter) !sum up total storage
-        END DO
-
+            river_file_hdle=14
+            OPEN(river_file_hdle,FILE=river_conds_file//trim(suffix), STATUS='replace')
+            if (river_transport == 1) then !UHG routing
+                WRITE(river_file_hdle,'(a)') 'UHG routing: values of routed discharge per timestep of unit hydrograph'
+                WRITE(river_file_hdle,*)'Subbasin', char(9),'[n_h x timestep]' !tab separated output
+            else !Muskingum routing
+                WRITE(river_file_hdle,'(a)') 'Muskingum routing: river reach volume status (for analysis or model re-start)'
+                WRITE(river_file_hdle,*)'Subbasin', char(9),'volume[m^3]' !tab separated output
+            end if 
+            
+            digits=floor(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
+            if (digits<10) then
+                write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
+            else
+                fmtstr='(I0,A1,E12.5)' !for large numbers, use exponential notation
+            end if
+            DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
+                if (river_file_hdle/=0) then
+                    WRITE(river_file_hdle,trim(fmtstr))id_subbas_extern(sb_counter), char(9),r_storage(sb_counter) !tab separated output
+                endif
+                !if (river_transport == 1) then !UHG routing
+                !else !Muskingum routing            
+                !end if !routing options
+            END DO
+            total_storage_river=sum(r_storage(1:subasin)) !sum up total storage
+            CLOSE(river_file_hdle, iostat=i_lu)    !close output files
+        endif
+        
         if (dosediment) then
             !write riverbed sediment storage
             !generate format string
@@ -251,6 +208,7 @@ contains
                 endif
                 !total_storage_sediment=total_storage_sediment+sum(riverbed_storage(sb_counter,:)) !sum up total storage
             END DO
+            CLOSE(sediment_file_hdle, iostat=i_lu)    !close output file
 
             !write suspended sediment storage
             if (susp_sediment_file_hdle/=0) then
@@ -269,6 +227,7 @@ contains
                 endif
                 !total_storage_suspsediment=total_storage_suspsediment+sum(sed_storage(sb_counter,:)) !sum up total storage
             END DO
+            CLOSE(susp_sediment_file_hdle, iostat=i_lu)    !close output file
         end if !dosediment
 
 
@@ -285,9 +244,12 @@ contains
                 ENDDO
             END DO
         END IF !small reservoirs
-
+        CLOSE(lake_file_hdle, iostat=i_lu)
+        
+        
+!save groundwater, intercept and soil storages 
         DO sb_counter=1,subasin
-            DO lu_counter=1,nbr_lu(sb_counter) !sum up groundwater, intercept and soil storages inside
+            DO lu_counter=1,nbr_lu(sb_counter) 
                 i_lu=id_lu_intern(lu_counter,sb_counter)
                 lu_area=area(sb_counter)*frac_lu(lu_counter,sb_counter)*1e6
                 if (gw_file_hdle/=0) then
@@ -332,16 +294,11 @@ contains
                 ENDDO    !loop TCs
             ENDDO    !loop LUs
         ENDDO    !loop subbasins
-
-
         CLOSE(soil_file_hdle, iostat=i_lu)    !close output files
         CLOSE(gw_file_hdle, iostat=i_lu)
         CLOSE(intercept_file_hdle, iostat=i_lu)
-        CLOSE(lake_file_hdle, iostat=i_lu)
-        CLOSE(river_file_hdle, iostat=i_lu)    !close output files
-        CLOSE(sediment_file_hdle, iostat=i_lu)    !close output files
-        CLOSE(susp_sediment_file_hdle, iostat=i_lu)    !close output files
-
+        
+        
 
         OPEN(11,FILE=summary_file//trim(suffix), STATUS='replace')        !write to summary file
         WRITE(11,*)'total water storage in catchment after model run [m3]'

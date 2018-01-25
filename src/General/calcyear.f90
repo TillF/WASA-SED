@@ -33,28 +33,14 @@ DO i=2,12
 END DO
 
 
-
-! Calculates no. of days of previous year (as a function of leap years)
-IF ( is_leapyear(t-1) .AND. t-1 /= tstart) THEN
-  daylastyear = 366
-ELSE IF ( (.NOT. is_leapyear(t-1)) .AND. t-1 /= tstart) THEN
-  daylastyear = 365
-END IF
-IF (t == tstart) THEN
-  daylastyear = sum(daymon(mstart:12))
-END IF
-
-
-
-
 ! first simulation year
 IF (t == tstart) THEN	
   dstart=min(dstart, daymon(mstart)) !correct start/stop days, when larger than days in month
   dstop =min(dstop,  daymon(mstop))
 
-  dprev     = sum(daymon(mstart:12)) !ii: is this correct?
-  dayyear   = sum(daymon(mstart:12)) !number of days to treat in current year
+  dprev     = sum(daymon(mstart:12)) !ii: is this correct? leap year and  dstart are apparently not considered
 
+  dayyear   = sum(daymon(mstart:12)) !number of days to treat in current year
   dayyear	  =	dayyear   - (dstart-1) !reduce by start_day_of month
   
   dtot=dayyear !Calculation of total days since simulation started (for first year)
@@ -68,6 +54,23 @@ IF (t == tstart) THEN
 
 END IF
 
+! Calculates no. of days of simulated days in previous year (as a function of leap years)
+daylastyear = -1 !debug option, can be removed
+IF (t == tstart + 1) THEN
+  !daylastyear = sum(daymon(mstart:12)) - dstart + 1
+  daylastyear = dtot
+else
+    IF ( is_leapyear(t-1) ) THEN
+        daylastyear = 366
+    ELSE 
+        daylastyear = 365
+    END IF 
+END IF
+
+
+
+
+
 
 ! intermediate simulation years
 IF (t /= tstart .AND. t /= tstop) THEN
@@ -79,7 +82,7 @@ END IF
 ! last simulation year
 IF (t == tstop .AND. t /= tstart) THEN
   dayyear   = sum(daymon(1:mstop))
-  dayyear	  =	dayyear   - (daymon(mstop)- dstop) !reduce by end_day_of month
+  dayyear	  =	dayyear   - (daymon(mstop)- dstop) !reduce by end_day_of_month
 
   dtot=dtot+dayyear !count simulation days
 END IF

@@ -17,10 +17,18 @@ OUTDIR=build
 # adjust according to DEBUG
 ifeq ($(DEBUG),1)
 EXEC=wasa_dbg
-OBJDIR=$(OUTDIR)\obj\debug
+    ifeq ($(OS),Windows_NT)
+        OBJDIR=$(OUTDIR)\obj\debug
+    else
+        OBJDIR=$(OUTDIR)/obj/debug
+    endif
 else
-EXEC=wasa
-OBJDIR=$(OUTDIR)\obj\release
+    EXEC=wasa
+    ifeq ($(OS),Windows_NT)
+        OBJDIR=$(OUTDIR)\obj\release
+    else
+        OBJDIR=$(OUTDIR)/obj/release
+    endif
 endif
 
 # script for updating revision number according to platform
@@ -206,13 +214,27 @@ distclean:
 
 prepare:
 	@echo "Output directories will be created (if they do not exist) ..."
+<<<<<<< HEAD
+	ifeq ($(OS),Windows_NT)
+        -@mkdir $(OUTDIR)\bin
+        -@mkdir $(OUTDIR) 
+        -@mkdir $(OBJDIR)
+    else
+        -@mkdir -p $(OUTDIR) $(OBJDIR) $(OUTDIR)/bin
+=======
 	-@mkdir $(OUTDIR) 
 	-@mkdir $(OBJDIR)
-	-@mkdir $(OUTDIR)\bin
+	ifeq ($(OS),Windows_NT)
+        -@mkdir $(OUTDIR)\bin
+    else
+        -@mkdir $(OUTDIR)/bin
+>>>>>>> 7f4b76b203685cdefd2d0c1843e3db560b2dd246
+    endif
 	
 update_rev:
 	@echo "Updating revision number ..."
 	@echo "Compiling model source code ..."
+	@$(UPDATE_SCRIPT) $(SRCDIR)
 
 $(OUTDIR)/bin/$(EXEC): $(OBJ)
 	@echo "Linking code ..."
