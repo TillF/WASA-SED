@@ -11,12 +11,12 @@ module reservoir_h
 save
 
 INTEGER :: nxsection_res=200 !number of cross sections at the strategic reservoirs
-INTEGER :: npointsxsect=200  !number of points (x,y) along the cross sections 
+INTEGER :: npointsxsect=200  !number of points (x,y) along the cross sections
 
 
 
 ! Options to run the WASA Model without river and hillslope modules
-INTEGER :: reservoir_balance	!option to read (0) or calculate (1) outflow discharges and reservoir levels 
+INTEGER :: reservoir_balance	!option to read (0) or calculate (1) outflow discharges and reservoir levels
 INTEGER :: reservoir_check		!option to run the WASA Model with river and hillslope modules (0) or without them (1)
 INTEGER :: reservoir_print		!option to print the output files within the timestep (0) or once a year (1)
 !
@@ -25,7 +25,8 @@ INTEGER :: reservoir_print		!option to print the output files within the timeste
 integer :: step
 !hour (on day)
 integer :: hour
-!
+! flag indicating if a specific subbasin contains a strategic reservoir; FALSE: no reservoir; TRUE: contains a reservoir
+logical, allocatable :: res_flag(:)
 !flag to calculate the ratio between the reservoir volumes given in the file cav.dat and that derived from the cross sections  [0 = initial value; 1 = after first calculation]
 integer, allocatable :: fcav(:)
 !flag to simulate reservoir routing during spillway overflow of the sub-basin's reservoir [0 = without time delay; 1 = with time delay]
@@ -99,7 +100,7 @@ real, allocatable :: forma_factor(:)
 real, allocatable :: qoutlet(:)
 !percentage of storage capacity that indicates the minimum storage volume for sediment release through the bottom outlets of the sub-basin's reservoir [-]
 real, allocatable :: fvol_bottom(:)
-!withdrawal water volume to supply the water use sectors (outflow discharge through the dam is not considered) [m**3/s] 
+!withdrawal water volume to supply the water use sectors (outflow discharge through the dam is not considered) [m**3/s]
 real, allocatable :: withdrawal(:)
 !maximum retention in the subbasin's reservoir [m**3]
 real, allocatable :: lakeret(:,:)
@@ -166,7 +167,7 @@ integer, allocatable :: id_sec_extern(:,:)
 integer, allocatable :: nbrsec(:)
 !number of points at the cross section of the reservoir in the sub-basin
 integer, allocatable :: npoints(:,:)
-!!number of cases for the calculation of bed geometry changes between two adjacent points 
+!!number of cases for the calculation of bed geometry changes between two adjacent points
 !at the cross section of the reservoir in the sub-basin
 integer, allocatable :: geom(:,:)
 !decrease of stored volume in the subbasin's reservoir [m**3]
@@ -195,9 +196,9 @@ real, allocatable :: y_sec0(:,:,:)
 real, allocatable :: sed_ret(:,:)
 !volume of overflowed sediment out the subbasin's reservoir [ton/timestep]
 real, allocatable :: sed_overflow(:,:)
-!volume of released sediment through the water intake device of the subbasin's reservoir through the water intake [ton/timestep] 
+!volume of released sediment through the water intake device of the subbasin's reservoir through the water intake [ton/timestep]
 real, allocatable :: sed_intake(:,:)
-!volume of released sediment through the bottom outlets of the subbasin's reservoir through the water intake [ton/timestep] 
+!volume of released sediment through the bottom outlets of the subbasin's reservoir through the water intake [ton/timestep]
 real, allocatable :: sed_bottom(:,:)
 !lateral sediment inflow into the dowstream reservoirs for each particle size class g [ton/timestep]
 real, allocatable :: sed_qlateral(:,:)
@@ -233,7 +234,7 @@ integer, allocatable :: sed_flag(:)
 integer, allocatable :: sed_routing_flag(:)
 !!amount of correlations between water inflow discharge and incoming sediment into the subbasin's reservoir [-]
 !integer, allocatable :: numbeqs(:)
-!!water discharge that represents the upper limit of applicability of each correlation 
+!!water discharge that represents the upper limit of applicability of each correlation
 !!between water inflow discharge and incoming sediment into the subbasin's reservoir [-]
 !real, allocatable :: Q_max(:,:)
 !!Qsed=a*Q**b (water input x sediment input) relationship parameters [-]
@@ -405,7 +406,7 @@ real, allocatable :: d50_actlay(:,:)
 real, allocatable :: d90_actlay(:,:)
 !sediment entering sub-basin's reservoir for each particle size class k [tons/timestep]
 real, allocatable :: frsedinflow(:,:,:)
-!!internal variables (temporarily described here) 
+!!internal variables (temporarily described here)
 real, allocatable :: frvol_actlay0(:,:,:)
 real, allocatable :: totvol_actlay0(:,:)
 !
@@ -439,7 +440,7 @@ real, allocatable :: partarea_toplay(:,:,:)
 !real, allocatable :: weightfac_toplay(:,:,:)
 !bed elevation at the beginning of the actual simulation timestep for each cross section in the sub-basin's reservoir [m]
 real, allocatable :: y_laststep(:,:,:)
-!water level used to attenuate elevation changes caused by erosion [m] 
+!water level used to attenuate elevation changes caused by erosion [m]
 real, allocatable :: erosion_level(:,:)
 !Point of the cross section in the sub-basin's reservoir that identifies the beginning of main channel (from left to right, view from upstream side) [-]
 integer, allocatable :: pt1(:,:)
@@ -451,7 +452,7 @@ integer, allocatable :: pt3(:,:)
 integer, allocatable :: pt4(:,:)
 !Initial location of the delta plunge point along the reservoir cross sections [-] (location varies acording to sedimento erosion/deposition in the reservoi)
 integer, allocatable :: pt_long0(:)
-!Location of the delta plunge point along the reservoir cross sections [-] 
+!Location of the delta plunge point along the reservoir cross sections [-]
 integer, allocatable :: pt_long(:)
 !Side slope at the beginning of main channel defined by pt1 [m/m]
 real, allocatable :: sideslope_pt1(:,:)

@@ -84,6 +84,7 @@ END IF
 
 IF (doreservoir) THEN
 	allocate( &
+      res_flag(subasin), &
    	  fcav(subasin), &
 	  fvol_over(subasin), &
       latflow_res(subasin), &
