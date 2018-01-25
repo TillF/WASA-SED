@@ -57,7 +57,6 @@ END IF
 ! Calculates no. of days of simulated days in previous year (as a function of leap years)
 daylastyear = -1 !debug option, can be removed
 IF (t == tstart + 1) THEN
-  !daylastyear = sum(daymon(mstart:12)) - dstart + 1
   daylastyear = dtot
 else
     IF ( is_leapyear(t-1) ) THEN

@@ -158,7 +158,7 @@ contains
 
 !write file contents
         !write river storage state to .stat file .
-        if (trim(river_conds_file)=='' .OR. (river_transport == 1)) then        !don't do anything if an empty filename is specified
+        if (trim(river_conds_file)=='') then        !don't do anything if an empty filename is specified
             river_file_hdle=0
         else
             river_file_hdle=14
@@ -171,21 +171,35 @@ contains
                 WRITE(river_file_hdle,*)'Subbasin', char(9),'volume[m^3]' !tab separated output
             end if 
             
-            digits=floor(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
-            if (digits<10) then
-                write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
-            else
-                fmtstr='(I0,A1,E12.5)' !for large numbers, use exponential notation
-            end if
-            DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
-                if (river_file_hdle/=0) then
+            if (river_transport == 1) then !UHG routing
+                tt = size(hrout,dim=1)-1 !length of UHG minus 1
+                digits=floor(log10(max(1.0,maxval(qout(d:d+tt,1:subasin)))))+1    !Till: number of pre-decimal digits required
+                if (digits<10) then
+                    write(fmtstr,'(A1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
+                else
+                    fmtstr='E12.5' !for large numbers, use exponential notation
+                end if
+                write(fmtstr,*) '(I0',(',A1,',trim(fmtstr),k=1,tt),')'        !generate format string
+                
+                DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
+                    WRITE(river_file_hdle,trim(fmtstr))id_subbas_extern(sb_counter), (char(9),qout(d+k,sb_counter), k=1, tt) !tab separated output
+                END DO
+                total_storage_river=sum(qout(d+1:d+size(hrout,dim=1),1:subasin)) !sum up total storage
+            else !Muskingum routing
+                digits=floor(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
+                if (digits<10) then
+                    write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),')'        !generate format string
+                else
+                    fmtstr='(I0,A1,E12.5)' !for large numbers, use exponential notation
+                end if
+
+                DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
                     WRITE(river_file_hdle,trim(fmtstr))id_subbas_extern(sb_counter), char(9),r_storage(sb_counter) !tab separated output
-                endif
-                !if (river_transport == 1) then !UHG routing
-                !else !Muskingum routing            
-                !end if !routing options
-            END DO
-            total_storage_river=sum(r_storage(1:subasin)) !sum up total storage
+                END DO
+                total_storage_river=sum(r_storage(1:subasin)) !sum up total storage
+            end if !routing options
+
+
             CLOSE(river_file_hdle, iostat=i_lu)    !close output files
         endif
         
