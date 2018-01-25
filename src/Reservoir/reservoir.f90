@@ -504,76 +504,48 @@ storcap(:)=0.
   END IF
 
 !Ge initialization of output files
-  OPEN(11,FILE=pfadn(1:pfadi)//'River_Velocity.out',STATUS='replace')
   if (f_river_velocity) then
+    OPEN(11,FILE=pfadn(1:pfadi)//'River_Velocity.out',STATUS='replace')
 	WRITE (11,*) 'Output file for flow velocity in m/s (with MAP IDs as in hymo.dat)'
 	write(fmtstr,'(a,i0,a)')'(3a6,',subasin,'i14)'		!generate format string
 	WRITE (11,fmtstr)' Year ', ' Day  ',' dt   ',(id_subbas_extern(i), i=1,subasin)
 	Close (11)
-  else
-    close(11, status='delete') !delete any existing file, if no output is desired
   endif
 
-  DO i=1,subasin
-    IF (storcap(i) /= 0.) THEN
-      WRITE(subarea,*)id_subbas_extern(i)
-	  DO j=1,12
-        IF (subarea(j:j) /= ' ') THEN
-          dummy1=j
-          EXIT
-        END IF
-      END DO
-	  OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_watbal.out',STATUS='replace')
-      IF (f_res_watbal) then
-	    WRITE(11,*)'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), elevation(m), area(m**2), volume(m**3)'
-        CLOSE(11)
-	  ELSE
-        CLOSE(11, status='delete') !delete any existing file, if no output is desired
-	  ENDIF
-	ENDIF
-  ENDDO
+  IF (f_res_watbal) then
+      DO i=1,subasin
+        IF (storcap(i) /= 0.) THEN
+          WRITE(subarea,*)id_subbas_extern(i)
+          OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_watbal.out',STATUS='replace')
+          WRITE(11,*)'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), elevation(m), area(m**2), volume(m**3)'
+          CLOSE(11)
+        ENDIF
+      ENDDO
+  ENDIF
 
 !Ge initialization of output files
-  DO i=1,subasin
-    IF (storcap(i) /= 0.) THEN
-      WRITE(subarea,*)id_subbas_extern(i)
-	  DO j=1,12
-        IF (subarea(j:j) /= ' ') THEN
-          dummy1=j
-          EXIT
-        END IF
-      END DO
-	  OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_vollost.out',STATUS='replace')
-      IF (f_res_vollost) then
-	    WRITE(11,*)'Subasin-ID, year, day, hour, deadvol(m**3), alertvol(m**3), storcap(m**3)'
-        CLOSE(11)
-	  ELSE
-        CLOSE(11, status='delete') !delete any existing file, if no output is desired
-	  ENDIF
-	ENDIF
-  ENDDO
+  IF (f_res_vollost) then
+      DO i=1,subasin
+        IF (storcap(i) /= 0.) THEN
+          WRITE(subarea,*)id_subbas_extern(i)
+          OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_vollost.out',STATUS='replace')
+          WRITE(11,*)'Subasin-ID, year, day, hour, deadvol(m**3), alertvol(m**3), storcap(m**3)'
+          CLOSE(11)
+        ENDIF
+      ENDDO
+  ENDIF
 
 !Ge initialization of output files
-  DO i=1,subasin
-   IF (nbrbat(i) /= 0) THEN
-    IF (storcap(i) /= 0.) THEN
-      WRITE(subarea,*)id_subbas_extern(i)
-	  DO j=1,12
-        IF (subarea(j:j) /= ' ') THEN
-          dummy1=j
-          EXIT
-        END IF
-      END DO
-	  OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_cav.out',STATUS='replace')
-      IF (f_res_cav) then
-	    WRITE(11,*)'Subasin-ID, year, day, hour, 1st row: elev_bat(m), 2nd row: area_bat(m**2), 3rd row: vol_bat(m**3)'
-        CLOSE(11)
-	  ELSE
-        CLOSE(11, status='delete') !delete any existing file, if no output is desired
-	  ENDIF
-	ENDIF
-   ENDIF
-  ENDDO
+  IF (f_res_cav) then
+      DO i=1,subasin
+       IF (nbrbat(i) /= 0) THEN
+        IF (storcap(i) /= 0.) THEN
+          WRITE(subarea,*)id_subbas_extern(i)
+          OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_cav.out',STATUS='replace')
+        ENDIF
+       ENDIF
+      ENDDO
+  ENDIF
 
 !**************************************************************************************
 !Ge temporary output files to test the cascade routing scheme of the lake module
@@ -685,9 +657,6 @@ IF (STATUS == 1) THEN
 !    END IF
 !  END DO
 
-  DO i=1,subasin
-  ENDDO
-
 
 !George reservoir water surface (m**2)
   DO i=1,subasin
@@ -722,14 +691,7 @@ IF (STATUS == 1) THEN
      IF (t >= damyear(i)) THEN !Andreas
 	  IF (storcap(i) > 0.) THEN
         WRITE(subarea,*)id_subbas_extern(i)
-	    DO j=1,12
-          IF (subarea(j:j) /= ' ') THEN
-            dummy1=j
-            EXIT
-          END IF
-        END DO
-
-		OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/inflow_'//subarea(dummy1:12)//'.dat', &
+		OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/inflow_'//trim(adjustl(subarea))//'.dat', &
 			STATUS='unknown')
           read(11,*)
           cont=(dtot-dayyear)*nt
@@ -772,14 +734,7 @@ IF (STATUS == 1) THEN
      IF (t >= damyear(i)) THEN !Andreas
 	  IF (storcap(i) > 0.) THEN
         WRITE(subarea,*)id_subbas_extern(i)
-	    DO j=1,12
-          IF (subarea(j:j) /= ' ') THEN
-            dummy1=j
-            EXIT
-          END IF
-        END DO
-
-		OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/inflow_'//subarea(dummy1:12)//'.dat', &
+		OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/inflow_'//trim(adjustl(subarea))//'.dat', &
 			STATUS='unknown')
           read(11,*)
           cont=(dtot-dayyear)*nt
@@ -848,14 +803,7 @@ IF (STATUS == 1) THEN
     IF (t >= damyear(i)) THEN
      IF (damq_frac(i) == -888.) THEN
       WRITE(subarea,*)id_subbas_extern(i)
-	  DO j=1,12
-       IF (subarea(j:j) /= ' ') THEN
-         dummy1=j
-         EXIT
-        END IF
-      END DO
-
-      OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/intake_'//subarea(dummy1:12)//'.dat', &
+      OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/intake_'//trim(adjustl(subarea))//'.dat', &
 			STATUS='unknown')
        read(11,*)
 	   read(11,*)
@@ -1488,14 +1436,8 @@ IF (STATUS == 2) THEN
 ! Print daily inflow and outflow discharges
     IF (reservoir_print == 0) THEN
      WRITE(subarea,*)id_subbas_extern(upstream)
-	 DO j=1,12
-       IF (subarea(j:j) /= ' ') THEN
-         dummy1=j
-         EXIT
-       END IF
-     END DO
 	 IF (f_res_watbal) THEN
-     OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_watbal.out',STATUS='old',  &
+     OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_watbal.out',STATUS='old',  &
 		  POSITION='append')
 	 WRITE(11,'(4I6,7f10.3,2f16.3)')id_subbas_extern(upstream),t,d,hour,qlateral(step,upstream),qinflow(step,upstream),  &
 				qintake(step,upstream),overflow(step,upstream),qbottom(step,upstream),  &
@@ -1506,7 +1448,7 @@ IF (STATUS == 2) THEN
 
 ! print storage losses due to reservoir sedimentation
 	 IF (f_res_vollost) THEN
-     OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_vollost.out',STATUS='old',  &
+     OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_vollost.out',STATUS='old',  &
 		  POSITION='append')
 	 WRITE(11,'(4I6,3f15.2)')id_subbas_extern(upstream),t,d,hour,daydamdead(step,upstream), &
 			daydamalert(step,upstream),daystorcap(step,upstream)
@@ -1517,7 +1459,7 @@ IF (STATUS == 2) THEN
      write(fmtstr,'(a,i0,a)')'(4I6,',nbrbat(upstream),'F15.2)'		!generate format string
      IF (nbrbat(upstream) /= 0) THEN
 	  IF (f_res_cav) THEN
-      OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_cav.out',STATUS='old',  &
+      OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_cav.out',STATUS='old',  &
 		    POSITION='append')
 		WRITE(11,fmtstr)id_subbas_extern(upstream),t,d,hour,(elev_bat(j,upstream),j=1,nbrbat(upstream))
 		WRITE(11,fmtstr)id_subbas_extern(upstream),t,d,hour,(area_bat(j,upstream),j=1,nbrbat(upstream))
@@ -1572,14 +1514,8 @@ IF (STATUS == 3) THEN
     DO i=1,subasin
       IF (storcap(i) /= 0. .and. t >= damyear(i)) THEN
         WRITE(subarea,*)id_subbas_extern(i)
-	    DO j=1,12
-          IF (subarea(j:j) /= ' ') THEN
-            dummy1=j
-            EXIT
-          END IF
-        END DO
 		IF (f_res_watbal) THEN
-	    OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_watbal.out',STATUS='old',  &
+	    OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_watbal.out',STATUS='old',  &
 			POSITION='append')
 	    DO d=1,dayyear
 	      DO ih=1,nt
@@ -1592,7 +1528,7 @@ IF (STATUS == 3) THEN
         CLOSE(11)
 		ENDIF
 		IF (f_res_vollost) THEN
-		OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_vollost.out',STATUS='old',  &
+		OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_vollost.out',STATUS='old',  &
 			POSITION='append')
 	    DO d=1,dayyear
 	      DO ih=1,nt
@@ -1607,14 +1543,8 @@ IF (STATUS == 3) THEN
 	  ENDIF
       IF (storcap(i) /= 0. .and. t >= damyear(i) .and. nbrbat(i) /= 0) THEN
         WRITE(subarea,*)id_subbas_extern(i)
-	    DO j=1,12
-          IF (subarea(j:j) /= ' ') THEN
-            dummy1=j
-            EXIT
-          END IF
-        END DO
 		IF (f_res_cav) THEN
-        OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_cav.out',STATUS='old',  &
+        OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_cav.out',STATUS='old',  &
 		    POSITION='append')
 	    write(fmtstr,'(a,i0,a)')'(4I6,',nbrbat(i),'F15.2)'		!generate format string
 		DO d=1,dayyear
