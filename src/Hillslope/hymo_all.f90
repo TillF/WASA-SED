@@ -133,7 +133,7 @@ SUBROUTINE hymo_all(STATUS)
         !cum_deposition_TC(:,:)=0.
 
         if (doloadstate) then
-            call init_model_state        !load initial conditions from file
+            call init_hillslope_state        !load initial conditions from file
         else !do default initialisations
             
             !** Initialise soil moisture of each horizon (horithact)

@@ -38,9 +38,11 @@ CALL calcyear
 CALL hymo_all(0)
 CALL climo(0)
 
-!Call routing routine
+
+!initialization of routing routines
 if (river_transport.eq.1) CALL routing(0)
 if (river_transport.ne.1) CALL routing_new(0)
+call init_river_state  
 
 CALL save_model_state(doloadstate, .TRUE.) !Till: do backups of state files if loaded from them, and save only summary on initial storage
 

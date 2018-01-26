@@ -8,13 +8,13 @@ integer, allocatable :: upbasin(:), downbasin(:)
 real, allocatable :: qin(:)
 ! qout: runoff out of the Sub-basin [m**3/s]
 !Allocatable      real qout (372,nmun)
-real, allocatable :: qout(:,:)
+real, pointer :: qout(:,:)
 !river inflow (m3/s) at time t and t+1 (2,subasin)
 real, allocatable :: r_qin(:,:)
 !river outflow (m3/s) at time t and t+1 (2,subasin)
 real, allocatable :: r_qout(:,:)
 !storage volume (m3) in river reach
-real, allocatable :: r_storage (:)
+real, pointer :: r_storage (:)
 !array stores runoff from hillslopes (m3/s) and erosion (tons), if it is generated outside WASA
 !real, allocatable :: runoff(:,:)
 !real, allocatable :: sediment(:,:,:)

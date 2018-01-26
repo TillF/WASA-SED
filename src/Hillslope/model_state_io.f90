@@ -4,17 +4,22 @@ module model_state_io
  
     use common_h
 contains
-    subroutine init_model_state        !load initial conditions
+    subroutine init_hillslope_state        !load initial conditions for hillslopes and reservoirs
+            !if (.not. doloadstate) return   !do not load files, if disabled
             call init_soil_conds(trim(pfadn)//'soil_moisture.stat')    !Till: load initial status of soil moisture
             call init_intercept_conds(trim(pfadn)//'intercept_storage.stat')    !Till: load initial status of gw storage
             call init_gw_conds(trim(pfadn)//'gw_storage.stat')    !Till: load initial status of gw storage
             call init_lake_conds(trim(pfadn)//'lake_volume.stat')    !Jose Miguel: load initial status of lake storage
+    end subroutine init_hillslope_state
+
+   subroutine init_river_state        !load initial conditions for riverscape
+            if (.not. doloadstate) return   !do not load files, if disabled
             call init_river_conds(trim(pfadn)//'river_storage.stat')    !Jose Miguel: load initial status of river storage
             if (dosediment) then
                call init_sediment_conds(trim(pfadn)//'sediment_storage.stat')    !Jose Miguel: load initial status of sediment storage
                call init_susp_sediment_conds(trim(pfadn)//'susp_sediment_storage.stat')    !Jose Miguel: load initial status of sediment storage
             endif
-    end subroutine init_model_state
+    end subroutine init_river_state
 
     subroutine save_model_state(backup_files, start)        !save all model state variables, optionally backup older files
     implicit none
@@ -327,10 +332,6 @@ contains
 
         CLOSE(11)
     end subroutine save_all_conds
-
-
-
-
 
     subroutine init_soil_conds(soil_conds_file)
 
@@ -668,8 +669,6 @@ contains
 
     end subroutine init_intercept_conds
 
-
-
     subroutine init_gw_conds(gw_conds_file)
 
         !load gw conditions from file gw_conds_file
@@ -796,55 +795,83 @@ contains
         implicit none
 
         character(len=*),intent(in):: river_conds_file        !file to load from
-        integer :: subbas_id, iostatus, i
+        integer :: subbas_id, iostatus, i, tt, k
         real :: dummy1
+        real, pointer :: array_ptr(:)
+        character(len=1000) :: linestr
 
-        if (river_transport == 2) then
-            OPEN(11,FILE=river_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
-            if (i/=0) then
-                write(*,'(a,a,a)')'WARNING: River storage file ''',trim(river_conds_file),''' not found, using defaults.'
-                CLOSE(11)
-			    return
+        OPEN(11,FILE=river_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
+        if (i/=0) then
+            write(*,'(a,a,a)')'WARNING: River storage file ''',trim(river_conds_file),''' not found, using defaults.'
+            CLOSE(11)
+		    return
+        end if
+
+        write(*,'(a,a,a)')'Initialize river storage from file ''',trim(river_conds_file),'''.'
+            
+        !verify that this river file belongs to the selected routing mode
+        READ(11,'(A)') linestr;
+        if ( (river_transport == 1 .AND. linestr(1:3) /= "UHG") .OR. &
+                (river_transport == 2 .AND. linestr(1:3) /= "Mus") )            then
+            write(*,'(a,a,a)')'WARNING: River storage file ''',trim(river_conds_file),''' does not match selected routing mode. File ignored, using defaults.'
+            CLOSE(11)
+		    return
+        end if 
+                
+        !skip next header line
+        READ(11,*)
+            
+	    if (river_transport == 1) then
+            tt = size(hrout,dim=1)-1 !length of UHG minus 1
+            qout(1,1:subasin)      =-1. !indicator for "not read"
+            qout(2:tt,1:subasin)   = 0. 
+                
+            !check that the current file matches the specs of the current UHG
+            READ(11,'(A)') linestr 
+            i = GetNumberOfSubstrings(linestr) - 1
+            if (i > tt .OR. i<1) write(*,'(a,a,a,i0,a,i0)')'WARNING: River storage file ''',trim(river_conds_file),''': expecting ',tt,' ordinates, found ',i,'. Truncated.'
+            backspace(11) !rewind line just read
+        end if    
+        if (river_transport == 2) r_storage(1:subasin)=-1. !indicator for "not read"
+           
+            
+        DO WHILE (.TRUE.)
+            READ(11,'(A)',IOSTAT=iostatus) linestr
+            IF (iostatus /=0) exit
+                
+            READ(linestr,*,IOSTAT=iostatus) i, dummy1
+                			    
+
+            subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
+		    if (subbas_id < 1 .OR. subbas_id > subasin) then
+			    WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ', i,' in river_storage.stat, ignored.'
+                cycle
             end if
 
-            write(*,'(a,a,a)')'Initialize river storage from file ''',trim(river_conds_file),'''.'
+            if (dummy1 < 0.) then
+			    WRITE(*,'(a,i0,a)') 'Error: negative value for subbasin ', id_subbas_extern(i),' in river_storage.stat.'
+                stop
+            end if
 
-            !read 2 header lines into buffer
-            READ(11,*); READ(11,*)
-		    r_storage(1:subasin)=-1. !indicator for "not read"
+            if (river_transport == 1) READ(linestr,*) k, (qout(i,subbas_id),i=1,tt)
+            if (river_transport == 2) r_storage(subbas_id)=dummy1  
+        END DO
+        close(11)
 
-            DO WHILE (.TRUE.)
-                READ(11,*,IOSTAT=iostatus) i, dummy1
-			    IF (iostatus /=0) exit
-
-                subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
-			    if (subbas_id < 1 .OR. subbas_id > subasin) then
-				    WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ', i,' in river_storage.stat, ignored.'
-                    cycle
+        !check for completeness
+        if (river_transport == 1) array_ptr => qout(1,1:subasin)
+        if (river_transport == 2) array_ptr => r_storage
+            
+        if (count(array_ptr==-1.) > 0) then
+            WRITE(*,'(A)') 'WARNING: could not read initial river storage from river_storage.stat for the following subbasins, assumed 0:'
+            DO subbas_id=1,subasin
+                if (array_ptr(subbas_id)==-1.) then
+                    WRITE(*,'(i0)') id_subbas_extern(subbas_id)
+                    array_ptr(subbas_id)=0.
                 end if
-
-                if (dummy1 < 0.) then
-				    WRITE(*,'(a,i0,a)') 'Error: negative value for subbasin ', id_subbas_extern(i),' in river_storage.stat.'
-                    stop
-			    end if
-
-                r_storage(subbas_id)=dummy1        !add the previous storage to the river reach additionally to potential volume from spring or runoff contribution.
             END DO
-            close(11)
-
-            if (count(r_storage==-1.) > 0) then
-                WRITE(*,'(A)') 'WARNING: could not read initial river storage from river_storage.stat for the following subbasins, assumed 0:'
-                DO subbas_id=1,subasin
-                    if (r_storage(subbas_id)==-1.) then
-                        WRITE(*,'(i0)') id_subbas_extern(subbas_id)
-                        r_storage(subbas_id)=0.
-                    end if
-                END DO
-            end if
-        else
-           r_storage(:)=0.  !old unit-hydrograph routing, set Muskingum storages to 0
-        end if !river_transport == 2
-
+        end if
+   
     end subroutine init_river_conds
 
 
