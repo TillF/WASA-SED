@@ -1409,9 +1409,9 @@ SUBROUTINE hymo_all(STATUS)
 
 
         if (doacud) CALL lake(3,dummy)
-        call save_model_state(.FALSE., .FALSE.) !Till: saves model state (soil moisture, ground water, etc.) to files. Don't do backups, use standard file names
-
-
+        if (save_states_yearly .OR. t==tstop ) then !saves model state at end of each simulation year, unless disabled. Save at end in any case.
+            call save_model_state(.FALSE., .FALSE.) !Till: (soil moisture, ground water, etc.) to files. Don't do backups, use standard file names
+        end if
     END IF
 
 

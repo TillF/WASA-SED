@@ -120,14 +120,21 @@ SUBROUTINE readgen(path2do_dat)
     READ(11,*)  !line ignored
     READ(11,*) river_transport
     READ(11,*) reservoir_transport
-    !READ(11,*, IOSTAT=i) doloadstate
+    
     READ(11,'(A)', IOSTAT=i) dummy !READ doloadstate
     IF (i==0) then  
         READ(dummy,*,IOSTAT=i) doloadstate, append_output !try to read doloadstate AND append_output
         IF (i/=0 ) READ(dummy,*,IOSTAT=i) doloadstate !read doloadstate only
     END IF
     
-    READ(11,*, IOSTAT=i) dosavestate
+    !READ(11,*, IOSTAT=i) dosavestate
+    READ(11,'(A)', IOSTAT=i) dummy !READ dosavestate
+    IF (i==0) then  
+        READ(dummy,*,IOSTAT=i) dosavestate, save_states_yearly !try to read dosavestate AND save_states_yearly
+        IF (i/=0 ) READ(dummy,*,IOSTAT=i) dosavestate !read dosavestate only
+    END IF
+    
+    
     READ(11,*, IOSTAT=i) dosnow !ii: rather use existence of snow input files as indicator
 
     CLOSE(11)
