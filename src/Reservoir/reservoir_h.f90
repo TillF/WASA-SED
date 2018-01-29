@@ -25,6 +25,14 @@ INTEGER :: reservoir_print		!option to print the output files within the timeste
 integer :: step
 !hour (on day)
 integer :: hour
+! temporary array for reading of data from intake.dat
+real, allocatable :: r_qintake(:)
+! number of columns in intake.dat
+integer :: no_col_intake
+! for each subasin position in intake.dat
+integer, allocatable :: corr_column_intakes(:)
+! does intake.dat exist for specific subasin (and contain information)?
+logical, allocatable :: f_intake_obs(:)
 ! flag indicating if a specific subbasin contains a strategic reservoir; FALSE: no reservoir; TRUE: contains a reservoir
 logical, allocatable :: res_flag(:)
 !flag to calculate the ratio between the reservoir volumes given in the file cav.dat and that derived from the cross sections  [0 = initial value; 1 = after first calculation]

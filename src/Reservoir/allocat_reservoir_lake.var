@@ -84,6 +84,8 @@ END IF
 
 IF (doreservoir) THEN
 	allocate( &
+	  f_intake_obs(subasin), &
+      corr_column_intakes(subasin), &
       res_flag(subasin), &
    	  fcav(subasin), &
 	  fvol_over(subasin), &

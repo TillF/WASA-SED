@@ -39,6 +39,7 @@ INTEGER, INTENT(IN)                  :: res_h
 !                 2=calculation day,    3=finalization year)
 
 INTEGER :: i,id,dummy1,dummy2,cont,s,p,q,h,istate,ka,ih !,irout,imun,dummy1a,dummy2a,f
+character(100) :: dummy_char
 !Ge include j,nbrbat1,cont,upstream,downstream
 INTEGER :: j,nbrbat1,flag_cav
 REAL :: elevhelp,evaphelp2,volhelp !,elevhelp2,elevhelp3
@@ -48,13 +49,15 @@ REAL :: help,help1,help2,help3,evaphelp,areahelp,infhelp,helpout,prechelp !,help
 
 CHARACTER(12) :: subarea
 
-REAL :: r_level0,r_level1,r_overflow,r_qintake,r_qbottom
-REAL :: r_precip,r_etp,r_qinflow
+!REAL :: r_level0,r_level1,r_overflow,r_qbottom
+!REAL :: r_precip,r_etp,r_qinflow
 
 INTEGER :: idummy,n !,npt, nbrsec1
 !INTEGER :: dummy3
 REAL :: dummy4,dummy5,dummy6
 character(len=1000) :: fmtstr	!string for formatting file output
+
+integer :: columnheader(1000) ! storing column heads of input files
 
 !*****************************************************************************
 !temporary variables used to test the cascade routing scheme of the lake module
@@ -67,6 +70,8 @@ IF (STATUS == 0) THEN
 reservoir_check=0 !(0=simulation will all components; 1=simulation without hillslope and river modules)
 reservoir_balance=1 !(0=inflow and outflow discharges must be provided as input file; 1=only inflow discharges must be provided as input file)
 reservoir_print=0 !(0=results printed at the end of the timestep; 1=results printed at the end of the simulated year)
+corr_column_intakes = 0
+f_intake_obs = .false.
 
 if (reservoir_check==0) reservoir_balance=1
 
@@ -323,6 +328,40 @@ storcap(:)=0.
       END IF
 	ENDDO
   ENDIF
+
+! initialise reading of intake.dat if it exists
+  open(101,file=pfadp(1:pfadj)// 'Time_series/intake.dat', iostat=istate,status='old')
+  if(istate /= 0) then
+    write(*,*) pfadp(1:pfadj)// 'Time_series/intake.dat was not found. Rund the model anyway.'
+    close(101)
+  else
+    write(*,*) 'Reading controlled reservoir outflow through intake devices from file Time_series/intake.dat.'
+    ! skip comment
+    read(101,*)
+    ! get reservoir (i.e. subbasin) ids from header line
+    read(101,'(a)') fmtstr
+    columnheader=0
+    no_col_intake=GetNumberOfSubstrings(fmtstr)-2
+    READ (fmtstr,*) dummy_char, dummy_char, (columnheader(i), i=1,no_col_intake)
+    DO i=1,subasin
+        DO j=1,size(columnheader)
+            IF(columnheader(j) == id_subbas_extern(i)) THEN
+                corr_column_intakes(i)= j    !for each subbasin, find position of corresponding column in input file
+                f_intake_obs(i)=.true.
+                exit
+            END IF
+        END DO
+    END DO
+    if(sum(corr_column_intakes) == 0) then
+        write(*,*) '   File intake.dat does not contain relevant reservoir (i.e. subbasin) ids! Run the model anyway.'
+        close(101)
+    else
+        allocate(r_qintake(no_col_intake))
+        r_qintake = 0.
+        ! go to correct start line by analysing the date column
+        call date_seek(101,tstart,mstart,dstart,'intake.dat')
+    endif
+  endif
 
 !Ge stage-volume curves for each sub-basin
   nbrbat(1:subasin)=0
@@ -798,33 +837,50 @@ IF (STATUS == 1) THEN
  ENDIF
 
 
-! begin block Andreas
+! begin block Andreas; changed by tobias
 ! Read daily data on (measured) regulated reservoir outflow to be considered in reservoir water balance
 ! data given in m**3/s, convert to m**3/d
-  IF (reservoir_balance == 1) THEN
-   DO i=1,subasin
-    IF (t >= damyear(i)) THEN
-     IF (damq_frac(i) == -888.) THEN
-      WRITE(subarea,*)id_subbas_extern(i)
-      OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/intake_'//trim(adjustl(subarea))//'.dat', &
-			STATUS='unknown')
-       read(11,*)
-	   read(11,*)
-       cont=(dtot-dayyear)*nt
-       DO id=1,cont
-         READ(11,*)
-       END DO
-       DO id=1,dayyear*nt
-         READ(11,*) dummy1,r_qintake
-		 IF (qintake(id,i) /= -999.) qintake(id,i)=r_qintake*(86400./nt)
-		 IF (qintake(id,i) == -999.) qintake(id,i)=damflow(i)*damq_frac(i)
-       ENDDO
-      CLOSE(11)
-     ENDIF
-    ENDIF
-   ENDDO
-  ENDIF
-! end block Andreas
+!  IF (reservoir_balance == 1) THEN
+!   DO i=1,subasin
+!    IF (t >= damyear(i)) THEN
+!     IF (damq_frac(i) == -888.) THEN
+!      WRITE(subarea,*)id_subbas_extern(i)
+!      OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/intake_'//trim(adjustl(subarea))//'.dat', &
+!			STATUS='unknown')
+!       read(11,*)
+!	   read(11,*)
+!       cont=(dtot-dayyear)*nt
+!       DO id=1,cont
+!         READ(11,*)
+!       END DO
+!       DO id=1,dayyear*nt
+!         READ(11,*) dummy1,r_qintake
+!		 IF (qintake(id,i) /= -999.) qintake(id,i)=r_qintake*(86400./nt)
+!		 IF (qintake(id,i) == -999.) qintake(id,i)=damflow(i)*damq_frac(i)
+!       ENDDO
+!      CLOSE(11)
+!     ENDIF
+!    ENDIF
+!   ENDDO
+!  ENDIF
+  if(any(f_intake_obs)) then
+    do id=1,dayyear*nt
+        ! read data for current day from intake.dat
+        read(101, *, iostat=istate) dummy1,dummy2, r_qintake
+        IF (istate/=0) THEN
+            write(*,*)'ERROR: Premature end of file intake.dat.'
+            stop
+        END IF
+        ! distribute values to qintake variable
+        ! NOTE: missing observations are treated later
+        do i=1,subasin
+            if( f_intake_obs(i) .and. (t >= damyear(i)) ) then
+                qintake(id,i) = r_qintake(corr_column_intakes(i))*(86400./nt)
+            endif
+        enddo
+    enddo
+  endif
+! end block Andreas; changed by tobias
 
 
   IF (dosediment) THEN
@@ -1001,33 +1057,35 @@ IF (STATUS == 2) THEN
 ! 4) Check flow through the reservoir
 ! 4a) Water intake device
 !     - dam outflow is fraction of Q90
-!     - according to J.C.Araújo this fraction is estimated to be 90%,
+!     - according to J.C.AraÃºjo this fraction is estimated to be 90%,
 !       and 80% for larger, strategic dams (e.g. Oros)
 !     - if alert volume is reached (if given for dam), outflow is reduced
 !     - no outflow if storage is below dead volume (if given for dam)
 !     - for non-strategic dams outflow is demand of regular (mean precip) years
 !       (not yet implemented)
 
+! use measured intake values if available
+      if(f_intake_obs(upstream) .and. qintake(step,upstream) > -0.5) then
+        helpout=qintake(step,upstream)
+      else
 ! Calculation of the maximum controlled outflow discharge using a factor defined in the reservoir.dat
-	  IF (damq_frac(upstream) >= 0.0) THEN !Andreas
-	    helpout=damflow(upstream)*damq_frac(upstream)
+          IF (damq_frac(upstream) >= 0.0) THEN !Andreas
+            helpout=damflow(upstream)*damq_frac(upstream)
 ! Calculation of the maximum controlled outflow discharge using a operation regime as provided in the operat_rule.dat
-	  ELSE IF (damq_frac(upstream) == -999.) THEN !Andreas
-	    dummy4=0.
-	    do s=1,3
-	      IF (dayoutsim+d >= dayexplot(upstream,s) .and. &
-		      dayoutsim+d < dayexplot(upstream,s+1)) dummy4=damq_frac_season(upstream,s)
-        enddo
-		IF (dayoutsim+d < dayexplot(upstream,1) .or. &
-		    dayoutsim+d >= dayexplot(upstream,4)) dummy4=damq_frac_season(upstream,4)
-        helpout=damflow(upstream)*dummy4
+          ELSE
+            dummy4=0.
+            do s=1,3
+              IF (dayoutsim+d >= dayexplot(upstream,s) .and. &
+                  dayoutsim+d < dayexplot(upstream,s+1)) dummy4=damq_frac_season(upstream,s)
+            enddo
+            IF (dayoutsim+d < dayexplot(upstream,1) .or. &
+                dayoutsim+d >= dayexplot(upstream,4)) dummy4=damq_frac_season(upstream,4)
+            helpout=damflow(upstream)*dummy4
+          ENDIF
 !write(*,*)upstream,dayoutsim+d,(dayexplot(upstream,s),s=1,4)
 !write(*,*)d,upstream,helpout,damflow(upstream),dummy4
 !write(*,*)step,id_subbas_extern(upstream),helpout/86400.,dummy4,damflow(upstream)/86400.
-!     use explicit (measured) daily values of regulated reservoir outflow
-	  ELSE IF (damq_frac(upstream) == -888.) THEN  !Andreas
-        helpout=qintake(step,upstream)                !Andreas
-	  ENDIF
+        endif ! measured or generic intake values
 
 ! Check water availability
       IF (daydamalert(step,upstream) > daydamdead(step,upstream)) THEN
@@ -1511,6 +1569,12 @@ END IF
 
 ! -----------------------------------------------------------------------
 IF (STATUS == 3) THEN
+
+! close intake.dat
+if( any(f_intake_obs) .and. (t == tstop) ) then
+    close(101)
+    deallocate(r_qintake)
+endif
 
 ! Output files of Reservoir Modules
   IF (reservoir_print == 1) THEN
