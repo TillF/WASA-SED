@@ -1,12 +1,3 @@
-!Till: computationally irrelevant: added program version information to parameter.out
-!2009-06-17
-
-!Till: optionally read location of do.dat from command line argument
-! 2008-04-24
-
-!Till: swapped CALL hymo_all(0) and CALL climo(0) to allow filecheck
-! 2007-05-07
-
 PROGRAM wasa_sed
 
 use common_h
@@ -19,9 +10,6 @@ use model_state_io
 IMPLICIT NONE
 
 !CCCCCCCCCCCCCCCCCCCCC MAIN PROGRAM CCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!C Main Program
-!Last update: November 2006
-!SESAM Project
 
 CALL GETARG(1, pfadn)		!Till: try to read path to central control file (do.dat)
 

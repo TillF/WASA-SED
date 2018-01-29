@@ -65,6 +65,9 @@ module common_h
     
     LOGICAL :: doloadstate=.FALSE.         !load initial values before model run
     LOGICAL :: dosavestate=.FALSE.         !save state of model after execution
+    LOGICAL :: append_output=.FALSE.       !append model output to potentially existing file
+    
+    
     REAL   :: default_rel_sat=1.0      !default relative saturation (initial value for all horizons, if not specified otherwise)
     REAL   :: default_gw_storage=0.0   !default ground water storage (to be assumed for all non-specified LUs) [mm]
 

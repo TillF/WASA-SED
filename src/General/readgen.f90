@@ -1,65 +1,4 @@
 SUBROUTINE readgen(path2do_dat)
-    !Till: computationally irrelevant: added options for LU-wise sediment output
-    !2014-05-15
-	
-    !Till: computationally irrelevant: create output directory, if not existing
-    !2012-09-25
-
-    !Till: computationally irrelevant: optionally read nxsection_res, npointsxsectfrom maxdim.dat
-    !2012-09-21
-
-    !Till: computationally irrelevant: added variable maxreservoir
-    !2012-09-14
-
-    !Till: computationally irrelevant: optionally load doloadstate and dosavestate from do.dat
-    !2012-06-14
-
-    !Till: computationally irrelevant: minor changes to improve compiler compatibility
-    !2011-04-29
-
-    !George & Till: computationally irrelevant: added flags for reservoir output files; error message for missing do.dat
-    !2010-03-03
-
-    !Till: computationally irrelevant: made "command-strings" in outfile.dat case-insensitive
-    !2009-10-14
-
-    !Till: computationally irrelevant: added program version information to parameter.out
-    !2009-06-17
-
-    !Till: added output for River_Sediment_Storage.out
-    !sediment-related output-files are all disabled, if dosediment=FALSE
-    !2008-11-13
-
-    !Till: if location of do.dat as argument is given, all path are interpreted relative to the location of do.dat
-    ! 2008-05-30
-
-    !Till: optionally get location of do.dat as argument
-    ! 2008-04-24
-
-    !Till: read in parameters for time-variate kfcorr
-    !2007-10-29
-
-    ! 2007-10-18 Till
-    ! increased length of pfadp variable to 160
-
-    ! 2007-06-04, Till
-    ! added flag f_tc_theta
-
-    ! 2007-04-28, Till
-    ! added flag f_tc_theta
-
-    ! 2007-01-10, Till
-    ! renamed f_deep_gw to f_deep_gw_recharge, added f_deep_gw_discharge
- 
-    ! 2005-10-24, Till
-    ! optional reading of outfiles.dat to configure, which output files are created
-
-    ! 2005-08-24, Eva
-    ! read additional information from do.dat
- 
-    ! 2005-08-09, Till
-    ! read optional dosediment from do.dat
-    ! read maximum dimensions of spatial units from maxdim.dat, if available
 
     ! Code converted using TO_F90 by Alan Miller
     ! Date: 2005-06-30  Time: 13:47:18
@@ -181,7 +120,13 @@ SUBROUTINE readgen(path2do_dat)
     READ(11,*)  !line ignored
     READ(11,*) river_transport
     READ(11,*) reservoir_transport
-    READ(11,*, IOSTAT=i) doloadstate
+    !READ(11,*, IOSTAT=i) doloadstate
+    READ(11,'(A)', IOSTAT=i) dummy !READ doloadstate
+    IF (i==0) then  
+        READ(dummy,*,IOSTAT=i) doloadstate, append_output !try to read doloadstate AND append_output
+        IF (i/=0 ) READ(dummy,*,IOSTAT=i) doloadstate !read doloadstate only
+    END IF
+    
     READ(11,*, IOSTAT=i) dosavestate
     READ(11,*, IOSTAT=i) dosnow !ii: rather use existence of snow input files as indicator
 

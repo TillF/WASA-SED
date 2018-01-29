@@ -189,7 +189,7 @@ contains
                 DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
                     WRITE(river_file_hdle,trim(fmtstr))id_subbas_extern(sb_counter), (char(9),qout(d+k,sb_counter), k=1, tt) !tab separated output
                 END DO
-                total_storage_river=sum(qout(d+1:d+size(hrout,dim=1),1:subasin)) !sum up total storage
+                total_storage_river=sum(qout(d+1:d+size(hrout,dim=1),1:subasin)) * 3600 * dt !sum up total storage, convert m3/s to m3
             else !Muskingum routing
                 digits=floor(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
                 if (digits<10) then
