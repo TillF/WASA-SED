@@ -1,6 +1,5 @@
-!Till: throw error message if allocation fails
-!2008-08-12
 
+!ii: do allocation specific to routing mode to save memory
 	 allocate ( &
      upbasin(subasin), &
 	 downbasin(subasin), &	 

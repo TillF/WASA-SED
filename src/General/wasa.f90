@@ -1,12 +1,3 @@
-!Till: computationally irrelevant: added program version information to parameter.out
-!2009-06-17
-
-!Till: optionally read location of do.dat from command line argument
-! 2008-04-24
-
-!Till: swapped CALL hymo_all(0) and CALL climo(0) to allow filecheck
-! 2007-05-07
-
 PROGRAM wasa_sed
 
 use common_h
@@ -19,9 +10,6 @@ use model_state_io
 IMPLICIT NONE
 
 !CCCCCCCCCCCCCCCCCCCCC MAIN PROGRAM CCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!C Main Program
-!Last update: November 2006
-!SESAM Project
 
 CALL GETARG(1, pfadn)		!Till: try to read path to central control file (do.dat)
 
@@ -38,9 +26,11 @@ CALL calcyear
 CALL hymo_all(0)
 CALL climo(0)
 
-!Call routing routine
+
+!initialization of routing routines
 if (river_transport.eq.1) CALL routing(0)
 if (river_transport.ne.1) CALL routing_new(0)
+call init_river_state  
 
 CALL save_model_state(doloadstate, .TRUE.) !Till: do backups of state files if loaded from them, and save only summary on initial storage
 

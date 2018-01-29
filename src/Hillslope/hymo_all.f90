@@ -133,7 +133,7 @@ SUBROUTINE hymo_all(STATUS)
         !cum_deposition_TC(:,:)=0.
 
         if (doloadstate) then
-            call init_model_state        !load initial conditions from file
+            call init_hillslope_state        !load initial conditions from file
         else !do default initialisations
             
             !** Initialise soil moisture of each horizon (horithact)
@@ -196,149 +196,44 @@ SUBROUTINE hymo_all(STATUS)
 
         ! create and open output files
         ! Output daily water contribution to river (m**3/s)
-        OPEN(11,FILE=pfadn(1:pfadi)// 'daily_water_subbasin.out', STATUS='replace')
-        IF (f_daily_water_subbasin) THEN
-            WRITE(11,'(a)') 'daily river flow [m3/s] for all sub-basins (MAP-IDs)'
-            write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'        !generate format string
-            WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
-            CLOSE(11)
-        ELSE                !delete any existing file, if no output is desired
-            CLOSE(11,status='delete')
-        END IF
-
-        ! Output daily water contribution to river (m**3)
-        OPEN(11,FILE=pfadn(1:pfadi)// 'daily_water_subbasin2.out', STATUS='replace')
-        IF (f_daily_water_subbasin) THEN
-            WRITE(11,'(a)') 'daily river flow [m3] for all sub-basins (MAP-IDs)'
-            write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'        !generate format string
-            WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
-            CLOSE(11)
-        ELSE                !delete any existing file, if no output is desired
-            CLOSE(11,status='delete')
-        END IF
-
+        CALL open_daily_output(f_daily_water_subbasin, 'daily_water_subbasin.out', 'daily river flow [m3/s] for all sub-basins (MAP-IDs)')
+        
+        !! Output daily water contribution to river (m**3)
+        CALL open_daily_output(f_daily_water_subbasin, 'daily_water_subbasin2.out', 'daily river flow [m3] for all sub-basins (MAP-IDs)')
+        
         ! Output daily actual evapotranspiration
-        OPEN(11,FILE=pfadn(1:pfadi)//  &
-            'daily_actetranspiration.out', STATUS='replace')
-        IF (f_daily_actetranspiration) THEN
-            WRITE(11,'(a)') 'daily actual evapotranspiration [mm/d] for all sub-basins (MAP-IDs)'
-            write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'        !generate format string
-            WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
-            CLOSE(11)
-        ELSE                !delete any existing file, if no output is desired
-            CLOSE(11,status='delete')
-        END IF
+        CALL open_daily_output(f_daily_actetranspiration, 'daily_actetranspiration.out', 'daily actual evapotranspiration [mm/d] for all sub-basins (MAP-IDs)')
 
         ! Output daily potential evapotranspiration
-        OPEN(11,FILE=pfadn(1:pfadi)//'daily_potetranspiration.out',  &
-            STATUS='replace')
-        IF (f_daily_potetranspiration) THEN
-            WRITE(11,'(a)') 'daily potential evapotranspiration [mm/d] for all sub-basins (MAP-IDs)'
-            write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'        !generate format string
-            WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
-            CLOSE(11)
-        ELSE                !delete any existing file, if no output is desired
-            CLOSE(11,status='delete')
-        END IF
-
+        CALL open_daily_output(f_daily_potetranspiration, 'daily_potetranspiration.out', 'daily potential evapotranspiration [mm/d] for all sub-basins (MAP-IDs)')
+        
         ! Output daily soil moisture
-        OPEN(11,FILE=pfadn(1:pfadi)//'daily_theta.out', STATUS='replace')
-        IF (f_daily_theta) THEN
-            WRITE(11,'(a)') 'soil moisture in profile [mm] for all sub-basins (MAP-IDs)'
-            write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'        !generate format string
-            WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
-            CLOSE(11)
-        ELSE                !delete any existing file, if no output is desired
-            CLOSE(11,status='delete')
-        END IF
-
+        CALL open_daily_output(f_daily_theta, 'daily_theta.out', 'soil moisture in profile [mm] for all sub-basins (MAP-IDs)')
+        
         ! Output daily Hortonian Overland Flow
-        OPEN(11,FILE=pfadn(1:pfadi)//'daily_qhorton.out', STATUS='replace')
-        IF (f_daily_qhorton) THEN
-            WRITE(11,'(a)') 'horton overland flow [m**3] for all sub-basins (MAP-IDs)'
-            write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'        !generate format string
-            WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
-            CLOSE(11)
-        ELSE                !delete any existing file, if no output is desired
-            CLOSE(11,status='delete')
-        END IF
-
+        CALL open_daily_output(f_daily_qhorton, 'daily_qhorton.out', 'horton overland flow [m**3] for all sub-basins (MAP-IDs)')
+        
         ! Output daily total overland flow
-        OPEN(11,FILE=pfadn(1:pfadi)//'daily_total_overlandflow.out',  &
-            STATUS='replace')
-        IF (f_daily_total_overlandflow) THEN
-            WRITE(11,'(a)') 'total overland flow [m**3] for all sub-basins (MAP-IDs)'
-            write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'        !generate format string
-            WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
-            CLOSE(11)
-        ELSE                !delete any existing file, if no output is desired
-            CLOSE(11,status='delete')
-        END IF
-
-
+        CALL open_daily_output(f_daily_total_overlandflow, 'daily_total_overlandflow.out', 'total overland flow [m**3] for all sub-basins (MAP-IDs)')
+        
         ! Output deep ground water recharge (losses from model domain / into lin. storage)
-        OPEN(11,FILE=pfadn(1:pfadi)//'deep_gw_recharge.out',  &
-            STATUS='replace')
-        IF (f_deep_gw_recharge) THEN
-            WRITE(11,'(a)') 'total deep ground water recharge [m3] for all sub-basins (MAP-IDs)'
-            write(fmtstr,'(a,i0,a)')'(a4,a,a4,',subasin,'(a,i0))'        !generate format string
-            WRITE(11,fmtstr)'Year', char(9),' Day', (char(9),id_subbas_extern(i),i=1,subasin)        !tab separated output
-            CLOSE(11)
-        ELSE                !delete any existing file, if no output is desired
-            CLOSE(11,status='delete')
-        END IF
-
+        CALL open_daily_output(f_deep_gw_recharge, 'deep_gw_recharge.out', 'total deep ground water recharge [m3] for all sub-basins (MAP-IDs)')
+        
         ! Output deep ground water discharge (component of water_subbasin)
-        OPEN(11,FILE=pfadn(1:pfadi)//'deep_gw_discharge.out',  &
-            STATUS='replace')
-        IF (f_deep_gw_discharge) THEN
-            allocate (deep_gw_discharge(366,subasin))
-            WRITE(11,'(a)') 'total deep ground water discharge [m3] for all sub-basins (MAP-IDs)'
-            write(fmtstr,'(a,i0,a)')'(a4,a,a4,',subasin,'(a,i0))'        !generate format string
-            WRITE(11,fmtstr)'Year', char(9),' Day', (char(9),id_subbas_extern(i),i=1,subasin)        !tab separated output
-            CLOSE(11)
-        ELSE                !delete any existing file, if no output is desired
-            CLOSE(11,status='delete')
-        END IF
+        IF (f_deep_gw_discharge) allocate (deep_gw_discharge(366,subasin))
+        CALL open_daily_output(f_deep_gw_discharge, 'deep_gw_discharge.out', 'total deep ground water discharge [m3] for all sub-basins (MAP-IDs)')
+        
 
         ! Output ground water loss (deep percolation in LUs with no ground water flag)
-        OPEN(11,FILE=pfadn(1:pfadi)//'daily_gw_loss.out',  &
-            STATUS='replace')
-        IF (f_daily_gw_loss) THEN
-            allocate (gw_loss(366,subasin))
-            WRITE(11,'(a)') 'ground water loss from model domain [m3] for all sub-basins (MAP-IDs)'
-            write(fmtstr,'(a,i0,a)')'(a4,a,a4,',subasin,'(a,i0))'        !generate format string
-            WRITE(11,fmtstr)'Year', char(9),' Day', (char(9),id_subbas_extern(i),i=1,subasin)        !tab separated output
-            CLOSE(11)
-        ELSE                !delete any existing file, if no output is desired
-            CLOSE(11,status='delete')
-        END IF
-
-
+        IF (f_daily_gw_loss) allocate (gw_loss(366,subasin))
+        CALL open_daily_output(f_daily_gw_loss, 'daily_gw_loss.out', 'ground water loss from model domain [m3] for all sub-basins (MAP-IDs)')
+        
         !     Output total subsurface runoff (m³/d)
-        OPEN(11,FILE=pfadn(1:pfadi)//'daily_subsurface_runoff.out',  &
-            STATUS='replace')
-        IF (f_daily_subsurface_runoff) THEN
-            WRITE(11,'(a)') 'total subsurface runoff [m**3/d] for all sub-basins (MAP-IDs)'
-            write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'        !generate format string
-            WRITE(11,fmtstr)'Year'//char(9)//'Julian_Day',(char(9),id_subbas_extern(i),i=1,subasin)
-            CLOSE(11)
-        ELSE                !delete any existing file, if no output is desired
-            CLOSE(11,status='delete')
-        END IF
+        CALL open_daily_output(f_daily_subsurface_runoff, 'daily_subsurface_runoff.out', 'total subsurface runoff [m**3/d] for all sub-basins (MAP-IDs)')
 
         ! Output sub-daily water flux
-        OPEN(11,FILE=pfadn(1:pfadi)//'water_subbasin.out', STATUS='replace')
-        IF (f_water_subbasin) THEN    !Till: if sub-daily resolution is required
-            WRITE(11,'(a)') 'sub-daily contribution to river [m3/s] for all sub-basins (MAP-IDs)'
-
-            write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'        !generate format string
-            WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep', (char(9),id_subbas_extern(i),i=1,subasin)
-            CLOSE(11)
-        ELSE                !delete any existing file, if no output is desired
-            CLOSE(11,status='delete')
-        END IF
-
+        CALL open_subdaily_output(f_water_subbasin, 'water_subbasin.out', 'sub-daily contribution to river [m3/s] for all sub-basins (MAP-IDs)')
+        
         !     Output sediment production (t)
         OPEN(11,FILE=pfadn(1:pfadi)//'daily_sediment_production.out', STATUS='replace')
         IF (f_daily_sediment_production .AND. dosediment) THEN
@@ -1514,9 +1409,9 @@ SUBROUTINE hymo_all(STATUS)
 
 
         if (doacud) CALL lake(3,dummy)
-        call save_model_state(.FALSE., .FALSE.) !Till: saves model state (soil moisture, ground water, etc.) to files. Don't do backups, use standard file names
-
-
+        if (save_states_yearly .OR. t==tstop ) then !saves model state at end of each simulation year, unless disabled. Save at end in any case.
+            call save_model_state(.FALSE., .FALSE.) !Till: (soil moisture, ground water, etc.) to files. Don't do backups, use standard file names
+        end if
     END IF
 
 
@@ -1525,13 +1420,52 @@ SUBROUTINE hymo_all(STATUS)
 
 contains
 
+    SUBROUTINE open_daily_output(f_flag,file_name,headerline)
+        ! open file Output for daily values or delete any existing files
+        IMPLICIT NONE
+        LOGICAL, INTENT(IN)                  :: f_flag
+        CHARACTER(len=*), INTENT(IN)         :: file_name,headerline
+        INTEGER                              :: iostate
+
+        if (append_output) then !if enabled, do not create file, but append
+            OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old', IOSTAT=iostate)
+            if (iostate == 0) return !if file exists, return
+            CLOSE(11)
+        end if    
+        
+        OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='replace', IOSTAT=iostate)
+        if (iostate /= 0) then
+            write(*,*)'ERROR: cannot create ', pfadn(1:pfadi)//file_name
+            stop
+        end if
+        IF (f_flag) THEN    !if output file is enabled
+            WRITE(11,'(a)') headerline
+            write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'        !generate format string
+            WRITE(11,fmtstr)'Year'//char(9)//'Day', (char(9),id_subbas_extern(i),i=1,subasin)
+            CLOSE(11)
+        ELSE                !delete any existing file, if no output is desired
+            CLOSE(11,status='delete')
+        END IF
+    END SUBROUTINE open_daily_output
+
     SUBROUTINE open_subdaily_output(f_flag,file_name,headerline)
         ! open file Output for subdaily values or delete any existing files
         IMPLICIT NONE
         LOGICAL, INTENT(IN)                  :: f_flag
         CHARACTER(len=*), INTENT(IN)         :: file_name,headerline
+        INTEGER                              :: iostate
+        
+        if (append_output) then !if enabled, do not create file, but append
+            OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old', IOSTAT=iostate)
+            if (iostate == 0) return !if file exists, return
+            CLOSE(11)
+        end if    
 
-        OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='replace')
+        OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='replace', IOSTAT=iostate)
+        if (iostate /= 0) then
+            write(*,*)'ERROR: cannot create ', pfadn(1:pfadi)//file_name
+            stop
+        end if
         IF (f_flag) THEN    !if output file is enabled
             WRITE(11,'(a)') headerline
             write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'        !generate format string
@@ -1547,8 +1481,19 @@ contains
         IMPLICIT NONE
         LOGICAL, INTENT(IN)                  :: f_flag
         CHARACTER(len=*), INTENT(IN)         :: file_name,headerline
+        INTEGER                              :: iostate
+                
+        if (append_output) then !if enabled, do not create file, but append
+            OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old', IOSTAT=iostate)
+            if (iostate == 0) return !if file exists, return
+            CLOSE(11)
+        end if    
 
-        OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='replace')
+        OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='replace', IOSTAT=iostate)
+        if (iostate /= 0) then
+            write(*,*)'ERROR: cannot create ', pfadn(1:pfadi)//file_name
+            stop
+        end if
         IF (f_flag) THEN    !if output file is enabled
             WRITE(11,'(a)') headerline
             WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep'//char(9)//'Subbasin'//char(9)//'LU'//char(9)//'TC'

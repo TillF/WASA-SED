@@ -1,12 +1,5 @@
 SUBROUTINE lake(STATUS,muni)
 
-! Till: fixed bugs in reading of lake_maxvol.dat, lake_number.dat, lake_frarea.dat
-!outcommented unused vars
-!2012-09-14
-
-! Till: computationally irrelevant: minor changes to improve compiler compatibility
-! 2011-04-29
-
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-06-30  Time: 13:47:13
 
@@ -314,161 +307,32 @@ IF (STATUS == 0) THEN
 
 
 !Ge initialization of output files
-  OPEN(11,FILE=pfadn(1:pfadi)//'lake_inflow_r.out',STATUS='replace')
-  IF (f_lake_inflow_r) then
-	WRITE(11,*)'Year, day, hour, inflow_r(m**3/timestep)'
-    CLOSE(11)
-  ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-  ENDIF
-
-  OPEN(11,FILE=pfadn(1:pfadi)//'lake_outflow_r.out',STATUS='replace')
-  IF (f_lake_outflow_r) then
-	WRITE(11,*)'Year, day, hour, outflow_r(m**3/timestep)'
-    CLOSE(11)
-  ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-  ENDIF
-
-  OPEN(11,FILE=pfadn(1:pfadi)//'lake_retention_r.out',STATUS='replace')
-  IF (f_lake_retention_r) then
-	WRITE(11,*)'Year, day, hour, retention_r(m**3/timestep)'
-    CLOSE(11)
-  ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-  ENDIF
-
-  OPEN(11,FILE=pfadn(1:pfadi)//'lake_volume_r.out',STATUS='replace')
-  IF (f_lake_volume_r) then
-	WRITE(11,*)'Year, day, hour, volume_r(m**3)'
-    CLOSE(11)
-  ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-  ENDIF
+    
+  call open_subdaily_output_lake(f_lake_inflow_r,'lake_inflow_r.out','Year, day, hour, inflow_r(m**3/timestep)', subbasin_line=.FALSE.)
+  call open_subdaily_output_lake(f_lake_outflow_r,'lake_outflow_r.out','Year, day, hour, outflow_r(m**3/timestep)', subbasin_line=.FALSE.)
+  call open_subdaily_output_lake(f_lake_retention_r,'lake_retention_r.out','Year, day, hour, retention_r(m**3/timestep)', subbasin_line=.FALSE.)
+  call open_subdaily_output_lake(f_lake_volume_r,'lake_volume_r.out','Year, day, hour, volume_r(m**3)', subbasin_line=.FALSE.)
 
   IF (dosediment) then
-   OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedinflow_r.out',STATUS='replace')
-   IF (f_lake_sedinflow_r) then
-	WRITE(11,*)'Year, day, hour, sedinflow_r(ton/timestep)'
-    CLOSE(11)
-   ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-   ENDIF
+    call open_subdaily_output_lake(f_lake_sedinflow_r,'lake_sedinflow_r.out','Year, day, hour, sedinflow_r(ton/timestep)', subbasin_line=.FALSE.)
+    call open_subdaily_output_lake(f_lake_sedoutflow_r,'lake_sedoutflow_r.out','Year, day, hour, sedoutflow_r(ton/timestep)', subbasin_line=.FALSE.)
+    call open_subdaily_output_lake(f_lake_sedretention_r,'lake_sedretention_r.out','Year, day, hour, sedretention_r(ton/timestep)', subbasin_line=.FALSE.)
+    call open_subdaily_output_lake(f_lake_sedbal,'lake_sedbal.out','Year, day, hour, totalsedinflow(ton/timestep), totalsedoutflow(ton/timestep), totalsedimentation(ton/timestep), cumsedimentation(ton)', subbasin_line=.FALSE.)
+    call open_subdaily_output_lake(f_lake_sedimentation_r,'lake_sedimentation_r.out','Year, day, hour, lakesedimentation_r(ton)', subbasin_line=.FALSE.)
+  end if
+  
+  call open_subdaily_output_lake(f_lake_watbal,'lake_watbal.out','Year, day, hour, totallakeinflow(m**3/timestep), totallakeoutflow(m**3/timestep), totallakeprecip(m**3/timestep), totallakeevap(m**3/timestep), lakevol(m**3)', subbasin_line=.FALSE.)
 
-   OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedoutflow_r.out',STATUS='replace')
-   IF (f_lake_sedoutflow_r) then
-	WRITE(11,*)'Year, day, hour, sedoutflow_r(ton/timestep)'
-    CLOSE(11)
-   ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-   ENDIF
-
-   OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedretention_r.out',STATUS='replace')
-   IF (f_lake_sedretention_r) then
-	WRITE(11,*)'Year, day, hour, sedretention_r(ton/timestep)'
-    CLOSE(11)
-   ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-   ENDIF
-
-   OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedimentation_r.out',STATUS='replace')
-   IF (f_lake_sedimentation_r) then
-	WRITE(11,*)'Year, day, hour, lakesedimentation_r(ton)'
-    CLOSE(11)
-   ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-   ENDIF
-  ENDIF
-
-  OPEN(11,FILE=pfadn(1:pfadi)//'lake_watbal.out',STATUS='replace')
-  IF (f_lake_watbal) then
-	WRITE(11,*)'Year, day, hour, totallakeinflow(m**3/timestep), totallakeoutflow(m**3/timestep), totallakeprecip(m**3/timestep), totallakeevap(m**3/timestep), lakevol(m**3)'
-    CLOSE(11)
-  ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-  ENDIF
-
+  call open_subdaily_output_lake(f_lake_inflow,'lake_inflow.out','Year, day, hour, reservoir_class, lakeinflow(m**3/timestep)')
+  call open_subdaily_output_lake(f_lake_outflow,'lake_outflow.out','Year, day, hour, reservoir_class, lakeoutflow(m**3/timestep)')
+  call open_subdaily_output_lake(f_lake_volume,'lake_volume.out','Year, day, hour, reservoir_class, lakevolume(m**3)')
+  call open_subdaily_output_lake(f_lake_vollost,'lake_vollost.out','Year, day, hour, reservoir_class, lakevollost(m**3)')
+  call open_subdaily_output_lake(f_lake_retention,'lake_retention.out','Year, day, hour, reservoir_class, lakeretention(m**3/timestep)')
+  
   IF (dosediment) then
-   OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedbal.out',STATUS='replace')
-   IF (f_lake_sedbal) then
-	WRITE(11,*)'Year, day, hour, totalsedinflow(ton/timestep), totalsedoutflow(ton/timestep), totalsedimentation(ton/timestep), cumsedimentation(ton)'
-    CLOSE(11)
-   ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-   ENDIF
-  ENDIF
+   call open_subdaily_output_lake(f_lake_sedinflow,'lake_sedinflow.out','Year, day, hour, reservoir_class, lakesedinflow(ton/timestep)')
+   call open_subdaily_output_lake(f_lake_sedoutflow,'lake_sedoutflow.out','Year, day, hour, reservoir_class, lakesedoutflow(ton/timestep)')
 
-  OPEN(11,FILE=pfadn(1:pfadi)//'lake_inflow.out',STATUS='replace')
-  IF (f_lake_inflow) then
-	WRITE(11,*)'Year, day, hour, reservoir_class, lakeinflow(m**3/timestep)'
-    write(fmtstr,'(a,i0,a)')'(A24,',subasin,'I15)'		!generate format string
-	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
-	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
-    CLOSE(11)
-  ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-  ENDIF
-
-  OPEN(11,FILE=pfadn(1:pfadi)//'lake_outflow.out',STATUS='replace')
-  IF (f_lake_outflow) then
-	WRITE(11,*)'Year, day, hour, reservoir_class, lakeoutflow(m**3/timestep)'
-	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
-	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
-    CLOSE(11)
-  ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-  ENDIF
-
-  OPEN(11,FILE=pfadn(1:pfadi)//'lake_volume.out',STATUS='replace')
-  IF (f_lake_volume) then
-	WRITE(11,*)'Year, day, hour, reservoir_class, lakevolume(m**3)'
-	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
-	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
-    CLOSE(11)
-  ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-  ENDIF
-
-  OPEN(11,FILE=pfadn(1:pfadi)//'lake_retention.out',STATUS='replace')
-  IF (f_lake_retention) then
-	WRITE(11,*)'Year, day, hour, reservoir_class, lakeretention(m**3/timestep)'
-	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
-	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
-    CLOSE(11)
-  ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-  ENDIF
-
-  OPEN(11,FILE=pfadn(1:pfadi)//'lake_vollost.out',STATUS='replace')
-  IF (f_lake_vollost) then
-	WRITE(11,*)'Year, day, hour, reservoir_class, lakevollost(m**3)'
-	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
-	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
-    CLOSE(11)
-  ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-  ENDIF
-
-  IF (dosediment) then
-   OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedinflow.out',STATUS='replace')
-   IF (f_lake_sedinflow) then
-	WRITE(11,*)'Year, day, hour, reservoir_class, lakesedinflow(ton/timestep)'
-	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
-	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
-    CLOSE(11)
-   ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-   ENDIF
-
-   OPEN(11,FILE=pfadn(1:pfadi)//'lake_sedoutflow.out',STATUS='replace')
-   IF (f_lake_sedoutflow) then
-	WRITE(11,*)'Year, day, hour, reservoir_class, lakesedoutflow(ton/timestep)'
-	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
-	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
-    CLOSE(11)
-   ELSE
-    CLOSE(11, status='delete') !delete any existing file, if no output is desired
-   ENDIF
 
    OPEN(11,FILE=pfadn(1:pfadi)//'lake_sizedistoutflow.out',STATUS='replace')
    IF (f_lake_sizedistoutflow) then
@@ -1567,5 +1431,40 @@ END IF
 
 RETURN
 
+    contains
+  SUBROUTINE open_subdaily_output_lake(f_flag,file_name,headerline, subbasin_line)
+        ! open file Output for subdaily values or delete any existing files
+        IMPLICIT NONE
+        LOGICAL, INTENT(IN)                  :: f_flag
+        CHARACTER(len=*), INTENT(IN)         :: file_name,headerline
+        INTEGER                              :: iostate
+        LOGICAL, optional                    :: subbasin_line
+        LOGICAL                              :: subbasin_line1
+        
+        subbasin_line1=.TRUE. !default: inlcude line with subbasin numbering
+        if (present(subbasin_line))   subbasin_line1=subbasin_line
+    
+        if (append_output) then !if enabled, do not create file, but append
+            OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old', IOSTAT=iostate)
+            if (iostate == 0) return !if file exists, return
+            CLOSE(11)
+        end if    
 
+        OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='replace', IOSTAT=iostate)
+        if (iostate /= 0) then
+            write(*,*)'ERROR: cannot create ', pfadn(1:pfadi)//file_name
+            stop
+        end if
+        IF (f_flag) THEN    !if output file is enabled
+            WRITE(11,'(a)') headerline
+            write(fmtstr,'(a,i0,a)')'(A24,',subasin,'I15)'		!generate format string
+	        if (subbasin_line1) WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin) 
+            !write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'        !generate format string
+            !WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep', (char(9),id_subbas_extern(i),i=1,subasin)
+            CLOSE(11)
+        ELSE                !delete any existing file, if no output is desired
+            CLOSE(11,status='delete')
+        END IF
+    END SUBROUTINE open_subdaily_output_lake    
+    
 END SUBROUTINE lake
