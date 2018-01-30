@@ -204,6 +204,25 @@ storcap(:)=0.
 		  STOP
 	  END IF
 
+	  ! check parameters
+	  if(damb(i) > 1. .or. damb(i) < 0.) then
+        write(*,'(A,i3,A)') 'ERROR: Parameter damb in reservoir.dat is outside of plausible range (0 < damb <= 1) for reservoir / subbasin id ', id_subbas_extern(i), '!'
+        stop
+	  end if
+      if(damq_frac(i) > 1. .or. (damq_frac(i) < 0. .and. damq_frac(i) > -998.)) then
+        write(*,'(A,i3,A)') 'WARNING: Parameter damq_frac in reservoir.dat is outside of plausible range (0 <= damq_frac <= 1 or eq. -999) for reservoir / subbasin id ', id_subbas_extern(i), '! During calibration this might make sense.'
+	  end if
+      if(fvol_bottom(i) > 1. .or. (fvol_bottom(i) < 0. .and. fvol_bottom(i) > -998.)) then
+        write(*,'(A,i3,A)') 'WARNING: Parameter fvol_bottom in reservoir.dat is outside of plausible range (0 <= fvol_bottom <= 1 or eq. -999) for reservoir / subbasin id ', id_subbas_extern(i), '! During calibration this might make sense.'
+	  end if
+      if(fvol_over(i) > 1. .or. fvol_over(i) < 0.) then
+        write(*,'(A,i3,A)') 'WARNING: Parameter fvol_over in reservoir.dat is outside of plausible range (0 <= fvol_over <= 1) for reservoir / subbasin id ', id_subbas_extern(i), '! During calibration this might make sense.'
+	  end if
+      if(damalert(i) < damdead(i)) then
+        write(*,'(A,i3,A)') 'ERROR: Parameter damalert in reservoir.dat is less than damdead for reservoir / subbasin id ', id_subbas_extern(i), '!'
+        stop
+	  end if
+
 	  ! set reservoir flag indicating that for subbasin i a reservoir exists and has been initialised
 	  res_flag(i) = .true.
 
