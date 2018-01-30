@@ -1,7 +1,7 @@
 module model_state_io
     !contains subroutines for saving and loading model state (soil water, ground water, interception)#
 
- 
+
     use common_h
 contains
     subroutine init_hillslope_state        !load initial conditions for hillslopes and reservoirs
@@ -87,7 +87,7 @@ contains
         REAL    :: total_storage_soil, total_storage_gw, total_storage_intercept, total_storage_lake(5), total_storage_river, total_storage_interflow  !, total_storage_sediment,total_storage_suspsediment    !total amount of water stored  [m3]
         REAL    :: lu_area, svc_area    !area of current lu/svc [m3]
         INTEGER    ::    soil_file_hdle, gw_file_hdle, intercept_file_hdle, lake_file_hdle, river_file_hdle,sediment_file_hdle,susp_sediment_file_hdle, interflow_file_hdle    !file handles to output files
-		character(len=1000) :: fmtstr    !string for formatting file output
+		character(len=1000) :: fmtstr, fmtstr2    !string for formatting file output
         character(len=6) :: suffix
 
         suffix=""
@@ -99,7 +99,7 @@ contains
         total_storage_intercept=0.
         total_storage_lake=0.
         total_storage_river=0.
-        total_storage_interflow=0. 
+        total_storage_interflow=0.
 !        total_storage_sediment=0.
 
 !write file headers
@@ -177,8 +177,8 @@ contains
             else !Muskingum routing
                 WRITE(river_file_hdle,'(a)') 'Muskingum routing: river reach volume status (for analysis or model re-start)'
                 WRITE(river_file_hdle,*)'Subbasin', char(9),'volume[m^3]' !tab separated output
-            end if 
-            
+            end if
+
             if (river_transport == 1) then !UHG routing
                 tt = size(hrout,dim=1)-1 !length of UHG minus 1
                 digits=floor(log10(max(1.0,maxval(qout(d:d+tt,1:subasin)))))+1    !Till: number of pre-decimal digits required
@@ -187,10 +187,9 @@ contains
                 else
                     fmtstr='E12.5' !for large numbers, use exponential notation
                 end if
-                write(fmtstr,*) '(I0',(',A1,',trim(fmtstr),k=1,tt),')'        !generate format string
-                
+                write(fmtstr2,*) '(I0',(',A1,',trim(fmtstr),k=1,tt),')'        !generate format string
                 DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
-                    WRITE(river_file_hdle,trim(fmtstr))id_subbas_extern(sb_counter), (char(9),qout(d+k-1,sb_counter), k=1, tt) !tab separated output
+                    WRITE(river_file_hdle,trim(fmtstr2))id_subbas_extern(sb_counter), (char(9),qout(d+k-1,sb_counter), k=1, tt) !tab separated output
                 END DO
                 total_storage_river=sum(qout(d:d+tt-1,1:subasin)) * 3600 * dt !sum up total storage, convert m3/s to m3
             else !Muskingum routing
@@ -210,8 +209,8 @@ contains
 
             CLOSE(river_file_hdle, iostat=i_lu)    !close output files
         endif
-        
-        
+
+
         !write interflow storage state to .stat file .
         if (trim(river_conds_file)=='') then        !don't do anything if an empty filename is specified
             interflow_file_hdle=0
@@ -221,7 +220,7 @@ contains
             WRITE(interflow_file_hdle,'(a)') 'interflow storage (for analysis or model re-start)'
             WRITE(interflow_file_hdle,*)'Subbasin', char(9),'LU', char(9),'TC' , char(9),'horizon' , char(9),&
                 'storage_[m3]'        !tab separated output
-            
+
             digits=floor(log10(max(1.0,maxval(latred))))+1    !Till: number of pre-decimal digits required
             if (digits<10) then
                 write(fmtstr,'(A1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
@@ -229,17 +228,16 @@ contains
                 fmtstr='E12.5' !for large numbers, use exponential notation
             end if
             tt = size(latred,dim=2) !number of interchange horizons in latred
-            write(fmtstr,*) '(4(I0,A1),',trim(fmtstr),')'        !generate format string
-      
+            write(fmtstr2,*) '(4(I0,A1),',trim(fmtstr),')'        !generate format string
             DO sb_counter=1,subasin
-                DO lu_counter=1,nbr_lu(sb_counter) 
+                DO lu_counter=1,nbr_lu(sb_counter)
                     i_lu=id_lu_intern(lu_counter,sb_counter)
                     DO tc_counter=1,nbrterrain(i_lu) !intercept and soil storages inside
                         tcid_instance=tcallid(sb_counter,lu_counter,tc_counter)    !id of TC instance
                         if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
                         id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
                         DO  h=1,tt
-                            WRITE(interflow_file_hdle,fmtstr) id_subbas_extern(sb_counter), char(9),&
+                            WRITE(interflow_file_hdle,fmtstr2) id_subbas_extern(sb_counter), char(9),&
                                     id_lu_extern(i_lu),char(9),id_terrain_extern(id_tc_type), &
                                     char(9), h, char(9), latred(tcid_instance,h)   !tab separated output
                         END DO
@@ -249,8 +247,8 @@ contains
             total_storage_interflow = sum(latred) !sum up total storage
             CLOSE(interflow_file_hdle, iostat=i_lu)    !close output file
         endif !interflow output
-        
-        
+
+
         if (dosediment) then
             !write riverbed sediment storage
             !generate format string
@@ -307,11 +305,11 @@ contains
             END DO
         END IF !small reservoirs
         CLOSE(lake_file_hdle, iostat=i_lu)
-        
-        
-!save groundwater, intercept and soil storages 
+
+
+!save groundwater, intercept and soil storages
         DO sb_counter=1,subasin
-            DO lu_counter=1,nbr_lu(sb_counter) 
+            DO lu_counter=1,nbr_lu(sb_counter)
                 i_lu=id_lu_intern(lu_counter,sb_counter)
                 lu_area=area(sb_counter)*frac_lu(lu_counter,sb_counter)*1e6
                 if (gw_file_hdle/=0) then
@@ -359,8 +357,8 @@ contains
         CLOSE(soil_file_hdle, iostat=i_lu)    !close output files
         CLOSE(gw_file_hdle, iostat=i_lu)
         CLOSE(intercept_file_hdle, iostat=i_lu)
-        
-        
+
+
 
         OPEN(11,FILE=summary_file//trim(suffix), STATUS='replace')        !write to summary file
         WRITE(11,*)'total water storage in catchment after model run [m3]'
@@ -368,13 +366,13 @@ contains
         WRITE(11,*)'gw_storage', char(9),total_storage_gw
         WRITE(11,*)'interception_storage', char(9),total_storage_intercept
         WRITE(11,*)'interflow_storage', char(9),total_storage_interflow
-        
+
         DO acud_class=1,5
             WRITE(11,'(A,I0,A,F12.1)')'lake_storage', acud_class, char(9),total_storage_lake(acud_class)
         ENDDO
         WRITE(11,*)'river_storage', char(9),total_storage_river
 
-        
+
         CLOSE(11)
     end subroutine save_all_conds
 
@@ -561,7 +559,7 @@ contains
         INTEGER :: i_subbasx,i_lux,i_tcx       ! external ids of components in work
         INTEGER :: i_subbas,i_lu,i_tc, i_soil, i_veg,id_tc_type, tt        ! internal ids of components in work
         INTEGER :: tcid_instance     !(internal) id of LU,TC,soil-instance (unique subbas-LU-TC-soil-combination)
-        REAL    :: horithact_temp 
+        REAL    :: horithact_temp
         INTEGER    :: file_read=0
         character(len=160) :: linestr='', error_msg=''
 
@@ -621,7 +619,7 @@ contains
                     write(error_msg,'(i12,2a12,i12)')line,'-','-',i_tcx
                     cycle    !proceed with next line
                 end if
-                
+
                 lu_counter=id_ext2int(i_lu,id_lu_intern(:,i_subbas))    !convert to position/index of lu instance in current subbasin
                 if (lu_counter==-1) then
                     write(error_msg,'(3i12)')line,i_subbasx,i_lux
@@ -641,7 +639,7 @@ contains
                     write(error_msg,'(5i12)')line,i_subbasx,i_lux,i_tcx,h
                     cycle    !proceed with next line
                 end if
-                
+
                 latred(tcid_instance,h)=horithact_temp            !set interchange horizon water content
 
             END DO
@@ -671,18 +669,18 @@ contains
                                     id_terrain_extern(id_tc_type), h            !issue warning
                             end if
 
-                            latred(tcid_instance,h)=0.  !resume to default (0) 
+                            latred(tcid_instance,h)=0.  !resume to default (0)
                         end if
                     END DO
                 END DO
             END DO
         END DO
- 
+
 
     end subroutine init_interflow_conds
 
-    
-    
+
+
     subroutine init_intercept_conds(intercept_conds_file)
 
         !load intercept state from file intercept_conds_file
@@ -984,7 +982,7 @@ contains
         end if
 
         write(*,'(a,a,a)')'Initialize river storage from file ''',trim(river_conds_file),'''.'
-            
+
         !verify that this river file belongs to the selected routing mode
         READ(11,'(A)') linestr;
         if ( (river_transport == 1 .AND. linestr(1:3) /= "UHG") .OR. &
@@ -992,31 +990,31 @@ contains
             write(*,'(a,a,a)')'WARNING: River storage file ''',trim(river_conds_file),''' does not match selected routing mode. File ignored, using defaults.'
             CLOSE(11)
 		    return
-        end if 
-                
+        end if
+
         !skip next header line
         READ(11,*)
-            
+
 	    if (river_transport == 1) then
             tt = size(hrout,dim=1)-1 !length of UHG minus 1
             qout(1,1:subasin)      =-1. !indicator for "not read"
-            qout(2:tt,1:subasin)   = 0. 
-                
+            qout(2:tt,1:subasin)   = 0.
+
             !check that the current file matches the specs of the current UHG
-            READ(11,'(A)') linestr 
+            READ(11,'(A)') linestr
             i = GetNumberOfSubstrings(linestr) - 1
             if (i > tt .OR. i<1) write(*,'(a,a,a,i0,a,i0)')'WARNING: River storage file ''',trim(river_conds_file),''': expecting ',tt,' ordinates, found ',i,'. Truncated.'
             backspace(11) !rewind line just read
-        end if    
+        end if
         if (river_transport == 2) r_storage(1:subasin)=-1. !indicator for "not read"
-           
-            
+
+
         DO WHILE (.TRUE.)
             READ(11,'(A)',IOSTAT=iostatus) linestr
             IF (iostatus /=0) exit
-                
+
             READ(linestr,*,IOSTAT=iostatus) i, dummy1
-                			    
+
 
             subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
 		    if (subbas_id < 1 .OR. subbas_id > subasin) then
@@ -1030,14 +1028,14 @@ contains
             end if
 
             if (river_transport == 1) READ(linestr,*) k, (qout(i,subbas_id),i=1,tt)
-            if (river_transport == 2) r_storage(subbas_id)=dummy1  
+            if (river_transport == 2) r_storage(subbas_id)=dummy1
         END DO
         close(11)
 
         !check for completeness
         if (river_transport == 1) array_ptr => qout(1,1:subasin)
         if (river_transport == 2) array_ptr => r_storage
-            
+
         if (count(array_ptr==-1.) > 0) then
             WRITE(*,'(A)') 'WARNING: could not read initial river storage from river_storage.stat for the following subbasins, assumed 0:'
             DO subbas_id=1,subasin
@@ -1047,7 +1045,7 @@ contains
                 end if
             END DO
         end if
-   
+
     end subroutine init_river_conds
 
 
