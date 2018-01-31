@@ -1,4 +1,4 @@
-svn_rev.var
+*svn_rev.var
 *.mod
 *.o
 /wasa/Debug

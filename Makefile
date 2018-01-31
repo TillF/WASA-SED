@@ -214,14 +214,13 @@ distclean:
 
 prepare:
 	@echo "Output directories will be created (if they do not exist) ..."
-
-	ifeq ($(OS),Windows_NT)
-        -@mkdir $(OUTDIR)\bin
-        -@mkdir $(OUTDIR) 
-        -@mkdir $(OBJDIR)
-    else
-        -@mkdir -p $(OUTDIR) $(OBJDIR) $(OUTDIR)/bin
-    endif
+ifeq ($(OS),Windows_NT)
+	-@mkdir $(OUTDIR)\bin
+	-@mkdir $(OUTDIR) 
+	-@mkdir $(OBJDIR)
+else
+	-@mkdir -p $(OUTDIR) $(OBJDIR) $(OUTDIR)/bin
+endif
 	
 update_rev:
 	@echo "Updating revision number ..."
