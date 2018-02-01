@@ -39,6 +39,7 @@ INTEGER, INTENT(IN)                  :: res_h
 !                 2=calculation day,    3=finalization year)
 
 INTEGER :: i,id,dummy1,dummy2,cont,s,p,q,h,istate,ka,ih !,irout,imun,dummy1a,dummy2a,f
+character(100) :: dummy_char
 !Ge include j,nbrbat1,cont,upstream,downstream
 INTEGER :: j,nbrbat1,flag_cav
 REAL :: elevhelp,evaphelp2,volhelp !,elevhelp2,elevhelp3
@@ -46,16 +47,17 @@ REAL :: help,help1,help2,help3,evaphelp,areahelp,infhelp,helpout,prechelp !,help
 !Ge actual storage capacity of large river reservoir in a certain year[10**6 m**3]
 !REAL :: storcapact
 
-REAL :: res_flag(subasin)
 CHARACTER(12) :: subarea
 
-REAL :: r_level0,r_level1,r_overflow,r_qintake,r_qbottom
-REAL :: r_precip,r_etp,r_qinflow
+!REAL :: r_level0,r_level1,r_overflow,r_qbottom
+!REAL :: r_precip,r_etp,r_qinflow
 
 INTEGER :: idummy,n !,npt, nbrsec1
 !INTEGER :: dummy3
 REAL :: dummy4,dummy5,dummy6
 character(len=1000) :: fmtstr	!string for formatting file output
+
+integer :: columnheader(1000) ! storing column heads of input files
 
 !*****************************************************************************
 !temporary variables used to test the cascade routing scheme of the lake module
@@ -68,6 +70,8 @@ IF (STATUS == 0) THEN
 reservoir_check=0 !(0=simulation will all components; 1=simulation without hillslope and river modules)
 reservoir_balance=1 !(0=inflow and outflow discharges must be provided as input file; 1=only inflow discharges must be provided as input file)
 reservoir_print=0 !(0=results printed at the end of the timestep; 1=results printed at the end of the simulated year)
+corr_column_intakes = 0
+f_intake_obs = .false.
 
 if (reservoir_check==0) reservoir_balance=1
 
@@ -138,7 +142,7 @@ if (reservoir_check==0) reservoir_balance=1
   ENDIF
 
 !! Read reservoir parameters
-res_flag(:)=-999.
+res_flag(:)=.false.
 storcap(:)=0.
 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/reservoir.dat',IOSTAT=istate,STATUS='old')
@@ -199,6 +203,28 @@ storcap(:)=0.
 		  WRITE (*,'(A,i0,A,A)') 'ERROR: Format error in reservoir.dat, line',j,':', fmtstr
 		  STOP
 	  END IF
+
+	  ! check parameters
+	  if(damb(i) > 1. .or. damb(i) < 0.) then
+        write(*,'(A,i3,A)') 'ERROR: Parameter damb in reservoir.dat is outside of plausible range (0 < damb <= 1) for reservoir / subbasin id ', id_subbas_extern(i), '!'
+        stop
+	  end if
+      if(damq_frac(i) > 1. .or. (damq_frac(i) < 0. .and. damq_frac(i) > -998.)) then
+        write(*,'(A,i3,A)') 'WARNING: Parameter damq_frac in reservoir.dat is outside of plausible range (0 <= damq_frac <= 1 or eq. -999) for reservoir / subbasin id ', id_subbas_extern(i), '! During calibration this might make sense.'
+	  end if
+      if(fvol_bottom(i) > 1. .or. (fvol_bottom(i) < 0. .and. fvol_bottom(i) > -998.)) then
+        write(*,'(A,i3,A)') 'WARNING: Parameter fvol_bottom in reservoir.dat is outside of plausible range (0 <= fvol_bottom <= 1 or eq. -999) for reservoir / subbasin id ', id_subbas_extern(i), '! During calibration this might make sense.'
+	  end if
+      if(fvol_over(i) > 1. .or. fvol_over(i) < 0.) then
+        write(*,'(A,i3,A)') 'WARNING: Parameter fvol_over in reservoir.dat is outside of plausible range (0 <= fvol_over <= 1) for reservoir / subbasin id ', id_subbas_extern(i), '! During calibration this might make sense.'
+	  end if
+      if(damalert(i) < damdead(i)) then
+        write(*,'(A,i3,A)') 'ERROR: Parameter damalert in reservoir.dat is less than damdead for reservoir / subbasin id ', id_subbas_extern(i), '!'
+        stop
+	  end if
+
+	  ! set reservoir flag indicating that for subbasin i a reservoir exists and has been initialised
+	  res_flag(i) = .true.
 
 !Ge "storcap" and "vol0" are read in 1000m**3 and after that they are converted into 10**6 m**3  &
 !Ge damarea renamed to maxdamarea  &
@@ -321,6 +347,40 @@ storcap(:)=0.
       END IF
 	ENDDO
   ENDIF
+
+! initialise reading of intake.dat if it exists
+  open(101,file=pfadp(1:pfadj)// 'Time_series/intake.dat', iostat=istate,status='old')
+  if(istate /= 0) then
+    write(*,*) pfadp(1:pfadj)// 'Time_series/intake.dat was not found. Rund the model anyway.'
+    close(101)
+  else
+    write(*,*) 'Reading controlled reservoir outflow through intake devices from file Time_series/intake.dat.'
+    ! skip comment
+    read(101,*)
+    ! get reservoir (i.e. subbasin) ids from header line
+    read(101,'(a)') fmtstr
+    columnheader=0
+    no_col_intake=GetNumberOfSubstrings(fmtstr)-2
+    READ (fmtstr,*) dummy_char, dummy_char, (columnheader(i), i=1,no_col_intake)
+    DO i=1,subasin
+        DO j=1,size(columnheader)
+            IF(columnheader(j) == id_subbas_extern(i)) THEN
+                corr_column_intakes(i)= j    !for each subbasin, find position of corresponding column in input file
+                f_intake_obs(i)=.true.
+                exit
+            END IF
+        END DO
+    END DO
+    if(sum(corr_column_intakes) == 0) then
+        write(*,*) '   File intake.dat does not contain relevant reservoir (i.e. subbasin) ids! Run the model anyway.'
+        close(101)
+    else
+        allocate(r_qintake(no_col_intake))
+        r_qintake = 0.
+        ! go to correct start line by analysing the date column
+        call date_seek(101,tstart,mstart,dstart,'intake.dat')
+    endif
+  endif
 
 !Ge stage-volume curves for each sub-basin
   nbrbat(1:subasin)=0
@@ -451,7 +511,7 @@ storcap(:)=0.
 
 
   DO i=1,subasin
-   IF (res_flag(i) /= -999.) THEN
+   IF (res_flag(i)) THEN
     nbrbat1=nbrbat(i)
     IF (nbrbat(i) /= 0) THEN
       DO j=1,nbrbat(i)-1
@@ -487,7 +547,7 @@ storcap(:)=0.
 
 !Ge Initialization of the parameters related to spillway overflow
   DO i=1,subasin
-	IF (res_flag(i) /= -999.) THEN
+	IF (res_flag(i)) THEN
 	  outflow_last(i)=0.
 	  volume_last(i)=0.
 	  alpha_over(i)=1./(1.-damb(i))
@@ -504,76 +564,48 @@ storcap(:)=0.
   END IF
 
 !Ge initialization of output files
-  OPEN(11,FILE=pfadn(1:pfadi)//'River_Velocity.out',STATUS='replace')
   if (f_river_velocity) then
+    OPEN(11,FILE=pfadn(1:pfadi)//'River_Velocity.out',STATUS='replace')
 	WRITE (11,*) 'Output file for flow velocity in m/s (with MAP IDs as in hymo.dat)'
 	write(fmtstr,'(a,i0,a)')'(3a6,',subasin,'i14)'		!generate format string
 	WRITE (11,fmtstr)' Year ', ' Day  ',' dt   ',(id_subbas_extern(i), i=1,subasin)
 	Close (11)
-  else
-    close(11, status='delete') !delete any existing file, if no output is desired
   endif
 
-  DO i=1,subasin
-    IF (storcap(i) /= 0.) THEN
-      WRITE(subarea,*)id_subbas_extern(i)
-	  DO j=1,12
-        IF (subarea(j:j) /= ' ') THEN
-          dummy1=j
-          EXIT
-        END IF
-      END DO
-	  OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_watbal.out',STATUS='replace')
-      IF (f_res_watbal) then
-	    WRITE(11,*)'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), elevation(m), area(m**2), volume(m**3)'
-        CLOSE(11)
-	  ELSE
-        CLOSE(11, status='delete') !delete any existing file, if no output is desired
-	  ENDIF
-	ENDIF
-  ENDDO
+  IF (f_res_watbal) then
+      DO i=1,subasin
+        IF (res_flag(i)) THEN
+          WRITE(subarea,*)id_subbas_extern(i)
+          OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_watbal.out',STATUS='replace')
+          WRITE(11,*)'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), elevation(m), area(m**2), volume(m**3)'
+          CLOSE(11)
+        ENDIF
+      ENDDO
+  ENDIF
 
 !Ge initialization of output files
-  DO i=1,subasin
-    IF (storcap(i) /= 0.) THEN
-      WRITE(subarea,*)id_subbas_extern(i)
-	  DO j=1,12
-        IF (subarea(j:j) /= ' ') THEN
-          dummy1=j
-          EXIT
-        END IF
-      END DO
-	  OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_vollost.out',STATUS='replace')
-      IF (f_res_vollost) then
-	    WRITE(11,*)'Subasin-ID, year, day, hour, deadvol(m**3), alertvol(m**3), storcap(m**3)'
-        CLOSE(11)
-	  ELSE
-        CLOSE(11, status='delete') !delete any existing file, if no output is desired
-	  ENDIF
-	ENDIF
-  ENDDO
+  IF (f_res_vollost) then
+      DO i=1,subasin
+        IF (res_flag(i)) THEN
+          WRITE(subarea,*)id_subbas_extern(i)
+          OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_vollost.out',STATUS='replace')
+          WRITE(11,*)'Subasin-ID, year, day, hour, deadvol(m**3), alertvol(m**3), storcap(m**3)'
+          CLOSE(11)
+        ENDIF
+      ENDDO
+  ENDIF
 
 !Ge initialization of output files
-  DO i=1,subasin
-   IF (nbrbat(i) /= 0) THEN
-    IF (storcap(i) /= 0.) THEN
-      WRITE(subarea,*)id_subbas_extern(i)
-	  DO j=1,12
-        IF (subarea(j:j) /= ' ') THEN
-          dummy1=j
-          EXIT
-        END IF
-      END DO
-	  OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_cav.out',STATUS='replace')
-      IF (f_res_cav) then
-	    WRITE(11,*)'Subasin-ID, year, day, hour, 1st row: elev_bat(m), 2nd row: area_bat(m**2), 3rd row: vol_bat(m**3)'
-        CLOSE(11)
-	  ELSE
-        CLOSE(11, status='delete') !delete any existing file, if no output is desired
-	  ENDIF
-	ENDIF
-   ENDIF
-  ENDDO
+  IF (f_res_cav) then
+      DO i=1,subasin
+       IF (nbrbat(i) /= 0) THEN
+        IF (res_flag(i)) THEN
+          WRITE(subarea,*)id_subbas_extern(i)
+          OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_cav.out',STATUS='replace')
+        ENDIF
+       ENDIF
+      ENDDO
+  ENDIF
 
 !**************************************************************************************
 !Ge temporary output files to test the cascade routing scheme of the lake module
@@ -637,7 +669,7 @@ IF (STATUS == 1) THEN
 
   !IF (t > tstart) THEN !Andreas
   DO i=1,subasin !Andreas
-   IF (storcap(i) > 0.) THEN
+   IF (res_flag(i)) THEN
      IF (t > damyear(i) .AND. t > tstart) THEN  !Andreas
        volact(1,i)=volact(daylastyear*nt,i)
        daystorcap(1,i)=daystorcap(daylastyear*nt,i)
@@ -685,13 +717,10 @@ IF (STATUS == 1) THEN
 !    END IF
 !  END DO
 
-  DO i=1,subasin
-  ENDDO
-
 
 !George reservoir water surface (m**2)
   DO i=1,subasin
-    IF (storcap(i) > 0. .and. t >= damyear(i)) THEN
+    IF (res_flag(i) .and. t >= damyear(i)) THEN
      nbrbat1=nbrbat(i)
      IF (nbrbat(i) /= 0) THEN
       DO j=1,nbrbat(i)-1
@@ -717,87 +746,74 @@ IF (STATUS == 1) THEN
 
 !Ge read daily data on reservoir level and outflow discharges
  IF (reservoir_check == 1) THEN
-   IF (reservoir_balance == 0) THEN
-    DO i=1,subasin
-     IF (t >= damyear(i)) THEN !Andreas
-	  IF (storcap(i) > 0.) THEN
-        WRITE(subarea,*)id_subbas_extern(i)
-	    DO j=1,12
-          IF (subarea(j:j) /= ' ') THEN
-            dummy1=j
-            EXIT
-          END IF
-        END DO
-
-		OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/inflow_'//subarea(dummy1:12)//'.dat', &
-			STATUS='unknown')
-          read(11,*)
-          cont=(dtot-dayyear)*nt
-          DO id=1,cont
-            READ(11,*)
-          END DO
-          DO id=1,dayyear*nt
-            READ(11,*) dummy1,dummy2,r_precip,r_etp,r_qinflow, &
-				r_overflow,r_qintake,r_qbottom,r_level0,r_level1
-	        damelev0(id,i)=r_level0
-	        damelev1(id,i)=r_level1
-            overflow(id,i)=r_overflow
-            qintake(id,i)=r_qintake
-	        qbottom(id,i)=r_qbottom
-            res_precip(id,i)=r_precip
-	        res_pet(id,i)=r_etp
-	        qinflow(id,i)=r_qinflow
-	      ENDDO
-	    CLOSE(11)
-        IF (nbrbat(i) /= 0) THEN
-	      nbrbat1=nbrbat(i)
-          DO id=1,dayyear
-            IF (damelev0(id,i) > elev_bat0(nbrbat1,i) .or. damelev1(id,i) > elev_bat0(nbrbat1,i) ) THEN
-              WRITE(*,*)'ERROR subasin ',id_subbas_extern(i),' year ',t,' day ',id, &
-			     	'GIVEN VALUE OF DAILY RESERVOIR LEVEL IS GREATER THAN THE MAXIMUM RESERVOIR ELEVATION AT THE STAGE-AREA-VOLUME CURVE (FILE: cav.dat)'
-			  STOP
-			ELSE IF (damelev0(id,i) < elev_bat0(1,i) .or. damelev1(id,i) < elev_bat0(1,i)) THEN
-			  WRITE(*,*)'ERROR subasin ',id_subbas_extern(i),' year ',t,' day ',id,  &
-					'GIVEN VALUE OF DAILY RESERVOIR LEVEL IS LESS THAN THE MINIMUM ELEVATION AT THE STAGE-AREA-VOLUME CURVE (FILE: cav.dat)'
-			  STOP
-			END IF
-		  ENDDO
-		ENDIF
-	  ENDIF
-	 ENDIF !Andreas
-	ENDDO
-   ENDIF
-   IF (reservoir_balance == 1) THEN
-    DO i=1,subasin
-     IF (t >= damyear(i)) THEN !Andreas
-	  IF (storcap(i) > 0.) THEN
-        WRITE(subarea,*)id_subbas_extern(i)
-	    DO j=1,12
-          IF (subarea(j:j) /= ' ') THEN
-            dummy1=j
-            EXIT
-          END IF
-        END DO
-
-		OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/inflow_'//subarea(dummy1:12)//'.dat', &
-			STATUS='unknown')
-          read(11,*)
-          cont=(dtot-dayyear)*nt
-          DO id=1,cont
-            READ(11,*)
-          END DO
-          DO id=1,dayyear*nt
-            READ(11,*) dummy1,dummy2,r_precip,r_etp,r_qinflow
-            res_precip(id,i)=r_precip
-	        res_pet(id,i)=r_etp
-	        qinflow(id,i)=r_qinflow
-	      ENDDO
-	    CLOSE(11)
-	  ENDIF
-	 ENDIF !Andreas
-	ENDDO
-   ENDIF
-  ELSE
+!   tobias: file Reservoir/inflow_*.dat is not documented: Maybe the following commented code section can be removed?!
+!   IF (reservoir_balance == 0) THEN
+!    DO i=1,subasin
+!     IF (t >= damyear(i)) THEN !Andreas
+!	  IF (storcap(i) > 0.) THEN
+!        WRITE(subarea,*)id_subbas_extern(i)
+!		OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/inflow_'//trim(adjustl(subarea))//'.dat', &
+!			STATUS='unknown')
+!          read(11,*)
+!          cont=(dtot-dayyear)*nt
+!          DO id=1,cont
+!            READ(11,*)
+!          END DO
+!          DO id=1,dayyear*nt
+!            READ(11,*) dummy1,dummy2,r_precip,r_etp,r_qinflow, &
+!				r_overflow,r_qintake,r_qbottom,r_level0,r_level1
+!	        damelev0(id,i)=r_level0
+!	        damelev1(id,i)=r_level1
+!            overflow(id,i)=r_overflow
+!            qintake(id,i)=r_qintake
+!	        qbottom(id,i)=r_qbottom
+!            res_precip(id,i)=r_precip
+!	        res_pet(id,i)=r_etp
+!	        qinflow(id,i)=r_qinflow
+!	      ENDDO
+!	    CLOSE(11)
+!        IF (nbrbat(i) /= 0) THEN
+!	      nbrbat1=nbrbat(i)
+!          DO id=1,dayyear
+!            IF (damelev0(id,i) > elev_bat0(nbrbat1,i) .or. damelev1(id,i) > elev_bat0(nbrbat1,i) ) THEN
+!              WRITE(*,*)'ERROR subasin ',id_subbas_extern(i),' year ',t,' day ',id, &
+!			     	'GIVEN VALUE OF DAILY RESERVOIR LEVEL IS GREATER THAN THE MAXIMUM RESERVOIR ELEVATION AT THE STAGE-AREA-VOLUME CURVE (FILE: cav.dat)'
+!			  STOP
+!			ELSE IF (damelev0(id,i) < elev_bat0(1,i) .or. damelev1(id,i) < elev_bat0(1,i)) THEN
+!			  WRITE(*,*)'ERROR subasin ',id_subbas_extern(i),' year ',t,' day ',id,  &
+!					'GIVEN VALUE OF DAILY RESERVOIR LEVEL IS LESS THAN THE MINIMUM ELEVATION AT THE STAGE-AREA-VOLUME CURVE (FILE: cav.dat)'
+!			  STOP
+!			END IF
+!		  ENDDO
+!		ENDIF
+!	  ENDIF
+!	 ENDIF !Andreas
+!	ENDDO
+!   ENDIF
+!   IF (reservoir_balance == 1) THEN
+!    DO i=1,subasin
+!     IF (t >= damyear(i)) THEN !Andreas
+!	  IF (storcap(i) > 0.) THEN
+!        WRITE(subarea,*)id_subbas_extern(i)
+!		OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/inflow_'//trim(adjustl(subarea))//'.dat', &
+!			STATUS='unknown')
+!          read(11,*)
+!          cont=(dtot-dayyear)*nt
+!          DO id=1,cont
+!            READ(11,*)
+!          END DO
+!          DO id=1,dayyear*nt
+!            READ(11,*) dummy1,dummy2,r_precip,r_etp,r_qinflow
+!            res_precip(id,i)=r_precip
+!	        res_pet(id,i)=r_etp
+!	        qinflow(id,i)=r_qinflow
+!	      ENDDO
+!	    CLOSE(11)
+!	  ENDIF
+!	 ENDIF !Andreas
+!	ENDDO
+!   ENDIF
+  ELSE ! tobias: reservoir_check == 0 which is actually the only possible value for reservoir_check as it is hard-coded
    DO i=1,subasin
     IF (t >= damyear(i)) THEN !Andreas
      dummy1=0
@@ -840,40 +856,50 @@ IF (STATUS == 1) THEN
  ENDIF
 
 
-! begin block Andreas
+! begin block Andreas; changed by tobias
 ! Read daily data on (measured) regulated reservoir outflow to be considered in reservoir water balance
 ! data given in m**3/s, convert to m**3/d
-  IF (reservoir_balance == 1) THEN
-   DO i=1,subasin
-    IF (t >= damyear(i)) THEN
-     IF (damq_frac(i) == -888.) THEN
-      WRITE(subarea,*)id_subbas_extern(i)
-	  DO j=1,12
-       IF (subarea(j:j) /= ' ') THEN
-         dummy1=j
-         EXIT
+!  IF (reservoir_balance == 1) THEN
+!   DO i=1,subasin
+!    IF (t >= damyear(i)) THEN
+!     IF (damq_frac(i) == -888.) THEN
+!      WRITE(subarea,*)id_subbas_extern(i)
+!      OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/intake_'//trim(adjustl(subarea))//'.dat', &
+!			STATUS='unknown')
+!       read(11,*)
+!	   read(11,*)
+!       cont=(dtot-dayyear)*nt
+!       DO id=1,cont
+!         READ(11,*)
+!       END DO
+!       DO id=1,dayyear*nt
+!         READ(11,*) dummy1,r_qintake
+!		 IF (qintake(id,i) /= -999.) qintake(id,i)=r_qintake*(86400./nt)
+!		 IF (qintake(id,i) == -999.) qintake(id,i)=damflow(i)*damq_frac(i)
+!       ENDDO
+!      CLOSE(11)
+!     ENDIF
+!    ENDIF
+!   ENDDO
+!  ENDIF
+  if(any(f_intake_obs)) then
+    do id=1,dayyear*nt
+        ! read data for current day from intake.dat
+        read(101, *, iostat=istate) dummy1,dummy2, r_qintake
+        IF (istate/=0) THEN
+            write(*,*)'ERROR: Premature end of file intake.dat.'
+            stop
         END IF
-      END DO
-
-      OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/intake_'//subarea(dummy1:12)//'.dat', &
-			STATUS='unknown')
-       read(11,*)
-	   read(11,*)
-       cont=(dtot-dayyear)*nt
-       DO id=1,cont
-         READ(11,*)
-       END DO
-       DO id=1,dayyear*nt
-         READ(11,*) dummy1,r_qintake
-		 IF (qintake(id,i) /= -999.) qintake(id,i)=r_qintake*(86400./nt)
-		 IF (qintake(id,i) == -999.) qintake(id,i)=damflow(i)*damq_frac(i)
-       ENDDO
-      CLOSE(11)
-     ENDIF
-    ENDIF
-   ENDDO
-  ENDIF
-! end block Andreas
+        ! distribute values to qintake variable
+        ! NOTE: missing observations are treated later
+        do i=1,subasin
+            if( f_intake_obs(i) .and. (t >= damyear(i)) ) then
+                qintake(id,i) = r_qintake(corr_column_intakes(i))*(86400./nt)
+            endif
+        enddo
+    enddo
+  endif
+! end block Andreas; changed by tobias
 
 
   IF (dosediment) THEN
@@ -898,7 +924,7 @@ IF (STATUS == 2) THEN
   endif
 
 ! Computation of reservoir water balance
-  IF (storcap(upstream) > 0.) THEN
+  IF (res_flag(upstream)) THEN
     IF (reservoir_balance == 1) THEN
       IF (reservoir_check == 1) THEN
 	    qinflow(step,upstream)=qinflow(step,upstream)*(86400./nt)
@@ -1050,33 +1076,35 @@ IF (STATUS == 2) THEN
 ! 4) Check flow through the reservoir
 ! 4a) Water intake device
 !     - dam outflow is fraction of Q90
-!     - according to J.C.Araújo this fraction is estimated to be 90%,
+!     - according to J.C.AraÃºjo this fraction is estimated to be 90%,
 !       and 80% for larger, strategic dams (e.g. Oros)
 !     - if alert volume is reached (if given for dam), outflow is reduced
 !     - no outflow if storage is below dead volume (if given for dam)
 !     - for non-strategic dams outflow is demand of regular (mean precip) years
 !       (not yet implemented)
 
+! use measured intake values if available
+      if(f_intake_obs(upstream) .and. qintake(step,upstream) > -0.5) then
+        helpout=qintake(step,upstream)
+      else
 ! Calculation of the maximum controlled outflow discharge using a factor defined in the reservoir.dat
-	  IF (damq_frac(upstream) >= 0.0) THEN !Andreas
-	    helpout=damflow(upstream)*damq_frac(upstream)
+          IF (damq_frac(upstream) >= 0.0) THEN !Andreas
+            helpout=damflow(upstream)*damq_frac(upstream)
 ! Calculation of the maximum controlled outflow discharge using a operation regime as provided in the operat_rule.dat
-	  ELSE IF (damq_frac(upstream) == -999.) THEN !Andreas
-	    dummy4=0.
-	    do s=1,3
-	      IF (dayoutsim+d >= dayexplot(upstream,s) .and. &
-		      dayoutsim+d < dayexplot(upstream,s+1)) dummy4=damq_frac_season(upstream,s)
-        enddo
-		IF (dayoutsim+d < dayexplot(upstream,1) .or. &
-		    dayoutsim+d >= dayexplot(upstream,4)) dummy4=damq_frac_season(upstream,4)
-        helpout=damflow(upstream)*dummy4
+          ELSE
+            dummy4=0.
+            do s=1,3
+              IF (dayoutsim+d >= dayexplot(upstream,s) .and. &
+                  dayoutsim+d < dayexplot(upstream,s+1)) dummy4=damq_frac_season(upstream,s)
+            enddo
+            IF (dayoutsim+d < dayexplot(upstream,1) .or. &
+                dayoutsim+d >= dayexplot(upstream,4)) dummy4=damq_frac_season(upstream,4)
+            helpout=damflow(upstream)*dummy4
+          ENDIF
 !write(*,*)upstream,dayoutsim+d,(dayexplot(upstream,s),s=1,4)
 !write(*,*)d,upstream,helpout,damflow(upstream),dummy4
 !write(*,*)step,id_subbas_extern(upstream),helpout/86400.,dummy4,damflow(upstream)/86400.
-!     use explicit (measured) daily values of regulated reservoir outflow
-	  ELSE IF (damq_frac(upstream) == -888.) THEN  !Andreas
-        helpout=qintake(step,upstream)                !Andreas
-	  ENDIF
+        endif ! measured or generic intake values
 
 ! Check water availability
       IF (daydamalert(step,upstream) > daydamdead(step,upstream)) THEN
@@ -1488,14 +1516,8 @@ IF (STATUS == 2) THEN
 ! Print daily inflow and outflow discharges
     IF (reservoir_print == 0) THEN
      WRITE(subarea,*)id_subbas_extern(upstream)
-	 DO j=1,12
-       IF (subarea(j:j) /= ' ') THEN
-         dummy1=j
-         EXIT
-       END IF
-     END DO
 	 IF (f_res_watbal) THEN
-     OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_watbal.out',STATUS='old',  &
+     OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_watbal.out',STATUS='old',  &
 		  POSITION='append')
 	 WRITE(11,'(4I6,7f10.3,2f16.3)')id_subbas_extern(upstream),t,d,hour,qlateral(step,upstream),qinflow(step,upstream),  &
 				qintake(step,upstream),overflow(step,upstream),qbottom(step,upstream),  &
@@ -1506,7 +1528,7 @@ IF (STATUS == 2) THEN
 
 ! print storage losses due to reservoir sedimentation
 	 IF (f_res_vollost) THEN
-     OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_vollost.out',STATUS='old',  &
+     OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_vollost.out',STATUS='old',  &
 		  POSITION='append')
 	 WRITE(11,'(4I6,3f15.2)')id_subbas_extern(upstream),t,d,hour,daydamdead(step,upstream), &
 			daydamalert(step,upstream),daystorcap(step,upstream)
@@ -1517,7 +1539,7 @@ IF (STATUS == 2) THEN
      write(fmtstr,'(a,i0,a)')'(4I6,',nbrbat(upstream),'F15.2)'		!generate format string
      IF (nbrbat(upstream) /= 0) THEN
 	  IF (f_res_cav) THEN
-      OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_cav.out',STATUS='old',  &
+      OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_cav.out',STATUS='old',  &
 		    POSITION='append')
 		WRITE(11,fmtstr)id_subbas_extern(upstream),t,d,hour,(elev_bat(j,upstream),j=1,nbrbat(upstream))
 		WRITE(11,fmtstr)id_subbas_extern(upstream),t,d,hour,(area_bat(j,upstream),j=1,nbrbat(upstream))
@@ -1567,19 +1589,19 @@ END IF
 ! -----------------------------------------------------------------------
 IF (STATUS == 3) THEN
 
+! close intake.dat
+if( any(f_intake_obs) .and. (t == tstop) ) then
+    close(101)
+    deallocate(r_qintake)
+endif
+
 ! Output files of Reservoir Modules
   IF (reservoir_print == 1) THEN
     DO i=1,subasin
-      IF (storcap(i) /= 0. .and. t >= damyear(i)) THEN
+      IF (res_flag(i) .and. t >= damyear(i)) THEN
         WRITE(subarea,*)id_subbas_extern(i)
-	    DO j=1,12
-          IF (subarea(j:j) /= ' ') THEN
-            dummy1=j
-            EXIT
-          END IF
-        END DO
 		IF (f_res_watbal) THEN
-	    OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_watbal.out',STATUS='old',  &
+	    OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_watbal.out',STATUS='old',  &
 			POSITION='append')
 	    DO d=1,dayyear
 	      DO ih=1,nt
@@ -1592,7 +1614,7 @@ IF (STATUS == 3) THEN
         CLOSE(11)
 		ENDIF
 		IF (f_res_vollost) THEN
-		OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_vollost.out',STATUS='old',  &
+		OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_vollost.out',STATUS='old',  &
 			POSITION='append')
 	    DO d=1,dayyear
 	      DO ih=1,nt
@@ -1605,16 +1627,10 @@ IF (STATUS == 3) THEN
         CLOSE(11)
 		ENDIF
 	  ENDIF
-      IF (storcap(i) /= 0. .and. t >= damyear(i) .and. nbrbat(i) /= 0) THEN
+      IF (res_flag(i) .and. t >= damyear(i) .and. nbrbat(i) /= 0) THEN
         WRITE(subarea,*)id_subbas_extern(i)
-	    DO j=1,12
-          IF (subarea(j:j) /= ' ') THEN
-            dummy1=j
-            EXIT
-          END IF
-        END DO
 		IF (f_res_cav) THEN
-        OPEN(11,FILE=pfadn(1:pfadi)//'res_'//subarea(dummy1:12)//'_cav.out',STATUS='old',  &
+        OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_cav.out',STATUS='old',  &
 		    POSITION='append')
 	    write(fmtstr,'(a,i0,a)')'(4I6,',nbrbat(i),'F15.2)'		!generate format string
 		DO d=1,dayyear
