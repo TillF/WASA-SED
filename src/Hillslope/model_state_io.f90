@@ -10,6 +10,7 @@ contains
             call init_intercept_conds (trim(pfadn)//'intercept_storage.stat')    !Till: load initial status of gw storage
             call init_gw_conds        (trim(pfadn)//'gw_storage.stat')    !Till: load initial status of gw storage
             call init_interflow_conds (trim(pfadn)//'interflow_storage.stat')    !Till: load initial status of interflow storage
+            call init_snow_conds      (trim(pfadn)//'snow_storage.stat')    !Till: load initial status of snow storage
             call init_lake_conds      (trim(pfadn)//'lake_volume.stat')    !Jose Miguel: load initial status of lake storage
     end subroutine init_hillslope_state
 
@@ -34,6 +35,7 @@ contains
         rename_or_return('gw_storage.stat'           , backup_files),&
         rename_or_return('intercept_storage.stat'    , backup_files),&
         rename_or_return('interflow_storage.stat'    , backup_files),&
+        rename_or_return('snow_storage.stat'         , backup_files),&
         rename_or_return('lake_volume.stat'          , backup_files),&
         rename_or_return('river_storage.stat'        , backup_files),&
         rename_or_return('sediment_storage.stat'     , backup_files),&
@@ -63,7 +65,7 @@ contains
 
 
 
-    subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, interflow_conds_file, lake_conds_file, river_conds_file, sediment_conds_file, susp_sediment_conds_file, summary_file, start)
+    subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, interflow_conds_file, snow_conds_file, lake_conds_file, river_conds_file, sediment_conds_file, susp_sediment_conds_file, summary_file, start)
         !store current conditions of soil moisture, ground water and interception in the specified files
         use hymo_h
         use params_h
@@ -75,18 +77,19 @@ contains
         use reservoir_h
         use time_h
         use common_h
+        use snow_h
 
         implicit none
 
-        character(len=*),intent(in):: soil_conds_file, gw_conds_file, ic_conds_file,interflow_conds_file, lake_conds_file,river_conds_file,sediment_conds_file,susp_sediment_conds_file,summary_file        !files to save to
+        character(len=*),intent(in):: soil_conds_file, gw_conds_file, ic_conds_file,interflow_conds_file, snow_conds_file, lake_conds_file,river_conds_file,sediment_conds_file,susp_sediment_conds_file,summary_file        !files to save to
         logical,intent(in), optional:: start
 
         INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter,h,acud_class, k, tt, digits    ! counters
         INTEGER :: i_lu,id_tc_type,i_svc,i_soil,i_veg        ! ids of components in work
         INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
-        REAL    :: total_storage_soil, total_storage_gw, total_storage_intercept, total_storage_lake(5), total_storage_river, total_storage_interflow  !, total_storage_sediment,total_storage_suspsediment    !total amount of water stored  [m3]
+        REAL    :: total_storage_soil, total_storage_gw, total_storage_intercept, total_storage_lake(5), total_storage_river, total_storage_interflow, total_storage_snow  !, total_storage_sediment,total_storage_suspsediment    !total amount of water stored  [m3]
         REAL    :: lu_area, svc_area    !area of current lu/svc [m3]
-        INTEGER    ::    soil_file_hdle, gw_file_hdle, intercept_file_hdle, lake_file_hdle, river_file_hdle,sediment_file_hdle,susp_sediment_file_hdle, interflow_file_hdle    !file handles to output files
+        INTEGER    ::    soil_file_hdle, gw_file_hdle, intercept_file_hdle, lake_file_hdle, river_file_hdle,sediment_file_hdle,susp_sediment_file_hdle, interflow_file_hdle, snow_file_hdle    !file handles to output files
 		character(len=1000) :: fmtstr, fmtstr2    !string for formatting file output
         character(len=6) :: suffix
 
@@ -100,6 +103,7 @@ contains
         total_storage_lake=0.
         total_storage_river=0.
         total_storage_interflow=0.
+        total_storage_snow=0.
 !        total_storage_sediment=0.
 
 !write file headers
@@ -211,7 +215,7 @@ contains
         endif
 
 
-        !write interflow storage state to .stat file .
+        !write interflow storage state to .stat file
         if (trim(river_conds_file)=='') then        !don't do anything if an empty filename is specified
             interflow_file_hdle=0
         else
@@ -247,6 +251,46 @@ contains
             total_storage_interflow = sum(latred) !sum up total storage
             CLOSE(interflow_file_hdle, iostat=i_lu)    !close output file
         endif !interflow output
+        
+        !write snow storage state to .stat file
+        if (trim(snow_conds_file)=='' .OR. .not. dosnow) then        !don't do anything if an empty filename is specified
+            snow_file_hdle=0
+        else
+            snow_file_hdle=15
+            OPEN(snow_file_hdle,FILE=snow_conds_file//trim(suffix), STATUS='replace')
+            WRITE(snow_file_hdle,'(a)') 'snow storage (for analysis or model re-start)'
+            WRITE(snow_file_hdle,*)'Subbasin', char(9),'LU', char(9), 'horizon' , char(9),&
+                'storage [m]', char(9), 'energy [kJ/m²]', char(9), 'albedo [-]'         !tab separated output
+
+            digits=floor(log10(max(1.0,maxval(latred))))+1    !Till: number of pre-decimal digits required
+            if (digits<10) then
+                write(fmtstr,'(A1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
+            else
+                fmtstr='E12.5' !for large numbers, use exponential notation
+            end if
+            
+            write(fmtstr2,*) '(2(I0,A1),I0,3(A1,',trim(fmtstr),'))'        !generate format string
+            tt = max(2, d) -1  !so it works both at the beginning and end of simulation year/period
+            DO sb_counter=1,subasin
+                DO lu_counter=1,nbr_lu(sb_counter)
+                    i_lu=id_lu_intern(lu_counter,sb_counter)
+                    lu_area=area(sb_counter)*frac_lu(lu_counter,sb_counter)*1e6
+                    DO tc_counter=1,nbrterrain(i_lu) !intercept and soil storages inside
+                        tcid_instance=tcallid(sb_counter,lu_counter,tc_counter)    !id of TC instance
+                        if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
+                        id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
+                            WRITE(snow_file_hdle,fmtstr2) id_subbas_extern(sb_counter), char(9),&
+                                    id_lu_extern(i_lu),char(9),id_terrain_extern(id_tc_type), &
+                                    char(9), snowWaterEquiv(tt, nt, tcid_instance), & 
+                                    char(9), snowEnergyCont(tt, nt, tcid_instance), &
+                                    char(9), snowAlbedo    (tt, nt, tcid_instance)
+                        total_storage_snow = total_storage_snow + snowWaterEquiv(tt, nt, tcid_instance)*lu_area*fracterrain(id_terrain_intern(tc_counter,i_lu)) !sum up total storage [m3]
+                    ENDDO    !loop TCs
+                ENDDO    !loop LUs
+            ENDDO    !loop subbasins
+            
+            CLOSE(snow_file_hdle, iostat=i_lu)    !close output file
+        endif !snow output
 
 
         if (dosediment) then
@@ -366,6 +410,7 @@ contains
         WRITE(11,*)'gw_storage', char(9),total_storage_gw
         WRITE(11,*)'interception_storage', char(9),total_storage_intercept
         WRITE(11,*)'interflow_storage', char(9),total_storage_interflow
+        WRITE(11,*)'snow_storage', char(9),total_storage_snow
 
         DO acud_class=1,5
             WRITE(11,'(A,I0,A,F12.1)')'lake_storage', acud_class, char(9),total_storage_lake(acud_class)
@@ -677,9 +722,138 @@ contains
         END DO
 
 
-    end subroutine init_interflow_conds
+end subroutine init_interflow_conds
+
+  subroutine init_snow_conds(snow_conds_file)
+
+        !load snow information from file snow_conds_file
+        use hymo_h
+        use utils_h
+        use snow_h
+        use params_h
+        implicit none
+
+        character(len=*),intent(in):: snow_conds_file        !file to load from
+        INTEGER :: i,line,errors,sb_counter,lu_counter,tc_counter,h    ! counters
+        INTEGER :: i_subbasx,i_lux,i_tcx       ! external ids of components in work
+        INTEGER :: i_subbas,i_lu,i_tc,  id_tc_type        ! internal ids of components in work
+        INTEGER :: tcid_instance     !(internal) id of LU,TC,soil-instance (unique subbas-LU-TC-soil-combination)
+        REAL    :: snowweqv_temp,snowetemp,albedo_temp
+        INTEGER    :: file_read=0
+        character(len=160) :: linestr='', error_msg=''
+
+        i=0
+        OPEN(11,FILE=snow_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
+        if (i/=0) then
+            write(*,'(a,a,a)')'WARNING: snow file ''',trim(snow_conds_file),''' not found, using defaults.'
+            CLOSE(11)
+			return
+        end if
+
+        snowWaterEquiv=-9999.                    !mark all snow storages as "not (yet) initialised"
+        if (trim(snow_conds_file)/='' .AND. i==0) then        !load values from file
+            write(*,'(a,a,a)')'Initialize snow  from file ''',trim(snow_conds_file),''''
+
+            READ(11,*); READ (11,*)    !skip header lines
+            line=2
+            errors=0
+
+            do while (.TRUE.)        !read whole file
+                IF (len(trim(error_msg))/=0) THEN    !print error message, if occured
+                    if (errors==0) then !print heading at before first error
+                        write(*,'(A,/,5a12)')' Entities not found in current domain (ignored):','Line','subbasin','LU','TC'
+                    end if
+                    write(*,*)trim(error_msg)
+                    error_msg='' !reset error message
+                    errors=errors+1
+                END IF
+
+                READ(11,'(A)',  IOSTAT=i) linestr
+
+                IF (i==24 .OR. i==-1) THEN    !end of file
+                    exit        !exit loop
+                END IF
+                line=line+1
+
+                READ(linestr,*,  IOSTAT=i) i_subbasx,i_lux,i_tcx,snowweqv_temp,snowetemp,albedo_temp
+                IF (i/=0) THEN    !format error
+                    write(error_msg,'(i12,1a12,a)')line,'-',trim(linestr)
+                    cycle    !proceed with next line
+                END IF
+
+                i_subbas=id_ext2int(i_subbasx,id_subbas_extern)    !convert to internal subbas id
+                if (i_subbas==-1) then
+                    write(error_msg,'(2i12)')line,i_subbasx
+                    cycle    !proceed with next line
+                end if
+                i_lu=id_ext2int(i_lux,id_lu_extern)    !convert to internal lu id
+                if (i_lu==-1) then
+                    write(error_msg,'(i12,1a12,i12)')line,'-',i_lux
+                    cycle    !proceed with next line
+                end if
+                i_tc=id_ext2int(i_tcx,id_terrain_extern)    !convert to internal tc-type id
+                if (i_tc==-1) then
+                    write(error_msg,'(i12,2a12,i12)')line,'-','-',i_tcx
+                    cycle    !proceed with next line
+                end if
+
+                lu_counter=id_ext2int(i_lu,id_lu_intern(:,i_subbas))    !convert to position/index of lu instance in current subbasin
+                if (lu_counter==-1) then
+                    write(error_msg,'(3i12)')line,i_subbasx,i_lux
+                    cycle    !proceed with next line
+                end if
+
+                tc_counter=id_ext2int(i_tc,id_terrain_intern(:,i_lu))    !convert to position/index of tc instance in current lu
+                if (tc_counter==-1) then
+                    write(error_msg,'(4i12)')line,i_subbasx,i_lux,i_tcx
+                    cycle    !proceed with next line
+                end if
+
+                tcid_instance=tcallid(i_subbas,lu_counter,tc_counter)    !get the ID of the TC instance
+                if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
+
+                snowWaterEquiv(1,1,tcid_instance) = snowweqv_temp
+                snowEnergyCont(1,1,tcid_instance) = snowetemp               
+                snowAlbedo    (1,1,tcid_instance) = albedo_temp   
+
+            END DO
+            file_read=1
+            CLOSE(11)
+        end if
+
+        errors=0
+
+        DO sb_counter=1,subasin            !check, if all relevant interchange horizons have been initialized, if not, use default values
+            DO lu_counter=1,nbr_lu(sb_counter)
+                i_lu=id_lu_intern(lu_counter,sb_counter)
+                DO tc_counter=1,nbrterrain(i_lu)
+                    tcid_instance=tcallid(sb_counter,lu_counter,tc_counter) !id of TC instance
+                    if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
+                    id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
+
+                    if (snowWaterEquiv(1,1,tcid_instance)==-9999.) then            !not yet set?
+                        if (file_read==1) then                        !but this should have been done before
+                            if (errors==0) then    !produce header before first warning only
+                                write(*,'(A,f4.2,a,/,4a12)')' Following entities not initialised, using defaults '// &
+                                    '(content=0):','subbasin','LU','TC'
+                            end if
+                            errors=errors+1
+                            write(*,'(4i12)')id_subbas_extern(sb_counter), id_lu_extern(i_lu),&
+                                id_terrain_extern(id_tc_type)            !issue warning
+                        end if
+                        snowWaterEquiv(1,1,tcid_instance) = 0.
+                        snowEnergyCont(1,1,tcid_instance) = 0.           
+                        snowAlbedo    (1,1,tcid_instance) = 0.
+                            
+                        !resume to default (0)
+                    end if
+                END DO
+            END DO
+        END DO
 
 
+    end subroutine init_snow_conds
+                
 
     subroutine init_intercept_conds(intercept_conds_file)
 
