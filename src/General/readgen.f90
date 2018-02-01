@@ -657,10 +657,12 @@ SUBROUTINE readgen(path2do_dat)
 !allocate necessary memory
     nt = int(24/dt)	!Till: number of simulation steps per day
 
-    !INCLUDE '../Hillslope/allocat_hymo.var'
     call allocate_hymo()
+
     INCLUDE '../Hillslope/allocat_erosion.var'
-    INCLUDE '../River/allocat_routing.var'
+!    INCLUDE '../River/allocat_routing.var'
+    call allocate_routing()
+
         nt = int(24/dt)	!Till: number of simulation steps per day !ii: can be removed?
     INCLUDE '../Reservoir/allocat_reservoir_lake.var'
 
