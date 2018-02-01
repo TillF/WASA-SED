@@ -45,7 +45,7 @@ INTEGER, INTENT(IN) :: h !subdaily timestep
 real ::  r_area !cross section area
 real ::  flow !discharge
 real ::  p !wetted perimeter
-real ::  topw, r_evp,r_infil, dummy2, dummy3 !,vol, c, rh, tbase, s1, s2
+real ::  topw, r_evp,r_infil, dummy2 !,vol, c, rh, tbase, s1, s2
 real :: c0, c1, c2, c3, yy, total_water, total_losses !, Fr
 
 flow = r_qout(1,i) !previous outflow

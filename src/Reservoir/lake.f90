@@ -31,9 +31,9 @@ REAL :: help,help1,help2,help3,delta_vol(5) !,class
 !*************************************************************************************
 REAL :: totallakeinflow,totallakeoutflow,totallakeprec,totallakeevap,totallakevol !,totallakearea
 REAL :: totalsedinflow,totalsedoutflow,totalsedimentation,cumsedimentation
-REAL :: totalrunoff2 !totalrunoff,directrunoff,wateryield,totalarea
+!REAL :: totalrunoff2 !totalrunoff,directrunoff,wateryield,totalarea
 !CHARACTER(12) :: subarea
-REAL :: cumarea,cumrunoff,cumrunoff2,cuminflow !cumvolume,
+!REAL :: cuminflow, cumrunoff, cumvolume, cumarea, cumrunoff2
 !*************************************************************************************
 character(len=1000) :: fmtstr	!string for formatting file output
 
@@ -303,8 +303,7 @@ IF (STATUS == 0) THEN
   END DO
 
   if (dosediment) cumsedimentation=0.
-  totalrunoff2=0.
-
+  
 
 !Ge initialization of output files
     
@@ -433,6 +432,8 @@ IF (STATUS == 2) THEN
 
 ! check water and sediment inflow discharge into the small reservoirs
 !George revised runoff contributing area by subtraction of the small reservoirs' areas
+  !totalrunoff2=0.
+
   DO ih=1,nt
     hour=ih
     step=(d-1)*nt+hour
@@ -443,13 +444,13 @@ IF (STATUS == 2) THEN
 
 !	lakeinflow(step,muni)=water_subbasin_t(d,ih,muni)*(intercepted/(1.-intercepted))
 	lakeinflow(step,muni)=water_subbasin_t(d,ih,muni)
-	totalrunoff2=totalrunoff2+lakeinflow(step,muni)
+!	totalrunoff2=totalrunoff2+lakeinflow(step,muni)
 
 !water_subbasin_t(d,ih,muni)=50.
-cumrunoff=cumrunoff+water_subbasin_t(d,ih,muni)
+!cumrunoff=cumrunoff+water_subbasin_t(d,ih,muni)
 if(muni==subasin .and. ih==nt) then
 !write(*,'(2I6,4F15.3)')step,muni,cumrunoff,water_subbasin_t(d,ih,muni)
-cumrunoff=0.
+!cumrunoff=0.
 endif
 !if(muni==subasin .and. ih==nt) write(*,'(2I5,F20.3)')muni,step,totalrunoff2
 !write(*,'(4I5,4F12.3)')muni,t,d,ih,lakeinflow(step,muni),water_subbasin_t(d,ih,muni),water_subbasin(d,muni),water_subbasin_t(d,ih,muni)*(intercepted/(1.-intercepted))
@@ -459,10 +460,10 @@ endif
 !write(*,'(3I6,4F10.3)')step,muni,k,temparea,lakearea(muni,k),acud(muni,k)
     END DO
     temparea=temparea+damareaact(muni)/1.e6
-cumarea=cumarea+temparea
+!cumarea=cumarea+temparea
 if(muni==subasin .and. ih==nt) then
 !write(*,*)step,cumarea*1.e6
-cumarea=0.
+!cumarea=0.
 endif
 !write(*,'(2I6,4F10.3)')step,muni,damareaact(muni)
 
@@ -483,16 +484,16 @@ endif
 
 	lakerunoff(step,muni)=water_subbasin_t(d,ih,muni)
 
-cumrunoff2=cumrunoff2+water_subbasin_t(d,ih,muni)
+!cumrunoff2=cumrunoff2+water_subbasin_t(d,ih,muni)
 if(muni==subasin .and. ih==nt) then
 !write(*,'(2I6,4F15.3)')step,muni,cumrunoff2,water_subbasin_t(d,ih,muni)
-cumrunoff2=0.
+!cumrunoff2=0.
 endif
 
-cuminflow=cuminflow+water_subbasin_t(d,ih,muni)*(1.-subfrarea(muni))
+!cuminflow=cuminflow+water_subbasin_t(d,ih,muni)*(1.-subfrarea(muni))
 if(muni==subasin .and. ih==nt) then
 !write(*,'(2I6,4F15.3)')step,muni,cuminflow,water_subbasin_t(d,ih,muni)*(1.-subfrarea(muni)),subfrarea(muni)
-cuminflow=0.
+!cuminflow=0.
 endif
 
 !write(*,'(2I6,4F15.3)')step,

@@ -26,7 +26,7 @@ INTEGER, INTENT(IN OUT)                  :: upstream
 ! STATUS of CALL (0=initialization run, 1=initialization year,
 !                 2=calculation day,    3=finalization year)
 
-INTEGER :: i,j,j1,id,ih,dummy1,dummy2,nbrsec1,k,b,p,cont,istate,iname,dummy1a,ka !irout,imun,f,q,
+INTEGER :: i,j,j1,id,ih,dummy1,dummy2,nbrsec1,k,b,p,cont,istate,dummy1a,ka !irout,imun,f,q,
 INTEGER :: g, npt,nbrbat1
 
 CHARACTER(20) :: subarea,section

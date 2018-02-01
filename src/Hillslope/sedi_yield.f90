@@ -95,7 +95,7 @@ SUBROUTINE sedi_yield(precip_dt, subbas_id, lu_id, tc_type_id, tcid_instance2, q
     INTEGER :: i,svc_id
     REAL :: d50                        !median diameter of soil particles
 
-    REAL :: gsize, accum1, accum2, dummy4, dummy15    !temporary auxiliary variables for computing D50
+    REAL :: gsize, accum1, accum2, dummy15    !temporary auxiliary variables for computing D50
     INTEGER :: dummy14                !temporary auxiliary variable for computing D50
 
     REAL :: trans_cap(1:n_sed_class)        !tranport capacities

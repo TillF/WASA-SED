@@ -38,7 +38,7 @@ INTEGER, INTENT(IN)                  :: res_h
 ! STATUS of CALL (0=initialization run, 1=initialization year,
 !                 2=calculation day,    3=finalization year)
 
-INTEGER :: i,id,dummy1,dummy2,cont,s,p,q,h,istate,ka,ih !,irout,imun,dummy1a,dummy2a,f
+INTEGER :: i,id,dummy1,dummy2,s,p,q,h,istate,ka,ih !,irout,imun,dummy1a,dummy2a,f
 character(100) :: dummy_char
 !Ge include j,nbrbat1,cont,upstream,downstream
 INTEGER :: j,nbrbat1,flag_cav

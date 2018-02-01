@@ -555,9 +555,9 @@ contains
         implicit none
 
         character(len=*),intent(in):: interflow_conds_file        !file to load from
-        INTEGER :: i,line,errors,sb_counter,lu_counter,tc_counter,svc_counter,h    ! counters
+        INTEGER :: i,line,errors,sb_counter,lu_counter,tc_counter,h    ! counters
         INTEGER :: i_subbasx,i_lux,i_tcx       ! external ids of components in work
-        INTEGER :: i_subbas,i_lu,i_tc, i_soil, i_veg,id_tc_type, tt        ! internal ids of components in work
+        INTEGER :: i_subbas,i_lu,i_tc,  id_tc_type, tt        ! internal ids of components in work
         INTEGER :: tcid_instance     !(internal) id of LU,TC,soil-instance (unique subbas-LU-TC-soil-combination)
         REAL    :: horithact_temp
         INTEGER    :: file_read=0

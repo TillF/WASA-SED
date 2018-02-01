@@ -12,15 +12,22 @@ subroutine allocate_general()
     implicit none
 
     INTEGER :: istate
-   	 allocate (temp(366,subasin))
-	 allocate (precip(366,subasin))
-	 allocate (preciph(366*24,subasin))
-	 allocate (pet(366,subasin))
-	 allocate (rad(366,subasin))
-	 allocate (rhum(366,subasin))
-	 allocate (wind(366,subasin))
-	 allocate (do_pre_outflow(subasin))
-	 do_pre_outflow=.true.
+   	allocate( & 
+     temp(366,subasin), &
+	 precip(366,subasin), &
+	 preciph(366*24,subasin), &
+	 pet(366,subasin), &
+	 rad(366,subasin), &
+	 rhum(366,subasin), &
+	 wind(366,subasin), &
+	 do_pre_outflow(subasin), &
+      STAT = istate)
+
+	if (istate/=0) then
+		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in general-module: '
+		stop
+	end if
+    do_pre_outflow=.true.
 
 end subroutine allocate_general
 
