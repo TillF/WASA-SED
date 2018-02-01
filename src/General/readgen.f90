@@ -660,11 +660,11 @@ SUBROUTINE readgen(path2do_dat)
     call allocate_hymo()
 
     INCLUDE '../Hillslope/allocat_erosion.var'
-!    INCLUDE '../River/allocat_routing.var'
     call allocate_routing()
 
         nt = int(24/dt)	!Till: number of simulation steps per day !ii: can be removed?
-    INCLUDE '../Reservoir/allocat_reservoir_lake.var'
+    !INCLUDE '../Reservoir/allocat_reservoir_lake.var'
+    call allocate_reservoir()
 
 
     
