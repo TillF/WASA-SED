@@ -16,7 +16,7 @@ module common_h
     LOGICAL :: doscale
     LOGICAL :: domuncell
     LOGICAL :: doreserv
-    LOGICAL :: do_pre_outflow=.TRUE.   !Till: consider pre-specified outflow time series from subbasins
+    LOGICAL, allocatable :: do_pre_outflow(:)   !Till: consider pre-specified outflow time series from subbasins
     LOGICAL :: do_pre_outsed=.TRUE.   !Till: consider pre-specified sediment outflow time series from subbasins
 
     INTEGER :: ezgt
@@ -61,14 +61,14 @@ module common_h
     LOGICAL :: f_snowEnergyCont, f_snowWaterEquiv, f_snowAlbedo, f_snowCover, f_snowTemp, f_surfTemp, f_liquFrac, f_fluxPrec, f_fluxSubl, f_fluxFlow, f_fluxNetS, f_fluxNetL, f_fluxSoil, f_fluxSens, f_stoiPrec, f_stoiSubl, f_stoiFlow, f_rateAlbe, f_precipMod, f_cloudFrac,f_radiMod,f_temperaMod,f_rel_elevation
     LOGICAL :: do_rad_corr=.FALSE.   ! modification of radiation with aspect and slope
     LOGICAL :: do_alt_corr=.FALSE.   ! modification of temperature with altitude of LU
-    
-    
+
+
     LOGICAL :: doloadstate=.FALSE.         !load initial values before model run
     LOGICAL :: dosavestate=.FALSE.         !save state of model after execution
     LOGICAL :: append_output=.FALSE.       !append model output to potentially existing file
     LOGICAL :: save_states_yearly=.TRUE.       !save model state at the end of each simulation year
-    
-    
+
+
     REAL   :: default_rel_sat=1.0      !default relative saturation (initial value for all horizons, if not specified otherwise)
     REAL   :: default_gw_storage=0.0   !default ground water storage (to be assumed for all non-specified LUs) [mm]
 
@@ -77,7 +77,7 @@ module common_h
     logical,parameter :: domean=.FALSE.   ! calculate daily ETP from mean daily values (this flag is dominant over donight)
     logical,parameter :: donight=.TRUE.      !if (domean==0):calculate daily ETP as sum of ETP for day and night (donight=1) or only day
     real :: daily_delta_temp =0. !daily temperature amplitude (Tmin=Tmean-daily_delta_temp; Tmax=Tmean+daily_delta_temp;)
-                                !ii: This should better be a parameter or for hourly data computed 
+                                !ii: This should better be a parameter or for hourly data computed
     REAL,parameter :: hours_of_daylight=12.0 !number of hours with sunlight per day !ii: improve this with radiation correction
     REAL,parameter :: pi=3.141593 !well, pi
 

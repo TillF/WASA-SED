@@ -205,8 +205,8 @@ storcap(:)=0.
 	  END IF
 
 	  ! check parameters
-	  if(damb(i) > 1. .or. damb(i) < 0.) then
-        write(*,'(A,i3,A)') 'ERROR: Parameter damb in reservoir.dat is outside of plausible range (0 < damb <= 1) for reservoir / subbasin id ', id_subbas_extern(i), '!'
+	  if(damb(i) > .9 .or. damb(i) < 0.) then
+        write(*,'(A,i3,A)') 'ERROR: Parameter damb in reservoir.dat is outside of plausible range (0 < damb <= 0.9) for reservoir / subbasin id ', id_subbas_extern(i), '!'
         stop
 	  end if
       if(damq_frac(i) > 1. .or. (damq_frac(i) < 0. .and. damq_frac(i) > -998.)) then

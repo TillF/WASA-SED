@@ -56,6 +56,7 @@ General/climo.f90 \
 General/petcalc.f90 \
 Reservoir/lake_h.f90 \
 Reservoir/reservoir_h.f90 \
+General/allocate_h.f90 \
 General/readgen.f90 \
 Hillslope/check_climate.f90 \
 Hillslope/erosion.f90 \

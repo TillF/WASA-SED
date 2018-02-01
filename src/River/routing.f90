@@ -112,7 +112,7 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 ! routing of autochtonous runoff  (triangular like this: /\_ ) - used for riverflow generated within the basin (tL*=0, tR*=tL+tR)
   allocate( hrout_intern(maxval(ceiling(0.5+sum(prout, dim=2))) ,subasin)) !allocate memory for triangular unit hydrograph
 
-  
+
   !allocate arrays for in- and outflow into/out of subbasins, as their length needs to accomodate hrout, too
   allocate( qout(366 + size(hrout,dim=1), subasin))
   allocate( qin (subasin))
@@ -267,7 +267,7 @@ IF (STATUS == 2) THEN !regular call during timestep
   ! Effectively, the unit hydrograph (hrout) is shrunk by half to account for less translation and retention of the autochtonous runoff compared to the runoff entering from upstream ("ishft" equals division by two, but is faster)
 
  DO i=1,subasin
-     if ( (do_pre_outflow) .AND. (corr_column_pre_subbas_outflow(i) > 0) )  then        !if water outflow from current subbasins is NOT given
+     if (do_pre_outflow(i))  then        !if water outflow from current subbasins is NOT given
         qout(d,i)=qout(d,i) + water_subbasin(d,i)
      else
          DO ih=1,size(hrout_intern,dim=1)
@@ -288,7 +288,7 @@ IF (STATUS == 2) THEN !regular call during timestep
     upstream=upbasin(i)  !internal code-ID for most upstream sub-basin (should usually just be i)
     downstream=downbasin(i) !internal code-ID for receiving sub-basin
 
-    if ( (.NOT. do_pre_outflow) .OR. (corr_column_pre_subbas_outflow(i) == 0) )  then        !if water outflow from current subbasins is NOT given
+    if (.NOT. do_pre_outflow(i))  then        !if water outflow from current subbasins is NOT given
 
 ! Route inflow from upstream sub-basins (qin) through current sub-basin within nn days
         DO ih=1,size(hrout,dim=1)

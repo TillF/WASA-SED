@@ -169,13 +169,11 @@ IF (STATUS == 0) THEN
 
 
   do i=1,subasin
-	if (associated(corr_column_pre_subbas_outflow) ) then
-		if (corr_column_pre_subbas_outflow(i)>0) then		!Till: assign dummy climate data for those subbasins that are prespecified
-			corr_column_temp(i)=1
-			corr_column_rhum(i)=1
-			corr_column_rad(i)=1
-			corr_column_precip(i)=1
-		end if
+	if (do_pre_outflow(i)) then !Till: assign dummy climate data for those subbasins that are prespecified
+        corr_column_temp(i)=1
+        corr_column_rhum(i)=1
+        corr_column_rad(i)=1
+        corr_column_precip(i)=1
 	end if
 
 	if (1.0*corr_column_temp(i)*corr_column_rhum(i)*corr_column_rad(i)*corr_column_precip(i)==0) then	!check completeness
