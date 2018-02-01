@@ -104,7 +104,7 @@ SUBROUTINE hymo_all(STATUS)
 
         CALL readhymo
 
-        if (do_pre_outflow) then        !if water outflow from upstream subbasins is given
+        if (any(do_pre_outflow)) then        !if water outflow from upstream subbasins is given
             call read_pre_subbas_outflow        !read
         end if
 
@@ -113,7 +113,7 @@ SUBROUTINE hymo_all(STATUS)
         !George    lakeoutflow(dprev,1:subasin)=0.
         water_subbasin(dprev,1:subasin)=0.
         soilwater(dprev,:)=0.
-        
+
 
 
         allocate(sed_in(maxval(nbrterrain),n_sed_class),sed_out(maxval(nbrterrain),n_sed_class))
@@ -125,7 +125,7 @@ SUBROUTINE hymo_all(STATUS)
         horithact(:,:,:)=0.    !set soil moisture of each horizon to 0
         intercept(:,:)=0.        !set interception storage to 0
         deepgw(1:subasin,:)=0.
-        r_storage(:)=0.0 
+        r_storage(:)=0.0
         sed_storage = 0.0
         riverbed_storage = 0.0
         sed_storage = 0.0
@@ -136,7 +136,7 @@ SUBROUTINE hymo_all(STATUS)
         if (doloadstate) then
             call init_hillslope_state        !load initial conditions from file
         else !do default initialisations
-            
+
             !** Initialise soil moisture of each horizon (horithact)
             !   and soil moisture of each terrain component (soilwater) with fixed values ii: put this into init_soil_conds
             DO sb_counter=1,subasin
@@ -198,43 +198,43 @@ SUBROUTINE hymo_all(STATUS)
         ! create and open output files
         ! Output daily water contribution to river (m**3/s)
         CALL open_daily_output(f_daily_water_subbasin, 'daily_water_subbasin.out', 'daily river flow [m3/s] for all sub-basins (MAP-IDs)')
-        
+
         !! Output daily water contribution to river (m**3)
         CALL open_daily_output(f_daily_water_subbasin, 'daily_water_subbasin2.out', 'daily river flow [m3] for all sub-basins (MAP-IDs)')
-        
+
         ! Output daily actual evapotranspiration
         CALL open_daily_output(f_daily_actetranspiration, 'daily_actetranspiration.out', 'daily actual evapotranspiration [mm/d] for all sub-basins (MAP-IDs)')
 
         ! Output daily potential evapotranspiration
         CALL open_daily_output(f_daily_potetranspiration, 'daily_potetranspiration.out', 'daily potential evapotranspiration [mm/d] for all sub-basins (MAP-IDs)')
-        
+
         ! Output daily soil moisture
         CALL open_daily_output(f_daily_theta, 'daily_theta.out', 'soil moisture in profile [mm] for all sub-basins (MAP-IDs)')
-        
+
         ! Output daily Hortonian Overland Flow
         CALL open_daily_output(f_daily_qhorton, 'daily_qhorton.out', 'horton overland flow [m**3] for all sub-basins (MAP-IDs)')
-        
+
         ! Output daily total overland flow
         CALL open_daily_output(f_daily_total_overlandflow, 'daily_total_overlandflow.out', 'total overland flow [m**3] for all sub-basins (MAP-IDs)')
-        
+
         ! Output deep ground water recharge (losses from model domain / into lin. storage)
         CALL open_daily_output(f_deep_gw_recharge, 'deep_gw_recharge.out', 'total deep ground water recharge [m3] for all sub-basins (MAP-IDs)')
-        
+
         ! Output deep ground water discharge (component of water_subbasin)
         IF (f_deep_gw_discharge) allocate (deep_gw_discharge(366,subasin))
         CALL open_daily_output(f_deep_gw_discharge, 'deep_gw_discharge.out', 'total deep ground water discharge [m3] for all sub-basins (MAP-IDs)')
-        
+
 
         ! Output ground water loss (deep percolation in LUs with no ground water flag)
         IF (f_daily_gw_loss) allocate (gw_loss(366,subasin))
         CALL open_daily_output(f_daily_gw_loss, 'daily_gw_loss.out', 'ground water loss from model domain [m3] for all sub-basins (MAP-IDs)')
-        
+
         !     Output total subsurface runoff (m³/d)
         CALL open_daily_output(f_daily_subsurface_runoff, 'daily_subsurface_runoff.out', 'total subsurface runoff [m**3/d] for all sub-basins (MAP-IDs)')
 
         ! Output sub-daily water flux
         CALL open_subdaily_output(f_water_subbasin, 'water_subbasin.out', 'sub-daily contribution to river [m3/s] for all sub-basins (MAP-IDs)')
-        
+
         !     Output sediment production (t)
         OPEN(11,FILE=pfadn(1:pfadi)//'daily_sediment_production.out', STATUS='replace')
         IF (f_daily_sediment_production .AND. dosediment) THEN
@@ -482,7 +482,7 @@ SUBROUTINE hymo_all(STATUS)
             CALL open_subdaily_output(f_river_susp_sediment_storage,'River_Susp_Sediment_Storage.out','Suspended sediment storage in river reach t (with MAP IDs as in hymo.dat)')
             CALL open_subdaily_output(f_river_flow,'River_Flow.out','Output file for river discharge q_out (m3/s) (with MAP IDs as in hymo.dat)')
         end if
-        
+
         !TC-wise output
         CALL open_subdaily_output_TC(f_snowEnergyCont,'snowEnergyCont.out','Output file TC-wise snow energy content (kJ/m2)')
         CALL open_subdaily_output_TC(f_snowWaterEquiv,'snowWaterEquiv.out','Output file TC-wise snow water equivalent (m)')
@@ -559,7 +559,7 @@ SUBROUTINE hymo_all(STATUS)
         if (associated(river_infiltration_t))           river_infiltration_t           =0.0 !infiltration into riverbed, loss from model domain
 
 
-        if (do_pre_outflow) then        !if water outflow from upstream subbasins is given
+        if (any(do_pre_outflow)) then        !if water outflow from upstream subbasins is given
             call read_pre_subbas_outflow        !read
         end if
 
@@ -574,17 +574,15 @@ SUBROUTINE hymo_all(STATUS)
 
             j=0    !Till: temporary indicator if this subbasin can be skipped because of prespecified values
 
-            if (do_pre_outflow) then        !if water outflow from subbasins is given
-                if (corr_column_pre_subbas_outflow(i_subbas)>0) then            !if outflow of subbasin is prespecified
-                    water_subbasin (d,i_subbas) = sum(pre_subbas_outflow(d,1:nt,corr_column_pre_subbas_outflow(i_subbas)))
-                    water_subbasin_t(d,1:nt,i_subbas)=pre_subbas_outflow(d,1:nt,corr_column_pre_subbas_outflow(i_subbas))
-                    j=1    !Till: indicate that this subbasin can be skipped because of prespecified values
-                    if (dosediment) then
-                        sediment_subbasin(d,i_subbas,:) = -1.    !Till: this is for clearly indicating missing data
-                        sediment_subbasin_t(d,1:nt,i_subbas,:)=-1.
-                    end if
+            if (do_pre_outflow(i_subbas)) then            !if outflow of subbasin is prespecified
+                water_subbasin (d,i_subbas) = sum(pre_subbas_outflow(d,1:nt,corr_column_pre_subbas_outflow(i_subbas)))
+                water_subbasin_t(d,1:nt,i_subbas)=pre_subbas_outflow(d,1:nt,corr_column_pre_subbas_outflow(i_subbas))
+                j=1    !Till: indicate that this subbasin can be skipped because of prespecified values
+                if (dosediment) then
+                    sediment_subbasin(d,i_subbas,:) = -1.    !Till: this is for clearly indicating missing data
+                    sediment_subbasin_t(d,1:nt,i_subbas,:)=-1.
                 end if
-            end if !do outflow
+            end if
 
             if (do_pre_outsed) then        !if water outsed from subbasins is given
                 if (corr_column_pre_subbas_outsed(i_subbas)>0) then            !if outsed of subbasin is prespecified
@@ -1352,7 +1350,7 @@ SUBROUTINE hymo_all(STATUS)
         end if
 
 
-                
+
         !conrad: output of theta [%] for each tc from theta_tc
         IF (f_tc_theta ) THEN
             OPEN(11,FILE=pfadn(1:pfadi)//'tc_theta.out', STATUS='old',POSITION='append')
@@ -1432,8 +1430,8 @@ contains
             OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old', IOSTAT=iostate)
             if (iostate == 0) return !if file exists, return
             CLOSE(11)
-        end if    
-        
+        end if
+
         OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='replace', IOSTAT=iostate)
         if (iostate /= 0) then
             write(*,*)'ERROR: cannot create ', pfadn(1:pfadi)//file_name
@@ -1455,12 +1453,12 @@ contains
         LOGICAL, INTENT(IN)                  :: f_flag
         CHARACTER(len=*), INTENT(IN)         :: file_name,headerline
         INTEGER                              :: iostate
-        
+
         if (append_output) then !if enabled, do not create file, but append
             OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old', IOSTAT=iostate)
             if (iostate == 0) return !if file exists, return
             CLOSE(11)
-        end if    
+        end if
 
         OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='replace', IOSTAT=iostate)
         if (iostate /= 0) then
@@ -1483,12 +1481,12 @@ contains
         LOGICAL, INTENT(IN)                  :: f_flag
         CHARACTER(len=*), INTENT(IN)         :: file_name,headerline
         INTEGER                              :: iostate
-                
+
         if (append_output) then !if enabled, do not create file, but append
             OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old', IOSTAT=iostate)
             if (iostate == 0) return !if file exists, return
             CLOSE(11)
-        end if    
+        end if
 
         OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='replace', IOSTAT=iostate)
         if (iostate /= 0) then
@@ -1548,7 +1546,7 @@ contains
             CLOSE(11)
         END IF
     END SUBROUTINE write_subdaily_output
-  
+
     SUBROUTINE write_subdaily_output_TC(f_flag,file_name,value_array)
     ! Output subdaily values of given array on TC-scale
         use utils_h

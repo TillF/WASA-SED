@@ -1,5 +1,5 @@
     SUBROUTINE readhymo
-    
+
     ! Code converted using TO_F90 by Alan Miller
     ! Date: 2005-06-30  Time: 13:47:20
 
@@ -1626,8 +1626,8 @@ if (dosnow /= 0) then
         h=2
 
         lu_aspect(:)=-999.
-        lu_alt(:)   =-999. 
-    
+        lu_alt(:)   =-999.
+
         do while (istate==0)
             READ(11,'(a)',IOSTAT=istate) cdummy
             h=h+1 !count lines
@@ -1639,7 +1639,7 @@ if (dosnow /= 0) then
                     write(*,'(a,i0,a,i0,a)')'ERROR in lu2.dat, line ',h,': Unknown LU ', j,' (not in soter.dat).'
                     cycle
                 END IF
-    
+
             READ(cdummy,*,IOSTAT=istate) j, lu_aspect(k), lu_alt(k)
             if (istate/=0) then    !format error
                 write(*,'(a,i0)')'ERROR (lu2.dat): Format error in line ',h
@@ -1653,8 +1653,8 @@ if (dosnow /= 0) then
                 WRITE(*,'(a, I3, a)') 'lu2.dat: LU ', id_lu_extern(i), ' is data for aspect or altitude.'
                 STOP
             END IF
-        END DO    
-      
+        END DO
+
         lu_aspect = lu_aspect * pi/180 !convert degree to radiants
 
         DO i_lu=1,nsoter  !Add relative LU elevation to rel_elevation() for all TCs of all LUs
@@ -1682,7 +1682,7 @@ end if ! do_snow
     !    allocate (deposition_TC(subasin,nterrain))
     !    allocate (cum_erosion_TC(subasin,nterrain))
     !    allocate (cum_deposition_TC(subasin,nterrain))
-    
+
 
     contains
 
@@ -1888,7 +1888,7 @@ end if ! do_snow
     INTEGER,save  :: no_columns(2)        !number of columns of input files for the input file
 
     !first call of function: memory allocation and seeking the required file position
-    IF (do_pre_outflow .AND. .NOT. allocated(pre_subbas_outflow)) THEN    
+    IF (any(do_pre_outflow) .AND. .NOT. allocated(pre_subbas_outflow)) THEN
         do_pre_outflow=.FALSE.
         OPEN(91,FILE=pfadp(1:pfadj)// '/Time_series/subbasin_out.dat',IOSTAT=i,STATUS='old')
         IF (i==0) THEN
@@ -1907,16 +1907,16 @@ end if ! do_snow
             corr_column_pre_subbas_outflow=>set_corr_column(columnheader, 'subbasin_out.dat')
             WHERE(corr_column_pre_subbas_outflow/=0)
                 nbr_lu=0        !Till: set number of LUs for prespecified subbasins to 0
+                do_pre_outflow=.TRUE.
             ENDWHERE
             if (sum(corr_column_pre_subbas_outflow)==0) then
                 write(*,*)'   File subbasin_out.dat does not contain relevant subbasins, omitted.' !ii: free pre_subbas_outflow, as it is not needed
                 deallocate(pre_subbas_outflow)
             else
-                do_pre_outflow=.TRUE.
                 call date_seek(91,tstart,mstart, dstart, 'subbasin_out.dat')    !set internal filepointer to correct line in file
-            end if    
+            end if
         END IF
-        
+
         OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='old',POSITION='append', IOSTAT=istate) !write to log file
         write(11,*) "using prespecified outflow:",       allocated(pre_subbas_outflow)
         close(11)
@@ -1973,8 +1973,8 @@ end if ! do_snow
 
 
     !subsequent calls of function: actual reading of data
-    IF (allocated(pre_subbas_outflow)) THEN
-        IF (do_pre_outflow .AND. (t/=tstart .OR. pre_subbas_outflow(1,1,1)==-2.)) THEN    !this clumsy check ensures that we do not read further when this function is called twice before the actual simulation starts
+    IF (any(do_pre_outflow)) then
+        if (t/=tstart .OR. pre_subbas_outflow(1,1,1)==-2.) THEN    !this clumsy check ensures that we do not read further when this function is called twice before the actual simulation starts
             !read outflow
             pre_subbas_outflow(:,:,:)=-1.
             READ(91, *, IOSTAT=istate) ((dstr,dstr,(pre_subbas_outflow(dc,j,i),i=1,no_columns(1)),j=1,nt),dc=1,dayyear)        !Reads in daily time series for pre-specified outflow from upstream basins
@@ -1982,12 +1982,12 @@ end if ! do_snow
                 write(*,*)'ERROR: Premature end of file subbasin_out.dat.'
                 stop
             END IF
-            
+
             WHERE(pre_subbas_outflow < 0.)
                 pre_subbas_outflow=-1.        !Till: mask negative values
             ENDWHERE
-
         END IF
+
     END IF
 
 

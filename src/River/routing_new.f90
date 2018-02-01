@@ -9,7 +9,7 @@ SUBROUTINE routing_new(STATUS)
 !2008-11-13
 
 !(George:) various changes concerning routing of reservoir fluxes
-!2008-10-07 
+!2008-10-07
 
 !Till: file and header of river_sediment_total was not created when river_transport=3
 !2008-07-11
@@ -17,13 +17,13 @@ SUBROUTINE routing_new(STATUS)
 !! Routing of water and sediment fluxes through the river system
 !!
 !! Status 0: reads input files and initialises run, calls subroutine reservoir (status 0)
-!! Status 1: initialises year, calls subroutine reservoir (status 1) 
+!! Status 1: initialises year, calls subroutine reservoir (status 1)
 !! Status 2: main calculations, calls subroutine reservoir (status 2)
 !! Status 3: finalises year, calls subroutine reservoir (status 3)
 !! Parameter file: routing_h.f90
 
 !!	Q_spring	(m3/s)		spring inflow at the start of a river
- 
+
 use lake_h
 use climo_h
 use common_h
@@ -59,11 +59,11 @@ IF (STATUS == 0) THEN
             stop
         END IF
   READ (11,*); READ(11,*)
-  
+
  r_depth(:)=-1. !for checking completeness
- DO WHILE (.TRUE.)        
+ DO WHILE (.TRUE.)
             READ(11,'(a)', IOSTAT=istate) fmtstr
-            
+
 			IF (istate/=0) THEN    !no further line
                 exit        !exit loop
             END IF
@@ -86,16 +86,16 @@ IF (STATUS == 0) THEN
                 write(*,'(A,i0,A)')'WARNING: (river.dat, subbasin ',i,') river erodibility factor must be in [0..1], truncated.'
                 r_efactor(k)=min(1., max(0., r_efactor(k)))
             end if
-            
+
             if (r_cover(k) < 0 .OR. r_cover(k)>1) then
                 write(*,'(A,i0,A)')'WARNING: (river.dat, subbasin ',i,') river cover factor must be in [0..1], truncated.'
                 r_cover(k)=min(1., max(0., r_cover(k)))
             end if
-            
+
  END DO
 
  i=which1(r_depth(1:subasin) == -1.) !check for non-specified subbasins
- if (i/=0) then	
+ if (i/=0) then
 	write(*,'(A,i0,A)')'ERROR: SUBBAS-ID ', id_subbas_extern(i),' missing in river.dat.'
     stop
  END IF
@@ -120,7 +120,7 @@ if(river_transport.eq.3) then
 	READ (11,*) idummy, D50(i)
 	IF (idummy /= id_subbas_extern(i)) THEN
 		WRITE(*,*) 'Sub-basin-IDs in file bedload.dat must have the same ordering scheme as in hymo.dat'
-		STOP 
+		STOP
 	END IF
   END DO
 endif
@@ -161,7 +161,7 @@ qout(:,:)=0.
 ! INITIALISATION OF RESERVOIR MODULE
 !George (status,upstream,h) instead (status,upstream)
   IF (doreservoir) CALL reservoir (status,upstream,h)
- 
+
 
 ! INITIALISATION OF OUTPUT FILES
 
@@ -170,7 +170,7 @@ qout(:,:)=0.
 if ((river_transport == 2)) then
   !  output of 'River_Sediment_total.out' handled in hymo_all.f90
   !  output of 'River_Sediment_Storage.out' handled in hymo_all.f90
-  
+
   OPEN(11,FILE=pfadn(1:pfadi)//'River_Sediment_Concentration.out',STATUS='replace')
   if (f_river_sediment_concentration) then
 	WRITE (11,*) 'Output file for sediment concentration (g/l) (with MAP IDs as in hymo.dat)'
@@ -224,8 +224,8 @@ endif
     close(11, status='delete') !delete any existing file, if no output is desired
   endif
 
- 
- 
+
+
   OPEN(11,FILE=pfadn(1:pfadi)//'River_Deposition.out',STATUS='replace')
   if (f_river_deposition) then
 	WRITE (11,'(A)') 'Deposition of sediments in the riverbed in t/timestep (with MAP IDs as in hymo.dat)'
@@ -277,16 +277,16 @@ qsediment2_t=0.
     r_depth_cur(:)=0.
     r_qout(:,:)=0.
 	r_qin(:,:)=0.
-      
+
    if(river_transport.eq.2) then
       sediment_in(:,:)=0.
 	  sediment_out(:,:)=0.
- 
+
 	  river_deposition(:,:)=0.
 	  river_degradation(:,:)=0.
 	  if (.not. doloadstate) then
 	    riverbed_storage(:,:)=0.
-        sed_storage(:,:)=0. 
+        sed_storage(:,:)=0.
 	  endif
 	elseif(river_transport.eq.3) then
 	  bedload(:,:) = 0.
@@ -295,11 +295,11 @@ qsediment2_t=0.
    r_qin(1,:) = Q_spring(:)	!spring water, start of a river
    r_qin(2,:) = Q_spring(:) !spring water, start of a river
    r_qout(1,:)= Q_spring(:) !guestimation of the outflow discharge
-  
+
 
  ENDIF
 
-  
+
 ! CALL Reservoir Sedimentation and Management Modules
 !George (status,upstream,h) instead (status,upstream)
  IF (doreservoir) CALL reservoir (status,upstream,h)
@@ -313,7 +313,7 @@ temp_water(:)=0. !for computing daily averages
 temp_sediment(:)=0.
 
 ! Calculation of inflow and outflow in stream flow order
-DO h=1,nt					
+DO h=1,nt
   DO i=1,subasin
 
   !Water (m3/s) and sediment (ton/dt) fluxes from the hillslope module are added to river stretch
@@ -334,19 +334,17 @@ DO h=1,nt
    upstream=upbasin(i)  !internal code-ID for most upstream sub-basin
    downstream=downbasin(i) !internal code-ID for receiving sub-basin
 
-   
+
    log_temp = .FALSE.
-   if (do_pre_outflow) then
-        if (associated(corr_column_pre_subbas_outflow)) then  !Till: succesive evaluation is necessary to adhere to Fortran standard (no short-circuit-evaluation guaranteed)
-            if (corr_column_pre_subbas_outflow(i)>0) log_temp = .TRUE.		!Till: if water outflow from upstream subbasins is given
-        end if
+   if (do_pre_outflow(i)) then
+        log_temp = .TRUE.		!Till: if water outflow from upstream subbasins is given
    end if
-   
+
    if (log_temp) then		!Till: if water outflow from upstream subbasins is given
      r_qout(2,upstream)=water_subbasin_t(d,h,upstream)
    else
      call muskingum (upstream, h)								!normal routing !ii:neither flow nor r_area is used further
-   end if 
+   end if
 
    log_temp = .FALSE.
    if (do_pre_outsed) then
@@ -366,7 +364,7 @@ DO h=1,nt
 	endif
    end if !do outsed
 
-   
+
 !George Loop was changed in April 2007 after including lateral inflow into the dowstream reservoirs
 !*************************************************************************************
 !   IF (downstream /= 9999 .AND. downstream /= 999) THEN !George
@@ -493,7 +491,7 @@ endif
 
 
 
-	
+
   END DO ! i=1,subasin
 
 
@@ -514,7 +512,7 @@ endif
         r_sediment_concentration(i) = qsediment2_t(d,h,i)/(r_qout(2,i)*3.6*dt)
      endif
   enddo
- 
+
 
 
 if (river_transport.eq.2) then !ii: modify arrays to collect data of more timesteps (as e.g. qsediment2_t) to avoid file access in each single timestep (slow!)
@@ -522,14 +520,14 @@ if (river_transport.eq.2) then !ii: modify arrays to collect data of more timest
 	OPEN(11,FILE=pfadn(1:pfadi)//'River_Sediment_Concentration.out',STATUS='old' ,POSITION='append'  )
 	write(fmtstr,'(a,i0,a)')'(3i6,',subasin,'f14.3)'		!generate format string
 	WRITE (11,fmtstr)t,d,h, (r_sediment_concentration(i),i=1,subasin)
-	CLOSE (11) 
+	CLOSE (11)
   endif
 elseif(river_transport.eq.3) then
-   if(f_river_bedload) then	
+   if(f_river_bedload) then
 	OPEN(11,FILE=pfadn(1:pfadi)//'River_Bedload.out',STATUS='old' ,POSITION='append'  )
 	write(fmtstr,'(a,i0,a)')'(3i6,',5*subasin,'f14.3)'		!generate format string
 	WRITE (11,fmtstr)t,d,h, (bedload(i,1), bedload(i,2),bedload(i,3), bedload(i,4), bedload(i,5), i=1,subasin)
-	CLOSE (11) 
+	CLOSE (11)
    endif
 endif
 
@@ -537,14 +535,14 @@ endif
 	OPEN(11,FILE=pfadn(1:pfadi)//'River_Velocity.out',STATUS='old' ,POSITION='append'  )
 	write(fmtstr,'(a,i0,a)')'(3i6,',subasin,'f14.3)'		!generate format string
 	WRITE (11,fmtstr)t, d,h, (velocity(i),i=1,subasin)
-	CLOSE (11) 
+	CLOSE (11)
   endif
 
   if(f_river_storage) then
 	OPEN(11,FILE=pfadn(1:pfadi)//'River_Storage.out',STATUS='old' ,POSITION='append'  )
 	write(fmtstr,'(a,i0,a)')'(3i6,',subasin,'f14.3)'		!generate format string
 	WRITE (11,fmtstr)t, d,h, (r_storage(i),i=1,subasin)
-	CLOSE (11) 
+	CLOSE (11)
   endif
 
   if(f_river_sediment_storage) then
@@ -559,7 +557,7 @@ endif
 	OPEN(11,FILE=pfadn(1:pfadi)//'River_Flowdepth.out',STATUS='old' ,POSITION='append'  )
 	write(fmtstr,'(a,i0,a)')'(3i6,',subasin,'f14.3)'		!generate format string
 	WRITE (11,fmtstr)t, d,h, (r_depth_cur(i),i=1,subasin)
-	CLOSE (11) 
+	CLOSE (11)
   endif
 
   if(f_river_deposition) then
@@ -576,7 +574,7 @@ endif
 	CLOSE (11)
   endif
 
- 
+
 
  ! for output of daily averages
   if (dohour.and.h.eq.24) then
@@ -598,22 +596,22 @@ endif
 	temp_sediment(:) = 0.
   endif
 
-! Update flows for next timestep 
+! Update flows for next timestep
   DO i=1,subasin
     qout(d,i)= r_qout(2,i)
 
-	r_qin(1,i) = r_qin(2,i)			
-	r_qout(1,i)= r_qout(2,i)	
+	r_qin(1,i) = r_qin(2,i)
+	r_qout(1,i)= r_qout(2,i)
 	r_qin(2,i)=0.
 	r_qout(2,i)=0.
-	
+
 	sediment_in(i, 1:n_sed_class)=0.
   ENDDO
- 
-  
+
+
 ENDDO	! end of day or hourly loop
-  
- 
+
+
 
 
 

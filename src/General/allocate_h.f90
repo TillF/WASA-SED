@@ -7,7 +7,8 @@ subroutine allocate_general()
 
     use params_h
     use climo_h
-    
+    use common_h
+
     implicit none
 
     INTEGER :: istate
@@ -18,10 +19,12 @@ subroutine allocate_general()
 	 allocate (rad(366,subasin))
 	 allocate (rhum(366,subasin))
 	 allocate (wind(366,subasin))
+	 allocate (do_pre_outflow(subasin))
+	 do_pre_outflow=.true.
 
 end subroutine allocate_general
-    
-    
+
+
 subroutine allocate_hymo()
 
 use hymo_h
@@ -44,14 +47,14 @@ INTEGER :: istate
 	 !period(4,subasin,tstop-tstart+1), &
 	 laimun(366,subasin), &
 	 soilm(366,subasin), &
-	 soilmroot(366,subasin), & 
+	 soilmroot(366,subasin), &
 	 aet(366,subasin), &
 	 soilet(366,subasin), &
 	 intc(366,subasin), &
 	 ovflow(366,subasin), &
 	 hortflow(366,subasin), &
 	 subflow(366,subasin), &
-	 gw_recharge(366,subasin), & 
+	 gw_recharge(366,subasin), &
 	 deepgw(subasin,maxsoter), &
 	 !deepgw_r(366,subasin), &
 	 qgen(366,subasin), &
@@ -61,9 +64,9 @@ INTEGER :: istate
 	 sofarea(366,subasin), &
 	 avail_all(366,subasin), &
 	 avail_ac(366,subasin), &
-	 
+
 	 nbr_svc(ntcinst), &
-	 
+
 	 rocky(ntcinst), &
 	 laitc(ntcinst), &
 	 aettc(ntcinst), &
@@ -77,7 +80,7 @@ INTEGER :: istate
 	 id_veg_intern(maxsoil,ntcinst), &
 	 svcrooth(ntcinst,maxsoil), &
 	 svcbedr(ntcinst,maxsoil), &
-	 	 
+
 	 frac_svc(maxsoil,ntcinst), &
 	 soilwater(366,ntcinst), &
 
@@ -91,9 +94,9 @@ INTEGER :: istate
 	 horithact(ntcinst,maxsoil,maxhori), &
 
 	 tctheta_s(5,2,ntcinst,maxsoil), & !allocated in soil_distr
-	 
+
 !	 latred(ntcinst,maxhori*3), &		!Till: latred is allocated in readhymo.f90 to adjust to maximum number of exchange horizons required
-	 
+
 	 id_lu_extern(nsoter), &
 	 nbrterrain(nsoter), &
 	 id_terrain_intern(maxterrain,nsoter), &
@@ -116,7 +119,7 @@ INTEGER :: istate
 	 nbrhori(nsoil), &
 	 bedrock(nsoil), &
 	 alluvial_flag(nsoil), &
-	 
+
 	 thetar(nsoil,maxhori), &
 	 soilpwp(nsoil,maxhori), &
 	 thetas(nsoil,maxhori), &
@@ -172,14 +175,14 @@ INTEGER :: istate
      soilet1sc(366,maxsoil), &
 !     intetsc(366,maxsoil), &
 !     aettotsc(366,maxsoil), &
-     
+
 !	 debug_out(366), & !remove
 !	 debug_out2(366,8), & !remove
-	 
+
 	 STAT = istate)
-	
+
 	if (istate/=0) then
-		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in hymo-module: ' 
+		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in hymo-module: '
 		stop
 	end if
 
@@ -197,7 +200,7 @@ INTEGER :: istate
 
 END subroutine allocate_hymo
 
-    
+
 subroutine allocate_routing()
 
 use hymo_h
@@ -212,7 +215,7 @@ INTEGER :: istate
 !ii: do allocation specific to routing mode to save memory
 	 allocate ( &
      upbasin(subasin), &
-	 downbasin(subasin), &	 
+	 downbasin(subasin), &
 !	 qin(372,subasin), &
 ! 	 qout(372,subasin), &
 	 prout (subasin,2), &
@@ -220,7 +223,7 @@ INTEGER :: istate
 	 r_qout(2,subasin), &
 	 r_storage(subasin), &
 !	 qsediment(372,subasin), &
-	 	 
+
 !	 runoff(8784,subasin), &
 
 	 r_width(subasin), &
@@ -246,7 +249,7 @@ INTEGER :: istate
 	 area_loflo(subasin), &
 	 q_bankful100(subasin), &
 	 bottom_width(subasin), &
-	 
+
 
 	 phi5(subasin), &
 	 phi10(subasin), &
@@ -268,16 +271,16 @@ INTEGER :: istate
 	 bedload(subasin,5), &
 
 	 STAT = istate)
-	
+
 	if (istate/=0) then
-		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in river-module.' 
+		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in river-module.'
 	end if
 
 	if (f_river_sediment_storage) allocate (river_sediment_storage_t(366,nt,subasin),  STAT = istate)
-	if (istate/=0) write(*,'(A,i0,a)')'Memory allocation error (',istate,') in river-module.' 
+	if (istate/=0) write(*,'(A,i0,a)')'Memory allocation error (',istate,') in river-module.'
 
 	if (f_river_susp_sediment_storage) allocate (river_susp_sediment_storage_t(366,nt,subasin),  STAT = istate)
-	if (istate/=0) write(*,'(A,i0,a)')'Memory allocation error (',istate,') in river-module.' 
+	if (istate/=0) write(*,'(A,i0,a)')'Memory allocation error (',istate,') in river-module.'
 
 
 END subroutine allocate_routing
@@ -289,7 +292,7 @@ subroutine allocate_reservoir()
     use lake_h
     use time_h
     use reservoir_h
-    
+
     implicit none
 
     INTEGER :: istate
@@ -645,7 +648,7 @@ subroutine allocate_snow()
 use snow_h
 use params_h
 
-implicit none 
+implicit none
 
 integer :: idummy, istate, i_lu, tc_counter
 real :: temp2
@@ -700,7 +703,7 @@ real :: temp2
        allocate(surfTemp(366,nt,ntcinst), STAT = istate)
     else
        allocate(surfTemp(1,1,1), STAT = istate)
-    end if    
+    end if
     idummy = istate + idummy
 
     if (f_liquFrac) then
@@ -710,35 +713,35 @@ real :: temp2
     end if
     idummy = istate + idummy
 
-    if (f_fluxPrec) then 
+    if (f_fluxPrec) then
        allocate(fluxPrec(366,nt,ntcinst), STAT = istate)
     else
        allocate(fluxPrec(1,1,1), STAT = istate)
     end if
     idummy = istate + idummy
 
-    if (f_fluxSubl) then 
+    if (f_fluxSubl) then
        allocate(fluxSubl(366,nt,ntcinst), STAT = istate)
     else
        allocate(fluxSubl(1,1,1), STAT = istate)
     end if
     idummy = istate + idummy
 
-    if (f_fluxFlow) then 
+    if (f_fluxFlow) then
        allocate(fluxFlow(366,nt,ntcinst), STAT = istate)
     else
        allocate(fluxFlow(1,1,1), STAT = istate)
     end if
     idummy = istate + idummy
-    
-    if (f_fluxNetS) then 
+
+    if (f_fluxNetS) then
        allocate(fluxNetS(366,nt,ntcinst), STAT = istate)
     else
        allocate(fluxNetS(1,1,1), STAT = istate)
     end if
     idummy = istate + idummy
 
-    if (f_fluxNetL) then 
+    if (f_fluxNetL) then
        allocate(fluxNetL(366,nt,ntcinst), STAT = istate)
     else
        allocate(fluxNetL(1,1,1), STAT = istate)
@@ -752,7 +755,7 @@ real :: temp2
     end if
     idummy = istate + idummy
 
-    if (f_fluxSens) then 
+    if (f_fluxSens) then
        allocate(fluxSens(366,nt,ntcinst), STAT = istate)
     else
        allocate(fluxSens(1,1,1), STAT = istate)
@@ -765,7 +768,7 @@ real :: temp2
        allocate(stoiPrec(1,1,1), STAT = istate)
     end if
     idummy = istate + idummy
-    
+
     if (f_stoiSubl) then
        allocate(stoiSubl(366,nt,ntcinst), STAT = istate)
     else
@@ -792,7 +795,7 @@ real :: temp2
         allocate(lu_alt(nsoter), STAT = istate)
     end if
     idummy = istate + idummy
-    
+
     if (idummy/=0) then
         write(*,'(A,i0,i0,a)')'Memory allocation error (',istate,'/',idummy,') in hymo-module (snow): '
         stop
@@ -816,9 +819,9 @@ real :: temp2
        END DO
 
     END DO
-       
+
 
 end subroutine allocate_snow
 
-    
+
 end module allocate_h
