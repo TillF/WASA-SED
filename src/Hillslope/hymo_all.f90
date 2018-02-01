@@ -3,6 +3,7 @@ SUBROUTINE hymo_all(STATUS)
     ! Code converted using TO_F90 by Alan Miller
     ! Date: 2005-06-30  Time: 13:47:07
 
+    use allocate_h
     use lake_h
     use climo_h
     use common_h

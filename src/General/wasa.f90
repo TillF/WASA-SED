@@ -13,7 +13,7 @@ IMPLICIT NONE
 
 CALL GETARG(1, pfadn)		!Till: try to read path to central control file (do.dat)
 
-include 'svn_rev.var' !Till: import revision information string
+include 'svn_rev.f90' !Till: import revision information string
 
 WRITE(*,'(A,A,/,A)') 'WASA model, ',trim(rev_string1),' '//trim(rev_string2)
 

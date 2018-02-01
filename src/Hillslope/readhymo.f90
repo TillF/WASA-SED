@@ -3,6 +3,7 @@
     ! Code converted using TO_F90 by Alan Miller
     ! Date: 2005-06-30  Time: 13:47:20
 
+    use allocate_h
     use lake_h
     use common_h
     use hymo_h
@@ -105,8 +106,7 @@
     END DO
 
 
-    INCLUDE '../General/allocat_general.var'
-
+    call allocate_general()
 
     !** read subbasin parameters
     OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/hymo.dat',STATUS='old',IOSTAT=istate)
@@ -1616,7 +1616,7 @@
 END IF !dosediments
 
 if (dosnow /= 0) then
-    INCLUDE '../Hillslope/allocat_snow.f90'
+    call allocate_snow()
 end if
 
 if (dosnow /= 0) then

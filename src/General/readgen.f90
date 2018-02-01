@@ -3,6 +3,7 @@ SUBROUTINE readgen(path2do_dat)
     ! Code converted using TO_F90 by Alan Miller
     ! Date: 2005-06-30  Time: 13:47:18
 
+    use allocate_h
     use climo_h
     use common_h
     use hymo_h
@@ -656,11 +657,15 @@ SUBROUTINE readgen(path2do_dat)
 !allocate necessary memory
     nt = int(24/dt)	!Till: number of simulation steps per day
 
-    INCLUDE '../Hillslope/allocat_hymo.var'
-    INCLUDE '../Hillslope/allocat_erosion.var'
-    INCLUDE '../River/allocat_routing.var'
+    call allocate_hymo()
+
+    ! variables are allocated in the end of readhymo, when all dimensions are known
+    !disabled call allocate_erosion()
+
+    call allocate_routing()
+
         nt = int(24/dt)	!Till: number of simulation steps per day !ii: can be removed?
-    INCLUDE '../Reservoir/allocat_reservoir_lake.var'
+    call allocate_reservoir()
 
 
     
