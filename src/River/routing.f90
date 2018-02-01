@@ -106,17 +106,19 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
     close(11, status='delete') !delete any existing file, if no output is desired
   endif
 
-    !allocate arrays for in- and outflow into/out of subbasins, as their length needs to accomodate hrout, too
-  allocate( qout(366 + size(hrout,dim=1), subasin))
-  allocate( qin (subasin))
-	qout(:,:)=0.
-	qin (:)=0.
-
 ! calculate external routing response function for each sub-basin (triangular like this: _|\_ ) - used for riverflow entering the subbasin from upstream
 ! (given parameter lag-time tL and retention-time tR)
   allocate( hrout       (maxval(ceiling(0.5+sum(prout, dim=2))) ,subasin)) !allocate memory for triangular unit hydrograph
 ! routing of autochtonous runoff  (triangular like this: /\_ ) - used for riverflow generated within the basin (tL*=0, tR*=tL+tR)
   allocate( hrout_intern(maxval(ceiling(0.5+sum(prout, dim=2))) ,subasin)) !allocate memory for triangular unit hydrograph
+
+  
+  !allocate arrays for in- and outflow into/out of subbasins, as their length needs to accomodate hrout, too
+  allocate( qout(366 + size(hrout,dim=1), subasin))
+  allocate( qin (subasin))
+	qout(:,:)=0.
+	qin (:)=0.
+
 
   hrout=0.
   hrout_intern=0.
