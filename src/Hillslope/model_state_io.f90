@@ -1,5 +1,5 @@
 module model_state_io
-    !contains subroutines for saving and loading model state (soil water, ground water, interception)#
+    !contains subroutines for saving and loading model state (soil water, ground water, interception)
 
  
     use common_h
