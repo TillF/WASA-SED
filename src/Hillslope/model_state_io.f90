@@ -251,9 +251,9 @@ contains
             total_storage_interflow = sum(latred) !sum up total storage
             CLOSE(interflow_file_hdle, iostat=i_lu)    !close output file
         endif !interflow output
-        
+
         !write snow storage state to .stat file
-        if (trim(snow_conds_file)=='' .OR. .not. dosnow) then        !don't do anything if an empty filename is specified
+        if (trim(snow_conds_file)=='' .OR. dosnow == 0) then        !don't do anything if an empty filename is specified
             snow_file_hdle=0
         else
             snow_file_hdle=15
@@ -268,7 +268,7 @@ contains
             else
                 fmtstr='E12.5' !for large numbers, use exponential notation
             end if
-            
+
             write(fmtstr2,*) '(2(I0,A1),I0,3(A1,',trim(fmtstr),'))'        !generate format string
             tt = max(2, d) -1  !so it works both at the beginning and end of simulation year/period
             DO sb_counter=1,subasin
@@ -281,14 +281,14 @@ contains
                         id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
                             WRITE(snow_file_hdle,fmtstr2) id_subbas_extern(sb_counter), char(9),&
                                     id_lu_extern(i_lu),char(9),id_terrain_extern(id_tc_type), &
-                                    char(9), snowWaterEquiv(tt, nt, tcid_instance), & 
+                                    char(9), snowWaterEquiv(tt, nt, tcid_instance), &
                                     char(9), snowEnergyCont(tt, nt, tcid_instance), &
                                     char(9), snowAlbedo    (tt, nt, tcid_instance)
                         total_storage_snow = total_storage_snow + snowWaterEquiv(tt, nt, tcid_instance)*lu_area*fracterrain(id_terrain_intern(tc_counter,i_lu)) !sum up total storage [m3]
                     ENDDO    !loop TCs
                 ENDDO    !loop LUs
             ENDDO    !loop subbasins
-            
+
             CLOSE(snow_file_hdle, iostat=i_lu)    !close output file
         endif !snow output
 
@@ -813,8 +813,8 @@ end subroutine init_interflow_conds
                 if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
 
                 snowWaterEquiv(1,1,tcid_instance) = snowweqv_temp
-                snowEnergyCont(1,1,tcid_instance) = snowetemp               
-                snowAlbedo    (1,1,tcid_instance) = albedo_temp   
+                snowEnergyCont(1,1,tcid_instance) = snowetemp
+                snowAlbedo    (1,1,tcid_instance) = albedo_temp
 
             END DO
             file_read=1
@@ -842,9 +842,9 @@ end subroutine init_interflow_conds
                                 id_terrain_extern(id_tc_type)            !issue warning
                         end if
                         snowWaterEquiv(1,1,tcid_instance) = 0.
-                        snowEnergyCont(1,1,tcid_instance) = 0.           
+                        snowEnergyCont(1,1,tcid_instance) = 0.
                         snowAlbedo    (1,1,tcid_instance) = 0.
-                            
+
                         !resume to default (0)
                     end if
                 END DO
@@ -853,7 +853,7 @@ end subroutine init_interflow_conds
 
 
     end subroutine init_snow_conds
-                
+
 
     subroutine init_intercept_conds(intercept_conds_file)
 
