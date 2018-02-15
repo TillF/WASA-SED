@@ -1025,22 +1025,31 @@ IF (STATUS == 2) THEN
 !George              daymaxdamarea(step,upstream))
 !George          damelevact(upstream)=maxlevel(upstream)
 !George        END IF
-        DO j=1,nbrbat(upstream)-1
-          IF (damelevact(upstream) >= elev_bat(j,upstream).AND.  &
-                damelevact(upstream) <= elev_bat(j+1,upstream)) THEN
+        volhelp = -1. !flag as "not computed"
+        DO j=1,nbrbat(upstream)-1 !iterate through points of CAV
+          IF ((damelevact(upstream) >= elev_bat(j,upstream).AND.  &
+                damelevact(upstream) <= elev_bat(j+1,upstream)) .OR. &
+            (j == nbrbat(upstream)-1) & ! (when water stage is higher than max stage in CAV extrapolate CAV-curve
+          ) THEN
             volhelp=vol_bat(j,upstream)+(damelevact(upstream)-elev_bat  &
                 (j,upstream))/(elev_bat(j+1,upstream)-elev_bat(j,upstream))*  &
                 (vol_bat(j+1,upstream)-vol_bat(j,upstream))
             areahelp=area_bat(j,upstream)+(damelevact(upstream)-elev_bat  &
                 (j,upstream))/(elev_bat(j+1,upstream)-elev_bat(j,upstream))*  &
                 (area_bat(j+1,upstream)-area_bat(j,upstream))
+            exit !correct point of CAV-found, no more searching
           END IF
-        END DO
-
+      END DO
+      
+      if (damelevact(upstream) > elev_bat(nbrbat(upstream),upstream)) then
+          write(*,"(A,i0,a)")"WARNING: Water stage of reservoir ",id_subbas_extern(upstream)," exceeds CAV-curve. Curve extrapolated."          
+      end if
+      
+        
 ! Calculation of evaporation and precipitation using the truncated cone volume (m3)
 ! (using the morphologic parameter alpha)
         evaphelp=(areahelp+SQRT(areahelp*damareaact(upstream))+  &
-            damareaact(upstream))*res_pet(step,upstream)/1000.*1./3.
+            damareaact(upstream))*res_pet(step,upstream)/1000.*1./3. 
         prechelp=(areahelp+SQRT(areahelp*damareaact(upstream))+  &
             damareaact(upstream))*res_precip(step,upstream)/1000.*1./3.
 !        infhelp=0. tp TODO not used=!
