@@ -69,7 +69,7 @@ IF (STATUS == 0) THEN
 
 reservoir_check=0 !(0=simulation will all components; 1=simulation without hillslope and river modules)
 reservoir_balance=1 !(0=inflow and outflow discharges must be provided as input file; 1=only inflow discharges must be provided as input file)
-reservoir_print=0 !(0=results printed at the end of the timestep; 1=results printed at the end of the simulated year)
+reservoir_print=1 !(0=results printed at the end of the timestep; 1=results printed at the end of the simulated year)
 corr_column_intakes = 0
 f_intake_obs = .false.
 
