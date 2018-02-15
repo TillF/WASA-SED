@@ -577,7 +577,7 @@ storcap(:)=0.
         IF (res_flag(i)) THEN
           WRITE(subarea,*)id_subbas_extern(i)
           OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_watbal.out',STATUS='replace')
-          WRITE(11,*)'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), evap(m**3), prec(m**3), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), withdrawal(m**3/s), elevation(m), area(m**2), volume(m**3)'
+          WRITE(11,*)'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), evap(m**3), prec(m**3), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), withdrawal(m**3/s), elevation(m), area(m**2), volume(m**3), vol_init(m**3)'
           CLOSE(11)
         ENDIF
       ENDDO
@@ -1528,7 +1528,7 @@ IF (STATUS == 2) THEN
 		  POSITION='append')
 	 WRITE(11,'(4I6,2f10.3,2f13.1,6f10.3,3f14.1)')id_subbas_extern(upstream),t,d,hour,qlateral(step,upstream),qinflow(step,upstream),etdam(step,upstream),precdam(step,upstream),  &
 				qintake(step,upstream),overflow(step,upstream),qbottom(step,upstream),res_qout(step,upstream), &
-				withdraw_out(step,upstream),damelevact(upstream),damareaact(upstream),volact(step,upstream)
+				withdraw_out(step,upstream),damelevact(upstream),damareaact(upstream),volact(step,upstream),help2
      CLOSE(11)
 	 ENDIF
 
@@ -1616,7 +1616,7 @@ endif
             step=(d-1)*nt+hour
 	        WRITE(11,'(4I6,2f10.3,2f13.1,6f10.3,3f14.1)')id_subbas_extern(i),t,d,hour,qlateral(step,i),qinflow(step,i),etdam(step,i),precdam(step,i),  &
 				qintake(step,i),overflow(step,i),qbottom(step,i),res_qout(step,i),withdraw_out(step,i), &
-				daydamelevact(step,i),daydamareaact(step,i),volact(step,i)*1.e6
+				daydamelevact(step,i),daydamareaact(step,i),volact(step,i)*1.e6,-999.
 		  ENDDO
 		ENDDO
         CLOSE(11)
