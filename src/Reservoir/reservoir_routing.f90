@@ -1,12 +1,12 @@
 SUBROUTINE reservoir_routing(upstream,help,help2)
 
 !Till: computationally irrelevant: outcommented unused vars
-!2012-09-14 
+!2012-09-14
 
 
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:31
- 
+
 use common_h
 use time_h
 use reservoir_h
@@ -33,7 +33,7 @@ REAL :: hmax0,vmax0,par_k,par_alpha
 ! Initialization
 inflow=help/(86400./nt)
 outflow=outflow_last(upstream)
-volmax=daystorcap(step,upstream)
+volmax=daystorcap(step,upstream) !storage capacity in the subbasin's reservoir [10**6 m**3]
 volstep=help2
 par_c=damc(upstream)
 par_d=damd(upstream)
@@ -55,6 +55,7 @@ ENDIF
 
 !write(*,'(10F12.1)') vol2,volume_last(upstream),volstep,volmax,inflow,outflow
 
+! initial condition from previous timestep
 y2=max((((vol2+vmax0)/par_k)**(1./par_alpha))-hmax0,0.)
 
 !write(*,'(10F20.6)') y2,vol2,volstep,volmax,inflow,outflow
@@ -78,10 +79,10 @@ frtime=0.
 error=1.
 dummy1=outflow
 dummy2=y2
-inflow_mean=0.
+!inflow_mean=0. TODO: unnecessary?
 outflow_mean=0.
 
-
+! loop over sub-steps
 DO i=1,ninterac
   frtime=frtime+(time/ninterac)
   inflow_t=inflow*(time/ninterac)
@@ -93,6 +94,7 @@ DO i=1,ninterac
 
 !write(*,'(I6,10F13.3)') i,y1,y2,vol1,vol2,volmax
 
+  ! predictor-corrector until convergence (?)
   n=0
   DO WHILE (ABS(error) > 0.001)
     n=n+1
@@ -100,12 +102,12 @@ DO i=1,ninterac
 	vol2=max(vol1+dvol,0.)
 !write(*,'(5F12.3)')frtime,inflow,outflow,dummy1,dvol
 	y2=max((((vol2+vmax0)/par_k)**(1./par_alpha))-hmax0,0.)
-	dummy1=par_c*(y2**par_d)
+	dummy1=par_c*(y2**par_d) ! outflow m3/s
 
 !if(upstream==29)write(*,'(I4,8F9.1)')upstream,frtime,y1,y2,vol1,vol2,dummy1,hmax0,vmax0
 ! boundary condition for constant inflow
 !******************************************************************************************
-    IF (dummy1*(time/ninterac)>inflow_t+vol1 .or. y2==0. .or. n>=10) THEN
+    IF (dummy1*(time/ninterac)>inflow_t*(time/ninterac)+vol1 .or. y2==0. .or. n>=10) THEN !tp corrected units, Feb 2018
 	 dummy1=inflow
      y2=0.
 	 vol2=0.
@@ -124,8 +126,8 @@ DO i=1,ninterac
   ENDDO
 !write(*,*)frtime,inflow,dummy1
   outflow=dummy1
-  outflow_mean=outflow_mean+outflow*(time/ninterac)
-  inflow_mean=inflow_mean+inflow*(time/ninterac)
+  outflow_mean=outflow_mean+outflow*(time/ninterac) ! cumulated outflow over sub-steps in m3
+  !inflow_mean=inflow_mean+inflow*(time/ninterac) TODO: unnecessary?
   error=1.
 
   outflow_last(upstream)=outflow
@@ -133,7 +135,7 @@ ENDDO
 
 overflow(step,upstream)=outflow_mean
 volume_last(upstream)=vol2
-volact(step,upstream)=volmax+vol2
+volact(step,upstream)=volmax+vol2 ! current reservoir volume in m3
 
 !write(*,'(I4,10F15.3)')upstream,frtime,overflow(step,upstream)/86400.,outflow_last(upstream),volact(step,upstream)
 
