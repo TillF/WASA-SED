@@ -63,7 +63,7 @@ real, allocatable :: volume_last(:)
 real, allocatable :: outflow_last(:)
 !effective water extraction (consumptive use) from the Sub-basin's reservoir [m**3]
 real, allocatable :: damex(:,:)
-!initial storage capacity in the sub-basin's reservoir [10**3 m**3]
+!initial storage capacity in the sub-basin's reservoir [10**3 m**3 and 10**6 m**3]
 real, allocatable :: storcap(:)
 !initial dead volume of the sub-basin's reservoir [10**3 m**3]
 real, allocatable :: damdead(:)
@@ -81,14 +81,17 @@ real, allocatable :: damflow(:)
 real, allocatable :: damq_frac(:)
 !percentage of Q90 released from the sub-basin's reservoir in different seasons in the sub-basin's reservoir [-]
 real, allocatable :: damq_frac_season(:,:)
-!actual stored volume in the subbasin's reservoir [10**6 m**3]
+!actual stored volume in the subbasin's reservoir [m**3]
 real, allocatable :: volact(:,:)
-!evaporation from the subbasin's reservoir [mm]
-real, allocatable :: evapdam(:,:)
+!precipitation into the subbasin's reservoir [m**3]
+real, allocatable :: precdam(:,:)
 !evaporation from the subbasin's reservoir [m**3]
 real, allocatable :: etdam(:,:)
-!infiltration losses from the subbasin's reservoir [m**3]
-real, allocatable :: infdam(:,:)
+! tp TODO never used
+!!evaporation from the subbasin's reservoir [mm]
+!real, allocatable :: evapdam(:,:)
+!!infiltration losses from the subbasin's reservoir [m**3]
+!real, allocatable :: infdam(:,:)
 !initial maximum reservoir area in subbasin [ha]
 real, allocatable :: maxdamarea(:)
 !actual reservoir area [m**2]
@@ -136,7 +139,9 @@ real, allocatable :: overflow(:,:)
 real, allocatable :: qintake(:,:)
 !controlled outflow relased through the bottom outlets of the sub-basin's reservoir [m**3/s]
 real, allocatable :: qbottom(:,:)
-!storage capacity in the subbasin's reservoir [10**6 m**3]
+!actual withdrawal from the sub-basin's reservoir (e.g. for irrigation; in the model not further used) [m**3/s]
+real, allocatable :: withdraw_out(:,:)
+!storage capacity in the subbasin's reservoir [m**3 and 10**6 m**3]
 real, allocatable :: daystorcap(:,:)
 !maximum reservoir area in the subbasin's reservoir [10**4 m**2]
 real, allocatable :: daymaxdamarea(:,:)

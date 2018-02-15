@@ -43,7 +43,7 @@ character(100) :: dummy_char
 !Ge include j,nbrbat1,cont,upstream,downstream
 INTEGER :: j,nbrbat1,flag_cav
 REAL :: elevhelp,evaphelp2,volhelp !,elevhelp2,elevhelp3
-REAL :: help,help1,help2,help3,evaphelp,areahelp,infhelp,helpout,prechelp !,helpin
+REAL :: help,help1,help2,help3,evaphelp,areahelp,helpout,prechelp !,helpin,infhelp
 !Ge actual storage capacity of large river reservoir in a certain year[10**6 m**3]
 !REAL :: storcapact
 
@@ -577,7 +577,7 @@ storcap(:)=0.
         IF (res_flag(i)) THEN
           WRITE(subarea,*)id_subbas_extern(i)
           OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_watbal.out',STATUS='replace')
-          WRITE(11,*)'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), elevation(m), area(m**2), volume(m**3)'
+          WRITE(11,*)'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), evap(m**3), prec(m**3), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), withdrawal(m**3/s), elevation(m), area(m**2), volume(m**3)'
           CLOSE(11)
         ENDIF
       ENDDO
@@ -1043,14 +1043,14 @@ IF (STATUS == 2) THEN
             damareaact(upstream))*res_pet(step,upstream)/1000.*1./3.
         prechelp=(areahelp+SQRT(areahelp*damareaact(upstream))+  &
             damareaact(upstream))*res_precip(step,upstream)/1000.*1./3.
-        infhelp=0.
+!        infhelp=0. tp TODO not used=!
         volact(step,upstream)=volhelp
 
       ELSE
         evaphelp=MIN(volact(step,upstream),(res_pet(step,upstream)/1000.)*areahelp)
         prechelp=(res_precip(step,upstream)/1000.)*areahelp
-        infhelp=0.
-        volact(step,upstream)=volact(step,upstream)+ (prechelp-evaphelp-infhelp)
+!        infhelp=0. tp TODO not used=!
+        volact(step,upstream)=volact(step,upstream)+ (prechelp-evaphelp) ! -infhelp) tp TODO not used
 
 ! Check overflow due to precipitation
 !        IF (volact(step,upstream) > daystorcap(step,upstream)) THEN
@@ -1061,16 +1061,19 @@ IF (STATUS == 2) THEN
 !write(*,'(2I4,4F15.3)')d,id_subbas_extern(upstream),overflow(step,upstream),volact(step,upstream)
 !write(*,'(2I4,3F15.4)')step,id_subbas_extern(upstream),volact(step,upstream)
 
+!tp store for output in reservoir balance in m**3
+       etdam(step,upstream)=evaphelp
+       precdam(step,upstream)=prechelp
 
-! 3) reservoir evaporation in mm
-      IF (nbrbat(upstream) /= 0) THEN
-        evapdam(step,upstream)=MAX(0.,res_pet(step,upstream)-(evaphelp2*1.e3))
-      ELSE
-        evapdam(step,upstream)=evaphelp/areahelp*1.e3
-      END IF
-!     reservoir evaporation in Mio m**3
-      etdam(step,upstream)=evaphelp/1.e6
-      infdam(step,upstream)=infhelp/1E6
+! 3) reservoir evaporation in mm, tp: TODO never used!
+!      IF (nbrbat(upstream) /= 0) THEN
+!        evapdam(step,upstream)=MAX(0.,res_pet(step,upstream)-(evaphelp2*1.e3))
+!      ELSE
+!        evapdam(step,upstream)=evaphelp/areahelp*1.e3
+!      END IF
+!!     reservoir evaporation in Mio m**3
+!      etdam(step,upstream)=evaphelp/1.e6
+!      infdam(step,upstream)=infhelp/1E6
 
 
 ! 4) Check flow through the reservoir
@@ -1183,8 +1186,11 @@ IF (STATUS == 2) THEN
 
 ! 4c) Withdrawal water volume to supply the water use sectors
       IF (volact(step,upstream) > .05*daystorcap(step,upstream)) THEN
+        withdraw_out(step,upstream) = withdrawal(upstream)
         volact(step,upstream)=MAX(0.,volact(step,upstream)-withdrawal(upstream))
-	  ENDIF
+	  ELSE
+        withdraw_out(step,upstream) = 0.
+      ENDIF
 
 !write(*,'(2I4,3F15.4)')step,id_subbas_extern(upstream),volact(step,upstream)
 
@@ -1253,6 +1259,7 @@ IF (STATUS == 2) THEN
       qintake(step,upstream)=qintake(step,upstream)/(86400./nt)
       overflow(step,upstream)=overflow(step,upstream)/(86400./nt)
 	  qbottom(step,upstream)=qbottom(step,upstream)/(86400./nt)
+	  withdraw_out(step,upstream)=withdraw_out(step,upstream)/(86400./nt)
 
 
 ! Calculation of reservoir surface area and reservoir volume when inflow discharges, outflow discharges
@@ -1519,9 +1526,9 @@ IF (STATUS == 2) THEN
 	 IF (f_res_watbal) THEN
      OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_watbal.out',STATUS='old',  &
 		  POSITION='append')
-	 WRITE(11,'(4I6,7f10.3,2f16.3)')id_subbas_extern(upstream),t,d,hour,qlateral(step,upstream),qinflow(step,upstream),  &
-				qintake(step,upstream),overflow(step,upstream),qbottom(step,upstream),  &
-				res_qout(step,upstream),damelevact(upstream),damareaact(upstream),volact(step,upstream)
+	 WRITE(11,'(4I6,2f10.3,2f13.1,6f10.3,3f14.1)')id_subbas_extern(upstream),t,d,hour,qlateral(step,upstream),qinflow(step,upstream),etdam(step,upstream),precdam(step,upstream),  &
+				qintake(step,upstream),overflow(step,upstream),qbottom(step,upstream),res_qout(step,upstream), &
+				withdraw_out(step,upstream),damelevact(upstream),damareaact(upstream),volact(step,upstream)
      CLOSE(11)
 	 ENDIF
 
@@ -1607,8 +1614,9 @@ endif
 	      DO ih=1,nt
 		    hour=ih
             step=(d-1)*nt+hour
-	        WRITE(11,'(4I6,7f10.3,2f16.3)')id_subbas_extern(i),t,d,hour,qlateral(step,i),qinflow(step,i),  &
-				qintake(step,i),overflow(step,i),qbottom(step,i),res_qout(step,i),daydamelevact(step,i),daydamareaact(step,i),volact(step,i)*1.e6
+	        WRITE(11,'(4I6,2f10.3,2f13.1,6f10.3,3f14.1)')id_subbas_extern(i),t,d,hour,qlateral(step,i),qinflow(step,i),etdam(step,i),precdam(step,i),  &
+				qintake(step,i),overflow(step,i),qbottom(step,i),res_qout(step,i),withdraw_out(step,i), &
+				daydamelevact(step,i),daydamareaact(step,i),volact(step,i)*1.e6
 		  ENDDO
 		ENDDO
         CLOSE(11)

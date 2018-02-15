@@ -12,7 +12,7 @@ subroutine allocate_general()
     implicit none
 
     INTEGER :: istate
-   	allocate( & 
+   	allocate( &
      temp(366,subasin), &
 	 precip(366,subasin), &
 	 preciph(366*24,subasin), &
@@ -405,9 +405,11 @@ subroutine allocate_reservoir()
 	      damq_frac(subasin), &
 	      damq_frac_season(subasin,4), &
 	      volact(366*nt,subasin), &
-	      evapdam(366*nt,subasin), &
-	      etdam(366*nt,subasin), &
-	      infdam(366*nt,subasin), &
+	      precdam(366*nt,subasin), &
+          etdam(366*nt,subasin), &
+! tp TODO never used
+!	      evapdam(366*nt,subasin), &
+!	      infdam(366*nt,subasin), &
 	      maxdamarea(subasin), &
 	      damareaact(subasin), &
 	      alpha_over(subasin), &
@@ -433,6 +435,7 @@ subroutine allocate_reservoir()
 	      overflow(366*nt,subasin), &
 	      qintake(366*nt,subasin), &
 	      qbottom(366*nt,subasin), &
+	      withdraw_out(366*nt,subasin), &
 	      daystorcap(366*nt,subasin), &
 	      daymaxdamarea(366*nt,subasin), &
 	      daydamdead(366*nt,subasin), &
