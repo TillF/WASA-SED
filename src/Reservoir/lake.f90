@@ -383,7 +383,7 @@ IF (STATUS == 1) THEN
 
 !** Initialization for actual year of calculation
 	lakeoutflow(1:dayyear*nt,1:subasin) = 0.
-	damareaact(1:subasin)=0. !for subbasin without strategic reservoir
+	if (doreservoir) damareaact(1:subasin)=0. !for subbasin without strategic reservoir
   				!for subbasin with strategic reservoir, surface area is updated in the reservoir module
 	if (dosediment) then
 		lakesedout(1:dayyear*nt,1:subasin)=0.
@@ -459,7 +459,7 @@ endif
       temparea=temparea+lakearea(muni,k)*acud(muni,k)
 !write(*,'(3I6,4F10.3)')step,muni,k,temparea,lakearea(muni,k),acud(muni,k)
     END DO
-    temparea=temparea+damareaact(muni)/1.e6
+    if (doreservoir) temparea=temparea+damareaact(muni)/1.e6
 !cumarea=cumarea+temparea
 if(muni==subasin .and. ih==nt) then
 !write(*,*)step,cumarea*1.e6
