@@ -1,11 +1,11 @@
 SUBROUTINE lake_routing(muni,k,help,help2,help3)
 !Till: computationally irrelevant: outcommented unused vars
-!2012-09-14 
- 
+!2012-09-14
+
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:31
 
- 
+
 use lake_h
 use common_h
 use time_h
@@ -115,7 +115,7 @@ if (acud(muni,k)>0.) then
 !if(upstream==29)write(*,'(I4,8F9.1)')upstream,frtime,y1,y2,vol1,vol2,dummy1,hmax0,vmax0
 ! boundary condition for constant inflow
 !******************************************************************************************
-    IF (dummy1*(time/ninterac)>inflow_t+vol1 .or. y2==0. .or. n>=10) THEN
+    IF (dummy1*(time/ninterac)>inflow_t*(time/ninterac)+vol1 .or. y2==0. .or. n>=10) THEN
 	 dummy1=inflow
      y2=0.
 	 vol2=0.

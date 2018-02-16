@@ -577,7 +577,7 @@ storcap(:)=0.
         IF (res_flag(i)) THEN
           WRITE(subarea,*)id_subbas_extern(i)
           OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_watbal.out',STATUS='replace')
-          WRITE(11,*)'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), evap(m**3), prec(m**3), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), withdrawal(m**3/s), elevation(m), area(m**2), volume(m**3), vol_init(m**3)'
+          WRITE(11,*)'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), evap(m**3), prec(m**3), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), withdrawal(m**3/s), elevation(m), area(m**2), volume(m**3)'
           CLOSE(11)
         ENDIF
       ENDDO
@@ -705,7 +705,7 @@ IF (STATUS == 1) THEN
 !Ge water availability approach for reservoirs has to be included
   avail_ac(:,:)=0. !water availability
   avail_all(:,:)=0.   !water availability
-  damex(:,:)=0.
+!  damex(:,:)=0. tp not used
 
 !  actual storage capacity in this year (as derived from the data in ??.dat)
 !  storcapact=0.
@@ -924,14 +924,14 @@ IF (STATUS == 2) THEN
   endif
 
 ! Computation of reservoir water balance
-  IF (res_flag(upstream)) THEN
+  IF (res_flag(upstream) .and. t >= damyear(i)) THEN
     IF (reservoir_balance == 1) THEN
       IF (reservoir_check == 1) THEN
 	    qinflow(step,upstream)=qinflow(step,upstream)*(86400./nt)
 	  ELSE
-        if (river_transport.eq.1)then
+        if (river_transport.eq.1)then ! old routing
 	      qinflow(step,upstream)=qout(step,upstream)*(86400./nt)
-	    else
+	    else ! new routing
           qinflow(step,upstream)=(r_qout(2,upstream)+qlateral(step,upstream))*(86400./nt)
 	    endif
 	  ENDIF
@@ -1040,16 +1040,16 @@ IF (STATUS == 2) THEN
             exit !correct point of CAV-found, no more searching
           END IF
       END DO
-      
+
       if (damelevact(upstream) > elev_bat(nbrbat(upstream),upstream)) then
-          write(*,"(A,i0,a)")"WARNING: Water stage of reservoir ",id_subbas_extern(upstream)," exceeds CAV-curve. Curve extrapolated."          
+          write(*,"(A,i0,a)")"WARNING: Water stage of reservoir ",id_subbas_extern(upstream)," exceeds CAV-curve. Curve extrapolated."
       end if
-      
-        
+
+
 ! Calculation of evaporation and precipitation using the truncated cone volume (m3)
 ! (using the morphologic parameter alpha)
         evaphelp=(areahelp+SQRT(areahelp*damareaact(upstream))+  &
-            damareaact(upstream))*res_pet(step,upstream)/1000.*1./3. 
+            damareaact(upstream))*res_pet(step,upstream)/1000.*1./3.
         prechelp=(areahelp+SQRT(areahelp*damareaact(upstream))+  &
             damareaact(upstream))*res_precip(step,upstream)/1000.*1./3.
 !        infhelp=0. tp TODO not used=!
@@ -1306,7 +1306,7 @@ IF (STATUS == 2) THEN
       damareaact(upstream)=areahelp
 	  volact(step,upstream)=volhelp
     ENDIF
-    damex(step,upstream)=res_qout(step,upstream)+withdrawal(upstream)
+!    damex(step,upstream)=res_qout(step,upstream)+withdrawal(upstream) tp not used
 
 ! Call sediment balance sub-routine
     IF (dosediment) then
@@ -1537,7 +1537,7 @@ IF (STATUS == 2) THEN
 		  POSITION='append')
 	 WRITE(11,'(4I6,2f10.3,2f13.1,6f10.3,3f14.1)')id_subbas_extern(upstream),t,d,hour,qlateral(step,upstream),qinflow(step,upstream),etdam(step,upstream),precdam(step,upstream),  &
 				qintake(step,upstream),overflow(step,upstream),qbottom(step,upstream),res_qout(step,upstream), &
-				withdraw_out(step,upstream),damelevact(upstream),damareaact(upstream),volact(step,upstream),help2
+				withdraw_out(step,upstream),damelevact(upstream),damareaact(upstream),volact(step,upstream)
      CLOSE(11)
 	 ENDIF
 
@@ -1596,7 +1596,14 @@ IF (STATUS == 2) THEN
 !write(*,'(2I4,3F15.4)')d,id_subbas_extern(upstream),dayminlevel(step,upstream),decstorcap(step,upstream)
 !if (d==4)stop
 
-! END of IF (storcap(upstream) > 0.) THEN
+  ELSE  ! reservoir does not (yet) exist
+
+    if (river_transport.eq.1)then
+      res_qout(step,upstream)=qout(step,upstream)
+    else
+      res_qout(step,upstream)=r_qout(2,upstream)+qlateral(step,upstream)
+    endif
+
   ENDIF
 
 ! END of STATUS = 2
@@ -1625,7 +1632,7 @@ endif
             step=(d-1)*nt+hour
 	        WRITE(11,'(4I6,2f10.3,2f13.1,6f10.3,3f14.1)')id_subbas_extern(i),t,d,hour,qlateral(step,i),qinflow(step,i),etdam(step,i),precdam(step,i),  &
 				qintake(step,i),overflow(step,i),qbottom(step,i),res_qout(step,i),withdraw_out(step,i), &
-				daydamelevact(step,i),daydamareaact(step,i),volact(step,i)*1.e6,-999.
+				daydamelevact(step,i),daydamareaact(step,i),volact(step,i)*1.e6
 		  ENDDO
 		ENDDO
         CLOSE(11)

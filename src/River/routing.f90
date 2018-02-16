@@ -319,6 +319,7 @@ IF (STATUS == 2) THEN !regular call during timestep
 ! and add possible inflow from other upstream sub-basins
         IF (doreservoir) THEN
           CALL reservoir (2,upstream,idummy)
+          qout(d,upstream) = res_qout(d,upstream) ! replace qout with reservoir outflow
         END IF
 
     END IF ! water outflow from current subbasin given?
