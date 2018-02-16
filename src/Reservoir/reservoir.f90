@@ -705,7 +705,7 @@ IF (STATUS == 1) THEN
 !Ge water availability approach for reservoirs has to be included
   avail_ac(:,:)=0. !water availability
   avail_all(:,:)=0.   !water availability
-  damex(:,:)=0.
+!  damex(:,:)=0. tp not used
 
 !  actual storage capacity in this year (as derived from the data in ??.dat)
 !  storcapact=0.
@@ -1040,16 +1040,16 @@ IF (STATUS == 2) THEN
             exit !correct point of CAV-found, no more searching
           END IF
       END DO
-      
+
       if (damelevact(upstream) > elev_bat(nbrbat(upstream),upstream)) then
-          write(*,"(A,i0,a)")"WARNING: Water stage of reservoir ",id_subbas_extern(upstream)," exceeds CAV-curve. Curve extrapolated."          
+          write(*,"(A,i0,a)")"WARNING: Water stage of reservoir ",id_subbas_extern(upstream)," exceeds CAV-curve. Curve extrapolated."
       end if
-      
-        
+
+
 ! Calculation of evaporation and precipitation using the truncated cone volume (m3)
 ! (using the morphologic parameter alpha)
         evaphelp=(areahelp+SQRT(areahelp*damareaact(upstream))+  &
-            damareaact(upstream))*res_pet(step,upstream)/1000.*1./3. 
+            damareaact(upstream))*res_pet(step,upstream)/1000.*1./3.
         prechelp=(areahelp+SQRT(areahelp*damareaact(upstream))+  &
             damareaact(upstream))*res_precip(step,upstream)/1000.*1./3.
 !        infhelp=0. tp TODO not used=!
@@ -1306,7 +1306,7 @@ IF (STATUS == 2) THEN
       damareaact(upstream)=areahelp
 	  volact(step,upstream)=volhelp
     ENDIF
-    damex(step,upstream)=res_qout(step,upstream)+withdrawal(upstream)
+!    damex(step,upstream)=res_qout(step,upstream)+withdrawal(upstream) tp not used
 
 ! Call sediment balance sub-routine
     IF (dosediment) then

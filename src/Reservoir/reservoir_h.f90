@@ -61,8 +61,9 @@ real, allocatable :: hmax(:)
 real, allocatable :: volume_last(:)
 !spillway overflow on the day before (m3/timestep)
 real, allocatable :: outflow_last(:)
+!tp not used
 !effective water extraction (consumptive use) from the Sub-basin's reservoir [m**3]
-real, allocatable :: damex(:,:)
+!real, allocatable :: damex(:,:)
 !initial storage capacity in the sub-basin's reservoir [10**3 m**3 and 10**6 m**3]
 real, allocatable :: storcap(:)
 !initial dead volume of the sub-basin's reservoir [10**3 m**3]

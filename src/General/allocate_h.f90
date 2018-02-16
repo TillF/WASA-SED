@@ -394,7 +394,7 @@ subroutine allocate_reservoir()
           hmax(subasin), &
           volume_last(subasin), &
           outflow_last(subasin), &
-	      damex(366*nt,subasin), &
+!	      damex(366*nt,subasin), & tp not used
 	      storcap(subasin), &
 	      damdead(subasin), &
 	      elevdead(subasin), &
