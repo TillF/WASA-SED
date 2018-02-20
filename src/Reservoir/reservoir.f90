@@ -924,7 +924,7 @@ IF (STATUS == 2) THEN
   endif
 
 ! Computation of reservoir water balance
-  IF (res_flag(upstream) .and. t >= damyear(i)) THEN
+  IF (res_flag(upstream) .and. t >= damyear(upstream)) THEN
     IF (reservoir_balance == 1) THEN
       IF (reservoir_check == 1) THEN
 	    qinflow(step,upstream)=qinflow(step,upstream)*(86400./nt)
