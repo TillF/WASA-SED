@@ -39,21 +39,21 @@ IF (istate/=0) THEN
 
 prout=0.
 READ (11,*, IOSTAT=istate); READ(11,*, IOSTAT=istate)
-h=3
+h=2
 i=0 !count treated subbasins
 
 DO WHILE (i<subasin)
-  READ (11,*, IOSTAT=istate)  idummy,temp2,  temp3
   h=h+1
+  READ (11,*, IOSTAT=istate)  idummy,temp2,  temp3
   IF (istate/=0) THEN
-		write(*,'(a, i0)')'Error (routing.dat): Format error or unexpected end in line ',h
+		write(*,'(a, i0)')'Error (response.dat): Format error or unexpected end in line ',h
 		stop
   END IF
 
   j=which1(idummy == id_subbas_extern) !relate to external IDs from routing.dat
 
   if (j==0) then
-	write(*,'(a, i0, a)')'Warning (routing.dat): Unknown subbasin ',idummy,', skipped.'
+	write(*,'(a, i0, a)')'Warning (response.dat): Unknown subbasin ',idummy,', skipped.'
   else
 	prout(j,1)=temp2
 	prout(j,2)=temp3
