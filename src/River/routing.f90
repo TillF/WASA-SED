@@ -46,7 +46,7 @@ DO WHILE (i<subasin)
   READ (11,*, IOSTAT=istate)  idummy,temp2,  temp3
   h=h+1
   IF (istate/=0) THEN
-		write(*,'(a, i0)')'Error (routing.dat): Format error or unexpected end in line',h
+		write(*,'(a, i0)')'Error (routing.dat): Format error or unexpected end in line ',h
 		stop
   END IF
 
