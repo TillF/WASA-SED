@@ -185,7 +185,7 @@ contains
 
             if (river_transport == 1) then !UHG routing
                 tt = size(hrout,dim=1)-1 !length of UHG minus 1
-                digits=floor(log10(max(1.0,maxval(qout(d:d+tt,1:subasin)))))+1    !Till: number of pre-decimal digits required
+                digits=ceiling(log10(max(1.0,maxval(qout(d:d+tt,1:subasin)))))+1    !Till: number of pre-decimal digits required
                 if (digits<10) then
                     write(fmtstr,'(A1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
                 else
@@ -197,7 +197,7 @@ contains
                 END DO
                 total_storage_river=sum(qout(d:d+tt-1,1:subasin)) * 3600 * dt !sum up total storage, convert m3/s to m3
             else !Muskingum routing
-                digits=floor(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
+                digits=ceiling(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
                 if (digits<10) then
                     write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),')'        !generate format string
                 else
@@ -225,7 +225,7 @@ contains
             WRITE(interflow_file_hdle,*)'Subbasin', char(9),'LU', char(9),'TC' , char(9),'horizon' , char(9),&
                 'storage_[m3]'        !tab separated output
 
-            digits=floor(log10(max(1.0,maxval(latred))))+1    !Till: number of pre-decimal digits required
+            digits=ceiling(log10(max(1.0,maxval(latred))))+1    !Till: number of pre-decimal digits required
             if (digits<10) then
                 write(fmtstr,'(A1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
             else
@@ -262,7 +262,7 @@ contains
             WRITE(snow_file_hdle,*)'Subbasin', char(9),'LU', char(9), 'horizon' , char(9),&
                 'storage [m]', char(9), 'energy [kJ/m²]', char(9), 'albedo [-]'         !tab separated output
 
-            digits=floor(log10(max(1.0,maxval(latred))))+1    !Till: number of pre-decimal digits required
+            digits=ceiling(log10(max(1.0,maxval(latred))))+1    !Till: number of pre-decimal digits required
             if (digits<10) then
                 write(fmtstr,'(A1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
             else
@@ -297,7 +297,7 @@ contains
             !write riverbed sediment storage
             !generate format string
             if (sediment_file_hdle/=0) then
-                digits=floor(log10(max(1.0,maxval(riverbed_storage))))+1    !Till: number of pre-decimal digits required
+                digits=ceiling(log10(max(1.0,maxval(riverbed_storage))))+1    !Till: number of pre-decimal digits required
                 if (digits<10) then
                     write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
                 else
@@ -316,7 +316,7 @@ contains
 
             !write suspended sediment storage
             if (susp_sediment_file_hdle/=0) then
-                digits=floor(log10(max(1.0,maxval(sed_storage))))+1    !Till: number of pre-decimal digits required
+                digits=ceiling(log10(max(1.0,maxval(sed_storage))))+1    !Till: number of pre-decimal digits required
                 if (digits<10) then
                   write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
                 else
@@ -629,7 +629,7 @@ contains
             do while (.TRUE.)        !read whole file
                 IF (len(trim(error_msg))/=0) THEN    !print error message, if occured
                     if (errors==0) then !print heading at before first error
-                        write(*,'(A,/,6a12)')' Entities not found in current domain (ignored):','Line','subbasin','LU','TC','horizon'
+                        write(*,'(A,/,5a12)')' Entities not found in current domain (ignored):','Line','subbasin','LU','TC','horizon'
                     end if
                     write(*,*)trim(error_msg)
                     error_msg='' !reset error message
@@ -645,7 +645,7 @@ contains
 
                 READ(linestr,*,  IOSTAT=i) i_subbasx,i_lux,i_tcx,h,horithact_temp
                 IF (i/=0) THEN    !format error
-                    write(error_msg,'(i12,1a12,a)')line,'-',trim(linestr)
+                    write(*,'(A,i0,A2,a)')' Format error in line ', line,': ',trim(linestr)
                     cycle    !proceed with next line
                 END IF
 
@@ -706,11 +706,11 @@ contains
                         if (latred(tcid_instance,h)==-9999.) then            !not yet set?
                             if (file_read==1) then                        !but this should have been done before
                                 if (errors==0) then    !produce header before first warning only
-                                    write(*,'(A,f4.2,a,/,5a12)')' Following entities not initialised, using defaults '// &
-                                        '(content=0):','subbasin','LU','TC','horizon'
+                                    write(*,'(a,/,4a12)')' Following entities not initialised, using defaults (content=0):', &
+                                    'subbasin','LU','TC','horizon'
                                 end if
                                 errors=errors+1
-                                write(*,'(5i12)')id_subbas_extern(sb_counter), id_lu_extern(i_lu),&
+                                write(*,'(4i12)')id_subbas_extern(sb_counter), id_lu_extern(i_lu),&
                                     id_terrain_extern(id_tc_type), h            !issue warning
                             end if
 

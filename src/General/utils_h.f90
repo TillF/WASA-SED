@@ -92,11 +92,11 @@ integer:: i
 	else
 	  indexarray(:)= pack((/(i,i=1,size(boolarray))/),boolarray)
 	end if
-	
-	if (size(indexarray)>1 .AND.  (.NOT. present(nowarning))  ) then 
+
+	if (size(indexarray)>1 .AND.  (.NOT. present(nowarning))  ) then
 		write(*,*)'Ambiguous result in which1 (replicates of soil/veg combination in TC?). Saved init_conds questionable.'
 		indexarray1=indexarray(1)		!use first occurence anyway
-		!stop 
+		!stop
 	else
 		indexarray1=indexarray(1)
 	end if
@@ -150,14 +150,14 @@ integer :: digits, fw_req, fw=11, dec=3
     if (present(fieldwidth)) fw=fieldwidth !if specified, override defaults
     if (present(decimals))   dec=decimals
 
-    digits=floor(log10(max(1.0,max_val)))+1    !Till: number of pre-decimal digits required
+    digits=ceiling(log10(max(1.0,max_val)))+1    !Till: number of pre-decimal digits required
     fw_req=digits+1+dec !total fieldwidth required
 
     if (fw_req <= fw) then
         write(fstr,'(a,i0,a,i0)') 'f',fw_req,'.',dec        !generate format string
-    else       
+    else
         write(fstr,'(a,i0,a,i0)') 'e',fw,'.5'       !for large numbers, use exponential notation
-    end if         
+    end if
 
 end function fmt_str
 
@@ -187,9 +187,9 @@ FUNCTION new_int_array1(old_pointer, newlength, dim_in)
     end if
 
     new_int_array1(1:newlength)=old_pointer(1:newlength)
-    deallocate(old_pointer) 
-    
-END FUNCTION new_int_array1   
+    deallocate(old_pointer)
+
+END FUNCTION new_int_array1
 
 FUNCTION new_real_array1(old_pointer, newlength, dim_in)
  !shrinks a given integer array (allocate new memory, copy contents, free old mem)
@@ -216,9 +216,9 @@ FUNCTION new_real_array1(old_pointer, newlength, dim_in)
     end if
 
     new_real_array1(1:newlength)=old_pointer(1:newlength)
-    deallocate(old_pointer) 
-    
-END FUNCTION new_real_array1   
+    deallocate(old_pointer)
+
+END FUNCTION new_real_array1
 
 FUNCTION new_int_array2(old_pointer, newlength, dim_in)
  !shrinks a given integer array (allocate new memory, copy contents, free old mem)
@@ -248,11 +248,11 @@ FUNCTION new_int_array2(old_pointer, newlength, dim_in)
     else
         new_int_array2(:,1:newlength)=old_pointer(:,1:newlength)
     end if
-    
-    deallocate(old_pointer) 
-    
+
+    deallocate(old_pointer)
+
     END FUNCTION new_int_array2
-    
+
 FUNCTION new_real_array2(old_pointer, newlength, dim_in)
  !shrinks a given integer array (allocate new memory, copy contents, free old mem)
     IMPLICIT NONE
@@ -281,10 +281,10 @@ FUNCTION new_real_array2(old_pointer, newlength, dim_in)
     else
         new_real_array2(:,1:newlength)=old_pointer(:,1:newlength)
     end if
-    
-    deallocate(old_pointer) 
-    
-    END FUNCTION new_real_array2   
+
+    deallocate(old_pointer)
+
+    END FUNCTION new_real_array2
 
 FUNCTION new_real_array3(old_pointer, newlength, dim_in)
  !shrinks a given integer array (allocate new memory, copy contents, free old mem)
@@ -312,10 +312,10 @@ FUNCTION new_real_array3(old_pointer, newlength, dim_in)
     if (change_dim==1) new_real_array3(1:newlength,:,:)=old_pointer(1:newlength,:,:)
     if (change_dim==2) new_real_array3(:,1:newlength,:)=old_pointer(:,1:newlength,:)
     if (change_dim==3) new_real_array3(:,:,1:newlength)=old_pointer(:,:,1:newlength)
-    
-    deallocate(old_pointer) 
-    
-END FUNCTION new_real_array3   
 
-    
+    deallocate(old_pointer)
+
+END FUNCTION new_real_array3
+
+
 END MODULE utils_h
