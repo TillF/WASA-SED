@@ -82,7 +82,7 @@ IF (STATUS == 0) THEN
 	  ENDDO
 
 		if ( count(dummy5(1:subasin)/=id_subbas_extern(1:subasin)) > 0) then
-			WRITE(*,*) 'Sub-basin-IDs in file lake_maxvol.dat must have the same ordering scheme as in hymo.dat'
+			WRITE(*,*) 'ERROR: Sub-basin-IDs in file lake_maxvol.dat must have the same ordering scheme as in hymo.dat'
 			STOP
 		end if
 
@@ -150,7 +150,7 @@ IF (STATUS == 0) THEN
 	ENDDO
 
 	if ( count(dummy5(1:subasin)/=id_subbas_extern(1:subasin)) > 0) then
-		WRITE(*,*) 'Sub-basin-IDs in file lake_number.dat must have the same ordering scheme as in hymo.dat'
+		WRITE(*,*) 'ERROR: Sub-basin-IDs in file lake_number.dat must have the same ordering scheme as in hymo.dat'
 		STOP
 	end if
 
@@ -184,7 +184,7 @@ IF (STATUS == 0) THEN
 		ENDDO
 
 		if ( count(dummy5(1:subasin)/=id_subbas_extern(1:subasin)) > 0) then
-			WRITE(*,*) 'Sub-basin-IDs in file lake_frarea.dat must have the same ordering scheme as in hymo.dat'
+			WRITE(*,*) 'ERROR: Sub-basin-IDs in file lake_frarea.dat must have the same ordering scheme as in hymo.dat'
 			STOP
 		end if
     END IF
@@ -303,10 +303,10 @@ IF (STATUS == 0) THEN
   END DO
 
   if (dosediment) cumsedimentation=0.
-  
+
 
 !Ge initialization of output files
-    
+
   call open_subdaily_output_lake(f_lake_inflow_r,'lake_inflow_r.out','Year, day, hour, inflow_r(m**3/timestep)', subbasin_line=.FALSE.)
   call open_subdaily_output_lake(f_lake_outflow_r,'lake_outflow_r.out','Year, day, hour, outflow_r(m**3/timestep)', subbasin_line=.FALSE.)
   call open_subdaily_output_lake(f_lake_retention_r,'lake_retention_r.out','Year, day, hour, retention_r(m**3/timestep)', subbasin_line=.FALSE.)
@@ -319,7 +319,7 @@ IF (STATUS == 0) THEN
     call open_subdaily_output_lake(f_lake_sedbal,'lake_sedbal.out','Year, day, hour, totalsedinflow(ton/timestep), totalsedoutflow(ton/timestep), totalsedimentation(ton/timestep), cumsedimentation(ton)', subbasin_line=.FALSE.)
     call open_subdaily_output_lake(f_lake_sedimentation_r,'lake_sedimentation_r.out','Year, day, hour, lakesedimentation_r(ton)', subbasin_line=.FALSE.)
   end if
-  
+
   call open_subdaily_output_lake(f_lake_watbal,'lake_watbal.out','Year, day, hour, totallakeinflow(m**3/timestep), totallakeoutflow(m**3/timestep), totallakeprecip(m**3/timestep), totallakeevap(m**3/timestep), lakevol(m**3)', subbasin_line=.FALSE.)
 
   call open_subdaily_output_lake(f_lake_inflow,'lake_inflow.out','Year, day, hour, reservoir_class, lakeinflow(m**3/timestep)')
@@ -327,7 +327,7 @@ IF (STATUS == 0) THEN
   call open_subdaily_output_lake(f_lake_volume,'lake_volume.out','Year, day, hour, reservoir_class, lakevolume(m**3)')
   call open_subdaily_output_lake(f_lake_vollost,'lake_vollost.out','Year, day, hour, reservoir_class, lakevollost(m**3)')
   call open_subdaily_output_lake(f_lake_retention,'lake_retention.out','Year, day, hour, reservoir_class, lakeretention(m**3/timestep)')
-  
+
   IF (dosediment) then
    call open_subdaily_output_lake(f_lake_sedinflow,'lake_sedinflow.out','Year, day, hour, reservoir_class, lakesedinflow(ton/timestep)')
    call open_subdaily_output_lake(f_lake_sedoutflow,'lake_sedoutflow.out','Year, day, hour, reservoir_class, lakesedoutflow(ton/timestep)')
@@ -564,20 +564,20 @@ endif
     hour=ih
     step=(d-1)*nt+hour !Till: timestep in current simulation year
 	if (step /= 1) then
-        d_laststep=step-1 !regular case    
+        d_laststep=step-1 !regular case
     else
-        if (t==tstart) then 
+        if (t==tstart) then
             d_laststep=1 !this is the very beginning
-        else    
+        else
 	      !  if (t==tstart+1) then
-          !      d_laststep= dtot !first new year after simulation start 
+          !      d_laststep= dtot !first new year after simulation start
                 !dayoutsim number of days in start year before start month
            ! else
                 d_laststep=(daylastyear)*nt !this is when a new year has begun
            ! end if
-        end if            
-    end if    
-	
+        end if
+    end if
+
 
 !**********************************************************************************
 !if(step<5)water_subbasin_t(d,ih,muni)=1500000.
@@ -1441,15 +1441,15 @@ RETURN
         INTEGER                              :: iostate
         LOGICAL, optional                    :: subbasin_line
         LOGICAL                              :: subbasin_line1
-        
+
         subbasin_line1=.TRUE. !default: inlcude line with subbasin numbering
         if (present(subbasin_line))   subbasin_line1=subbasin_line
-    
+
         if (append_output) then !if enabled, do not create file, but append
             OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old', IOSTAT=iostate)
             if (iostate == 0) return !if file exists, return
             CLOSE(11)
-        end if    
+        end if
 
         OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='replace', IOSTAT=iostate)
         if (iostate /= 0) then
@@ -1459,13 +1459,13 @@ RETURN
         IF (f_flag) THEN    !if output file is enabled
             WRITE(11,'(a)') headerline
             write(fmtstr,'(a,i0,a)')'(A24,',subasin,'I15)'		!generate format string
-	        if (subbasin_line1) WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin) 
+	        if (subbasin_line1) WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
             !write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'        !generate format string
             !WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep', (char(9),id_subbas_extern(i),i=1,subasin)
             CLOSE(11)
         ELSE                !delete any existing file, if no output is desired
             CLOSE(11,status='delete')
         END IF
-    END SUBROUTINE open_subdaily_output_lake    
-    
+    END SUBROUTINE open_subdaily_output_lake
+
 END SUBROUTINE lake

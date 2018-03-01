@@ -182,7 +182,7 @@ FUNCTION new_int_array1(old_pointer, newlength, dim_in)
 
     allocate(new_int_array1(old_dims(1)),STAT = i)
     if (i/=0) then
-        write(*,'(A,i0,a)')'Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
+        write(*,'(A,i0,a)')'ERROR: Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
         stop
     end if
 
@@ -211,7 +211,7 @@ FUNCTION new_real_array1(old_pointer, newlength, dim_in)
 
     allocate(new_real_array1(old_dims(1)),STAT = i)
     if (i/=0) then
-        write(*,'(A,i0,a)')'Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
+        write(*,'(A,i0,a)')'ERROR: Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
         stop
     end if
 
@@ -240,7 +240,7 @@ FUNCTION new_int_array2(old_pointer, newlength, dim_in)
 
     allocate(new_int_array2(old_dims(1),old_dims(2)),STAT = i)
     if (i/=0) then
-        write(*,'(A,i0,a)')'Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
+        write(*,'(A,i0,a)')'ERROR: Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
         stop
     end if
     if (change_dim==1) then
@@ -273,7 +273,7 @@ FUNCTION new_real_array2(old_pointer, newlength, dim_in)
 
     allocate(new_real_array2(old_dims(1),old_dims(2)),STAT = i)
     if (i/=0) then
-        write(*,'(A,i0,a)')'Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
+        write(*,'(A,i0,a)')'ERROR: Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
         stop
     end if
     if (change_dim==1) then
@@ -306,7 +306,7 @@ FUNCTION new_real_array3(old_pointer, newlength, dim_in)
 
     allocate(new_real_array3(old_dims(1),old_dims(2),old_dims(3)),STAT = i)
     if (i/=0) then
-        write(*,'(A,i0,a)')'Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
+        write(*,'(A,i0,a)')'ERROR: Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
         stop
     end if
     if (change_dim==1) new_real_array3(1:newlength,:,:)=old_pointer(1:newlength,:,:)

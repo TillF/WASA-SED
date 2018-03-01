@@ -24,7 +24,7 @@ subroutine allocate_general()
       STAT = istate)
 
 	if (istate/=0) then
-		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in general-module: '
+		write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in general-module: '
 		stop
 	end if
     do_pre_outflow=.true.
@@ -189,7 +189,7 @@ INTEGER :: istate
 	 STAT = istate)
 
 	if (istate/=0) then
-		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in hymo-module: '
+		write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in hymo-module: '
 		stop
 	end if
 
@@ -343,7 +343,7 @@ subroutine allocate_reservoir()
 	    STAT = istate)
 
 	    if (istate/=0) then
-		    write(*,'(A,i0,a)')'Memory allocation error (',istate,') in acude-module (small reservoirs).'
+		    write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in acude-module (small reservoirs).'
 		    stop
 	    end if
 
@@ -610,7 +610,7 @@ subroutine allocate_reservoir()
 	     STAT = istate)
 
 	    if (istate/=0) then
-		    write(*,'(A,i0,a)')'Memory allocation error (',istate,') in reservoir-module.'
+		    write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in reservoir-module.'
 		    stop
 	    end if
 
@@ -634,7 +634,7 @@ subroutine allocate_reservoir()
 		    STAT = istate)
 
 		    if (istate/=0) then
-			    write(*,'(A,i0,a)')'Memory allocation error (',istate,') in reservoir-module (sediments).'
+			    write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in reservoir-module (sediments).'
 			    stop
 		    end if
 
@@ -807,7 +807,7 @@ real :: temp2
     idummy = istate + idummy
 
     if (idummy/=0) then
-        write(*,'(A,i0,i0,a)')'Memory allocation error (',istate,'/',idummy,') in hymo-module (snow): '
+        write(*,'(A,i0,i0,a)')'ERROR: Memory allocation error (',istate,'/',idummy,') in hymo-module (snow): '
         stop
     end if
 

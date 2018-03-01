@@ -73,7 +73,7 @@ DO i=1,subasin
   ih=which1(id_subbas_extern == upbasin(i))
 
   IF (ih==0) THEN
-      WRITE (*,'(A,I0,A)') 'unknown upstream subbasin ID ', upbasin(i),' in routing.dat'
+      WRITE (*,'(A,I0,A)') 'ERROR: unknown upstream subbasin ID ', upbasin(i),' in routing.dat'
       STOP
   else
 	upbasin(i)=ih
@@ -84,7 +84,7 @@ DO i=1,subasin
   ih=which1(id_subbas_extern == downbasin(i))
 
   IF (ih==0) THEN
-      WRITE (*,'(A,I0,A)') 'unknown downstream subbasin ID ', downbasin(i),' in routing.dat'
+      WRITE (*,'(A,I0,A)') 'ERROR: unknown downstream subbasin ID ', downbasin(i),' in routing.dat'
       STOP
   else
 	downbasin(i)=ih

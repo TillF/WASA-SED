@@ -24,12 +24,12 @@ implicit none
 	end do
 
 	if (iostat==-1) then	!reached end of file
-		write(*,'(A,i0,a,i0,a,i0)')'ABORTED: input file '//trim(filename)//' does not contain simulation start ',dstart,'/',mstart,'/',tstart,' (d/m/y)'
+		write(*,'(A,i0,a,i0,a,i0)')'ERROR: input file '//trim(filename)//' does not contain simulation start ',dstart,'/',mstart,'/',tstart,' (d/m/y)'
 		stop
 	end if
 
 	if (iostat/=0) then	!format error
-		write(*,'(A,i0)')'ABORTED: format error in '//trim(filename)//' in line ',linecount
+		write(*,'(A,i0)')'ERROR: format error in '//trim(filename)//' in line ',linecount
 		stop
 	end if
 
@@ -128,7 +128,7 @@ IF (STATUS == 0) THEN
   no_columns(1)=GetNumberOfSubstrings(linedummy)-2	!Till: count number of columns
   READ (linedummy,*, IOSTAT=iostat) dummy, dummy, (columnheader(i), i=1,no_columns(1))	!Till: extract column headers
   if (iostat/=0) then
-		write(*,*)'Format error in temperature.dat'
+		write(*,*)'ERROR: Format error in temperature.dat'
 		stop
   end if
   corr_column_temp=>set_corr_column(columnheader, 'temperature.dat')
@@ -139,7 +139,7 @@ IF (STATUS == 0) THEN
   no_columns(2)=GetNumberOfSubstrings(linedummy)-2	!Till: count number of columns
   READ (linedummy,*, IOSTAT=iostat) dummy, dummy, (columnheader(i), i=1,no_columns(2))	!Till: extract column headers
   if (iostat/=0) then
-		write(*,*)'Format error in humidity.dat'
+		write(*,*)'ERROR: Format error in humidity.dat'
 		stop
   end if
   corr_column_rhum=>set_corr_column(columnheader,'humidity.dat')
@@ -150,7 +150,7 @@ IF (STATUS == 0) THEN
   no_columns(3)=GetNumberOfSubstrings(linedummy)-2	!Till: count number of columns
   READ (linedummy,*, IOSTAT=iostat) dummy, dummy, (columnheader(i), i=1,no_columns(3))	!Till: extract column headers
   if (iostat/=0) then
-		write(*,*)'Format error in radiation.dat'
+		write(*,*)'ERROR: Format error in radiation.dat'
 		stop
   end if
   corr_column_rad=> set_corr_column(columnheader,'radiation.dat')
@@ -162,7 +162,7 @@ IF (STATUS == 0) THEN
   no_columns(4)=GetNumberOfSubstrings(linedummy)-2	!Till: count number of columns
   READ (linedummy,*, IOSTAT=iostat) dummy, dummy, (columnheader(i), i=1,no_columns(4))	!Till: extract column headers
   if (iostat/=0) then
-		write(*,*)'Format error in '//trim(dumstr)
+		write(*,*)'ERROR: Format error in '//trim(dumstr)
 		stop
   end if
   corr_column_precip=>set_corr_column(columnheader,dumstr)

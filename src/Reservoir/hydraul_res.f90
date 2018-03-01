@@ -1,13 +1,13 @@
 SUBROUTINE hydraul_res(upstream)
 !Till: computationally irrelevant: outcommented unused vars
-!2012-09-14 
+!2012-09-14
 
 !Till: computationally irrelevant: minor changes to improve compiler compatibility
 !2011-04-29
 
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:41
- 
+
 use common_h
 use routing_h
 use time_h
@@ -118,7 +118,7 @@ DO j=1,nbrsec(upstream)
   npt=npoints(j,upstream)
   maxelev_sec(j,upstream)=MIN(y_sec(1,j,upstream), y_sec(npt,j,upstream))
   maxdepth_sec(j,upstream)=maxelev_sec(j,upstream)- minelev_sec(j,upstream)
-  
+
   DO m=2,npt
     TAN=ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/  &
         (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))
@@ -143,12 +143,12 @@ END DO
 ! Check if the cross sections are completely sedimented
 DO j=1,nbrsec(upstream)
   if (maxarea_sec(j,upstream) == 0.) then
-    WRITE(*,*)'stop because the cross section ',j
+    WRITE(*,*)'ERROR: cross section ',j
     WRITE(*,*)'is completely sedimented'
     STOP
   END IF
 END DO
-	  
+
 
 
 ! Check if the cross section belongs to either the river or the reservoir
@@ -159,10 +159,10 @@ n=0
 DO j=1,nbrsec(upstream)
   IF (damelev >= minelev_sec(j,upstream)) THEN
     IF (damelev > maxelev_sec(j,upstream)) THEN
-      WRITE(*,*)'the water discharge overflows the cross section geometry ',j
+      WRITE(*,*)'ERROR: the water discharge overflows the cross section geometry ',j
       STOP
     END IF
-    
+
 ! RESERVOIR SUBREACH
     n=n+1
 ! Cross section area
@@ -186,21 +186,21 @@ DO j=1,nbrsec(upstream)
             (((damelev-y_sec(m-1,j,upstream))**2.)/(2.*TAN))
       END IF
     END DO
-    
+
 ! Reservoir's volume represented by two consecutive cross section
     IF (n == 1 .and. j /= 1) THEN
       dist0_sec=(damelev-minelev_sec(j,upstream))/ bedslope_sec(j-1,upstream)
       resvol_sec(j,upstream)=resarea_sec(j,upstream)*dist0_sec/3.
     ELSE IF (n == 1 .and. j == 1) THEN
       dist0_sec=(damelev-minelev_sec(j,upstream))/ bedslope_sec(j,upstream)
-      resvol_sec(j,upstream)=resarea_sec(j,upstream)*dist0_sec/3. 
+      resvol_sec(j,upstream)=resarea_sec(j,upstream)*dist0_sec/3.
     ELSE
       resvol_sec(j,upstream)=(dist_sec(j-1,upstream)/3.)*  &
           (resarea_sec(j,upstream)+resarea_sec(j-1,upstream)+  &
           SQRT(resarea_sec(j,upstream)*resarea_sec(j-1,upstream)))
     END IF
     resvol(upstream)=resvol(upstream)+resvol_sec(j,upstream)
-    
+
   ELSE
 ! RIVER SUBREACH
     resarea_sec(j,upstream)=0.
@@ -220,7 +220,7 @@ if (q /= 0) then
     resarea_sec(j,upstream)=0.
   enddo
 endif
-        
+
 ! Weighted averaged value
 weight=0.
 DO j=1,nbrsec(upstream)
@@ -254,7 +254,7 @@ k=0
 
 DO j=1,nbrsec(upstream)
   npt=npoints(j,upstream)
-  
+
   if (j==1) depth_sec(j,upstream)=1.
   if (j/=1) depth_sec(j,upstream)=depth_sec(j-1,upstream)
 
@@ -279,12 +279,12 @@ DO j=1,nbrsec(upstream)
       area_sec(j,upstream)=0.
       topwidth_sec(j,upstream)=0.
       wetper_sec(j,upstream)=0.
-      
+
       IF (watelev_sec(j,upstream) > maxelev_sec(j,upstream)) THEN
         watelev_sec(j,upstream)=maxelev_sec(j,upstream)
         depth_sec(j,upstream)=maxdepth_sec(j,upstream)
       END IF
-      
+
       DO m=2,npt
         TAN=ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/  &
             (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))
@@ -323,22 +323,22 @@ DO j=1,nbrsec(upstream)
               **2+(watelev_sec(j,upstream)-y_sec(m-1,j,upstream))**2.)
         END IF
       END DO
-      
-      
+
+
 ! check if there is neither inflow nor outflow at the reservoir
-      hydrad_sec(j,upstream)=area_sec(j,upstream)/ wetper_sec(j,upstream)  
+      hydrad_sec(j,upstream)=area_sec(j,upstream)/ wetper_sec(j,upstream)
       discharge_calc=(1./(manning_sec(j,upstream)))*  &
           SQRT(bedslope_sec(j,upstream))*hydrad_sec(j,upstream)**(2./3.)  &
           *area_sec(j,upstream)
-      
+
       error=discharge_calc-discharge_sec(j,upstream)
-      
+
       IF (watelev_sec(j,upstream) == maxelev_sec(j,upstream).AND.  &
             discharge_calc < discharge_sec(j,upstream) .AND. a/=1) THEN
-        WRITE(*,*)'the water discharge overflows the cross section ',j
+        WRITE(*,*)'ERROR: the water discharge overflows the cross section ',j
         STOP
       END IF
-      
+
       if (dummy3==1) then
 	    error=0.00001
         watelev_sec(j,upstream)=minelev_sec(j,upstream)+  &
@@ -358,7 +358,7 @@ DO j=1,nbrsec(upstream)
             interv=1
           END IF
         END IF
-          
+
         IF (interv /= 0) THEN
           IF (error1 < 0. .AND. error < 0.) THEN
             lowlim=MAX(depth_sec(j,upstream),dep)
@@ -371,7 +371,7 @@ DO j=1,nbrsec(upstream)
           dep=depth_sec(j,upstream)
           depth_sec(j,upstream)=(lowlim+toplim)/2.
         END IF
-          
+
         error1=error
 
 		IF (toplim-lowlim < 1e-4 .and. toplim/=0. .and. lowlim/=0.) then
@@ -382,7 +382,7 @@ DO j=1,nbrsec(upstream)
 !		  write(*,*)'stopped for an approximation error of ',error1
 !		  write(*,*)'hidraulic calculation (step 1) and cross section',j
 		ENDIF
-          
+
         watelev_sec(j,upstream)=minelev_sec(j,upstream)+  &
               depth_sec(j,upstream)
 		normalelev_sec(j,upstream)=watelev_sec(j,upstream)
@@ -411,11 +411,11 @@ END DO
 
 DO j=1,nbrsec(upstream)
   if(j==k+1 .and. k/=nbrsec(upstream))exit
-  
+
   npt=npoints(j,upstream)
   crdepth_sec(j,upstream)=depth_sec(j,upstream)
   crwatelev_sec(j,upstream)=watelev_sec(j,upstream)
-  
+
 ! trial-and-error
   error=1.
   error1=0.
@@ -423,7 +423,7 @@ DO j=1,nbrsec(upstream)
   lowlim=0.
   interv=0
   dep=0.
-  
+
 ! check if there is neither inflow nor outflow at the reservoir
   b=0
   dummy3=0
@@ -431,17 +431,17 @@ DO j=1,nbrsec(upstream)
     DO WHILE (ABS(error) > 0.01)
       b=b+1
 !dummy(j)=b
-      
+
 ! hydraulic parameters at the first cross section
       crarea_sec(j,upstream)=0.
       crtopwidth_sec(j,upstream)=0.
       crwetper_sec(j,upstream)=0.
-      
+
       IF (watelev_sec(j,upstream) > maxelev_sec(j,upstream)) THEN
         crwatelev_sec(j,upstream)=maxelev_sec(j,upstream)
         crdepth_sec(j,upstream)=maxdepth_sec(j,upstream)
       END IF
-      
+
       DO m=2,npt
         TAN=ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/  &
             (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))
@@ -480,7 +480,7 @@ DO j=1,nbrsec(upstream)
               **2+(crwatelev_sec(j,upstream)-y_sec(m-1,j,upstream))**2.)
         END IF
       END DO
-          
+
       discharge_calc=SQRT(9.807*(crarea_sec(j,upstream)**3.)/  &
           crtopwidth_sec(j,upstream))
 
@@ -490,21 +490,21 @@ DO j=1,nbrsec(upstream)
 
       IF (crwatelev_sec(j,upstream) == maxelev_sec(j,upstream).AND.  &
             discharge_calc < discharge_sec(j,upstream)) THEN
-        WRITE(*,*)'the water discharge overflows the cross section ',j
+        WRITE(*,*)'ERROR: the water discharge overflows the cross section ',j
         STOP
       END IF
-      
+
       if (dummy3==1) then
 	    error=0.00001
         crwatelev_sec(j,upstream)=minelev_sec(j,upstream)+  &
               crdepth_sec(j,upstream)
-	    crvel_sec(j,upstream)=discharge_sec(j,upstream)/crarea_sec(j,upstream)	 
-	    crhydrad_sec(j,upstream)=crarea_sec(j,upstream)/crwetper_sec(j,upstream)	 
+	    crvel_sec(j,upstream)=discharge_sec(j,upstream)/crarea_sec(j,upstream)
+	    crhydrad_sec(j,upstream)=crarea_sec(j,upstream)/crwetper_sec(j,upstream)
 		crslope_sec(j,upstream)=((manning_sec(j,upstream)*crvel_sec(j,upstream))**2)/ &
 			  (crhydrad_sec(j,upstream)**(4./3.))
         exit
 	  endif
-	    
+
 
       IF (ABS(error) > 0.01) THEN
         IF (interv == 0) THEN
@@ -518,7 +518,7 @@ DO j=1,nbrsec(upstream)
             interv=1
           END IF
         END IF
-          
+
         IF (interv /= 0) THEN
           IF (error1 < 0. .AND. error < 0.) THEN
             lowlim=MAX(crdepth_sec(j,upstream),dep)
@@ -531,7 +531,7 @@ DO j=1,nbrsec(upstream)
           dep=crdepth_sec(j,upstream)
           crdepth_sec(j,upstream)=(lowlim+toplim)/2.
         END IF
-          
+
         error1=error
 
 		IF (toplim-lowlim<1e-4 .and. toplim/=0. .and. lowlim/=0.) then
@@ -545,8 +545,8 @@ DO j=1,nbrsec(upstream)
 
         crwatelev_sec(j,upstream)=minelev_sec(j,upstream)+  &
               crdepth_sec(j,upstream)
-	    crvel_sec(j,upstream)=discharge_sec(j,upstream)/crarea_sec(j,upstream)	 
-	    crhydrad_sec(j,upstream)=crarea_sec(j,upstream)/crwetper_sec(j,upstream)	 
+	    crvel_sec(j,upstream)=discharge_sec(j,upstream)/crarea_sec(j,upstream)
+	    crhydrad_sec(j,upstream)=crarea_sec(j,upstream)/crwetper_sec(j,upstream)
 		crslope_sec(j,upstream)=((manning_sec(j,upstream)*crvel_sec(j,upstream))**2)/ &
 			  (crhydrad_sec(j,upstream)**(4./3.))
       END IF
@@ -557,13 +557,13 @@ DO j=1,nbrsec(upstream)
 !     crwatelev_sec(j,upstream),crarea_sec(j,upstream),crwetper_sec(j,upstream),hydrad_sec(j,upstream),error
 
     if(crwatelev_sec(j,upstream)>maxelev_sec(j,upstream)) then
-      WRITE(*,*)'the water discharge overflows the cross section ',j
+      WRITE(*,*)'ERROR: the water discharge overflows the cross section ',j
       STOP
     END IF
 
   END IF
 
-  
+
 END DO
 
 
@@ -572,7 +572,7 @@ END DO
 
 !write(*,*)'Step (3.1)'
 DO j=1,nbrsec(upstream)
-  
+
 ! 3.1) computation of hydraulic parameters if the cross section j belongs to the reservoir subreach
   IF (resarea_sec(j,upstream) /= 0.) THEN
 
@@ -580,11 +580,11 @@ DO j=1,nbrsec(upstream)
 
 	  area_sec(j,upstream)=resarea_sec(j,upstream)
       depth_sec(j,upstream)=damelev-minelev_sec(j,upstream)
-	  watelev_sec(j,upstream)=damelev   	   
+	  watelev_sec(j,upstream)=damelev
 
 	  topwidth_sec(j,upstream)=0.
 	  wetper_sec(j,upstream)=0.
-	                                    
+
       DO m=2,npt
         TAN=ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/  &
             (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))
@@ -642,7 +642,7 @@ DO p=1,k
 !    dummy2=dummy2+1
   endif
 ENDDO
-!flow_regime=real(dummy2)/real(k)    
+!flow_regime=real(dummy2)/real(k)
 flow_regime=1.
 
 IF (k /= 0) THEN
@@ -651,7 +651,7 @@ IF (k /= 0) THEN
 ! 3.2a) for the case M1 (mild slope at the river subreach)
  if (flow_regime>=0.5) then
 ! for the case, which the reservoir is not completely empty (simulation affected by the reservoir subreach)
- 
+
   IF (k == nbrsec(upstream)) THEN
     depth_sec(k,upstream)=crdepth_sec(k,upstream)
 	watelev_sec(k,upstream)=crwatelev_sec(k,upstream)
@@ -667,11 +667,11 @@ IF (k /= 0) THEN
     calctothead_sec(k,upstream)=tothead_sec(k,upstream)
 	k=k-1
   endif
-    
+
 !write(*,*)'Step (3.2a)'
   DO p=1,k
     npt=npoints(k+1-p,upstream)
-    
+
 ! trial-and-error
     error=1.
     error1=0.
@@ -679,25 +679,25 @@ IF (k /= 0) THEN
     lowlim=0.
     interv=0
     dep=0.
-    
+
     e=0
     dummy3=0
     IF (discharge_sec(k+1-p,upstream) > 0.) THEN
       DO WHILE (ABS(error) > 0.001)
         e=e+1
 !dummy(k+1-p)=e
-        
+
 ! hydraulic parameters at the cross section j
         area_sec(k+1-p,upstream)=0.
         topwidth_sec(k+1-p,upstream)=0.
         wetper_sec(k+1-p,upstream)=0.
-        
-        
+
+
         IF (watelev_sec(k+1-p,upstream) > maxelev_sec(k+1-p,upstream)) THEN
           watelev_sec(k+1-p,upstream)=maxelev_sec(k+1-p,upstream)
           depth_sec(k+1-p,upstream)=maxdepth_sec(k+1-p,upstream)
         END IF
-        
+
         DO m=1,npt
 		  area_part(m,k+1-p)=0.
 		enddo
@@ -746,7 +746,7 @@ IF (k /= 0) THEN
                 (watelev_sec(k+1-p,upstream)- y_sec(m-1,k+1-p,upstream))**2.)
           END IF
         END DO
-        
+
         hydrad_sec(k+1-p,upstream)=area_sec(k+1-p,upstream)/  &
             wetper_sec(k+1-p,upstream)
         meanvel_sec(k+1-p,upstream)=discharge_sec(k+1-p,upstream)/  &
@@ -785,31 +785,31 @@ dummy1=23
 				(discharge_sec(k+2-p,upstream)/sqrt(energslope_sec(k+2-p,upstream)))))**2.)
 dummy1=22
           endif
-		endif		  
+		endif
 
 ! local head-loss coefficient (dimensionless)
         IF (area_sec(k+1-p,upstream) >= 1.2*area_sec(k+2-p,upstream)) THEN
           loclosscoef=0.1
-        ELSEIF (area_sec(k+1-p,upstream) <= 0.8*area_sec(k+2-p,upstream)) THEN 
+        ELSEIF (area_sec(k+1-p,upstream) <= 0.8*area_sec(k+2-p,upstream)) THEN
 		  loclosscoef=0.3
         ELSE
           loclosscoef=0.
         END IF
-        
+
         locloss_sec(k+1-p,upstream)=(loclosscoef/(2.*9.807))*  &
             (discharge_sec(k+1-p,upstream)**2.)*  &
             ABS((1./(area_sec(k+1-p,upstream)**2.))  &
             -(1./(area_sec(k+2-p,upstream)**2.)))
-        
+
         coef=1.
-        
+
         calctothead_sec(k+1-p,upstream)=tothead_sec(k+2-p,upstream)+coef*(headloss_sec(k+1-p,upstream)  &
             +locloss_sec(k+1-p,upstream))
-      
+
         error=tothead_sec(k+1-p,upstream)-calctothead_sec(k+1-p,upstream)
-        
+
 		if (e>20 .and. ABS(error1)>0.1) exit
-		if (e>30) exit                    
+		if (e>30) exit
         IF (watelev_sec(k+1-p,upstream) == maxelev_sec(k+1-p,upstream)  &
               .AND.calctothead_sec(k+1-p,upstream) <  &
               tothead_sec(k+1-p,upstream) &
@@ -817,7 +817,7 @@ dummy1=22
         IF (watelev_sec(k+1-p,upstream) == maxelev_sec(k+1-p,upstream)  &
               .AND.calctothead_sec(k+1-p,upstream) <  &
               tothead_sec(k+1-p,upstream)) THEN
-          WRITE(*,*)'the water discharge overflows the cross section ', k+1-p
+          WRITE(*,*)'ERROR: the water discharge overflows the cross section ', k+1-p
           STOP
         END IF
 
@@ -827,7 +827,7 @@ dummy1=22
               depth_sec(k+1-p,upstream)
           exit
 	    endif
-        
+
         IF (ABS(error) > 0.001) THEN
           IF (interv == 0) THEN
             IF (error1 >= 0. .AND. error > 0.) THEN
@@ -840,7 +840,7 @@ dummy1=22
               interv=1
             END IF
           END IF
-          
+
           IF (interv /= 0) THEN
             IF (error1 < 0.AND.error < 0) THEN
               lowlim=MAX(depth_sec(k+1-p,upstream),dep)
@@ -853,7 +853,7 @@ dummy1=22
             dep=depth_sec(k+1-p,upstream)
             depth_sec(k+1-p,upstream)=(lowlim+toplim)/2.
           END IF
-        
+
           error1=error
 
 		  IF (toplim-lowlim<1e-5 .and. toplim/=0. .and. lowlim/=0.) then
@@ -867,8 +867,8 @@ dummy1=22
 
           watelev_sec(k+1-p,upstream)=minelev_sec(k+1-p,upstream)+  &
               depth_sec(k+1-p,upstream)
-	              
-        END IF  
+
+        END IF
 
 !if (error==0.00001) then
 !write(*,'(2I4,9F10.5,I4,3F10.5)')k+1-p,dummy1,depth_sec(k+1-p,upstream),dep, &
@@ -877,7 +877,7 @@ dummy1=22
 !     error,lowlim,toplim,interv,headloss_sec(k+1-p,upstream), &
 !     locloss_sec(k+1-p,upstream),energslope_sec(k+1-p,upstream)
 !endif
-        
+
       END DO
 	  IF (depth_sec(k+1-p,upstream)<crdepth_sec(k+1-p,upstream) .or. ABS(error1)>0.1 .or. e>30) then
 	    depth_sec(k+1-p,upstream)=crdepth_sec(k+1-p,upstream)
@@ -900,18 +900,18 @@ dummy1=22
 	  endif
 
       if(watelev_sec(k+1-p,upstream)>maxelev_sec(k+1-p,upstream)) then
-        WRITE(*,*)'the water discharge overflows the cross section ',k+1-p
+        WRITE(*,*)'ERROR: the water discharge overflows the cross section ',k+1-p
         STOP
       END IF
 
-    END IF  
+    END IF
 
-    
+
   END DO
-!  stop  
- 
+!  stop
+
 ! 3.2b) for the case S1 (steep slope at the river subreach)
- else 
+ else
 ! for the case, which the reservoir is completely empty (simulation is not affected by the reservoir subreach)
   depth_sec(1,upstream)=crdepth_sec(1,upstream)
   watelev_sec(1,upstream)=crwatelev_sec(1,upstream)
@@ -925,12 +925,12 @@ dummy1=22
   energslope_sec(1,upstream)=(meanvel_sec(1,upstream)**2.)*  &
 		(manning_sec(1,upstream)**2.)/ (hydrad_sec(1,upstream)**(4./3.))
   calctothead_sec(1,upstream)=tothead_sec(1,upstream)
-    
+
   if (k>1) then
 !write(*,*)'Step (3.2b)'
    DO p=2,k
     npt=npoints(p,upstream)
-    
+
 ! trial-and-error
     error=1.
     error1=0.
@@ -938,25 +938,25 @@ dummy1=22
     lowlim=0.
     interv=0
     dep=0.
-    
+
     f=0
     dummy3=0
     IF (discharge_sec(p,upstream) > 0.) THEN
       DO WHILE (ABS(error) > 0.001)
         f=f+1
 !dummy(p)=e
-        
+
 ! hydraulic parameters at the cross section j
         area_sec(p,upstream)=0.
         topwidth_sec(p,upstream)=0.
         wetper_sec(p,upstream)=0.
-        
-        
+
+
         IF (watelev_sec(p,upstream) > maxelev_sec(p,upstream)) THEN
           watelev_sec(p,upstream)=maxelev_sec(p,upstream)
           depth_sec(p,upstream)=maxdepth_sec(p,upstream)
         END IF
-        
+
         DO m=2,npt
           TAN=ABS(y_sec(m,p,upstream)-y_sec(m-1,p,upstream))/  &
               (x_sec(m,p,upstream)-x_sec(m-1,p,upstream))
@@ -965,7 +965,7 @@ dummy1=22
             area_part(m,p)=(x_sec(m,p,upstream)-x_sec(m-1,p,upstream))*  &
                 (watelev_sec(p,upstream)-  &
                 (y_sec(m,p,upstream)+y_sec(m-1,p,upstream))/2.)
-			area_sec(p,upstream)=area_sec(p,upstream)+area_part(m,p)                
+			area_sec(p,upstream)=area_sec(p,upstream)+area_part(m,p)
             topwidth_sec(p,upstream)=topwidth_sec(p,upstream)+  &
                 (x_sec(m,p,upstream)-x_sec(m-1,p,upstream))
             wetper_sec(p,upstream)=wetper_sec(p,upstream)+  &
@@ -976,7 +976,7 @@ dummy1=22
                  >= y_sec(m,p,upstream)) THEN
             area_part(m,p)=(((watelev_sec(p,upstream)-  &
                 y_sec(m,p,upstream))**2.)/(2.*TAN))
-			area_sec(p,upstream)=area_sec(p,upstream)+area_part(m,p)                
+			area_sec(p,upstream)=area_sec(p,upstream)+area_part(m,p)
             topwidth_sec(p,upstream)=topwidth_sec(p,upstream)+  &
                 ((x_sec(m,p,upstream)-x_sec(m-1,p,upstream))*  &
                 (watelev_sec(p,upstream)-y_sec(m,p,upstream))/  &
@@ -990,7 +990,7 @@ dummy1=22
                  < y_sec(m,p,upstream)) THEN
             area_part(m,p)=(((watelev_sec(p,upstream)-  &
                 y_sec(m-1,p,upstream))**2.)/(2.*TAN))
-			area_sec(p,upstream)=area_sec(p,upstream)+area_part(m,p)                
+			area_sec(p,upstream)=area_sec(p,upstream)+area_part(m,p)
             topwidth_sec(p,upstream)=topwidth_sec(p,upstream)+  &
                 ((x_sec(m,p,upstream)-x_sec(m-1,p,upstream))*  &
                 (watelev_sec(p,upstream)-y_sec(m-1,p,upstream))/  &
@@ -1001,7 +1001,7 @@ dummy1=22
                 (watelev_sec(p,upstream)- y_sec(m-1,p,upstream))**2.)
           END IF
         END DO
-        
+
         hydrad_sec(p,upstream)=area_sec(p,upstream)/  &
             wetper_sec(p,upstream)
         meanvel_sec(p,upstream)=discharge_sec(p,upstream)/  &
@@ -1040,31 +1040,31 @@ dummy1=23
 				(discharge_sec(p-1,upstream)/sqrt(energslope_sec(p-1,upstream)))))**2.)
 dummy1=22
           endif
-		endif		  
+		endif
 
 ! local head-loss coefficient (dimensionless)
         IF (area_sec(p,upstream) >= 1.2*area_sec(p-1,upstream)) THEN
           loclosscoef=0.05
-        ELSEIF (area_sec(p,upstream) <= 0.8*area_sec(p-1,upstream)) THEN 
+        ELSEIF (area_sec(p,upstream) <= 0.8*area_sec(p-1,upstream)) THEN
 		  loclosscoef=0.1
         ELSE
           loclosscoef=0.
         END IF
-        
+
         locloss_sec(p,upstream)=(loclosscoef/(2.*9.807))*  &
             (discharge_sec(p,upstream)**2.)*  &
             ABS((1./(area_sec(p,upstream)**2.))  &
             -(1./(area_sec(p-1,upstream)**2.)))
-        
+
         coef=-1.
-        
+
         calctothead_sec(p,upstream)=tothead_sec(p-1,upstream)+coef*(headloss_sec(p,upstream)  &
             +locloss_sec(p,upstream))
 
         error=tothead_sec(p,upstream)-calctothead_sec(p,upstream)
-        
+
 		if (e>20 .and. ABS(error1)>0.1) exit
-		if (e>30) exit                    
+		if (e>30) exit
         IF (watelev_sec(p,upstream) == maxelev_sec(p,upstream)  &
               .AND.calctothead_sec(p,upstream) <  &
               tothead_sec(p,upstream) &
@@ -1072,10 +1072,10 @@ dummy1=22
         IF (watelev_sec(p,upstream) == maxelev_sec(p,upstream)  &
               .AND.calctothead_sec(p,upstream) <  &
               tothead_sec(p,upstream)) THEN
-          WRITE(*,*)'the water discharge overflows the cross section ', p
+          WRITE(*,*)'ERROR: the water discharge overflows the cross section ', p
           STOP
         END IF
-        
+
         if (dummy3==1) then
 	      error=0.00001
           watelev_sec(p,upstream)=minelev_sec(p,upstream)+  &
@@ -1096,7 +1096,7 @@ dummy1=22
               interv=1
             END IF
           END IF
-          
+
           IF (interv /= 0) THEN
             IF (error1 < 0.AND.error < 0) THEN
               lowlim=MAX(depth_sec(p,upstream),dep)
@@ -1109,7 +1109,7 @@ dummy1=22
             dep=depth_sec(p,upstream)
             depth_sec(p,upstream)=(lowlim+toplim)/2.
           END IF
-        
+
           error1=error
 
 		  IF (toplim-lowlim <1e-5 .and. toplim/=0. .and. lowlim/=0.) then
@@ -1120,10 +1120,10 @@ dummy1=22
 !			write(*,*)'stopped for an approximation error of ',error1
 !		    write(*,*)'hidraulic calculation (step 3.2a) and cross section',p
 		  ENDIF
-          
+
           watelev_sec(p,upstream)=minelev_sec(p,upstream)+  &
               depth_sec(p,upstream)
-        END IF  
+        END IF
 
 !if (error==0.00001) then
 !write(*,'(2I4,9F10.5,I4,2F10.5)')p,dummy1,depth_sec(p,upstream),dep, &
@@ -1156,20 +1156,20 @@ dummy1=22
 	  endif
 
       if(watelev_sec(p,upstream)>maxelev_sec(p,upstream)) then
-        WRITE(*,*)'the water discharge overflows the cross section ',p
+        WRITE(*,*)'ERROR: the water discharge overflows the cross section ',p
         STOP
       END IF
 
-    END IF    
+    END IF
 
-    
+
    END DO
 
   endif
 
  endif
 
- 
+
 END IF
 
 !DO j=1,nbrsec(upstream)
