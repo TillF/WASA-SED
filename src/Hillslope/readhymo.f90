@@ -364,7 +364,7 @@
 
         dummy1=GetNumberOfSubstrings(cdummy)-5 !Till: count number of fields (ie SVCs) specified for this combination
         if (dummy1 > maxsoil) then
-            write (*,*)'Line ',h,' in soil_vegetation.dat contains ',dummy1,' soil types - more than specified in maxdim.dat or assumed by default.'
+            write (*,*)'ERROR: Line ',h,' in soil_vegetation.dat contains ',dummy1,' soil types - more than specified in maxdim.dat or assumed by default.'
             stop
         end if
         k=0
@@ -446,7 +446,7 @@
         dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields
 
         if (dummy1 > 2+maxhori*13+1+(c-3)) then
-            write (*,'(A,i0,a,i0,a)')'Line ',h,' in soil.dat contains ',(dummy1-3-(c-3))/13,' horizons - more than specified in maxdim.dat or assumed by default.'
+            write (*,'(A,i0,a,i0,a)')'ERROR: Line ',h,' in soil.dat contains ',(dummy1-3-(c-3))/13,' horizons - more than specified in maxdim.dat or assumed by default.'
             stop
         end if
 
@@ -473,7 +473,7 @@
 
         DO k=1,nbrhori(j)
             if (coarse(j,k)>1.) then
-                write(*,*)'coarse fraction cannot be larger than 1. Check soil.dat in line ', j+2
+                write(*,*)'ERROR: coarse fraction cannot be larger than 1. Check soil.dat in line ', j+2
                 stop
             end if
         END DO
@@ -507,7 +507,7 @@
 
         if (istate == -1 ) then
             if ((trim(cdummy)=='') .and. j < nveg) then
-                write(*,'(a,i0,a,i0)')'WARNING: vegetation.dat, expected ', nveg, ' valid entries, found ',j
+                write(*,'(a,i0,a,i0)')'ERROR: vegetation.dat, expected ', nveg, ' valid entries, found ',j
                 stop
             else
                 exit
@@ -560,7 +560,7 @@
         !** read SVC information (numbering scheme, erosion properties)
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/svc.dat', IOSTAT=istate,STATUS='old')
         IF (istate/=0) THEN
-            write(*,*)pfadp(1:pfadj)// 'Hillslope/svc.dat could not be opened. Supply this file or disable sediment modelling or loading/saving states. Aborting.'
+            write(*,*) "ERROR: ", pfadp(1:pfadj)// 'Hillslope/svc.dat could not be opened. Supply this file or disable sediment modelling or loading/saving states. Aborting.'
             stop
         END IF
         READ(11,*)
@@ -659,7 +659,7 @@
             if (trim(cdummy)=='') cycle    !skip blank lines
             READ(cdummy,*, IOSTAT=istate) id_svc_extern(i), j, n, svc_k_fac(i,:), svc_c_fac(i,:), svc_p_fac(i,:), svc_coarse_fac(i,:), svc_n(i,:)
             IF (istate /= 0 .OR. GetNumberOfSubstrings(cdummy)/=k) THEN    !format error
-                write(*,'(a,i0,a)')'svc.dat, line ',h,': unexpected number of fields. Check *_seasons.dat'
+                write(*,'(a,i0,a)')'ERROR: svc.dat, line ',h,': unexpected number of fields. Check *_seasons.dat'
                 stop
             END IF
 
@@ -775,7 +775,7 @@
             DO j=1,n_sed_class  !check completeness
                 DO i=1,nsoil
                     IF (soil_particles(i,j)==-1.) then        !found soil/particle class for that no fraction has been read
-                        WRITE(*,'(a, I3, a, I3)') 'soil_particles.dat: Soil ', id_soil_extern(i), ' is lacking particle-size data for class ', j
+                        WRITE(*,'(a, I3, a, I3)') 'ERROR: soil_particles.dat: Soil ', id_soil_extern(i), ' is lacking particle-size data for class ', j
                         STOP
                     END IF
                 END DO
@@ -788,7 +788,7 @@
         !** read SVC relations towards TCs
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/svc_in_tc.dat', IOSTAT=istate,STATUS='old')
         IF (istate/=0) THEN
-            write(*,*)pfadp(1:pfadj)// 'Hillslope/svc_in_tc.dat could not be opened. Aborting.'
+            write(*,*) "ERROR: ", pfadp(1:pfadj)// 'Hillslope/svc_in_tc.dat could not be opened. Aborting.'
             stop
         END IF
         READ(11,*)
@@ -892,7 +892,7 @@
             end if
             i=id_ext2int(dummy1,id_soil_extern)    !convert external to internal ID
             if (i==-1) then
-                write(*,'(a,i0,a)')'Unknown soil-ID ',dummy1,' in calibration.dat'
+                write(*,'(a,i0,a)')'ERROR: Unknown soil-ID ',dummy1,' in calibration.dat'
                 stop
             end if
             k_sat(i,:)=k_sat(i,:)*temp1                !modify Ksat of specified soil
@@ -935,7 +935,7 @@
             END DO
 
             IF (n > nsoter) THEN    !reference to undefined LU
-                WRITE(*,'(a, I0,a, I0, a)') 'LU ', id_lu_intern(j,i), ' (Subbasin ', id_subbas_extern(i), ') not found in soter.dat.'
+                WRITE(*,'(a, I0,a, I0, a)') 'ERROR: LU ', id_lu_intern(j,i), ' (Subbasin ', id_subbas_extern(i), ') not found in soter.dat.'
                 STOP
             END IF
             id_lu_intern(j,i)=n                                !replace external ID with internal ID
@@ -985,7 +985,7 @@
             END DO
 
             IF (n > nsoil) THEN    !reference to undefined SOIL
-                WRITE(*,'(a, I0, a)') 'Soil ', id_soil_intern(j,i), ' not found in soil.dat.'
+                WRITE(*,'(a, I0, a)') 'ERROR: Soil ', id_soil_intern(j,i), ' not found in soil.dat.'
                 STOP
             END IF
 
@@ -1002,7 +1002,7 @@
             END DO
 
             if (n>nveg) then
-                write(*,'(a, I0, a, I0, a)')'Vegetation class ',id_veg_intern(j,i),' not found in vegetation.dat.'
+                write(*,'(a, I0, a, I0, a)')'ERROR: Vegetation class ',id_veg_intern(j,i),' not found in vegetation.dat.'
                 stop
             end if
             id_veg_intern(j,i)=n                                        !replace internal ID with external ID
@@ -1650,7 +1650,7 @@ if (dosnow /= 0) then
 
         DO i=1,nsoter !check completeness
             if (lu_aspect(i)==-999 .OR. lu_alt(i)==-999) then
-                WRITE(*,'(a, I3, a)') 'lu2.dat: LU ', id_lu_extern(i), ' is data for aspect or altitude.'
+                WRITE(*,'(a, I3, a)') 'ERROR: lu2.dat: LU ', id_lu_extern(i), ' is data for aspect or altitude.'
                 STOP
             END IF
         END DO
@@ -1792,7 +1792,7 @@ end if ! do_snow
 
             IF (any(test_ar == tiny(test_ar))) then
                 IF (all(test_ar == tiny(test_ar))) then
-                    WRITE(*,'(a, I0, a, I0)') ' '//inputfile_name//': Sub-basin ', id_subbas_extern(j), &
+                    WRITE(*,'(a, I0, a, I0)') 'ERROR: '//inputfile_name//': Sub-basin ', id_subbas_extern(j), &
                         ' lacks seasonality data for begin of simulation year ', i
                     STOP
                 END IF
@@ -1945,7 +1945,7 @@ end if ! do_snow
                 READ (linedummy,*,IOSTAT=i) pre_psd
 
                 if (abs(1.-sum(pre_psd))>0.05) then
-                    stop 'trouble reading mean PSD from subbasin_outsed.dat. Not specified, format error or sum<>1'
+                    stop 'ERROR: trouble reading mean PSD from subbasin_outsed.dat. Not specified, format error or sum<>1'
                 end if
 
                 READ(92,*)

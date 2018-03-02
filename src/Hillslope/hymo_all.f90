@@ -617,19 +617,19 @@ SUBROUTINE hymo_all(STATUS)
 				height_act=0.01 !prevent 0, which will cause problems in division otherwise
        		END WHERE
 			if (count(rootd_act < 0) > 0) then !ii: check values beforehand, not every day (checking tiepoints should suffice)
-                write(*,*)'Negative root depth, check rainy_season.dat and vegetation.dat.'
+                write(*,*)'ERROR: Negative root depth, check rainy_season.dat and vegetation.dat.'
                 stop
             END IF
 			if (count(lai_act < 0) > 0) then
-                write(*,*)'Negative LAI, check rainy_season.dat and vegetation.dat.'
+                write(*,*)'ERROR: Negative LAI, check rainy_season.dat and vegetation.dat.'
                 stop
             END IF
 			if (count(alb_act < 0) > 0) then
-                write(*,*)'Negative albedo, check rainy_season.dat and vegetation.dat.'
+                write(*,*)'ERROR: Negative albedo, check rainy_season.dat and vegetation.dat.'
                 stop
             END IF
 			if (count(height_act < 0) > 0) then
-                write(*,*)'Negative vegetation height, check rainy_season.dat and vegetation.dat.'
+                write(*,*)'ERROR: Negative vegetation height, check rainy_season.dat and vegetation.dat.'
                 stop
             END IF
 
@@ -642,23 +642,23 @@ SUBROUTINE hymo_all(STATUS)
                 svc_n_day         = calc_seasonality2(i_subbas, t, julian_day, seasonality_n,      svc_n)                !compute n of current day
 
                 if (count(svc_k_fac_day < 0) > 0) then !ii: check values beforehand, not every day (checking tiepoints should suffice)
-                    write(*,*)'Negative K-factor, check rainy_season.dat and svc.dat.'
+                    write(*,*)'ERROR: Negative K-factor, check rainy_season.dat and svc.dat.'
                     stop
                 END IF
                 if (count(svc_c_fac_day < 0) > 0) then
-                    write(*,*)'Negative C-factor, check rainy_season.dat and svc.dat.'
+                    write(*,*)'ERROR: Negative C-factor, check rainy_season.dat and svc.dat.'
                     stop
                 END IF
                 if (count(svc_p_fac_day < 0) > 0) then
-                    write(*,*)'Negative P-factor, check rainy_season.dat and svc.dat.'
+                    write(*,*)'ERROR: Negative P-factor, check rainy_season.dat and svc.dat.'
                     stop
                 END IF
                 if (count(svc_coarse_fac_day < 0) > 0) then
-                    write(*,*)'Negative coarse fraction, check rainy_season.dat and svc.dat.'
+                    write(*,*)'ERROR: Negative coarse fraction, check rainy_season.dat and svc.dat.'
                     stop
                 END IF
                 if (count(svc_n_day < 0) > 0) then
-                    write(*,*)'Negative Manning''s n, check rainy_season.dat and svc.dat.'
+                    write(*,*)'ERROR: Negative Manning''s n, check rainy_season.dat and svc.dat.'
                     stop
                 END IF
 

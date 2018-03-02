@@ -180,7 +180,7 @@ IF (STATUS == 0) THEN
           dummy1=id_subbas_extern(i)
         END IF
         IF (dummy1 /= id_subbas_extern(i)) THEN
-          WRITE(*,*) 'Sub-basin-IDs in file hydraul_param.dat must have the same ordering scheme as in hymo.dat'
+          WRITE(*,*) 'ERROR: Sub-basin-IDs in file hydraul_param.dat must have the same ordering scheme as in hymo.dat'
           STOP
         END IF
       END DO
@@ -228,7 +228,7 @@ IF (STATUS == 0) THEN
 	ENDIF
     IF (storcap(i) == 0.) dummy1=id_subbas_extern(i)
     IF (dummy1 /= id_subbas_extern(i)) THEN
-      WRITE(*,*) 'Sub-basin-IDs in file sed.dat must have the same ordering scheme as in hymo.dat'
+      WRITE(*,*) 'ERROR: Sub-basin-IDs in file sed.dat must have the same ordering scheme as in hymo.dat'
       STOP
     END IF
 !write(*,*) dummy1,dry_dens(i),factor_actlay(i)
@@ -466,7 +466,7 @@ IF (STATUS == 0) THEN
           dummy1=id_subbas_extern(i)
         END IF
         IF (dummy1 /= id_subbas_extern(i)) THEN
-          WRITE(*,*) 'Sub-basin-IDs in file main_channel.dat must have the same ordering scheme as in hymo.dat'
+          WRITE(*,*) 'ERROR: Sub-basin-IDs in file main_channel.dat must have the same ordering scheme as in hymo.dat'
           STOP
         END IF
       END DO

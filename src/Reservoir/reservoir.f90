@@ -122,7 +122,7 @@ if (reservoir_check==0) reservoir_balance=1
 	  ih=which1(id_subbas_extern == upbasin(i))
 
 	  IF (ih==0) THEN
-		  WRITE (*,'(A,I0,A)') 'unknown upstream subbasin ID ', upbasin(i),' in routing.dat'
+		  WRITE (*,'(A,I0,A)') 'ERROR: unknown upstream subbasin ID ', upbasin(i),' in routing.dat'
 		  STOP
 	  else
 		upbasin(i)=ih
@@ -133,7 +133,7 @@ if (reservoir_check==0) reservoir_balance=1
 	  ih=which1(id_subbas_extern == downbasin(i))
 
 	  IF (ih==0) THEN
-		  WRITE (*,'(A,I0,A)') 'unknown downstream subbasin ID ', downbasin(i),' in routing.dat'
+		  WRITE (*,'(A,I0,A)') 'ERROR: unknown downstream subbasin ID ', downbasin(i),' in routing.dat'
 		  STOP
 	  else
 		downbasin(i)=ih
@@ -147,7 +147,7 @@ storcap(:)=0.
 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/reservoir.dat',IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!reservoir.dat not found
-	  write(*,*)pfadp(1:pfadj)// 'Reservoir/reservoir.dat was not found, please provide it.'
+	  write(*,*) "ERROR: ", pfadp(1:pfadj)// 'Reservoir/reservoir.dat was not found, please provide it.'
 	  stop
 	ENDIF
 
@@ -278,7 +278,7 @@ storcap(:)=0.
           READ (11,*)dummy1,reservoir_down(i)
 
           IF (dummy1 /= id_subbas_extern(i)) THEN
-            WRITE(*,*) 'Sub-basin-IDs in file lateral_inflow.dat must have the same ordering scheme as in hymo.dat'
+            WRITE(*,*) 'ERROR: Sub-basin-IDs in file lateral_inflow.dat must have the same ordering scheme as in hymo.dat'
             STOP
           END IF
 
@@ -287,7 +287,7 @@ storcap(:)=0.
             DO WHILE (id_subbas_extern(j) /= reservoir_down(i))
               j=j+1
               IF (j > 500) THEN
-                WRITE (*,*) 'downsbasin(i) loop in readhymo.f'
+                WRITE (*,*) 'ERROR: downsbasin(i) loop in readhymo.f'
                 STOP
               END IF
             END DO
@@ -297,7 +297,7 @@ storcap(:)=0.
 		  dummy1=id_subbas_extern(i)
 		ENDIF
         IF (dummy1 /= id_subbas_extern(i)) THEN
-         WRITE(*,*) 'Sub-basin-IDs in file operat_rule.dat must have the same ordering scheme as in hymo.dat'
+         WRITE(*,*) 'ERROR: Sub-basin-IDs in file operat_rule.dat must have the same ordering scheme as in hymo.dat'
          STOP
         END IF
      ENDDO
@@ -309,7 +309,7 @@ storcap(:)=0.
 	write(*,*)pfadp(1:pfadj)// 'Reservoir/operat_rule.dat was not found. Run the model anyway.'
     DO i=1,subasin
 	  if (damq_frac(i) == -999.) then
-	    write(*,*)'[operat_rule.dat must be given [or change the value of the parameter damq_frac in reservoir.dat]'
+	    write(*,*)'ERROR: operat_rule.dat must be given [or change the value of the parameter damq_frac in reservoir.dat]'
 		stop
 	  endif
 	ENDDO
@@ -320,7 +320,7 @@ storcap(:)=0.
 	  IF (damq_frac(i) == -999.) READ (11,*)dummy1,(dayexplot(i,s),s=1,4),(damq_frac_season(i,s),s=1,4)
 	  IF (damq_frac(i) /= -999.) dummy1=id_subbas_extern(i)
       IF (dummy1 /= id_subbas_extern(i)) THEN
-        WRITE(*,*) 'Sub-basin-IDs in file operat_rule.dat must have the same ordering scheme as in hymo.dat'
+        WRITE(*,*) 'ERROR: Sub-basin-IDs in file operat_rule.dat must have the same ordering scheme as in hymo.dat'
         STOP
       END IF
 	ENDDO
@@ -331,7 +331,7 @@ storcap(:)=0.
 	write(*,*)pfadp(1:pfadj)// 'Reservoir/operat_bottom.dat was not found. Run the model anyway.'
     DO i=1,subasin
 	  if (fvol_bottom(i) == -999.) then
-	    write(*,*)'[operat_bottom.dat must be given [or change the value of the parameter damq_frac in reservoir.dat]'
+	    write(*,*)'ERROR: operat_bottom.dat must be given [or change the value of the parameter damq_frac in reservoir.dat]'
 		stop
 	  endif
 	ENDDO
@@ -342,7 +342,7 @@ storcap(:)=0.
 	  IF (fvol_bottom(i) == -999.) READ (11,*)dummy1,operat_start(i),operat_stop(i),operat_elev(i)
 	  IF (fvol_bottom(i) /= -999.) dummy1=id_subbas_extern(i)
       IF (dummy1 /= id_subbas_extern(i)) THEN
-        WRITE(*,*) 'Sub-basin-IDs in file operat_bottom.dat must have the same ordering scheme as in hymo.dat'
+        WRITE(*,*) 'ERROR: Sub-basin-IDs in file operat_bottom.dat must have the same ordering scheme as in hymo.dat'
         STOP
       END IF
 	ENDDO
@@ -426,7 +426,7 @@ storcap(:)=0.
 	vol_bat=0
 
 	if (istate/=0) then
-		write(*,'(A,i0,a)')'Memory allocation error (',istate,') in reservoir-module (rating curves too detailed).'
+		write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in reservoir-module (rating curves too detailed).'
 		stop
 	end if
 

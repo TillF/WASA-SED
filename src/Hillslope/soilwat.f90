@@ -747,17 +747,17 @@
     !	END DO
     !END DO
     !!for debugging - remove end
-    
+
 
 
     prec          =   prec_in !these assignments are necessary even if snow module not active; in steps after snow module usage of prec
-    prechall2     =   prechall2_in 
-    precday       =   precday_in 
+    prechall2     =   prechall2_in
+    precday       =   precday_in
 
     !** -------------------------------------------------------------------------
     !SNOW MODULE
     !Physically-based simulations based on energy balance method of ECHSE (Eco-hydrological Simulation Environment)
-    
+
     if(dosnow > 0) then
 
         temperature   =   temp(day,i_subbas2)
@@ -2037,7 +2037,7 @@
 
         if (isnan(evapt)) then
             evaps=1.
-            write(*,*)'problems with evaps1'
+            write(*,*)'ERROR: problems with evaps1'
             stop
         end if
 
@@ -2070,7 +2070,7 @@
 
             if (isnan(evaps)) then
                 evaps=1.
-                write(*,*)'problems with evaps'
+                write(*,*)'ERROR: problems with evaps'
                 stop
             end if
 
@@ -2443,7 +2443,7 @@
                         ELSE IF (tempx > riverbed(i_lu) .AND. temp4 < riverbed(i_lu)) THEN
                             temp2=(riverbed(i_lu)-temp4)/temp3		!Till: drain saturated fraction of horizon that is above riverbed
                         ELSE
-                            WRITE(*,*) 'groundwater level not valid'
+                            WRITE(*,*) 'ERROR: groundwater level not valid'
                             WRITE(*,*) i,tcid_instance2,soilid
                             STOP
                         END IF

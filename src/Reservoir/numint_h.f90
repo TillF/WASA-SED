@@ -104,7 +104,7 @@ do j=1,JMAX
   end if
   olds=qtrap
 end do
-write(*,*)"Too many steps in 'qtrap'"
+write(*,*)"ERROR: Too many steps in 'qtrap'"
 stop 1
 END FUNCTION qtrap
 

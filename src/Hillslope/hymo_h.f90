@@ -131,7 +131,7 @@ module hymo_h
     !fraction of sheetflow that gets concentrated within the TC (and vice-versa)
     real, allocatable :: frac_diff2conc(:), frac_conc2diff(:)
 
-    
+
     ! SOIL-VEGETATION COMPONENT PARAMETERS
     ! Till thickness of horizons (lowest horizon may be different from that of profiles)
     !Allocatable      real horiz_thickness(nmunsutc,maxsoil,maxhori)
@@ -282,7 +282,7 @@ module hymo_h
     real, pointer ::  gw_loss_t(:,:,:)				!ground water loss (deep percolation in LUs with no ground water flag) for each day and timestep(366,nt,subasin)
     real, pointer ::  river_infiltration_t(:,:,:)	!infiltration into riverbed, loss from model domain
     real, pointer ::  riverflow_t(:,:,:)	!Till: flow in the river in m3/s for each day and timestep(366,nt,subasin)
-   
+
 
     ! daily soil evaporation (mm/day)
     !Allocatable       real soilet(366,subasin)
@@ -317,7 +317,7 @@ module hymo_h
     real, allocatable ::  water_subbasin(:,:)
     !Till: contribution of each subbasin to the river in m3/s for each day and timestep(366,nt,subasin)
     real, allocatable ::  water_subbasin_t(:,:,:)
-    
+
     ! losses in river network by evaporation
     !Allocatable       real qloss(366,subasin)
     real, allocatable ::   qloss(:,:)
@@ -551,7 +551,7 @@ contains
         if (f_flag) then
             allocate(allocate_hourly_array(366,nt,subasin),STAT = istate)
             if (istate/=0) then
-                write(*,'(A,i0,a)')'Memory allocation error (',istate,') in hymo-module. Try disabling some hourly output.'
+                write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in hymo-module. Try disabling some hourly output.'
                 stop
             end if
         else
@@ -674,7 +674,7 @@ contains
     END FUNCTION calc_seasonality2
 
     FUNCTION soildistr()
- 
+
     use common_h
     use params_h
 
@@ -704,7 +704,7 @@ contains
 
     allocate(soildistr(5,2,size(thsprof, dim=1), size(thsprof, dim=2)),STAT = i)
     if (i/=0) then
-        write(*,'(A,i0,a)')'Memory allocation error (',i,') in soil-distr-module. Try disabling some hourly output.'
+        write(*,'(A,i0,a)')'ERROR: Memory allocation error (',i,') in soil-distr-module. Try disabling some hourly output.'
         stop
     end if
 
@@ -721,23 +721,23 @@ contains
     DO k=1,ntcinst
       DO i=1,nbr_svc(k)
         tempx=thsprof(k,i)
-    
+
         if (k==5 .AND. i==3) then
             var2=0.1
         end if
-    
+
         soildistr(1,1,k,i)=tempx-var2*tempx
         soildistr(2,1,k,i)=tempx-var1*tempx
         soildistr(3,1,k,i)=tempx
         soildistr(4,1,k,i)=tempx+var1*tempx
         soildistr(5,1,k,i)=tempx+var2*tempx
-    
+
         soildistr(1,2,k,i)=0.0
         soildistr(2,2,k,i)=0.1
         soildistr(3,2,k,i)=0.5
         soildistr(4,2,k,i)=0.9
         soildistr(5,2,k,i)=1.0
-    
+
     !  end of loop for all soil components
       END DO
     END DO

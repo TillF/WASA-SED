@@ -37,7 +37,7 @@ SUBROUTINE route_sediments(i)
 !!    sed_storage(:,:)    |metric tons   |amount of sediment stored in reach
 !!    spcon       |none          |linear parameter for calculating sediment 0.0001-0.01
 !!                               |reentrained in channel sediment routing
-!!    spexp       |none          |exponent parameter for calculating sediment 1.0-1.5 
+!!    spexp       |none          |exponent parameter for calculating sediment 1.0-1.5
 !!                               |reentrained in channel sediment routing
 !!	  r_cfactor(i) |none          |0.0-1.0    |channel cover factor: 0.0=channel is completely protected from erosion by cover; 1.0=no vegetative cover on channel
 
@@ -99,7 +99,7 @@ if (r_qout(1,i) == 0. .and. r_storage(i) == (r_qin(2,i)+3600.*dt)) then
     return
 endif
 !! do not perform sediment routing if no water in reach
-IF (volume == 0.0) then 
+IF (volume == 0.0) then
  river_deposition(i,:) = sed_storage(i,:) + sediment_in(i,:) !incoming and suspended sediment is deposited
  riverbed_storage(i,:) = riverbed_storage(i,:) + river_deposition(i,:)
  sediment_out(i,:) = 0.
@@ -109,7 +109,7 @@ ENDIF
 !! initialize sediment mass in reach during time step [tons]
 
 prf= 1.
-!spcon(:)=  0.016111		!0.0001-0.01  
+!spcon(:)=  0.016111		!0.0001-0.01
 !spexp (:)= 1.707			!1 - 1.5
 !det = 24/dt	!number of simulation steps per day
 
@@ -126,9 +126,9 @@ prf= 1.
     !vel_peak = 5.
     vel_peak =vel_peak_thresh+(vel_peak_thresh2-vel_peak_thresh)*(-sqrt(velocity(i)**2+4)/2+velocity(i)/2+1) !smoothly reduce implausibly high velocity values to upper threshold
     write(*,'(A, i0)') 'very high flow velocity for sediment transport in sub-basin ', id_subbas_extern(i)
-    
+
   endif
-  
+
 
 !Loop through all sediment classes
 do k=1, n_sed_class
@@ -147,7 +147,7 @@ do k=1, n_sed_class
 ! Calculation of degradation [tons]
 ! Extension to incorporate detachment limitations (e.g. rocky riverbeds, where nothing can be degradeded, r_rock: percentage cover of riverbed with rock)
 ! only allow degradation if discharge larger than 0.1 m3/s
-	if (r_qout(1,i) > 0.1) then   
+	if (r_qout(1,i) > 0.1) then
 	   river_degradation(i,k) = depnet * r_efactor(i) * r_cover(i) * (1. - r_rock(i))
     else
        river_degradation (i,k) = 0.
@@ -162,23 +162,23 @@ do k=1, n_sed_class
     river_degradation(i,k) = 0.
   END IF
 
-  
-! Calculation of deposited sediments in the riverbed of the stretch [tons] 
+
+! Calculation of deposited sediments in the riverbed of the stretch [tons]
  riverbed_storage(i,k)=riverbed_storage(i,k) + river_deposition(i,k) - river_degradation(i,k)
  !if (riverbed_storage(i,k).lt.0.) riverbed_storage(i,k) = 0.
 
 
-! Calculation of sediment balance [tons] (assuming instantaneous mixing) 
+! Calculation of sediment balance [tons] (assuming instantaneous mixing)
 !Till: update amount of suspended sediment in reach due to erosion/deposition
   sed_storage(i,k) = sed_storage(i,k)+ sediment_in(i,k) +  river_degradation(i,k) - river_deposition(i,k)
-  
+
 !Calculation of sediment leaving the reach [tons]
-  sediment_out(i,k) = sed_storage(i,k)/ volume * (r_qout(2,i)*3600.*dt) !export from reach [t] : concentration * volumes 
+  sediment_out(i,k) = sed_storage(i,k)/ volume * (r_qout(2,i)*3600.*dt) !export from reach [t] : concentration * volumes
   sediment_out(i,k) = max(0., sed_storage(i,k)) !Till: because outflow out of a river may exceed its storage volume (sadly), this needs to be done to ensure preservation of mass
-  
+
   IF (sediment_out(i,k) < 0.) then
       sediment_out(i,k) = 0.
-      write(*,*) 'negative sediment output. This is a bug, please report.'
+      write(*,*) 'ERROR: negative sediment output. This is a bug, please report.'
       stop
   end if
 

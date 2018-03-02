@@ -55,7 +55,7 @@ IF (STATUS == 0) THEN
 ! Read hydrological response and river parameters
  OPEN(11,FILE=pfadp(1:pfadj)// 'River/river.dat', IOSTAT=istate,STATUS='old')
         IF (istate/=0) THEN
-            write(*,*)pfadp(1:pfadj)// 'River/river.dat could not be opened. Aborting.'
+            write(*,*) "ERROR: ", pfadp(1:pfadj)// 'River/river.dat could not be opened. Aborting.'
             stop
         END IF
   READ (11,*); READ(11,*)
@@ -119,7 +119,7 @@ if(river_transport.eq.3) then
   DO i=1,subasin
 	READ (11,*) idummy, D50(i)
 	IF (idummy /= id_subbas_extern(i)) THEN
-		WRITE(*,*) 'Sub-basin-IDs in file bedload.dat must have the same ordering scheme as in hymo.dat'
+		WRITE(*,*) 'ERROR: Sub-basin-IDs in file bedload.dat must have the same ordering scheme as in hymo.dat'
 		STOP
 	END IF
   END DO
@@ -132,7 +132,7 @@ DO i=1,subasin
   DO WHILE (id_subbas_extern(j) /= upbasin(i))
     j=j+1
     IF (j > 1000) THEN
-      WRITE (*,*) 'upbasin(i) loop in routing_new.f'
+      WRITE (*,*) 'ERROR: upbasin(i) loop in routing_new.f'
       STOP
     END IF
   END DO
@@ -145,7 +145,7 @@ DO i=1,subasin
     DO WHILE (id_subbas_extern(j) /= downbasin(i))
       j=j+1
       IF (j > 1000) THEN
-        WRITE (*,*) 'downbasin(i) loop in routing_new.f'
+        WRITE (*,*) 'ERROR: downbasin(i) loop in routing_new.f'
         STOP
       END IF
     END DO
