@@ -711,7 +711,7 @@ IF (STATUS == 1) THEN
 	      OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/frsedinflow_'//trim(adjustl(subarea))//'.dat', &
 			STATUS='unknown')
           read(11,*)
-          cont=(dtot-dayyear)*nt
+          cont=dtot*nt
           DO id=1,cont
             READ(11,*)
           END DO

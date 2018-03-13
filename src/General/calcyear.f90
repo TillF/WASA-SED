@@ -1,5 +1,5 @@
 SUBROUTINE calcyear
- 
+
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-06-30  Time: 13:50:58
 use time_h
@@ -34,7 +34,7 @@ END DO
 
 
 ! first simulation year
-IF (t == tstart) THEN	
+IF (t == tstart) THEN
   dstart=min(dstart, daymon(mstart)) !correct start/stop days, when larger than days in month
   dstop =min(dstop,  daymon(mstop))
 
@@ -42,28 +42,28 @@ IF (t == tstart) THEN
 
   dayyear   = sum(daymon(mstart:12)) !number of days to treat in current year
   dayyear	  =	dayyear   - (dstart-1) !reduce by start_day_of month
-  
-  dtot=dayyear !Calculation of total days since simulation started (for first year)
+
+!  dtot=dayyear !Calculation of total days since simulation started (for first year)
 
 	!Ge check total number of days before the start month in the start year
 	IF (mstart /= 1) THEN
 	  dayoutsim = sum(daymon(1:mstart-1))
-	ENDIF 
-	
-	dayoutsim = dayoutsim + (dstart-1) 
+	ENDIF
+
+	dayoutsim = dayoutsim + (dstart-1)
 
 END IF
 
 ! Calculates no. of days of simulated days in previous year (as a function of leap years)
 daylastyear = -1 !debug option, can be removed
 IF (t == tstart + 1) THEN
-  daylastyear = dtot
+  daylastyear = dtot-1
 else
     IF ( is_leapyear(t-1) ) THEN
         daylastyear = 366
-    ELSE 
+    ELSE
         daylastyear = 365
-    END IF 
+    END IF
 END IF
 
 
@@ -73,8 +73,8 @@ END IF
 
 ! intermediate simulation years
 IF (t /= tstart .AND. t /= tstop) THEN
-  dayyear   = sum(daymon(1:12))  
-  dtot=dtot+dayyear !count simulation days
+  dayyear   = sum(daymon(1:12))
+!  dtot=dtot+dayyear !count simulation days
 END IF
 
 
@@ -83,7 +83,7 @@ IF (t == tstop .AND. t /= tstart) THEN
   dayyear   = sum(daymon(1:mstop))
   dayyear	  =	dayyear   - (daymon(mstop)- dstop) !reduce by end_day_of_month
 
-  dtot=dtot+dayyear !count simulation days
+!  dtot=dtot+dayyear !count simulation days
 END IF
 
 
@@ -91,7 +91,7 @@ END IF
 IF (t == tstop .AND. t == tstart) THEN
   dayyear   = sum(daymon(mstart:mstop))
   dayyear	= dayyear    - (dstart-1) - (daymon(mstop)- dstop) !reduce by start_day_of month and end_day_of month
-  dtot=dayyear
+!  dtot=dayyear
 END IF
 
 

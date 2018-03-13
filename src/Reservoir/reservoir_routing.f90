@@ -46,8 +46,9 @@ hmax0=hmax(upstream)
 
 !stop
 
-
-IF (outflow==0.) THEN
+! if this is the initial timestep, volume_last might be > 0 even if outflow_last = 0
+! because there is no information about outflow_last at initial timestep but volume_last might be > 0 depending on parameter vol0
+IF (outflow==0. .and. dtot > 1) THEN
   vol2=0.
 ELSE
   vol2=volume_last(upstream)
