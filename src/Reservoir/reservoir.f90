@@ -549,7 +549,7 @@ storcap(:)=0.
   DO i=1,subasin
 	IF (res_flag(i)) THEN
 	  outflow_last(i)=0.
-	  volume_last(i)=0.
+	  volume_last(i)=max(0., vol0(i) - storcap(i))
 	  alpha_over(i)=1./(1.-damb(i))
 	  k_over(i)=(dama(i)/alpha_over(i))**alpha_over(i)
 !write(*,*)id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),storcap(i)*1.e6
@@ -1206,10 +1206,13 @@ IF (STATUS == 2) THEN
 
 ! 5) Calculation of the overflow discharges from the reservoir
       IF (help3 > daystorcap(step,upstream) .and. fvol_over(upstream) == 1) THEN
+        ! volume in/decrease relative to storage capacity after all other water balance components were added
         help=(volact(step,upstream)-daystorcap(step,upstream))+qinflow(step,upstream)
+        ! total volume after all other water balance components were added
 		help1=help2+help
         help=max(0.,help)
 !write(*,'(2I4,6F11.1)')step,id_subbas_extern(upstream),help,help1,help2,help3,volact(step,upstream),daystorcap(step,upstream)
+        ! total volume still larger than storage capacity -> calculate overspill
         IF (help1 > daystorcap(step,upstream)) THEN
 !write(*,'(2I4,6F15.2)')step,id_subbas_extern(upstream),help,help2
          call reservoir_routing(upstream,help,help2)
