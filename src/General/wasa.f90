@@ -21,6 +21,7 @@ WRITE(*,*) ':Initialization'
 CALL readgen(pfadn)
 t = tstart
 CALL calcyear
+dtot = 1 ! count days of simulation
 
 ! READ INPUT DATA (STATUS 0) AND INITIALISE ARRAYS (STATUS 0)
 CALL hymo_all(0)
@@ -30,7 +31,7 @@ CALL climo(0)
 !initialization of routing routines
 if (river_transport.eq.1) CALL routing(0)
 if (river_transport.ne.1) CALL routing_new(0)
-call init_river_state  
+call init_river_state
 
 CALL save_model_state(doloadstate, .TRUE.) !Till: do backups of state files if loaded from them, and save only summary on initial storage
 
@@ -56,6 +57,7 @@ DO t=tstart, tstop
 	if (river_transport.eq.1) CALL routing(2)
     if (river_transport.ne.1) CALL routing_new(2)
     dprev = d
+    dtot = dtot + 1 ! count days of simulation
   END DO
 !!! END LOOP FOR DAILY TIME STEPS
 
