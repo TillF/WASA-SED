@@ -19,7 +19,7 @@ SUBROUTINE readgen(path2do_dat)
     IMPLICIT NONE
     CHARACTER (LEN=160) :: path2do_dat		!Till: path to central control file (do.dat)
 
-    INTEGER :: i,istate !,imun,imicro,imeso
+    INTEGER :: i,istate,line !,imun,imicro,imeso
     CHARACTER (LEN=150) :: custompath
     CHARACTER (LEN=250) :: dummy
     CHARACTER (LEN=150) :: dummy2
@@ -48,24 +48,32 @@ SUBROUTINE readgen(path2do_dat)
         stop
     END IF
 	
-
-    READ(11,*)
-    READ(11,'(a)') pfadp
-    READ(11,'(a)') pfadn
-    READ(11,*) tstart
-    READ(11,*) tstop
-
+    line=1 !count lines for issuing error messages
+    READ(11,*,IOSTAT=i)
+    call checkio(line,i) !check validity of line
+    READ(11,'(a)',IOSTAT=i) pfadp
+    call checkio(line,i) !check validity of line
+    READ(11,'(a)',IOSTAT=i) pfadn
+    call checkio(line,i) !check validity of line
+    READ(11,*,IOSTAT=i) tstart
+    call checkio(line,i) !check validity of line
+    READ(11,*,IOSTAT=i) tstop
+    call checkio(line,i) !check validity of line
+    
+    
     READ(11,'(A)') dummy !READ mstart (optional: dstart)
     READ(dummy,*,IOSTAT=i)mstart,dstart
     IF (i/=0 .OR. dstart==0.) THEN	!no dstart specified, assume 1
-        READ(dummy,*)mstart
+        READ(dummy,*, IOSTAT=i)mstart
+        call checkio(line,i) !check validity of line
         dstart=1
     END IF
 
     READ(11,'(A)') dummy !READ mstop (optional: dstop)
     READ(dummy,*,IOSTAT=i)mstop,dstop
     IF (i/=0 .OR. dstop==0.) THEN	!no dstop specified, assume 31
-        READ(dummy,*)mstop
+        READ(dummy,*, IOSTAT=i)mstop
+        call checkio(line,i) !check validity of line
         dstop=31
     END IF
 
@@ -84,43 +92,71 @@ SUBROUTINE readgen(path2do_dat)
         stop
     end if
 
-    READ(11,*) subasin  !total no. of sub-basins
-    READ(11,*) ntcinst  !total no. of sub-basin / SO / TC combinations
-    READ(11,*) nsoter  !total no. of SOTER units / LUs in study area
-    READ(11,*) nterrain  !total no. of terrain components in study area
-    READ(11,*) nsoil  !total no. of soil components in study area
-    READ(11,*) nveg   !total no. of vegetation units in study area
-    READ(11,*) doreservoir !do large reservoir calculation (George's modules)
-    READ(11,*) doacud
-    READ(11,*) dolattc
-    READ(11,*) doalllattc
-    READ(11,*) dolatsc
-    READ(11,*) dolatscsub
-    READ(11,*) dotrans
-
-    READ(11,*) dohour !overwritten by value of dt
-    READ(11,*) scenario
-    READ(11,*) krig
+    READ(11,*, IOSTAT=i) subasin  !total no. of sub-basins
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) ntcinst  !total no. of sub-basin / SO / TC combinations
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) nsoter  !total no. of SOTER units / LUs in study area
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) nterrain  !total no. of terrain components in study area
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) nsoil  !total no. of soil components in study area
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) nveg   !total no. of vegetation units in study area
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) doreservoir !do large reservoir calculation (George's modules)
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) doacud
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) dolattc
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) doalllattc
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) dolatsc
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) dolatscsub
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) dotrans
+    call checkio(line,i) !check validity of line
+             
+    READ(11,*, IOSTAT=i) dohour !overwritten by value of dt
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) scenario
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) krig
+    call checkio(line,i) !check validity of line
 
     READ(11,'(A)') dummy !READ kfkorr (optional: kfkorr_a and kfkorr_b)
     READ(dummy,*,IOSTAT=i)kfkorr,kfkorr_a,kfkorr_b
     IF (i/=0 .OR. kfkorr_a==0.) THEN	!no parameters for variable kfcorr specified, use constant kfcorr (as in old version)
-        READ(dummy,*)kfkorr
+        READ(dummy,*, IOSTAT=i)kfkorr
+        call checkio(line,i) !check validity of line
         kfkorr_a=0.
         kfkorr_b=1.
     END IF
 
-    READ(11,*) intcf
-    READ(11,*) dointc
-    READ(11,*) doscale
-    READ(11,*) domuncell
-    READ(11,*) sensfactor
-    READ(11,*) dt
-    READ(11,*) dosediment
-    READ(11,*) n_sed_class
-    READ(11,*)  !line ignored
-    READ(11,*) river_transport
-    READ(11,*) reservoir_transport
+    READ(11,*, IOSTAT=i) intcf
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) dointc
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) doscale
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) domuncell
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) sensfactor
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) dt
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) dosediment
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) n_sed_class
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i)  !line ignored
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) river_transport
+    call checkio(line,i) !check validity of line
+    READ(11,*, IOSTAT=i) reservoir_transport
+    call checkio(line,i) !check validity of line
     
     READ(11,'(A)', IOSTAT=i) dummy !READ doloadstate
     IF (i==0) then  
@@ -128,7 +164,6 @@ SUBROUTINE readgen(path2do_dat)
         IF (i/=0 ) READ(dummy,*,IOSTAT=i) doloadstate !read doloadstate only
     END IF
     
-    !READ(11,*, IOSTAT=i) dosavestate
     READ(11,'(A)', IOSTAT=i) dummy !READ dosavestate
     IF (i==0) then  
         READ(dummy,*,IOSTAT=i) dosavestate, save_states_yearly !try to read dosavestate AND save_states_yearly
@@ -742,4 +777,19 @@ SUBROUTINE readgen(path2do_dat)
 
     RETURN
 
+    contains
+    subroutine checkio(line, i) !check validity of line read previously
+        implicit none
+        integer, intent(inout) :: line
+        integer, intent(in) :: i
+    
+        if (i /= 0) then
+            write (*,"(A,i0,a)") "ERROR: do.dat: format error in line ", line
+            stop
+        else
+            line=line+1
+        end if
+    end subroutine checkio
+    
+    
 END SUBROUTINE readgen
