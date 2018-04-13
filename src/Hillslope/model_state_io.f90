@@ -1201,7 +1201,10 @@ end subroutine init_interflow_conds
                 stop
             end if
 
-            if (river_transport == 1) READ(linestr,*) k, (qout(i,subbas_id),i=1,tt)
+            if (river_transport == 1) then
+                READ(linestr,*,IOSTAT=iostatus) k, (qout(i,subbas_id),i=1,tt)
+                if (iostatus /= 0) WRITE(*,'(a,i0,a)') 'WARNING: length of saved UHG not matching for subbasin ', i,' in river_storage.stat; truncated/padded.'
+            end if    
             if (river_transport == 2) r_storage(subbas_id)=dummy1
         END DO
         close(11)
