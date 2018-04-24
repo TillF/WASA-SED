@@ -171,11 +171,13 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 
                !interval containing start of triangle, only covered by a fraction (mean value of two first and last valid point in interval, mutiplied by the fraction covered)
                hrout(itl,i) =  (1+temp2)/2 * (itl - (0.5 + prout(i,1) ))
-               !interval containing end of triangle, only covered by a fraction
-               hrout(j+1,i) =  (0+temp3)/2 * ((0.5 + prout(i,1)+prout(i,2) ) - j )
+               !interval containing end of triangle, only covered by a fraction (if any)
+               if (j > 0.5 + prout(i,1)+prout(i,2) ) then
+                hrout(j+1,i) =  (0+temp3)/2 * ((0.5 + prout(i,1)+prout(i,2) ) - j )
+               end if
         end if
-
-        hrout_intern(itl+1:j+1,i) = hrout(itl+1:j+1,i) !the falling limbs of the hydrographs should be identical
+        ih=size(hrout,dim=1) !length of array
+        hrout_intern(itl+1:ih,i) = hrout(itl+1:ih,i) !the falling limbs of the hydrographs should be identical
         hrout(:,i)        = hrout(:,i)        / sum(hrout(:,i))          !normalize response function
         hrout_intern(:,i) = hrout_intern(:,i) / sum(hrout_intern(:,i))   !normalize response function
         if (sum(hrout(:,i))==0 .OR. sum(hrout_intern(:,i))==0) then
