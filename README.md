@@ -1,4 +1,4 @@
-!!!The executable (WASA.exe) are updated only infrequently, if at all.
+!!!The executable (WASA.exe) is updated only infrequently, if at all.
 To use the latest version, you need to compile from source code. !!!
 
 

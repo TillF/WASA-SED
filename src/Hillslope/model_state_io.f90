@@ -1143,7 +1143,7 @@ end subroutine init_interflow_conds
         implicit none
 
         character(len=*),intent(in):: river_conds_file        !file to load from
-        integer :: subbas_id, iostatus, i, tt, k
+        integer :: subbas_id, iostatus, i, tt, k, line
         real :: dummy1
         real, pointer :: array_ptr(:)
         character(len=1000) :: linestr
@@ -1182,28 +1182,34 @@ end subroutine init_interflow_conds
         end if
         if (river_transport == 2) r_storage(1:subasin)=-1. !indicator for "not read"
 
-
+        line = 2 !line counter
         DO WHILE (.TRUE.)
             READ(11,'(A)',IOSTAT=iostatus) linestr
             IF (iostatus /=0) exit
-
+            line = line+2
+           
             READ(linestr,*,IOSTAT=iostatus) i, dummy1
-
+            
+            if (iostatus /=0) then
+			    WRITE(*,'(a,i0,a)') 'WARNING: format error in line ', line,' of river_storage.stat, line ignored.'
+                cycle
+            end if
+              
 
             subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
 		    if (subbas_id < 1 .OR. subbas_id > subasin) then
-			    WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ', i,' in river_storage.stat, ignored.'
+			    WRITE(*,'(a,i0,a,i0,a)') 'WARNING: unknown subbasin ', i,' in line ', line, ' of river_storage.stat, ignored.'
                 cycle
             end if
 
             if (dummy1 < 0.) then
-			    WRITE(*,'(a,i0,a)') 'Error: negative value for subbasin ', id_subbas_extern(i),' in river_storage.stat.'
+			    WRITE(*,'(a,i0,a,i0,a)') 'ERROR: negative value for subbasin ', i,' in line ', line, ' of river_storage.stat.'
                 stop
             end if
 
             if (river_transport == 1) then
                 READ(linestr,*,IOSTAT=iostatus) k, (qout(i,subbas_id),i=1,tt)
-                if (iostatus /= 0) WRITE(*,'(a,i0,a)') 'WARNING: length of saved UHG not matching for subbasin ', i,' in river_storage.stat; truncated/padded.'
+                if (iostatus /= 0) WRITE(*,'(a,i0,a,i0,a)') 'WARNING: length of saved UHG not matching for subbasin ',i,' in line ', line, ' of river_storage.stat; truncated/padded.'
             end if    
             if (river_transport == 2) r_storage(subbas_id)=dummy1
         END DO
