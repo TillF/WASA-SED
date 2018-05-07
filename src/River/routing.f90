@@ -57,6 +57,11 @@ DO WHILE (i<subasin)
   else
 	prout(j,1)=temp2
 	prout(j,2)=temp3
+    if (temp2 + temp3 > 200) then
+        write(*,'(a, i0, a)')'Warning (response.dat): Subbasin ',idummy,': lag+retention must be < 200, rescaled.'
+        prout(j,1)=prout(j,1) * 200/(temp2+temp3)
+	    prout(j,2)=prout(j,2) * 200/(temp2+temp3)
+    end if     
 	i=i+1
   end if
 

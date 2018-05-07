@@ -191,7 +191,7 @@ contains
                 else
                     fmtstr='E12.5' !for large numbers, use exponential notation
                 end if
-                write(fmtstr2,*) '(I0',(',A1,',trim(fmtstr),k=1,tt),')'        !generate format string
+                write(fmtstr2,*) '(I0,',tt,'(A1,',trim(fmtstr),'))'        !generate format string
                 DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
                     WRITE(river_file_hdle,trim(fmtstr2))id_subbas_extern(sb_counter), (char(9),qout(d+k-1,sb_counter), k=1, tt) !tab separated output
                 END DO
@@ -1143,7 +1143,7 @@ end subroutine init_interflow_conds
         implicit none
 
         character(len=*),intent(in):: river_conds_file        !file to load from
-        integer :: subbas_id, iostatus, i, tt, k, line
+        integer :: subbas_id, iostatus, i, j, tt, k, line
         real :: dummy1
         real, pointer :: array_ptr(:)
         character(len=1000) :: linestr
@@ -1175,10 +1175,15 @@ end subroutine init_interflow_conds
             qout(2:tt,1:subasin)   = 0.
 
             !check that the current file matches the specs of the current UHG
-            READ(11,'(A)') linestr
-            i = GetNumberOfSubstrings(linestr) - 1
-            if (i > tt .OR. i<1) write(*,'(a,a,a,i0,a,i0)')'WARNING: River storage file ''',trim(river_conds_file),''': expecting ',tt,' ordinates, found ',i,'. Truncated.'
-            backspace(11) !rewind line just read
+            READ(11,'(A)',IOSTAT=iostatus) linestr
+             IF (iostatus /=0) then
+                write(*,'(a,a,a)')'WARNING: format error in river storage file ''',trim(river_conds_file),', line ',line,', using defaults.'             
+             else
+               line = line+2
+               i = GetNumberOfSubstrings(linestr) - 1
+               if (i > tt .OR. i<1) write(*,'(a,a,a,i0,a,i0)')'WARNING: River storage file ''',trim(river_conds_file),''': expecting ',tt,' ordinates, found ',i,'. Truncated.'
+                backspace(11) !rewind line just read
+             end if   
         end if
         if (river_transport == 2) r_storage(1:subasin)=-1. !indicator for "not read"
 
@@ -1194,7 +1199,6 @@ end subroutine init_interflow_conds
 			    WRITE(*,'(a,i0,a)') 'WARNING: format error in line ', line,' of river_storage.stat, line ignored.'
                 cycle
             end if
-              
 
             subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
 		    if (subbas_id < 1 .OR. subbas_id > subasin) then
@@ -1208,7 +1212,7 @@ end subroutine init_interflow_conds
             end if
 
             if (river_transport == 1) then
-                READ(linestr,*,IOSTAT=iostatus) k, (qout(i,subbas_id),i=1,tt)
+                READ(linestr,*,IOSTAT=iostatus) k, (qout(i,subbas_id), j=1,tt)
                 if (iostatus /= 0) WRITE(*,'(a,i0,a,i0,a)') 'WARNING: length of saved UHG not matching for subbasin ',i,' in line ', line, ' of river_storage.stat; truncated/padded.'
             end if    
             if (river_transport == 2) r_storage(subbas_id)=dummy1
