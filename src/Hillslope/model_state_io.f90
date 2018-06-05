@@ -1171,9 +1171,9 @@ end subroutine init_interflow_conds
 
 	    if (river_transport == 1) then
             tt = size(hrout,dim=1)-1 !length of UHG minus 1
+            qout                   = 0.
             qout(1,1:subasin)      =-1. !indicator for "not read"
-            qout(2:tt,1:subasin)   = 0.
-
+            
             !check that the current file matches the specs of the current UHG
             READ(11,'(A)',IOSTAT=iostatus) linestr
              IF (iostatus /=0) then
@@ -1187,7 +1187,7 @@ end subroutine init_interflow_conds
         end if
         if (river_transport == 2) r_storage(1:subasin)=-1. !indicator for "not read"
 
-        line = 2 !line counter
+        line = 1 !line counter
         DO WHILE (.TRUE.)
             READ(11,'(A)',IOSTAT=iostatus) linestr
             IF (iostatus /=0) exit
@@ -1212,7 +1212,7 @@ end subroutine init_interflow_conds
             end if
 
             if (river_transport == 1) then
-                READ(linestr,*,IOSTAT=iostatus) k, (qout(i,subbas_id), j=1,tt)
+                READ(linestr,*,IOSTAT=iostatus) k, (qout(j,subbas_id), j=1,tt)
                 if (iostatus /= 0) WRITE(*,'(a,i0,a,i0,a)') 'WARNING: length of saved UHG not matching for subbasin ',i,' in line ', line, ' of river_storage.stat; truncated/padded.'
             end if    
             if (river_transport == 2) r_storage(subbas_id)=dummy1
