@@ -23,7 +23,7 @@ INTEGER, INTENT(IN)                  :: STATUS
 INTEGER :: irout,idummy,id !,imun,imunx,irout2,irout_d,imeso,istate
 INTEGER :: upstream, downstream
 INTEGER :: itl, ih, i, j, istate, h !, mm, imunout, iout, make
-REAL :: temp2, temp3, temp4, qtemp, x, b, y, hi  !,xdum(48),storcapact
+REAL :: temp2, temp3, temp4, qtemp !, x, b, y, hi  !,xdum(48),storcapact
 character(len=1000) :: fmtstr	!string for formatting file output
 
 
@@ -129,74 +129,55 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
   hrout_intern=0.
 
     DO i=1,subasin
-        !compute values of triangular function at full integer points (0.5 is added because we assume the pulse to be routed centered at mid-day)
-        itl = ceiling (prout(i,1)) !index to position in which peak will be located
-        j   = ceiling   (prout(i,1)+prout(i,2) ) !                   (integer index to end of triangle)
+        itl = ceiling (prout(i,1)) !index to position in hrout where peak will be located
+        j   = ceiling   ( prout(i,1)+prout(i,2) ) !                   (integer index to end of triangle)
 
-!internal response function (hrout_intern)
-        !1. compute y-values of triangular function AT full integer points (ih=1 denotes t=0)
-        if (prout(i,1) > 0) then
-            DO ih = 1, floor(prout(i,1))+1 !rising limb
-                hrout_intern(ih,i) =  (ih-1)*1/prout(i,1)
-            END DO
-        end if
-        
-        temp2=hrout_intern(itl,i) !keep first and last valid value of triangle - they'll be overwritten in the next steps
-        temp3=hrout_intern(itl+1,i)
+    if(itl > 1) then
+      do ih = 1,(itl-1) !ascending part 
+        hrout_intern(ih,i) = (ih-0.5) / prout(i,1)
+        hrout       (ih,i) = 0
+      end do
+      temp2 = hrout_intern(itl-1,i)
+    end if 
+  
+    !peak interval
 
-        ! considering that the value of response function changes within the time step, we want its mean:
-        !2. compute MEAN values of triangular function BETWEEN full integer points
-        DO ih = 1,(itl-1)  
-            hrout_intern(ih,i) =  ( hrout_intern(ih,i) + hrout_intern(ih+1,i)) / 2
-        END DO
-        temp4 = 1- (itl  - (0.5 + prout(i,1))) !fraction of rising limb in interval of peak
-        hrout_intern(itl,i) =  ( (temp2 + 1) * temp4       +&
-                                 (temp3 + 1) * (1-temp4 ) ) / 2
+    temp2 = (itl-1) / prout(i,1) !value AT interval border before itl
+    temp4 = 1 -(itl - prout(i,1))  !fraction of rising limb in interval of peak !!r
+
+    hrout_intern(itl,i) =   (temp2 + 1)/2 * temp4
+
+    temp3 = 1- temp4 - max(0., (itl - (prout(i,1) + prout(i,2)))) !fraction of falling limb in interval of peak 
+
+    temp2 = 1 - temp3 / prout(i,2) !value AT interval border after itl (or end of triangle) 
+
+    hrout       (itl,i) =   (1 + temp2)/2 * temp3 
+    hrout_intern(itl,i) =  hrout_intern(itl,i)  + hrout       (itl,i)
+
+    !recession part - do fully covered intervals only
+    if (itl+1 < prout(i,1) + prout(i,2)) then
+      do ih = (itl+1),(j-1) !recession part 
+        temp4 = 1 - (ih-0.5-prout(i,1)) / prout(i,2)
+        hrout_intern(ih,i) = temp4  !recession parts of internal and external UHG are identical
+        hrout       (ih,i) = temp4
+      end do
+    end if
+
+    !remaining part of triangle that ends midway in interval
+    temp4 = j - (prout(i,1) + prout(i,2)) !fraction of interval covered by triangle tail
+    if (temp4 == 0) temp4=1 !special case: triangle ends exactly at interval border
+    
+             temp2 = 1 - (j-1-prout(i,1)) / prout(i,2) !value AT interval border before j
+         
+             temp3 =   (temp2 + 0)/2 * temp4
+             hrout_intern(j,i) = temp3  !recession parts of internal and external UHG are identical
+             hrout       (j,i) = temp3
+    
+    hrout(:,i)        = hrout(:,i)        / sum(hrout(:,i))          !normalize response function
+    hrout_intern(:,i) = hrout_intern(:,i) / sum(hrout_intern(:,i))   !normalize response function
 
 
-!external response function (hrout)
-        if (itl > j) then !triangle fits completely into single interval
-            hrout(itl,i)=1.
-        else
-            !compute y-values of triangular function AT full integer points (ih=1 denotes t=1)
-            DO ih = itl, j+1
-                hrout(ih,i) =  1. -  (ih - (prout(i,1)+1))/prout(i,2)
-            END DO
-
-            temp2=hrout(itl,i) !keep first and last valid value of triangle - they'll be overwritten in the next steps
-            temp3=hrout(j,i)
-           ! considering that the value of response function changes within the time step, we want its mean:
-           
-              !interval containing start of triangle, only covered by a fraction
-            !do some geometry:
-            if (itl /= ceiling(prout(i,1))) then !not necessary, if tlag is integer
-                x = min(itl - prout(i,1),  prout(i,2))
-                b = hrout(itl+1,i)
-                !A1 = x*b
-                y = prout(i,1) - floor(prout(i,1))
-                hi = (temp2 - b) * x / (x+y)
-                !A2 = x*hi/2 
-                !hrout(itl,i) = (A1+A2) / x
-                hrout(itl,i) = (b+hi/2) 
-            end if
-                
-               !compute MEAN values of traingular function BETWEEN full integer points (function BETWEEN full integer points (complete intervals only)
-               DO ih = itl+1,j 
-                  hrout(ih,i) =  ( hrout(ih+1,i) + hrout(ih,i)) / 2
-               END DO
-
-               !interval containing end of triangle, only covered by a fraction (if any)
-               hrout(j+1,i) =  temp3/2 * (max(0.,prout(i,1)+prout(i,2) - j))
-        end if 
-        hrout(:,i)        = hrout(:,i)        / sum(hrout(:,i))          !normalize response function
-        hrout_intern(:,i) = hrout_intern(:,i) / sum(hrout_intern(:,i))   !normalize response function
-        
-        temp2= prout(i,1) / (prout(i,1)+prout(i,2)) ! fraction of rising limb in hrout_internal
-        hrout_intern(:,i) =  temp2*hrout_intern(:,i) + (1-temp2) * hrout(:,i) !the falling limbs of the hydrographs should be identical 
-        
-        hrout_intern(:,i) = hrout_intern(:,i) / sum(hrout_intern(:,i))   !normalize just for safety, shouldnt be necessary
-
-        if (sum(hrout(:,i))==0 .OR. sum(hrout_intern(:,i))==0) then
+        if (sum(hrout(:,i))==0 .OR. sum(hrout_intern(:,i))==0 .OR. any(hrout<0) .OR. any(hrout_intern<0)) then
             write(*,*) "Error when computing response functions: Please send response.dat to the developers."
             stop
         end if
