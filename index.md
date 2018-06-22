@@ -80,34 +80,16 @@ Table 1 Folder structure of WASA code
 |Folder Name | Content  |
 |---|---| 
 \General\ | Main program and utility routines of the WASA model  
-\Hillslope\	| Hillslope routines (Overland, sub-surface flow, evapotranspiration, sediment production etc.)  
+\Hillslope\ | Hillslope routines (Overland, sub-surface flow, evapotranspiration, sediment production etc.)  
+\River\	| River routines (Routing of water and sediment in the river network)
+\Reservoir\ | Reservoir water and sediment modelling routines (Water balance, bed elevation change, management options)
+\Input\	| Input data, contains parameter file: do.dat<br>
+	\Input\Hillslope<br>
+	\Input\River<br>
+	\Input\Reservoir<br>
+	\Input\Time_series<br>
+\Output\ | Output files of model scenarios 
 
 
-\River\	River routines (Routing of water and sediment in the river network)
-\Reservoir\	Reservoir water and sediment modelling routines (Water balance, bed elevation change, management options)
-\Input\	Input data, contains parameter file: do.dat
-	\Input\Hillslope
-	\Input\River
-	\Input\Reservoir
-	\Input\Time_series
-\Output\	Output files of model scenarios 
-
-
-Colons can be used to align columns.
-
-| Tables        | Are           | Cool  |
-| ------------- |:-------------:| -----:|
-| col 3 is      | right-aligned | $1600 |
-| col 2 is      | centered      |   $12 |
-| zebra stripes | are neat      |    $1 |
-
-There must be at least 3 dashes separating each header cell.
-The outer pipes (|) are optional, and you don't need to make the 
-raw Markdown line up prettily. You can also use inline Markdown.
-
-Markdown | Less | Pretty
---- | --- | ---
-*Still* | `renders` | **nicely**
-1 | 2 | 3
 
 
