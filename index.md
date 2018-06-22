@@ -1,6 +1,6 @@
 <center>
-# WASA-SED
-# User Manual
+# WASA-SED<br>
+# User Manual<br>
 Eva Nora Müller, Till Francke, George Mamede and Andreas Güntner
 <br>
 <br>
@@ -131,14 +131,4 @@ Markdown | Less | Pretty
 *Still* | `renders` | **nicely**
 1 | 2 | 3
 
-
-
-# Heading levels
-
-
-## Heading
-
-This is an h1 heading
-
-### Sub-heading
 
