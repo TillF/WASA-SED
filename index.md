@@ -91,8 +91,8 @@ The WASA-SED model is programmed in Fortran 90 and was tested with Compaq Visual
 
 Table 1 Folder structure of WASA code
 
-|Folder Name | Content  |
-|---|---| 
+Folder Name | Content
+---|---
 \General\ | Main program and utility routines of the WASA model  
 \Hillslope\ | Hillslope routines (Overland, sub-surface flow, evapotranspiration, sediment production etc.)  
 \River\	| River routines (Routing of water and sediment in the river network)
@@ -103,6 +103,192 @@ Table 1 Folder structure of WASA code
 A complete example input-data set is part of the Subversion repository (see top of document). Model parameterisations are available e.g. for meso-scale catchments in dryland areas of Spain and Brazil (Bengue Catchment in Spain: Mamede 2008, Ribera Salada Catchment in Spain: Mueller et al. 2008, Mueller et al. submitted to CATENA, Isábena Catchment in Spain: Francke 2009).
 
 The original WASA code version (Güntner 2002, Güntner and Bronstert 2004) was extended within the SESAM-Project to include sediment-transport processes at the hillslope scale using various USLE-derivative approaches, a spatially distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network and a reservoir module that computes the transport of water and sediment as well as sedimentation processes in reservoirs.
+
+Table 2 Main subroutines of the main program (wasa.f90)
+
+Routine	| Content
+---|---
+readgen.f90	| Reads parameter file: do.dat
+calcyear.f90	| Counter for time
+calcday.f90	| Number of days per month
+climo.f90	| Climate calculations
+hymo_all.f90	| Hydrological 
+routing.f90 |	Old river routing routine without sediment transport (unit hydrograph)
+routing_new.f90 | New river routine with Muskingum and sediment transport, calls reservoir routines
+
+The following sections give some information on the computational background and the functional structure of the corresponding routines for each of the three conceptual levels: hillslope, river and reservoir.
+
+## Hillslope module
+The hillslope module comprises the modelling of the hydrological and sediment-transport processes. The hydrological modelling accounts for interception, evaporation, infiltration, surface and subsurface runoff, transpiration and ground water recharge. Details are given in Güntner (2002, Chapter 4). The main hydrological calculations are carried out in hymo_all.f90 (for daily or hourly time steps). The subroutines that are called within hymo_all.f90 are summarised in Table 3. The temporal sequence of hydrological process modelling is summarised in Güntner (p. 36-37).
+
+Table 3 Main subroutines of hymo_all.f90 (hydrological subroutines)
+
+Routine	| Content	| Subroutine	| Content of Subroutine
+---|---|---|---
+readhymo.f90 |	reads input data	| soildistr.f90	| distribution functions for soil parameters
+lake.f90	| water balance for small reservoirs	| - |	-
+soilwat.f90	| soil water components (infiltration, percolation, runoff generation)	|etp_max.f90, etp_soil.f90, sedi_yield.f90	| maximal evapotranspiration, daily evapotranspiration, hillslope erosion
+
+Sediment generation on the hillslopes in the form of soil erosion by water is modelled with four erosion equations (USLE, Onstad-Foster, MUSLE and MUST after Williams, 1995). The following subroutines contain the main calculations for the water and sediment production for the hillslopes:
+
+-	hymo_all.f90: general loop in daily or hourly timesteps
+  1.	Initialisation and reading of hillslope input data, preparation of output files
+  2.	For each timestep
+    +	nested loop that contains the calculation for hydrological and sediment budgets for each sub-basin, landscape unit, terrain component, soil-vegetation component (soilwat.f90)
+    +	aggregated runoff refers to the whole available area including reservoir areas; the corresponding reservoir areal fraction is substracted afterwards if reservoirs / small reservoirs are considered
+   +	call module for small (diffuse, unlocated) reservoirs (lake.f90)
+   + write daily results into output files
+
+	soilwat.f90: computes water and sediment balance for a terrain component in a given landscape unit of a given sub-basin
+1.	For each soil vegetation component (SVCs) in the terrain component:
+-	calculate hydrological variables (infiltration, surface runoff, subsurface runoff, evapotranspiration, etc.)
+2.	Re-distribute surface runoff, subsurface runoff among SVCs, allow re-infiltration and compute overall water balance for terrain component
+3.	Estimate runoff height and peak-runoff using Manning Equation
+4.	Call module for hillslope erosion (sedi_yield.f90)
+
+	sedi_yield.f90: computes sediment production and sediment export for a TC
+1.	No sediment export without surface runoff out of terrain component
+2.	Otherwise, compute gross erosion for current terrain component using one of four erosion equations
+3.	Distribute gross erosion among particle classes according to constitution of uppermost horizons in the current terrain component
+4.	Completely mix the newly generated sediment with any sediment coming from upslope terrain components
+5.	If necessary, limit sediment export by transport capacity.
+River module
+The river routing of the original WASA model (Güntner 2002) bases on daily linear response functions (Bronstert et al. 1999) similar to a triangular unit hydrograph. Its implementation does not support output in hourly resolution (only daily is produced) and sediment transport. It was extended to include a spatially semi-distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network. The implemented water modelling approach is similar to the routing routines from the SWAT model (Soil Water Assessment Tool, Neitsch et al. 2002) model and the SWIM model (Soil Water Integrated Modelling, Krysanova et al. 2000). The new water routing is based on the Muskingum kinematic wave approximation. Suspended sediment transport and bedload is modelled using the transport capacity concept. The river module can be run with variable time steps. Transmission losses through riverbed infiltration and evaporation are accounted for. The main routing calculations as well as the initialisation and reading of the river input files are carried out in routing.f90. The following sub-routines are called from routing.f90:
+
+	muskingum.f90: contains the flow calculation using the Muskingum method
+1. Calculation of water volume in reach
+2. Calculation of cross-section area of current flow, flow depth, wetted perimeter and hydraulic radius
+3. Calculation of flow in reach with Manning Equation
+4. Calculation of Muskingum coefficients
+5. Calculation of discharge out of the reach and water storage in reach at end of time step
+
+	routing_coefficients.f90: contains the calculations for travel time and flow depth
+1. Calculation of initial water storage for each river stretch
+2. Calculation of channel dimensions
+3. Calculation of flow and travel time at 100 % bankfull depth, 120 % bankfull depth and 10 % bankfull depth
+
+	route_sediments.f90: contains the calculation for suspended sediment-transport routing
+1. Calculation of water volume and sediment mass in reach
+2. Calculation of peak flow and peak velocity
+3. Calculation of maximum sediment carrying capacity concentration
+4. Comparison with current concentration
+5. Calculation of net deposition and degradation
+6. Calculation of sediment mass out of the reach and sediment storage in reach at end of time step
+	bedload.f90: contains the calculation for bedload transport using 5 different formulas
+1.	Calculation of current width of the river
+2.	Bedload formulas after Meyer-Peter & Müller (1948), Schoklitsch (1950), Smart & Jaeggi (1983), Bagnold (1956) und Rickenmann (2001), see Mueller et al. 2008 relevant references
+Reservoir module
+The reservoir sedimentation routine was included into the WASA-SED model by Mamede (2008) to enable the calculation of non-uniform sediment transport along the longitudinal profile of a reservoir, of the reservoir bed changes caused by deposition/erosion processes and of reservoir management options. 
+In order to perform the simulation of sediment transport in reservoirs, four important processes have to be considered: (1) reservoir water balance, (2) hydraulic calculations in the reservoir, (3) sediment transport along the longitudinal profile of the reservoir and (4) reservoir bed elevation changes. For the calculation of sediment transport in the reservoir, four different equations for the calculation of total sediment load were selected from recent literature. The reservoir bed elevation changes are calculated through the sediment balance at each cross section, taking into account three conceptual sediment layers above the original bed material. The reservoir sedimentation module is composed by the following subroutines:
+
+	reservoir.f90: contains the reservoir water balance
+1. Calculation of reservoir level
+2. Calculation of controlled and uncontrolled outflow
+
+	semres.f90: contains the sediment balance for each cross section
+1. Calculation of sediment deposition for each cross section
+2. Calculation of sediment entrainment for each cross section
+3. Calculation of sediment compaction for each cross section
+4. Calculation of total load transport
+5. Calculation of storage capacity reduction because of the accumulated sediment
+6. Calculation of effluent grain size distribution
+
+	sedbal.f90: contains a simplified sediment balance of the reservoir whenever its geometry is not provided (no cross-section)
+1. Calculation of sediment deposition in the reservoir
+2. Calculation of trapping efficiency
+3. Calculation of storage capacity reduction because of the accumulated sediment
+4. Calculation of effluent grain size distribution
+
+	hydraul_res.f90: contains the hydraulic calculations for each cross section in the reservoir
+1. Calculation of mean velocity of current flow for each cross section
+2. Calculation of hydraulic radius for each cross section
+3. Calculation of slope of energy-grade line for each cross section
+4. Calculation of top width for each cross section
+5. Calculation of water depth for each cross section
+
+	eq1_wu.f90, eq2_ashida.f90, eq3_tsinghua.f90 and eq4_ackers.f90: each sub-routine contains a specific sediment transport function, mentioned in Table 4
+1. Calculation of fractional bed load transport for each cross section
+2. Calculation of fractional suspended load transport for each cross section
+
+	change_sec.f90: contains the calculation of reservoir geometry changes
+1. Calculation of bed elevation changes for each cross section.
+	reservoir_routing.f90: contains the calculation of level-pool reservoir routing 
+1. Calculation of water routing for reservoirs with uncontrolled overflow spillways
+	vert_dist.f90: contains the calculation of vertical distribution of sediment concentration in the reservoir 
+1. Calculation of sediment concentration at the reservoir outlets
+	lake.f90: contains the water balance for networks of small reservoirs 
+1. Calculation of water level in the reservoirs
+2. Calculation of controlled and uncontrolled outflow out the small reservoirs
+	sedbal_lake.f90: contains a simplified sediment balance for networks of small reservoirs
+1. Calculation of sediment deposition in small reservoir
+2. Calculation of trapping efficiency in small reservoirs
+3. Calculation of storage capacity reduction because of the accumulated sediment in small reservoirs
+4. Calculation of effluent grain size distribution in small reservoirs
+	lake_routing.f90: contains the calculation of level-pool routing for networks of small reservoirs
+1. Calculation of water routing for small reservoirs
+Input Data
+The model runs as a Fortran console application for catchment from a few km² up to several 100,000 km²) on daily or hourly time steps. Climatic drivers are daily/hourly time series for precipitation, humidity, short-wave radiation and temperature. For model parameterisation, regional digital maps on soil associations, land-use and vegetation cover, a digital elevation model with a cell size of 100 metres (or smaller) and, optional, bathymetric surveys of the reservoirs are required. The soil, vegetation and terrain maps are processed with the LUMP tool (see above) to derive the spatial discretisation into soil-vegetation units, terrain components and landscape units. Table 4 summarises the input parameters for the climatic drivers and the hillslope, river and reservoir modules. The vegetation parameters may be derived with the comprehensive study of, for example, Breuer et al. (2003), the soil and erosion parameters with the data compilation of FAO (1993, 2001), Morgan (1995), Maidment (1993) and Antronico et al. (2005).
+
+For a semi-automated discretisation of the model domain into landscape units and terrain components, the software tool LUMP (Landscape Unit Mapping Program) is available (Francke et al. 2008). LUMP incorporates an algorithm that delineates areas with similar hillslope characteristics by retrieving homogeneous catenas with regard to e.g. hillslope shape, flow length and slope (provided by a digital elevation model), and additional properties such as for soil and land-use and optionally for specific model parameters such as leaf area index, albedo or soil aggregate stability. The LUMP tool is linked with the WASA-SED parameterisation procedure through a databank management tool, which allows to process and store digital soil, vegetation and topographical data in a coherent way and facilitates the generation of the required input files for the model. LUMP and further WASA-SED pre-processing tools have been transferred to the package lumpR for the free software environment for statistical computing and graphics R which is available from https://github.com/tpilz/lumpR.
+The input files for general purpose, the hillslope, river and reservoir routines are explained below with details on parameter type, units, data structure including examples parameterisation files.
+Table 4: Summary of model input parameters
+Type	Model input parameter
+Climate	Daily or hourly time series on rainfall [mm/day, mm/h]
+Daily time series for average short-wave radiation [W/m2]
+Daily time series for humidity [%]
+Daily time series for temperature [°C]
+Vegetation	Stomata resistance [s/m]
+Minimum suction [hPa]
+Maximum suction [hPa]
+Height [m]
+Root depth [m]
+LAI [-]
+Albedo [-]
+Manning's n of hillslope[-]
+USLE C [-]
+Soil	No. of horizons*
+Residual water content [Vol. %]
+Water content at permanent wilting point [Vol. %]
+Usable field capacity [Vol. %]
+Saturated water content [Vol. %]
+Saturated hydraulic conductivity (mm/h)
+Thickness [mm]
+Suction at wetting front [mm]
+Pore size index [-]
+Bubble pressure [cm]
+USLE K [-]**
+Particle size distribution**
+Terrain and river	Hydraulic conductivity of bedrock [mm/d]
+Mean maximum depth of soil zone [mm]
+Depth of river bed below terrain component [mm]
+Initial depth of groundwater below surface [mm]
+Storage coefficient for groundwater outflow [day]
+Bankful depth of river [m]
+Bankful width of river [m]
+Run to rise ratio of river banks [-]
+Bottom width of floodplain [m]
+Run to rise ratio of floodplain side slopes [-]
+River length [km]
+River slope [m/m]
+D¬¬¬50 (median sediment particle size) of riverbed [m]
+Manning’s n for riverbed and floodplains [-]
+Reservoir	Longitudinal profile of reservoir [m]
+Cross-section profiles of reservoir [m]
+Stage-volume curves
+Initial water storage and storage capacity volumes [m3]
+Initial area of the reservoir [ha]
+Maximal outflow through the bottom outlets [m3/s]
+Manning’s roughness for reservoir bed
+Depth of active layer [m]
+* for each soil horizon, all following parameters in the column are required, ** of topmost horizon
+General parameter and control files
+Four parameter files control the data input and output and some internal settings:
+
+do.dat  [can be generated with The LUMP package, manual completing required] 
+The do.dat file is located in the folder WASA\Input and contains the main parameter specifications for the WASA-SED model. Figure 1 displays an example file for the do.dat. The first line of the do.dat contains the title. Line 2 and 3 specify the path for the location of WASA input and output folder. Relative paths are supported. The backslash “\” only works on Windows-platforms. The slash “/” is accepted on Windows and Unix/Linux systems. Make sure that both specified paths end with slash or backslash, respectively. Line 4 and 5 contain the start and the end year of the simulation, respectively. Line 6 and 7 contain the start and the end calendar month of the simulation, respectively. Optionally, the day of month for begin and end can be specified. Line 10 contains the number of sub-basins. The number in line 9 is given by the sum of the number of terrain components in each landscape-unit of each sub-basin (e.g. if the system has only two sub-basins, sub-basin A has 1 landscape unit with 3 terrain components, sub-basin B has 2 landscape units with 1 terrain component each, then the number of combinations is 5). Line 14 specifies if the reservoir module is switched on (.t.) or is switched off (.f.). The same issue for the calculations of networks of small reservoirs in line 15. Lines 16 – 19 allow customizing the way water and sediment is (re-)distributed within and among the TCs. Line 21 allows the setting of the simulation timestep (daily / hourly). This may become obsolete in future versions by setting the timestep directly in line 30. Line 24 allows specifying a correction factor for hydraulic conductivity to account for intra-daily rainfall intensities. Optionally, this factor can also be made a function of daily rainfall by specifying two more parameters (a and b) in the same line, so that kfkorr=kfkorr0*(a*1/daily_precip+b+1). In line 31 the erosion and sediment-transport routines may be switched on and off. Specify the number of grain size classes you want to model in line 32. Their limits must be specified in part_class.dat, if more than one class is desired. Line 33 lets you choose the hillslope erosion model to be used in WASA. Currently, this parameter is disregarded, further options can be chosen in erosion.ctl. Select the model for the river routing in line 34. Possible options are: (1) old WASA routing (daily resolution only, no sediment transport), (2) Muskingum and suspended sediment, (3) Muskingum and bedload transport. Choose the sediment model in the reservoir in line 35 among 4 sediment transport equations: (1) Wu et al. (2000); (2) Ashida & Michiue (1973); (3) Yang (1973, 1984); (4) Ackers & White (1973).
+The optional lines 36 and 37 allow the saving/loading of state variables (i.e. groundwater, interception and soil storages) at the end/beginning of a model run (works only if svc.dat has been specified).
+Line 36 may additionally contain a second logical variable (append_output), allowing the model to append to existing output files (not yet implemented for all outputs). The consistence with the existing files is not checked! Default is .FALSE.
+Line 37 may additionally contain a second logical variable (save_states_yearly), determining if the model states are saved (and overwritten) at the end of each simulation year. Default is .TRUE.
 
 
 
