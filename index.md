@@ -4,16 +4,30 @@
 
 Eva Nora Müller, Till Francke, George Mamede and Andreas Güntner
 
-**30.1.2018<br>WASA-SED rev. 255**
+<br>
+<br>
 
-Developed within the SESAM-Project:
-Sediment Export of Semi-Arid Catchment: Monitoring and Modelling 2005-2008
-SESAM II 2010-2014,
+**30.1.2018<br>
+WASA-SED rev. 255**
+
+<br>
+<br>
+
+Developed within the SESAM-Project:<br>
+Sediment Export of Semi-Arid Catchment: Monitoring and Modelling 2005-2008<br>
+SESAM II 2010-2014,<br>
 2015-2018
 
-Institute of Earth and Environmental Science, University of Potsdam, Potsdam, 
-Deutsches Geoforschungszentrum Potsdam, 
+<br>
+<br>
+
+Institute of Earth and Environmental Science, University of Potsdam, Potsdam,<br>
+Deutsches Geoforschungszentrum Potsdam,<br>
 Germany
+
+
+<br>
+<br>
 
 **Recent change: snow module (“WASA-SNOW” by Erwin Rottler)**<br>
 The respective documentation has not been included yet. It can be found in Rottler’s thesis (on request, to be published on https://publishup.uni-potsdam.de/opus4-ubp/home)
@@ -31,12 +45,12 @@ Mueller EN, Güntner A, Francke T, Mamede G (2010) Modelling sediment export, re
 Information about the SESAM-Project:
 http://uni-potsdam.de/sesam/
 
-Contact:
-Till Francke
-Institute of Earth and Environmental Sciences 
-University of Potsdam 
-Karl-Liebknecht-Str. 24-25
-14476 Potsdam, Germany
+Contact:<br>
+Till Francke<br>
+Institute of Earth and Environmental Sciences<br>
+University of Potsdam<br>
+Karl-Liebknecht-Str. 24-25<br>
+14476 Potsdam, Germany<br>
 Email: till.francke@uni-potsdam.de
  
 Copyrights and ownership:<br>
@@ -84,12 +98,15 @@ Table 1 Folder structure of WASA code
 \River\	| River routines (Routing of water and sediment in the river network)
 \Reservoir\ | Reservoir water and sediment modelling routines (Water balance, bed elevation change, management options)
 \Input\	| Input data, contains parameter file: do.dat<br>
-	  \Input\Hillslope<br>
-	  \Input\River<br>
-	  \Input\Reservoir<br>
-	  \Input\Time_series<br>
+	| \Input\Hillslope<br>
+	| \Input\River<br>
+	| \Input\Reservoir<br>
+	| \Input\Time_series<br>
 \Output\ | Output files of model scenarios 
 
+A complete example input-data set is part of the Subversion repository (see top of document). Model parameterisations are available e.g. for meso-scale catchments in dryland areas of Spain and Brazil (Bengue Catchment in Spain: Mamede 2008, Ribera Salada Catchment in Spain: Mueller et al. 2008, Mueller et al. submitted to CATENA, Isábena Catchment in Spain: Francke 2009).
+
+The original WASA code version (Güntner 2002, Güntner and Bronstert 2004) was extended within the SESAM-Project to include sediment-transport processes at the hillslope scale using various USLE-derivative approaches, a spatially distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network and a reservoir module that computes the transport of water and sediment as well as sedimentation processes in reservoirs.
 
 
 
