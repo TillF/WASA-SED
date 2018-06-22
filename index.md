@@ -252,7 +252,8 @@ Reservoir	| Longitudinal profile of reservoir [m], Cross-section profiles of res
 ### General parameter and control files
 Four parameter files control the data input and output and some internal settings:
 
-***do.dat*** \[can be generated with The LUMP package, manual completing required\]
+***do.dat*** 
+\[can be generated with The LUMP package, manual completing required\]
 The *do.dat* file is located in the folder WASA\Input and contains the main parameter specifications for the WASA-SED model. Figure 1 displays an example file for the do.dat. The first line of the do.dat contains the title. Line 2 and 3 specify the path for the location of WASA input and output folder. Relative paths are supported. The backslash “\” only works on Windows-platforms. The slash “/” is accepted on Windows and Unix/Linux systems. Make sure that both specified paths end with slash or backslash, respectively. Line 4 and 5 contain the start and the end year of the simulation, respectively. Line 6 and 7 contain the start and the end calendar month of the simulation, respectively. Optionally, the day of month for begin and end can be specified. Line 10 contains the number of sub-basins. The number in line 9 is given by the sum of the number of terrain components in each landscape-unit of each sub-basin (e.g. if the system has only two sub-basins, sub-basin A has 1 landscape unit with 3 terrain components, sub-basin B has 2 landscape units with 1 terrain component each, then the number of combinations is 5). Line 14 specifies if the reservoir module is switched on (.t.) or is switched off (.f.). The same issue for the calculations of networks of small reservoirs in line 15. Lines 16 – 19 allow customizing the way water and sediment is (re-)distributed within and among the TCs. Line 21 allows the setting of the simulation timestep (daily / hourly). This may become obsolete in future versions by setting the timestep directly in line 30. Line 24 allows specifying a correction factor for hydraulic conductivity to account for intra-daily rainfall intensities. Optionally, this factor can also be made a function of daily rainfall by specifying two more parameters (a and b) in the same line, so that kfkorr=kfkorr0\*(a\*1/daily_precip+b+1). In line 31 the erosion and sediment-transport routines may be switched on and off. Specify the number of grain size classes you want to model in line 32. Their limits must be specified in part_class.dat, if more than one class is desired. Line 33 lets you choose the hillslope erosion model to be used in WASA. Currently, this parameter is disregarded, further options can be chosen in erosion.ctl. Select the model for the river routing in line 34. Possible options are: (1) old WASA routing (daily resolution only, no sediment transport), (2) Muskingum and suspended sediment, (3) Muskingum and bedload transport. Choose the sediment model in the reservoir in line 35 among 4 sediment transport equations: (1) Wu et al. (2000); (2) Ashida & Michiue (1973); (3) Yang (1973, 1984); (4) Ackers & White (1973).
 
 The optional lines 36 and 37 allow the saving/loading of state variables (i.e. groundwater, interception and soil storages) at the end/beginning of a model run (works only if svc.dat has been specified).
@@ -304,7 +305,8 @@ Parameter specification for the WASA Model (SESAM-Project)
 
 Figure 1 WASA parameter specification file: do.dat
 
-***maxdim.dat*** optional \[can be generated with the LUMP package\]
+***maxdim.dat*** 
+optional \[can be generated with the LUMP package\]
 The file *maxdim.dat* serves to optimise memory management and thus improves computational performance. It is, however, optional and if not encountered, default values are assumed.
 
 ```
@@ -317,6 +319,234 @@ contains maximum dimensions of spatial units
 0	//number of cross sections at the strategic reservoirs [optional]
 0	//number of points (x,y) along the cross sections [optional]
 ```
+
+Example: In the given example, no more than 3 LU may occur in one sub-basin (line 2). Analogously, no LU may contain more than 3 TCs (line 3) and no TC more than 4 SVCs (line 4). The number of horizons in a soil is limited to 6 (line 5). No more than 2 transpositions between sub-basins may exist. The last two lines are optional and valid only for computation of sedimentation patterns in strategic reservoirs (assumed 200, if missing).
+
+***part_class.dat***
+optional \[can be generated with the LUMP package\]
+The file *part_class.dat* is only necessary if sediment transport in multiple particle-size classes is to be modelled. If *part_class.dat* is missing, sediment transport will be modelled for a single particle-size class only. Otherwise, the file defines the number and the properties of the particle sizes that will be modelled. Please note that class numbering has to be continuous, starting with 1. The particle size classes must be ordered from fine to coarse.
+
+```
+Particle size classes to be used in sediment modelling
+class_number  upper_limit[mm]
+1	            0.002
+2	            0.063
+3	            2.0
+```
+
+Class_number		continuous numbering of particle classes
+Upper_limit 		upper limit of particle size for the respective class \[mm\]
+
+Example: The example file describes the 3 particle-size-classes clay, silt and sand (according to German classification) with clay particles up to 0.002 mm, silt (0.002 - 0.063 mm) and sand (0.063 - 2.0 mm).
+
+***outfiles.dat***
+optional
+The file allows specifying, which output files are desired. Disabling unnecessary output files saves computation time and disk space. The contains two headerlines, each following line contains a keyword, which is the filename of a possible output file (case insensitive, without the extension .out). If a keyword for a certain output file is not contained in *outfiles.dat* the respective file is not created, any existing file of that name is deleted. Information on the content of output files can be found in the respective sections. If *outfiles.dat* is not found, WASA-SED creates a default set of output files. 
+
+This files describe which output files are generated
+put any character before the files you don't want to be created
+daily_actetranspiration
+#daily_potetranspiration
+#daily_qhorton
+daily_qin_m3s
+daily_qout_m3s
+daily_rain
+daily_runoff
+daily_sediment_production
+daily_subsurface_runoff
+daily_theta
+daily_total_overlandflow
+daily_water_subbasin
+routing_response
+sediment_production
+water_subbasin
+deep_gw_recharge
+deep_gw_discharge
+
+tc_theta
+river_degradation
+river_deposition
+river_flow
+river_flow_dailyaverage
+river_flowdepth
+river_sediment_concentration
+river_sediment_total
+river_sediment_total_dailyaverage
+river_storage
+river_sediment_storage
+river_susp_sediment_storage
+river_velocity
+river_bedload
+river_infiltration
+tc_surfflow
+tc_sedout
+lu_sedout
+
+actetranspiration
+qhorton
+subsurface_runoff
+total_overlandflow
+gw_discharge
+potetranspiration
+gw_loss
+gw_recharge
+
+res_watbal
+res_vollost
+res_cav
+res_hydraul
+res_bedchange
+res_sedbal
+res_longitudunal
+res_sedcomposition
+lake_inflow_r
+lake_outflow_r
+lake_retention_r
+lake_volume_r
+lake_sedinflow_r
+lake_sedoutflow_r
+lake_sedretention_r
+lake_sedimentation_r
+lake_watbal
+lake_sedbal
+lake_inflow
+lake_outflow
+lake_volume
+lake_retention
+lake_vollost
+lake_sedinflow
+lake_sedoutflow
+lake_sizedistoutflow
+
+Example: The output files daily_actetranspiration.out and daily_qhorton.out will be created. The creation of daily_potetranspiration.dat is omitted.
+Input files for the hillslope module
+The input files for the hillslope module are located in the folder Input\[case_study]\Hillslope and are summarised in Table 5.
+
+Table 5	Input data files for the hillslope component
+Parameter File	Content
+hymo.dat		Specification of the sub-basins
+soter.dat	Specification of the landscape units
+terrain.dat	Specification of the terrain components
+svc.dat	Specifications of soil vegetation components, erosion parameters
+soil_vegetation.dat	Specification of soil-vegetation components
+svc_in_tc.dat	Specification which SVCs are contained in each TC
+soil.dat	Specification of the soil properties
+horizon_particles.dat	Particle size distributions of soil horizons
+vegetation.dat	Specification of the vegetation properties
+rainy_season.dat (optional)
+k_seasons.dat (optional)
+c_seasons.dat (optional)
+p_seasons.dat (optional)
+coarse_seasons.dat (optional)
+n_seasons.dat (optional)	Specification of the start and end of rainy season
+Seasonality of USLE factors K, C, P, coarse fraction and Manning’s n, resp.
+scaling_factor.dat (optional)	Scaling/calibration factors for hydraulic conductivity
+calibration.dat (optional)	Calibration factors for hydraulic conductivity of soils
+Transposition.dat (optional)	Specification of additional water fluxes between sub-basins
+../erosion.ctl (optional)	Options for the erosion module
+gw_storage.stat (optional)
+intercept_storage.stat (optional)
+soil_moisture.stat (optional)	Initialisation of storage content of ground water
+Initialisation of storage content of interception
+Initialisation of storage content of soil moisture
+frac_direct_gw.dat (optional)	partitioning of groundwater into river and alluvia
+beta_fac_lu.dat (optional)
+sdr_lu.dat (optional)	Correction factors for beta (USLE L-factor computation)
+LU-wise specification of sediment delivery ratio
+calib_wind.dat (optional)	Calibration of wind speed (sensitive parameter for evapotranspiration)
+
+The spatial conceptualisation of the WASA model is explained in detail in Güntner (2002), and are only shortly summarised in this manual. The following spatial modelling units were identified (Güntner 2002, p. 33):
+
+	Sub-Basins: ca. 50-1000 km3, topologically referenced, defined e.g. by the location of river gauging stations, or large reservoirs with a storage capacity of more than 50x106 m3 and the confluence of major rivers;
+
+	Landscape units (LUs): based on the LU concept (e.g. SOil and TERrain digital database, FAO, 1995), i.e. structure of the landscape according to geological, topographic and soil characteristics with similarity in major landform, general lithology, soil associations and toposequences, georeferenced;
+
+	Terrain components (TCs): fraction of area of a landscape unit with similarity in slope gradients, position within toposequence (highlands, slopes and valley bottoms), soil association;
+
+	Soil vegetation components (SVCs): fraction of area of a terrain component, characterised by specific combination of soil type, and vegetation/land-cover class 
+	Soil profile: descriptions of characteristic soil horizons.
+
+
+The model domain is divided into sub-basins; each sub-basin has an individual Map-ID. This Map-ID has to be a unique number; the employed numbering scheme does not have to be continuous (i.e. with three sub-basins, they do not have to be named Map-ID 1, 2 and 3, but could be named e.g. 100, 500, 877). The following paragraphs explain each of the input files in turns.
+
+1) hymo.dat [can be generated with the LUMP package]
+
+Specification of the sub-basins and their total number, type & areal fraction of LU units
+Subasin-ID [-], Area[km**2],  nbr[-],  LU-IDs[-], areal fraction of LU[-]
+49	10    4   19   87   90  135  0.357  0.147  0.214  0.282
+50	15    2   19   87  0.827  0.173
+1	40    3   19  103   87  0.612  0.143  0.245
+44	37    3   19   87   18  0.646  0.097  0.257
+10	5    3   19   18   87  0.483  0.173  0.344
+4	22    3  159   19   18  0.107  0.793  0.100
+15	13    2   87  138  0.740  0.260
+39	25    5   87   18  142   56   31  0.351  0.146  0.142  0.237  0.124
+3	31    3   87   18  136  0.416  0.471  0.113
+29	20    4   56  122   31    7  0.091  0.652  0.131  0.126                                                
+
+Subasin-ID		Map-ID of sub-basin
+Area 			Area of each sub-basin in [km2] (including reservoir areas)
+nbr			Number of LU units in each sub-basin
+LU-IDs 		List of LU-Ids which occur in this specific sub-basin
+areal fraction		Fraction of each LU unit within each sub-basin [-]
+
+Example: In the do.dat, it was specified that 10 sub-basins are simulated with the WASA model. Accordingly, the file hymo.dat above contains the specification of 10 sub-basins, with the map IDs 49, 50,  1, … 29. The first sub-basin has a Map ID of 49 and an area of 10 km2. Within this sub-basin, four different landscape units can be identified with the LU-IDs 19, 87, 90 and 135.  The first LU (ID 19) covers an area of 35.7 % (0.357) of the total area of the sub-basin, the second one 14.7 %, the third one 21.4 % and the last one 28.2 % (total 100 %).
+Important: Any subbasin that is not listed in the file routing.dat will be ignored.
+
+2) soter.dat [can be generated with the LUMP package]
+
+Specification of LU units										
+LU-ID [-],No._of_TC[-], TC1[-], TC2[-],TC3[-],kfsu[mm/d],length[m],meandep[mm],maxdep[mm],riverbed[mm],gwflag[0/1],gw_dist[mm], frgw_delay[day]
+1	3	7	49	11	100	601	-1	-1	1500	0	0	1
+2	1	2	100	1963.7	-1	-1	1500	0	0	1
+…
+
+LU_id			ID of landscape units
+Nb._of_TC		Number of terrain components	
+TC1			ID of a terrain component 
+TC2			ID of another terrain component
+TC3			ID of a third terrain component
+...			more TC-IDs according to field 2
+kfsu			Hydraulic conductivity of bedrock [mm/d]
+length			Mean  slope length in LU unit [m]
+meandep		Mean maximum depth of soil zone [mm]
+maxdep			Maximum depth of alluvial soil zone [mm]
+riverbed		Depth of river bed below terrain component [mm]
+gw_flag		Flag for LU unit [0: no groundwater, 1: with groundwater] 
+gw_dist			Initial depth of groundwater below surface [mm] (ignored, unless gw_flag=99)
+frgw_delay		Storage coefficient for groundwater outflow [day]
+
+Example: The landscape unit with ID 1 has 3 terrain components with the IDs 7, 49 and 11, a hydraulic conductivity of bedrock of 100 mm/d, a mean slope length of 601 m, etc.
+The LU with ID 2 has only 1 terrain component with the ID-Number 2 (i.e. consisting only of one rather homogenous hillslope section, TC2 and TC3 are set to zero), a hydraulic conductivity of bedrock of 100 mm/d, a mean slope length of 1963.7 m, etc. The TCs within a LU can be listed in any order, their position in the toposequence is read from terrain.dat.
+LU-ids not lister in hymo.dat are ignored.
+
+Remarks concerning groundwater: In WASA-SED, the representation of groundwater is yet quite simplistic. The general groundwater regime is essentially controlled by the flag for groundwater (gw_flag) in soter.dat. Currently, the three options for setting gw_flag are gwflag=0, 1 or 99 (see Table below). This determines if the water that leaves the soil column is “lost” for the model (gwflag=0) or enters a linear storage (gwflag=1). Gw_flag=99 is an experimental modelling option which usually should not be chosen.
+
+Please note that the depth of the bedrock may be specified in two ways: In soil.dat, the bedrock is assumed beneath the deepest soil horizon, if the bedrock flag is set (bedrock=1). Otherwise (bedrock=0), its depth is taken from the meandep (maxdep for alluvial soils) specification given in soter.dat.
+
+Please note that in the case of alluvial soils, for each option in Tables 1 or 2 below, maxdep as defined in soter.dat instead of meandep is used. maxdep usually should be set larger than meandep. The rationale behind this is that alluvial soils in the valley bottoms, in particular in crystalline bedrock environment, usually have larger soil depths (and thus higher water storage capacity) than average soils somewhere else (at the slopes) within the landscape unit. 
+
+IMPORTANT:
+In any of the above options, riverbed is to be defined in soter.dat. In WASA, only soil horizons of the lowest terrain component which are located at depths above the riverbed are allowed to exfiltrate into the river by lateral flow. Soil horizons below riverbed cannot lose water to the river, but only due to evapotranspiration or percolation to groundwater/bedrock.
+
+I) Groundwater option Gw_flag=0
+Modelling options	Groundwater regime,
+internal representation of processes	Gw flag (soter.dat)	Bed-rock (soil.dat)	Add. parameters (soter.dat)
+I) Groundwater below soil zone is ignored / not relevant for surface processes	Soil water balance is modelled within the zone above bedrock. Water percolation out of the deepest soil horizon leaves the model domain	0	Select option 1.1 or 1.2
+I.1) No bedrock is taken into account	Water percolation out of the deepest soil horizon leaves the model domain. 	0	Select option 1.1.1 or 1.1.2
+I.1.1) Depth of soil zone is the sum of all horizons given in soil.dat	See 1.1) 	0	0	meandep=-1
+maxdep=-1
+riverbed
+I.1.2) Depth of soil zone is meandep (or the total profile depth given in soil.dat if this is larger than meandep)	See 1.1) 	0	0	Meandep
+Maxdep
+riverbed
+I.2) Bedrock is taken into account below deepest soil horizon	Hydraulic conductivity of bedrock may affect percolation rates out of the deepest soil horizon. A saturated zone (“groundwater”) above bedrock may consequently evolve due to saturation. Groundwater percolating into the bedrock leaves the model domain. 	0	Select option 1.2.1 or 1.2.2
+I.2.1) Bedrock is given in soil.dat	See 1.2) 	0	1	Kfsu
+riverbed
+I.2.2) If bedrock is not given in soil.dat, bedrock is assumed to be in the depth defined by meandep (or below deepest horizon given in soil.dat if its depth is greater than meandep)	See 1.2) 	0	0	Meandep
+maxdep
+kfsu
+riverbed
 
 
 
