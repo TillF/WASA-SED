@@ -1,5 +1,3 @@
-hallo
-
 # WASA-SED
 
 # User Manual
@@ -263,6 +261,50 @@ Line 36 may additionally contain a second logical variable (append_output), allo
 
 Line 37 may additionally contain a second logical variable (save_states_yearly), determining if the model states are saved (and overwritten) at the end of each simulation year. Default is .TRUE.
 
+
+```
+Parameter specification for the WASA Model (SESAM-Project)
+..\WASA\Input\Case_study\ 	Location of model platform
+..\WASA\Output\		Specification of folder for simulation output
+1980  //tstart (start year of simulation) 
+1981  //tstop (end year of simulation)
+1 15     //mstart (start month of simulation) in this case: simulation from January, 15th 1980	
+12    15 //mstop (end month of simulation)   until December, 31st (=defaults to end of month) 1981	
+10    //no. of sub-basins
+49    //no. of combinations of sub-basins, landscape units, terrain components
+321   //total no. of landscape units in study area
+515   //total no. of terrain components in study area
+77    //total no. of soil components in study area
+34    //total no. of vegetation units in study area
+.f.    //doreservoir: do reservoir calculations
+.f.   //doacudes:includes dam calculations
+.t.   //dolattc: do latflow between TCs
+.f.   //doalllattc: rout latflow completely to next downslope TC
+.t.   //dolatsc: do latflow within TCs (surface runoff)
+.t.   //dolatscsub: do latflow within TCs (subsurface runoff)
+.f.   //dotrans: do water transpositions betwen sub-basins
+.f.   //dohour: do hourly version (ignored, use “dt”)
+0     //scenario: choose scenario (0:less rain (ECHAM), 1:no trend, 2:more rain (Hadley))
+0     //krig: type of precipitation interpolation (0….)
+15.0  //kfkorr:  hydraulic conductivity factor (for daily model version) (kfkorr)
+0.30  //intcf: interception capacity per unit LAI (mm)
+0     //dointc: type of interception routine (simple bucket:0, modified bucket:1)
+.f.   //doscale: do scaling due to rainfall interpolation ?
+.f.   //domuncell: for muni/ezg-nocell-version, use rainfall input derived from cells ? (change kf_calib.dat !)
+1,   //sensfactor: factor for sensitivity studies
+24  //dt: time step in [hours]
+.t.   //dosediment
+1   //No. of grain size classes
+1   // type of sediment transport model at the hillslope	
+1   type of water / sediment model in the river: (1) old routing, (2) Muskingum & ss transport, (3) Muskingum & bedload modelling
+1   //type of sediment model in the reservoir: choose sediment transport …
+.t. //load state of storages from files (if present) at start (optional)
+.f. //save state of storages to files after simulation period (optional)
+```
+
+
+
+
 insert here: Figure 1 -> table? figure?...
 
 
@@ -347,7 +389,7 @@ Medeiros, PHA., Guentner, A., Francke, T., Mamede, GL., De Araújo, JC. (2010): 
 
 Maidment, D. R., 1993. Handbook of hydrology. MGraw-Hill, New York.
 
-Mamede, G., 2008. Reservoir sedimentation in dryland catchments: Modelling and management. PhD thesis at the University of Potsdam, Germany, published on: urn:nbn:de:kobv:517-opus-17047.
+Mamede, G., 2008. Reservoir sedimentation in dryland catchments: Modelling and management. PhD thesis at the University of Potsdam, Germany, published on: https://publishup.uni-potsdam.de/opus4-ubp/files/1546/mamede_diss.pdf.
 
 Mamede, G.L., Bronstert, A., Araujo, J.C., Batalla, R. J., Güntner, A., Mueller, E. N., Francke, T. 2006. 1D Process-Based Modelling of Reservoir Sedimentation: a Case Study for the Barasona Reservoir in Spain. Proceedings of the International Conference on Fluvial Hydraulics, Lisbon, Vol. 2: 1585-1594.
 
