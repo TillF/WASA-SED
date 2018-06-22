@@ -97,11 +97,7 @@ Table 1 Folder structure of WASA code
 \Hillslope\ | Hillslope routines (Overland, sub-surface flow, evapotranspiration, sediment production etc.)  
 \River\	| River routines (Routing of water and sediment in the river network)
 \Reservoir\ | Reservoir water and sediment modelling routines (Water balance, bed elevation change, management options)
-\Input\	| Input data, contains parameter file: do.dat, 
-        | \Input\Hillslope, 
-        | \Input\River, 
-        | \Input\Reservoir, 
-        | \Input\Time_series
+\Input\	| Input data, contains parameter file: do.dat, \Input\Hillslope, \Input\River, \Input\Reservoir, \Input\Time_series
 \Output\ | Output files of model scenarios 
 
 A complete example input-data set is part of the Subversion repository (see top of document). Model parameterisations are available e.g. for meso-scale catchments in dryland areas of Spain and Brazil (Bengue Catchment in Spain: Mamede 2008, Ribera Salada Catchment in Spain: Mueller et al. 2008, Mueller et al. submitted to CATENA, Isábena Catchment in Spain: Francke 2009).
