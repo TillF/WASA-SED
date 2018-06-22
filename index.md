@@ -244,7 +244,7 @@ Type |	Model input parameter
 Climate |	Daily or hourly time series on rainfall [mm/day, mm/h], Daily time series for average short-wave radiation [W/m2], Daily time series for humidity [%], Daily time series for temperature [°C]
 Vegetation	| Stomata resistance [s/m], Minimum suction [hPa], Maximum suction [hPa], Height [m], Root depth [m], LAI [-], Albedo [-], Manning's n of hillslope[-], USLE C [-]
 Soil	| No. of horizons\*, Residual water content [Vol. %], Water content at permanent wilting point [Vol. %], Usable field capacity [Vol. %], Saturated water content [Vol. %], Saturated hydraulic conductivity (mm/h), Thickness [mm], Suction at wetting front [mm], Pore size index [-], Bubble pressure [cm], USLE K [-]\*\*, Particle size distribution\*\*
-Terrain and river |	Hydraulic conductivity of bedrock [mm/d], Mean maximum depth of soil zone [mm], Depth of river bed below terrain component [mm], Initial depth of groundwater below surface [mm], Storage coefficient for groundwater outflow [day], Bankful depth of river [m], Bankful width of river [m], Run to rise ratio of river banks [-], Bottom width of floodplain [m], Run to rise ratio of floodplain side slopes [-], River length [km], River slope [m/m], D~50~ (median sediment particle size) of riverbed [m], Manning’s n for riverbed and floodplains [-]
+Terrain and river |	Hydraulic conductivity of bedrock [mm/d], Mean maximum depth of soil zone [mm], Depth of river bed below terrain component [mm], Initial depth of groundwater below surface [mm], Storage coefficient for groundwater outflow [day], Bankful depth of river [m], Bankful width of river [m], Run to rise ratio of river banks [-], Bottom width of floodplain [m], Run to rise ratio of floodplain side slopes [-], River length [km], River slope [m/m], D<sub>50</sub> (median sediment particle size) of riverbed [m], Manning’s n for riverbed and floodplains [-]
 Reservoir	| Longitudinal profile of reservoir [m], Cross-section profiles of reservoir [m], Stage-volume curves, Initial water storage and storage capacity volumes [m3], Initial area of the reservoir [ha], Maximal outflow through the bottom outlets [m3/s], Manning’s roughness for reservoir bed, Depth of active layer [m]
 
 \* for each soil horizon, all following parameters in the column are required, \** of topmost horizon
@@ -261,5 +261,110 @@ Line 36 may additionally contain a second logical variable (append_output), allo
 
 Line 37 may additionally contain a second logical variable (save_states_yearly), determining if the model states are saved (and overwritten) at the end of each simulation year. Default is .TRUE.
 
+insert here: Figure 1 -> table? figure?...
+
+
+
+
+
+# Relevant Literature for the WASA-SED Model
+**For WASA-SED:**<br>
+Mueller, EN., Guentner, A., Francke, T., Mamede, GL. (2010): Modelling sediment export, retention and reservoir sedimentation in drylands with the WASA-SED Model.  Geoscientific Model Development 3, 275-291.
+
+Mamede, GL. (2008): Reservoir sedimentation in dryland catchments: Modelling and management. PhD thesis, Universität Potsdam, Germany. http://opus.kobv.de/ubp/volltexte/2008/1704/
+
+**For WASA-SED parameterisations:**<br>
+Appel, K., 2006. Characterisation of badlands and modelling of soil erosion in the Isabena watershed, NE Spain. Unpublished MSc thesis. University of Potsdam, Germany.
+
+Medeiros, PHA. (2009): Hydro-sedimentological processes and connectivity in a semiarid basin: modelling and validation in several scales. PhD thesis, Universidade Federal do Ceará, Brazil. http://www.teses.ufc.br/tde_busca/arquivo.php?codArquivo=4425
+
+Medeiros, PHA., Guentner, A., Francke, T., Mamede, GL., De Araújo, JC. (2010): Modelling spatio-temporal patterns of sediment yield and connectivity in a semi-arid catchment with the WASA-SED model. Hydrological Sciences Journal 55:4, 636-648. (1)
+
+Mueller, EN., Francke, T., Batalla, RJ., Bronstert, A. (2009): Modelling the effects of land-use change on runoff and sediment yield for a meso-scale catchment in the Southern Pyrenees. Catena 79:3, 288-296. (1)
+
+Mueller E. N., Batalla, R. J., Garcia, C., Bronstert, A., 2008. Modelling bedload rates from fine grain-size patches during small floods in a gravel-bed river. J. of Hydr. Eng. in press 
+
+Francke, T. (2009): Measurement and Modelling of Water and Sediment Fluxes in Meso-Scale Dryland Catchments. PhD thesis, Universität Potsdam, Germany. http://opus.kobv.de/ubp/volltexte/2009/3152/ 
+
+**For the hydrological modules:**<br>
+Güntner, A., 2002. Large-scale hydrological modelling in the semi-arid North-East of Brazil. PIK-Report No. 77, Potsdam Institute for Climate Research, Germany.
+Güntner, A. and Bronstert, A., 2004. Representation of landscape variability and lateral redistribution processes for large-scale hydrological modelling in semi-arid areas, Journal of Hydrology, 297: 136-161.
+
+**For LUMP:**<br>
+Francke, T., Güntner, A., Bronstert, A., Mamede, G., Müller, E. N., 2008. Automated catena-based discretisation of landscapes for the derivation of hydrological modelling units, International Journal of Geographical Information Science, 22: 111-132.
+
+**For LUMP package:**<br>
+Pilz, T (2015): https://github.com/tpilz/LUMP
+
+<br>
+<br>
+
+# References
+Antronico, L., Coscarelli, R., Terranova, O., 2005. Surface erosion assessment in two Calabrian basins (southern Italy). In: R. J. Batalla and C. Garcia (Ed.), Geomorphological Processes and Human Impacts in River Basins, IAHS, pp. 16-22.
+
+Appel, K., 2006. Characterisation of badlands and modelling of soil erosion in the Isabena watershed, NE Spain. Unpublished MSc thesis. University of Potsdam, Germany 
+
+Ashida, K. and Michiue, M. 1973. “Studies on bed load transport rate in alluvial streams”, Trans. Japan Society of Civil Engineers, Vol. 4.
+
+Ackers, P. and White, W.R. 1973. “Sediment transport: a new approach and analysis”, Proc. ASCE, Journal of the Hydraulics Division, Vol. 99, HY11, pp. 2041-2060.
+
+Breuer, L., Eckhardt, K., Frede, H.-G., 2003. Plant parameter values for models in temperate climates, Ecological Modelling, 169: 237-293.
+
+Bronstert, A., Güntner, A., Jaeger, A., Krol, M., and Krywkow, J. 1999. Großräumige hydrologische Parameterisierung und Modellierung als Teil der integrierten Modellierung, pp. 31-40. In N. Fohrer and P. Döll, editors, Modellierung des Wasser- und Stofftransports in großen Einzugsgebieten. Kassel University Press, Kassel
+
+Bronstert, A., Jaeger, A., Güntner, A., Hauschild, M., Döll, P., and Krol, M. 2000. Integrated modelling of water availability and water use in the semi-arid Northeast of Brazil, Physics and Chemistry of the Earth 25: 227-232
+
+Francke, T., Parameterisation of the Esera/Isabena Catchment, Pre-Pyrenees, Spain. SESAM Working Report, http://brandenburg.geoecology.uni-potsdam.de/projekte/sesam/publications.php 
+
+Francke, T., Güntner, A., Bronstert, A., Mamede, G., Müller, E. N., 2008. Automated catena-based discretisation of landscapes for the derivation of hydrological modelling units. International Journal of Geographical Information Science 22: 111-132.
+
+Francke, T., 2005. LUMP package, Manual, Auxiliary software tool to generate the input files for the hillslope module of the WASa model, SESAM working reports on http://brandenburg.geoecology.uni-potsdam.de/projekte/sesam/publications.php
+
+FAO 1993. Global and national soils and terrain digital databases (SOTER). Procedures Manual. World Soil Resources Reports, No. 74., FAO (Food and Agriculture Organization of the United Nations), Rome, Italy.
+
+FAO 2001. Global Soil and Terrain Database (WORLD-SOTER). FAO, AGL (Food and AgricultureOrganization of the United Nations, Land and Water Development Division), http://www.fao.org/ag/AGL/agll/soter.htm.
+
+Güntner, A., 2002. Large-scale hydrological modelling in the semi-arid North-East of Brazil. PIK-Report No. 77. Potsdam Institute for Climate Research, Germany (http://www.pik-potsdam.de/pik_web/ publications/pik_reports/reports/reports/pr.77/pr77.pdf)
+
+Güntner, A., Bronstert, A., 2002. Process-based modelling of large-scale water availability in a semi-arid environment: process representation and scaling issues. In G.H. Schmitz, editor, Schriftenreihe des Institutes für Abfallwirtschaft und Altlasten, Universität Dresden, Dresden, pp. 46
+
+Güntner, A., Bronstert, A., 2003. Large-scale hydrological modeling of a semiarid environment: model development, validation and application, In T. Gaiser, M. Krol, H. Frischkorn, and J.C.Araujo, editors, Global change and regional impacts. Springer-Verlag, Berlin
+
+Güntner, A., Bronstert, A., 2003. Large-scale hydrological modelling in the semiarid Northeast of Brazil: aspects of model sensitivity and uncertainty, In E. Servat, W. Najem, C. Leduc, and A. Shakeel, editors, Hydrology of the Mediterranean and Semi-Arid Regions. IAHS-Publication 278
+
+Güntner, A., 2003. Auswirkung von Klimaänderungen auf die Wasserverfügbarkeit in Trockengebieten - Ergebnisse und Unsicherheiten am Beispiel Nordost-Brasiliens. In H.-B.Kleeberg, editor, Hydrologische Wissenschaften - Fachgemeinschaft in der ATV-DVWK, pp. 205-214
+Güntner, A., Bronstert, A., 2004. Representation of landscape variability and lateral redistribution processes for large-scale hydrological modelling in semi-arid areas, Journal of Hydrology 297: 136-161
+
+Güntner, A., Krol, M., Araujo, J.C., and Bronstert, A. 2004. Simple water balance modelling of surface reservoir systems in a large data-scarce semiarid region, Hydrological Sciences Journal 49: 901-918
+
+IRTCES, 1985. Lecture notes of the training course on reservoir sedimentation. International Research of Training Center on Erosion and Sedimentation, Sediment Research Laboratory of Tsinghua University, Beijing, China.
+
+Krysanova, V., Wechsung, F., Arnold, J., Srinivasan, R.., Williams, J., 2000. SWIM (Soil and Water Integrated Model), User Manual. PIK Report Nr. 69, pp 239.
+
+Medeiros, PHA., Guentner, A., Francke, T., Mamede, GL., De Araújo, JC. (2010): Modelling spatio-temporal patterns of sediment yield and connectivity in a semi-arid catchment with the WASA-SED model. Hydrological Sciences Journal 55:4, 636-648. (1)
+
+Maidment, D. R., 1993. Handbook of hydrology. MGraw-Hill, New York.
+
+Mamede, G., 2008. Reservoir sedimentation in dryland catchments: Modelling and management. PhD thesis at the University of Potsdam, Germany, published on: urn:nbn:de:kobv:517-opus-17047.
+
+Mamede, G.L., Bronstert, A., Araujo, J.C., Batalla, R. J., Güntner, A., Mueller, E. N., Francke, T. 2006. 1D Process-Based Modelling of Reservoir Sedimentation: a Case Study for the Barasona Reservoir in Spain. Proceedings of the International Conference on Fluvial Hydraulics, Lisbon, Vol. 2: 1585-1594.
+
+Morgan, R.P.C., 1995. Soil erosion and conservation Longman Group, UK Limited. 
+
+Mueller, EN., Francke, T., Batalla, RJ., Bronstert, A. (2009): Modelling the effects of land-use change on runoff and sediment yield for a meso-scale catchment in the Southern Pyrenees. Catena 79:3, 288-296. (1)
+
+Mueller, E. N., Batalla, R. J., Garcia, C., Bronstert, A., 2008. Modelling bedload rates from fine grain-size patches during small floods in a gravel-bed river. J. of Hydr. Eng. in press
+
+Mueller, E. N., Güntner, A., Francke, T., Mamede, G., 2008. Modelling water availability, sediment export and reservoir sedimentation in drylands with the WASA-SED Model. submitted to Geoscientific Model Development
+
+Neitsch, S.L., Arnold, J.G., Kiniry, J.R., Williams, J.R., King, K.W., 2002. Soil and Water Assessment Tool. Theoretical Documentation, Version 2000. Published by Texas Water Resources Institute, TWRI Report TR-191
+
+Renard, K.G., Foster, G.R., Weesies, G.A., McCool, D.K. and Yoder, D.C., 1997. Renard K, Foster G, Weesies G, McCool D, Yoder D 1997. Predicting soil loss by water: A guide to conservation planning with the Revised Universal Soil Loss Equation (RUSLE). U.S. Dep. of Agriculture, Agriculture Handbook 703.
+
+Williams, J., 1995. The EPIC Model. In: Singh, V. P. (Eds.), Computer Models of Watershed Hydrology. Water Resources Publications, Highlands Ranch, CO., pp. 909-1000.
+
+Wu, W., Wang, S.S.Y. and Jia, Y. 2000, “Nonuniform sediment transport in alluvial rivers”, Journal of Hydraulic Research, Vol. 38, No. 6, pp 427-434.
+
+Yang, T.C. and Simoes, F.J.M. 2002 User’s Manual for GSTARS3 (Generalized Sediment Transport model for Alluvial River Simulation version 3.0). U.S. Department of the Interior, Bureau of Reclamation, Technical Service Center, Denver, Colorado
 
 
