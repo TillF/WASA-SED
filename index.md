@@ -1,6 +1,9 @@
 <center>
-# WASA-SED<br>
-# User Manual<br>
+
+# WASA-SED
+
+# User Manual
+
 Eva Nora Müller, Till Francke, George Mamede and Andreas Güntner
 <br>
 <br>
@@ -68,8 +71,8 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 <br>
 <br>
 <br>
-## Table of Content
 
+## Table of Content
 [Introduction](#heading)<br>
 [Program folders and structure](#heading)<br>
 - [Hillslope module](#sub-heading)<br>
@@ -89,7 +92,7 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 [Reference](#heading)<br>
 <br>
 <br>
-<br>
+
 ## Introduction
 The WASA-SED model simulates the runoff and erosion processes at the hillslope scale, the transport processes of suspended and bedload fluxes at the river scale and the retention and remobilisation processes of sediments in large reservoirs. The modelling tool enables the evaluation of management options both for sustainable land-use change scenarios to reduce erosion in the headwater catchments as well as adequate reservoir management options to lessen sedimentation in large reservoirs and reservoir networks. The model concept, its spatial discretisation and the numerical components of the hillslope, river and reservoir processes are summarised and current model applications are reviewed in Mueller et al. (2008). The hydrological routines of the model are based on the WASA model (Model for Water Availability in Semi-Arid environments), which was developed by Güntner (2002) and Güntner and Bronstert (2002, 2003) to enable the quantification of water availability in semi-arid regions. The WASA-SED model was developed within the joint Spanish-Brazilian-German research project SESAM (Sediment Export from Semi-Arid Catchments: Measurement and Modelling). The existing WASA model code has been extended to include sediment-transport routines for the three new conceptual levels of the WASA-SED model: the hillslope scale, river scale and the reservoir scale for the calculation of sedimentation. This documentation gives a short outline of the structure, computational routines and folder system of the WASA-SED code in Chapter 2, followed by a description of the input files for model parameterisation in Chapter 3 and output files for the hillslope, river and reservoir modules in Chapter 4.
 
