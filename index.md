@@ -64,7 +64,7 @@ Email: till.francke@uni-potsdam.de
 Copyrights and ownership:<br>
 For the original WASA code: Andreas Güntner, Geoforschungszentrum Potsdam, Telegrafenberg, 14473 Potsdam, Germany.<br>
 For all extensions of WASA-SED: SESAM-project team, University of Potsdam, 14476 Potsdam, Germany.<br>
-* Creative Commons Attribution 4.0 International License
+\* Creative Commons Attribution 4.0 International License
 
 Disclaimer:<br>
 The WASA-SED program is large and complex and extensive knowledge of its design, purpose, and limitations is required in order to apply it properly. The WASA-SED and its source code is freely available under a CC4 licence (“use as you wish, don’t blame us, give credit,…”). See license.txt.
@@ -73,7 +73,7 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 <br>
 
 ## Table of Content
-[Introduction](#heading)<br>
+[Introduction](#heading)
 [Program folders and structure](#heading)<br>
 - [Hillslope module](#sub-heading)<br>
 - [River module](#sub-heading)<br>
