@@ -67,25 +67,23 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 <br>
 
 ## Table of Content
-- [Introduction](#heading)<br>
-- [Program folders and structure](#heading-1)<br>
-  * [Hillslope module](#sub-heading)<br>
-  * [River module](#sub-heading-1)<br>
-  * [Reservoir module](#sub-heading-2)<br>
-  * [Input Data](#sub-heading-3)<br>
-  * [General parameter and control files](#sub-heading)<br>
-  * [Input files for the hillslope module](#sub-heading)<br>
-  * [Input files for the river module](#sub-heading)<br>
-  * [Input files for the reservoir module](#sub-heading)<br>
-  * [Input of climate data](#sub-heading)<br>
-- [Output Data](#heading)<br>
-  * [Output of the hillslope module](#sub-heading)<br>
-  * [Output of the river module](#sub-heading)<br>
-  * [Output of the reservoir module](#sub-heading)<br>
-- [Relevant Literature for the WASA-SED Model](#heading)<br>
-- [Reference](#heading)<br>
-
-<!-- toc -->
+- [Introduction](#introduction)<br>
+- [Program folders and structure](#program-folders-and-structure)<br>
+  * [Hillslope module](#hillslope-module)<br>
+  * [River module](#river-module)<br>
+  * [Reservoir module](#reservoir-module)<br>
+- [Input Data](#input-data)<br>
+  * [General parameter and control files](#general-parameter-and-control-files)<br>
+  * [Input files for the hillslope module](#input-files-for-the-hillslope-module)<br>
+  * [Input files for the river module](#Input-files-for-the-river-module)<br>
+  * [Input files for the reservoir module](#Input-files-for-the-reservoir-module)<br>
+  * [Input of climate data](#input-of-climate-data)<br>
+- [Output Data](#output-data)<br>
+  * [Output of the hillslope module](#output-of-the-hillslope-module)<br>
+  * [Output of the river module](#output-of-the-river-module)<br>
+  * [Output of the reservoir module](#output-of-the-reservoir-module)<br>
+- [Relevant Literature for the WASA-SED Model](#relevant-literature-for-the-wasa-sed-model)<br>
+- [References](#references)<br>
 
 ## Introduction
 The WASA-SED model simulates the runoff and erosion processes at the hillslope scale, the transport processes of suspended and bedload fluxes at the river scale and the retention and remobilisation processes of sediments in large reservoirs. The modelling tool enables the evaluation of management options both for sustainable land-use change scenarios to reduce erosion in the headwater catchments as well as adequate reservoir management options to lessen sedimentation in large reservoirs and reservoir networks. The model concept, its spatial discretisation and the numerical components of the hillslope, river and reservoir processes are summarised and current model applications are reviewed in Mueller et al. (2008). The hydrological routines of the model are based on the WASA model (Model for Water Availability in Semi-Arid environments), which was developed by Güntner (2002) and Güntner and Bronstert (2002, 2003) to enable the quantification of water availability in semi-arid regions. The WASA-SED model was developed within the joint Spanish-Brazilian-German research project SESAM (Sediment Export from Semi-Arid Catchments: Measurement and Modelling). The existing WASA model code has been extended to include sediment-transport routines for the three new conceptual levels of the WASA-SED model: the hillslope scale, river scale and the reservoir scale for the calculation of sedimentation. This documentation gives a short outline of the structure, computational routines and folder system of the WASA-SED code in Chapter 2, followed by a description of the input files for model parameterisation in Chapter 3 and output files for the hillslope, river and reservoir modules in Chapter 4.
@@ -122,7 +120,7 @@ routing_new.f90 | New river routine with Muskingum and sediment transport, calls
 
 The following sections give some information on the computational background and the functional structure of the corresponding routines for each of the three conceptual levels: hillslope, river and reservoir.
 
-## Hillslope module
+### Hillslope module
 The hillslope module comprises the modelling of the hydrological and sediment-transport processes. The hydrological modelling accounts for interception, evaporation, infiltration, surface and subsurface runoff, transpiration and ground water recharge. Details are given in Güntner (2002, Chapter 4). The main hydrological calculations are carried out in hymo_all.f90 (for daily or hourly time steps). The subroutines that are called within hymo_all.f90 are summarised in Table 3. The temporal sequence of hydrological process modelling is summarised in Güntner (p. 36-37).
 
 Table 3 Main subroutines of hymo_all.f90 (hydrological subroutines)
@@ -157,7 +155,7 @@ terrain component
 4.	Completely mix the newly generated sediment with any sediment coming from upslope terrain components
 5.	If necessary, limit sediment export by transport capacity.
 
-## River module
+### River module
 The river routing of the original WASA model (Güntner 2002) bases on daily linear response functions (Bronstert et al. 1999) similar to a triangular unit hydrograph. Its implementation does not support output in hourly resolution (only daily is produced) and sediment transport. It was extended to include a spatially semi-distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network. The implemented water modelling approach is similar to the routing routines from the SWAT model (Soil Water Assessment Tool, Neitsch et al. 2002) model and the SWIM model (Soil Water Integrated Modelling, Krysanova et al. 2000). The new water routing is based on the Muskingum kinematic wave approximation. Suspended sediment transport and bedload is modelled using the transport capacity concept. The river module can be run with variable time steps. Transmission losses through riverbed infiltration and evaporation are accounted for. The main routing calculations as well as the initialisation and reading of the river input files are carried out in routing.f90. The following sub-routines are called from routing.f90:
 
 *muskingum.f90:* contains the flow calculation using the Muskingum method
@@ -184,7 +182,7 @@ The river routing of the original WASA model (Güntner 2002) bases on daily line
 1.	Calculation of current width of the river
 2.	Bedload formulas after Meyer-Peter & Müller (1948), Schoklitsch (1950), Smart & Jaeggi (1983), Bagnold (1956) und Rickenmann (2001), see Mueller et al. 2008 relevant references
 
-## Reservoir module
+### Reservoir module
 The reservoir sedimentation routine was included into the WASA-SED model by Mamede (2008) to enable the calculation of non-uniform sediment transport along the longitudinal profile of a reservoir, of the reservoir bed changes caused by deposition/erosion processes and of reservoir management options. 
 In order to perform the simulation of sediment transport in reservoirs, four important processes have to be considered: (1) reservoir water balance, (2) hydraulic calculations in the reservoir, (3) sediment transport along the longitudinal profile of the reservoir and (4) reservoir bed elevation changes. For the calculation of sediment transport in the reservoir, four different equations for the calculation of total sediment load were selected from recent literature. The reservoir bed elevation changes are calculated through the sediment balance at each cross section, taking into account three conceptual sediment layers above the original bed material. The reservoir sedimentation module is composed by the following subroutines:
 
@@ -253,7 +251,7 @@ Reservoir	| Longitudinal profile of reservoir [m], Cross-section profiles of res
 
 \* for each soil horizon, all following parameters in the column are required, \** of topmost horizon
 
-## General parameter and control files
+### General parameter and control files
 Four parameter files control the data input and output and some internal settings:
 
 *do.dat* \[can be generated with The LUMP package, manual completing required\]
@@ -271,7 +269,7 @@ insert here: Figure 1 -> table? figure?...
 
 
 
-# Relevant Literature for the WASA-SED Model
+## Relevant Literature for the WASA-SED Model
 **For WASA-SED:**<br>
 Mueller, EN., Guentner, A., Francke, T., Mamede, GL. (2010): Modelling sediment export, retention and reservoir sedimentation in drylands with the WASA-SED Model.  Geoscientific Model Development 3, 275-291.
 
@@ -303,7 +301,7 @@ Pilz, T (2015): https://github.com/tpilz/LUMP
 <br>
 <br>
 
-# References
+## References
 Antronico, L., Coscarelli, R., Terranova, O., 2005. Surface erosion assessment in two Calabrian basins (southern Italy). In: R. J. Batalla and C. Garcia (Ed.), Geomorphological Processes and Human Impacts in River Basins, IAHS, pp. 16-22.
 
 Appel, K., 2006. Characterisation of badlands and modelling of soil erosion in the Isabena watershed, NE Spain. Unpublished MSc thesis. University of Potsdam, Germany 
