@@ -343,7 +343,8 @@ Example: The example file describes the 3 particle-size-classes clay, silt and s
 optional
 The file allows specifying, which output files are desired. Disabling unnecessary output files saves computation time and disk space. The contains two headerlines, each following line contains a keyword, which is the filename of a possible output file (case insensitive, without the extension .out). If a keyword for a certain output file is not contained in *outfiles.dat* the respective file is not created, any existing file of that name is deleted. Information on the content of output files can be found in the respective sections. If *outfiles.dat* is not found, WASA-SED creates a default set of output files. 
 
-This files describe which output files are generated
+```
+This file describes which output files are generated
 put any character before the files you don't want to be created
 daily_actetranspiration
 #daily_potetranspiration
@@ -417,60 +418,62 @@ lake_vollost
 lake_sedinflow
 lake_sedoutflow
 lake_sizedistoutflow
+```
 
-Example: The output files daily_actetranspiration.out and daily_qhorton.out will be created. The creation of daily_potetranspiration.dat is omitted.
-Input files for the hillslope module
-The input files for the hillslope module are located in the folder Input\[case_study]\Hillslope and are summarised in Table 5.
+Example: The output files *daily_actetranspiration.out* and *daily_qhorton.out* will be created. The creation of *daily_potetranspiration.dat* is omitted.
+
+### Input files for the hillslope module
+The input files for the hillslope module are located in the folder `Input\[case_study]\Hillslope` and are summarised in Table 5.
 
 Table 5	Input data files for the hillslope component
-Parameter File	Content
-hymo.dat		Specification of the sub-basins
-soter.dat	Specification of the landscape units
-terrain.dat	Specification of the terrain components
-svc.dat	Specifications of soil vegetation components, erosion parameters
-soil_vegetation.dat	Specification of soil-vegetation components
-svc_in_tc.dat	Specification which SVCs are contained in each TC
-soil.dat	Specification of the soil properties
-horizon_particles.dat	Particle size distributions of soil horizons
-vegetation.dat	Specification of the vegetation properties
-rainy_season.dat (optional)
-k_seasons.dat (optional)
-c_seasons.dat (optional)
-p_seasons.dat (optional)
-coarse_seasons.dat (optional)
-n_seasons.dat (optional)	Specification of the start and end of rainy season
-Seasonality of USLE factors K, C, P, coarse fraction and Manning’s n, resp.
-scaling_factor.dat (optional)	Scaling/calibration factors for hydraulic conductivity
-calibration.dat (optional)	Calibration factors for hydraulic conductivity of soils
-Transposition.dat (optional)	Specification of additional water fluxes between sub-basins
-../erosion.ctl (optional)	Options for the erosion module
-gw_storage.stat (optional)
-intercept_storage.stat (optional)
-soil_moisture.stat (optional)	Initialisation of storage content of ground water
-Initialisation of storage content of interception
-Initialisation of storage content of soil moisture
-frac_direct_gw.dat (optional)	partitioning of groundwater into river and alluvia
-beta_fac_lu.dat (optional)
-sdr_lu.dat (optional)	Correction factors for beta (USLE L-factor computation)
-LU-wise specification of sediment delivery ratio
-calib_wind.dat (optional)	Calibration of wind speed (sensitive parameter for evapotranspiration)
+
+Parameter File |	Content
+---|---
+hymo.dat	|	Specification of the sub-basins
+soter.dat	| Specification of the landscape units
+terrain.dat	| Specification of the terrain components
+svc.dat |	Specifications of soil vegetation components, erosion parameters
+soil_vegetation.dat	| Specification of soil-vegetation components
+svc_in_tc.dat |	Specification which SVCs are contained in each TC
+soil.dat	| Specification of the soil properties
+horizon_particles.dat	| Particle size distributions of soil horizons
+vegetation.dat |	Specification of the vegetation properties
+rainy_season.dat (optional) | Specification of the start and end of rainy season
+k_seasons.dat (optional) | Seasonality of USLE factor K
+c_seasons.dat (optional) | Seasonality of USLE factor C
+p_seasons.dat (optional) | Seasonality of USLE factor P
+coarse_seasons.dat (optional) | Seasonality of coarse fraction
+n_seasons.dat (optional)	 | Seasonality of Manning’s n
+scaling_factor.dat (optional)	| Scaling/calibration factors for hydraulic conductivity
+calibration.dat (optional)	| Calibration factors for hydraulic conductivity of soils
+Transposition.dat (optional)	| Specification of additional water fluxes between sub-basins
+../erosion.ctl (optional)	| Options for the erosion module
+gw_storage.stat (optional) | Initialisation of storage content of ground water
+intercept_storage.stat (optional) | Initialisation of storage content of interception
+soil_moisture.stat (optional)	| Initialisation of storage content of soil moisture
+
+frac_direct_gw.dat (optional)	| partitioning of groundwater into river and alluvia
+beta_fac_lu.dat (optional) |  Correction factors for beta (USLE L-factor computation)
+sdr_lu.dat (optional)	| LU-wise specification of sediment delivery ratio
+calib_wind.dat (optional)	| Calibration of wind speed (sensitive parameter for evapotranspiration)
 
 The spatial conceptualisation of the WASA model is explained in detail in Güntner (2002), and are only shortly summarised in this manual. The following spatial modelling units were identified (Güntner 2002, p. 33):
 
-	Sub-Basins: ca. 50-1000 km3, topologically referenced, defined e.g. by the location of river gauging stations, or large reservoirs with a storage capacity of more than 50x106 m3 and the confluence of major rivers;
+-	*Sub-Basins:* ca. 50-1000 km3, topologically referenced, defined e.g. by the location of river gauging stations, or large reservoirs with a storage capacity of more than 50x106 m3 and the confluence of major rivers;
 
-	Landscape units (LUs): based on the LU concept (e.g. SOil and TERrain digital database, FAO, 1995), i.e. structure of the landscape according to geological, topographic and soil characteristics with similarity in major landform, general lithology, soil associations and toposequences, georeferenced;
+-	*Landscape units (LUs):* based on the LU concept (e.g. SOil and TERrain digital database, FAO, 1995), i.e. structure of the landscape according to geological, topographic and soil characteristics with similarity in major landform, general lithology, soil associations and toposequences, georeferenced;
 
-	Terrain components (TCs): fraction of area of a landscape unit with similarity in slope gradients, position within toposequence (highlands, slopes and valley bottoms), soil association;
+-	*Terrain components (TCs):* fraction of area of a landscape unit with similarity in slope gradients, position within toposequence (highlands, slopes and valley bottoms), soil association;
 
-	Soil vegetation components (SVCs): fraction of area of a terrain component, characterised by specific combination of soil type, and vegetation/land-cover class 
-	Soil profile: descriptions of characteristic soil horizons.
-
+-	*Soil vegetation components (SVCs):* fraction of area of a terrain component, characterised by specific combination of soil type, and vegetation/land-cover class 
+-	*Soil profile:* descriptions of characteristic soil horizons.
 
 The model domain is divided into sub-basins; each sub-basin has an individual Map-ID. This Map-ID has to be a unique number; the employed numbering scheme does not have to be continuous (i.e. with three sub-basins, they do not have to be named Map-ID 1, 2 and 3, but could be named e.g. 100, 500, 877). The following paragraphs explain each of the input files in turns.
 
-1) hymo.dat [can be generated with the LUMP package]
+***hymo.dat***
+\[can be generated with the LUMP package\]
 
+```
 Specification of the sub-basins and their total number, type & areal fraction of LU units
 Subasin-ID [-], Area[km**2],  nbr[-],  LU-IDs[-], areal fraction of LU[-]
 49	10    4   19   87   90  135  0.357  0.147  0.214  0.282
@@ -483,23 +486,28 @@ Subasin-ID [-], Area[km**2],  nbr[-],  LU-IDs[-], areal fraction of LU[-]
 39	25    5   87   18  142   56   31  0.351  0.146  0.142  0.237  0.124
 3	31    3   87   18  136  0.416  0.471  0.113
 29	20    4   56  122   31    7  0.091  0.652  0.131  0.126                                                
+```
 
-Subasin-ID		Map-ID of sub-basin
-Area 			Area of each sub-basin in [km2] (including reservoir areas)
-nbr			Number of LU units in each sub-basin
-LU-IDs 		List of LU-Ids which occur in this specific sub-basin
+Subasin-ID		    Map-ID of sub-basin
+Area 		    	    Area of each sub-basin in [km2] (including reservoir areas)
+nbr			          Number of LU units in each sub-basin
+LU-IDs 		       List of LU-Ids which occur in this specific sub-basin
 areal fraction		Fraction of each LU unit within each sub-basin [-]
 
-Example: In the do.dat, it was specified that 10 sub-basins are simulated with the WASA model. Accordingly, the file hymo.dat above contains the specification of 10 sub-basins, with the map IDs 49, 50,  1, … 29. The first sub-basin has a Map ID of 49 and an area of 10 km2. Within this sub-basin, four different landscape units can be identified with the LU-IDs 19, 87, 90 and 135.  The first LU (ID 19) covers an area of 35.7 % (0.357) of the total area of the sub-basin, the second one 14.7 %, the third one 21.4 % and the last one 28.2 % (total 100 %).
+Example: In *do.dat*, it was specified that 10 sub-basins are simulated with the WASA model. Accordingly, the file hymo.dat above contains the specification of 10 sub-basins, with the map IDs 49, 50,  1, … 29. The first sub-basin has a Map ID of 49 and an area of 10 km2. Within this sub-basin, four different landscape units can be identified with the LU-IDs 19, 87, 90 and 135.  The first LU (ID 19) covers an area of 35.7 % (0.357) of the total area of the sub-basin, the second one 14.7 %, the third one 21.4 % and the last one 28.2 % (total 100 %).
+
 Important: Any subbasin that is not listed in the file routing.dat will be ignored.
 
-2) soter.dat [can be generated with the LUMP package]
+***soter.dat*** 
+\[can be generated with the LUMP package\]
 
+```
 Specification of LU units										
 LU-ID [-],No._of_TC[-], TC1[-], TC2[-],TC3[-],kfsu[mm/d],length[m],meandep[mm],maxdep[mm],riverbed[mm],gwflag[0/1],gw_dist[mm], frgw_delay[day]
 1	3	7	49	11	100	601	-1	-1	1500	0	0	1
 2	1	2	100	1963.7	-1	-1	1500	0	0	1
 …
+```
 
 LU_id			ID of landscape units
 Nb._of_TC		Number of terrain components	
