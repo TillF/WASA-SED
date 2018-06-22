@@ -252,8 +252,8 @@ Reservoir	| Longitudinal profile of reservoir [m], Cross-section profiles of res
 ### General parameter and control files
 Four parameter files control the data input and output and some internal settings:
 
-***do.dat*** 
-\[can be generated with The LUMP package, manual completing required\]
+***do.dat*** <br>
+\[can be generated with The LUMP package, manual completing required\]<br>
 The *do.dat* file is located in the folder WASA\Input and contains the main parameter specifications for the WASA-SED model. Figure 1 displays an example file for the do.dat. The first line of the do.dat contains the title. Line 2 and 3 specify the path for the location of WASA input and output folder. Relative paths are supported. The backslash “\” only works on Windows-platforms. The slash “/” is accepted on Windows and Unix/Linux systems. Make sure that both specified paths end with slash or backslash, respectively. Line 4 and 5 contain the start and the end year of the simulation, respectively. Line 6 and 7 contain the start and the end calendar month of the simulation, respectively. Optionally, the day of month for begin and end can be specified. Line 10 contains the number of sub-basins. The number in line 9 is given by the sum of the number of terrain components in each landscape-unit of each sub-basin (e.g. if the system has only two sub-basins, sub-basin A has 1 landscape unit with 3 terrain components, sub-basin B has 2 landscape units with 1 terrain component each, then the number of combinations is 5). Line 14 specifies if the reservoir module is switched on (.t.) or is switched off (.f.). The same issue for the calculations of networks of small reservoirs in line 15. Lines 16 – 19 allow customizing the way water and sediment is (re-)distributed within and among the TCs. Line 21 allows the setting of the simulation timestep (daily / hourly). This may become obsolete in future versions by setting the timestep directly in line 30. Line 24 allows specifying a correction factor for hydraulic conductivity to account for intra-daily rainfall intensities. Optionally, this factor can also be made a function of daily rainfall by specifying two more parameters (a and b) in the same line, so that kfkorr=kfkorr0\*(a\*1/daily_precip+b+1). In line 31 the erosion and sediment-transport routines may be switched on and off. Specify the number of grain size classes you want to model in line 32. Their limits must be specified in part_class.dat, if more than one class is desired. Line 33 lets you choose the hillslope erosion model to be used in WASA. Currently, this parameter is disregarded, further options can be chosen in erosion.ctl. Select the model for the river routing in line 34. Possible options are: (1) old WASA routing (daily resolution only, no sediment transport), (2) Muskingum and suspended sediment, (3) Muskingum and bedload transport. Choose the sediment model in the reservoir in line 35 among 4 sediment transport equations: (1) Wu et al. (2000); (2) Ashida & Michiue (1973); (3) Yang (1973, 1984); (4) Ackers & White (1973).
 
 The optional lines 36 and 37 allow the saving/loading of state variables (i.e. groundwater, interception and soil storages) at the end/beginning of a model run (works only if svc.dat has been specified).
@@ -305,8 +305,8 @@ Parameter specification for the WASA Model (SESAM-Project)
 
 Figure 1 WASA parameter specification file: do.dat
 
-***maxdim.dat*** 
-optional \[can be generated with the LUMP package\]
+***maxdim.dat*** <br>
+optional \[can be generated with the LUMP package\]<br>
 The file *maxdim.dat* serves to optimise memory management and thus improves computational performance. It is, however, optional and if not encountered, default values are assumed.
 
 ```
@@ -322,8 +322,8 @@ contains maximum dimensions of spatial units
 
 Example: In the given example, no more than 3 LU may occur in one sub-basin (line 2). Analogously, no LU may contain more than 3 TCs (line 3) and no TC more than 4 SVCs (line 4). The number of horizons in a soil is limited to 6 (line 5). No more than 2 transpositions between sub-basins may exist. The last two lines are optional and valid only for computation of sedimentation patterns in strategic reservoirs (assumed 200, if missing).
 
-***part_class.dat***
-optional \[can be generated with the LUMP package\]
+***part_class.dat***<br>
+optional \[can be generated with the LUMP package\]<br>
 The file *part_class.dat* is only necessary if sediment transport in multiple particle-size classes is to be modelled. If *part_class.dat* is missing, sediment transport will be modelled for a single particle-size class only. Otherwise, the file defines the number and the properties of the particle sizes that will be modelled. Please note that class numbering has to be continuous, starting with 1. The particle size classes must be ordered from fine to coarse.
 
 ```
@@ -334,13 +334,13 @@ class_number  upper_limit[mm]
 3	            2.0
 ```
 
-Class_number		continuous numbering of particle classes
-Upper_limit 		upper limit of particle size for the respective class \[mm\]
+Class_number		continuous numbering of particle classes<br>
+Upper_limit 		upper limit of particle size for the respective class \[mm\]<br>
 
 Example: The example file describes the 3 particle-size-classes clay, silt and sand (according to German classification) with clay particles up to 0.002 mm, silt (0.002 - 0.063 mm) and sand (0.063 - 2.0 mm).
 
-***outfiles.dat***
-optional
+***outfiles.dat***<br>
+optional<br>
 The file allows specifying, which output files are desired. Disabling unnecessary output files saves computation time and disk space. The contains two headerlines, each following line contains a keyword, which is the filename of a possible output file (case insensitive, without the extension .out). If a keyword for a certain output file is not contained in *outfiles.dat* the respective file is not created, any existing file of that name is deleted. Information on the content of output files can be found in the respective sections. If *outfiles.dat* is not found, WASA-SED creates a default set of output files. 
 
 ```
@@ -451,7 +451,6 @@ Transposition.dat (optional)	| Specification of additional water fluxes between 
 gw_storage.stat (optional) | Initialisation of storage content of ground water
 intercept_storage.stat (optional) | Initialisation of storage content of interception
 soil_moisture.stat (optional)	| Initialisation of storage content of soil moisture
-
 frac_direct_gw.dat (optional)	| partitioning of groundwater into river and alluvia
 beta_fac_lu.dat (optional) |  Correction factors for beta (USLE L-factor computation)
 sdr_lu.dat (optional)	| LU-wise specification of sediment delivery ratio
@@ -470,7 +469,7 @@ The spatial conceptualisation of the WASA model is explained in detail in Güntn
 
 The model domain is divided into sub-basins; each sub-basin has an individual Map-ID. This Map-ID has to be a unique number; the employed numbering scheme does not have to be continuous (i.e. with three sub-basins, they do not have to be named Map-ID 1, 2 and 3, but could be named e.g. 100, 500, 877). The following paragraphs explain each of the input files in turns.
 
-***hymo.dat***
+***hymo.dat***<br>
 \[can be generated with the LUMP package\]
 
 ```
@@ -488,17 +487,17 @@ Subasin-ID [-], Area[km**2],  nbr[-],  LU-IDs[-], areal fraction of LU[-]
 29	20    4   56  122   31    7  0.091  0.652  0.131  0.126                                                
 ```
 
-Subasin-ID		    Map-ID of sub-basin
-Area 		    	    Area of each sub-basin in [km2] (including reservoir areas)
-nbr			          Number of LU units in each sub-basin
-LU-IDs 		       List of LU-Ids which occur in this specific sub-basin
+Subasin-ID		    Map-ID of sub-basin<br>
+Area 		    	    Area of each sub-basin in \[km2\] (including reservoir areas)<br>
+nbr			          Number of LU units in each sub-basin<br>
+LU-IDs 		       List of LU-Ids which occur in this specific sub-basin<br>
 areal fraction		Fraction of each LU unit within each sub-basin [-]
 
 Example: In *do.dat*, it was specified that 10 sub-basins are simulated with the WASA model. Accordingly, the file hymo.dat above contains the specification of 10 sub-basins, with the map IDs 49, 50,  1, … 29. The first sub-basin has a Map ID of 49 and an area of 10 km2. Within this sub-basin, four different landscape units can be identified with the LU-IDs 19, 87, 90 and 135.  The first LU (ID 19) covers an area of 35.7 % (0.357) of the total area of the sub-basin, the second one 14.7 %, the third one 21.4 % and the last one 28.2 % (total 100 %).
 
 Important: Any subbasin that is not listed in the file routing.dat will be ignored.
 
-***soter.dat*** 
+***soter.dat*** <br>
 \[can be generated with the LUMP package\]
 
 ```
@@ -509,13 +508,13 @@ LU-ID [-],No._of_TC[-], TC1[-], TC2[-],TC3[-],kfsu[mm/d],length[m],meandep[mm],m
 …
 ```
 
-LU_id			ID of landscape units
-Nb._of_TC		Number of terrain components	
-TC1			ID of a terrain component 
-TC2			ID of another terrain component
-TC3			ID of a third terrain component
-...			more TC-IDs according to field 2
-kfsu			Hydraulic conductivity of bedrock [mm/d]
+LU_id			    ID of landscape units<br>
+Nb.\_of_TC		Number of terrain components<br>
+TC1		      	ID of a terrain component <br>
+TC2		      	ID of another terrain component<br>
+TC3			      ID of a third terrain component<br>
+...			      more TC-IDs according to field 2<br>
+kfsu			Hydraulic conductivity of bedrock [mm/d]<br>
 length			Mean  slope length in LU unit [m]
 meandep		Mean maximum depth of soil zone [mm]
 maxdep			Maximum depth of alluvial soil zone [mm]
