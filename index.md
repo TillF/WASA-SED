@@ -252,8 +252,8 @@ Reservoir	| Longitudinal profile of reservoir [m], Cross-section profiles of res
 ### General parameter and control files
 Four parameter files control the data input and output and some internal settings:
 
-*do.dat* \[can be generated with The LUMP package, manual completing required\]
-The do.dat file is located in the folder WASA\Input and contains the main parameter specifications for the WASA-SED model. Figure 1 displays an example file for the do.dat. The first line of the do.dat contains the title. Line 2 and 3 specify the path for the location of WASA input and output folder. Relative paths are supported. The backslash “\” only works on Windows-platforms. The slash “/” is accepted on Windows and Unix/Linux systems. Make sure that both specified paths end with slash or backslash, respectively. Line 4 and 5 contain the start and the end year of the simulation, respectively. Line 6 and 7 contain the start and the end calendar month of the simulation, respectively. Optionally, the day of month for begin and end can be specified. Line 10 contains the number of sub-basins. The number in line 9 is given by the sum of the number of terrain components in each landscape-unit of each sub-basin (e.g. if the system has only two sub-basins, sub-basin A has 1 landscape unit with 3 terrain components, sub-basin B has 2 landscape units with 1 terrain component each, then the number of combinations is 5). Line 14 specifies if the reservoir module is switched on (.t.) or is switched off (.f.). The same issue for the calculations of networks of small reservoirs in line 15. Lines 16 – 19 allow customizing the way water and sediment is (re-)distributed within and among the TCs. Line 21 allows the setting of the simulation timestep (daily / hourly). This may become obsolete in future versions by setting the timestep directly in line 30. Line 24 allows specifying a correction factor for hydraulic conductivity to account for intra-daily rainfall intensities. Optionally, this factor can also be made a function of daily rainfall by specifying two more parameters (a and b) in the same line, so that kfkorr=kfkorr0\*(a\*1/daily_precip+b+1). In line 31 the erosion and sediment-transport routines may be switched on and off. Specify the number of grain size classes you want to model in line 32. Their limits must be specified in part_class.dat, if more than one class is desired. Line 33 lets you choose the hillslope erosion model to be used in WASA. Currently, this parameter is disregarded, further options can be chosen in erosion.ctl. Select the model for the river routing in line 34. Possible options are: (1) old WASA routing (daily resolution only, no sediment transport), (2) Muskingum and suspended sediment, (3) Muskingum and bedload transport. Choose the sediment model in the reservoir in line 35 among 4 sediment transport equations: (1) Wu et al. (2000); (2) Ashida & Michiue (1973); (3) Yang (1973, 1984); (4) Ackers & White (1973).
+***do.dat*** \[can be generated with The LUMP package, manual completing required\]
+The *do.dat* file is located in the folder WASA\Input and contains the main parameter specifications for the WASA-SED model. Figure 1 displays an example file for the do.dat. The first line of the do.dat contains the title. Line 2 and 3 specify the path for the location of WASA input and output folder. Relative paths are supported. The backslash “\” only works on Windows-platforms. The slash “/” is accepted on Windows and Unix/Linux systems. Make sure that both specified paths end with slash or backslash, respectively. Line 4 and 5 contain the start and the end year of the simulation, respectively. Line 6 and 7 contain the start and the end calendar month of the simulation, respectively. Optionally, the day of month for begin and end can be specified. Line 10 contains the number of sub-basins. The number in line 9 is given by the sum of the number of terrain components in each landscape-unit of each sub-basin (e.g. if the system has only two sub-basins, sub-basin A has 1 landscape unit with 3 terrain components, sub-basin B has 2 landscape units with 1 terrain component each, then the number of combinations is 5). Line 14 specifies if the reservoir module is switched on (.t.) or is switched off (.f.). The same issue for the calculations of networks of small reservoirs in line 15. Lines 16 – 19 allow customizing the way water and sediment is (re-)distributed within and among the TCs. Line 21 allows the setting of the simulation timestep (daily / hourly). This may become obsolete in future versions by setting the timestep directly in line 30. Line 24 allows specifying a correction factor for hydraulic conductivity to account for intra-daily rainfall intensities. Optionally, this factor can also be made a function of daily rainfall by specifying two more parameters (a and b) in the same line, so that kfkorr=kfkorr0\*(a\*1/daily_precip+b+1). In line 31 the erosion and sediment-transport routines may be switched on and off. Specify the number of grain size classes you want to model in line 32. Their limits must be specified in part_class.dat, if more than one class is desired. Line 33 lets you choose the hillslope erosion model to be used in WASA. Currently, this parameter is disregarded, further options can be chosen in erosion.ctl. Select the model for the river routing in line 34. Possible options are: (1) old WASA routing (daily resolution only, no sediment transport), (2) Muskingum and suspended sediment, (3) Muskingum and bedload transport. Choose the sediment model in the reservoir in line 35 among 4 sediment transport equations: (1) Wu et al. (2000); (2) Ashida & Michiue (1973); (3) Yang (1973, 1984); (4) Ackers & White (1973).
 
 The optional lines 36 and 37 allow the saving/loading of state variables (i.e. groundwater, interception and soil storages) at the end/beginning of a model run (works only if svc.dat has been specified).
 
@@ -302,10 +302,27 @@ Parameter specification for the WASA Model (SESAM-Project)
 .f. //save state of storages to files after simulation period (optional)
 ```
 
+Figure 1 WASA parameter specification file: do.dat
+
+***maxdim.dat*** optional \[can be generated with the LUMP package\]
+The file *maxdim.dat* serves to optimise memory management and thus improves computational performance. It is, however, optional and if not encountered, default values are assumed.
+
+```
+contains maximum dimensions of spatial units
+3	//maximum no. of landscape units in a sub-basins
+3	//maximum no. of terrain components in a landscape unit
+4	//maximum no. of soil vegetation components in a terrain component
+6	//maximum no. of horizons in a soil
+2	//maximum no. transpositions between sub-basins
+0	//number of cross sections at the strategic reservoirs [optional]
+0	//number of points (x,y) along the cross sections [optional]
+```
 
 
 
-insert here: Figure 1 -> table? figure?...
+
+
+
 
 
 
