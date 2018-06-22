@@ -6,9 +6,9 @@ Eva Nora Müller, Till Francke, George Mamede and Andreas Güntner
 
 **30.1.2018<br>WASA-SED rev. 255**
 
-Developed within the SESAM-Project:<br>
-Sediment Export of Semi-Arid Catchment: Monitoring and Modelling 2005-2008<br>
-SESAM II 2010-2014, <br>
+Developed within the SESAM-Project:
+Sediment Export of Semi-Arid Catchment: Monitoring and Modelling 2005-2008
+SESAM II 2010-2014,
 2015-2018
 
 Institute of Earth and Environmental Science, University of Potsdam, Potsdam, 
@@ -31,12 +31,12 @@ Mueller EN, Güntner A, Francke T, Mamede G (2010) Modelling sediment export, re
 Information about the SESAM-Project:
 http://uni-potsdam.de/sesam/
 
-Contact:<br>
-Till Francke<br>
-Institute of Earth and Environmental Sciences<br> 
-University of Potsdam <br>
-Karl-Liebknecht-Str. 24-25<br> 
-14476 Potsdam, Germany<br>
+Contact:
+Till Francke
+Institute of Earth and Environmental Sciences 
+University of Potsdam 
+Karl-Liebknecht-Str. 24-25
+14476 Potsdam, Germany
 Email: till.francke@uni-potsdam.de
  
 Copyrights and ownership:<br>
@@ -84,10 +84,10 @@ Table 1 Folder structure of WASA code
 \River\	| River routines (Routing of water and sediment in the river network)
 \Reservoir\ | Reservoir water and sediment modelling routines (Water balance, bed elevation change, management options)
 \Input\	| Input data, contains parameter file: do.dat<br>
-	\Input\Hillslope<br>
-	\Input\River<br>
-	\Input\Reservoir<br>
-	\Input\Time_series<br>
+	  \Input\Hillslope<br>
+	  \Input\River<br>
+	  \Input\Reservoir<br>
+	  \Input\Time_series<br>
 \Output\ | Output files of model scenarios 
 
 
