@@ -65,12 +65,12 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 <br>
 
 ## Table of Content
-- [Introduction](# Introduction)<br>
-- [Program folders and structure](# Program folders and structure)<br>
-  * [Hillslope module](#Hillslope module)<br>
-  * [River module](#River module)<br>
-  * [Reservoir module](#sub-heading)<br>
-  * [Input Data](#sub-heading)<br>
+- [Introduction](#heading)<br>
+- [Program folders and structure](#heading-1)<br>
+  * [Hillslope module](#sub-heading)<br>
+  * [River module](#sub-heading-1)<br>
+  * [Reservoir module](#sub-heading-2)<br>
+  * [Input Data](#sub-heading-3)<br>
   * [General parameter and control files](#sub-heading)<br>
   * [Input files for the hillslope module](#sub-heading)<br>
   * [Input files for the river module](#sub-heading)<br>
