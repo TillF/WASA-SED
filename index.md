@@ -27,8 +27,7 @@ Germany
 <br>
 <br>
 <br>
-<span style="color:red">
-**Recent change: snow module (“WASA-SNOW” by Erwin Rottler)**<br>
+<span style="color:red"> **Recent change: snow module (“WASA-SNOW” by Erwin Rottler)**<br>
 The respective documentation has not been included yet. It can be found in Rottler’s thesis (on request, to be published on https://publishup.uni-potsdam.de/opus4-ubp/home)
 </span>
 </center>
@@ -73,23 +72,23 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 <br>
 
 ## Table of Content
-[Introduction](#heading)
-[Program folders and structure](#heading)<br>
-- [Hillslope module](#sub-heading)<br>
-- [River module](#sub-heading)<br>
-- [Reservoir module](#sub-heading)<br>
-- [Input Data](#sub-heading)<br>
-- [General parameter and control files](#sub-heading)<br>
-- [Input files for the hillslope module](#sub-heading)<br>
-- [Input files for the river module](#sub-heading)<br>
-- [Input files for the reservoir module](#sub-heading)<br>
-- [Input of climate data](#sub-heading)<br>
-[Output Data](#heading)<br>
-- [Output of the hillslope module](#sub-heading)<br>
--[Output of the river module](#sub-heading)<br>
--[Output of the reservoir module](#sub-heading)<br>
-[Relevant Literature for the WASA-SED Model](#heading)<br>
-[Reference](#heading)<br>
+-[Introduction](#heading)
+-[Program folders and structure](#heading)
+ *[Hillslope module](#sub-heading)
+ *[River module](#sub-heading)
+ *[Reservoir module](#sub-heading)
+ *[Input Data](#sub-heading)<br>
+ *[General parameter and control files](#sub-heading)<br>
+ *[Input files for the hillslope module](#sub-heading)<br>
+ *[Input files for the river module](#sub-heading)<br>
+ *[Input files for the reservoir module](#sub-heading)<br>
+ *[Input of climate data](#sub-heading)<br>
+-[Output Data](#heading)<br>
+ *[Output of the hillslope module](#sub-heading)<br>
+ *[Output of the river module](#sub-heading)<br>
+ *[Output of the reservoir module](#sub-heading)<br>
+-[Relevant Literature for the WASA-SED Model](#heading)<br>
+-[Reference](#heading)<br>
 <br>
 <br>
 
