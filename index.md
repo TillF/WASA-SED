@@ -1631,7 +1631,7 @@ Example: After each time step, e.g. hourly, the discharge is given for each sub-
 
 The reservoir module simulates the water and sediment transport through the reservoirs located in the study area. Currently, the output comprises results on water balance, hydraulic calculations, sediment transport and bed elevation changes for all reservoirs located at the outlet point of the sub-basins. The results are printed for all outlet reservoirs separately, identified by the Map-ID of the sub-basin where it is located. Additional files are also printed for the reservoir size classes. The following files are generated:
 
-|Output file | Content
+Nr. |Output file | Content
 ---|---|---
 1 | ```res_”Map-ID”_watbal.out``` | Water balance components of outlet reservoirs 
 2 | ```res_”Map-ID”_vollost.out``` | Dead volume, alert volume, and storage capacity of outlet reservoirs 
