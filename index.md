@@ -1139,6 +1139,7 @@ This optional file allows specifying the sediment output of selected subbasins. 
 Example: Sub-basin 4 has pre-specified sediment output of 0.5 t/d for 1 Sep 2005, distributed among 3 particle size classes with the fractions 0.3, 0.2 and 0.5.
 
 ### Input files for the reservoir module
+
 The input files for the reservoir module are located in the folder *Input\\[case_study]\Reservoir* and are summarised in Table 7. The files listed below are required according to the simulation option defined in the file ```do.dat```. Reservoirs are considered in the model simulations if the option doreservoir is switched on. For simulations of reservoir water balance the file ```reservoir.dat``` (file 1) is required. Nevertheless, additional files can be given to improve the model results (files 2 to 6). For calculations of reservoir sediment balance, the options doreservoir and dosediment must be switched on. The reservoir sedimentation model consists of two modelling approaches, which may be applied according to reservoir size and data availability. For reservoirs with information about their geometric features (reservoir topography, stage-area and stage-volume curves) and physical properties of sediment deposits, such as deposition thickness, grain size distribution of sediment deposits and sediment densities, a detailed modelling approach to reservoir sedimentation may be applied (files 7 to 9 are required; and files 10 to 12 are used to improve model results). For reservoirs without those characteristics, a simplified modelling approach is used (file 8 is required). Networks of small reservoirs are considered in the model simulations if the option doacudes is switched on. For simulations of water and sediment routing through the reservoir networks the file 13 and 16 are required (files 14, 15 and 17 are used to improve model results).
 
 **Table 7:** Input data files for the reservoir component
@@ -1659,10 +1660,10 @@ Output file | Content
 25) ```lake_sedoutflow.out``` | Sediment outflow discharges from the reservoir size classes³
 26) ```lake_sizedistoutflow.out``` | Effluent grain size distribution of the reservoir size classes <sup>4</sup>
 
-1 - Results are displayed for the whole catchment after grouping them by reservoir size classes (one value for the whole catchment and each reservoir size class) <br>
-2 - Results are displayed for the whole catchment without distinguishing between size classes (one value for the whole catchment) <br>
-3 - Results are displayed for all sub-basins after grouping them by reservoir size classes (one value for each sub-basin and reservoir size class). <br>
-4 - Results are displayed for all sub-basins without distinguishing between size classes (one value for each sub-basin).
+<sup>1</sup> Results are displayed for the whole catchment after grouping them by reservoir size classes (one value for the whole catchment and each reservoir size class) <br>
+<sup>2</sup> Results are displayed for the whole catchment without distinguishing between size classes (one value for the whole catchment) <br>
+<sup>3</sup> Results are displayed for all sub-basins after grouping them by reservoir size classes (one value for each sub-basin and reservoir size class). <br>
+<sup>4</sup> Results are displayed for all sub-basins without distinguishing between size classes (one value for each sub-basin).
 
 ***1) res_”Map-ID”_watbal.out***
 
