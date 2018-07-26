@@ -581,7 +581,7 @@ II.2.2) If bedrock is not given in soil.dat, bedrock is assumed to be in the dep
 Experimental option, not verified!
 
 Modelling options | Groundwater regime, internal representation of processes | Gw flag (soter.dat) | Add. parameters (soter.dat)
----|---|---|---|---
+---|---|---|---
 III) Groundwater in soil zone. The initial depth of the groundwater surface below soil surface is defined by gw_dist in ```soter.dat```. A separate deep groundwater storage or bedrock is ignored. | Permanent groundwater in soil zone is assumed. The groundwater level may vary in time as a function of input by percolation and drainage into river. | 99 | meandep, maxdep, riverbed, gw_dist
 
 ***3) terrain.dat***<br> 
@@ -989,8 +989,6 @@ Warning: Using SDR should be used without a transport capacity limitation, other
 (optional) 
 
 This file contains a single value which will be used as static wind speed value (in m/s) within the model. If this file is not given, a value of 1 m/s is used by default. As this is a very sensitive parameter, it can be used for calibration of evapotranspiration.
-
-
 
 ### Input files for the river module
 
