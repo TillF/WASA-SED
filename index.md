@@ -1633,8 +1633,8 @@ The reservoir module simulates the water and sediment transport through the rese
 
 Output file | Content
 ---|---
-1) res_”Map-ID”_watbal.out | Water balance components of outlet reservoirs 
-2) res_”Map-ID”_vollost.out | Dead volume, alert volume, and storage capacity of outlet reservoirs 
+\1) res_”Map-ID”_watbal.out | Water balance components of outlet reservoirs 
+\2) ```res_”Map-ID”_vollost.out``` | Dead volume, alert volume, and storage capacity of outlet reservoirs 
 3) res_”Map-ID”_cav.out | Stage-area and stage-volume curves of outlet reservoirs 
 4) res_”Map-ID”_hydraul.out | Hydraulic components of outlet reservoirs
 5) res_”Map-ID”_sec”ID”_bedchange.out | Bed elevation at cross sections (identified by a specific Section-ID) of outlet reservoirs
