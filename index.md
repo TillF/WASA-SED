@@ -458,7 +458,7 @@ Parameter File |	Content
 ```coarse_seasons.dat``` (optional) | Seasonality of coarse fraction
 ```n_seasons.dat``` (optional)	 | Seasonality of Manning’s n
 ```scaling_factor.dat``` (optional)	| Scaling/calibration factors for hydraulic conductivity
-```calibration.dat (optional)	| Calibration factors for hydraulic conductivity of soils
+```calibration.dat``` (optional)	| Calibration factors for hydraulic conductivity of soils
 ```Transposition.dat``` (optional)	| Specification of additional water fluxes between sub-basins
 ```../erosion.ctl``` (optional)	| Options for the erosion module
 ```gw_storage.stat``` (optional) | Initialisation of storage content of ground water
