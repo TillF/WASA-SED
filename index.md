@@ -1854,7 +1854,7 @@ inflow_r: Water inflow discharges into the reservoir size classes [m³/timestep]
 
 Example: After each time step, e.g. after one day, five values of water inflow discharges into the reservoir size classes are computed (5748.602 m³, 2409.138 m³, 31.014 m³, 0.000 m³ and 0.000 m³ within the timestep for the size classes 1 to 5, respectively). Results are displayed for the whole catchment after grouping them by reservoir size classes. The files 10 to 16 have the same structure, as shown by the file ```lake_ inflow_r.out``` (file 9).
 
-***10) lake_ watbal.out***
+***17) lake_ watbal.out***
 
 ```
 Year, day, hour, totallakeinflow(m**3/timestep), totallakeoutflow(m**3/timestep
@@ -1876,7 +1876,7 @@ lakevol: Total water volume stored in all upstream reservoirs of the catchment [
 
 Example: After each time step, e.g. after one day, a total water inflow discharge into all upstream reservoir of 3747.793 m³/timestep, no water outflow discharge, no rainfall over the reservoir areas, a total evaporation of 53.854 m³/timestep, and a total water storage of 38678.957 m³ in all upstream reservoirs. Results are displayed for the whole catchment without distinguishing between size classes.
 
-***11) lake_ sedbal.out***
+***18) lake_ sedbal.out***
 
 ```
 Year, day, hour, totalsedinflow(ton/timestep), totalsedoutflow(ton/timestep), t
@@ -1897,7 +1897,7 @@ cumsedimentation: Cumulative sediment deposition in all upstream reservoirs of t
 
 Example: After each time step, e.g. after one day, a total sediment inflow discharge into all upstream reservoir of 200 ton/timestep, no sediment outflow discharge, a total sediment deposition of 200 ton/timestep, and a cumulative sediment deposition of 200 ton in all upstream reservoirs. Results are displayed for the whole catchment without distinguishing between size classes.
 
-***12) lake_inflow.out***
+***19) lake_inflow.out***
 
 ```
 Year, day, hour, reservoir_class, lakeinflow(m**3/timestep)
@@ -1919,7 +1919,7 @@ lakeinflow: Water inflow discharges into the reservoir size classes. Currently, 
 
 Example: After each time step, e.g. after one day, after one day, values of water inflow discharges into the reservoir size classes are computed for all sub-basins (e.g. for size class 1: 384.741 m³, 587.248 m³, 38.144 m³, and 17.718 m³ within the timestep, for sub-basins 57, 15, 20 and 60, respectively). Results are displayed for all sub-basins after grouping them by reservoir size classes. The files 20 to 25 have the same structure, as shown by the file ```lake_ inflow_r.out``` (file 9).
 
-*** 13) lake_sizedistoutflow.out***
+*** 20) lake_sizedistoutflow.out***
 
 ```
 Year, day, hour, sediment size class, lakesizedistoutflow(-)
