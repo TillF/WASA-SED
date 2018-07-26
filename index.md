@@ -73,8 +73,8 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 - [Input Data](#input-data)<br>
   * [General parameter and control files](#general-parameter-and-control-files)<br>
   * [Input files for the hillslope module](#input-files-for-the-hillslope-module)<br>
-  * [Input files for the river module](#Input-files-for-the-river-module)<br>
-  * [Input files for the reservoir module](#Input-files-for-the-reservoir-module)<br>
+  * [Input files for the river module](#input-files-for-the-river-module)<br>
+  * [Input files for the reservoir module](#input-files-for-the-reservoir-module)<br>
   * [Input of climate data](#input-of-climate-data)<br>
 - [Output Data](#output-data)<br>
   * [Output of the hillslope module](#output-of-the-hillslope-module)<br>
@@ -1633,32 +1633,32 @@ The reservoir module simulates the water and sediment transport through the rese
 
 Output file | Content
 ---|---
-1) ```res_”Map-ID”_watbal.out``` | Water balance components of outlet reservoirs 
-2) ```res_”Map-ID”_vollost.out``` | Dead volume, alert volume, and storage capacity of outlet reservoirs 
-3) ```res_”Map-ID”_cav.out``` | Stage-area and stage-volume curves of outlet reservoirs 
-4) ```res_”Map-ID”_hydraul.out``` | Hydraulic components of outlet reservoirs
-5) ```res_”Map-ID”_sec”ID”_bedchange.out``` | Bed elevation at cross sections (identified by a specific Section-ID) of outlet reservoirs
-6) ```res_”Map-ID”_sedbal.out``` | Sediment balance components of outlet reservoirs
-7) ```res_”Map-ID”_longitudinal.out``` | Longitudinal bed profile of outlet reservoirs
-8) ```res_”Map-ID”_sedcomposition.out``` | Effluent grain size distribution of outlet reservoirs
-9) ```lake_inflow_r.out``` | Water inflow discharges into the reservoir size classes¹
-10) ```lake_outflow_r.out``` | Water outflow discharges from the reservoir size classes¹
-11) ```lake_retention_r.out``` | Water retention in the reservoir size classes¹
-12) ```lake_volume_r.out``` | Water volume of the reservoir size classes¹
-13) ```lake_sedinflow_r.out``` | Sediment inflow discharges into the reservoir size classes¹
-14) ```lake_sedoutflow_r.out``` | Sediment outflow discharges from the reservoir size classes¹
-15) ```lake_sedretention_r.out``` | Sediment retention in the reservoir size classes¹
-16) ```lake_sedimentation_r.out``` | Cumulative sediment deposition in the reservoir size classes¹
-17) ```lake_watbal.out``` | Water balance components of all upstream reservoirs²
-18) ```lake_sedbal.out``` | Sediment balance components of all upstream reservoirs²
-19) ```lake_inflow.out``` | Water inflow discharges into the reservoir size classes³
-20) ```lake_outflow.out``` | Water outflow discharges from the reservoir size classes³
-21) ```lake_volume.out``` | Water volume of the reservoir size classes³
-22) ```lake_retention.out``` | Water retention in the reservoir size classes³
-23) ```lake_vollost.out``` | Sediment retention in the reservoir size classes³
-24) ```lake_sedinflow.out``` | Sediment inflow discharges into the reservoir size classes³
-25) ```lake_sedoutflow.out``` | Sediment outflow discharges from the reservoir size classes³
-26) ```lake_sizedistoutflow.out``` | Effluent grain size distribution of the reservoir size classes <sup>4</sup>
+1) res_”Map-ID”_watbal.out | Water balance components of outlet reservoirs 
+2) res_”Map-ID”_vollost.out | Dead volume, alert volume, and storage capacity of outlet reservoirs 
+3) res_”Map-ID”_cav.out | Stage-area and stage-volume curves of outlet reservoirs 
+4) res_”Map-ID”_hydraul.out | Hydraulic components of outlet reservoirs
+5) res_”Map-ID”_sec”ID”_bedchange.out | Bed elevation at cross sections (identified by a specific Section-ID) of outlet reservoirs
+6) res_”Map-ID”_sedbal.out | Sediment balance components of outlet reservoirs
+7) res_”Map-ID”_longitudinal.out | Longitudinal bed profile of outlet reservoirs
+8) res_”Map-ID”_sedcomposition.out | Effluent grain size distribution of outlet reservoirs
+9) lake_inflow_r.out | Water inflow discharges into the reservoir size classes<sup>1</sup>
+10) lake_outflow_r.out | Water outflow discharges from the reservoir size classes<sup>1</sup>
+11) lake_retention_r.out | Water retention in the reservoir size classes<sup>1</sup>
+12) lake_volume_r.out | Water volume of the reservoir size classes<sup>1</sup>
+13) lake_sedinflow_r.out | Sediment inflow discharges into the reservoir size classes<sup>1</sup>
+14) lake_sedoutflow_r.out | Sediment outflow discharges from the reservoir size classes<sup>1</sup>
+15) lake_sedretention_r.out | Sediment retention in the reservoir size classes<sup>1</sup>
+16) lake_sedimentation_r.out | Cumulative sediment deposition in the reservoir size classes<sup>1</sup>
+17) lake_watbal.out | Water balance components of all upstream reservoirs<sup>2</sup>
+18) lake_sedbal.out | Sediment balance components of all upstream reservoirs<sup>2</sup>
+19) lake_inflow.out | Water inflow discharges into the reservoir size classes<sup>2</sup>
+20) lake_outflow.out | Water outflow discharges from the reservoir size classes<sup>3</sup>
+21) lake_volume.out | Water volume of the reservoir size classes<sup>3</sup>
+22) lake_retention.out | Water retention in the reservoir size classes<sup>3</sup>
+23) lake_vollost.out | Sediment retention in the reservoir size classes<sup>3</sup>
+24) lake_sedinflow.out | Sediment inflow discharges into the reservoir size classes<sup>3</sup>
+25) lake_sedoutflow.out | Sediment outflow discharges from the reservoir size classes<sup>3</sup>
+26) lake_sizedistoutflow.out | Effluent grain size distribution of the reservoir size classes <sup>4</sup>
 
 <sup>1</sup> Results are displayed for the whole catchment after grouping them by reservoir size classes (one value for the whole catchment and each reservoir size class) <br>
 <sup>2</sup> Results are displayed for the whole catchment without distinguishing between size classes (one value for the whole catchment) <br>
