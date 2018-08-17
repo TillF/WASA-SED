@@ -2,7 +2,8 @@
 
 # User Manual
 
-Eva Nora Müller, Till Francke, George Mamede and Andreas Güntner
+Eva Nora 
+Müller, Till Francke, George Mamede and Andreas Güntner
 
 <br>
 <br>
@@ -103,7 +104,7 @@ Folder Name | Content
 *\Input\\* | Input data, contains parameter file: do.dat, *\Input\Hillslope, \Input\River, \Input\Reservoir, \Input\Time_series*
 *\Output\\* | Output files of model scenarios 
 
-A complete example input-data set is part of the Subversion repository (see top of document). Model parameterisations are available e.g. for meso-scale catchments in dryland areas of Spain and Brazil (Bengue Catchment in Spain: Mamede 2008, Ribera Salada Catchment in Spain: Mueller et al. 2008, Mueller et al. submitted to CATENA, Isábena Catchment in Spain: Francke 2009).
+A complete example input-data set is part of the github repository (see top of document). Model parameterisations are available e.g. for meso-scale catchments in dryland areas of Spain and Brazil (Bengue Catchment in Spain: Mamede 2008, Ribera Salada Catchment in Spain: Mueller et al. 2008, Mueller et al. submitted to CATENA, Isábena Catchment in Spain: Francke 2009).
 
 The original WASA code version (Güntner 2002, Güntner and Bronstert 2004) was extended within the SESAM-Project to include sediment-transport processes at the hillslope scale using various USLE-derivative approaches, a spatially distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network and a reservoir module that computes the transport of water and sediment as well as sedimentation processes in reservoirs.
 
@@ -1919,7 +1920,7 @@ lakeinflow: Water inflow discharges into the reservoir size classes. Currently, 
 
 Example: After each time step, e.g. after one day, after one day, values of water inflow discharges into the reservoir size classes are computed for all sub-basins (e.g. for size class 1: 384.741 m³, 587.248 m³, 38.144 m³, and 17.718 m³ within the timestep, for sub-basins 57, 15, 20 and 60, respectively). Results are displayed for all sub-basins after grouping them by reservoir size classes. The files 20 to 25 have the same structure, as shown by the file ```lake_ inflow_r.out``` (file 9).
 
-*** 20) lake_sizedistoutflow.out***
+***20) lake_sizedistoutflow.out***
 
 ```
 Year, day, hour, sediment size class, lakesizedistoutflow(-)
