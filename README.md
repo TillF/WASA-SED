@@ -6,6 +6,7 @@ WASA-SED Model
 --------------
 WASA-SED is a numerical model for simulation hydrological and sediment fluxes from meso-scale catchments (Mueller et al., 2010).
 This repository contains documentation, sample data set and source code.
+
 All rights under the stated license (see license.txt) of the WASA-SED code are with the SESAM-Project and successors, c/o Till Francke, Universität Potsdam, Karl-Liebknecht-Str. 24-25, 14473 Potsdam, Germany, please contact: francke@uni-potsdam.de).
 
 ******************************
@@ -14,10 +15,11 @@ WASA-SED is a large and complex hydrological and sediment transport model. It is
 
 Contents
 --------
-* doc/: Directory containg the documentation
+* docs/: Directory containg the documentation
   * coding_guidelines.txt: Guidelines for modifying the code
-  * Wasa_Documentation.doc: Model technical documentation
-  * variables.ods: List of variables used (incomplete)
+  * index.md: technical documentation (also available via https://tillf.github.io/WASA-SED/, replaces Wasa_Documentation.doc)
+  * Wasa_Documentation.doc: Model technical documentation (no longer mantained, replaced by index.md)
+  * variables.ods: List of variables used in the source code (incomplete)
   * tutorial_wasa_input.zip: Example input to run the model
 
 * src/: Contains the model's Fortran 90 source code structures in sub-directories
