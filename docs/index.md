@@ -1062,7 +1062,7 @@ Q_Spring: Initial conditions for headwater reaches (minimum discharge) [m3/s]
 Example: The river stretch at the sub-basin with the Map-ID of 1 has a bankful depth of 1 m, a width of 5 metres, a site ratio of 2, a bottom width of the floodplain of 100 m, a side ratio on the floodplains of 4, a channel slope of 0.006 (or 0.6 %), a length of 7.4 km, a Manning’s n of 0.02 and a Manning’s n in the floodplain of 0.05, a Ksat of 25 mm/h, an erodibility factor of 0.1, a cover factor of 1, a riverbedrock factor of 0, a baseflowalphafactor of 0.1 days, a Muskingum X coefficient of 0.2, a Muskingum K factor of 4 hours and an initial condition of 0.1 m3/s. The dimensions of the trapezoidal channels including the floodplains are depicted in Figure 2. The height of the wedge at the channel bottom (enables smooth transition of low flows) is fixed to 0.1 m.
  
 **Figure 2:** Trapezoidal channel dimension with floodplains
-![Trapezoidal channel dimension with floodplains](https://github.com/TillF/WASA-SED/raw/master/docs/Figure_2.svg)
+![Trapezoidal channel dimension with floodplains](./Figure_2.svg)<img src="./Figure_2.svg">
 
 
 ***3) response.dat***
