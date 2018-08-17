@@ -97,12 +97,12 @@ The WASA-SED model is programmed in Fortran 90 and was tested with Compaq Visual
 
 Folder Name | Content
 ---|---
-*\General\\*| Main program and utility routines of the WASA model  
-*\Hillslope\\* | Hillslope routines (Overland, sub-surface flow, evapotranspiration, sediment production etc.)  
-*\River\\* | River routines (Routing of water and sediment in the river network)
-*\Reservoir\\* | Reservoir water and sediment modelling routines (Water balance, bed elevation change, management options)
-*\Input\\* | Input data, contains parameter file: do.dat, *\Input\Hillslope, \Input\River, \Input\Reservoir, \Input\Time_series*
-*\Output\\* | Output files of model scenarios 
+*/General*| Main program and utility routines of the WASA model  
+*/Hillslope* | Hillslope routines (Overland, sub-surface flow, evapotranspiration, sediment production etc.)  
+*/River* | River routines (Routing of water and sediment in the river network)
+*/Reservoir* | Reservoir water and sediment modelling routines (Water balance, bed elevation change, management options)
+*/Input* | Input data, contains parameter file: do.dat, */Input/Hillslope, /Input/River, /Input/Reservoir, /Input/Time_series*
+*/Output* | Output files of model scenarios 
 
 A complete example input-data set is part of the github repository (see top of document). Model parameterisations are available e.g. for meso-scale catchments in dryland areas of Spain and Brazil (Bengue Catchment in Spain: Mamede 2008, Ribera Salada Catchment in Spain: Mueller et al. 2008, Mueller et al. submitted to CATENA, Isábena Catchment in Spain: Francke 2009).
 
@@ -437,7 +437,7 @@ Example: The output files ```daily_actetranspiration.out``` and ```daily_qhorton
 
 ### Input files for the hillslope module
 
-The input files for the hillslope module are located in the folder *Input\\[case_study]\Hillslope* and are summarised in Table 5.
+The input files for the hillslope module are located in the folder *Input/[case_study]/Hillslope* and are summarised in Table 5.
 
 **Table 5:** Input data files for the hillslope component
 
@@ -1062,7 +1062,7 @@ Q_Spring: Initial conditions for headwater reaches (minimum discharge) [m3/s]
 Example: The river stretch at the sub-basin with the Map-ID of 1 has a bankful depth of 1 m, a width of 5 metres, a site ratio of 2, a bottom width of the floodplain of 100 m, a side ratio on the floodplains of 4, a channel slope of 0.006 (or 0.6 %), a length of 7.4 km, a Manning’s n of 0.02 and a Manning’s n in the floodplain of 0.05, a Ksat of 25 mm/h, an erodibility factor of 0.1, a cover factor of 1, a riverbedrock factor of 0, a baseflowalphafactor of 0.1 days, a Muskingum X coefficient of 0.2, a Muskingum K factor of 4 hours and an initial condition of 0.1 m3/s. The dimensions of the trapezoidal channels including the floodplains are depicted in Figure 2. The height of the wedge at the channel bottom (enables smooth transition of low flows) is fixed to 0.1 m.
  
 **Figure 2:** Trapezoidal channel dimension with floodplains
-![Trapezoidal channel dimension with floodplains](https://github.com/SophiaUP/WASA-SED/blob/master/doc/Figure_2.png)
+![Trapezoidal channel dimension with floodplains](https://github.com/TillF/WASA-SED/raw/master/docs/Figure_2.svg)
 
 
 ***3) response.dat***
@@ -1078,7 +1078,7 @@ Subasin-ID:	Map-ID of sub-basin<br>
 lag time: Lag time between runoff input to sub-basin and first runoff response at its outlet in [days]<br>
 retention:	Retention specifies the maximum retention time in the sub-basin in [days]
 
-Reference is midday, partial coverage of days is considered. Autochtonous runoff (riverflow generated inside a subbasin, not entering from upstream) is routed slightly different with zero lag time (triangular like this: /\_; tL*=0, tR*=tL+tR).
+Reference is midday, partial coverage of days is considered. Autochtonous runoff (riverflow generated inside a subbasin, not entering from upstream) is routed slightly different with zero lag time (triangular like this: /\\_; tL*=0, tR*=tL+tR).
 Example: The sub-basin with the Map-ID of 49 has a lag time of 0.5 days and a retention time of 2 days (i.e. its runoff will be delayed by 0.5 day, then stretched over another 2 days). The sub-basin with the Map-ID of 50 has a lag time of 1 day and a retention time of 1.5 days; etc.
 
 For a detailed description of the routing process and the linear response function, see Güntner (2002), p. 48 and Bronstert et al. (1999). The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs as was used in ```hymo.dat``` (due to computational reasons); otherwise an error message occurs.
