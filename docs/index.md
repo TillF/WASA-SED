@@ -870,8 +870,9 @@ transp\_cap\_b:		empirical factor for computing suspended sediment transport cap
 
 This file and any of its entries are optional. If not present, default values are used (Application scale=0; Erosion equation=3, ri_05_coeffs = (a_i30=1.1630; b_i30=0.667981 for daily resolution;  a_i30=1; b_i30=1 for hourly resolution); transport_limit_mode=2, transp_cap_a=0.016111, transp_cap_b=1.707).
 
-***15) gw_storage.stat, intercept_storage.stat, soil_moisture.stat, interflow_storage.stat, snow_storage.stat
-lake_volume.stat, river_storage.stat***<br>
+***15) gw_storage.stat, intercept_storage.stat, soil_moisture.stat, interflow_storage.stat, snow_storage.stat***
+
+***lake_volume.stat, river_storage.stat***<br>
 (optional)
 
 ```
@@ -879,32 +880,53 @@ ground water storage (for analysis or model re-start)
  Subbasin	LU	volume_[mm]	area_[m²]
 1	11111	   39.51	   1013437.4
 …
+```
+
+```
 interception storage (for analysis or model re-start)
  Subbasin	LU	TC	SVC	storage_[mm]	area_[m²]
 1	11111	5	16010	    0.00	     73491.9
 …
+```
+
+```
 soil moisture status (for analysis or model re-start)
  Subbasin	LU	TC	SVC	horizon	watercontent_[mm]	area_[m²]
 1	11111	5	16010	1	   26.70	     73491.9
 …
+```
+
+```
 interflow storage (for analysis or model re-start)
  Subbasin	LU	TC	horizon	storage_[m3]
 1	1	3	1	   0.000
 ...
+```
+
+```
 snow storage (for analysis or model re-start)
  Subbasin	LU	horizon	storage [m]	energy [kJ/m²]	albedo [-]
 1	2	10	0.000	0.000	0.880
+```
+
+```
 Lake volume status (for analysis or model re-start)
  Subbasin	reservoir_size_class	volume[m^3]
 1	1	       0.00
+```
+
+```
 UHG routing: values of routed discharge per timestep of unit hydrograph
  Subbasin	[n_h x timestep]
 101	1.286	0.649	0.074
+```
+
+```
 Muskingum routing: river reach volume status (for analysis or model re-start)
  Subbasin	volume[m^3]
 1	2033.808
 ```
-<br>
+
 subbasin:		subbasin ID<br>
 LU:		landscape unit ID<br>
 TC:		ID of terrain component<br>
