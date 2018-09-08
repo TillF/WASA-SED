@@ -5,30 +5,17 @@
 Eva Nora 
 Müller, Till Francke, George Mamede and Andreas Güntner
 
-<br>
-<br>
-
 **30.1.2018<br>
 WASA-SED rev. 255**
-
-<br>
-<br>
 
 Developed within the SESAM-Project:<br>
 Sediment Export of Semi-Arid Catchment: Monitoring and Modelling 2005-2008<br>
 SESAM II 2010-2014,<br>
 2015-2018
 
-<br>
-<br>
-
 Institute of Earth and Environmental Science, University of Potsdam, Potsdam,<br>
 Deutsches Geoforschungszentrum Potsdam,<br>
 Germany
-
-
-<br>
-<br>
 
 **Recent change: snow module (“WASA-SNOW” by Erwin Rottler)**<br>
 The respective documentation has not been included yet. It can be found in Rottler’s thesis (on request, to be published on https://publishup.uni-potsdam.de/opus4-ubp/home)
@@ -61,9 +48,6 @@ For all extensions of WASA-SED: SESAM-project team, University of Potsdam, 14476
 
 Disclaimer:<br>
 The WASA-SED program is large and complex and extensive knowledge of its design, purpose, and limitations is required in order to apply it properly. The WASA-SED and its source code is freely available under a CC4 licence (“use as you wish, don’t blame us, give credit,…”). See license.txt.
-<br>
-<br>
-<br>
 
 ## Table of Content
 - [Introduction](#introduction)<br>
@@ -83,7 +67,6 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
   * [Output of the reservoir module](#output-of-the-reservoir-module)<br>
 - [Relevant Literature for the WASA-SED Model](#relevant-literature-for-the-wasa-sed-model)<br>
 - [References](#references)<br>
-
 
 ## Introduction
 
