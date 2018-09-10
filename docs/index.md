@@ -1987,9 +1987,9 @@ Antronico, L., Coscarelli, R., Terranova, O. (2005): Surface erosion assessment 
 
 Appel, K. (2006): Characterisation of badlands and modelling of soil erosion in the Isabena watershed, NE Spain. Unpublished MSc thesis, University of Potsdam, Germany.
 
-Ashida, K. and Michiue, M. (1973): “Studies on bed load transport rate in alluvial streams”, Trans. Japan Society of Civil Engineers, Vol. 4.
+Ashida, K. and Michiue, M. (1973): Studies on bed load transport rate in alluvial streams. Trans. Japan Society of Civil Engineers, Vol. 4.
 
-Ackers, P. and White, W.R. (1973): “Sediment transport: a new approach and analysis”, Proc. ASCE, Journal of the Hydraulics Division, Vol. 99, HY11, pp. 2041-2060.
+Ackers, P. and White, W.R. (1973): Sediment transport: a new approach and analysis. Proc. ASCE, Journal of the Hydraulics Division, Vol. 99, HY11, pp. 2041-2060.
 
 Breuer, L., Eckhardt, K., Frede, H.-G. (2003): Plant parameter values for models in temperate climates, Ecological Modelling, 169: 237-293.
 
