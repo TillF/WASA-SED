@@ -70,7 +70,7 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 
 ## Introduction
 
-The WASA-SED model simulates the runoff and erosion processes at the hillslope scale, the transport processes of suspended and bedload fluxes at the river scale and the retention and remobilisation processes of sediments in large reservoirs. The modelling tool enables the evaluation of management options both for sustainable land-use change scenarios to reduce erosion in the headwater catchments as well as adequate reservoir management options to lessen sedimentation in large reservoirs and reservoir networks. The model concept, its spatial discretisation and the numerical components of the hillslope, river and reservoir processes are summarised and current model applications are reviewed in [Mueller et al. (2008)](#mueller-et-al-2008). The hydrological routines of the model are based on the WASA model (Model for Water Availability in Semi-Arid environments), which was developed by [Güntner (2002)](#guentner-2002) and Güntner and Bronstert ([2002](#guentner-bronstert-2002), [2003](#guentner-bronstert-2003) to enable the quantification of water availability in semi-arid regions. The WASA-SED model was developed within the joint Spanish-Brazilian-German research project SESAM (Sediment Export from Semi-Arid Catchments: Measurement and Modelling). The existing WASA model code has been extended to include sediment-transport routines for the three new conceptual levels of the WASA-SED model: the hillslope scale, river scale and the reservoir scale for the calculation of sedimentation. This documentation gives a short outline of the structure, computational routines and folder system of the WASA-SED code in Chapter 2, followed by a description of the input files for model parameterisation in Chapter 3 and output files for the hillslope, river and reservoir modules in Chapter 4.
+The WASA-SED model simulates the runoff and erosion processes at the hillslope scale, the transport processes of suspended and bedload fluxes at the river scale and the retention and remobilisation processes of sediments in large reservoirs. The modelling tool enables the evaluation of management options both for sustainable land-use change scenarios to reduce erosion in the headwater catchments as well as adequate reservoir management options to lessen sedimentation in large reservoirs and reservoir networks. The model concept, its spatial discretisation and the numerical components of the hillslope, river and reservoir processes are summarised and current model applications are reviewed in [Mueller et al. (2010)](#mueller-et-al-2010). The hydrological routines of the model are based on the WASA model (Model for Water Availability in Semi-Arid environments), which was developed by [Güntner (2002)](#guentner-2002) and [Güntner and Bronstert (2002](#guentner-bronstert-2002), [2003a](#guentner-bronstert-2003a) to enable the quantification of water availability in semi-arid regions. The WASA-SED model was developed within the joint Spanish-Brazilian-German research project SESAM (Sediment Export from Semi-Arid Catchments: Measurement and Modelling). The existing WASA model code has been extended to include sediment-transport routines for the three new conceptual levels of the WASA-SED model: the hillslope scale, river scale and the reservoir scale for the calculation of sedimentation. This documentation gives a short outline of the structure, computational routines and folder system of the WASA-SED code in [Chapter 2](#program-folders-and-structure), followed by a description of the input files for model parameterisation in Chapter 3 and output files for the hillslope, river and reservoir modules in Chapter 4.
 
 ## Program folders and structure
 
@@ -2025,11 +2025,11 @@ Güntner, A. (2002): Large-scale hydrological modelling in the semi-arid North-E
 <a name="guentner-bronstert-2002"></a>
 Güntner, A., Bronstert, A. (2002): Process-based modelling of large-scale water availability in a semi-arid environment: process representation and scaling issues. In G.H. Schmitz, editor, Schriftenreihe des Institutes für Abfallwirtschaft und Altlasten, Universität Dresden, Dresden, pp. 46.
 
-<a name="guentner-bronstert-2003"></a>
-Güntner, A., Bronstert, A. (2003): Large-scale hydrological modeling of a semiarid environment: model development, validation and application, In T. Gaiser, M. Krol, H. Frischkorn, and J.C.Araujo, editors, Global change and regional impacts. Springer-Verlag, Berlin.
+<a name="guentner-bronstert-2003a"></a>
+Güntner, A., Bronstert, A. (2003a): Large-scale hydrological modeling of a semiarid environment: model development, validation and application, In T. Gaiser, M. Krol, H. Frischkorn, and J.C.Araujo, editors, Global change and regional impacts. Springer-Verlag, Berlin.
 
 <a name=""></a>
-Güntner, A., Bronstert, A. (2003): Large-scale hydrological modelling in the semiarid Northeast of Brazil: aspects of model sensitivity and uncertainty, In E. Servat, W. Najem, C. Leduc, and A. Shakeel, editors, Hydrology of the Mediterranean and Semi-Arid Regions. IAHS-Publication 278.
+Güntner, A., Bronstert, A. (2003b): Large-scale hydrological modelling in the semiarid Northeast of Brazil: aspects of model sensitivity and uncertainty, In E. Servat, W. Najem, C. Leduc, and A. Shakeel, editors, Hydrology of the Mediterranean and Semi-Arid Regions. IAHS-Publication 278.
 
 <a name=""></a>
 Güntner, A. (2003): Auswirkung von Klimaänderungen auf die Wasserverfügbarkeit in Trockengebieten - Ergebnisse und Unsicherheiten am Beispiel Nordost-Brasiliens. In H.-B.Kleeberg, editor, Hydrologische Wissenschaften - Fachgemeinschaft in der ATV-DVWK, pp. 205-214.
@@ -2064,11 +2064,11 @@ Morgan, R.P.C. (1995): Soil erosion and conservation Longman Group, UK Limited.
 <a name=""></a>
 Mueller, EN., Francke, T., Batalla, RJ., Bronstert, A. (2009): Modelling the effects of land-use change on runoff and sediment yield for a meso-scale catchment in the Southern Pyrenees. Catena 79:3, 288-296. (1)
 
-<a name=""></a>
+<a name="mueller-et-al-2008"></a>
 Mueller, E. N., Batalla, R. J., Garcia, C., Bronstert, A. (2008): Modelling bedload rates from fine grain-size patches during small floods in a gravel-bed river. J. of Hydr. Eng. in press.
 
-<a name="mueller-et-al-2008"></a>
-Mueller, E. N., Güntner, A., Francke, T., Mamede, G. (2008): Modelling water availability, sediment export and reservoir sedimentation in drylands with the WASA-SED Model. Submitted to Geoscientific Model Development.
+<a name="mueller-et-al-2010"></a>
+Mueller, E.N., Güntner, A., Francke, T., Mamede, G. (2010): Modelling sediment export, retention and reservoir sedimentation in drylands with the WASA-SED model. Geosci Model Dev 3:275–291, doi:10.5194/gmd-3-275-2010, published on: http://www.geosci-model-dev.net/3/275/2010/.
 
 <a name=""></a>
 Neitsch, S.L., Arnold, J.G., Kiniry, J.R., Williams, J.R., King, K.W. (2002): Soil and Water Assessment Tool. Theoretical Documentation, Version 2000. Published by Texas Water Resources Institute, TWRI Report TR-191.
