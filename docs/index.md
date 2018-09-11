@@ -223,12 +223,12 @@ In order to perform the simulation of sediment transport in reservoirs, four imp
 ```lake.f90```: contains the water balance for networks of small reservoirs 
 1. Calculation of water level in the reservoirs
 2. Calculation of controlled and uncontrolled outflow out the small reservoirs
-*sedbal_lake.f90:* contains a simplified sediment balance for networks of small reservoirs
+```sedbal_lake.f90```: contains a simplified sediment balance for networks of small reservoirs
 1. Calculation of sediment deposition in small reservoir
 2. Calculation of trapping efficiency in small reservoirs
 3. Calculation of storage capacity reduction because of the accumulated sediment in small reservoirs
 4. Calculation of effluent grain size distribution in small reservoirs
-*lake_routing.f90:* contains the calculation of level-pool routing for networks of small reservoirs
+```lake_routing.f90```: contains the calculation of level-pool routing for networks of small reservoirs
 1. Calculation of water routing for small reservoirs
 
 ## Input Data
@@ -256,8 +256,8 @@ Reservoir	| Longitudinal profile of reservoir [m], Cross-section profiles of res
 
 Four parameter files control the data input and output and some internal settings:
 
-***do.dat*** <br>
-[can be generated with The LUMP package, manual completing required]
+```do.dat``` <br>
+\[can be generated with The LUMP package, manual completing required\]
 
 The ```do.dat``` file is located in the folder WASA\Input and contains the main parameter specifications for the WASA-SED model. Figure 1 displays an example file for the do.dat. The first line of the do.dat contains the title. Line 2 and 3 specify the path for the location of WASA input and output folder. Relative paths are supported. The backslash “\” only works on Windows-platforms. The slash “/” is accepted on Windows and Unix/Linux systems. Make sure that both specified paths end with slash or backslash, respectively. Line 4 and 5 contain the start and the end year of the simulation, respectively. Line 6 and 7 contain the start and the end calendar month of the simulation, respectively. Optionally, the day of month for begin and end can be specified. Line 10 contains the number of sub-basins. The number in line 9 is given by the sum of the number of terrain components in each landscape-unit of each sub-basin (e.g. if the system has only two sub-basins, sub-basin A has 1 landscape unit with 3 terrain components, sub-basin B has 2 landscape units with 1 terrain component each, then the number of combinations is 5). Line 14 specifies if the reservoir module is switched on (.t.) or is switched off (.f.). The same issue for the calculations of networks of small reservoirs in line 15. Lines 16 – 19 allow customizing the way water and sediment is (re-)distributed within and among the TCs. Line 21 allows the setting of the simulation timestep (daily / hourly). This may become obsolete in future versions by setting the timestep directly in line 30. Line 24 allows specifying a correction factor for hydraulic conductivity to account for intra-daily rainfall intensities. Optionally, this factor can also be made a function of daily rainfall by specifying two more parameters (a and b) in the same line, so that kfkorr=kfkorr0\*(a\*1/daily_precip+b+1). In line 31 the erosion and sediment-transport routines may be switched on and off. Specify the number of grain size classes you want to model in line 32. Their limits must be specified in part_class.dat, if more than one class is desired. Line 33 lets you choose the hillslope erosion model to be used in WASA. Currently, this parameter is disregarded, further options can be chosen in erosion.ctl. Select the model for the river routing in line 34. Possible options are: (1) old WASA routing (daily resolution only, no sediment transport), (2) Muskingum and suspended sediment, (3) Muskingum and bedload transport. Choose the sediment model in the reservoir in line 35 among 4 sediment transport equations: (1) Wu et al. (2000); (2) Ashida & Michiue (1973); (3) Yang (1973, 1984); (4) Ackers & White (1973).
 
@@ -310,7 +310,7 @@ Parameter specification for the WASA Model (SESAM-Project)
 
 **Figure 1:** WASA parameter specification file ```do.dat```
 
-***maxdim.dat*** <br>
+```maxdim.dat``` <br>
 optional \[can be generated with the LUMP package\]<br>
 The file ```maxdim.dat``` serves to optimise memory management and thus improves computational performance. It is, however, optional and if not encountered, default values are assumed.
 
@@ -327,7 +327,7 @@ contains maximum dimensions of spatial units
 
 Example: In the given example, no more than 3 LU may occur in one sub-basin (line 2). Analogously, no LU may contain more than 3 TCs (line 3) and no TC more than 4 SVCs (line 4). The number of horizons in a soil is limited to 6 (line 5). No more than 2 transpositions between sub-basins may exist. The last two lines are optional and valid only for computation of sedimentation patterns in strategic reservoirs (assumed 200, if missing).
 
-***part_class.dat***<br>
+```part_class.dat```<br>
 optional \[can be generated with the LUMP package\]<br>
 The file ```part_class.dat``` is only necessary if sediment transport in multiple particle-size classes is to be modelled. If ```part_class.dat``` is missing, sediment transport will be modelled for a single particle-size class only. Otherwise, the file defines the number and the properties of the particle sizes that will be modelled. Please note that class numbering has to be continuous, starting with 1. The particle size classes must be ordered from fine to coarse.
 
@@ -344,7 +344,7 @@ Upper_limit: upper limit of particle size for the respective class \[mm\]<br>
 
 Example: The example file describes the 3 particle-size-classes clay, silt and sand (according to German classification) with clay particles up to 0.002 mm, silt (0.002 - 0.063 mm) and sand (0.063 - 2.0 mm).
 
-***outfiles.dat***<br>
+```outfiles.dat```<br>
 optional<br>
 The file allows specifying, which output files are desired. Disabling unnecessary output files saves computation time and disk space. The contains two headerlines, each following line contains a keyword, which is the filename of a possible output file (case insensitive, without the extension .out). If a keyword for a certain output file is not contained in ```outfiles.dat``` the respective file is not created, any existing file of that name is deleted. Information on the content of output files can be found in the respective sections. If ```outfiles.dat``` is not found, WASA-SED creates a default set of output files. 
 
@@ -430,7 +430,7 @@ Example: The output files ```daily_actetranspiration.out``` and ```daily_qhorton
 
 ### Input files for the hillslope module
 
-The input files for the hillslope module are located in the folder *Input/[case_study]/Hillslope* and are summarised in Table 5.
+The input files for the hillslope module are located in the folder ```Input/[case_study]/Hillslope``` and are summarised in **Table 5**.
 
 **Table 5:** Input data files for the hillslope component
 
@@ -479,7 +479,7 @@ The spatial conceptualisation of the WASA model is explained in detail in Güntn
 
 The model domain is divided into sub-basins; each sub-basin has an individual Map-ID. This Map-ID has to be a unique number; the employed numbering scheme does not have to be continuous (i.e. with three sub-basins, they do not have to be named Map-ID 1, 2 and 3, but could be named e.g. 100, 500, 877). The following paragraphs explain each of the input files in turns.
 
-***hymo.dat***<br>
+**1)** ```hymo.dat```<br>
 \[can be generated with the LUMP package\]
 
 ```
@@ -507,7 +507,7 @@ Example: In ```do.dat```, it was specified that 10 sub-basins are simulated with
 
 Important: Any subbasin that is not listed in the file ```routing.dat``` will be ignored.
 
-***soter.dat*** <br>
+**2)** ```soter.dat``` <br>
 \[can be generated with the LUMP package\]
 
 ```
@@ -524,14 +524,14 @@ TC1:		    ID of a terrain component <br>
 TC2:		    ID of another terrain component<br>
 TC3:			ID of a third terrain component<br>
 ...			    more TC-IDs according to field 2<br>
-kfsu:			Hydraulic conductivity of bedrock [mm/d]<br>
-length:			Mean  slope length in LU unit [m]<br>
-meandep:		Mean maximum depth of soil zone [mm]<br>
-maxdep:			Maximum depth of alluvial soil zone [mm]<br>
-riverbed:		Depth of river bed below terrain component [mm]<br>
-gw_flag:		Flag for LU unit [0: no groundwater, 1: with groundwater] <br>
-gw_dist:			Initial depth of groundwater below surface [mm] (ignored, unless gw_flag=99)<br>
-frgw_delay:		Storage coefficient for groundwater outflow [day]<br>
+kfsu:			Hydraulic conductivity of bedrock \[mm/d]<br>
+length:			Mean  slope length in LU unit \[m]<br>
+meandep:		Mean maximum depth of soil zone \[mm]<br>
+maxdep:			Maximum depth of alluvial soil zone \[mm]<br>
+riverbed:		Depth of river bed below terrain component \[mm]<br>
+gw_flag:		Flag for LU unit \[0: no groundwater, 1: with groundwater\] <br>
+gw_dist:			Initial depth of groundwater below surface \[mm] (ignored, unless gw_flag=99)<br>
+frgw_delay:		Storage coefficient for groundwater outflow \[day]<br>
 
 Example: The landscape unit with ID 1 has 3 terrain components with the IDs 7, 49 and 11, a hydraulic conductivity of bedrock of 100 mm/d, a mean slope length of 601 m, etc.
 The LU with ID 2 has only 1 terrain component with the ID-Number 2 (i.e. consisting only of one rather homogenous hillslope section, TC2 and TC3 are set to zero), a hydraulic conductivity of bedrock of 100 mm/d, a mean slope length of 1963.7 m, etc. The TCs within a LU can be listed in any order, their position in the toposequence is read from terrain.dat.
@@ -548,7 +548,7 @@ In any of the above options, riverbed is to be defined in soter.dat. In WASA, on
 
 **I) Groundwater option Gw_flag=0**
 
-Modelling options |	Groundwater regime, internal representation of processes | Gw flag (soter.dat) | Bed-rock (soil.dat) / Add. parameters (soter.dat)
+Modelling options |	Groundwater regime, internal representation of processes | Gw flag (```soter.dat```) | Bed-rock (```soil.dat```) / Add. parameters (```soter.dat```)
 ---|---|---|---
 I) Groundwater below soil zone is ignored / not relevant for surface processes |	Soil water balance is modelled within the zone above bedrock. Water percolation out of the deepest soil horizon leaves the model domain	| 0	/ Select option 1.1 or 1.2 |
 I.1) No bedrock is taken into account | Water percolation out of the deepest soil horizon leaves the model domain. | 0	| Select option 1.1.1 or 1.1.2
@@ -561,7 +561,7 @@ I.2.2) If bedrock is not given in ```soil.dat```, bedrock is assumed to be in th
 
 **II) Groundwater option Gw_flag=1**
 
-Modelling options | Groundwater regime, internal representation of processes | Gw flag (soter.dat) | Bed-rock (soil.dat) / Add. parameters (soter.dat)
+Modelling options | Groundwater regime, internal representation of processes | Gw flag (```soter.dat```) | Bed-rock (```soil.dat```) / Add. parameters (```soter.dat```)
 ---|---|---|---
 II) Groundwater below soil zone is taken into account | Soil water balance is modelled within the zone above bedrock. Water percolation out of the deepest soil horizon enters linear groundwater storage | 1 | Select option 2.1 or 2.2
 II.1) No bedrock is taken into account | Water percolation out of the deepest soil horizon goes directly into the groundwater storage. | 1 | 0 / meandep=-1, maxdep=-1, frgw_delay, riverbed
@@ -574,12 +574,12 @@ II.2.2) If bedrock is not given in soil.dat, bedrock is assumed to be in the dep
 
 Experimental option, not verified!
 
-Modelling options | Groundwater regime, internal representation of processes | Gw flag (soter.dat) | Add. parameters (soter.dat)
+Modelling options | Groundwater regime, internal representation of processes | Gw flag (```soter.dat```) | Add. parameters (```soter.dat```)
 ---|---|---|---
 III) Groundwater in soil zone. The initial depth of the groundwater surface below soil surface is defined by gw_dist in ```soter.dat```. A separate deep groundwater storage or bedrock is ignored. | Permanent groundwater in soil zone is assumed. The groundwater level may vary in time as a function of input by percolation and drainage into river. | 99 | meandep, maxdep, riverbed, gw_dist
 
-***3) terrain.dat***<br> 
-[can be generated with the LUMP package]
+**3)** ```terrain.dat```<br> 
+\[can be generated with the LUMP package]
 
 ```
 Specification of terrain components
@@ -590,8 +590,8 @@ TC-ID, fraction, slope [%], position [-]
 ```
 
 TC-ID:  		ID of terrain component<br>
-fraction: 		Fraction of terrain component in LU [-]<br>
-slope:			Slope of terrain component [%]<br>
+fraction: 		Fraction of terrain component in LU \[-]<br>
+slope:			Slope of terrain component \[%]<br>
 position:	    Position of terrain component in LU (e.g. 1: highlands, 2: middle slopes, 3: lowland)<br>
 (beta_fac):	(optional) correction factor for beta (details below)<br>
 (SDR):         (optional) TC-specific sediment delivery ratio (details below)
@@ -601,8 +601,8 @@ For erosion modelling, ```terrain.dat``` may contain a fifth column holding corr
 A fifth AND sixth column holding beta_fac and a sediment delivery ratio (SDR) for each TC. If either of these are given, the respective settings for the LUs are ignored.
 SDRs are applied to raw erosion on TC-scale before transport capacity limitations. Normally, they should be used with USLE and without transport capacity limitation, otherwise deposition may be accounted for twice.
 
-***4) svc.dat***<br>
-[can be generated with the LUMP package] <br>
+**4)** ```svc.dat```<br>
+\[can be generated with the LUMP package] <br>
 (optional, mandatory for sediment module and saving/loading of model states)
 
 ```
@@ -615,18 +615,18 @@ id	soil_id	veg_id	musle_k[(ton acre hr)/(acre ft-ton inch)]	musle_c[-]	musle_p[-
 ID:			    unique ID for the soil-vegetation component<br>
 Soil_id:	   	ID of corresponding soil unit (as specified in ```soil.dat```)<br>
 Veg_id:			ID of corresponding vegetation component (as specified in vegetation.dat)<br>
-Musle_k\*:		MUSLE erodibility factor [(ton acre hr)/(acre ft-ton inch)]<br>
+Musle_k\*:		MUSLE erodibility factor \[(ton acre hr)/(acre ft-ton inch)]<br>
 Musle_c\*:		MUSLE crop factor <br>
 Musle_p\*:		MUSLE protection factor <br>
-Coarse_fraction\*:	fraction of soil fragments > 2 mm [%]<br>
+Coarse_fraction\*:	fraction of soil fragments > 2 mm \[%]<br>
 Manning_n\*:		Manning’s n roughness coefficient<br>
 
 \*Each of these columns can be replicated 4 times to describe seasonal dynamics of the respective parameter. In that case, the corresponding seasonality file must be created (see ```rainy_season.dat```).
 
-Example: The SVC with the ID 11 consists of the soil with ID 13 (as specified in ```soil.dat```) and the vegetation/landuse with ID 21 (as specified in *vegetation.dat*), resulting in the MUSLE-factors K, C, P of 0.13, 1.0 and 1.0, respectively. It contains 0.8 % coarse particles and has a surface roughness coefficient of 0.011.
+Example: The SVC with the ID 11 consists of the soil with ID 13 (as specified in ```soil.dat```) and the vegetation/landuse with ID 21 (as specified in ```vegetation.dat```), resulting in the MUSLE-factors K, C, P of 0.13, 1.0 and 1.0, respectively. It contains 0.8 % coarse particles and has a surface roughness coefficient of 0.011.
 
-***5) svc_in_tc.dat*** <br>
-[can be generated with the LUMP package]
+**5)** ```svc_in_tc.dat``` <br>
+\[can be generated with the LUMP package]
 
 ```
 Specification of which SVCs are contained in each TC
@@ -645,8 +645,8 @@ Note: The sum of “fraction” over a specific TC can be smaller than one as th
 
 Example: The TC with the ID 11 consists only of the SVC with the ID 12. The TC with the ID 12 is covered by the SCV 12 at 20 % of its area. The remaining 80 % of TC 12 consist of SVC 14.
 
-***6) soil_vegetation.dat***<br>
-[can be generated with the LUMP package]
+**6)** ```soil_vegetation.dat```<br>
+\[can be generated with the LUMP package]
 
 ```
 Specification of soil-vegetation components (links LU, terrain component, soil and vegetation properties) 
@@ -664,7 +664,7 @@ Subasin-ID[-],LU-ID[-],TC-ID[-],fraction_rocky[-],nbrSVC[-],Soil-ID(30 values)[-
 Subasin-ID:	ID of sub-basin (Map-ID), same ordering as in ```hymo.dat```<br>
 LU-ID:  ID of corresponding LU (as determined in ```hymo.dat```)<br>
 TC-ID:  	ID of corresponding terrain component (as determined in ```soter.dat```)<br>
-fraction_rocky:	   	fraction of impermeable (rock) area in each terrain component [-]<sup>1</sup> <br>
+fraction_rocky:	   	fraction of impermeable (rock) area in each terrain component \[-]<sup>1</sup> <br>
 nbrSVC:	 Number of soil-vegetation components (SVCs) in current TC of  sub-basin<br>
 Soil-IDs(nbrSVC values): 	1<sup>st</sup> row of each block: corresponding soil-IDs as defined in ```soil.dat```<br>
 Vegetation-ID(nbrSVC values):	2<sup>nd</sup> row of each block: corresponding vegetation-ID as defined in ```vegetation.dat``` <br>
@@ -676,8 +676,8 @@ fraction (nbrSVC values): Areal fraction of SVCs in current terrain component of
 Example: The combination sub-basin Map-ID of 49, the LU-ID of 19 and the terrain component-ID 25 has a fraction of 12 % (0.12) of impermeable rock area, and 9 different soil and landuse / vegetation classes. The sum of the fraction of the impermeable area and of the areal fractions of all SVCs must equal 1.0. The first row holds the 9 different soil-IDs (86, 30, 77, 86, etc.). The second row contains the landuse / vegetation classes for the same sub-basin – LU – terrain component combination (8002, 8004, 8005, etc.). The third line holds the areal fraction of each soil-vegetation specification within each LU-terrain combination. The next three lines contain the same block of data for sub-basin 49, LU 19 but for terrain component-ID 26. <br>
 The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs that was used in hymo.dat (due to computational reasons), in this case 49, 50, 1, 44, etc.; otherwise an error message occurs.
 
-***7) soil.dat***<br>
-[can be generated with the LUMP package]
+**7)** ```soil.dat```<br>
+\[can be generated with the LUMP package]
 
 ```
 Specification of soil parameters
