@@ -81,6 +81,8 @@ The WASA-SED model simulates the runoff and erosion processes at the hillslope s
 
 [Mueller et al. (2008)](#mueller--e-n--g-ntner--a--francke--t--mamede--g--2008-).
 
+In standard Markdown, place an anchor  where you want to link to and refer to it on the same page by [Mueller et al. (2008)](#mueller-et-al-2008).
+
 The hydrological routines of the model are based on the WASA model (Model for Water Availability in Semi-Arid environments), which was developed by Güntner (2002) and Güntner and Bronstert (2002, 2003) to enable the quantification of water availability in semi-arid regions. The WASA-SED model was developed within the joint Spanish-Brazilian-German research project SESAM (Sediment Export from Semi-Arid Catchments: Measurement and Modelling). The existing WASA model code has been extended to include sediment-transport routines for the three new conceptual levels of the WASA-SED model: the hillslope scale, river scale and the reservoir scale for the calculation of sedimentation. This documentation gives a short outline of the structure, computational routines and folder system of the WASA-SED code in Chapter 2, followed by a description of the input files for model parameterisation in Chapter 3 and output files for the hillslope, river and reservoir modules in Chapter 4.
 
 ## Program folders and structure
@@ -2050,6 +2052,7 @@ Mueller, EN., Francke, T., Batalla, RJ., Bronstert, A. (2009): Modelling the eff
 
 Mueller, E. N., Batalla, R. J., Garcia, C., Bronstert, A. (2008): Modelling bedload rates from fine grain-size patches during small floods in a gravel-bed river. J. of Hydr. Eng. in press.
 
+<a name="mueller-et-al-2008"></a>
 Mueller, E. N., Güntner, A., Francke, T., Mamede, G. (2008): Modelling water availability, sediment export and reservoir sedimentation in drylands with the WASA-SED Model. Submitted to Geoscientific Model Development.
 
 Neitsch, S.L., Arnold, J.G., Kiniry, J.R., Williams, J.R., King, K.W. (2002): Soil and Water Assessment Tool. Theoretical Documentation, Version 2000. Published by Texas Water Resources Institute, TWRI Report TR-191.
