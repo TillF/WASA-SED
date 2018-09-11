@@ -70,7 +70,7 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 
 ## Introduction
 
-The WASA-SED model simulates the runoff and erosion processes at the hillslope scale, the transport processes of suspended and bedload fluxes at the river scale and the retention and remobilisation processes of sediments in large reservoirs. The modelling tool enables the evaluation of management options both for sustainable land-use change scenarios to reduce erosion in the headwater catchments as well as adequate reservoir management options to lessen sedimentation in large reservoirs and reservoir networks. The model concept, its spatial discretisation and the numerical components of the hillslope, river and reservoir processes are summarised and current model applications are reviewed in [Mueller et al. (2010)](#mueller-et-al-2010). The hydrological routines of the model are based on the WASA model (Model for Water Availability in Semi-Arid environments), which was developed by [Güntner (2002)](#guentner-2002) and [Güntner and Bronstert (2002](#guentner-bronstert-2002), [2003a](#guentner-bronstert-2003a) to enable the quantification of water availability in semi-arid regions. The WASA-SED model was developed within the joint Spanish-Brazilian-German research project SESAM (Sediment Export from Semi-Arid Catchments: Measurement and Modelling). The existing WASA model code has been extended to include sediment-transport routines for the three new conceptual levels of the WASA-SED model: the hillslope scale, river scale and the reservoir scale for the calculation of sedimentation. This documentation gives a short outline of the structure, computational routines and folder system of the WASA-SED code in [Chapter 2](#program-folders-and-structure), followed by a description of the input files for model parameterisation in [Chapter 3](#input-data) and output files for the hillslope, river and reservoir modules in [Chapter 4](#output-data).
+The WASA-SED model simulates the runoff and erosion processes at the hillslope scale, the transport processes of suspended and bedload fluxes at the river scale and the retention and remobilisation processes of sediments in large reservoirs. The modelling tool enables the evaluation of management options both for sustainable land-use change scenarios to reduce erosion in the headwater catchments as well as adequate reservoir management options to lessen sedimentation in large reservoirs and reservoir networks. The model concept, its spatial discretisation and the numerical components of the hillslope, river and reservoir processes are summarised and current model applications are reviewed in [Mueller et al. (2010)](#mueller-et-al-2010). The hydrological routines of the model are based on the WASA model (Model for Water Availability in Semi-Arid environments), which was developed by [Güntner (2002)](#guentner-2002) and [Güntner and Bronstert (2002](#guentner-bronstert-2002), [2003a](#guentner-bronstert-2003a)) to enable the quantification of water availability in semi-arid regions. The WASA-SED model was developed within the joint Spanish-Brazilian-German research project SESAM (Sediment Export from Semi-Arid Catchments: Measurement and Modelling). The existing WASA model code has been extended to include sediment-transport routines for the three new conceptual levels of the WASA-SED model: the hillslope scale, river scale and the reservoir scale for the calculation of sedimentation. This documentation gives a short outline of the structure, computational routines and folder system of the WASA-SED code in [Chapter 2](#program-folders-and-structure), followed by a description of the input files for model parameterisation in [Chapter 3](#input-data) and output files for the hillslope, river and reservoir modules in [Chapter 4](#output-data).
 
 ## Program folders and structure
 
@@ -146,7 +146,7 @@ terrain component
 
 ### River module
 
-The river routing of the original WASA model ([Güntner 2002](#guentner-2002)) bases on daily linear response functions ([Bronstert et al. 1999](#bronstert-et-al-1999) similar to a triangular unit hydrograph. Its implementation does not support output in hourly resolution (only daily is produced) and sediment transport. It was extended to include a spatially semi-distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network. The implemented water modelling approach is similar to the routing routines from the SWAT model (Soil Water Assessment Tool, Neitsch et al. 2002) model and the SWIM model (Soil Water Integrated Modelling, Krysanova et al. 2000). The new water routing is based on the Muskingum kinematic wave approximation. Suspended sediment transport and bedload is modelled using the transport capacity concept. The river module can be run with variable time steps. Transmission losses through riverbed infiltration and evaporation are accounted for. The main routing calculations as well as the initialisation and reading of the river input files are carried out in ```routing.f90```. The following sub-routines are called from ```routing.f90```:
+The river routing of the original WASA model ([Güntner 2002](#guentner-2002)) bases on daily linear response functions ([Bronstert et al. 1999](#bronstert-et-al-1999) similar to a triangular unit hydrograph. Its implementation does not support output in hourly resolution (only daily is produced) and sediment transport. It was extended to include a spatially semi-distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network. The implemented water modelling approach is similar to the routing routines from the SWAT model (Soil Water Assessment Tool, [Neitsch et al. 2002](#neitsch-et-al-2002)) model and the SWIM model (Soil Water Integrated Modelling, [Krysanova et al. 2000](#krysanova-et-al-2000)). The new water routing is based on the Muskingum kinematic wave approximation. Suspended sediment transport and bedload is modelled using the transport capacity concept. The river module can be run with variable time steps. Transmission losses through riverbed infiltration and evaporation are accounted for. The main routing calculations as well as the initialisation and reading of the river input files are carried out in ```routing.f90```. The following sub-routines are called from ```routing.f90```:
 
 ```muskingum.f90```: contains the flow calculation using the Muskingum method
 1. Calculation of water volume in reach
@@ -170,11 +170,11 @@ The river routing of the original WASA model ([Güntner 2002](#guentner-2002)) b
 
 ```bedload.f90```: contains the calculation for bedload transport using 5 different formulas
 1.	Calculation of current width of the river
-2.	Bedload formulas after Meyer-Peter & Müller (1948), Schoklitsch (1950), Smart & Jaeggi (1983), Bagnold (1956) und Rickenmann (2001), see Mueller et al. 2008 relevant references
+2.	Bedload formulas after Meyer-Peter and Müller (1948), Schoklitsch (1950), Smart and Jaeggi (1983), Bagnold (1956) and Rickenmann (2001), see [Mueller et al. 2008](#mueller-et-al-2008) relevant references.
 
 ### Reservoir module
 
-The reservoir sedimentation routine was included into the WASA-SED model by Mamede (2008) to enable the calculation of non-uniform sediment transport along the longitudinal profile of a reservoir, of the reservoir bed changes caused by deposition/erosion processes and of reservoir management options. 
+The reservoir sedimentation routine was included into the WASA-SED model by [Mamede (2008)](#mamede-2008) to enable the calculation of non-uniform sediment transport along the longitudinal profile of a reservoir, of the reservoir bed changes caused by deposition/erosion processes and of reservoir management options. 
 
 In order to perform the simulation of sediment transport in reservoirs, four important processes have to be considered: (1) reservoir water balance, (2) hydraulic calculations in the reservoir, (3) sediment transport along the longitudinal profile of the reservoir and (4) reservoir bed elevation changes. For the calculation of sediment transport in the reservoir, four different equations for the calculation of total sediment load were selected from recent literature. The reservoir bed elevation changes are calculated through the sediment balance at each cross section, taking into account three conceptual sediment layers above the original bed material. The reservoir sedimentation module is composed by the following subroutines:
 
@@ -226,12 +226,13 @@ In order to perform the simulation of sediment transport in reservoirs, four imp
 
 ## Input Data
 
-The model runs as a Fortran console application for catchment from a few km² up to several 100,000 km²) on daily or hourly time steps. Climatic drivers are daily/hourly time series for precipitation, humidity, short-wave radiation and temperature. For model parameterisation, regional digital maps on soil associations, land-use and vegetation cover, a digital elevation model with a cell size of 100 metres (or smaller) and, optional, bathymetric surveys of the reservoirs are required. The soil, vegetation and terrain maps are processed with the LUMP tool (see above) to derive the spatial discretisation into soil-vegetation units, terrain components and landscape units. **Table 4** summarises the input parameters for the climatic drivers and the hillslope, river and reservoir modules. The vegetation parameters may be derived with the comprehensive study of, for example, Breuer et al. (2003), the soil and erosion parameters with the data compilation of FAO (1993, 2001), Morgan (1995), Maidment (1993) and Antronico et al. (2005).
+The model runs as a Fortran console application for catchment from a few km² up to several 100,000 km²) on daily or hourly time steps. Climatic drivers are daily/hourly time series for precipitation, humidity, short-wave radiation and temperature. For model parameterisation, regional digital maps on soil associations, land-use and vegetation cover, a digital elevation model with a cell size of 100 metres (or smaller) and, optional, bathymetric surveys of the reservoirs are required. The soil, vegetation and terrain maps are processed with the LUMP tool (see above) to derive the spatial discretisation into soil-vegetation units, terrain components and landscape units. [Table 4](#table-4) summarises the input parameters for the climatic drivers and the hillslope, river and reservoir modules. The vegetation parameters may be derived with the comprehensive study of, for example, [Breuer et al. (2003)](#breuer-et-al-2003), the soil and erosion parameters with the data compilation of [FAO (1993,](#fao-1993) [2001)](#fao-2001), Morgan (1995), Maidment (1993) and Antronico et al. (2005).
 
 For a semi-automated discretisation of the model domain into landscape units and terrain components, the software tool LUMP (Landscape Unit Mapping Program) is available (Francke et al. 2008). LUMP incorporates an algorithm that delineates areas with similar hillslope characteristics by retrieving homogeneous catenas with regard to e.g. hillslope shape, flow length and slope (provided by a digital elevation model), and additional properties such as for soil and land-use and optionally for specific model parameters such as leaf area index, albedo or soil aggregate stability. The LUMP tool is linked with the WASA-SED parameterisation procedure through a databank management tool, which allows to process and store digital soil, vegetation and topographical data in a coherent way and facilitates the generation of the required input files for the model. LUMP and further WASA-SED pre-processing tools have been transferred to the package lumpR for the free software environment for statistical computing and graphics R which is available from https://github.com/tpilz/lumpR.
 
 The input files for general purpose, the hillslope, river and reservoir routines are explained below with details on parameter type, units, data structure including examples parameterisation files.
 
+<a name="table-4"></a>
 **Table 4:** Summary of model input parameters
 
 Type |	Model input parameter
@@ -1998,7 +1999,7 @@ Ashida, K. and Michiue, M. (1973): Studies on bed load transport rate in alluvia
 <a name=""></a>
 Ackers, P. and White, W.R. (1973): Sediment transport: a new approach and analysis. Proc. ASCE, Journal of the Hydraulics Division, Vol. 99, HY11, pp. 2041-2060.
 
-<a name=""></a>
+<a name="breuer-et-al-2003"></a>
 Breuer, L., Eckhardt, K., Frede, H.-G. (2003): Plant parameter values for models in temperate climates, Ecological Modelling, 169: 237-293.
 
 <a name="bronstert-et-al-1999"></a>
@@ -2007,10 +2008,10 @@ Bronstert, A., Güntner, A., Jaeger, A., Krol, M., and Krywkow, J. (1999): Groß
 <a name=""></a>
 Bronstert, A., Jaeger, A., Güntner, A., Hauschild, M., Döll, P., and Krol, M. (2000): Integrated modelling of water availability and water use in the semi-arid Northeast of Brazil, Physics and Chemistry of the Earth 25: 227-232.
 
-<a name=""></a>
+<a name="fao-1993"></a>
 FAO (1993): Global and national soils and terrain digital databases (SOTER). Procedures Manual. World Soil Resources Reports, No. 74., FAO (Food and Agriculture Organization of the United Nations), Rome, Italy.
 
-<a name=""></a>
+<a name="fao-2001"></a>
 FAO (2001): Global Soil and Terrain Database (WORLD-SOTER). FAO, AGL (Food and AgricultureOrganization of the United Nations, Land and Water Development Division), http://www.fao.org/ag/AGL/agll/soter.htm.
 
 <a name=""></a>
@@ -2049,7 +2050,7 @@ Güntner, A., Krol, M., Araujo, J.C., and Bronstert, A. (2004): Simple water bal
 <a name=""></a>
 IRTCES (1985): Lecture notes of the training course on reservoir sedimentation. International Research of Training Center on Erosion and Sedimentation, Sediment Research Laboratory of Tsinghua University, Beijing, China.
 
-<a name=""></a>
+<a name="krysanova-et-al-2000"></a>
 Krysanova, V., Wechsung, F., Arnold, J., Srinivasan, R., Williams, J. (2000): SWIM (Soil and Water Integrated Model), User Manual. PIK Report Nr. 69, pp 239.
 
 <a name=""></a>
@@ -2076,7 +2077,7 @@ Mueller, E. N., Batalla, R. J., Garcia, C., Bronstert, A. (2008): Modelling bedl
 <a name="mueller-et-al-2010"></a>
 Mueller, E.N., Güntner, A., Francke, T., Mamede, G. (2010): Modelling sediment export, retention and reservoir sedimentation in drylands with the WASA-SED model. Geosci Model Dev 3:275–291, doi:10.5194/gmd-3-275-2010, published on: http://www.geosci-model-dev.net/3/275/2010/.
 
-<a name=""></a>
+<a name="neitsch-et-al-2002"></a>
 Neitsch, S.L., Arnold, J.G., Kiniry, J.R., Williams, J.R., King, K.W. (2002): Soil and Water Assessment Tool. Theoretical Documentation, Version 2000. Published by Texas Water Resources Institute, TWRI Report TR-191.
 
 <a name=""></a>
