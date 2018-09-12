@@ -250,8 +250,9 @@ Reservoir	| Longitudinal profile of reservoir \[m], Cross-section profiles of re
 
 Four parameter files control the data input and output and some internal settings:
 
+<a name="do-dat"></a>
 ```do.dat``` <br>
-\[can be generated with The LUMP package, manual completing required\]
+\[can be generated with The LUMP package, manual completing required]
 
 The ```do.dat``` file is located in the folder WASA\Input and contains the main parameter specifications for the WASA-SED model. [Figure 1](#figure-1) displays an example file for the ```do.dat```. The first line of the do.dat contains the title. Line 2 and 3 specify the path for the location of WASA input and output folder. Relative paths are supported. The backslash “\” only works on Windows-platforms. The slash “/” is accepted on Windows and Unix/Linux systems. Make sure that both specified paths end with slash or backslash, respectively. Line 4 and 5 contain the start and the end year of the simulation, respectively. Line 6 and 7 contain the start and the end calendar month of the simulation, respectively. Optionally, the day of month for begin and end can be specified. Line 10 contains the number of sub-basins. The number in line 9 is given by the sum of the number of terrain components in each landscape-unit of each sub-basin (e.g. if the system has only two sub-basins, sub-basin A has 1 landscape unit with 3 terrain components, sub-basin B has 2 landscape units with 1 terrain component each, then the number of combinations is 5). Line 14 specifies if the reservoir module is switched on (.t.) or is switched off (.f.). The same issue for the calculations of networks of small reservoirs in line 15. Lines 16 – 19 allow customizing the way water and sediment is (re-)distributed within and among the TCs. Line 21 allows the setting of the simulation timestep (daily / hourly). This may become obsolete in future versions by setting the timestep directly in line 30. Line 24 allows specifying a correction factor for hydraulic conductivity to account for intra-daily rainfall intensities. Optionally, this factor can also be made a function of daily rainfall by specifying two more parameters (a and b) in the same line, so that kfkorr=kfkorr0\*(a\*1/daily_precip+b+1). In line 31 the erosion and sediment-transport routines may be switched on and off. Specify the number of grain size classes you want to model in line 32. Their limits must be specified in ```part_class.dat```, if more than one class is desired. Line 33 lets you choose the hillslope erosion model to be used in WASA. Currently, this parameter is disregarded, further options can be chosen in ```erosion.ctl```. Select the model for the river routing in line 34. Possible options are: (1) old WASA routing (daily resolution only, no sediment transport), (2) Muskingum and suspended sediment, (3) Muskingum and bedload transport. Choose the sediment model in the reservoir in line 35 among 4 sediment transport equations: (1) [Wu et al. (2000)](#wu-et-al-2000); (2) [Ashida and Michiue (1973)](#ashida-michiue-1973); (3) [Yang (1973,](#???) [1984)](#???); (4) [Ackers and White (1973)](#ackers-white-1973).
 
@@ -1597,7 +1598,7 @@ Beware: “day” counts the number of days in the respective simulation year, i
 
 **```gw_storage.stat```, ```intercept_storage.stat```, ```soil_moisture.stat``` and ```storage.stats```:**<br>
 These files are written at the end of each simulation year, thus allowing recommencing an aborted WASA run starting from the last simulation timestep. <br>
-Beware: all other output files are overwritten in this case. For file structure, see section **Input files**. ```storage.stats``` contains the overall summary of storages corresponding to the three files mentioned before.
+Beware: all other output files are overwritten in this case. For file structure, see section [Input data](#input-data). ```storage.stats``` contains the overall summary of storages corresponding to the three files mentioned before.
 
 ### Output of the river module
 The river routine calculates the water and sediment discharge in each river stretch. Currently, the output comprises the water discharge and storage values for each timestep, and the linear response function, when river routing scheme 1 is selected. The following files are generated as daily time series, if enabled and depending on the selected routing scheme:
@@ -1608,7 +1609,7 @@ Output file | Content
 ```River_storage.out``` | River storage volume in m<sup>3</sup>
 ```River_velocity.out``` | Flow velocity in m/s
 ```River_flowdepth.out```	| Flow depth in m
-```River_Flow_dailyaverage.out``` | Daily averaged  flow in m3/s
+```River_Flow_dailyaverage.out``` | Daily averaged  flow in m<sup>3</sup>/s
 ```River_Sediment_total.out``` | Suspended sediment in tons/timestep
 ```River_Sediment_Concentration.out``` | Suspended sediment conc. in g/l
 ```River_Sediment_total_dailyaverage.out``` | Daily averaged sediment flux in tons/h
@@ -1636,9 +1637,9 @@ Year  Day    dt   9          10             11
 
 Subasin-ID: Map-ID of all sub-basins in the second line of the file <br>
 Timestep: Timestep as specified in the ```do.dat``` in \[hours] <br>
-Time series: water discharge in river stretch in m3/s
+Time series: water discharge in river stretch in m<sup>3</sup>/s
 
-Example: After each time step, e.g. hourly, the discharge is given for each sub-basin, e.g. Sub-basin No. 9 has a discharge of 6.313 m3/s, Sub-basin No. 10 of 1.797 m3/s and Sub-basin No. 11 of 8.922 m3/s after 1 hours.
+Example: After each time step, e.g. hourly, the discharge is given for each sub-basin, e.g. Sub-basin No. 9 has a discharge of 6.313 m3/s, Sub-basin No. 10 of 1.797 m3/s and Sub-basin No. 11 of 8.922 m<sup>3</sup>/s after 1 hours.
 
 ### Output of the reservoir module
 
@@ -1693,16 +1694,16 @@ Subasin-ID: Map-ID of sub-basin <br>
 year: Year of simulation <br>
 day: Day of simulation <br>
 hour: Hour of simulation <br>
-inflow: Water inflow discharges into the sub-basin's reservoir \[m3/s] <br>
-intake: Water outflow discharges through water intake devices in the sub-basin's reservoir \[m3/s] <br>
-qbottom: Water outflow discharges through bottom outlets in the sub-basin's reservoir \[m3/s] <br>
-overflow: Water overflow discharges in the sub-basin's reservoir \[m3/s] <br>
-qout: Total outflow discharges in the sub-basin's reservoir \[m3/s] <br>
+inflow: Water inflow discharges into the sub-basin's reservoir \[m<sup>3</sup>/s] <br>
+intake: Water outflow discharges through water intake devices in the sub-basin's reservoir \[m<sup>3</sup>/s] <br>
+qbottom: Water outflow discharges through bottom outlets in the sub-basin's reservoir \[m<sup>3</sup>/s] <br>
+overflow: Water overflow discharges in the sub-basin's reservoir \[m<sup>3</sup>/s] <br>
+qout: Total outflow discharges in the sub-basin's reservoir \[m<sup>3</sup>/s] <br>
 elevation: Reservoir level in the sub-basin's reservoir \[m] <br>
-area: Reservoir area in the sub-basin's reservoir \[m2] <br>
-volume: Reservoir volume in the sub-basin's reservoir \[m3]
+area: Reservoir area in the sub-basin's reservoir \[m<sup>2</sup>] <br>
+volume: Reservoir volume in the sub-basin's reservoir \[m<sup>3</sup>]
 
-Example: After each time step, e.g. after one day, the reservoir of the sub-basin with the Map-ID 60 has a water inflow discharge of 55.04 m3/s, a water outflow discharge through the intake device of 6.12 m3/s, no water overflow discharge, no water outflow discharge through the bottom outlets, a total water outflow discharge of 6.12 m3/s, a water level of 440.86, a reservoir area of 5,255,332.50 m2 and a reservoir volume of 49,625,572.00 m3. Currently, the model generates an output file for each reservoir considered in the simulation (e.g. ```res_60_watbal.out``` referred to sub-basin with Map-ID 60)
+Example: After each time step, e.g. after one day, the reservoir of the sub-basin with the Map-ID 60 has a water inflow discharge of 55.04 m<sup>3</sup>/s, a water outflow discharge through the intake device of 6.12 m<sup>3</sup>/s, no water overflow discharge, no water outflow discharge through the bottom outlets, a total water outflow discharge of 6.12 m<sup>3</sup>/s, a water level of 440.86, a reservoir area of 5,255,332.50 m<sup>2</sup> and a reservoir volume of 49,625,572.00 m<sup>3</sup>. Currently, the model generates an output file for each reservoir considered in the simulation (e.g. ```res_60_watbal.out``` referred to sub-basin with Map-ID 60)
 
 **2)** ```res_”Map-ID”_vollost.out```
 
@@ -1717,11 +1718,11 @@ Subasin-ID: Map-ID of sub-basin <br>
 year: Year of simulation <br>
 day: Day of simulation <br>
 hour: Hour of simulation <br>
-deadvol: Dead volume in the sub-basin's reservoir \[m3] <br>
-alertvol: Alert volume in the sub-basin's reservoir \[m3] <br>
-storvap: Storage capacity in the sub-basin's reservoir \[m3]
+deadvol: Dead volume in the sub-basin's reservoir \[m<sup>3</sup>] <br>
+alertvol: Alert volume in the sub-basin's reservoir \[m<sup>3</sup>] <br>
+storvap: Storage capacity in the sub-basin's reservoir \[m<sup>3</sup>]
 
-Example: After each time step, e.g. after one day, the reservoir of the sub-basin with the Map-ID 60 has a dead volume of 4,795,484.24 m3, an alert volume of 45,171,678.11 m3, and a alert volume of 91,744,848.62 m3. Currently, the model generates an output file for each reservoir considered in the simulation (e.g. ```res_60_watbal.out``` referred to sub-basin with Map-ID 60).
+Example: After each time step, e.g. after one day, the reservoir of the sub-basin with the Map-ID 60 has a dead volume of 4,795,484.24 m<sup>3</sup>, an alert volume of 45,171,678.11 m<sup>3</sup>, and a alert volume of 91,744,848.62 m<sup>3</sup>. Currently, the model generates an output file for each reservoir considered in the simulation (e.g. ```res_60_watbal.out``` referred to sub-basin with Map-ID 60).
 
 **3)** ```res_”Map-ID”_cav.out```
 
@@ -1740,10 +1741,10 @@ year: Year of simulation <br>
 day: Day of simulation <br>
 hour: Hour of simulation <br>
 1st row: elevation	1st row: bed elevation values of the stage-area and stage-volume curves after sediment erosion/deposition in the sub-basin's reservoir \[m] <br>
-2nd row: res. area	2nd row: reservoir area values of the stage-area and stage-volume curves after sediment erosion/deposition in the sub-basin's reservoir \[m2] <br>
-3rd row: res. volume	3rd row: reservoir volume of the stage-area and stage-volume curves after sediment erosion/deposition in the sub-basin's reservoir \[m3]
+2nd row: res. area	2nd row: reservoir area values of the stage-area and stage-volume curves after sediment erosion/deposition in the sub-basin's reservoir \[m<sup>2</sup>] <br>
+3rd row: res. volume	3rd row: reservoir volume of the stage-area and stage-volume curves after sediment erosion/deposition in the sub-basin's reservoir \[m<sup>3</sup>]
 
-Example: After each time step, e.g. after one day, the reservoir of the sub-basin with the Map-ID 60 has 36 new points at the stage-area and stage-volume curves changed due to sediment erosion/deposition. The first row holds 36 values of water elevation at the stage-area-volume curve (413.34 m, 415.00 m, 416.00 m, etc). The second row holds 36 values of corresponding reservoir area (0.00 m2, 79,176.34 m2, 122,767.10 m2, etc). Finally, the third row holds 36 values of corresponding reservoir volume (0.00 m3, 35,021.39 m3, 110,657.75 m3, etc). Currently, the model generates an output file for each reservoir considered in the simulation (e.g. ```res_60_cav.out``` referred to sub-basin with Map-ID 60).
+Example: After each time step, e.g. after one day, the reservoir of the sub-basin with the Map-ID 60 has 36 new points at the stage-area and stage-volume curves changed due to sediment erosion/deposition. The first row holds 36 values of water elevation at the stage-area-volume curve (413.34 m, 415.00 m, 416.00 m, etc). The second row holds 36 values of corresponding reservoir area (0.00 m<sup>2</sup>, 79,176.34 m<sup>2</sup>, 122,767.10 m2, etc). Finally, the third row holds 36 values of corresponding reservoir volume (0.00 m<sup>3</sup>, 35,021.39 m<sup>3</sup>, 110,657.75 m<sup>3</sup>, etc). Currently, the model generates an output file for each reservoir considered in the simulation (e.g. ```res_60_cav.out``` referred to sub-basin with Map-ID 60).
 
 **4)** ```res_”Map-ID”_hydraul.out```
 
@@ -1763,14 +1764,14 @@ hour: Hour of simulation <br>
 section-ID: Map-ID of cross-section in the sub-basin's reservoir <br>
 depth_sec: Water depth of each cross section in the sub-basin's reservoir \[m] <br>
 watelev_sec: Water elevation of each cross section in the sub-basin's reservoir \[m] <br>
-area_sec: Wetted area of each cross section in the sub-basin's reservoir \[m2] <br>
+area_sec: Wetted area of each cross section in the sub-basin's reservoir \[m<sup>2</sup>] <br>
 topwidth_sec: Top width of each cross section in the sub-basin's reservoir \[m] <br>
 energslope_sec: Slope of energy-grade line of each cross section in the sub-basin's reservoir \[-] <br>
 hydrad_sec: Hydraulic radius of each cross section in the sub-basin's reservoir \[m] <br>
 meanvel_sec: Mean velocity of each cross section in the sub-basin's reservoir \[m/s] <br>
-discharge_sec: Discharge of each cross section in the sub-basin's reservoir \[m3/s]
+discharge_sec: Discharge of each cross section in the sub-basin's reservoir \[m<sup>3</sup>/s]
 
-Example: After each time step, e.g. after one day, the most upstream cross section (section 1) of the reservoir of the sub-basin with the Map-ID 60 has a water depth of 1.325 m, a water elevation of 448.635 m, a wetted area of 34.717 m2, a top width of 40.183 m, a slope of energy-grade line of 0.00192, a hydraulic radius of 0.858863 m, a mean velocity of 1.585346 m/s and a discharge of 55.038498 m3/s. Currently, the model generates an output file for each reservoir considered in the simulation (e.g. ```res_60_hydraul.out``` referred to sub-basin with Map-ID 60).
+Example: After each time step, e.g. after one day, the most upstream cross section (section 1) of the reservoir of the sub-basin with the Map-ID 60 has a water depth of 1.325 m, a water elevation of 448.635 m, a wetted area of 34.717 m2, a top width of 40.183 m, a slope of energy-grade line of 0.00192, a hydraulic radius of 0.858863 m, a mean velocity of 1.585346 m/s and a discharge of 55.038498 m<sup>3</sup>/s. Currently, the model generates an output file for each reservoir considered in the simulation (e.g. ```res_60_hydraul.out``` referred to sub-basin with Map-ID 60).
 
 **5)** ```res_”Map-ID”_sec”ID”_bedchange.out```
 
@@ -1848,6 +1849,7 @@ sedcomp_outflow: Effluent size distribution downstream the sub-basin's reservoir
 
 Example: After each time step, e.g. after one day, the reservoir of the sub-basin with the Map-ID 60 has the following effluent size distribution for the given sediment classes (e.g. three sediment classes): 0.999, 0.001, and 0.000. Currently, the model generates an output file for each reservoir considered in the simulation (e.g. ```res_60 _sedcomposition.out``` referred to sub-basin with Map-ID 60).
 
+<a name="lake-inflow-r-out"></a>
 **9)** ```lake_ inflow_r.out```
 
 ```
@@ -1862,9 +1864,9 @@ Year: Year of simulation <br>
 day: Day of simulation <br>
 hour: Hour of simulation <br>
 nbr. classes: Number of sediment size classes considered in the simulation <br>
-inflow_r: Water inflow discharges into the reservoir size classes \[m³/timestep]. Currently, the number of reservoir size classes can not be changed (total of five classes)
+inflow_r: Water inflow discharges into the reservoir size classes \[m<sup>3</sup>/timestep]. Currently, the number of reservoir size classes can not be changed (total of five classes)
 
-Example: After each time step, e.g. after one day, five values of water inflow discharges into the reservoir size classes are computed (5748.602 m³, 2409.138 m³, 31.014 m³, 0.000 m³ and 0.000 m³ within the timestep for the size classes 1 to 5, respectively). Results are displayed for the whole catchment after grouping them by reservoir size classes. The files 10 to 16 have the same structure, as shown by the file ```lake_ inflow_r.out``` (file 9).
+Example: After each time step, e.g. after one day, five values of water inflow discharges into the reservoir size classes are computed (5748.602 m<sup>3</sup>, 2409.138 m<sup>3</sup>, 31.014 m<sup>3</sup>, 0.000 m<sup>3</sup> and 0.000 m<sup>3</sup> within the timestep for the size classes 1 to 5, respectively). Results are displayed for the whole catchment after grouping them by reservoir size classes. The files 10 to 16 have the same structure, as shown by the file ```lake_ inflow_r.out``` (file 9).
 
 **17)** ```lake_ watbal.out```
 
@@ -1880,13 +1882,13 @@ Year, day, hour, totallakeinflow(m**3/timestep), totallakeoutflow(m**3/timestep
 Year: Year of simulation <br>
 day: Day of simulation <br>
 hour: Hour of simulation <br>
-totallakeinflow: Total water inflow discharge into all upstream reservoirs of the catchment \[m³/timestep] <br>
-totallakeoutflow: Total water outflow discharge from all upstream reservoirs of the catchment \[m³/timestep] <br>
-totallakeprecip: Total rainfall over all upstream reservoirs of the catchment \[m³/timestep] <br>
-totallakeevap: Total evaporation from all upstream reservoirs of the catchment \[m³/timestep] <br>
-lakevol: Total water volume stored in all upstream reservoirs of the catchment \[m³]
+totallakeinflow: Total water inflow discharge into all upstream reservoirs of the catchment \[m<sup>3</sup>/timestep] <br>
+totallakeoutflow: Total water outflow discharge from all upstream reservoirs of the catchment \[m<sup>3</sup>/timestep] <br>
+totallakeprecip: Total rainfall over all upstream reservoirs of the catchment \[m<sup>3</sup>/timestep] <br>
+totallakeevap: Total evaporation from all upstream reservoirs of the catchment \[m<sup>3</sup>/timestep] <br>
+lakevol: Total water volume stored in all upstream reservoirs of the catchment \[m<sup>3</sup>]
 
-Example: After each time step, e.g. after one day, a total water inflow discharge into all upstream reservoir of 3747.793 m³/timestep, no water outflow discharge, no rainfall over the reservoir areas, a total evaporation of 53.854 m³/timestep, and a total water storage of 38678.957 m³ in all upstream reservoirs. Results are displayed for the whole catchment without distinguishing between size classes.
+Example: After each time step, e.g. after one day, a total water inflow discharge into all upstream reservoir of 3747.793 m<sup>3</sup>/timestep, no water outflow discharge, no rainfall over the reservoir areas, a total evaporation of 53.854 m<sup>3</sup>/timestep, and a total water storage of 38678.957 m<sup>3</sup> in all upstream reservoirs. Results are displayed for the whole catchment without distinguishing between size classes.
 
 **18)** ```lake_ sedbal.out```
 
@@ -1929,7 +1931,7 @@ hour: Hour of simulation <br>
 nbr. classes: Number of sediment size classes considered in the simulation <br>
 lakeinflow: Water inflow discharges into the reservoir size classes. Currently, the number of reservoir size classes can not be changed (total of five classes)
 
-Example: After each time step, e.g. after one day, after one day, values of water inflow discharges into the reservoir size classes are computed for all sub-basins (e.g. for size class 1: 384.741 m³, 587.248 m³, 38.144 m³, and 17.718 m³ within the timestep, for sub-basins 57, 15, 20 and 60, respectively). Results are displayed for all sub-basins after grouping them by reservoir size classes. The files 20 to 25 have the same structure, as shown by the file ```lake_ inflow_r.out``` (file 9).
+Example: After each time step, e.g. after one day, after one day, values of water inflow discharges into the reservoir size classes are computed for all sub-basins (e.g. for size class 1: 384.741 m<sup>3</sup>, 587.248 m<sup>3</sup>, 38.144 m<sup>3</sup>, and 17.718 m<sup>3</sup> within the timestep, for sub-basins 57, 15, 20 and 60, respectively). Results are displayed for all sub-basins after grouping them by reservoir size classes. The files 20 to 25 have the same structure, as shown by the file [```lake_ inflow_r.out```](#lake-inflow-r-out) (file 9).
 
 **20)** ```lake_sizedistoutflow.out```
 
@@ -1947,7 +1949,7 @@ Year: Year of simulation <br>
 day: Day of simulation <br>
 hour: Hour of simulation <br>
 nbr. classes: Number of sediment size classes considered in the simulation <br>
-lakeinflow: Effluent size distribution at the sub-basin outlet after sediment routing through the reservoir cascade \[-].The total number of sediment size classes is previously specified in the file ```do.dat```.
+lakeinflow: Effluent size distribution at the sub-basin outlet after sediment routing through the reservoir cascade \[-].The total number of sediment size classes is previously specified in the file [```do.dat```](#do-dat).
 
 Example: After each time step, e.g. after one day, the sediment outflow discharge at the sub-basin outlet has the following effluent size distribution for the given sediment classes (e.g. three sediment classes): fifth column displays the results of grain size distribution for the sub-basin with Map-ID 57 (0.60, 0.30 and 0.10, for sediment classes 1 to 3, respectively). Results are displayed for all sub-basins without distinguishing between size classes. 
 
