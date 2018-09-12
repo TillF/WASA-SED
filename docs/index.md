@@ -55,6 +55,7 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
   * [Hillslope module](#hillslope-module)<br>
   * [River module](#river-module)<br>
   * [Reservoir module](#reservoir-module)<br>
+  * [Snow module](#snow-module)<br>
 - [Input data](#input-data)<br>
   * [General parameter and control files](#general-parameter-and-control-files)<br>
   * [Input files for the hillslope module](#input-files-for-the-hillslope-module)<br>
@@ -109,7 +110,7 @@ The following sections give some information on the computational background and
 
 ### Hillslope module
 
-The hillslope module comprises the modelling of the hydrological and sediment-transport processes. The hydrological modelling accounts for interception, evaporation, infiltration, surface and subsurface runoff, transpiration and ground water recharge. Details are given in [Güntner (2002](#guentner-2002), [Chapter 4](#output-data)). The main hydrological calculations are carried out in ```hymo_all.f90``` (for daily or hourly time steps). The subroutines that are called within ```hymo_all.f90``` are summarised in [Table 3](#table-3). The temporal sequence of hydrological process modelling is summarised in Güntner (p. 36-37).
+The hillslope module comprises the modelling of the hydrological and sediment-transport processes. The hydrological modelling accounts for interception, evaporation, infiltration, surface and subsurface runoff, transpiration and ground water recharge. Details are given in [Güntner (2002](#guentner-2002), Chapter 4). The main hydrological calculations are carried out in ```hymo_all.f90``` (for daily or hourly time steps). The subroutines that are called within ```hymo_all.f90``` are summarised in [Table 3](#table-3). The temporal sequence of hydrological process modelling is summarised in [Güntner](#??) (p. 36-37).
 
 <a name="table-3"></a>
 **Table 3:** Main subroutines of ```hymo_all.f90``` (hydrological subroutines)
@@ -146,7 +147,7 @@ terrain component
 
 ### River module
 
-The river routing of the original WASA model ([Güntner 2002](#guentner-2002)) bases on daily linear response functions ([Bronstert et al. 1999](#bronstert-et-al-1999) similar to a triangular unit hydrograph. Its implementation does not support output in hourly resolution (only daily is produced) and sediment transport. It was extended to include a spatially semi-distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network. The implemented water modelling approach is similar to the routing routines from the SWAT model (Soil Water Assessment Tool, [Neitsch et al. 2002](#neitsch-et-al-2002)) model and the SWIM model (Soil Water Integrated Modelling, [Krysanova et al. 2000](#krysanova-et-al-2000)). The new water routing is based on the Muskingum kinematic wave approximation. Suspended sediment transport and bedload is modelled using the transport capacity concept. The river module can be run with variable time steps. Transmission losses through riverbed infiltration and evaporation are accounted for. The main routing calculations as well as the initialisation and reading of the river input files are carried out in ```routing.f90```. The following sub-routines are called from ```routing.f90```:
+The river routing of the original WASA model ([Güntner 2002](#guentner-2002)) bases on daily linear response functions ([Bronstert et al. 1999](#bronstert-et-al-1999)) similar to a triangular unit hydrograph. Its implementation does not support output in hourly resolution (only daily is produced) and sediment transport. It was extended to include a spatially semi-distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network. The implemented water modelling approach is similar to the routing routines from the SWAT model (Soil Water Assessment Tool, [Neitsch et al. 2002](#neitsch-et-al-2002)) model and the SWIM model (Soil Water Integrated Modelling, [Krysanova et al. 2000](#krysanova-et-al-2000)). The new water routing is based on the Muskingum kinematic wave approximation. Suspended sediment transport and bedload is modelled using the transport capacity concept. The river module can be run with variable time steps. Transmission losses through riverbed infiltration and evaporation are accounted for. The main routing calculations as well as the initialisation and reading of the river input files are carried out in ```routing.f90```. The following sub-routines are called from ```routing.f90```:
 
 ```muskingum.f90```: contains the flow calculation using the Muskingum method
 1. Calculation of water volume in reach
@@ -224,13 +225,77 @@ In order to perform the simulation of sediment transport in reservoirs, four imp
 ```lake_routing.f90```: contains the calculation of level-pool routing for networks of small reservoirs
 1. Calculation of water routing for small reservoirs
 
+### Snow module
+
+The snow routine implemented into WASA-SED in the framework of this study is an optional module. Depending on the user’s needs it can be turned on or off. A corresponding logical parameter was included into the control file ```do.dat```. This control file contains the main parameter specifications for a model run. The logical parameter is called dosnow. If set to 1, the snow routine is active and all related
+calculations are performed. If set to 0, the snow routine remains inactive. 
+Output files can be generated for all state variables and mass and energy fluxes related to the snow routine. The specification, which output file is prepared, occurs in the control file ```outfiles.dat```. The filenames of the desired output files have to be added as keyword to activate their creation. A list of possible output files with corresponding keyword is given in [Table snow](#table-snow). The output is created TC-wise. For each time step, values for each TC of each LU get exported.
+
+<a name="table-snow"></a>
+**Table snow**: Keywords and descriptions optional outfiles related to the snow routine.
+Keyword | Description
+---|---
+snowEnergyCont | Snow energy content of snow cover \[kJ/m²]
+snowWaterEquiv | Snow water equivalent snow cover \[m]
+snowAlbedo | Snow albedo \[-]
+snowCover | Snow cover \[-]
+snowTemp | Snow temperature \[°C]
+surfTemp | Snow surface temperature \[°C]
+liquFrac | Fraction of liquid water \[-]
+fluxPrec | Precipitation flux \[m/s]
+fluxFlow | Melt water flux \[m/s]
+fluxSubl | Sublimation flux \[m/s]
+fluxNetS | Short-wave radiation balance \[W/m²]
+fluxNetL | Long-wave radiation balance \[W/m²]
+fluxSoil | Soil heat flux \[W/m²]
+fluxSens | Sensible heat flux \[W/m²]
+stoiPrec | Conversion factor mass and energy flux precipitation \[kJ/m3]
+stoiSubl | Conversion factor mass and energy flux sublimation \[kJ/m3]
+stoiFlow | Conversion factor mass and energy flux melt water \[kJ/m3]
+rateAlbe | Change rate snow albedo \[1/s]
+precipMod | Modified precipitation signal \[mm]
+cloudFrac | Cloud cover fraction \[-]
+radiMod | Radiation signal corrected for aspect and slope \[W/m²]
+temperaMod | Height-modified temperature signal \[°C]
+rel_elevation | Relative elevation of TC to mean sub-basin \[m]
+
+Furthermore, two logical parameter specified in the control file ```snow_params.ctl```, do_rad_corr and do_alt_corr, allow controlling, whether radiation correction for aspect and slope, and height-depended temperature modifications, respectively, are applied.
+
+```
+#WASA-control file for snow routines;
+a0	0.002	Empirical coefficient (m/s); linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1*WindSpeed
+a1	0.0008	Empirical coefficient (-)  ; linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1*WindSpeed
+kSatSnow	0.00004	Saturated hydraulic conductivity of snow (m/s)
+densDrySnow	450	Density of dry snow (kg/m³)
+specCapRet	0.05	Capill. retention volume as fraction of solid SWE (-)
+emissivitySnowMin	0.84	Minimum snow emissivity used for old snow (-)
+emissivitySnowMax	0.99	Maximum snow emissivity used for new snow (-)
+tempAir_crit	0.2	Threshold temperature for rain-/snowfall (°C)
+albedoMin	0.55	Minimum albedo used for old snow (-)
+albedoMax	0.88	Maximum albedo used for new snow (-)
+agingRate_tAirPos	0.00000111	Aging rate for air temperatures > 0 (1/s)
+agingRate_tAirNeg	0.000000462	Aging rate for air temperatures < 0 (1/s)
+soilDepth	0.1	Depth of interacting soil layer (m)
+soilDens	1300	Density of soil (kg/m3)
+soilSpecHeat	2.18	Spec. heat capacity of soil (kJ/kg/K)
+weightAirTemp	0.5	Weighting param. for air temp. (-) in 0...1
+lat	42.4	Latitude of centre of study area
+lon	0.55	Longitude of centre of study area
+do_rad_corr	.TRUE.	Modification of radiation with aspect and slope
+do_alt_corr	.TRUE.	Modification of temperature with altitude of LU
+tempLaps	-0.006	Temperature lapse rate for modification depending on elevation of TC (°C/m)
+tempAmplitude	8	Temperature amplitude to simulate daily cycle (°C])
+tempMaxOffset	2	Offset of daily temperature maximum from 12:00 (h)
+snowFracThresh	0.03	Threshold to determine when TC snow covered (m)
+```
+
 ## Input data
 
 The model runs as a Fortran console application for catchment from a few km² up to several 100,000 km²) on daily or hourly time steps. Climatic drivers are daily/hourly time series for precipitation, humidity, short-wave radiation and temperature. For model parameterisation, regional digital maps on soil associations, land-use and vegetation cover, a digital elevation model with a cell size of 100 metres (or smaller) and, optional, bathymetric surveys of the reservoirs are required. The soil, vegetation and terrain maps are processed with the LUMP tool (see above) to derive the spatial discretisation into soil-vegetation units, terrain components and landscape units. [Table 4](#table-4) summarises the input parameters for the climatic drivers and the hillslope, river and reservoir modules. The vegetation parameters may be derived with the comprehensive study of, for example, [Breuer et al. (2003)](#breuer-et-al-2003), the soil and erosion parameters with the data compilation of [FAO (1993,](#fao-1993) [2001)](#fao-2001), [Morgan (1995)](#morgan-1995), [Maidment (1993)](#maidment-1993) and [Antronico et al. (2005)](#antronico-et-al-2005).
 
 For a semi-automated discretisation of the model domain into landscape units and terrain components, the software tool LUMP (Landscape Unit Mapping Program) is available [(Francke et al. 2008)](#francke-et-al-2008). LUMP incorporates an algorithm that delineates areas with similar hillslope characteristics by retrieving homogeneous catenas with regard to e.g. hillslope shape, flow length and slope (provided by a digital elevation model), and additional properties such as for soil and land-use and optionally for specific model parameters such as leaf area index, albedo or soil aggregate stability. The LUMP tool is linked with the WASA-SED parameterisation procedure through a databank management tool, which allows to process and store digital soil, vegetation and topographical data in a coherent way and facilitates the generation of the required input files for the model. LUMP and further WASA-SED pre-processing tools have been transferred to the package lumpR for the free software environment for statistical computing and graphics R which is available from https://github.com/tpilz/lumpR.
 
-The input files for general purpose, the hillslope, river and reservoir routines are explained below with details on parameter type, units, data structure including examples parameterisation files.
+The input files for general purpose, the hillslope, river and reservoir routines are explained below with details on parameter type, units, data structure including examples of the parameterisation files.
 
 <a name="table-4"></a>
 **Table 4:** Summary of model input parameters
