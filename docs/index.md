@@ -233,6 +233,7 @@ Output files can be generated for all state variables and mass and energy fluxes
 
 <a name="table-snow"></a>
 **Table snow**: Keywords and descriptions optional outfiles related to the snow routine.
+
 Keyword | Description
 ---|---
 snowEnergyCont | Snow energy content of snow cover \[kJ/m²]
