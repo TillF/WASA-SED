@@ -55,22 +55,22 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
   * [Hillslope module](#hillslope-module)<br>
   * [River module](#river-module)<br>
   * [Reservoir module](#reservoir-module)<br>
-- [Input Data](#input-data)<br>
+- [Input data](#input-data)<br>
   * [General parameter and control files](#general-parameter-and-control-files)<br>
   * [Input files for the hillslope module](#input-files-for-the-hillslope-module)<br>
   * [Input files for the river module](#input-files-for-the-river-module)<br>
   * [Input files for the reservoir module](#input-files-for-the-reservoir-module)<br>
   * [Input of climate data](#input-of-climate-data)<br>
-- [Output Data](#output-data)<br>
+- [Output data](#output-data)<br>
   * [Output of the hillslope module](#output-of-the-hillslope-module)<br>
   * [Output of the river module](#output-of-the-river-module)<br>
   * [Output of the reservoir module](#output-of-the-reservoir-module)<br>
-- [Relevant Literature for the WASA-SED Model](#relevant-literature-for-the-wasa-sed-model)<br>
+- [Relevant literature for the WASA-SED model](#relevant-literature-for-the-wasa-sed-model)<br>
 - [References](#references)<br>
 
 ## Introduction
 
-The WASA-SED model simulates the runoff and erosion processes at the hillslope scale, the transport processes of suspended and bedload fluxes at the river scale and the retention and remobilisation processes of sediments in large reservoirs. The modelling tool enables the evaluation of management options both for sustainable land-use change scenarios to reduce erosion in the headwater catchments as well as adequate reservoir management options to lessen sedimentation in large reservoirs and reservoir networks. The model concept, its spatial discretisation and the numerical components of the hillslope, river and reservoir processes are summarised and current model applications are reviewed in [Mueller et al. (2010)](#mueller-et-al-2010). The hydrological routines of the model are based on the WASA model (Model for Water Availability in Semi-Arid environments), which was developed by [Güntner (2002)](#guentner-2002) and [Güntner and Bronstert (2002](#guentner-bronstert-2002), [2003a](#guentner-bronstert-2003a)) to enable the quantification of water availability in semi-arid regions. The WASA-SED model was developed within the joint Spanish-Brazilian-German research project SESAM (Sediment Export from Semi-Arid Catchments: Measurement and Modelling). The existing WASA model code has been extended to include sediment-transport routines for the three new conceptual levels of the WASA-SED model: the hillslope scale, river scale and the reservoir scale for the calculation of sedimentation. This documentation gives a short outline of the structure, computational routines and folder system of the WASA-SED code in [Chapter 2](#program-folders-and-structure), followed by a description of the input files for model parameterisation in [Chapter 3](#input-data) and output files for the hillslope, river and reservoir modules in [Chapter 4](#output-data).
+The WASA-SED model simulates the runoff and erosion processes at the hillslope scale, the transport processes of suspended and bedload fluxes at the river scale and the retention and remobilisation processes of sediments in large reservoirs. The modelling tool enables the evaluation of management options both for sustainable land-use change scenarios to reduce erosion in the headwater catchments as well as adequate reservoir management options to lessen sedimentation in large reservoirs and reservoir networks. The model concept, its spatial discretisation and the numerical components of the hillslope, river and reservoir processes are summarised and current model applications are reviewed in [Mueller et al. (2010)](#mueller-et-al-2010). The hydrological routines of the model are based on the WASA model (Model for Water Availability in Semi-Arid environments), which was developed by [Güntner (2002)](#guentner-2002) and [Güntner and Bronstert (2002](#guentner-bronstert-2002), [2003](#guentner-bronstert-2003)) to enable the quantification of water availability in semi-arid regions. The WASA-SED model was developed within the joint Spanish-Brazilian-German research project SESAM (Sediment Export from Semi-Arid Catchments: Measurement and Modelling). The existing WASA model code has been extended to include sediment-transport routines for the three new conceptual levels of the WASA-SED model: the hillslope scale, river scale and the reservoir scale for the calculation of sedimentation. This documentation gives a short outline of the structure, computational routines and folder system of the WASA-SED code in [Chapter 2](#program-folders-and-structure), followed by a description of the input files for model parameterisation in [Chapter 3](#input-data) and output files for the hillslope, river and reservoir modules in [Chapter 4](#output-data).
 
 ## Program folders and structure
 
@@ -224,11 +224,11 @@ In order to perform the simulation of sediment transport in reservoirs, four imp
 ```lake_routing.f90```: contains the calculation of level-pool routing for networks of small reservoirs
 1. Calculation of water routing for small reservoirs
 
-## Input Data
+## Input data
 
-The model runs as a Fortran console application for catchment from a few km² up to several 100,000 km²) on daily or hourly time steps. Climatic drivers are daily/hourly time series for precipitation, humidity, short-wave radiation and temperature. For model parameterisation, regional digital maps on soil associations, land-use and vegetation cover, a digital elevation model with a cell size of 100 metres (or smaller) and, optional, bathymetric surveys of the reservoirs are required. The soil, vegetation and terrain maps are processed with the LUMP tool (see above) to derive the spatial discretisation into soil-vegetation units, terrain components and landscape units. [Table 4](#table-4) summarises the input parameters for the climatic drivers and the hillslope, river and reservoir modules. The vegetation parameters may be derived with the comprehensive study of, for example, [Breuer et al. (2003)](#breuer-et-al-2003), the soil and erosion parameters with the data compilation of [FAO (1993,](#fao-1993) [2001)](#fao-2001), Morgan (1995), Maidment (1993) and Antronico et al. (2005).
+The model runs as a Fortran console application for catchment from a few km² up to several 100,000 km²) on daily or hourly time steps. Climatic drivers are daily/hourly time series for precipitation, humidity, short-wave radiation and temperature. For model parameterisation, regional digital maps on soil associations, land-use and vegetation cover, a digital elevation model with a cell size of 100 metres (or smaller) and, optional, bathymetric surveys of the reservoirs are required. The soil, vegetation and terrain maps are processed with the LUMP tool (see above) to derive the spatial discretisation into soil-vegetation units, terrain components and landscape units. [Table 4](#table-4) summarises the input parameters for the climatic drivers and the hillslope, river and reservoir modules. The vegetation parameters may be derived with the comprehensive study of, for example, [Breuer et al. (2003)](#breuer-et-al-2003), the soil and erosion parameters with the data compilation of [FAO (1993,](#fao-1993) [2001)](#fao-2001), [Morgan (1995)](#morgan-1995), [Maidment (1993)](#maidment-1993) and [Antronico et al. (2005)](#antronico-et-al-2005).
 
-For a semi-automated discretisation of the model domain into landscape units and terrain components, the software tool LUMP (Landscape Unit Mapping Program) is available (Francke et al. 2008). LUMP incorporates an algorithm that delineates areas with similar hillslope characteristics by retrieving homogeneous catenas with regard to e.g. hillslope shape, flow length and slope (provided by a digital elevation model), and additional properties such as for soil and land-use and optionally for specific model parameters such as leaf area index, albedo or soil aggregate stability. The LUMP tool is linked with the WASA-SED parameterisation procedure through a databank management tool, which allows to process and store digital soil, vegetation and topographical data in a coherent way and facilitates the generation of the required input files for the model. LUMP and further WASA-SED pre-processing tools have been transferred to the package lumpR for the free software environment for statistical computing and graphics R which is available from https://github.com/tpilz/lumpR.
+For a semi-automated discretisation of the model domain into landscape units and terrain components, the software tool LUMP (Landscape Unit Mapping Program) is available [(Francke et al. 2008)](#francke-et-al-2008). LUMP incorporates an algorithm that delineates areas with similar hillslope characteristics by retrieving homogeneous catenas with regard to e.g. hillslope shape, flow length and slope (provided by a digital elevation model), and additional properties such as for soil and land-use and optionally for specific model parameters such as leaf area index, albedo or soil aggregate stability. The LUMP tool is linked with the WASA-SED parameterisation procedure through a databank management tool, which allows to process and store digital soil, vegetation and topographical data in a coherent way and facilitates the generation of the required input files for the model. LUMP and further WASA-SED pre-processing tools have been transferred to the package lumpR for the free software environment for statistical computing and graphics R which is available from https://github.com/tpilz/lumpR.
 
 The input files for general purpose, the hillslope, river and reservoir routines are explained below with details on parameter type, units, data structure including examples parameterisation files.
 
@@ -253,7 +253,7 @@ Four parameter files control the data input and output and some internal setting
 ```do.dat``` <br>
 \[can be generated with The LUMP package, manual completing required\]
 
-The ```do.dat``` file is located in the folder WASA\Input and contains the main parameter specifications for the WASA-SED model. Figure 1 displays an example file for the ```do.dat```. The first line of the do.dat contains the title. Line 2 and 3 specify the path for the location of WASA input and output folder. Relative paths are supported. The backslash “\” only works on Windows-platforms. The slash “/” is accepted on Windows and Unix/Linux systems. Make sure that both specified paths end with slash or backslash, respectively. Line 4 and 5 contain the start and the end year of the simulation, respectively. Line 6 and 7 contain the start and the end calendar month of the simulation, respectively. Optionally, the day of month for begin and end can be specified. Line 10 contains the number of sub-basins. The number in line 9 is given by the sum of the number of terrain components in each landscape-unit of each sub-basin (e.g. if the system has only two sub-basins, sub-basin A has 1 landscape unit with 3 terrain components, sub-basin B has 2 landscape units with 1 terrain component each, then the number of combinations is 5). Line 14 specifies if the reservoir module is switched on (.t.) or is switched off (.f.). The same issue for the calculations of networks of small reservoirs in line 15. Lines 16 – 19 allow customizing the way water and sediment is (re-)distributed within and among the TCs. Line 21 allows the setting of the simulation timestep (daily / hourly). This may become obsolete in future versions by setting the timestep directly in line 30. Line 24 allows specifying a correction factor for hydraulic conductivity to account for intra-daily rainfall intensities. Optionally, this factor can also be made a function of daily rainfall by specifying two more parameters (a and b) in the same line, so that kfkorr=kfkorr0\*(a\*1/daily_precip+b+1). In line 31 the erosion and sediment-transport routines may be switched on and off. Specify the number of grain size classes you want to model in line 32. Their limits must be specified in ```part_class.dat```, if more than one class is desired. Line 33 lets you choose the hillslope erosion model to be used in WASA. Currently, this parameter is disregarded, further options can be chosen in ```erosion.ctl```. Select the model for the river routing in line 34. Possible options are: (1) old WASA routing (daily resolution only, no sediment transport), (2) Muskingum and suspended sediment, (3) Muskingum and bedload transport. Choose the sediment model in the reservoir in line 35 among 4 sediment transport equations: (1) Wu et al. (2000); (2) Ashida & Michiue (1973); (3) Yang (1973, 1984); (4) Ackers & White (1973).
+The ```do.dat``` file is located in the folder WASA\Input and contains the main parameter specifications for the WASA-SED model. [Figure 1](#figure-1) displays an example file for the ```do.dat```. The first line of the do.dat contains the title. Line 2 and 3 specify the path for the location of WASA input and output folder. Relative paths are supported. The backslash “\” only works on Windows-platforms. The slash “/” is accepted on Windows and Unix/Linux systems. Make sure that both specified paths end with slash or backslash, respectively. Line 4 and 5 contain the start and the end year of the simulation, respectively. Line 6 and 7 contain the start and the end calendar month of the simulation, respectively. Optionally, the day of month for begin and end can be specified. Line 10 contains the number of sub-basins. The number in line 9 is given by the sum of the number of terrain components in each landscape-unit of each sub-basin (e.g. if the system has only two sub-basins, sub-basin A has 1 landscape unit with 3 terrain components, sub-basin B has 2 landscape units with 1 terrain component each, then the number of combinations is 5). Line 14 specifies if the reservoir module is switched on (.t.) or is switched off (.f.). The same issue for the calculations of networks of small reservoirs in line 15. Lines 16 – 19 allow customizing the way water and sediment is (re-)distributed within and among the TCs. Line 21 allows the setting of the simulation timestep (daily / hourly). This may become obsolete in future versions by setting the timestep directly in line 30. Line 24 allows specifying a correction factor for hydraulic conductivity to account for intra-daily rainfall intensities. Optionally, this factor can also be made a function of daily rainfall by specifying two more parameters (a and b) in the same line, so that kfkorr=kfkorr0\*(a\*1/daily_precip+b+1). In line 31 the erosion and sediment-transport routines may be switched on and off. Specify the number of grain size classes you want to model in line 32. Their limits must be specified in ```part_class.dat```, if more than one class is desired. Line 33 lets you choose the hillslope erosion model to be used in WASA. Currently, this parameter is disregarded, further options can be chosen in ```erosion.ctl```. Select the model for the river routing in line 34. Possible options are: (1) old WASA routing (daily resolution only, no sediment transport), (2) Muskingum and suspended sediment, (3) Muskingum and bedload transport. Choose the sediment model in the reservoir in line 35 among 4 sediment transport equations: (1) [Wu et al. (2000)](#wu-et-al-2000); (2) [Ashida and Michiue (1973)](#ashida-michiue-1973); (3) [Yang (1973,](#???) [1984)](#???); (4) [Ackers and White (1973)](#ackers-white-1973).
 
 The optional lines 36 and 37 allow the saving/loading of state variables (i.e. groundwater, interception and soil storages) at the end/beginning of a model run (works only if ```svc.dat``` has been specified).
 
@@ -261,7 +261,7 @@ Line 36 may additionally contain a second logical variable (append_output), allo
 
 Line 37 may additionally contain a second logical variable (save_states_yearly), determining if the model states are saved (and overwritten) at the end of each simulation year. Default is .TRUE.
 
-
+<a name="figure-1"></a>
 ```
 Parameter specification for the WASA Model (SESAM-Project)
 ..\WASA\Input\Case_study\ 	Location of model platform
@@ -424,8 +424,9 @@ Example: The output files ```daily_actetranspiration.out``` and ```daily_qhorton
 
 ### Input files for the hillslope module
 
-The input files for the hillslope module are located in the folder ```Input/[case_study]/Hillslope``` and are summarised in **Table 5**.
+The input files for the hillslope module are located in the folder ```Input/[case_study]/Hillslope``` and are summarised in [Table 5](#table-5).
 
+<a name="table-5"></a>
 **Table 5:** Input data files for the hillslope component
 
 Parameter File |	Content
@@ -459,11 +460,11 @@ Parameter File |	Content
 
 <br>
 
-The spatial conceptualisation of the WASA model is explained in detail in Güntner (2002), and are only shortly summarised in this manual. The following spatial modelling units were identified (Güntner 2002, p. 33):
+The spatial conceptualisation of the WASA model is explained in detail in [Güntner (2002)](#guentner-2002), and are only shortly summarised in this manual. The following spatial modelling units were identified ([Güntner 2002](#guentner-2002), p. 33):
 
 -	*Sub-Basins:* ca. 50-1000 km3, topologically referenced, defined e.g. by the location of river gauging stations, or large reservoirs with a storage capacity of more than 50x106 m3 and the confluence of major rivers;
 
--	*Landscape units (LUs):* based on the LU concept (e.g. SOil and TERrain digital database, FAO, 1995), i.e. structure of the landscape according to geological, topographic and soil characteristics with similarity in major landform, general lithology, soil associations and toposequences, georeferenced;
+-	*Landscape units (LUs):* based on the LU concept (e.g. SOil and TERrain digital database, [FAO, 1995](#??)), i.e. structure of the landscape according to geological, topographic and soil characteristics with similarity in major landform, general lithology, soil associations and toposequences, georeferenced;
 
 -	*Terrain components (TCs):* fraction of area of a landscape unit with similarity in slope gradients, position within toposequence (highlands, slopes and valley bottoms), soil association;
 
@@ -474,7 +475,7 @@ The spatial conceptualisation of the WASA model is explained in detail in Güntn
 The model domain is divided into sub-basins; each sub-basin has an individual Map-ID. This Map-ID has to be a unique number; the employed numbering scheme does not have to be continuous (i.e. with three sub-basins, they do not have to be named Map-ID 1, 2 and 3, but could be named e.g. 100, 500, 877). The following paragraphs explain each of the input files in turns.
 
 **1)** ```hymo.dat```<br>
-\[can be generated with the LUMP package\]
+\[can be generated with the LUMP package]
 
 ```
 Specification of the sub-basins and their total number, type & areal fraction of LU units
@@ -502,7 +503,7 @@ Example: In ```do.dat```, it was specified that 10 sub-basins are simulated with
 Important: Any subbasin that is not listed in the file ```routing.dat``` will be ignored.
 
 **2)** ```soter.dat``` <br>
-\[can be generated with the LUMP package\]
+\[can be generated with the LUMP package]
 
 ```
 Specification of LU units										
@@ -523,7 +524,7 @@ length:			Mean  slope length in LU unit \[m]<br>
 meandep:		Mean maximum depth of soil zone \[mm]<br>
 maxdep:			Maximum depth of alluvial soil zone \[mm]<br>
 riverbed:		Depth of river bed below terrain component \[mm]<br>
-gw_flag:		Flag for LU unit \[0: no groundwater, 1: with groundwater\] <br>
+gw_flag:		Flag for LU unit \[0: no groundwater, 1: with groundwater] <br>
 gw_dist:			Initial depth of groundwater below surface \[mm] (ignored, unless gw_flag=99)<br>
 frgw_delay:		Storage coefficient for groundwater outflow \[day]<br>
 
@@ -662,7 +663,7 @@ fraction_rocky:	   	fraction of impermeable (rock) area in each terrain componen
 nbrSVC:	 Number of soil-vegetation components (SVCs) in current TC of  sub-basin<br>
 Soil-IDs(nbrSVC values): 	1<sup>st</sup> row of each block: corresponding soil-IDs as defined in ```soil.dat```<br>
 Vegetation-ID(nbrSVC values):	2<sup>nd</sup> row of each block: corresponding vegetation-ID as defined in ```vegetation.dat``` <br>
-fraction (nbrSVC values): Areal fraction of SVCs in current terrain component of current sub-basin [-]
+fraction (nbrSVC values): Areal fraction of SVCs in current terrain component of current sub-basin \[-]
 
 (\*each Sub-basin, LU, Terrain Component Unit has a block of data in three lines)<br>
 <sup>1</sup> fraction_rocky will probably become obsolete in future versions. If it is 0 for all TCs, the rocky fraction is determined from the fraction of soils that have with a coarse fraction of 1 in their topsoil (see ```soil.dat```). Please note that fraction_rocky and the fraction values are internally normalized to unity if the sum is greater than one. It is advisable, however, to respect this already during the pre-processing. The package lumpR is able to handle impervious areas.
@@ -688,8 +689,8 @@ Soil-ID[-],number(horizons)[-],res[Vol-],PWP[-],FK2.5[-],FK1.8[-],nFK[-],saturat
 
 \* the data must be all in one line
 
-Soil-ID:			ID of soil unit [-]<br>
-numb (*horizons*):	number of horizons in soil profile [-]<br>
+Soil-ID:			ID of soil unit \[-]<br>
+numb (*horizons*):	number of horizons in soil profile \[-]<br>
 res:		residual soil water content (horizons) \[Vol. fraction]<br>
 PWP:		water content at permanent wilting point (at 15000 cm suction) (*horizons*) \[Vol. fraction]<br>
 FK2.5:		field capacity (316 hPa / pF=2.6) (*horizons*) \[Vol. fraction] <br>
@@ -874,8 +875,7 @@ transp\_cap\_b:		empirical factor for computing suspended sediment transport cap
 
 This file and any of its entries are optional. If not present, default values are used (Application scale=0; Erosion equation=3, ri_05_coeffs = (a_i30=1.1630; b_i30=0.667981 for daily resolution;  a_i30=1; b_i30=1 for hourly resolution); transport_limit_mode=2, transp_cap_a=0.016111, transp_cap_b=1.707).
 
-**15)** ```gw_storage.stat, intercept_storage.stat, soil_moisture.stat, interflow_storage.stat, snow_storage.stat```
-
+**15)** ```gw_storage.stat, intercept_storage.stat, soil_moisture.stat, interflow_storage.stat, snow_storage.stat```<br>
 ```lake_volume.stat, river_storage.stat```<br>
 (optional)
 
@@ -941,7 +941,7 @@ Storage/<br>
 Watercontent<br>
 Area		\[ignored, for external analysis only]
 
-These files are optional. If not present, default values are used (currently, 100 % relative saturation for the soils, 0 for all others). These files are expected in the WASA-SED output directory. WASA overwrites them at the end of each simulation year. See also section **Output files**. Any existing files at the start of the simulation will be renamed to ```*.*_start```.
+These files are optional. If not present, default values are used (currently, 100 % relative saturation for the soils, 0 for all others). These files are expected in the WASA-SED output directory. WASA overwrites them at the end of each simulation year. See also section [Output data](#output-data). Any existing files at the start of the simulation will be renamed to ```*.*_start```.
 The structure of ```river_storage.stat``` depends on the routing option chosen (UHG or Muskingum, see examples above).
 
 **16)** ```frac_direct_gw.dat```<br>
@@ -991,7 +991,7 @@ This file allows specifying a sediment delivery ratio for selected LUs.
 
 Default value (for non-specified LUs) is 1. Check!
 
-If this correction factor is already specified for the TC-scale in ```terrain.dat```, the values in sdr_lu.dat are ignored. A row with an lu_id of -1 will set all unset LUs to the specified value.
+If this correction factor is already specified for the TC-scale in ```terrain.dat```, the values in ```sdr_lu.dat``` are ignored. A row with an lu_id of -1 will set all unset LUs to the specified value.
 
 Warning: Using SDR should be used without a transport capacity limitation, otherwise, deposition is considered twice.
 
@@ -1002,8 +1002,9 @@ This file contains a single value which will be used as static wind speed value 
 
 ### Input files for the river module
 
-The input files for the river module are located in the folder ```Input\\[case_study]\River``` and are summarised in Table 6. Three options are available for the river routing: routing scheme 1 comprises the original river routing using time response functions, routing scheme 2 uses the Muskingum routing and suspended sediment transport and routing scheme 3 uses the Muskingum routing and bedload transport. Routing schemes 2 and 3 enable a spatially distributed representation of river stretch characteristics. Sediment-transport calculations are only possible for routing schemes 2 and 3. The flow calculations are carried out in routing order, i.e. the river stretches which are located most upstream are calculated first. The routing order is specified in ```routing.dat``` (see WASA documentation, Mueller and Güntner 2005). The key model input parameters for water and sediment routing are stored in an input file called ```river.dat``` that assigns each sub-basin with a specific map ID a corresponding river stretch. The input file ```response.dat``` contains the time response parameters that were used for the original version of the WASA code (routing scheme 1).
+The input files for the river module are located in the folder ```Input\\[case_study]\River``` and are summarised in [Table 6](#table-6). Three options are available for the river routing: routing scheme 1 comprises the original river routing using time response functions, routing scheme 2 uses the Muskingum routing and suspended sediment transport and routing scheme 3 uses the Muskingum routing and bedload transport. Routing schemes 2 and 3 enable a spatially distributed representation of river stretch characteristics. Sediment-transport calculations are only possible for routing schemes 2 and 3. The flow calculations are carried out in routing order, i.e. the river stretches which are located most upstream are calculated first. The routing order is specified in ```routing.dat``` (see WASA documentation, [Mueller and Güntner 2005](#??)). The key model input parameters for water and sediment routing are stored in an input file called ```river.dat``` that assigns each sub-basin with a specific map ID a corresponding river stretch. The input file ```response.dat``` contains the time response parameters that were used for the original version of the WASA code (routing scheme 1).
 
+<a name="table-6"></a>
 **Table 6:** Input data files for the river component
 
 Parameter File | Content
@@ -1068,9 +1069,10 @@ msk_x: Muskingum X weighting coefficient \[-] <br>
 msk_k: Muskingum K storage time constant \[hours] <br>
 Q_Spring: Initial conditions for headwater reaches (minimum discharge) \[m3/s]
 
-Example: The river stretch at the sub-basin with the Map-ID of 1 has a bankful depth of 1 m, a width of 5 metres, a site ratio of 2, a bottom width of the floodplain of 100 m, a side ratio on the floodplains of 4, a channel slope of 0.006 (or 0.6 %), a length of 7.4 km, a Manning’s n of 0.02 and a Manning’s n in the floodplain of 0.05, a Ksat of 25 mm/h, an erodibility factor of 0.1, a cover factor of 1, a riverbedrock factor of 0, a baseflowalphafactor of 0.1 days, a Muskingum X coefficient of 0.2, a Muskingum K factor of 4 hours and an initial condition of 0.1 m3/s. The dimensions of the trapezoidal channels including the floodplains are depicted in Figure 2. The height of the wedge at the channel bottom (enables smooth transition of low flows) is fixed to 0.1 m.
+Example: The river stretch at the sub-basin with the Map-ID of 1 has a bankful depth of 1 m, a width of 5 metres, a site ratio of 2, a bottom width of the floodplain of 100 m, a side ratio on the floodplains of 4, a channel slope of 0.006 (or 0.6 %), a length of 7.4 km, a Manning’s n of 0.02 and a Manning’s n in the floodplain of 0.05, a Ksat of 25 mm/h, an erodibility factor of 0.1, a cover factor of 1, a riverbedrock factor of 0, a baseflowalphafactor of 0.1 days, a Muskingum X coefficient of 0.2, a Muskingum K factor of 4 hours and an initial condition of 0.1 m3/s. The dimensions of the trapezoidal channels including the floodplains are depicted in [Figure 2](#figure-2). The height of the wedge at the channel bottom (enables smooth transition of low flows) is fixed to 0.1 m.
  
-**Figure 2:** Trapezoidal channel dimension with floodplains
+ <a name="figure-2"></a>
+**Figure 2:** Trapezoidal channel dimension with floodplains.
 ![Trapezoidal channel dimension with floodplains](./Figure_2.svg)
 
 
@@ -1087,10 +1089,10 @@ Subasin-ID:	Map-ID of sub-basin<br>
 lag time: Lag time between runoff input to sub-basin and first runoff response at its outlet in \[days]<br>
 retention:	Retention specifies the maximum retention time in the sub-basin in \[days]
 
-Reference is midday, partial coverage of days is considered. Autochtonous runoff (riverflow generated inside a subbasin, not entering from upstream) is routed slightly different with zero lag time (triangular like this: /\\_; tL*=0, tR*=tL+tR).
+Reference is midday, partial coverage of days is considered. Autochtonous runoff (riverflow generated inside a subbasin, not entering from upstream) is routed slightly different with zero lag time (triangular like this: /\ \_; tL\*=0, tR\*=tL+tR).
 Example: The sub-basin with the Map-ID of 49 has a lag time of 0.5 days and a retention time of 2 days (i.e. its runoff will be delayed by 0.5 day, then stretched over another 2 days). The sub-basin with the Map-ID of 50 has a lag time of 1 day and a retention time of 1.5 days; etc.
 
-For a detailed description of the routing process and the linear response function, see Güntner (2002), p. 48 and Bronstert et al. (1999). The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs as was used in ```hymo.dat``` (due to computational reasons); otherwise an error message occurs.
+For a detailed description of the routing process and the linear response function, see [Güntner (2002)](#guentner-2002), p. 48 and [Bronstert et al. (1999)](#bronstert-et-al-1999). The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs as was used in ```hymo.dat``` (due to computational reasons); otherwise an error message occurs.
 
 **4)** ```bedload.dat```
 
@@ -1202,7 +1204,7 @@ fvol_over: Fraction of storage capacity that indicates the minimum storage volum
 damc, damd: Parameters of the spillway rating curve in the sub-basin’s reservoir (Qout=damc.Hvdamd) \[-]. Values of water height over the spillway and overflow discharges are expressed in m and m<sup>3</sup>/s, respectively <br>
 elevbottom: bottom outlet elevation of the sub-basin's reservoir \[m]. Currently not used, fill in dummy values.
 
-Example: At the outlet point of the sub-basin with the Map-ID 60, there is a reservoir with an initial minimum level of 413.30 m, a maximum water level of 447.67 m, an initial volume of 45,213,920 m³, an initial storage capacity of 91,795,660 m³, a target outflow discharge of 36 m³/s, a water withdrawal discharge to supply the water use sectors of 20 L/s, year of construction in 1980, an initial maximum area of 718.67 ha, an initial dead volume of 4,802,950 m³, an initial alert volume of 45,213,920 m³, an area-volume relationship with parameters dama and damb set to 20.935 and 0.716, respectively, an maximum outflow discharge through the bottom outlets of 146.84 m³, a percentage of storage capacity for the operation of bottom outlets of 100 % and a percentage of storage capacity for overflow discharge through radial gates of 80 %, a spillway rating curve with parameters damc and damd set to 300 and 1.5, respectively. Value of vol0 set to -999 means that at the beginning of the simulation period the water volume is 20 % of the storage capacity (Güntner, 2002). Value of damq_frac set to -999 means that the reservoir operation rule is affected by irrigation season. Thus, an additional file has to be provided, which gives the interannual variability of exploitation regime (see below the file ```operat_rule.dat```). Values of damflow may be replaced by measurements when providing the optional input file ```intake.dat``` (see file description). Value of fvol_bottom set to -999 means that an additional file must be provided with detailed information about the sediment management technique selected to routing sediment through the sub-basin’s reservoir (see below the file ```operat_bottom.dat```). The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs as was used in ```hymo.dat``` (due to computational reasons); otherwise, an error message occurs. Sub-basins without outlet reservoirs must not be entered in the file.
+Example: At the outlet point of the sub-basin with the Map-ID 60, there is a reservoir with an initial minimum level of 413.30 m, a maximum water level of 447.67 m, an initial volume of 45,213,920 m³, an initial storage capacity of 91,795,660 m³, a target outflow discharge of 36 m³/s, a water withdrawal discharge to supply the water use sectors of 20 L/s, year of construction in 1980, an initial maximum area of 718.67 ha, an initial dead volume of 4,802,950 m³, an initial alert volume of 45,213,920 m³, an area-volume relationship with parameters dama and damb set to 20.935 and 0.716, respectively, an maximum outflow discharge through the bottom outlets of 146.84 m³, a percentage of storage capacity for the operation of bottom outlets of 100 % and a percentage of storage capacity for overflow discharge through radial gates of 80 %, a spillway rating curve with parameters damc and damd set to 300 and 1.5, respectively. Value of vol0 set to -999 means that at the beginning of the simulation period the water volume is 20 % of the storage capacity [(Güntner, 2002)](#guentner-2002). Value of damq_frac set to -999 means that the reservoir operation rule is affected by irrigation season. Thus, an additional file has to be provided, which gives the interannual variability of exploitation regime (see below the file ```operat_rule.dat```). Values of damflow may be replaced by measurements when providing the optional input file ```intake.dat``` (see file description). Value of fvol_bottom set to -999 means that an additional file must be provided with detailed information about the sediment management technique selected to routing sediment through the sub-basin’s reservoir (see below the file ```operat_bottom.dat```). The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs as was used in ```hymo.dat``` (due to computational reasons); otherwise, an error message occurs. Sub-basins without outlet reservoirs must not be entered in the file.
 
 **2)** ```lateral_inflow.dat```
 
@@ -1296,10 +1298,10 @@ Subasin-ID, nbr. cross sec, 1st row: manning [s/m**1/3], 2nd row: distance [-]
 
 Subasin-ID: Map-ID of sub-basin <br>
 nbr cross sec: Number of cross sections in the sub-basin’s reservoir <br>
-1st row: manning	1st row of each sub-basin: Manning's roughness for each cross section \[m-1/3.s] <br>
+1st row: manning	1st row of each sub-basin: Manning's roughness for each cross section \[m<sup>-1/3</sup>/s] <br>
 2nd row: distance	2nd row of each sub-basin: distance to the downstream cross section \[m]
 
-Example: This optional file allows specifying hydraulic parameters for the calculation of water routing through the sub-basin’s reservoir. If this file is not found in the folder reservoir, a simplified modelling approach for the calculation of sediment balance is assumed. The reservoir located at the outlet point of the sub-basin with the Map-ID 60 has 53 cross sections. The first row holds 53 values of Manning's roughness (0.025 m-1/3.s, 0.035 m-1/3.s, 0.025 m-1/3.s, etc). The second row holds 50 values of distance from a given cross section to the downstream cross section (209.485 m, 199.605 m, 162.748 m, etc). The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs as was used in ```hymo.dat``` (due to computational reasons); otherwise an error message occurs. Sub-basins without outlet reservoirs or those without hydraulic data must not be entered in the file.
+Example: This optional file allows specifying hydraulic parameters for the calculation of water routing through the sub-basin’s reservoir. If this file is not found in the folder reservoir, a simplified modelling approach for the calculation of sediment balance is assumed. The reservoir located at the outlet point of the sub-basin with the Map-ID 60 has 53 cross sections. The first row holds 53 values of Manning's roughness (0.025 m<sup>-1/3</sup>/s, 0.035 m<sup>-1/3</sup>/s, 0.025 m<sup>-1/3</sup>/s, etc). The second row holds 50 values of distance from a given cross section to the downstream cross section (209.485 m, 199.605 m, 162.748 m, etc). The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs as was used in ```hymo.dat``` (due to computational reasons); otherwise an error message occurs. Sub-basins without outlet reservoirs or those without hydraulic data must not be entered in the file.
 
 **8)** ```sed.dat```
 
@@ -1540,7 +1542,7 @@ Extra-terrestrial shortwave radiation as monthly mean daily value in [W/m2]
 This file specifies the extraterrestrial incoming shortwave radiation at the top of the atmosphere \[W/m2]. The values are daily averages for each month from January until December (12 values). 
 
 
-## Output Data
+## Output data
 
 The location of the output folder is specified in the ```do.dat```. By default, the output folder is set to ```WASA\Output```. The parameter file ```parameter.out``` echoes the main parameter specification for the WASA model, as were given in the ```do.dat``` file.
 
@@ -1949,7 +1951,7 @@ lakeinflow: Effluent size distribution at the sub-basin outlet after sediment ro
 
 Example: After each time step, e.g. after one day, the sediment outflow discharge at the sub-basin outlet has the following effluent size distribution for the given sediment classes (e.g. three sediment classes): fifth column displays the results of grain size distribution for the sub-basin with Map-ID 57 (0.60, 0.30 and 0.10, for sediment classes 1 to 3, respectively). Results are displayed for all sub-basins without distinguishing between size classes. 
 
-## Relevant Literature for the WASA-SED Model
+## Relevant literature for the WASA-SED model
 
 **For WASA-SED:**
 
@@ -1987,17 +1989,17 @@ Pilz, T (2015): https://github.com/tpilz/LUMP.
 
 ## References
 
-<a name=""></a>
+<a name="ackers-white-1973"></a>
+Ackers, P. and White, W.R. (1973): Sediment transport: a new approach and analysis. Proc. ASCE, Journal of the Hydraulics Division, Vol. 99, HY11, pp. 2041-2060.
+
+<a name="antronico-et-al-2005"></a>
 Antronico, L., Coscarelli, R., Terranova, O. (2005): Surface erosion assessment in two Calabrian basins (southern Italy). In: R. J. Batalla and C. Garcia (Ed.), Geomorphological Processes and Human Impacts in River Basins, IAHS, pp. 16-22.
 
 <a name=""></a>
 Appel, K. (2006): Characterisation of badlands and modelling of soil erosion in the Isabena watershed, NE Spain. Unpublished MSc thesis, University of Potsdam, Germany.
 
-<a name=""></a>
+<a name="ashida-michiue-1973"></a>
 Ashida, K. and Michiue, M. (1973): Studies on bed load transport rate in alluvial streams. Trans. Japan Society of Civil Engineers, Vol. 4.
-
-<a name=""></a>
-Ackers, P. and White, W.R. (1973): Sediment transport: a new approach and analysis. Proc. ASCE, Journal of the Hydraulics Division, Vol. 99, HY11, pp. 2041-2060.
 
 <a name="breuer-et-al-2003"></a>
 Breuer, L., Eckhardt, K., Frede, H.-G. (2003): Plant parameter values for models in temperate climates, Ecological Modelling, 169: 237-293.
@@ -2017,7 +2019,7 @@ FAO (2001): Global Soil and Terrain Database (WORLD-SOTER). FAO, AGL (Food and A
 <a name=""></a>
 Francke, T., Parameterisation of the Esera/Isabena Catchment, Pre-Pyrenees, Spain. SESAM Working Report, http://brandenburg.geoecology.uni-potsdam.de/projekte/sesam/publications.php.
 
-<a name=""></a>
+<a name="francke-et-al-2008"></a>
 Francke, T., Güntner, A., Bronstert, A., Mamede, G., Müller, E. N. (2008): Automated catena-based discretisation of landscapes for the derivation of hydrological modelling units. International Journal of Geographical Information Science 22: 111-132.
 
 <a name=""></a>
@@ -2032,11 +2034,8 @@ Güntner, A. (2002): Large-scale hydrological modelling in the semi-arid North-E
 <a name="guentner-bronstert-2002"></a>
 Güntner, A., Bronstert, A. (2002): Process-based modelling of large-scale water availability in a semi-arid environment: process representation and scaling issues. In G.H. Schmitz, editor, Schriftenreihe des Institutes für Abfallwirtschaft und Altlasten, Universität Dresden, Dresden, pp. 46.
 
-<a name="guentner-bronstert-2003a"></a>
-Güntner, A., Bronstert, A. (2003a): Large-scale hydrological modeling of a semiarid environment: model development, validation and application, In T. Gaiser, M. Krol, H. Frischkorn, and J.C.Araujo, editors, Global change and regional impacts. Springer-Verlag, Berlin.
-
-<a name=""></a>
-Güntner, A., Bronstert, A. (2003b): Large-scale hydrological modelling in the semiarid Northeast of Brazil: aspects of model sensitivity and uncertainty, In E. Servat, W. Najem, C. Leduc, and A. Shakeel, editors, Hydrology of the Mediterranean and Semi-Arid Regions. IAHS-Publication 278.
+<a name="guentner-bronstert-2003"></a>
+Güntner, A., Bronstert, A. (2003): Large-scale hydrological modeling of a semiarid environment: model development, validation and application, In T. Gaiser, M. Krol, H. Frischkorn, and J.C.Araujo, editors, Global change and regional impacts. Springer-Verlag, Berlin.
 
 <a name=""></a>
 Güntner, A. (2003): Auswirkung von Klimaänderungen auf die Wasserverfügbarkeit in Trockengebieten - Ergebnisse und Unsicherheiten am Beispiel Nordost-Brasiliens. In H.-B.Kleeberg, editor, Hydrologische Wissenschaften - Fachgemeinschaft in der ATV-DVWK, pp. 205-214.
@@ -2056,7 +2055,7 @@ Krysanova, V., Wechsung, F., Arnold, J., Srinivasan, R., Williams, J. (2000): SW
 <a name=""></a>
 Medeiros, PHA., Güntner, A., Francke, T., Mamede, GL., De Araújo, JC. (2010): Modelling spatio-temporal patterns of sediment yield and connectivity in a semi-arid catchment with the WASA-SED model. Hydrological Sciences Journal 55:4, 636-648. (1)
 
-<a name=""></a>
+<a name="maidment-1993"></a>
 Maidment, D. R. (1993): Handbook of hydrology. MGraw-Hill, New York.
 
 <a name="mamede-2008"></a>
@@ -2065,7 +2064,7 @@ Mamede, G. (2008): Reservoir sedimentation in dryland catchments: Modelling and 
 <a name=""></a>
 Mamede, G.L., Bronstert, A., Araujo, J.C., Batalla, R. J., Güntner, A., Mueller, E. N., Francke, T. (2006): 1D Process-Based Modelling of Reservoir Sedimentation: a Case Study for the Barasona Reservoir in Spain. Proceedings of the International Conference on Fluvial Hydraulics, Lisbon, Vol. 2: 1585-1594.
 
-<a name=""></a>
+<a name="morgan-1995"></a>
 Morgan, R.P.C. (1995): Soil erosion and conservation Longman Group, UK Limited. 
 
 <a name="mueller-et-al-2009"></a>
@@ -2086,7 +2085,7 @@ Renard, K.G., Foster, G.R., Weesies, G.A., McCool, D.K., Yoder, D.C. (1997): Pre
 <a name="williams-1995"></a>
 Williams, J. (1995): The EPIC Model. In: Singh, V. P. (Eds.): Computer Models of Watershed Hydrology. Water Resources Publications, Highlands Ranch, CO., pp. 909-1000.
 
-<a name=""></a>
+<a name="wu-et-al-2000"></a>
 Wu, W., Wang, S.S.Y., Jia, Y. (2000): Nonuniform sediment transport in alluvial rivers. Journal of Hydraulic Research, Vol. 38, No. 6, pp 427-434.
 
 <a name=""></a>
