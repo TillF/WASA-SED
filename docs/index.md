@@ -1189,7 +1189,7 @@ damalert.: Initial alert volume of the sub-basin’s reservoir [10³ m³]. Value
 dama, damb:	Parameters of the area-volume relationship in the sub-basin’s reservoir (area=dama.Voldamb) [-]. Values of reservoir area and volume are expressed in m² and m³, respectively. damb should be > 0 and <= 1.
 qoutlet	Maximum outflow discharge released through the bottom outlets in the sub-basin’s reservoir [m³/s]. Contributes to qbottom in output file ```res_*_watbal.out```. Set to zero if less than damdead or less than fvol_bottom*storcap. <br>
 fvol_bottom: Fraction of storage capacity that indicates the minimum storage volume for sediment release through the bottom outlets of the sub-basin's reservoir [-]. Influences the actual value of qoutlet. <br>
-fvol_over: Fraction of storage capacity that indicates the minimum storage volume for water release through the spillway of the sub-basin's reservoir [-] <br>
+fvol_over: flag to simulate the retention of reservoir overflow during spillway operation [0 = without time delay; 1 = with time delay]
 damc, damd: Parameters of the spillway rating curve in the sub-basin’s reservoir (Qout=damc.Hvdamd) [-]. Values of water height over the spillway and overflow discharges are expressed in m and m³/s, respectively <br>
 elevbottom: bottom outlet elevation of the sub-basin's reservoir [m]. Currently not used, fill in dummy values.
 
