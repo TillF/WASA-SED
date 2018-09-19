@@ -66,8 +66,8 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
   * [Output of the hillslope module](#output-of-the-hillslope-module)<br>
   * [Output of the river module](#output-of-the-river-module)<br>
   * [Output of the reservoir module](#output-of-the-reservoir-module)<br>
-- [Relevant literature for the WASA-SED model](#relevant-literature-for-the-wasa-sed-model)<br>
 - [References](#references)<br>
+- [Further relevant literature for the WASA-SED model](#further-relevant-literature-for-the-wasa-sed-model)<br>
 
 ## Introduction
 
@@ -110,7 +110,7 @@ The following sections give some information on the computational background and
 
 ### Hillslope module
 
-The hillslope module comprises the modelling of the hydrological and sediment-transport processes. The hydrological modelling accounts for interception, evaporation, infiltration, surface and subsurface runoff, transpiration and ground water recharge. Details are given in [Güntner (2002](#guentner-2002), Chapter 4). The main hydrological calculations are carried out in ```hymo_all.f90``` (for daily or hourly time steps). The subroutines that are called within ```hymo_all.f90``` are summarised in [Table 3](#table-3). The temporal sequence of hydrological process modelling is summarised in [Güntner](#??) (p. 36-37).
+The hillslope module comprises the modelling of the hydrological and sediment-transport processes. The hydrological modelling accounts for interception, evaporation, infiltration, surface and subsurface runoff, transpiration and ground water recharge. Details are given in [Güntner (2002](#guentner-2002), Chapter 4). The main hydrological calculations are carried out in ```hymo_all.f90``` (for daily or hourly time steps). The subroutines that are called within ```hymo_all.f90``` are summarised in [Table 3](#table-3). The temporal sequence of hydrological process modelling is summarised in [Güntner (2002](#guentner-2002), p. 36-37).
 
 <a name="table-3"></a>
 **Table 3:** Main subroutines of ```hymo_all.f90``` (hydrological subroutines)
@@ -320,7 +320,7 @@ Four parameter files control the data input and output and some internal setting
 ```do.dat``` <br>
 \[can be generated with The LUMP package, manual completing required]
 
-The ```do.dat``` file is located in the folder WASA\Input and contains the main parameter specifications for the WASA-SED model. [Figure 1](#figure-1) displays an example file for the ```do.dat```. The first line of the ```do.dat``` contains the title. Line 2 and 3 specify the path for the location of WASA input and output folder. Relative paths are supported. The backslash “\” only works on Windows-platforms. The slash “/” is accepted on Windows and Unix/Linux systems. Make sure that both specified paths end with slash or backslash, respectively. Line 4 and 5 contain the start and the end year of the simulation, respectively. Line 6 and 7 contain the start and the end calendar month of the simulation, respectively. Optionally, the day of month for begin and end can be specified. Line 10 contains the number of sub-basins. The number in line 9 is given by the sum of the number of terrain components in each landscape-unit of each sub-basin (e.g. if the system has only two sub-basins, sub-basin A has 1 landscape unit with 3 terrain components, sub-basin B has 2 landscape units with 1 terrain component each, then the number of combinations is 5). Line 14 specifies if the reservoir module is switched on (.t.) or is switched off (.f.). The same issue for the calculations of networks of small reservoirs in line 15. Lines 16 – 19 allow customizing the way water and sediment is (re-)distributed within and among the TCs. Line 21 allows the setting of the simulation timestep (daily / hourly). This may become obsolete in future versions by setting the timestep directly in line 30. Line 24 allows specifying a correction factor for hydraulic conductivity to account for intra-daily rainfall intensities. Optionally, this factor can also be made a function of daily rainfall by specifying two more parameters (a and b) in the same line, so that kfkorr=kfkorr0\*(a\*1/daily_precip+b+1). In line 31 the erosion and sediment-transport routines may be switched on and off. Specify the number of grain size classes you want to model in line 32. Their limits must be specified in ```part_class.dat```, if more than one class is desired. Line 33 lets you choose the hillslope erosion model to be used in WASA. Currently, this parameter is disregarded, further options can be chosen in ```erosion.ctl```. Select the model for the river routing in line 34. Possible options are: (1) old WASA routing (daily resolution only, no sediment transport), (2) Muskingum and suspended sediment, (3) Muskingum and bedload transport. Choose the sediment model in the reservoir in line 35 among 4 sediment transport equations: (1) [Wu et al. (2000)](#wu-et-al-2000); (2) [Ashida and Michiue (1973)](#ashida-michiue-1973); (3) [Yang (1973,](#???) [1984)](#???); (4) [Ackers and White (1973)](#ackers-white-1973).
+The ```do.dat``` file is located in the folder WASA\Input and contains the main parameter specifications for the WASA-SED model. [Figure 1](#figure-1) displays an example file for the ```do.dat```. The first line of the ```do.dat``` contains the title. Line 2 and 3 specify the path for the location of WASA input and output folder. Relative paths are supported. The backslash “\” only works on Windows-platforms. The slash “/” is accepted on Windows and Unix/Linux systems. Make sure that both specified paths end with slash or backslash, respectively. Line 4 and 5 contain the start and the end year of the simulation, respectively. Line 6 and 7 contain the start and the end calendar month of the simulation, respectively. Optionally, the day of month for begin and end can be specified. Line 10 contains the number of sub-basins. The number in line 9 is given by the sum of the number of terrain components in each landscape-unit of each sub-basin (e.g. if the system has only two sub-basins, sub-basin A has 1 landscape unit with 3 terrain components, sub-basin B has 2 landscape units with 1 terrain component each, then the number of combinations is 5). Line 14 specifies if the reservoir module is switched on (.t.) or is switched off (.f.). The same issue for the calculations of networks of small reservoirs in line 15. Lines 16 – 19 allow customizing the way water and sediment is (re-)distributed within and among the TCs. Line 21 allows the setting of the simulation timestep (daily / hourly). This may become obsolete in future versions by setting the timestep directly in line 30. Line 24 allows specifying a correction factor for hydraulic conductivity to account for intra-daily rainfall intensities. Optionally, this factor can also be made a function of daily rainfall by specifying two more parameters (a and b) in the same line, so that kfkorr=kfkorr0\*(a\*1/daily_precip+b+1). In line 31 the erosion and sediment-transport routines may be switched on and off. Specify the number of grain size classes you want to model in line 32. Their limits must be specified in ```part_class.dat```, if more than one class is desired. Line 33 lets you choose the hillslope erosion model to be used in WASA. Currently, this parameter is disregarded, further options can be chosen in ```erosion.ctl```. Select the model for the river routing in line 34. Possible options are: (1) old WASA routing (daily resolution only, no sediment transport), (2) Muskingum and suspended sediment, (3) Muskingum and bedload transport. Choose the sediment model in the reservoir in line 35 among 4 sediment transport equations: (1) [Wu et al. (2000)](#wu-et-al-2000); (2) [Ashida and Michiue (1973)](#ashida-michiue-1973); (3) [Yang (1973,](#yang-1973) [1984)](#yang-1984); (4) [Ackers and White (1973)](#ackers-white-1973).
 
 The optional lines 36 and 37 allow the saving/loading of state variables (i.e. groundwater, interception and soil storages) at the end/beginning of a model run (works only if ```svc.dat``` has been specified).
 
@@ -531,7 +531,7 @@ The spatial conceptualisation of the WASA model is explained in detail in [Günt
 
 -	*Sub-Basins:* ca. 50-1000 km3, topologically referenced, defined e.g. by the location of river gauging stations, or large reservoirs with a storage capacity of more than 50x106 m3 and the confluence of major rivers;
 
--	*Landscape units (LUs):* based on the LU concept (e.g. SOil and TERrain digital database, [FAO, 1995](#??)), i.e. structure of the landscape according to geological, topographic and soil characteristics with similarity in major landform, general lithology, soil associations and toposequences, georeferenced;
+-	*Landscape units (LUs):* based on the LU concept (e.g. SOil and TERrain digital database, [FAO, 1993](#fao-1993)), i.e. structure of the landscape according to geological, topographic and soil characteristics with similarity in major landform, general lithology, soil associations and toposequences, georeferenced;
 
 -	*Terrain components (TCs):* fraction of area of a landscape unit with similarity in slope gradients, position within toposequence (highlands, slopes and valley bottoms), soil association;
 
@@ -1069,7 +1069,7 @@ This file contains a single value which will be used as static wind speed value 
 
 ### Input files for the river module
 
-The input files for the river module are located in the folder ```Input\\[case_study]\River``` and are summarised in [Table 6](#table-6). Three options are available for the river routing: routing scheme 1 comprises the original river routing using time response functions, routing scheme 2 uses the Muskingum routing and suspended sediment transport and routing scheme 3 uses the Muskingum routing and bedload transport. Routing schemes 2 and 3 enable a spatially distributed representation of river stretch characteristics. Sediment-transport calculations are only possible for routing schemes 2 and 3. The flow calculations are carried out in routing order, i.e. the river stretches which are located most upstream are calculated first. The routing order is specified in ```routing.dat``` (see WASA documentation, [Mueller and Güntner 2005](#??)). The key model input parameters for water and sediment routing are stored in an input file called ```river.dat``` that assigns each sub-basin with a specific map ID a corresponding river stretch. The input file ```response.dat``` contains the time response parameters that were used for the original version of the WASA code (routing scheme 1).
+The input files for the river module are located in the folder ```Input\\[case_study]\River``` and are summarised in [Table 6](#table-6). Three options are available for the river routing: routing scheme 1 comprises the original river routing using time response functions, routing scheme 2 uses the Muskingum routing and suspended sediment transport and routing scheme 3 uses the Muskingum routing and bedload transport. Routing schemes 2 and 3 enable a spatially distributed representation of river stretch characteristics. Sediment-transport calculations are only possible for routing schemes 2 and 3. The flow calculations are carried out in routing order, i.e. the river stretches which are located most upstream are calculated first. The routing order is specified in ```routing.dat```. The key model input parameters for water and sediment routing are stored in an input file called ```river.dat``` that assigns each sub-basin with a specific map ID a corresponding river stretch. The input file ```response.dat``` contains the time response parameters that were used for the original version of the WASA code (routing scheme 1).
 
 <a name="table-6"></a>
 **Table 6:** Input data files for the river component
@@ -2018,7 +2018,94 @@ lakeinflow: Effluent size distribution at the sub-basin outlet after sediment ro
 
 Example: After each time step, e.g. after one day, the sediment outflow discharge at the sub-basin outlet has the following effluent size distribution for the given sediment classes (e.g. three sediment classes): fifth column displays the results of grain size distribution for the sub-basin with Map-ID 57 (0.60, 0.30 and 0.10, for sediment classes 1 to 3, respectively). Results are displayed for all sub-basins without distinguishing between size classes. 
 
-## Relevant literature for the WASA-SED model
+## References
+
+<a name="ackers-white-1973"></a>
+Ackers, P. and White, W.R. (1973): Sediment transport: a new approach and analysis. Proc. ASCE, Journal of the Hydraulics Division, Vol. 99, HY11, pp. 2041-2060.
+
+<a name="antronico-et-al-2005"></a>
+Antronico, L., Coscarelli, R., Terranova, O. (2005): Surface erosion assessment in two Calabrian basins (southern Italy). In: R. J. Batalla and C. Garcia (Ed.), Geomorphological Processes and Human Impacts in River Basins, IAHS, pp. 16-22.
+
+<a name="ashida-michiue-1973"></a>
+Ashida, K. and Michiue, M. (1973): Studies on bed load transport rate in alluvial streams. Trans. Japan Society of Civil Engineers, Vol. 4.
+
+<a name="breuer-et-al-2003"></a>
+Breuer, L., Eckhardt, K., Frede, H.-G. (2003): Plant parameter values for models in temperate climates, Ecological Modelling, 169: 237-293.
+
+<a name="bronstert-et-al-1999"></a>
+Bronstert, A., Güntner, A., Jaeger, A., Krol, M., and Krywkow, J. (1999): Großräumige hydrologische Parameterisierung und Modellierung als Teil der integrierten Modellierung, pp. 31-40. In N. Fohrer and P. Döll, editors, Modellierung des Wasser- und Stofftransports in großen Einzugsgebieten. Kassel University Press, Kassel.
+
+<a name="fao-1993"></a>
+FAO (1993): Global and national soils and terrain digital databases (SOTER). Procedures Manual. World Soil Resources Reports, No. 74., FAO (Food and Agriculture Organization of the United Nations), Rome, Italy.
+
+<a name="fao-2001"></a>
+FAO (2001): Global Soil and Terrain Database (WORLD-SOTER). FAO, AGL (Food and AgricultureOrganization of the United Nations, Land and Water Development Division), http://www.fao.org/ag/AGL/agll/soter.htm.
+
+<a name="francke-et-al-2008"></a>
+Francke, T., Güntner, A., Bronstert, A., Mamede, G., Müller, E. N. (2008): Automated catena-based discretisation of landscapes for the derivation of hydrological modelling units. International Journal of Geographical Information Science 22: 111-132.
+
+<a name="francke-2009"></a>
+Francke, T. (2009): Measurement and Modelling of Water and Sediment Fluxes in Meso-Scale Dryland Catchments. PhD thesis, Universität Potsdam, Germany. http://opus.kobv.de/ubp/volltexte/2009/3152/. 
+
+<a name="guentner-2002"></a>
+Güntner, A. (2002): Large-scale hydrological modelling in the semi-arid North-East of Brazil. PIK-Report No. 77. Potsdam Institute for Climate Research, Germany (http://www.pik-potsdam.de/pik_web/ publications/pik_reports/reports/reports/pr.77/pr77.pdf).
+
+<a name="guentner-bronstert-2002"></a>
+Güntner, A., Bronstert, A. (2002): Process-based modelling of large-scale water availability in a semi-arid environment: process representation and scaling issues. In G.H. Schmitz, editor, Schriftenreihe des Institutes für Abfallwirtschaft und Altlasten, Universität Dresden, Dresden, pp. 46.
+
+<a name="guentner-bronstert-2003"></a>
+Güntner, A., Bronstert, A. (2003): Large-scale hydrological modeling of a semiarid environment: model development, validation and application, In T. Gaiser, M. Krol, H. Frischkorn, and J.C.Araujo, editors, Global change and regional impacts. Springer-Verlag, Berlin.
+
+<a name="guentner-bronstert-2004"></a>
+Güntner, A., Bronstert, A. (2004): Representation of landscape variability and lateral redistribution processes for large-scale hydrological modelling in semi-arid areas, Journal of Hydrology 297: 136-161.
+
+<a name="krysanova-et-al-2000"></a>
+Krysanova, V., Wechsung, F., Arnold, J., Srinivasan, R., Williams, J. (2000): SWIM (Soil and Water Integrated Model), User Manual. PIK Report Nr. 69, pp 239.
+
+<a name="maidment-1993"></a>
+Maidment, D. R. (1993): Handbook of hydrology. MGraw-Hill, New York.
+
+<a name="mamede-2008"></a>
+Mamede, G. (2008): Reservoir sedimentation in dryland catchments: Modelling and management. PhD thesis at the University of Potsdam, Germany, published on: https://publishup.uni-potsdam.de/opus4-ubp/files/1546/mamede_diss.pdf.
+
+<a name="morgan-1995"></a>
+Morgan, R.P.C. (1995): Soil erosion and conservation Longman Group, UK Limited. 
+
+<a name="mueller-et-al-2009"></a>
+Mueller, EN., Francke, T., Batalla, RJ., Bronstert, A. (2009): Modelling the effects of land-use change on runoff and sediment yield for a meso-scale catchment in the Southern Pyrenees. Catena 79:3, 288-296. (1)
+
+<a name="mueller-et-al-2008"></a>
+Mueller, E. N., Batalla, R. J., Garcia, C., Bronstert, A. (2008): Modelling bedload rates from fine grain-size patches during small floods in a gravel-bed river. J. of Hydr. Eng. in press.
+
+<a name="mueller-et-al-2010"></a>
+Mueller, E.N., Güntner, A., Francke, T., Mamede, G. (2010): Modelling sediment export, retention and reservoir sedimentation in drylands with the WASA-SED model. Geosci Model Dev 3:275–291, doi:10.5194/gmd-3-275-2010, published on: http://www.geosci-model-dev.net/3/275/2010/.
+
+<a name="neitsch-et-al-2002"></a>
+Neitsch, S.L., Arnold, J.G., Kiniry, J.R., Williams, J.R., King, K.W. (2002): Soil and Water Assessment Tool. Theoretical Documentation, Version 2000. Published by Texas Water Resources Institute, TWRI Report TR-191.
+
+<a name="williams-1995"></a>
+Williams, J. (1995): The EPIC Model. In: Singh, V. P. (Eds.): Computer Models of Watershed Hydrology. Water Resources Publications, Highlands Ranch, CO., pp. 909-1000.
+
+<a name="wu-et-al-2000"></a>
+Wu, W., Wang, S.S.Y., Jia, Y. (2000): Nonuniform sediment transport in alluvial rivers. Journal of Hydraulic Research, Vol. 38, No. 6, pp 427-434.
+
+<a name="yang-1973"></a>
+Yang, C.T. (1973): Incipient  motion  and  sediment transport.  Journal  of  the  Hydraulic  Division, ASCE, 99, no. HY 10, pp. 1679-1704. 
+
+<a name="yang-1984"></a>
+Yang, C.T. (1984): Unit stream power equation for gravel. Journal of Hydraulic Engineering, ASCE, 110 (12), pp. 1783-1797. 
+
+## Further relevant literature for the WASA-SED model
+
+Bronstert, A., Jaeger, A., Güntner, A., Hauschild, M., Döll, P., and Krol, M. (2000): Integrated modelling of water availability and water use in the semi-arid Northeast of Brazil, Physics and Chemistry of the Earth 25: 227-232.
+
+Mamede, G.L., Bronstert, A., Araujo, J.C., Batalla, R. J., Güntner, A., Mueller, E. N., Francke, T. (2006): 1D Process-Based Modelling of Reservoir Sedimentation: a Case Study for the Barasona Reservoir in Spain. Proceedings of the International Conference on Fluvial Hydraulics, Lisbon, Vol. 2: 1585-1594.
+
+Francke, T. (2005): LUMP package, Manual, Auxiliary software tool to generate the input files for the hillslope module of the WASa model, SESAM working reports on http://brandenburg.geoecology.uni-potsdam.de/projekte/sesam/publications.php.
+
+Güntner, A. (2003): Auswirkung von Klimaänderungen auf die Wasserverfügbarkeit in Trockengebieten - Ergebnisse und Unsicherheiten am Beispiel Nordost-Brasiliens. In H.-B.Kleeberg, editor, Hydrologische Wissenschaften - Fachgemeinschaft in der ATV-DVWK, pp. 205-214.
+
+Güntner, A., Krol, M., Araujo, J.C., Bronstert, A. (2004): Simple water balance modelling of surface reservoir systems in a large data-scarce semiarid region, Hydrological Sciences Journal 49: 901-918.
 
 **For WASA-SED:**
 
@@ -2026,15 +2113,18 @@ Mueller, EN., Guentner, A., Francke, T., Mamede, GL. (2010): Modelling sediment 
 
 Mamede, GL. (2008): Reservoir sedimentation in dryland catchments: Modelling and management. PhD thesis, Universität Potsdam, Germany. http://opus.kobv.de/ubp/volltexte/2008/1704/.
 
+
 **For WASA-SED parameterisations:**
 
 Appel, K. (2006): Characterisation of badlands and modelling of soil erosion in the Isabena watershed, NE Spain. Unpublished MSc thesis, University of Potsdam, Germany.
 
 Francke, T. (2009): Measurement and Modelling of Water and Sediment Fluxes in Meso-Scale Dryland Catchments. PhD thesis, Universität Potsdam, Germany. http://opus.kobv.de/ubp/volltexte/2009/3152/. 
 
+Francke, T., Parameterisation of the Esera/Isabena Catchment, Pre-Pyrenees, Spain. SESAM Working Report, http://brandenburg.geoecology.uni-potsdam.de/projekte/sesam/publications.php.
+
 Medeiros, PHA. (2009): Hydro-sedimentological processes and connectivity in a semiarid basin: modelling and validation in several scales. PhD thesis, Universidade Federal do Ceará, Brazil. http://www.teses.ufc.br/tde_busca/arquivo.php?codArquivo=4425.
 
-Medeiros, PHA., Guentner, A., Francke, T., Mamede, GL., De Araújo, JC. (2010): Modelling spatio-temporal patterns of sediment yield and connectivity in a semi-arid catchment with the WASA-SED model. Hydrological Sciences Journal 55:4, 636-648. (1)
+Medeiros, P.H.A., Guentner, A., Francke, T., Mamede, GL., De Araújo, JC. (2010): Modelling spatio-temporal patterns of sediment yield and connectivity in a semi-arid catchment with the WASA-SED model. Hydrological Sciences Journal 55:4, 636-648. (1)
 
 Mueller, EN., Francke, T., Batalla, RJ., Bronstert, A. (2009): Modelling the effects of land-use change on runoff and sediment yield for a meso-scale catchment in the Southern Pyrenees. Catena 79:3, 288-296. (1)
 
@@ -2053,107 +2143,3 @@ Francke, T., Güntner, A., Bronstert, A., Mamede, G., Müller, E. N. (2008): Aut
 **For LUMP package:**
 
 Pilz, T (2015): https://github.com/tpilz/LUMP.
-
-## References
-
-<a name="ackers-white-1973"></a>
-Ackers, P. and White, W.R. (1973): Sediment transport: a new approach and analysis. Proc. ASCE, Journal of the Hydraulics Division, Vol. 99, HY11, pp. 2041-2060.
-
-<a name="antronico-et-al-2005"></a>
-Antronico, L., Coscarelli, R., Terranova, O. (2005): Surface erosion assessment in two Calabrian basins (southern Italy). In: R. J. Batalla and C. Garcia (Ed.), Geomorphological Processes and Human Impacts in River Basins, IAHS, pp. 16-22.
-
-<a name=""></a>
-Appel, K. (2006): Characterisation of badlands and modelling of soil erosion in the Isabena watershed, NE Spain. Unpublished MSc thesis, University of Potsdam, Germany.
-
-<a name="ashida-michiue-1973"></a>
-Ashida, K. and Michiue, M. (1973): Studies on bed load transport rate in alluvial streams. Trans. Japan Society of Civil Engineers, Vol. 4.
-
-<a name="breuer-et-al-2003"></a>
-Breuer, L., Eckhardt, K., Frede, H.-G. (2003): Plant parameter values for models in temperate climates, Ecological Modelling, 169: 237-293.
-
-<a name="bronstert-et-al-1999"></a>
-Bronstert, A., Güntner, A., Jaeger, A., Krol, M., and Krywkow, J. (1999): Großräumige hydrologische Parameterisierung und Modellierung als Teil der integrierten Modellierung, pp. 31-40. In N. Fohrer and P. Döll, editors, Modellierung des Wasser- und Stofftransports in großen Einzugsgebieten. Kassel University Press, Kassel.
-
-<a name=""></a>
-Bronstert, A., Jaeger, A., Güntner, A., Hauschild, M., Döll, P., and Krol, M. (2000): Integrated modelling of water availability and water use in the semi-arid Northeast of Brazil, Physics and Chemistry of the Earth 25: 227-232.
-
-<a name="fao-1993"></a>
-FAO (1993): Global and national soils and terrain digital databases (SOTER). Procedures Manual. World Soil Resources Reports, No. 74., FAO (Food and Agriculture Organization of the United Nations), Rome, Italy.
-
-<a name="fao-2001"></a>
-FAO (2001): Global Soil and Terrain Database (WORLD-SOTER). FAO, AGL (Food and AgricultureOrganization of the United Nations, Land and Water Development Division), http://www.fao.org/ag/AGL/agll/soter.htm.
-
-<a name=""></a>
-Francke, T., Parameterisation of the Esera/Isabena Catchment, Pre-Pyrenees, Spain. SESAM Working Report, http://brandenburg.geoecology.uni-potsdam.de/projekte/sesam/publications.php.
-
-<a name="francke-et-al-2008"></a>
-Francke, T., Güntner, A., Bronstert, A., Mamede, G., Müller, E. N. (2008): Automated catena-based discretisation of landscapes for the derivation of hydrological modelling units. International Journal of Geographical Information Science 22: 111-132.
-
-<a name=""></a>
-Francke, T. (2005): LUMP package, Manual, Auxiliary software tool to generate the input files for the hillslope module of the WASa model, SESAM working reports on http://brandenburg.geoecology.uni-potsdam.de/projekte/sesam/publications.php.
-
-<a name="francke-2009"></a>
-Francke, T. (2009): Measurement and Modelling of Water and Sediment Fluxes in Meso-Scale Dryland Catchments. PhD thesis, Universität Potsdam, Germany. http://opus.kobv.de/ubp/volltexte/2009/3152/. 
-
-<a name="guentner-2002"></a>
-Güntner, A. (2002): Large-scale hydrological modelling in the semi-arid North-East of Brazil. PIK-Report No. 77. Potsdam Institute for Climate Research, Germany (http://www.pik-potsdam.de/pik_web/ publications/pik_reports/reports/reports/pr.77/pr77.pdf).
-
-<a name="guentner-bronstert-2002"></a>
-Güntner, A., Bronstert, A. (2002): Process-based modelling of large-scale water availability in a semi-arid environment: process representation and scaling issues. In G.H. Schmitz, editor, Schriftenreihe des Institutes für Abfallwirtschaft und Altlasten, Universität Dresden, Dresden, pp. 46.
-
-<a name="guentner-bronstert-2003"></a>
-Güntner, A., Bronstert, A. (2003): Large-scale hydrological modeling of a semiarid environment: model development, validation and application, In T. Gaiser, M. Krol, H. Frischkorn, and J.C.Araujo, editors, Global change and regional impacts. Springer-Verlag, Berlin.
-
-<a name=""></a>
-Güntner, A. (2003): Auswirkung von Klimaänderungen auf die Wasserverfügbarkeit in Trockengebieten - Ergebnisse und Unsicherheiten am Beispiel Nordost-Brasiliens. In H.-B.Kleeberg, editor, Hydrologische Wissenschaften - Fachgemeinschaft in der ATV-DVWK, pp. 205-214.
-
-<a name="guentner-bronstert-2004"></a>
-Güntner, A., Bronstert, A. (2004): Representation of landscape variability and lateral redistribution processes for large-scale hydrological modelling in semi-arid areas, Journal of Hydrology 297: 136-161.
-
-<a name=""></a>
-Güntner, A., Krol, M., Araujo, J.C., and Bronstert, A. (2004): Simple water balance modelling of surface reservoir systems in a large data-scarce semiarid region, Hydrological Sciences Journal 49: 901-918.
-
-<a name=""></a>
-IRTCES (1985): Lecture notes of the training course on reservoir sedimentation. International Research of Training Center on Erosion and Sedimentation, Sediment Research Laboratory of Tsinghua University, Beijing, China.
-
-<a name="krysanova-et-al-2000"></a>
-Krysanova, V., Wechsung, F., Arnold, J., Srinivasan, R., Williams, J. (2000): SWIM (Soil and Water Integrated Model), User Manual. PIK Report Nr. 69, pp 239.
-
-<a name=""></a>
-Medeiros, PHA., Güntner, A., Francke, T., Mamede, GL., De Araújo, JC. (2010): Modelling spatio-temporal patterns of sediment yield and connectivity in a semi-arid catchment with the WASA-SED model. Hydrological Sciences Journal 55:4, 636-648. (1)
-
-<a name="maidment-1993"></a>
-Maidment, D. R. (1993): Handbook of hydrology. MGraw-Hill, New York.
-
-<a name="mamede-2008"></a>
-Mamede, G. (2008): Reservoir sedimentation in dryland catchments: Modelling and management. PhD thesis at the University of Potsdam, Germany, published on: https://publishup.uni-potsdam.de/opus4-ubp/files/1546/mamede_diss.pdf.
-
-<a name=""></a>
-Mamede, G.L., Bronstert, A., Araujo, J.C., Batalla, R. J., Güntner, A., Mueller, E. N., Francke, T. (2006): 1D Process-Based Modelling of Reservoir Sedimentation: a Case Study for the Barasona Reservoir in Spain. Proceedings of the International Conference on Fluvial Hydraulics, Lisbon, Vol. 2: 1585-1594.
-
-<a name="morgan-1995"></a>
-Morgan, R.P.C. (1995): Soil erosion and conservation Longman Group, UK Limited. 
-
-<a name="mueller-et-al-2009"></a>
-Mueller, EN., Francke, T., Batalla, RJ., Bronstert, A. (2009): Modelling the effects of land-use change on runoff and sediment yield for a meso-scale catchment in the Southern Pyrenees. Catena 79:3, 288-296. (1)
-
-<a name="mueller-et-al-2008"></a>
-Mueller, E. N., Batalla, R. J., Garcia, C., Bronstert, A. (2008): Modelling bedload rates from fine grain-size patches during small floods in a gravel-bed river. J. of Hydr. Eng. in press.
-
-<a name="mueller-et-al-2010"></a>
-Mueller, E.N., Güntner, A., Francke, T., Mamede, G. (2010): Modelling sediment export, retention and reservoir sedimentation in drylands with the WASA-SED model. Geosci Model Dev 3:275–291, doi:10.5194/gmd-3-275-2010, published on: http://www.geosci-model-dev.net/3/275/2010/.
-
-<a name="neitsch-et-al-2002"></a>
-Neitsch, S.L., Arnold, J.G., Kiniry, J.R., Williams, J.R., King, K.W. (2002): Soil and Water Assessment Tool. Theoretical Documentation, Version 2000. Published by Texas Water Resources Institute, TWRI Report TR-191.
-
-<a name=""></a>
-Renard, K.G., Foster, G.R., Weesies, G.A., McCool, D.K., Yoder, D.C. (1997): Predicting soil loss by water: A guide to conservation planning with the Revised Universal Soil Loss Equation (RUSLE). U.S. Dep. of Agriculture, Agriculture Handbook 703.
-
-<a name="williams-1995"></a>
-Williams, J. (1995): The EPIC Model. In: Singh, V. P. (Eds.): Computer Models of Watershed Hydrology. Water Resources Publications, Highlands Ranch, CO., pp. 909-1000.
-
-<a name="wu-et-al-2000"></a>
-Wu, W., Wang, S.S.Y., Jia, Y. (2000): Nonuniform sediment transport in alluvial rivers. Journal of Hydraulic Research, Vol. 38, No. 6, pp 427-434.
-
-<a name=""></a>
-Yang, T.C., Simoes, F.J.M. (2002): User’s Manual for GSTARS3 (Generalized Sediment Transport model for Alluvial River Simulation version 3.0). U.S. Department of the Interior, Bureau of Reclamation, Technical Service Center, Denver, Colorado.
