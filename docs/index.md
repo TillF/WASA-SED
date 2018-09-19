@@ -55,7 +55,7 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
   [2.1 Hillslope module](#hillslope-module)<br>
   [2.2 River module](#river-module)<br>
   [2.3 Reservoir module](#reservoir-module)<br>
-  * [Snow module](#snow-module)<br>
+  [2.4 Snow module](#snow-module)<br>
 [3 Input data](#input-data)<br>
   [3.1 General parameter and control files](#general-parameter-and-control-files)<br>
   [3.2 Input files for the hillslope module](#input-files-for-the-hillslope-module)<br>
