@@ -50,24 +50,24 @@ Disclaimer:<br>
 The WASA-SED program is large and complex and extensive knowledge of its design, purpose, and limitations is required in order to apply it properly. The WASA-SED and its source code is freely available under a CC4 licence (“use as you wish, don’t blame us, give credit,…”). See license.txt.
 
 ## Table of Content
-- [Introduction](#introduction)<br>
-- [Program folders and structure](#program-folders-and-structure)<br>
-  * [Hillslope module](#hillslope-module)<br>
-  * [River module](#river-module)<br>
-  * [Reservoir module](#reservoir-module)<br>
+[1 Introduction](#introduction)<br>
+[2 Program folders and structure](#program-folders-and-structure)<br>
+  [2.1 Hillslope module](#hillslope-module)<br>
+  [2.2 River module](#river-module)<br>
+  [2.3 Reservoir module](#reservoir-module)<br>
   * [Snow module](#snow-module)<br>
-- [Input data](#input-data)<br>
-  * [General parameter and control files](#general-parameter-and-control-files)<br>
-  * [Input files for the hillslope module](#input-files-for-the-hillslope-module)<br>
-  * [Input files for the river module](#input-files-for-the-river-module)<br>
-  * [Input files for the reservoir module](#input-files-for-the-reservoir-module)<br>
-  * [Input of climate data](#input-of-climate-data)<br>
-- [Output data](#output-data)<br>
-  * [Output of the hillslope module](#output-of-the-hillslope-module)<br>
-  * [Output of the river module](#output-of-the-river-module)<br>
-  * [Output of the reservoir module](#output-of-the-reservoir-module)<br>
-- [References](#references)<br>
-- [Further relevant literature for the WASA-SED model](#further-relevant-literature-for-the-wasa-sed-model)<br>
+[3 Input data](#input-data)<br>
+  [3.1 General parameter and control files](#general-parameter-and-control-files)<br>
+  [3.2 Input files for the hillslope module](#input-files-for-the-hillslope-module)<br>
+  [3.3 Input files for the river module](#input-files-for-the-river-module)<br>
+  [3.4 Input files for the reservoir module](#input-files-for-the-reservoir-module)<br>
+  [3.5 Input of climate data](#input-of-climate-data)<br>
+[4 Output data](#output-data)<br>
+  [4.1 Output of the hillslope module](#output-of-the-hillslope-module)<br>
+  [4.2 Output of the river module](#output-of-the-river-module)<br>
+  [4.3 Output of the reservoir module](#output-of-the-reservoir-module)<br>
+[5 References](#references)<br>
+[6 Further relevant literature for the WASA-SED model](#further-relevant-literature-for-the-wasa-sed-model)<br>
 
 ## Introduction
 
