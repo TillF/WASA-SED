@@ -52,16 +52,16 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 ## Table of Content
 1 [Introduction](#introduction)<br>
 2 [Program folders and structure](#program-folders-and-structure)<br>
-  2.1 [Hillslope module](#hillslope-module)<br>
-  2.2 [River module](#river-module)<br>
-  [2.3  Reservoir module](#reservoir-module)<br>
-  [2.4  Snow module](#snow-module)<br>
+    2.1 [Hillslope module](#hillslope-module)<br>
+    2.2 [River module](#river-module)<br>
+    [2.3 Reservoir module](#reservoir-module)<br>
+    [2.4 Snow module](#snow-module)<br>
 3. [Input data](#input-data)<br>
-  [3.1  General parameter and control files](#general-parameter-and-control-files)<br>
-  [3.2  Input files for the hillslope module](#input-files-for-the-hillslope-module)<br>
-  [3.3 Input files for the river module](#input-files-for-the-river-module)<br>
-  [3.4 Input files for the reservoir module](#input-files-for-the-reservoir-module)<br>
-  [3.5 Input of climate data](#input-of-climate-data)<br>
+    3.1 [General parameter and control files](#general-parameter-and-control-files)<br>
+    [3.2  Input files for the hillslope module](#input-files-for-the-hillslope-module)<br>
+    [3.3 Input files for the river module](#input-files-for-the-river-module)<br>
+    [3.4 Input files for the reservoir module](#input-files-for-the-reservoir-module)<br>
+    [3.5 Input of climate data](#input-of-climate-data)<br>
 [4 Output data](#output-data)<br>
   [4.1 Output of the hillslope module](#output-of-the-hillslope-module)<br>
   [4.2 Output of the river module](#output-of-the-river-module)<br>
