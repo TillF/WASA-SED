@@ -1,3 +1,71 @@
+noch einzufügen:
+
+### Snow module
+
+The snow routine implemented into WASA-SED in the framework of this study is an optional module. Depending on the user’s needs it can be turned on or off. A corresponding logical parameter was included into the control file ```do.dat```. This control file contains the main parameter specifications for a model run. The logical parameter is called dosnow. If set to 1, the snow routine is active and all related
+calculations are performed. If set to 0, the snow routine remains inactive. 
+Output files can be generated for all state variables and mass and energy fluxes related to the snow routine. The specification, which output file is prepared, occurs in the control file ```outfiles.dat```. The filenames of the desired output files have to be added as keyword to activate their creation. A list of possible output files with corresponding keyword is given in [Table snow](#table-snow). The output is created TC-wise. For each time step, values for each TC of each LU get exported.
+
+<a name="table-snow"></a>
+**Table snow**: Keywords and descriptions optional outfiles related to the snow routine.
+
+Keyword | Description
+---|---
+snowEnergyCont | Snow energy content of snow cover \[kJ/m²]
+snowWaterEquiv | Snow water equivalent snow cover \[m]
+snowAlbedo | Snow albedo \[-]
+snowCover | Snow cover \[-]
+snowTemp | Snow temperature \[°C]
+surfTemp | Snow surface temperature \[°C]
+liquFrac | Fraction of liquid water \[-]
+fluxPrec | Precipitation flux \[m/s]
+fluxFlow | Melt water flux \[m/s]
+fluxSubl | Sublimation flux \[m/s]
+fluxNetS | Short-wave radiation balance \[W/m²]
+fluxNetL | Long-wave radiation balance \[W/m²]
+fluxSoil | Soil heat flux \[W/m²]
+fluxSens | Sensible heat flux \[W/m²]
+stoiPrec | Conversion factor mass and energy flux precipitation \[kJ/m3]
+stoiSubl | Conversion factor mass and energy flux sublimation \[kJ/m3]
+stoiFlow | Conversion factor mass and energy flux melt water \[kJ/m3]
+rateAlbe | Change rate snow albedo \[1/s]
+precipMod | Modified precipitation signal \[mm]
+cloudFrac | Cloud cover fraction \[-]
+radiMod | Radiation signal corrected for aspect and slope \[W/m²]
+temperaMod | Height-modified temperature signal \[°C]
+rel_elevation | Relative elevation of TC to mean sub-basin \[m]
+
+Furthermore, two logical parameter specified in the control file ```snow_params.ctl```, do_rad_corr and do_alt_corr, allow controlling, whether radiation correction for aspect and slope, and height-depended temperature modifications, respectively, are applied.
+
+```snow_params.ctl:```
+```
+#WASA-control file for snow routines;
+a0	0.002	Empirical coefficient (m/s); linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1*WindSpeed
+a1	0.0008	Empirical coefficient (-)  ; linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1*WindSpeed
+kSatSnow	0.00004	Saturated hydraulic conductivity of snow (m/s)
+densDrySnow	450	Density of dry snow (kg/m³)
+specCapRet	0.05	Capill. retention volume as fraction of solid SWE (-)
+emissivitySnowMin	0.84	Minimum snow emissivity used for old snow (-)
+emissivitySnowMax	0.99	Maximum snow emissivity used for new snow (-)
+tempAir_crit	0.2	Threshold temperature for rain-/snowfall (°C)
+albedoMin	0.55	Minimum albedo used for old snow (-)
+albedoMax	0.88	Maximum albedo used for new snow (-)
+agingRate_tAirPos	0.00000111	Aging rate for air temperatures > 0 (1/s)
+agingRate_tAirNeg	0.000000462	Aging rate for air temperatures < 0 (1/s)
+soilDepth	0.1	Depth of interacting soil layer (m)
+soilDens	1300	Density of soil (kg/m3)
+soilSpecHeat	2.18	Spec. heat capacity of soil (kJ/kg/K)
+weightAirTemp	0.5	Weighting param. for air temp. (-) in 0...1
+lat	42.4	Latitude of centre of study area
+lon	0.55	Longitude of centre of study area
+do_rad_corr	.TRUE.	Modification of radiation with aspect and slope
+do_alt_corr	.TRUE.	Modification of temperature with altitude of LU
+tempLaps	-0.006	Temperature lapse rate for modification depending on elevation of TC (°C/m)
+tempAmplitude	8	Temperature amplitude to simulate daily cycle (°C])
+tempMaxOffset	2	Offset of daily temperature maximum from 12:00 (h)
+snowFracThresh	0.03	Threshold to determine when TC snow covered (m)
+```
+
 # WASA-SED
 
 # User Manual
@@ -69,7 +137,6 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 - [5 References](#5-references)<br>
 - [6 Further relevant literature for the WASA-SED model](#6-further-relevant-literature-for-the-wasa-sed-model)<br>
 
-\[[Table of contents](#toc)]
 ## 1 Introduction
 
 The WASA-SED model simulates the runoff and erosion processes at the hillslope scale, the transport processes of suspended and bedload fluxes at the river scale and the retention and remobilisation processes of sediments in large reservoirs. The modelling tool enables the evaluation of management options both for sustainable land-use change scenarios to reduce erosion in the headwater catchments as well as adequate reservoir management options to lessen sedimentation in large reservoirs and reservoir networks. The model concept, its spatial discretisation and the numerical components of the hillslope, river and reservoir processes are summarised and current model applications are reviewed in [Mueller et al. (2010)](#mueller-et-al-2010). The hydrological routines of the model are based on the WASA model (Model for Water Availability in Semi-Arid environments), which was developed by [Güntner (2002)](#guentner-2002) and [Güntner and Bronstert (2002,](#guentner-bronstert-2002) [2003)](#guentner-bronstert-2003) to enable the quantification of water availability in semi-arid regions. The WASA-SED model was developed within the joint Spanish-Brazilian-German research project SESAM (Sediment Export from Semi-Arid Catchments: Measurement and Modelling). The existing WASA model code has been extended to include sediment-transport routines for the three new conceptual levels of the WASA-SED model: the hillslope scale, river scale and the reservoir scale for the calculation of sedimentation. This documentation gives a short outline of the structure, computational routines and folder system of the WASA-SED code in [Chapter 2](#program-folders-and-structure), followed by a description of the input files for model parameterisation in [Chapter 3](#input-data) and output files for the hillslope, river and reservoir modules in [Chapter 4](#output-data).
@@ -226,71 +293,6 @@ In order to perform the simulation of sediment transport in reservoirs, four imp
 4. Calculation of effluent grain size distribution in small reservoirs
 ```lake_routing.f90```: contains the calculation of level-pool routing for networks of small reservoirs
 1. Calculation of water routing for small reservoirs
-
-### Snow module
-
-The snow routine implemented into WASA-SED in the framework of this study is an optional module. Depending on the user’s needs it can be turned on or off. A corresponding logical parameter was included into the control file ```do.dat```. This control file contains the main parameter specifications for a model run. The logical parameter is called dosnow. If set to 1, the snow routine is active and all related
-calculations are performed. If set to 0, the snow routine remains inactive. 
-Output files can be generated for all state variables and mass and energy fluxes related to the snow routine. The specification, which output file is prepared, occurs in the control file ```outfiles.dat```. The filenames of the desired output files have to be added as keyword to activate their creation. A list of possible output files with corresponding keyword is given in [Table snow](#table-snow). The output is created TC-wise. For each time step, values for each TC of each LU get exported.
-
-<a name="table-snow"></a>
-**Table snow**: Keywords and descriptions optional outfiles related to the snow routine.
-
-Keyword | Description
----|---
-snowEnergyCont | Snow energy content of snow cover \[kJ/m²]
-snowWaterEquiv | Snow water equivalent snow cover \[m]
-snowAlbedo | Snow albedo \[-]
-snowCover | Snow cover \[-]
-snowTemp | Snow temperature \[°C]
-surfTemp | Snow surface temperature \[°C]
-liquFrac | Fraction of liquid water \[-]
-fluxPrec | Precipitation flux \[m/s]
-fluxFlow | Melt water flux \[m/s]
-fluxSubl | Sublimation flux \[m/s]
-fluxNetS | Short-wave radiation balance \[W/m²]
-fluxNetL | Long-wave radiation balance \[W/m²]
-fluxSoil | Soil heat flux \[W/m²]
-fluxSens | Sensible heat flux \[W/m²]
-stoiPrec | Conversion factor mass and energy flux precipitation \[kJ/m3]
-stoiSubl | Conversion factor mass and energy flux sublimation \[kJ/m3]
-stoiFlow | Conversion factor mass and energy flux melt water \[kJ/m3]
-rateAlbe | Change rate snow albedo \[1/s]
-precipMod | Modified precipitation signal \[mm]
-cloudFrac | Cloud cover fraction \[-]
-radiMod | Radiation signal corrected for aspect and slope \[W/m²]
-temperaMod | Height-modified temperature signal \[°C]
-rel_elevation | Relative elevation of TC to mean sub-basin \[m]
-
-Furthermore, two logical parameter specified in the control file ```snow_params.ctl```, do_rad_corr and do_alt_corr, allow controlling, whether radiation correction for aspect and slope, and height-depended temperature modifications, respectively, are applied.
-
-```
-#WASA-control file for snow routines;
-a0	0.002	Empirical coefficient (m/s); linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1*WindSpeed
-a1	0.0008	Empirical coefficient (-)  ; linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1*WindSpeed
-kSatSnow	0.00004	Saturated hydraulic conductivity of snow (m/s)
-densDrySnow	450	Density of dry snow (kg/m³)
-specCapRet	0.05	Capill. retention volume as fraction of solid SWE (-)
-emissivitySnowMin	0.84	Minimum snow emissivity used for old snow (-)
-emissivitySnowMax	0.99	Maximum snow emissivity used for new snow (-)
-tempAir_crit	0.2	Threshold temperature for rain-/snowfall (°C)
-albedoMin	0.55	Minimum albedo used for old snow (-)
-albedoMax	0.88	Maximum albedo used for new snow (-)
-agingRate_tAirPos	0.00000111	Aging rate for air temperatures > 0 (1/s)
-agingRate_tAirNeg	0.000000462	Aging rate for air temperatures < 0 (1/s)
-soilDepth	0.1	Depth of interacting soil layer (m)
-soilDens	1300	Density of soil (kg/m3)
-soilSpecHeat	2.18	Spec. heat capacity of soil (kJ/kg/K)
-weightAirTemp	0.5	Weighting param. for air temp. (-) in 0...1
-lat	42.4	Latitude of centre of study area
-lon	0.55	Longitude of centre of study area
-do_rad_corr	.TRUE.	Modification of radiation with aspect and slope
-do_alt_corr	.TRUE.	Modification of temperature with altitude of LU
-tempLaps	-0.006	Temperature lapse rate for modification depending on elevation of TC (°C/m)
-tempAmplitude	8	Temperature amplitude to simulate daily cycle (°C])
-tempMaxOffset	2	Offset of daily temperature maximum from 12:00 (h)
-snowFracThresh	0.03	Threshold to determine when TC snow covered (m)
-```
 
 \[[Table of contents](#toc)]
 ## 3 Input data
