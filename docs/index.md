@@ -41,8 +41,8 @@ Furthermore, two logical parameter specified in the control file ```snow_params.
 
 ```
 #WASA-control file for snow routines
-a0               	a1               	kSatSnow         	densDrySnow      	specCapRet       	emissivitySnowMin	emissivitySnowMax	tempAir_crit     	albedoMin        	albedoMax        	agingRate_tAirPos	agingRate_tAirNeg	soilDepth        	soilDens         	soilSpecHeat     	weightAirTemp    	lat              	lon              	do_rad_corr      	do_alt_corr      	tempLaps         	tempAmplitude    	tempMaxOffset    	snowFracThresh   
-0.002	0.0008	0.00004	450	0.05	0.84	0.99	0.2	0.55	0.88	0.00000111	0.000000462	0.1	1300	2.18	0.5	42.4	0.55	.TRUE.     	.TRUE.     	-0.006	8	2	0.03
+a0 a1 kSatSnow	densDrySnow	specCapRet	emissivitySnowMin	emissivitySnowMax	tempAir_crit	albedoMin	albedoMax	agingRate_tAirPos	agingRate_tAirNeg	soilDepth	soilDens	soilSpecHeat	weightAirTemp	lat	lon	do_rad_corr	do_alt_corr	tempLaps	tempAmplitude	tempMaxOffset	snowFracThresh   
+0.002	0.0008	0.00004	450	0.05	0.84	0.99	0.2	0.55	0.88	0.00000111	0.000000462	0.1	1300	2.18	0.5	42.4	0.55	.TRUE.	.TRUE.	-0.006	8	2	0.03
 ```
 
 *a0*:	Empirical coefficient (m/s); linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1\*WindSpeed<br>
