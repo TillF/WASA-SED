@@ -38,32 +38,11 @@ rel_elevation | Relative elevation of TC to mean sub-basin \[m]
 Furthermore, two logical parameter specified in the control file ```snow_params.ctl```, do_rad_corr and do_alt_corr, allow controlling, whether radiation correction for aspect and slope, and height-depended temperature modifications, respectively, are applied.
 
 ```snow_params.ctl:```
+
 ```
-#WASA-control file for snow routines;
-a0	0.002	
-a1	0.0008	
-kSatSnow	0.00004	
-densDrySnow	450	
-specCapRet	0.05	
-emissivitySnowMin	0.84	
-emissivitySnowMax	0.99
-tempAir_crit	0.2	
-albedoMin	0.55	
-albedoMax	0.88	
-agingRate_tAirPos	0.00000111	
-agingRate_tAirNeg	0.000000462	
-soilDepth	0.1	
-soilDens	1300	
-soilSpecHeat	2.18	
-weightAirTemp	0.5	
-lat	42.4	
-lon	0.55	
-do_rad_corr	.TRUE.	
-do_alt_corr	.TRUE.	
-tempLaps	-0.006	
-tempAmplitude	8	
-tempMaxOffset	2	
-snowFracThresh	0.03
+#WASA-control file for snow routines
+a0               	a1               	kSatSnow         	densDrySnow      	specCapRet       	emissivitySnowMin	emissivitySnowMax	tempAir_crit     	albedoMin        	albedoMax        	agingRate_tAirPos	agingRate_tAirNeg	soilDepth        	soilDens         	soilSpecHeat     	weightAirTemp    	lat              	lon              	do_rad_corr      	do_alt_corr      	tempLaps         	tempAmplitude    	tempMaxOffset    	snowFracThresh   
+0.002	0.0008	0.00004	450	0.05	0.84	0.99	0.2	0.55	0.88	0.00000111	0.000000462	0.1	1300	2.18	0.5	42.4	0.55	.TRUE.     	.TRUE.     	-0.006	8	2	0.03
 ```
 
 *a0*:	Empirical coefficient (m/s); linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1\*WindSpeed<br>
