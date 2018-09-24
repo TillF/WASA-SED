@@ -40,31 +40,57 @@ Furthermore, two logical parameter specified in the control file ```snow_params.
 ```snow_params.ctl:```
 ```
 #WASA-control file for snow routines;
-a0	0.002	Empirical coefficient (m/s); linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1*WindSpeed
-a1	0.0008	Empirical coefficient (-)  ; linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1*WindSpeed
-kSatSnow	0.00004	Saturated hydraulic conductivity of snow (m/s)
-densDrySnow	450	Density of dry snow (kg/m³)
-specCapRet	0.05	Capill. retention volume as fraction of solid SWE (-)
-emissivitySnowMin	0.84	Minimum snow emissivity used for old snow (-)
-emissivitySnowMax	0.99	Maximum snow emissivity used for new snow (-)
-tempAir_crit	0.2	Threshold temperature for rain-/snowfall (°C)
-albedoMin	0.55	Minimum albedo used for old snow (-)
-albedoMax	0.88	Maximum albedo used for new snow (-)
-agingRate_tAirPos	0.00000111	Aging rate for air temperatures > 0 (1/s)
-agingRate_tAirNeg	0.000000462	Aging rate for air temperatures < 0 (1/s)
-soilDepth	0.1	Depth of interacting soil layer (m)
-soilDens	1300	Density of soil (kg/m3)
-soilSpecHeat	2.18	Spec. heat capacity of soil (kJ/kg/K)
-weightAirTemp	0.5	Weighting param. for air temp. (-) in 0...1
-lat	42.4	Latitude of centre of study area
-lon	0.55	Longitude of centre of study area
-do_rad_corr	.TRUE.	Modification of radiation with aspect and slope
-do_alt_corr	.TRUE.	Modification of temperature with altitude of LU
-tempLaps	-0.006	Temperature lapse rate for modification depending on elevation of TC (°C/m)
-tempAmplitude	8	Temperature amplitude to simulate daily cycle (°C])
-tempMaxOffset	2	Offset of daily temperature maximum from 12:00 (h)
-snowFracThresh	0.03	Threshold to determine when TC snow covered (m)
+a0	0.002	
+a1	0.0008	
+kSatSnow	0.00004	
+densDrySnow	450	
+specCapRet	0.05	
+emissivitySnowMin	0.84	
+emissivitySnowMax	0.99
+tempAir_crit	0.2	
+albedoMin	0.55	
+albedoMax	0.88	
+agingRate_tAirPos	0.00000111	
+agingRate_tAirNeg	0.000000462	
+soilDepth	0.1	
+soilDens	1300	
+soilSpecHeat	2.18	
+weightAirTemp	0.5	
+lat	42.4	
+lon	0.55	
+do_rad_corr	.TRUE.	
+do_alt_corr	.TRUE.	
+tempLaps	-0.006	
+tempAmplitude	8	
+tempMaxOffset	2	
+snowFracThresh	0.03
 ```
+
+*a0*:	Empirical coefficient (m/s); linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1\*WindSpeed<br>
+*a1*:	Empirical coefficient (-)  ; linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1\*WindSpeed<br>
+*kSatSnow*:	Saturated hydraulic conductivity of snow (m/s)<br>
+*densDrySnow*:	Density of dry snow (kg/m³)<br>
+*specCapRet*:	Capill. retention volume as fraction of solid SWE (-)<br>
+*emissivitySnowMin*:	Minimum snow emissivity used for old snow (-)<br>
+*emissivitySnowMax*:	Maximum snow emissivity used for new snow (-)<br>
+*tempAir_crit*:	Threshold temperature for rain-/snowfall (°C)<br>
+*albedoMin*:	Minimum albedo used for old snow (-)<br>
+*albedoMax*:	Maximum albedo used for new snow (-)<br>
+*agingRate_tAirPos*:	Aging rate for air temperatures > 0 (1/s)<br>
+*agingRate_tAirNeg*:	Aging rate for air temperatures < 0 (1/s)<br>
+*soilDepth*:	Depth of interacting soil layer (m)<br>
+*soilDens*:	Density of soil (kg/m3)<br>
+*soilSpecHeat*:	Spec. heat capacity of soil (kJ/kg/K)<br>
+*weightAirTemp*:	Weighting param. for air temp. (-) in 0...1<br>
+*lat*:	Latitude of centre of study area<br>
+*lon*:	Longitude of centre of study area<br>
+*do_rad_corr*:	Modification of radiation with aspect and slope (TRUE or FALSE)<br>
+*do_alt_corr*:	Modification of temperature with altitude of LU (TRUE or FALSE)<br>
+*tempLaps*:	Temperature lapse rate for modification depending on elevation of TC (°C/m)<br>
+*tempAmplitude*:	Temperature amplitude to simulate daily cycle (°C])<br>
+*tempMaxOffset*:	Offset of daily temperature maximum from 12:00 (h)<br>
+*snowFracThresh*:	Threshold to determine when TC snow covered (m)
+
 
 # WASA-SED
 
