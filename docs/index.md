@@ -41,7 +41,7 @@ Furthermore, two logical parameter specified in the control file ```snow_params.
 
 ```
 #WASA-control file for snow routines
-a0 a1 kSatSnow	densDrySnow	specCapRet	emissivitySnowMin	emissivitySnowMax	tempAir_crit	albedoMin	albedoMax	agingRate_tAirPos	agingRate_tAirNeg	soilDepth	soilDens	soilSpecHeat	weightAirTemp	lat	lon	do_rad_corr	do_alt_corr	tempLaps	tempAmplitude	tempMaxOffset	snowFracThresh   
+a0, a1, kSatSnow,	densDrySnow,	specCapRet,	emissivitySnowMin,	emissivitySnowMax,	tempAir_crit,	albedoMin,	albedoMax,	agingRate_tAirPos,	agingRate_tAirNeg,	soilDepth,	soilDens,	soilSpecHeat,	weightAirTemp,	lat,	lon,	do_rad_corr,	do_alt_corr,	tempLaps,	tempAmplitude,	tempMaxOffset,	snowFracThresh   
 0.002	0.0008	0.00004	450	0.05	0.84	0.99	0.2	0.55	0.88	0.00000111	0.000000462	0.1	1300	2.18	0.5	42.4	0.55	.TRUE.	.TRUE.	-0.006	8	2	0.03
 ```
 
@@ -682,7 +682,7 @@ SDRs are applied to raw erosion on TC-scale before transport capacity limitation
 
 ```
 Specifications of soil vegetation components and erosion parameters
-id	soil_id	veg_id	musle_k[(ton acre hr)/(acre ft-ton inch)]	musle_c[-]	musle_p[-]	coarse_fraction[%]	manning_n
+ID,	soil_id,	veg_id	musle_k[(ton acre hr)/(acre ft-ton inch)],	musle_c[-],	musle_p[-],	coarse_fraction[%],	manning_n
 11	13	21	0.13	1.0	1.0	0.8	0.011
 …
 ```
@@ -705,7 +705,7 @@ Example: The SVC with the ID 11 consists of the soil with ID 13 (as specified in
 
 ```
 Specification of which SVCs are contained in each TC
-TC-ID[-]	SVC-ID[-]	fraction[-] 
+TC-ID[-],	SVC-ID[-],	fraction[-] 
 11			12			1.0
 12			13			0.2
 12			14			0.8
@@ -726,7 +726,7 @@ Example: The TC with the ID 11 consists only of the SVC with the ID 12. The TC w
 ```
 Specification of soil-vegetation components (links LU, terrain component, soil and vegetation properties) 
 For each block: first line Soil IDs, Second line Land use, third line fraction of SVCs in each terrain component
-Subasin-ID[-],LU-ID[-],TC-ID[-],fraction_rocky[-],nbrSVC[-],Soil-ID(30 values)[-],Vegetation-ID (30 values)[-],fraction (30 values)[-]	
+Subasin-ID[-], LU-ID[-], TC-ID[-], fraction_rocky[-], nbrSVC[-], Soil-ID(30 values)[-], Vegetation-ID (30 values)[-], fraction (30 values)[-]
 49	19	25	0.12	9	86	30	77	86	85	86 …	43  in total max. 30 IDs*
 49	19	25	0.12	9	8002	8004	8005	8500	7203	9203 …	7203  
 49	19	25	0.12	9	0.017	0.031	0.019	0.022	0.043	0.598 …	0.025 
@@ -756,9 +756,9 @@ The order of the sub-basins in the first column has to follow the same order of 
 
 ```
 Specification of soil parameters
-Soil-ID[-],number(horizons)[-],res[Vol-],PWP[-],FK2.5[-],FK1.8[-],nFK[-],saturated[-],depth[mm],ks[mm/d],suction[mm],pore-size-index[-],bubblepressure[cm],coarse_frag[-], shrinks[0/1] , bedrock[0/1] , alluvial[0/1] (1 line)*
+Soil-ID[-], number(horizons)[-], res[Vol-], PWP[-], FK2.5[-], FK1.8[-], nFK[-], saturated[-], depth[mm], ks[mm/d], suction[mm], pore-size-index[-], bubblepressure[cm], coarse_frag[-], shrinks[0/1], bedrock[0/1], alluvial[0/1] (1 line)\*
 
-    1    3  0.073  0.102  0.184  0.270  0.168  0.472   200.0    504 9.037   72.9  0.3593    9.80 0.000 0  0.102  0.160  0.265  0.349  0.188  0.472   600.0    1096.288  125.5  0.2705   16.16 0.000 0  0.064  0.084  0.152  0.229  0.145  0.472   300.0  7709.267   46.1  0.3891  6.31 0.000 0 0 0 (1 line)*
+    1    3  0.073  0.102  0.184  0.270  0.168  0.472   200.0    504 9.037   72.9  0.3593    9.80 0.000 0  0.102  0.160  0.265  0.349  0.188  0.472   600.0    1096.288  125.5  0.2705   16.16 0.000 0  0.064  0.084  0.152  0.229  0.145  0.472   300.0  7709.267   46.1  0.3891  6.31 0.000 0 0 0 (1 line)\*
 
     2    4  0.070  0.094  0.164  0.240  0.146  0.452   250.0    6229.629   67.2  0.3816    9.07 0.001 0  0.075  0.102  0.176  0.253  0.151  0.453   250.0    5250.267   71.4  0.3655    9.56 0.001 0  0.076  0.106  0.184  0.262  0.156  0.458   500.0    5368.695   82.4  0.3558   10.96 0.000 0  0.066  0.087  0.155  0.232  0.145  0.462   500.0    8344.087   56.4  0.3903    7.67 0.225 0 0 1
     
@@ -795,7 +795,7 @@ Example: The soil class with the ID 1 has 3 horizons in the soil profile. Consec
 
 ```
 Particle size distribution of topmost horizons of soils
-soil_id	part_class_id	fraction[-]
+soil_id,	part_class_id,	fraction[-]
 1		1				0.3
 1		2				0.4
 1		3				0.3
@@ -816,7 +816,7 @@ Example: The topmost horizon of soil 1 contains 30 % of particles falling into t
 
 ```
 Specification of vegetation parameters
-Veg-ID, Stomata_Resistance[s/m],minsuction[hPa],maxsuction[hPa],height[m],root-depth[m,]LAI [-],albedo[-] 
+Veg-ID, Stomata_Resistance[s/m], minsuction[hPa], maxsuction[hPa], height[m], root-depth[m], LAI [-], albedo[-] 
 9101 200 10000	30000 5	 5.5  6  6  1.5 1.5  1.7 1.8	1 5.5  5.5  1.5 0.23	0.17	0.17	0.21
 9102 175 10000	30000 3 3  3  3   1.25  1.25	1.25  1.25  0.4 4 4 0.8 0.25	0.18	0.18	0.23
 …
@@ -844,7 +844,7 @@ Example: The landuse/vegetation class with ID 9101 has a stomata resistance with
 ```
 Specification of the rainy season (per year)
 for the interpolation of temporal distribution of vegetation characteristics (Rootdepth,height,lai,albedo)
-Subasin	Veg_id	Year	DOY1	DOY2	DOY3	DOY4
+Subasin,	Veg_id,	Year,	DOY1,	DOY2,	DOY3,	DOY4
 49	2	1980	10	40	175	205
 49	-1	1980	20	40	175	205
 50	-1	1980	10	40	175	205
@@ -877,7 +877,7 @@ In 1981, the same DOYs are used for all subbasins (line 7). All other subbasins,
 (optional)
 
 ```
-Subasin-ID	mean_kf-calib-factor
+Subasin-ID,	mean_kf-calib-factor
 1	10 
 2	4.5 
 …
@@ -894,7 +894,7 @@ Example: All values for saturated hydraulic conductivity during infiltration in 
 (optional)
 
 ```
-Soil-ID	Ksat-calib-factor
+Soil-ID,	Ksat-calib-factor
 -1	20
 5	0.3
 …
@@ -912,7 +912,7 @@ Example: All values for saturated hydraulic conductivity of ALL soils (wildcard 
 
 ```
 Water transpositions via canals or pipes between sub-basins, in order of routing scheme
-Start-Subasin-ID Flag(reservoir/river) Flow(m3/s) Loss(%) Destination-Subasin-ID Flag (reservoir/river), begin_year
+Start-Subasin-ID, Flag(reservoir/river), Flow(m3/s,) Loss(%), Destination-Subasin-ID, Flag (reservoir/river), begin_year
         91         1      1.75      0.01        96         1      1965
         67         2       2.4       0.1        31         1      1997
         31         1         2      0.06        30         1      1993
@@ -959,54 +959,54 @@ This file and any of its entries are optional. If not present, default values ar
 (optional)
 
 ```
-ground water storage (for analysis or model re-start)
- Subbasin	LU	volume_[mm]	area_[m²]
-1	11111	   39.51	   1013437.4
+#Ground water storage (for analysis or model re-start)
+Subbasin,	LU,	volume_[mm],	area_[m²]
+1 11111	39.51	1013437.4
 …
 ```
 
 ```
-interception storage (for analysis or model re-start)
- Subbasin	LU	TC	SVC	storage_[mm]	area_[m²]
+#Interception storage (for analysis or model re-start)
+Subbasin,	LU,	TC,	SVC,	storage_[mm],	area_[m²]
 1	11111	5	16010	    0.00	     73491.9
 …
 ```
 
 ```
-soil moisture status (for analysis or model re-start)
- Subbasin	LU	TC	SVC	horizon	watercontent_[mm]	area_[m²]
+#Soil moisture status (for analysis or model re-start)
+Subbasin,	LU,	TC,	SVC,	horizon,	watercontent_[mm],	area_[m²]
 1	11111	5	16010	1	   26.70	     73491.9
 …
 ```
 
 ```
-interflow storage (for analysis or model re-start)
- Subbasin	LU	TC	horizon	storage_[m3]
+#Interflow storage (for analysis or model re-start)
+ Subbasin,	LU,	TC,	horizon,	storage_[m3]
 1	1	3	1	   0.000
 ...
 ```
 
 ```
-snow storage (for analysis or model re-start)
- Subbasin	LU	horizon	storage [m]	energy [kJ/m²]	albedo [-]
+#Snow storage (for analysis or model re-start)
+Subbasin,	LU,	horizon,	storage [m],	energy [kJ/m²],	albedo [-]
 1	2	10	0.000	0.000	0.880
 ```
 
 ```
-Lake volume status (for analysis or model re-start)
- Subbasin	reservoir_size_class	volume[m^3]
+#Lake volume status (for analysis or model re-start)
+Subbasin	reservoir_size_class,	volume[m^3]
 1	1	       0.00
 ```
 
 ```
-UHG routing: values of routed discharge per timestep of unit hydrograph
- Subbasin	[n_h x timestep]
+#UHG routing: values of routed discharge per timestep of unit hydrograph
+Subbasin	[n_h x timestep]
 101	1.286	0.649	0.074
 ```
 
 ```
-Muskingum routing: river reach volume status (for analysis or model re-start)
- Subbasin	volume[m^3]
+#Muskingum routing: river reach volume status (for analysis or model re-start)
+Subbasin	volume[m^3]
 1	2033.808
 ```
 
@@ -1035,8 +1035,8 @@ This file contains a single value x that specifies the fraction of the groundwat
 **17)** ```beta_fac_lu.dat```<br>
 (optional)
 ```
-specified correction factor for beta (rill/interrill ratio, used for the computation of L-factor, see Renard, 1997, pp.101
-lu_id	beta_factor
+#specified correction factor for beta (rill/interrill ratio, used for the computation of L-factor, see Renard, 1997, pp.101
+lu_id,	beta_factor
 12111	2
 21111	0.5
 …
@@ -1056,8 +1056,8 @@ A row with an lu_id of -1 (wild card) will set all unset LUs to the specified va
 (optional)
 
 ```
-Prespecified Sediment delivery ratio [0-1] for Landscape units		
-lu_id	sdr
+#Prespecified Sediment delivery ratio [0-1] for Landscape units		
+lu_id,	sdr
 11211	0.94
 11311	0.94
 …
@@ -1677,12 +1677,13 @@ Year Day            57            15            20            60
 
 Beware: “day” counts the number of days in the respective simulation year, i.e. if you start your simulation on May, 1, the number “1” refers to this day and the rest of the days in that year will be counted till 306.
 
-**```gw_storage.stat```, ```intercept_storage.stat```, ```soil_moisture.stat``` and ```storage.stats```:**<br>
+```gw_storage.stat```, ```intercept_storage.stat```, ```soil_moisture.stat``` and ```storage.stats```:<br>
 These files are written at the end of each simulation year, thus allowing recommencing an aborted WASA run starting from the last simulation timestep. <br>
 Beware: all other output files are overwritten in this case. For file structure, see section [Input data](#input-data). ```storage.stats``` contains the overall summary of storages corresponding to the three files mentioned before.
 
 <a name="4-2-output-of-the-river-module"></a>
 ### 4.2 Output of the river module
+
 The river routine calculates the water and sediment discharge in each river stretch. Currently, the output comprises the water discharge and storage values for each timestep, and the linear response function, when river routing scheme 1 is selected. The following files are generated as daily time series, if enabled and depending on the selected routing scheme:
 
 Output file | Content
@@ -1709,7 +1710,7 @@ All above-mentioned files have the same structure, as shown by the example ```Ri
 ```River_flow.out```
 
 ```
-Output files for river discharge q_out (m3/s) (with MAP IDs as in ```hymo.dat```)
+Output files for river discharge q_out (m3/s) (with MAP IDs as in hymo.dat)
 Year  Day    dt   9          10             11            
 2009     1     1         6.313         1.797         8.922         
 2009     1     2         6.176         1.744         8.733         
