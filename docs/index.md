@@ -67,18 +67,24 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 - [6 Further relevant literature for the WASA-SED model](#6-further-relevant-literature-for-the-wasa-sed-model)<br>
 
 ## List of figures
-[Figure 1](#figure-1):
-[Figure 2](#figure-2):
+[Figure 1](#figure-1): WASA parameter specification file ```do.dat```.<br>
+[Figure 2](#figure-2): Trapezoidal channel dimension with floodplains.
 
 ## List of tables
-[Table 1](#table-1): Folder structure of WASA code.
-[Table 2](#table-2): Main subroutines of the main program (```wasa.f90```).
-[Table 3](#table-3):
-[Table 4](#table-4):
-[Table 5](#table-5):
-[Table 6](#table-6):
-[Table 7](#table-7):
-[Table 8](#table-8):
+[Table 1](#table-1): Folder structure of WASA code.<br>
+[Table 2](#table-2): Main subroutines of the main program (```wasa.f90```).<br>
+[Table 3](#table-3): Main subroutines of ```hymo_all.f90``` (hydrological subroutines).<br>
+[Table 4](#table-4): Summary of model input parameters.<br>
+[Table 5](#table-5): Keywords and descriptions optional outfiles related to the snow routine.<br>
+[Table 6](#table-6): Input data files for the hillslope component.<br>
+[Table 7](#table-7): Groundwater option Gw_flag=0.<br>
+[Table 8](#table-8): Groundwater option Gw_flag=1.<br>
+[Table 9](#table-9): Groundwater option Gw_flag=99.<br>
+[Table 10](#table-10): Input data files for the river component.<br>
+[Table 11](#table-11): Input data files for the reservoir component.<br>
+[Table 12](#table-12): Output files of the hillslope module.<br>
+[Table 13](#table-13): Output files of the river module.<br>
+[Table 14](#table-14): Output files of the reservoir module.
 
 ## 1 Introduction
 
@@ -1696,7 +1702,10 @@ Beware: all other output files are overwritten in this case. For file structure,
 <a name="4-2-output-of-the-river-module"></a>
 ### 4.2 Output of the river module
 
-The river routine calculates the water and sediment discharge in each river stretch. Currently, the output comprises the water discharge and storage values for each timestep, and the linear response function, when river routing scheme 1 is selected. The following files are generated as daily time series, if enabled and depending on the selected routing scheme:
+The river routine calculates the water and sediment discharge in each river stretch. Currently, the output comprises the water discharge and storage values for each timestep, and the linear response function, when river routing scheme 1 is selected. The following files (see [Table 13](#table-13)) are generated as daily time series, if enabled and depending on the selected routing scheme.
+
+<a name="table-13"></a>
+**Table 13:** Output files of the river module.
 
 Output file | Content
 ---|---
@@ -1739,10 +1748,10 @@ Example: After each time step, e.g. hourly, the discharge is given for each sub-
 <a name="4-3-output-of-the-reservoir-module"></a>
 ### 4.3 Output of the reservoir module
 
-The reservoir module simulates the water and sediment transport through the reservoirs located in the study area. Currently, the output comprises results on water balance, hydraulic calculations, sediment transport and bed elevation changes for all reservoirs located at the outlet point of the sub-basins. The results are printed for all outlet reservoirs separately, identified by the Map-ID of the sub-basin where it is located. Additional files are also printed for the reservoir size classes. [Table 13](#table-13) shows the generated files.
+The reservoir module simulates the water and sediment transport through the reservoirs located in the study area. Currently, the output comprises results on water balance, hydraulic calculations, sediment transport and bed elevation changes for all reservoirs located at the outlet point of the sub-basins. The results are printed for all outlet reservoirs separately, identified by the Map-ID of the sub-basin where it is located. Additional files are also printed for the reservoir size classes. [Table 14](#table-14) shows the generated files.
 
-<a name="table-13"></a>
-**Table 13:** Output files of the reservoir module.
+<a name="table-14"></a>
+**Table 14:** Output files of the reservoir module.
 
 Nr. |Output file | Content
 ---|---|---
