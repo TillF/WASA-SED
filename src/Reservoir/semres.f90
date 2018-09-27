@@ -766,8 +766,11 @@ IF (STATUS == 2) THEN
 !stop
 !****************************************************************
 
-
-  conc_inflow=sed_inflow(step,upstream)/(qinflow(step,upstream)*(86400./nt)*.001)
+if (qinflow(step,upstream)==0.) then
+    conc_inflow = 0. 
+else
+    conc_inflow=sed_inflow(step,upstream)/(qinflow(step,upstream)*(86400./nt)*.001)
+end if
 
 
 !write(*,*)step,upstream,(sediment_in(upstream,g),g=1,n_sed_class)
