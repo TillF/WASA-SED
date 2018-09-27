@@ -1,76 +1,3 @@
-noch einzufügen:
-
-### Snow module
-
-The snow routine implemented into WASA-SED in the framework of this study is an optional module. Depending on the user’s needs it can be turned on or off. A corresponding logical parameter was included into the control file ```do.dat```. This control file contains the main parameter specifications for a model run. The logical parameter is called dosnow. If set to 1, the snow routine is active and all related
-calculations are performed. If set to 0, the snow routine remains inactive. 
-Output files can be generated for all state variables and mass and energy fluxes related to the snow routine. The specification, which output file is prepared, occurs in the control file ```outfiles.dat```. The filenames of the desired output files have to be added as keyword to activate their creation. A list of possible output files with corresponding keyword is given in [Table snow](#table-snow). The output is created TC-wise. For each time step, values for each TC of each LU get exported.
-
-<a name="table-snow"></a>
-**Table snow**: Keywords and descriptions optional outfiles related to the snow routine.
-
-Keyword | Description
----|---
-snowEnergyCont | Snow energy content of snow cover \[kJ/m²]
-snowWaterEquiv | Snow water equivalent snow cover \[m]
-snowAlbedo | Snow albedo \[-]
-snowCover | Snow cover \[-]
-snowTemp | Snow temperature \[°C]
-surfTemp | Snow surface temperature \[°C]
-liquFrac | Fraction of liquid water \[-]
-fluxPrec | Precipitation flux \[m/s]
-fluxFlow | Melt water flux \[m/s]
-fluxSubl | Sublimation flux \[m/s]
-fluxNetS | Short-wave radiation balance \[W/m²]
-fluxNetL | Long-wave radiation balance \[W/m²]
-fluxSoil | Soil heat flux \[W/m²]
-fluxSens | Sensible heat flux \[W/m²]
-stoiPrec | Conversion factor mass and energy flux precipitation \[kJ/m3]
-stoiSubl | Conversion factor mass and energy flux sublimation \[kJ/m3]
-stoiFlow | Conversion factor mass and energy flux melt water \[kJ/m3]
-rateAlbe | Change rate snow albedo \[1/s]
-precipMod | Modified precipitation signal \[mm]
-cloudFrac | Cloud cover fraction \[-]
-radiMod | Radiation signal corrected for aspect and slope \[W/m²]
-temperaMod | Height-modified temperature signal \[°C]
-rel_elevation | Relative elevation of TC to mean sub-basin \[m]
-
-Furthermore, two logical parameter specified in the control file ```snow_params.ctl```, do_rad_corr and do_alt_corr, allow controlling, whether radiation correction for aspect and slope, and height-depended temperature modifications, respectively, are applied.
-
-```snow_params.ctl:```
-
-```
-#WASA-control file for snow routines
-a0, a1, kSatSnow,	densDrySnow,	specCapRet,	emissivitySnowMin,	emissivitySnowMax,	tempAir_crit,	albedoMin,	albedoMax,	agingRate_tAirPos,	agingRate_tAirNeg,	soilDepth,	soilDens,	soilSpecHeat,	weightAirTemp,	lat,	lon,	do_rad_corr,	do_alt_corr,	tempLaps,	tempAmplitude,	tempMaxOffset,	snowFracThresh   
-0.002	0.0008	0.00004	450	0.05	0.84	0.99	0.2	0.55	0.88	0.00000111	0.000000462	0.1	1300	2.18	0.5	42.4	0.55	.TRUE.	.TRUE.	-0.006	8	2	0.03
-```
-
-*a0*:	Empirical coefficient (m/s); linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1\*WindSpeed<br>
-*a1*:	Empirical coefficient (-)  ; linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1\*WindSpeed<br>
-*kSatSnow*:	Saturated hydraulic conductivity of snow (m/s)<br>
-*densDrySnow*:	Density of dry snow (kg/m³)<br>
-*specCapRet*:	Capill. retention volume as fraction of solid SWE (-)<br>
-*emissivitySnowMin*:	Minimum snow emissivity used for old snow (-)<br>
-*emissivitySnowMax*:	Maximum snow emissivity used for new snow (-)<br>
-*tempAir_crit*:	Threshold temperature for rain-/snowfall (°C)<br>
-*albedoMin*:	Minimum albedo used for old snow (-)<br>
-*albedoMax*:	Maximum albedo used for new snow (-)<br>
-*agingRate_tAirPos*:	Aging rate for air temperatures > 0 (1/s)<br>
-*agingRate_tAirNeg*:	Aging rate for air temperatures < 0 (1/s)<br>
-*soilDepth*:	Depth of interacting soil layer (m)<br>
-*soilDens*:	Density of soil (kg/m3)<br>
-*soilSpecHeat*:	Spec. heat capacity of soil (kJ/kg/K)<br>
-*weightAirTemp*:	Weighting param. for air temp. (-) in 0...1<br>
-*lat*:	Latitude of centre of study area<br>
-*lon*:	Longitude of centre of study area<br>
-*do_rad_corr*:	Modification of radiation with aspect and slope (TRUE or FALSE)<br>
-*do_alt_corr*:	Modification of temperature with altitude of LU (TRUE or FALSE)<br>
-*tempLaps*:	Temperature lapse rate for modification depending on elevation of TC (°C/m)<br>
-*tempAmplitude*:	Temperature amplitude to simulate daily cycle (°C])<br>
-*tempMaxOffset*:	Offset of daily temperature maximum from 12:00 (h)<br>
-*snowFracThresh*:	Threshold to determine when TC snow covered (m)
-
-
 # WASA-SED
 
 # User Manual
@@ -89,9 +16,6 @@ SESAM II 2010-2014,<br>
 Institute of Earth and Environmental Science, University of Potsdam, Potsdam,<br>
 Deutsches Geoforschungszentrum Potsdam,<br>
 Germany
-
-**Recent change: snow module (“WASA-SNOW” by Erwin Rottler)**<br>
-The respective documentation has not been included yet. It can be found in Rottler’s thesis (on request, to be published on https://publishup.uni-potsdam.de/opus4-ubp/home).
 
 Updates of WASA-SED Manual (this file):
 https://github.com/TillF/WASA-SED
@@ -341,45 +265,48 @@ Line 36 may additionally contain a second logical variable (append_output), allo
 
 Line 37 may additionally contain a second logical variable (save_states_yearly), determining if the model states are saved (and overwritten) at the end of each simulation year. Default is .TRUE.
 
+Line 38 (dosnow) defines, if the optional snow routine, implemented by [Rottler (2017)](#rottler-2017), is included. If set to 1, the snow routine is active and all related calculations are performed. If set to 0, the snow routine remains inactive.
+
 <a name="figure-1"></a>
 ```
-Parameter specification for the WASA Model (SESAM-Project)
-..\WASA\Input\Case_study\ 	Location of model platform
-..\WASA\Output\		Specification of folder for simulation output
-1980  //tstart (start year of simulation) 
-1981  //tstop (end year of simulation)
-1 15     //mstart (start month of simulation) in this case: simulation from January, 15th 1980	
-12    15 //mstop (end month of simulation)   until December, 31st (=defaults to end of month) 1981	
-10    //no. of sub-basins
-49    //no. of combinations of sub-basins, landscape units, terrain components
-321   //total no. of landscape units in study area
-515   //total no. of terrain components in study area
-77    //total no. of soil components in study area
-34    //total no. of vegetation units in study area
-.f.    //doreservoir: do reservoir calculations
-.f.   //doacudes:includes dam calculations
-.t.   //dolattc: do latflow between TCs
-.f.   //doalllattc: rout latflow completely to next downslope TC
-.t.   //dolatsc: do latflow within TCs (surface runoff)
-.t.   //dolatscsub: do latflow within TCs (subsurface runoff)
-.f.   //dotrans: do water transpositions betwen sub-basins
-.f.   //dohour: do hourly version (ignored, use “dt”)
-0     //scenario: choose scenario (0:less rain (ECHAM), 1:no trend, 2:more rain (Hadley))
-0     //krig: type of precipitation interpolation (0….)
-15.0  //kfkorr:  hydraulic conductivity factor (for daily model version) (kfkorr)
-0.30  //intcf: interception capacity per unit LAI (mm)
-0     //dointc: type of interception routine (simple bucket:0, modified bucket:1)
-.f.   //doscale: do scaling due to rainfall interpolation ?
-.f.   //domuncell: for muni/ezg-nocell-version, use rainfall input derived from cells ? (change kf_calib.dat !)
-1,   //sensfactor: factor for sensitivity studies
-24  //dt: time step in [hours]
-.t.   //dosediment
-1   //No. of grain size classes
-1   // type of sediment transport model at the hillslope	
-1   type of water / sediment model in the river: (1) old routing, (2) Muskingum & ss transport, (3) Muskingum & bedload modelling
-1   //type of sediment model in the reservoir: choose sediment transport …
-.t. //load state of storages from files (if present) at start (optional)
-.f. //save state of storages to files after simulation period (optional)
+ 1   Parameter specification for the WASA Model (SESAM-Project)
+ 2   ..\WASA\Input\Case_study\ 	Location of model platform
+ 3   ..\WASA\Output\		Specification of folder for simulation output
+ 4   1980  //tstart (start year of simulation) 
+ 5   1981  //tstop (end year of simulation)
+ 6   1 15  //mstart (start month of simulation) in this case: simulation from January, 15th 1980	
+ 7   12 15 //mstop (end month of simulation)   until December, 31st (=defaults to end of month) 1981	
+ 8   10    //no. of sub-basins
+ 9   49    //no. of combinations of sub-basins, landscape units, terrain components
+10   321   //total no. of landscape units in study area
+11   515   //total no. of terrain components in study area
+12   77    //total no. of soil components in study area
+13   34    //total no. of vegetation units in study area
+14   .f.   //doreservoir: do reservoir calculations
+15   .f.   //doacudes:includes dam calculations
+16   .t.   //dolattc: do latflow between TCs
+17   .f.   //doalllattc: rout latflow completely to next downslope TC
+18   .t.   //dolatsc: do latflow within TCs (surface runoff)
+19   .t.   //dolatscsub: do latflow within TCs (subsurface runoff)
+20   .f.   //dotrans: do water transpositions betwen sub-basins
+21   .f.   //dohour: do hourly version (ignored, use “dt”)
+22   0     //scenario: choose scenario (0:less rain (ECHAM), 1:no trend, 2:more rain (Hadley))
+23   0     //krig: type of precipitation interpolation (0….)0
+24   15.0  //kfkorr:  hydraulic conductivity factor (for daily model version) (kfkorr)
+25   0.30  //intcf: interception capacity per unit LAI (mm)
+26   0     //dointc: type of interception routine (simple bucket:0, modified bucket:1)
+27   .f.   //doscale: do scaling due to rainfall interpolation ?
+28   .f.   //domuncell: for muni/ezg-nocell-version, use rainfall input derived from cells ? (change kf_calib.dat !)
+29   1     //sensfactor: factor for sensitivity studies
+30   24    //dt: time step in [hours]
+31   .t.   //dosediment
+32   1     //No. of grain size classes
+33   1     // type of sediment transport model at the hillslope	
+34   1     //type of water / sediment model in the river: (1) old routing, (2) Muskingum & ss transport, (3) Muskingum & bedload modelling
+35   1     //type of sediment model in the reservoir: choose sediment transport …
+36   .t.   //load state of storages from files (if present) at start (optional)
+37   .f.   //save state of storages to files after simulation period (optional)
+38   .t.   //dosnow: activate snow routine
 ```
 
 **Figure 1:** WASA parameter specification file ```do.dat```
@@ -501,13 +428,45 @@ lake_sizedistoutflow
 
 Example: The output files ```daily_actetranspiration.out``` and ```daily_qhorton.out``` will be created. The creation of ```daily_potetranspiration.dat``` is omitted.
 
+The output files of the snow routine ([Rottler, 2017](#rottler-2017)) are also defined in the control file ```outfiles.dat```. 
+Output files can be generated for all state variables and mass and energy fluxes related to the snow routine. The filenames of the desired output files have to be added as keyword to activate their creation. A list of possible output files with corresponding keyword is given in [Table 5](#table-5). The output is created TC-wise. For each time step, values for each TC of each LU get exported.
+
+<a name="table-5"></a>
+**Table 5**: Keywords and descriptions optional outfiles related to the snow routine.
+
+Keyword | Description
+---|---
+snowEnergyCont | Snow energy content of snow cover \[kJ/m²]
+snowWaterEquiv | Snow water equivalent snow cover \[m]
+snowAlbedo | Snow albedo \[-]
+snowCover | Snow cover \[-]
+snowTemp | Snow temperature \[°C]
+surfTemp | Snow surface temperature \[°C]
+liquFrac | Fraction of liquid water \[-]
+fluxPrec | Precipitation flux \[m/s]
+fluxFlow | Melt water flux \[m/s]
+fluxSubl | Sublimation flux \[m/s]
+fluxNetS | Short-wave radiation balance \[W/m²]
+fluxNetL | Long-wave radiation balance \[W/m²]
+fluxSoil | Soil heat flux \[W/m²]
+fluxSens | Sensible heat flux \[W/m²]
+stoiPrec | Conversion factor mass and energy flux precipitation \[kJ/m3]
+stoiSubl | Conversion factor mass and energy flux sublimation \[kJ/m3]
+stoiFlow | Conversion factor mass and energy flux melt water \[kJ/m3]
+rateAlbe | Change rate snow albedo \[1/s]
+precipMod | Modified precipitation signal \[mm]
+cloudFrac | Cloud cover fraction \[-]
+radiMod | Radiation signal corrected for aspect and slope \[W/m²]
+temperaMod | Height-modified temperature signal \[°C]
+rel_elevation | Relative elevation of TC to mean sub-basin \[m]
+
 <a name="3-2-input-files-for-the-hillslope-module"></a>
 ### 3.2 Input files for the hillslope module
 
-The input files for the hillslope module are located in the folder ```Input/[case_study]/Hillslope``` and are summarised in [Table 5](#table-5).
+The input files for the hillslope module are located in the folder ```Input/[case_study]/Hillslope``` and are summarised in [Table 6](#table-6).
 
-<a name="table-5"></a>
-**Table 5:** Input data files for the hillslope component
+<a name="table-6"></a>
+**Table 6:** Input data files for the hillslope component.
 
 Parameter File |	Content
 ---|---
@@ -537,7 +496,7 @@ Parameter File |	Content
 ```beta_fac_lu.dat``` (optional) |  Correction factors for beta (USLE L-factor computation)
 ```sdr_lu.dat``` (optional)	| LU-wise specification of sediment delivery ratio
 ```calib_wind.dat``` (optional)	| Calibration of wind speed (sensitive parameter for evapotranspiration)
-
+```snow_params.ctl```(optional) | Options for the snow module
 <br>
 
 The spatial conceptualisation of the WASA model is explained in detail in [Güntner (2002)](#guentner-2002), and are only shortly summarised in this manual. The following spatial modelling units were identified ([Güntner 2002](#guentner-2002), p. 33):
@@ -1079,13 +1038,49 @@ Warning: Using SDR should be used without a transport capacity limitation, other
 
 This file contains a single value which will be used as static wind speed value (in m/s) within the model. If this file is not given, a value of 1 m/s is used by default. As this is a very sensitive parameter, it can be used for calibration of evapotranspiration.
 
+**27)** ```snow_params.ctl```<br>
+(optional)
+
+The two logical parameters do_rad_corr and do_alt_corr allow controlling, whether radiation correction for aspect and slope, and height-depended temperature modifications, respectively, are applied.
+
+```
+#WASA-control file for snow routines
+a0, a1, kSatSnow,	densDrySnow,	specCapRet,	emissivitySnowMin,	emissivitySnowMax,	tempAir_crit,	albedoMin,	albedoMax,	agingRate_tAirPos,	agingRate_tAirNeg,	soilDepth,	soilDens,	soilSpecHeat,	weightAirTemp,	lat,	lon,	do_rad_corr,	do_alt_corr,	tempLaps,	tempAmplitude,	tempMaxOffset,	snowFracThresh   
+0.002	0.0008	0.00004	450	0.05	0.84	0.99	0.2	0.55	0.88	0.00000111	0.000000462	0.1	1300	2.18	0.5	42.4	0.55	.TRUE.	.TRUE.	-0.006	8	2	0.03
+```
+
+*a0*:	Empirical coefficient (m/s); linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1\*WindSpeed<br>
+*a1*:	Empirical coefficient (-)  ; linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1\*WindSpeed<br>
+*kSatSnow*:	Saturated hydraulic conductivity of snow (m/s)<br>
+*densDrySnow*:	Density of dry snow (kg/m³)<br>
+*specCapRet*:	Capill. retention volume as fraction of solid SWE (-)<br>
+*emissivitySnowMin*:	Minimum snow emissivity used for old snow (-)<br>
+*emissivitySnowMax*:	Maximum snow emissivity used for new snow (-)<br>
+*tempAir_crit*:	Threshold temperature for rain-/snowfall (°C)<br>
+*albedoMin*:	Minimum albedo used for old snow (-)<br>
+*albedoMax*:	Maximum albedo used for new snow (-)<br>
+*agingRate_tAirPos*:	Aging rate for air temperatures > 0 (1/s)<br>
+*agingRate_tAirNeg*:	Aging rate for air temperatures < 0 (1/s)<br>
+*soilDepth*:	Depth of interacting soil layer (m)<br>
+*soilDens*:	Density of soil (kg/m3)<br>
+*soilSpecHeat*:	Spec. heat capacity of soil (kJ/kg/K)<br>
+*weightAirTemp*:	Weighting param. for air temp. (-) in 0...1<br>
+*lat*:	Latitude of centre of study area<br>
+*lon*:	Longitude of centre of study area<br>
+*do_rad_corr*:	Modification of radiation with aspect and slope (TRUE or FALSE)<br>
+*do_alt_corr*:	Modification of temperature with altitude of LU (TRUE or FALSE)<br>
+*tempLaps*:	Temperature lapse rate for modification depending on elevation of TC (°C/m)<br>
+*tempAmplitude*:	Temperature amplitude to simulate daily cycle (°C])<br>
+*tempMaxOffset*:	Offset of daily temperature maximum from 12:00 (h)<br>
+*snowFracThresh*:	Threshold to determine when TC snow covered (m)
+
 <a name="3-3-input-files-for-the-river-module"></a>
 ### 3.3 Input files for the river module
 
-The input files for the river module are located in the folder ```Input\\[case_study]\River``` and are summarised in [Table 6](#table-6). Three options are available for the river routing: routing scheme 1 comprises the original river routing using time response functions, routing scheme 2 uses the Muskingum routing and suspended sediment transport and routing scheme 3 uses the Muskingum routing and bedload transport. Routing schemes 2 and 3 enable a spatially distributed representation of river stretch characteristics. Sediment-transport calculations are only possible for routing schemes 2 and 3. The flow calculations are carried out in routing order, i.e. the river stretches which are located most upstream are calculated first. The routing order is specified in ```routing.dat```. The key model input parameters for water and sediment routing are stored in an input file called ```river.dat``` that assigns each sub-basin with a specific map ID a corresponding river stretch. The input file ```response.dat``` contains the time response parameters that were used for the original version of the WASA code (routing scheme 1).
+The input files for the river module are located in the folder ```Input\\[case_study]\River``` and are summarised in [Table 7](#table-7). Three options are available for the river routing: routing scheme 1 comprises the original river routing using time response functions, routing scheme 2 uses the Muskingum routing and suspended sediment transport and routing scheme 3 uses the Muskingum routing and bedload transport. Routing schemes 2 and 3 enable a spatially distributed representation of river stretch characteristics. Sediment-transport calculations are only possible for routing schemes 2 and 3. The flow calculations are carried out in routing order, i.e. the river stretches which are located most upstream are calculated first. The routing order is specified in ```routing.dat```. The key model input parameters for water and sediment routing are stored in an input file called ```river.dat``` that assigns each sub-basin with a specific map ID a corresponding river stretch. The input file ```response.dat``` contains the time response parameters that were used for the original version of the WASA code (routing scheme 1).
 
-<a name="table-6"></a>
-**Table 6:** Input data files for the river component
+<a name="table-7"></a>
+**Table 7:** Input data files for the river component
 
 Parameter File | Content
 ---|---
@@ -1233,9 +1228,10 @@ Example: Sub-basin 4 has pre-specified sediment output of 0.5 t/d for 1 Sep 2005
 <a name="3-4-input-files-for-the-reservoir-module"></a>
 ### 3.4 Input files for the reservoir module
 
-The input files for the reservoir module are located in the folder ```Input\\[case_study]\Reservoir``` and are summarised in Table 7. The files listed below are required according to the simulation option defined in the file ```do.dat```. Reservoirs are considered in the model simulations if the option doreservoir is switched on. For simulations of reservoir water balance the file ```reservoir.dat``` (file 1) is required. Nevertheless, additional files can be given to improve the model results (files 2 to 6). For calculations of reservoir sediment balance, the options doreservoir and dosediment must be switched on. The reservoir sedimentation model consists of two modelling approaches, which may be applied according to reservoir size and data availability. For reservoirs with information about their geometric features (reservoir topography, stage-area and stage-volume curves) and physical properties of sediment deposits, such as deposition thickness, grain size distribution of sediment deposits and sediment densities, a detailed modelling approach to reservoir sedimentation may be applied (files 7 to 9 are required; and files 10 to 12 are used to improve model results). For reservoirs without those characteristics, a simplified modelling approach is used (file 8 is required). Networks of small reservoirs are considered in the model simulations if the option doacudes is switched on. For simulations of water and sediment routing through the reservoir networks the file 13 and 16 are required (files 14, 15 and 17 are used to improve model results).
+The input files for the reservoir module are located in the folder ```Input\\[case_study]\Reservoir``` and are summarised in [Table 8](#table-8). The files listed below are required according to the simulation option defined in the file ```do.dat```. Reservoirs are considered in the model simulations if the option doreservoir is switched on. For simulations of reservoir water balance the file ```reservoir.dat``` (file 1) is required. Nevertheless, additional files can be given to improve the model results (files 2 to 6). For calculations of reservoir sediment balance, the options doreservoir and dosediment must be switched on. The reservoir sedimentation model consists of two modelling approaches, which may be applied according to reservoir size and data availability. For reservoirs with information about their geometric features (reservoir topography, stage-area and stage-volume curves) and physical properties of sediment deposits, such as deposition thickness, grain size distribution of sediment deposits and sediment densities, a detailed modelling approach to reservoir sedimentation may be applied (files 7 to 9 are required; and files 10 to 12 are used to improve model results). For reservoirs without those characteristics, a simplified modelling approach is used (file 8 is required). Networks of small reservoirs are considered in the model simulations if the option doacudes is switched on. For simulations of water and sediment routing through the reservoir networks the file 13 and 16 are required (files 14, 15 and 17 are used to improve model results).
 
-**Table 7:** Input data files for the reservoir component
+<a name="table-8"></a>
+**Table 8:** Input data files for the reservoir component
 
 Parameter File	| Content
 ---|---
@@ -2101,6 +2097,9 @@ Mueller, E.N., Güntner, A., Francke, T., Mamede, G. (2010): Modelling sediment 
 
 <a name="neitsch-et-al-2002"></a>
 Neitsch, S.L., Arnold, J.G., Kiniry, J.R., Williams, J.R., King, K.W. (2002): Soil and Water Assessment Tool. Theoretical Documentation, Version 2000. Published by Texas Water Resources Institute, TWRI Report TR-191.
+
+<a name="rottler-2017"></a>
+Rottler, E. (2017): Implementation of a snow routine into the hydrological model WASA-SED and its validation in a mountainous catchment. MSc Thesis, University Potsdam, Germany. To be published on https://publishup.uni-potsdam.de/opus4-ubp/home).
 
 <a name="williams-1995"></a>
 Williams, J. (1995): The EPIC Model. In: Singh, V. P. (Eds.): Computer Models of Watershed Hydrology. Water Resources Publications, Highlands Ranch, CO., pp. 909-1000.
