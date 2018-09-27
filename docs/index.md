@@ -715,13 +715,14 @@ Subasin-ID[-], LU-ID[-], TC-ID[-], fraction_rocky[-], nbrSVC[-], Soil-ID(30 valu
 …
 ```
 <br>
+
 *Subasin-ID*:	ID of sub-basin (Map-ID), same ordering as in ```hymo.dat```<br>
 *LU-ID*:  ID of corresponding LU (as determined in ```hymo.dat```)<br>
 *TC-ID*:  	ID of corresponding terrain component (as determined in ```soter.dat```)<br>
 *fraction\_rocky*:	   	fraction of impermeable (rock) area in each terrain component \[-]<sup>1</sup> <br>
 *nbrSVC*:	 Number of soil-vegetation components (SVCs) in current TC of  sub-basin<br>
-*Soil-IDs(nbrSVC values)*: 	1<sup>st</sup> row of each block: corresponding soil-IDs as defined in ```soil.dat```<br>
-*Vegetation-ID(nbrSVC values)*:	2<sup>nd</sup> row of each block: corresponding vegetation-ID as defined in ```vegetation.dat``` <br>
+*Soil-IDs (nbrSVC values)*: 	1<sup>st</sup> row of each block: corresponding soil-IDs as defined in ```soil.dat```<br>
+*Vegetation-ID (nbrSVC values)*:	2<sup>nd</sup> row of each block: corresponding vegetation-ID as defined in ```vegetation.dat``` <br>
 *fraction (nbrSVC values)*: Areal fraction of SVCs in current terrain component of current sub-basin \[-]
 
 (\*each Sub-basin, LU, Terrain Component Unit has a block of data in three lines)<br>
