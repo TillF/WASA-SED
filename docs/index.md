@@ -47,7 +47,7 @@ Disclaimer:<br>
 The WASA-SED program is large and complex and extensive knowledge of its design, purpose, and limitations is required in order to apply it properly. The WASA-SED and its source code is freely available under a CC4 licence (“use as you wish, don’t blame us, give credit,…”). See license.txt.
 
 <a name="toc"></a>
-## Table of Content
+## Table of content
 - [1 Introduction](#1-introduction)<br>
 - [2 Program folders and structure](#2-program-folders-and-structure)<br>
   -	[2.1 Hillslope module](#2-1-hillslope-module)<br>
@@ -66,6 +66,20 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 - [5 References](#5-references)<br>
 - [6 Further relevant literature for the WASA-SED model](#6-further-relevant-literature-for-the-wasa-sed-model)<br>
 
+## List of figures
+[Figure 1](#figure-1):
+[Figure 2](#figure-2):
+
+## List of tables
+[Table 1](#table-1): Folder structure of WASA code.
+[Table 2](#table-2): Main subroutines of the main program (```wasa.f90```).
+[Table 3](#table-3):
+[Table 4](#table-4):
+[Table 5](#table-5):
+[Table 6](#table-6):
+[Table 7](#table-7):
+[Table 8](#table-8):
+
 ## 1 Introduction
 
 The WASA-SED model simulates the runoff and erosion processes at the hillslope scale, the transport processes of suspended and bedload fluxes at the river scale and the retention and remobilisation processes of sediments in large reservoirs. The modelling tool enables the evaluation of management options both for sustainable land-use change scenarios to reduce erosion in the headwater catchments as well as adequate reservoir management options to lessen sedimentation in large reservoirs and reservoir networks. The model concept, its spatial discretisation and the numerical components of the hillslope, river and reservoir processes are summarised and current model applications are reviewed in [Mueller et al. (2010)](#mueller-et-al-2010). The hydrological routines of the model are based on the WASA model (Model for Water Availability in Semi-Arid environments), which was developed by [Güntner (2002)](#guentner-2002) and [Güntner and Bronstert (2002,](#guentner-bronstert-2002) [2003)](#guentner-bronstert-2003) to enable the quantification of water availability in semi-arid regions. The WASA-SED model was developed within the joint Spanish-Brazilian-German research project SESAM (Sediment Export from Semi-Arid Catchments: Measurement and Modelling). The existing WASA model code has been extended to include sediment-transport routines for the three new conceptual levels of the WASA-SED model: the hillslope scale, river scale and the reservoir scale for the calculation of sedimentation. This documentation gives a short outline of the structure, computational routines and folder system of the WASA-SED code in [Chapter 2](#program-folders-and-structure), followed by a description of the input files for model parameterisation in [Chapter 3](#input-data) and output files for the hillslope, river and reservoir modules in [Chapter 4](#output-data).
@@ -76,7 +90,7 @@ The WASA-SED model simulates the runoff and erosion processes at the hillslope s
 The WASA-SED model is programmed in Fortran 90 and was tested with Compaq Visual Fortran (6.6.a) and gfortran 4.x compilers on Windows gfortran-4.3 under Linux. The WASA-SED code is organised as presented in [Table 1](#table-1). The main program is named ```wasa.f90``` and calls the key subroutines as summarised in [Table 2](#table-2).
 
 <a name="table-1"></a>
-**Table 1:** Folder structure of WASA code
+**Table 1:** Folder structure of WASA code.
 
 Folder Name | Content
 ---|---
@@ -92,7 +106,7 @@ A complete example input-data set is part of the github repository (see top of d
 The original WASA code version ([Güntner 2002](#guentner-2002), [Güntner and Bronstert 2004](#guentner-bronstert-2004)) was extended within the SESAM-Project to include sediment-transport processes at the hillslope scale using various USLE-derivative approaches, a spatially distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network and a reservoir module that computes the transport of water and sediment as well as sedimentation processes in reservoirs.
 
 <a name="table-2"></a>
-**Table 2:** Main subroutines of the main program (```wasa.f90```)
+**Table 2:** Main subroutines of the main program (```wasa.f90```).
 
 Routine	| Content
 ---|---
@@ -112,7 +126,7 @@ The following sections give some information on the computational background and
 The hillslope module comprises the modelling of the hydrological and sediment-transport processes. The hydrological modelling accounts for interception, evaporation, infiltration, surface and subsurface runoff, transpiration and ground water recharge. Details are given in [Güntner (2002](#guentner-2002), Chapter 4). The main hydrological calculations are carried out in ```hymo_all.f90``` (for daily or hourly time steps). The subroutines that are called within ```hymo_all.f90``` are summarised in [Table 3](#table-3). The temporal sequence of hydrological process modelling is summarised in [Güntner (2002](#guentner-2002), p. 36-37).
 
 <a name="table-3"></a>
-**Table 3:** Main subroutines of ```hymo_all.f90``` (hydrological subroutines)
+**Table 3:** Main subroutines of ```hymo_all.f90``` (hydrological subroutines).
 
 Routine	| Content	| Subroutine	| Content of Subroutine
 ---|---|---|---
@@ -236,7 +250,7 @@ For a semi-automated discretisation of the model domain into landscape units and
 The input files for general purpose, the hillslope, river and reservoir routines are explained below with details on parameter type, units, data structure including examples of the parameterisation files.
 
 <a name="table-4"></a>
-**Table 4:** Summary of model input parameters
+**Table 4:** Summary of model input parameters.
 
 Type |	Model input parameter
 ---|---
@@ -309,7 +323,7 @@ Line 38 (dosnow) defines, if the optional snow routine, implemented by [Rottler 
 38   .t.   //dosnow: activate snow routine
 ```
 
-**Figure 1:** WASA parameter specification file ```do.dat```
+**Figure 1:** WASA parameter specification file ```do.dat```.
 
 ```maxdim.dat``` <br>
 optional \[can be generated with the LUMP package\]<br>
@@ -347,7 +361,7 @@ Example: The example file describes the 3 particle-size-classes clay, silt and s
 
 ```outfiles.dat```<br>
 optional<br>
-The file allows specifying, which output files are desired. Disabling unnecessary output files saves computation time and disk space. The file contains two headerlines, each following line contains a keyword, which is the filename of a possible output file (case insensitive, without the extension .out). If a keyword for a certain output file is not contained in ```outfiles.dat``` the respective file is not created, any existing file of that name is deleted. Information on the content of output files can be found in the respective sections. If ```outfiles.dat``` is not found, WASA-SED creates a default set of output files. 
+The file allows specifying, which output files are desired. Disabling unnecessary output files saves computation time and disk space. The file contains two headerlines, each following line contains a keyword, which is the filename of a possible output file (case insensitive, without the ```extension .out```). If a keyword for a certain output file is not contained in ```outfiles.dat``` the respective file is not created, any existing file of that name is deleted. Information on the content of output files can be found in the respective sections. If ```outfiles.dat``` is not found, WASA-SED creates a default set of output files. 
 
 ```
 This file describes which output files are generated
@@ -567,11 +581,10 @@ LU-ID [-], No._of_TC[-], TC1[-], TC2[-], TC3[-], kfsu[mm/d], length[m], meandep[
 *gw_dist*:			Initial depth of groundwater below surface \[mm] (ignored, unless gw_flag=99)<br>
 *frgw_delay*:		Storage coefficient for groundwater outflow \[day]<br>
 
-Example: The landscape unit with ID 1 has 3 terrain components with the IDs 7, 49 and 11, a hydraulic conductivity of bedrock of 100 mm/d, a mean slope length of 601 m, etc.
-The LU with ID 2 has only 1 terrain component with the ID-Number 2 (i.e. consisting only of one rather homogenous hillslope section, TC2 and TC3 are set to zero), a hydraulic conductivity of bedrock of 100 mm/d, a mean slope length of 1963.7 m, etc. The TCs within a LU can be listed in any order, their position in the toposequence is read from terrain.dat.
+Example: The landscape unit with ID 1 has 3 terrain components with the IDs 7, 49 and 11, a hydraulic conductivity of bedrock of 100 mm/d, a mean slope length of 601 m, etc. The LU with ID 2 has only 1 terrain component with the ID-Number 2 (i.e. consisting only of one rather homogenous hillslope section, TC2 and TC3 are set to zero), a hydraulic conductivity of bedrock of 100 mm/d, a mean slope length of 1963.7 m, etc. The TCs within a LU can be listed in any order, their position in the toposequence is read from terrain.dat.
 LU-ids not lister in ```hymo.dat``` are ignored.
 
-Remarks concerning groundwater: In WASA-SED, the representation of groundwater is yet quite simplistic. The general groundwater regime is essentially controlled by the flag for groundwater (gw_flag) in soter.dat. Currently, the three options for setting gw_flag are gwflag=0, 1 or 99 (see Table below). This determines if the water that leaves the soil column is “lost” for the model (gwflag=0) or enters a linear storage (gwflag=1). Gw_flag=99 is an experimental modelling option which usually should not be chosen.
+Remarks concerning groundwater: In WASA-SED, the representation of groundwater is yet quite simplistic. The general groundwater regime is essentially controlled by the flag for groundwater (gw_flag) in ```soter.dat```. Currently, the three options for setting gw_flag are gwflag=0, 1 or 99 (see [Table 7](#table-7), [8](#table-8), [9](#table-9), respectively). This determines if the water that leaves the soil column is “lost” for the model (gwflag=0) or enters a linear storage (gwflag=1). Gw_flag=99 is an experimental modelling option which usually should not be chosen.
 
 Please note that the depth of the bedrock may be specified in two ways: In ```soil.dat```, the bedrock is assumed beneath the deepest soil horizon, if the bedrock flag is set (bedrock=1). Otherwise (bedrock=0), its depth is taken from the meandep (maxdep for alluvial soils) specification given in ```soter.dat```.
 
@@ -580,7 +593,8 @@ Please note that in the case of alluvial soils, for each option in Tables 1 or 2
 IMPORTANT:
 In any of the above options, riverbed is to be defined in soter.dat. In WASA, only soil horizons of the lowest terrain component which are located at depths above the riverbed are allowed to exfiltrate into the river by lateral flow. Soil horizons below riverbed cannot lose water to the river, but only due to evapotranspiration or percolation to groundwater/bedrock.
 
-**I) Groundwater option Gw_flag=0**
+<a name="table-7"></a>
+**Table 7:** Groundwater option Gw_flag=0.
 
 Modelling options |	Groundwater regime, internal representation of processes | Gw flag (```soter.dat```) | Bed-rock (```soil.dat```) / Add. parameters (```soter.dat```)
 ---|---|---|---
@@ -592,8 +606,8 @@ I.2) Bedrock is taken into account below deepest soil horizon | Hydraulic conduc
 I.2.1) Bedrock is given in ```soil.dat```	| See 1.2) | 0 | 1 / Kfsu, riverbed
 I.2.2) If bedrock is not given in ```soil.dat```, bedrock is assumed to be in the depth defined by meandep (or below deepest horizon given in ```soil.dat``` if its depth is greater than meandep) | See 1.2) |	0 | 0 / Meandep, maxdep, kfsu, riverbed
 
-
-**II) Groundwater option Gw_flag=1**
+<a name="table-8"></a>
+**Table 8:** Groundwater option Gw_flag=1.
 
 Modelling options | Groundwater regime, internal representation of processes | Gw flag (```soter.dat```) | Bed-rock (```soil.dat```) / Add. parameters (```soter.dat```)
 ---|---|---|---
@@ -603,8 +617,8 @@ II.2) Bedrock is taken into account below deepest soil horizon | The hydraulic c
 II.2.1) Bedrock is given in ```soil.dat``` | See 2.2) | 1 | 1 / Kfsu, frgw_delay, riverbed
 II.2.2) If bedrock is not given in soil.dat, bedrock is assumed to be in the depth defined by meandep (or below deepest horizon given in ```soil.dat``` if the profile depth is greater than meandep) | See 2.2) | 1 | 0 / Meandep, maxdep, kfsu, frgw_delay, riverbed
 
-
-**III) Groundwater option Gw_flag=99**
+<a name="table-9"></a>
+**Table 9:** Groundwater option Gw_flag=99.
 
 Experimental option, not verified!
 
@@ -722,7 +736,6 @@ Soil-ID[-], number(horizons)[-], res[Vol-], PWP[-], FK2.5[-], FK1.8[-], nFK[-], 
     2    4  0.070  0.094  0.164  0.240  0.146  0.452   250.0    6229.629   67.2  0.3816    9.07 0.001 0  0.075  0.102  0.176  0.253  0.151  0.453   250.0    5250.267   71.4  0.3655    9.56 0.001 0  0.076  0.106  0.184  0.262  0.156  0.458   500.0    5368.695   82.4  0.3558   10.96 0.000 0  0.066  0.087  0.155  0.232  0.145  0.462   500.0    8344.087   56.4  0.3903    7.67 0.225 0 0 1
     
     3    3  0.075  0.104  0.191  0.278  0.174  0.396   100.0    1020.368  154.2  0.3666   20.89 0.000 0  0.089  0.126  0.215  0.297  0.170  0.434   400.0    1381.206  107.1  0.3192   14.18 0.000 0  0.070  0.097  0.181  0.270  0.173  0.434   500.0    2655.635  102.0  0.3741   13.87 0.000 0 0 0
-
 …
 ```
 
@@ -1077,10 +1090,10 @@ a0, a1, kSatSnow,	densDrySnow,	specCapRet,	emissivitySnowMin,	emissivitySnowMax,
 <a name="3-3-input-files-for-the-river-module"></a>
 ### 3.3 Input files for the river module
 
-The input files for the river module are located in the folder ```Input\\[case_study]\River``` and are summarised in [Table 7](#table-7). Three options are available for the river routing: routing scheme 1 comprises the original river routing using time response functions, routing scheme 2 uses the Muskingum routing and suspended sediment transport and routing scheme 3 uses the Muskingum routing and bedload transport. Routing schemes 2 and 3 enable a spatially distributed representation of river stretch characteristics. Sediment-transport calculations are only possible for routing schemes 2 and 3. The flow calculations are carried out in routing order, i.e. the river stretches which are located most upstream are calculated first. The routing order is specified in ```routing.dat```. The key model input parameters for water and sediment routing are stored in an input file called ```river.dat``` that assigns each sub-basin with a specific map ID a corresponding river stretch. The input file ```response.dat``` contains the time response parameters that were used for the original version of the WASA code (routing scheme 1).
+The input files for the river module are located in the folder ```Input\\[case_study]\River``` and are summarised in [Table 10](#table-10). Three options are available for the river routing: routing scheme 1 comprises the original river routing using time response functions, routing scheme 2 uses the Muskingum routing and suspended sediment transport and routing scheme 3 uses the Muskingum routing and bedload transport. Routing schemes 2 and 3 enable a spatially distributed representation of river stretch characteristics. Sediment-transport calculations are only possible for routing schemes 2 and 3. The flow calculations are carried out in routing order, i.e. the river stretches which are located most upstream are calculated first. The routing order is specified in ```routing.dat```. The key model input parameters for water and sediment routing are stored in an input file called ```river.dat``` that assigns each sub-basin with a specific map ID a corresponding river stretch. The input file ```response.dat``` contains the time response parameters that were used for the original version of the WASA code (routing scheme 1).
 
-<a name="table-7"></a>
-**Table 7:** Input data files for the river component
+<a name="table-10"></a>
+**Table 10:** Input data files for the river component.
 
 Parameter File | Content
 ---|---
@@ -1228,10 +1241,10 @@ Example: Sub-basin 4 has pre-specified sediment output of 0.5 t/d for 1 Sep 2005
 <a name="3-4-input-files-for-the-reservoir-module"></a>
 ### 3.4 Input files for the reservoir module
 
-The input files for the reservoir module are located in the folder ```Input\\[case_study]\Reservoir``` and are summarised in [Table 8](#table-8). The files listed below are required according to the simulation option defined in the file ```do.dat```. Reservoirs are considered in the model simulations if the option doreservoir is switched on. For simulations of reservoir water balance the file ```reservoir.dat``` (file 1) is required. Nevertheless, additional files can be given to improve the model results (files 2 to 6). For calculations of reservoir sediment balance, the options doreservoir and dosediment must be switched on. The reservoir sedimentation model consists of two modelling approaches, which may be applied according to reservoir size and data availability. For reservoirs with information about their geometric features (reservoir topography, stage-area and stage-volume curves) and physical properties of sediment deposits, such as deposition thickness, grain size distribution of sediment deposits and sediment densities, a detailed modelling approach to reservoir sedimentation may be applied (files 7 to 9 are required; and files 10 to 12 are used to improve model results). For reservoirs without those characteristics, a simplified modelling approach is used (file 8 is required). Networks of small reservoirs are considered in the model simulations if the option doacudes is switched on. For simulations of water and sediment routing through the reservoir networks the file 13 and 16 are required (files 14, 15 and 17 are used to improve model results).
+The input files for the reservoir module are located in the folder ```Input\\[case_study]\Reservoir``` and are summarised in [Table 11](#table-11). The files listed below are required according to the simulation option defined in the file ```do.dat```. Reservoirs are considered in the model simulations if the option doreservoir is switched on. For simulations of reservoir water balance the file ```reservoir.dat``` (file 1) is required. Nevertheless, additional files can be given to improve the model results (files 2 to 6). For calculations of reservoir sediment balance, the options doreservoir and dosediment must be switched on. The reservoir sedimentation model consists of two modelling approaches, which may be applied according to reservoir size and data availability. For reservoirs with information about their geometric features (reservoir topography, stage-area and stage-volume curves) and physical properties of sediment deposits, such as deposition thickness, grain size distribution of sediment deposits and sediment densities, a detailed modelling approach to reservoir sedimentation may be applied (files 7 to 9 are required; and files 10 to 12 are used to improve model results). For reservoirs without those characteristics, a simplified modelling approach is used (file 8 is required). Networks of small reservoirs are considered in the model simulations if the option doacudes is switched on. For simulations of water and sediment routing through the reservoir networks the file 13 and 16 are required (files 14, 15 and 17 are used to improve model results).
 
-<a name="table-8"></a>
-**Table 8:** Input data files for the reservoir component
+<a name="table-11"></a>
+**Table 11:** Input data files for the reservoir component.
 
 Parameter File	| Content
 ---|---
@@ -1626,7 +1639,10 @@ The location of the output folder is specified in the ```do.dat```. By default, 
 <a name="4-1-output-of-the-hillslope-module"></a>
 ### 4.1 Output of the hillslope module
 
-The hillslope routine generates the following output files:
+The output files generated by the hillslope routine are shown in [Table 12](#table-12).
+
+<a name="table-12"></a>
+**Table 12:** Output files of the hillslope module.
 
 Output file | Content
 ---|---
@@ -1723,7 +1739,10 @@ Example: After each time step, e.g. hourly, the discharge is given for each sub-
 <a name="4-3-output-of-the-reservoir-module"></a>
 ### 4.3 Output of the reservoir module
 
-The reservoir module simulates the water and sediment transport through the reservoirs located in the study area. Currently, the output comprises results on water balance, hydraulic calculations, sediment transport and bed elevation changes for all reservoirs located at the outlet point of the sub-basins. The results are printed for all outlet reservoirs separately, identified by the Map-ID of the sub-basin where it is located. Additional files are also printed for the reservoir size classes. The following files are generated:
+The reservoir module simulates the water and sediment transport through the reservoirs located in the study area. Currently, the output comprises results on water balance, hydraulic calculations, sediment transport and bed elevation changes for all reservoirs located at the outlet point of the sub-basins. The results are printed for all outlet reservoirs separately, identified by the Map-ID of the sub-basin where it is located. Additional files are also printed for the reservoir size classes. [Table 13](#table-13) shows the generated files.
+
+<a name="table-13"></a>
+**Table 13:** Output files of the reservoir module.
 
 Nr. |Output file | Content
 ---|---|---
