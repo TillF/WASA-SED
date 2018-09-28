@@ -1258,25 +1258,25 @@ The input files for the reservoir module are located in the folder ```Input\\[ca
 <a name="table-11"></a>
 **Table 11:** Input data files for the reservoir component.
 
-Parameter File	| Content
+ |Parameter File	| Content
 ---|---
-1) ```reservoir.dat``` | Specification of reservoir parameters
-2) ```lateral_inflow.dat``` (optional) | Specification of lateral inflow into the sub-basin’s reservoir
-3) ```operat_rule.dat``` (optional) | Specification of reservoir operation rule
-4) ```operat_bottom.dat``` (optional) | Specification of operation rule of reservoir bottom outlets
-5) ```cav.dat``` (optional) | Specification of stage-area and stage-volume curves of the sub-basin’s reservoir
-6) ```intake.dat``` (optional) | Specification of measured data on regulated outflow discharge through intake devices from the sub-basin’s reservoir. This file is a time series file and thus need to be in directory Time_series!
-7) ```hydraul_param.dat``` (optional)	| Specification of hydraulic parameters of the sub-basin’s reservoir
-8) ```sed.dat``` | Specification of sedimentation parameters of the sub-basin’s reservoir
-9) ```cross_sec_”Map-ID”.dat``` (optional) | Specification of cross section geometry of the sub-basin’s reservoir (sub-basin with a specific Map-ID)
-10) ```original_sec_”Map-ID”.dat``` | (optional)	Specification of original cross section geometry of the sub-basin’s reservoir (sub-basin with a specific Map-ID)
-11) ```sizedist_”Map-ID”.dat``` (optional) | Specification of size distribution of original bed material along the cross sections of the sub-basin’s reservoir (sub-basin with a specific Map-ID)
-12) ```main_channel.dat``` (optional) | Specification of main channel geometry of the sub-basin’s reservoir
-13) ```lake.dat``` | Specification of parameters for the reservoir size classes
-14) ```lake_maxvol.dat``` (optional) | Specification of water storage capacity for the reservoir size classes
-15) ```lake_year.dat``` (optional) | Specification of changes on the number of reservoirs in the size classes
-16) ```lake_number.dat``` | Specification of total number of reservoirs in the size classes
-17) ```lake_frarea.dat``` (optional) | Specification of runoff contributing area for the reservoir size classes
+1 | ```reservoir.dat``` | Specification of reservoir parameters
+2 | ```lateral_inflow.dat``` (optional) | Specification of lateral inflow into the sub-basin’s reservoir
+3 | ```operat_rule.dat``` (optional) | Specification of reservoir operation rule
+4 | ```operat_bottom.dat``` (optional) | Specification of operation rule of reservoir bottom outlets
+5 | ```cav.dat``` (optional) | Specification of stage-area and stage-volume curves of the sub-basin’s reservoir
+6 | ```intake.dat``` (optional) | Specification of measured data on regulated outflow discharge through intake devices from the sub-basin’s reservoir. This file is a time series file and thus need to be in directory Time_series!
+7 | ```hydraul_param.dat``` (optional)	| Specification of hydraulic parameters of the sub-basin’s reservoir
+8 | ```sed.dat``` | Specification of sedimentation parameters of the sub-basin’s reservoir
+9 | ```cross_sec_”Map-ID”.dat``` (optional) | Specification of cross section geometry of the sub-basin’s reservoir (sub-basin with a specific Map-ID)
+10 | ```original_sec_”Map-ID”.dat``` | (optional)	Specification of original cross section geometry of the sub-basin’s reservoir (sub-basin with a specific Map-ID)
+11 | ```sizedist_”Map-ID”.dat``` (optional) | Specification of size distribution of original bed material along the cross sections of the sub-basin’s reservoir (sub-basin with a specific Map-ID)
+12 | ```main_channel.dat``` (optional) | Specification of main channel geometry of the sub-basin’s reservoir
+13 | ```lake.dat``` | Specification of parameters for the reservoir size classes
+14 | ```lake_maxvol.dat``` (optional) | Specification of water storage capacity for the reservoir size classes
+15 | ```lake_year.dat``` (optional) | Specification of changes on the number of reservoirs in the size classes
+16 | ```lake_number.dat``` | Specification of total number of reservoirs in the size classes
+17 | ```lake_frarea.dat``` (optional) | Specification of runoff contributing area for the reservoir size classes
 
 **1)** ```reservoir.dat```
 
