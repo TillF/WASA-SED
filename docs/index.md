@@ -1258,8 +1258,8 @@ The input files for the reservoir module are located in the folder ```Input\\[ca
 <a name="table-11"></a>
 **Table 11:** Input data files for the reservoir component.
 
- |Parameter File	| Content
----|---
+Nr. |Parameter File	| Content
+---|---|---
 1 | ```reservoir.dat``` | Specification of reservoir parameters
 2 | ```lateral_inflow.dat``` (optional) | Specification of lateral inflow into the sub-basin’s reservoir
 3 | ```operat_rule.dat``` (optional) | Specification of reservoir operation rule
