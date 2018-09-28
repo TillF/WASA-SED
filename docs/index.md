@@ -353,7 +353,7 @@ optional \[can be generated with the LUMP package\]<br>
 The file ```part_class.dat``` is only necessary if sediment transport in multiple particle-size classes is to be modelled. If ```part_class.dat``` is missing, sediment transport will be modelled for a single particle-size class only. Otherwise, the file defines the number and the properties of the particle sizes that will be modelled. Please note that class numbering has to be continuous, starting with 1. The particle size classes must be ordered from fine to coarse.
 
 ```
-Particle size classes to be used in sediment modelling
+# Particle size classes to be used in sediment modelling
 class_number    upper_limit[mm]
 1	            0.002
 2	            0.063
@@ -370,8 +370,8 @@ optional<br>
 The file allows specifying, which output files are desired. Disabling unnecessary output files saves computation time and disk space. The file contains two headerlines, each following line contains a keyword, which is the filename of a possible output file (case insensitive, without the ```extension .out```). If a keyword for a certain output file is not contained in ```outfiles.dat``` the respective file is not created, any existing file of that name is deleted. Information on the content of output files can be found in the respective sections. If ```outfiles.dat``` is not found, WASA-SED creates a default set of output files. 
 
 ```
-This file describes which output files are generated
-put any character before the files you don't want to be created
+# This file describes which output files are generated
+# put any character before the files you don't want to be created
 daily_actetranspiration
 #daily_potetranspiration
 #daily_qhorton
@@ -537,7 +537,7 @@ The model domain is divided into sub-basins; each sub-basin has an individual Ma
 \[can be generated with the LUMP package]
 
 ```
-Specification of the sub-basins and their total number, type & areal fraction of LU units
+# Specification of the sub-basins and their total number, type & areal fraction of LU units
 Subasin-ID [-], Area[km**2],  nbr[-],  LU-IDs[-], areal fraction of LU[-]
 49	  10    4   19   87   90  135  0.357  0.147  0.214  0.282
 50	  15    2   19   87   0.827  0.173
@@ -565,7 +565,7 @@ Important: Any subbasin that is not listed in the file ```routing.dat``` will be
 \[can be generated with the LUMP package]
 
 ```
-Specification of LU units										
+# Specification of LU units										
 LU-ID [-], No._of_TC[-], TC1[-], TC2[-], TC3[-], kfsu[mm/d], length[m], meandep[mm], maxdep[mm], riverbed[mm], gwflag[0/1], gw_dist[mm], frgw_delay[day]
 1	3	7	49	   11	100	601	  -1	-1	1500	0	0	1
 2	1	2	100	1963.7   -1	 -1	1500	 0	   0	1
@@ -636,7 +636,7 @@ III) Groundwater in soil zone. The initial depth of the groundwater surface belo
 \[can be generated with the LUMP package]
 
 ```
-Specification of terrain components
+# Specification of terrain components
 TC-ID, fraction, slope [%], position [-]
 1      0.65      12         1
 2      1.00       2         2
@@ -660,7 +660,7 @@ SDRs are applied to raw erosion on TC-scale before transport capacity limitation
 (optional, mandatory for sediment module and saving/loading of model states)
 
 ```
-Specifications of soil vegetation components and erosion parameters
+# Specifications of soil vegetation components and erosion parameters
 ID,	soil_id,	veg_id	musle_k[(ton acre hr)/(acre ft-ton inch)],	musle_c[-],	musle_p[-],	coarse_fraction[%],	manning_n
 11	13	21	0.13	1.0	1.0	0.8	0.011
 …
@@ -683,7 +683,7 @@ Example: The SVC with the ID 11 consists of the soil with ID 13 (as specified in
 \[can be generated with the LUMP package]
 
 ```
-Specification of which SVCs are contained in each TC
+# Specification of which SVCs are contained in each TC
 TC-ID[-],	SVC-ID[-],	fraction[-] 
 11			12			1.0
 12			13			0.2
@@ -703,8 +703,8 @@ Example: The TC with the ID 11 consists only of the SVC with the ID 12. The TC w
 \[can be generated with the LUMP package]
 
 ```
-Specification of soil-vegetation components (links LU, terrain component, soil and vegetation properties) 
-For each block: first line Soil IDs, Second line Land use, third line fraction of SVCs in each terrain component
+# Specification of soil-vegetation components (links LU, terrain component, soil and vegetation properties) 
+# For each block: first line Soil IDs, Second line Land use, third line fraction of SVCs in each terrain component
 Subasin-ID[-], LU-ID[-], TC-ID[-], fraction_rocky[-], nbrSVC[-], Soil-ID(30 values)[-], Vegetation-ID (30 values)[-], fraction (30 values)[-]
 49	19	25	0.12	9	86	30	77	86	85	86 …	43  in total max. 30 IDs*
 49	19	25	0.12	9	8002	8004	8005	8500	7203	9203 …	7203  
@@ -735,7 +735,7 @@ The order of the sub-basins in the first column has to follow the same order of 
 \[can be generated with the LUMP package]
 
 ```
-Specification of soil parameters
+# Specification of soil parameters
 Soil-ID[-], number(horizons)[-], res[Vol-], PWP[-], FK2.5[-], FK1.8[-], nFK[-], saturated[-], depth[mm], ks[mm/d], suction[mm], pore-size-index[-], bubblepressure[cm], coarse_frag[-], shrinks[0/1], bedrock[0/1], alluvial[0/1] (1 line)\*
 
     1    3  0.073  0.102  0.184  0.270  0.168  0.472   200.0    504 9.037   72.9  0.3593    9.80 0.000 0  0.102  0.160  0.265  0.349  0.188  0.472   600.0    1096.288  125.5  0.2705   16.16 0.000 0  0.064  0.084  0.152  0.229  0.145  0.472   300.0  7709.267   46.1  0.3891  6.31 0.000 0 0 0 (1 line)\*
@@ -773,7 +773,7 @@ Example: The soil class with the ID 1 has 3 horizons in the soil profile. Consec
 \[can be generated with the LUMP package]
 
 ```
-Particle size distribution of topmost horizons of soils
+# Particle size distribution of topmost horizons of soils
 soil_id,	part_class_id,	fraction[-]
 1		1				0.3
 1		2				0.4
@@ -794,7 +794,7 @@ Example: The topmost horizon of soil 1 contains 30 % of particles falling into t
 \[can be generated with the LUMP package]
 
 ```
-Specification of vegetation parameters
+# Specification of vegetation parameters
 Veg-ID, Stomata_Resistance[s/m], minsuction[hPa], maxsuction[hPa], height[m], root-depth[m], LAI [-], albedo[-] 
 9101 200 10000	30000 5	 5.5  6  6  1.5 1.5  1.7 1.8	1 5.5  5.5  1.5 0.23	0.17	0.17	0.21
 9102 175 10000	30000 3 3  3  3   1.25  1.25	1.25  1.25  0.4 4 4 0.8 0.25	0.18	0.18	0.23
@@ -821,8 +821,8 @@ Example: The landuse/vegetation class with ID 9101 has a stomata resistance with
 ```n_seasons.dat``` (optional)
 
 ```
-Specification of the rainy season (per year)
-for the interpolation of temporal distribution of vegetation characteristics (Rootdepth,height,lai,albedo)
+# Specification of the rainy season (per year)
+# for the interpolation of temporal distribution of vegetation characteristics (Rootdepth,height,lai,albedo)
 Subasin,	Veg_id,	Year,	DOY1,	DOY2,	DOY3,	DOY4
 49	2	1980	10	40	175	205
 49	-1	1980	20	40	175	205
@@ -831,7 +831,7 @@ Subasin,	Veg_id,	Year,	DOY1,	DOY2,	DOY3,	DOY4
 -1	-1	-1	36	151	181
 …
 ```
-<br>
+
 *Subasin-ID*: Map-ID of sub-basin<br>
 *Year*:	Simulation year(s), each individual year has to be listed in the file<br>
 *Veg\_id*: (optional column) option for vegetation-specific dynamics<br>
@@ -861,7 +861,7 @@ Subasin-ID,	mean_kf-calib-factor
 2	4.5 
 …
 ```
-<br>
+
 *Subasin-ID*:		Map-ID of sub-basin<br>
 *mean\_kf-calib-factor*:	scaling factor (actually a divisor)
 
@@ -897,7 +897,7 @@ Start-Subasin-ID, Flag(reservoir/river), Flow(m3/s,) Loss(%), Destination-Subasi
         31         1         2      0.06        30         1      1993
         30         1         2      0.02        29         2      1993
 ```
-<br>
+
 *Start-Subasin-ID*:		ID of subbasin (source of water abstraction)<br>
 *Flag(reservoir/river)*:		?<br>
 *Flow(m3/s)*:			amount of re-routed water<br>
@@ -922,44 +922,43 @@ transport_limit_mode	2
 transp_cap_a	0.016111	
 transp_cap_b	1.807	
 ```
-<br>
+
 *Application scale*:		0: apply equations on TC-scale; 1: apply on subbasin-scale<br>
-*Erosion equation*:		erosion equation to be used
-1: USLE, 2: Onstad-Foster, 3: MUSLE, 4: MUST<br>
+*Erosion equation*:		erosion equation to be used 1: USLE, 2: Onstad-Foster, 3: MUSLE, 4: MUST<br>
 *ri\_05\_coeffs*:	needed for USLE and OF: coefficients for estimation of maximum half-hour rainfall intensity (ri\_05) from daily/hourly rainfall data (R\_dt): ri\_05=a\*R\_dt^b. <br>
 *transport\_limit\_mode*:		different modes how/if transport capacity of runoff is limited: 1: no transport capacity limit; 2: transport capacity according to Everaert (1991); 3: transport capacity computed from MUSLE with maximum erodibility<br>
 *transp\_cap\_a*:	empirical factor for computing suspended sediment transport capacity in river (a \* vel_peak \*\* b)<br>
 *transp\_cap\_b*:		empirical factor for computing suspended sediment transport capacity in river (a \* vel_peak \*\* b)
 
-This file and any of its entries are optional. If not present, default values are used (Application scale=0; Erosion equation=3, ri_05_coeffs = (a_i30=1.1630; b_i30=0.667981 for daily resolution;  a_i30=1; b_i30=1 for hourly resolution); transport_limit_mode=2, transp_cap_a=0.016111, transp_cap_b=1.707).
+This file and any of its entries are optional. If not present, default values are used (Application scale=0; Erosion equation=3, ri\_05\_coeffs = (a\_i30=1.1630; b\_i30=0.667981 for daily resolution;  a\_i30=1; b\_i30=1 for hourly resolution); transport\_limit\_mode=2, transp\_cap\_a=0.016111, transp\_cap\_b=1.707).
 
 **15)** ```gw_storage.stat, intercept_storage.stat, soil_moisture.stat, interflow_storage.stat, snow_storage.stat```<br>
 ```lake_volume.stat, river_storage.stat```<br>
 (optional)
 
 ```
-#Ground water storage (for analysis or model re-start)
+# Ground water storage (for analysis or model re-start)
 Subbasin,	LU,	volume_[mm],	area_[m²]
 1 11111	39.51	1013437.4
 …
 ```
 
 ```
-#Interception storage (for analysis or model re-start)
+# Interception storage (for analysis or model re-start)
 Subbasin,	LU,	TC,	SVC,	storage_[mm],	area_[m²]
 1	11111	5	16010	    0.00	     73491.9
 …
 ```
 
 ```
-#Soil moisture status (for analysis or model re-start)
+# Soil moisture status (for analysis or model re-start)
 Subbasin,	LU,	TC,	SVC,	horizon,	watercontent_[mm],	area_[m²]
 1	11111	5	16010	1	   26.70	     73491.9
 …
 ```
 
 ```
-#Interflow storage (for analysis or model re-start)
+# Interflow storage (for analysis or model re-start)
  Subbasin,	LU,	TC,	horizon,	storage_[m3]
 1	1	3	1	   0.000
 ...
@@ -972,19 +971,19 @@ Subbasin,	LU,	horizon,	storage [m],	energy [kJ/m²],	albedo [-]
 ```
 
 ```
-#Lake volume status (for analysis or model re-start)
+# Lake volume status (for analysis or model re-start)
 Subbasin	reservoir_size_class,	volume[m^3]
 1	1	       0.00
 ```
 
 ```
-#UHG routing: values of routed discharge per timestep of unit hydrograph
+# UHG routing: values of routed discharge per timestep of unit hydrograph
 Subbasin	[n_h x timestep]
 101	1.286	0.649	0.074
 ```
 
 ```
-#Muskingum routing: river reach volume status (for analysis or model re-start)
+# Muskingum routing: river reach volume status (for analysis or model re-start)
 Subbasin	volume[m^3]
 1	2033.808
 ```
@@ -1004,15 +1003,18 @@ The structure of ```river_storage.stat``` depends on the routing option chosen (
 
 **16)** ```frac_direct_gw.dat```<br>
 (optional)
+
 ```
 0.7
 ```
+
 This file contains a single value x that specifies the fraction of the groundwater (formed in the LUs) that is routed directly into the river. The remaining fraction 1-x enters the lowermost TC as subsurface flow. Low values of x tend to reduce periods of very low flow in ephemeral rivers. Default x is 1.
 
 ```frac_direct_gw.dat``` resides in the root of the WASA-SED input-directory as specified in ```do.dat```.
 
 **17)** ```beta_fac_lu.dat```<br>
 (optional)
+
 ```
 # specified correction factor for beta (rill/interrill ratio, used for the computation of L-factor, see Renard, 1997, pp.101
 lu_id,	beta_factor
@@ -1020,8 +1022,8 @@ lu_id,	beta_factor
 21111	0.5
 …
 ```
-<br>
-*Lu_id*:		landscape unit ID<br>
+
+*Lu\_id*:		landscape unit ID<br>
 *beta\_factor*:	factor for modification of beta
 
 This file allows specifying a correction factor for beta for selected LUs. Beta describes the ratio of
@@ -1179,6 +1181,7 @@ Subasin-ID,lag time [d],retention[d]
 1	4	7
 …
 ```
+
 *Subasin-ID*:	Map-ID of sub-basin<br>
 *lag time*: Lag time between runoff input to sub-basin and first runoff response at its outlet in \[days]<br>
 *retention*:	Retention specifies the maximum retention time in the sub-basin in \[days]
@@ -1216,6 +1219,7 @@ Date	Timestep	Subbasin-ID.
 3092005	1	0.2
 …
 ```
+
 *Date*: Date in the format ddmmyyyy <br>
 *Timestep*: timestep (not interpreted in daily resolution, 1..24 for hourly resolution)<br>
 *Subasin-ID*: Map-ID of sub-basin
@@ -1236,6 +1240,7 @@ Date	Timestep	Subbasin-ID.
 3092005	1	0.2
 …
 ```
+
 *mean PSD*:	mean particle size distribution to be used for all records, consists of n_sed_classes fraction values that sum to 1 <br>
 *Date*: Date in the format ddmmyyyy <br>
 *Timestep*:	timestep (not interpreted in daily resolution, 1..24 for hourly resolution) <br>
@@ -1442,6 +1447,7 @@ Subasin-ID, section-ID, nbpoints, y_original[m]
 60	2	12	460	450	449	…	455	460			in totalmax 200 IDs
 …
 ```
+
 *Subasin-ID*:	Map-ID of sub-basin <br>
 *Section-ID*:	Map-ID of cross-section <br>
 *nbrpoints*: Number of points at the cross section of the sub-basin’s reservoir <br>
@@ -1577,7 +1583,7 @@ The WASA model requires time series with a temporal resolution of one hour or on
 
 ```
 # Daily average temperature (in degree Celcius) for each subasin, ordered according to Map-IDs
-Date	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID
+Date,	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID
 0	0	49	50	1	44	10	4	15	39	3	29
 01011980	1	15	15	15	15	15	15	15	15	15	15
 02011980	2	15	15	15	15	15	15	15	15	15	15
@@ -1589,7 +1595,7 @@ Date	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Su
 
 ```
 # Daily average precipitation [mm/d] for each subasin, ordered according to Map-IDs				
-Date	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID
+Date,	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID
 0	0	49	50	1	44	10	4	15	39	3	29
 01011980	1	40	40	40	40	40	40	40	40	40	40
 02011980	2	40	40	40	40	40	40	40	40	40	40
@@ -1601,7 +1607,7 @@ Date	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Su
 
 ```
 # Daily average humidity [in %] for each subasin, ordered according to Map-IDs
-Date	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID
+Date,	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID
 0	0	49	50	1	44	10	4	15	39	3	29
 01011980	1	75	75	75	75	75	75	75	75	75	75
 02011980	2	75	75	75	75	75	75	75	75	75	75
@@ -1613,7 +1619,7 @@ Date	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Su
 
 ```
 # Daily average shortwave radiation [in W/m2] for each subasin, ordered according to Map-IDs
-Date	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID
+Date,	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID
 0	0	49	50	1	44	10	4	15	39	3	29
 01011980	1	260	260	260	260	260	260	260	260	260	260
 02011980	2	260	260	260	260	260	260	260	260	260	260
@@ -1684,9 +1690,9 @@ The output files ```daily_water_subbasin.out```, ```sediment_production.out``` a
 
 ```
 # Daily actual evapotranspiration [mm/d]  for all sub-basins (MAP-IDs)
-Year Day            57            15            20            60
-  1980     1         3.495         2.974         3.258         3.412
-  1980     2         3.504         3.076         3.424         3.436 
+Year,    Day,      57,           15,           20,           60
+1980     1         3.495         2.974         3.258         3.412
+1980     2         3.504         3.076         3.424         3.436 
     …
 ```
     
@@ -1791,13 +1797,11 @@ Nr. |Output file | Content
 **1)** ```res_”Map-ID”_watbal.out```
 
 ```
-Subasin-ID, year, day, hour, inflow(m**3/s), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s),
- qout(m**3/s), elevation(m), area(m**2), volume(m**3)
+Subasin-ID, year, day, hour, inflow(m**3/s), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), elevation(m), area(m**2), volume(m**3)
 60  1980   1   1     55.04      6.12      0.00      0.00      6.12    440.86     5255332.50    49625572.00
 60  1980   1   2     42.01      6.12      0.00      0.00      6.12    441.48     4580464.00    52922032.00
 …
 ```
-<br>
 
 *Subasin-ID*: Map-ID of sub-basin <br>
 *year*: Year of simulation <br>
@@ -1836,14 +1840,12 @@ Example: After each time step, e.g. after one day, the reservoir of the sub-basi
 **3)** ```res_”Map-ID”_cav.out```
 
 ```
-Subasin-ID, year, day, hour, 1st row: elev_bat(m), 2nd row: area_bat(m**2), 3rd row: 
- vol_bat(m**3)
-60  1980   1   1         413.34          415.00            416.00	…	          447.00              447.67              448.00
-60  1980   1   1             0.00      79176.34      122767.10	…	  5872791.16      6020551.37      7288430.00
-60  1980   1   1             0.00      35021.39      110657.75	…	86999642.73    91744848.62    94132893.50
+Subasin-ID, year, day, hour, 1st row: elev_bat(m), 2nd row: area_bat(m**2), 3rd row: vol_bat(m**3)
+60  1980   1   1         413.34        415.00         416.00	…	        447.00          447.67          448.00
+60  1980   1   1           0.00      79176.34      122767.10	…	    5872791.16      6020551.37      7288430.00
+60  1980   1   1           0.00      35021.39      110657.75	…   	86999642.73     91744848.62     94132893.50
 …
 ```
-<br>
 
 *Subasin-ID*: Map-ID of sub-basin <br>
 *year*: Year of simulation <br>
@@ -1864,18 +1866,17 @@ Subasin-ID, year, day, hour, section-ID, depth_sec(m), watelev_sec(m), area_sec(
 60  1980   1   1    2          1.376        446.956         33.455         56.513      0.345E-02       0.585371       1.645158      55.038498
 …
 ```
-<br>
 
 *Subasin-ID*: Map-ID of sub-basin <br>
 *year*: Year of simulation <br>
 *day*: Day of simulation <br>
 *hour*: Hour of simulation <br>
 *section-ID*: Map-ID of cross-section in the sub-basin's reservoir <br>
-*depth_sec*: Water depth of each cross section in the sub-basin's reservoir \[m] <br>
-*watelev_sec*: Water elevation of each cross section in the sub-basin's reservoir \[m] <br>
+*depth\_sec*: Water depth of each cross section in the sub-basin's reservoir \[m] <br>
+*watelev\_sec*: Water elevation of each cross section in the sub-basin's reservoir \[m] <br>
 *area\_sec*: Wetted area of each cross section in the sub-basin's reservoir \[m<sup>2</sup>] <br>
 *topwidth\_sec*: Top width of each cross section in the sub-basin's reservoir \[m] <br>
-*energslope_sec*: Slope of energy-grade line of each cross section in the sub-basin's reservoir \[-] <br>
+*energslope\_sec*: Slope of energy-grade line of each cross section in the sub-basin's reservoir \[-] <br>
 *hydrad\_sec*: Hydraulic radius of each cross section in the sub-basin's reservoir \[m] <br>
 *meanvel\_sec*: Mean velocity of each cross section in the sub-basin's reservoir \[m/s] <br>
 *discharge\_sec*: Discharge of each cross section in the sub-basin's reservoir \[m<sup>3</sup>/s]
@@ -1890,7 +1891,6 @@ Subasin-ID, section-ID, year, day, hour, nbr. points, y-axis(m)
 60   1   1980   1   2   11     460.000000     451.000000     450.000000	…	450.000000     451.000000     460.000000
 …
 ```
-<br>
 
 *Subasin-ID*: Map-ID of sub-basin <br>
 *section-ID*: Map-ID of cross-section in the sub-basin's reservoir <br>
@@ -1958,7 +1958,7 @@ Subasin-ID, year, day, hour, nbr. classes, sedcomp_outflow(-)
 
 Example: After each time step, e.g. after one day, the reservoir of the sub-basin with the Map-ID 60 has the following effluent size distribution for the given sediment classes (e.g. three sediment classes): 0.999, 0.001, and 0.000. Currently, the model generates an output file for each reservoir considered in the simulation (e.g. ```res_60 _sedcomposition.out``` referred to sub-basin with Map-ID 60).
 
-**9)** ```lake_ inflow_r.out```
+**9)** ```lake_inflow_r.out```
 
 ```
 Year, day, hour, inflow_r(m**3/timestep)
@@ -1966,7 +1966,6 @@ Year, day, hour, inflow_r(m**3/timestep)
 1980     2     1       2098.507       1457.613         10.831          0.000          0.000
 …
 ```
-<br>
 
 *Year*: Year of simulation <br>
 *day*: Day of simulation <br>
@@ -1985,7 +1984,6 @@ Year, day, hour, totallakeinflow(m**3/timestep), totallakeoutflow(m**3/timestep
 1980     2     1       3566.949          0.000          0.000         63.270      42182.633
 …
 ```
-<br>
 
 *Year*: Year of simulation <br>
 *day*: Day of simulation <br>
@@ -1998,7 +1996,7 @@ Year, day, hour, totallakeinflow(m**3/timestep), totallakeoutflow(m**3/timestep
 
 Example: After each time step, e.g. after one day, a total water inflow discharge into all upstream reservoir of 3747.793 m<sup>3</sup>/timestep, no water outflow discharge, no rainfall over the reservoir areas, a total evaporation of 53.854 m<sup>3</sup>/timestep, and a total water storage of 38678.957 m<sup>3</sup> in all upstream reservoirs. Results are displayed for the whole catchment without distinguishing between size classes.
 
-**18)** ```lake_ sedbal.out```
+**18)** ```lake_sedbal.out```
 
 ```
 Year, day, hour, totalsedinflow(ton/timestep), totalsedoutflow(ton/timestep), totalsedimentation(ton/timestep), cumsedimentation(ton)
@@ -2006,7 +2004,6 @@ Year, day, hour, totalsedinflow(ton/timestep), totalsedoutflow(ton/timestep), to
 1980     2     1        100.000          50.000          50.000          250.000
 …
 ```
-<br>
  
 *Year*: Year of simulation <br>
 *day*: Day of simulation <br>
@@ -2030,7 +2027,6 @@ Year, day, hour, reservoir_class, lakeinflow(m**3/timestep)
 1980     1     1     5          0.000          0.000          0.000          0.000
 …
 ```
-<br>
 
 *Year*: Year of simulation <br>
 *day*: Day of simulation <br>
@@ -2050,7 +2046,6 @@ Year, day, hour, sediment size class, lakesizedistoutflow(-)
 1980     1     1     3              0.10              0.30              0.40             0.10
 …
 ```
-<br>
 
 *Year*: Year of simulation <br>
 *day*: Day of simulation <br>
