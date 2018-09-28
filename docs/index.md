@@ -295,7 +295,7 @@ Parameter specification for the WASA Model (SESAM-Project)
 .f.   //doalllattc: rout latflow completely to next downslope TC
 .t.   //dolatsc: do latflow within TCs (surface runoff)
 .t.   //dolatscsub: do latflow within TCs (subsurface runoff)
-.f.   //dotrans: do water transpositions betwen sub-basins
+.f.   //dotrans: do water transpositions between sub-basins
 .f.   //dohour: do hourly version (ignored, use “dt”)
 0     //scenario: choose scenario (0:less rain (ECHAM), 1:no trend, 2:more rain (Hadley))
 0     //krig: type of precipitation interpolation (0….)
@@ -840,8 +840,8 @@ This file is optional and is in the subdirectory *Others/*.
 Example: All values for saturated hydraulic conductivity of ALL soils (wildcard “-1”) are increased by factor 20. For soil 5, the values are additionally multiplied with 0.3.
 
 ***13) transposition.dat***<br>
-(optional)
-
+(optional) Currently only works for daily resolution. For sediments, abstraction from reservoirs assumes zero concentration, whereas abstraction from river uses river concentration.
+Abstractions are taken from the outlet of river reaches, and added to the inlet points of reaches.
 ```
 Water transpositions via canals or pipes between sub-basins, in order of routing scheme
 Start-Subasin-ID Flag(reservoir/river) Flow(m3/s) Loss(%) Destination-Subasin-ID Flag (reservoir/river), begin_year

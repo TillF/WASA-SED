@@ -23,7 +23,7 @@ INTEGER, INTENT(IN)                  :: STATUS
 INTEGER :: irout,idummy,id !,imun,imunx,irout2,irout_d,imeso,istate
 INTEGER :: upstream, downstream
 INTEGER :: itl, ih, i, j, istate, h !, mm, imunout, iout, make
-REAL :: temp2, temp3, temp4, qtemp !, x, b, y, hi  !,xdum(48),storcapact
+REAL :: temp2, temp3, temp4, qtemp, qtemp_sed(n_sed_class) !, x, b, y, hi  !,xdum(48),storcapact
 character(len=1000) :: fmtstr	!string for formatting file output
 
 
@@ -114,20 +114,25 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 ! calculate external routing response function for each sub-basin (triangular like this: _|\_ ) - used for riverflow ENTERING the subbasin from upstream
 ! (given parameter lag-time tL and retention-time tR)
   !ii: the dimensions must be computed differently when delta_t is not 24 hours!
-  allocate( hrout       (maxval(ceiling(1+sum(prout, dim=2))) ,subasin)) !allocate memory for triangular unit hydrograph
+  allocate( hrout       (maxval(ceiling(1+sum(prout, dim=2))) ,subasin)) !allocate memory for triangular unit hydrograph (allochtonous runoff)
 ! routing of autochtonous runoff  (triangular like this: /\_ ) - used for riverflow generated WITHIN the basin (tL*=0, tR*=tL+tR)
-  allocate( hrout_intern(maxval(ceiling(1+sum(prout, dim=2))) ,subasin)) !allocate memory for triangular unit hydrograph
-
-
+  allocate( hrout_intern(maxval(ceiling(1+sum(prout, dim=2))) ,subasin)) !allocate memory for triangular unit hydrograph (autochtonous runoff)
+  hrout=0.
+  hrout_intern=0.
+ 
   !allocate arrays for in- and outflow into/out of subbasins, as their length needs to accomodate hrout, too
   allocate( qout(366 + size(hrout,dim=1), subasin))
   allocate( qin (subasin))
-	qout(:,:)=0.
-	qin (:)=0.
+  qout(:,:)=0.
+  qin (:)=0.
 
+  if (dosediment) then
+    allocate( qsediment(366 + size(hrout,dim=1), subasin))
+    allocate( qin_sed (subasin))
+    qsediment(:,:)=0.
+    qin_sed (:)=0.
+  end if  
 
-  hrout=0.
-  hrout_intern=0.
 
     DO i=1,subasin
         itl = ceiling (prout(i,1)) !index to position in hrout where peak will be located
@@ -211,13 +216,22 @@ IF (STATUS == 1) THEN   !beginning of a new simulation year
 
   IF (t > tstart) THEN
       DO id=1,size(hrout,dim=1)-1   !shift routed riverflow that reaches beyond boundary of year to the beginning of new year
-        qout(id,1:subasin)  =qout(daylastyear+id,1:subasin)
+        qout(id,1:subasin)  = qout(daylastyear+id,1:subasin)
       END DO
+      
+      if (dosediment) then
+        DO id=1,size(hrout,dim=1)-1   !shift routed sediment flow that reaches beyond boundary of year to the beginning of new year
+            qsediment(id,1:subasin)  = qsediment(daylastyear+id,1:subasin)
+        END DO
+      end if
+      
   END IF
 
 ! ... and initialize remaining values
   qout(size(hrout,dim=1):size(qout,dim=1),1:subasin)=0. !reset the rest of the year to 0
-
+  if (dosediment) then
+      qsediment(size(hrout,dim=1):size(qout,dim=1),1:subasin)=0. !reset the rest of the year to 0
+  end if    
 
 ! CALL Reservoir Sedimentation and Management Modules
   IF (doreservoir) THEN
@@ -233,30 +247,47 @@ IF (STATUS == 2) THEN !regular call during timestep
 !**  Transfer of water between sub-basins
 !    assumption: time delay = 1 day (?)
 !    transfer variable qtemp in [m3/day]
-
+!ii: needs to be refined for subdaily resolution
+    
   IF (dotrans) THEN
     DO i=1,ntrans
       IF (t >= y_trans(i)) THEN
-!    from river
         qtemp=0.
+        qtemp_sed(:)=0.
         irout=trans_start(1,i)
-        IF (trans_start(2,i) == 2) THEN
-          qtemp=MIN(qout(d,irout)*86400.,q_trans(i)*86400.)
-          qout(d,irout)=qout(d,irout)-qtemp/86400.
-          qout(d,irout)=MAX(qout(d,irout),0.)
+        IF (trans_start(2,i) == 2) THEN ! if transposition starts in river 
+          qtemp=MIN(qout(d,irout)*86400.,q_trans(i)*86400.) !take as much water as specified, but no more than is available [m³]
+          qout(d,irout)=qout(d,irout)-qtemp/86400.   !reduce start of transposition by amount abstracted
+          qout(d,irout)=MAX(qout(d,irout),0.)   !prevent negative values (is this necessary?)
+          if (dosediment) then
+            !qtemp_sed = qsediment(d,irout) * qtemp/86400. / qout(d,irout)  ![t/d] assume homogenous mixing, abstract the same fraction of sediment as water
+            qtemp_sed = sediment_out(irout,:) * qtemp/86400. / qout(d,irout)  ! assume homogenous mixing, abstract the same fraction of sediment as water for every particle size class [t/d]
+        
+            qsediment(d,irout) = qsediment(d,irout) - sum(qtemp_sed)  !abstract sediment from source (total over all particle size classes)
+            qsediment(d,irout)=MAX(qsediment(d,irout),0.)   !prevent negative values (is this necessary?)
+          end if    
 !    from acude (there must be a large acude in this muni !)
         ELSE IF (trans_start(2,i) == 1) THEN
           qtemp=MIN(volact(d,irout)*1.e6,q_trans(i)*86400.)
           volact(d,irout)=volact(d,irout)-qtemp/1.e6
           volact(d,irout)=MAX(volact(d,irout),0.)
+          if (dosediment) then
+            qtemp_sed(:) = 0.  ![t/d] assume no sediment is transfered when water is abstracted from reservoir
+          end if
         END IF
-!    into river
         irout=trans_end(1,i)
-        IF (trans_end(2,i) == 2) THEN
+        IF (trans_end(2,i) == 2) THEN !    into river
           qout(d+1,irout)=qout(d+1,irout)+qtemp*(1.-loss_trans(i))/ 86400.
-!    into acude (there must be a large acude in this muni !)
-        ELSE IF (trans_end(2,i) == 1) THEN
+          if (dosediment) then
+              sediment_in(irout,:) = sediment_in(irout,:) + qtemp_sed
+              qsediment(d+1,irout) = qsediment(d+1,irout)+ sum(qtemp_sed)
+          end if     
+        ELSE IF (trans_end(2,i) == 1) THEN !    into acude (there must be a large acude in this muni !)
           volact(d+1,irout)=volact(d+1,irout)+ qtemp*(1.-loss_trans(i))/1.e6
+          if (dosediment) then
+            sediment_in(irout,:) = sediment_in(irout,:) + qtemp_sed !particle size specific
+            sed_inflow(d+1,irout) = sed_inflow(d+1,irout) + sum(qtemp_sed) !sum over all particle size fractions
+          end if  
         END IF
       END IF
     END DO
