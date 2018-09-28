@@ -573,7 +573,7 @@ SUBROUTINE readgen(path2do_dat)
                 CASE ('river_sediment_concentration')
                     f_river_sediment_concentration =dosediment
                 CASE ('river_sediment_total')
-                    f_river_sediment_total=dosediment .AND. river_transport /= 1
+                    f_river_sediment_total=dosediment
                 CASE ('river_sediment_total_dailyaverage')
                     f_river_sediment_total_dailyaverage =dosediment
                 CASE ('river_storage')
