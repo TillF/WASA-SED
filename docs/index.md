@@ -1355,7 +1355,7 @@ Example: This optional file allows specifying the operation rule of bottom outle
 (optional)
 
 ```
-Specification of stage-area and stage-volume curves of the sub-basin’s reservoir
+# Specification of stage-area and stage-volume curves of the sub-basin’s reservoir
 Subasin-ID, nbr. points, 1st row: elevation [m], 2nd row: reservoir area [1000m**2], 3rd row: reservoir volume [1000m**3]
 60	36	413.30	415.00	416.00	417.00	…	447.00	447.67	448.00		in totalmax 200 IDs
 60	36	0.00	54.82	96.10	142.89	…	6980.25	7186.73	7288.43		in totalmax 200 IDs
