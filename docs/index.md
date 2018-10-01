@@ -167,11 +167,8 @@ terrain component
 <a name="2-2-river-module"></a>
 ### 2.2 River module
 
-<<<<<<< HEAD
-The river routing of the original WASA model (Güntner 2002) bases on daily linear response functions (Bronstert et al. 1999) similar to a triangular unit hydrograph. Its implementation does not support output in hourly resolution (only daily is produced). It was extended to include a spatially semi-distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network. The implemented water modelling approach is similar to the routing routines from the SWAT model (Soil Water Assessment Tool, Neitsch et al. 2002) model and the SWIM model (Soil Water Integrated Modelling, Krysanova et al. 2000). The new water routing is based on the Muskingum kinematic wave approximation. Suspended sediment transport and bedload is modelled using the transport capacity concept. The river module can be run with variable time steps. Transmission losses through riverbed infiltration and evaporation are accounted for. The main routing calculations as well as the initialisation and reading of the river input files are carried out in *routing.f90*. The following sub-routines are called from *routing.f90*:
-=======
-The river routing of the original WASA model ([Güntner 2002](#guentner-2002)) bases on daily linear response functions ([Bronstert et al. 1999](#bronstert-et-al-1999)) similar to a triangular unit hydrograph. Its implementation does not support output in hourly resolution (only daily is produced) and sediment transport. It was extended to include a spatially semi-distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network. The implemented water modelling approach is similar to the routing routines from the SWAT model (Soil Water Assessment Tool, [Neitsch et al. 2002](#neitsch-et-al-2002)) model and the SWIM model (Soil Water Integrated Modelling, [Krysanova et al. 2000](#krysanova-et-al-2000)). The new water routing is based on the Muskingum kinematic wave approximation. Suspended sediment transport and bedload is modelled using the transport capacity concept. The river module can be run with variable time steps. Transmission losses through riverbed infiltration and evaporation are accounted for. The main routing calculations as well as the initialisation and reading of the river input files are carried out in ```routing.f90```. The following sub-routines are called from ```routing.f90```:
->>>>>>> master
+
+The river routing of the original WASA model ([Güntner 2002](#guentner-2002)) bases on daily linear response functions ([Bronstert et al. 1999](#bronstert-et-al-1999)) similar to a triangular unit hydrograph. Its implementation does not support output in hourly resolution (only daily is produced). It was extended to include a spatially semi-distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network. The implemented water modelling approach is similar to the routing routines from the SWAT model (Soil Water Assessment Tool, [Neitsch et al. 2002](#neitsch-et-al-2002)) model and the SWIM model (Soil Water Integrated Modelling, [Krysanova et al. 2000](#krysanova-et-al-2000)). The new water routing is based on the Muskingum kinematic wave approximation. Suspended sediment transport and bedload is modelled using the transport capacity concept. The river module can be run with variable time steps. Transmission losses through riverbed infiltration and evaporation are accounted for. The main routing calculations as well as the initialisation and reading of the river input files are carried out in ```routing.f90```. The following sub-routines are called from ```routing.f90```:
 
 ```muskingum.f90```: contains the flow calculation using the Muskingum method
 1. Calculation of water volume in reach
@@ -289,52 +286,6 @@ Line 36 may additionally contain a second logical variable (append_output), allo
 
 Line 37 may additionally contain a second logical variable (save_states_yearly), determining if the model states are saved (and overwritten) at the end of each simulation year. Default is .TRUE.
 
-<<<<<<< HEAD
-
-```
-Parameter specification for the WASA Model (SESAM-Project)
-..\WASA\Input\Case_study\ 	Location of model platform
-..\WASA\Output\		Specification of folder for simulation output
-1980  //tstart (start year of simulation) 
-1981  //tstop (end year of simulation)
-1 15     //mstart (start month of simulation) in this case: simulation from January, 15th 1980	
-12    15 //mstop (end month of simulation)   until December, 31st (=defaults to end of month) 1981	
-10    //no. of sub-basins
-49    //no. of combinations of sub-basins, landscape units, terrain components
-321   //total no. of landscape units in study area
-515   //total no. of terrain components in study area
-77    //total no. of soil components in study area
-34    //total no. of vegetation units in study area
-.f.    //doreservoir: do reservoir calculations
-.f.   //doacudes:includes dam calculations
-.t.   //dolattc: do latflow between TCs
-.f.   //doalllattc: rout latflow completely to next downslope TC
-.t.   //dolatsc: do latflow within TCs (surface runoff)
-.t.   //dolatscsub: do latflow within TCs (subsurface runoff)
-.f.   //dotrans: do water transpositions between sub-basins
-.f.   //dohour: do hourly version (ignored, use “dt”)
-0     //scenario: choose scenario (0:less rain (ECHAM), 1:no trend, 2:more rain (Hadley))
-0     //krig: type of precipitation interpolation (0….)
-15.0  //kfkorr:  hydraulic conductivity factor (for daily model version) (kfkorr)
-0.30  //intcf: interception capacity per unit LAI (mm)
-0     //dointc: type of interception routine (simple bucket:0, modified bucket:1)
-.f.   //doscale: do scaling due to rainfall interpolation ?
-.f.   //domuncell: for muni/ezg-nocell-version, use rainfall input derived from cells ? (change kf_calib.dat !)
-1,   //sensfactor: factor for sensitivity studies
-24  //dt: time step in [hours]
-.t.   //dosediment
-1   //No. of grain size classes
-1   // type of sediment transport model at the hillslope	
-1   type of water / sediment model in the river: (1) old routing, (2) Muskingum & ss transport, (3) Muskingum & bedload modelling
-1   //type of sediment model in the reservoir: choose sediment transport …
-.t. //load state of storages from files (if present) at start (optional)
-.f. //save state of storages to files after simulation period (optional)
-```
-
-**Figure 1:** WASA parameter specification file ```do.dat```
-
-***maxdim.dat*** <br>
-=======
 Line 38 (dosnow) defines, if the optional snow routine, implemented by [Rottler (2017)](#rottler-2017), is included. If set to 1, the snow routine is active and all related calculations are performed. If set to 0, the snow routine remains inactive.
 
 <a name="figure-1"></a>
@@ -382,7 +333,6 @@ Line 38 (dosnow) defines, if the optional snow routine, implemented by [Rottler 
 **Figure 1:** WASA parameter specification file ```do.dat```.
 
 ```maxdim.dat``` <br>
->>>>>>> master
 optional \[can be generated with the LUMP package\]<br>
 The file ```maxdim.dat``` serves to optimise memory management and thus improves computational performance. It is, however, optional and if not encountered, default values are assumed.
 
@@ -937,15 +887,10 @@ This file is optional and is in the subdirectory ```Others/```.
 
 Example: All values for saturated hydraulic conductivity of ALL soils (wildcard “-1”) are increased by factor 20. For soil 5, the values are additionally multiplied with 0.3.
 
-<<<<<<< HEAD
 ***13) transposition.dat***<br>
 (optional) Currently only works for daily resolution. For sediments, abstraction from reservoirs assumes zero concentration, whereas abstraction from river uses river concentration.
 Abstractions are taken from the outlet of river reaches, and added to the inlet points of reaches.
-=======
-**13)** ```transposition.dat```<br>
-(optional)
 
->>>>>>> master
 ```
 # Water transpositions via canals or pipes between sub-basins, in order of routing scheme
 Start-Subasin-ID, Flag(reservoir/river), Flow(m3/s,) Loss(%), Destination-Subasin-ID, Flag (reservoir/river), begin_year
@@ -956,11 +901,11 @@ Start-Subasin-ID, Flag(reservoir/river), Flow(m3/s,) Loss(%), Destination-Subasi
 ```
 
 *Start-Subasin-ID*:		ID of subbasin (source of water abstraction)<br>
-*Flag(reservoir/river)*:		?<br>
+*Flag(reservoir/river)*:		water abstraction from: 1 (river) or 2 (reservoir)<br>
 *Flow(m3/s)*:			amount of re-routed water<br>
 *Loss(%)*:			transmission loss<br>
 *Destination-Subasin-ID*:		ID of subbasin (destination of water abstraction)
-*Flag (reservoir/river)*:		?<br>
+*Flag (reservoir/river)*:		water diversion to: 1 (river) or 2 (reservoir)<br>
 *begin\_year*:			start time of water abstraction
 
 This file is optional and is only read if dotrans (in ```do.dat```) is set to true. In this case, ```transposition.dat``` is expected in the subdirectory ```Others/```. <br>
