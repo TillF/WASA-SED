@@ -367,7 +367,7 @@ Example: The example file describes the 3 particle-size-classes clay, silt and s
 
 ```outfiles.dat``` <br>
 optional<br>
-The file allows specifying, which output files are desired. Disabling unnecessary output files saves computation time and disk space. The file contains two headerlines, each following line contains a keyword, which is the filename of a possible output file (case insensitive, without the ```extension .out```). If a keyword for a certain output file is not contained in ```outfiles.dat``` the respective file is not created, any existing file of that name is deleted. Information on the content of output files can be found in the respective sections. If ```outfiles.dat``` is not found, WASA-SED creates a default set of output files. 
+The file allows specifying, which output files are desired. Disabling unnecessary output files saves computation time and disk space. The file contains two headerlines, each following line contains a keyword, which is the filename of a possible output file (case insensitive, without the extension ```.out```). If a keyword for a certain output file is not contained in ```outfiles.dat``` the respective file is not created, any existing file of that name is deleted. Information on the content of output files can be found in the respective sections. If ```outfiles.dat``` is not found, WASA-SED creates a default set of output files. 
 
 ```
 # This file describes which output files are generated
@@ -2145,7 +2145,7 @@ Bronstert, A., Jaeger, A., Güntner, A., Hauschild, M., Döll, P., and Krol, M. 
 
 Mamede, G.L., Bronstert, A., Araujo, J.C., Batalla, R. J., Güntner, A., Mueller, E. N., Francke, T. (2006): 1D Process-Based Modelling of Reservoir Sedimentation: a Case Study for the Barasona Reservoir in Spain. Proceedings of the International Conference on Fluvial Hydraulics, Lisbon, Vol. 2: 1585-1594.
 
-Francke, T. (2005): LUMP package, Manual, Auxiliary software tool to generate the input files for the hillslope module of the WASa model, SESAM working reports on http://brandenburg.geoecology.uni-potsdam.de/projekte/sesam/publications.php.
+Francke, T. (2005): LUMP package, Manual, Auxiliary software tool to generate the input files for the hillslope module of the WASA model, SESAM working reports on http://brandenburg.geoecology.uni-potsdam.de/projekte/sesam/publications.php.
 
 Güntner, A. (2003): Auswirkung von Klimaänderungen auf die Wasserverfügbarkeit in Trockengebieten - Ergebnisse und Unsicherheiten am Beispiel Nordost-Brasiliens. In H.-B.Kleeberg, editor, Hydrologische Wissenschaften - Fachgemeinschaft in der ATV-DVWK, pp. 205-214.
 
