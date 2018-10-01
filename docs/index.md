@@ -347,8 +347,10 @@ contains maximum dimensions of spatial units
 ```
 
 Example: In the given example, no more than 3 LU may occur in one sub-basin (line 2). Analogously, no LU may contain more than 3 TCs (line 3) and no TC more than 4 SVCs (line 4). The number of horizons in a soil is limited to 6 (line 5). No more than 2 transpositions between sub-basins may exist. The last two lines are optional and valid only for computation of sedimentation patterns in strategic reservoirs (assumed 200, if missing).
+some dummy
 
-```part_class.dat```<br>
+```part_class.dat``` <br>
+some dummy
 optional \[can be generated with the LUMP package\]<br>
 The file ```part_class.dat``` is only necessary if sediment transport in multiple particle-size classes is to be modelled. If ```part_class.dat``` is missing, sediment transport will be modelled for a single particle-size class only. Otherwise, the file defines the number and the properties of the particle sizes that will be modelled. Please note that class numbering has to be continuous, starting with 1. The particle size classes must be ordered from fine to coarse.
 
@@ -1686,6 +1688,7 @@ Output file | Content
 ```gw_storage.stat``` | Ground water storage
 ```intercept_storage.stat``` | Interception storage
 ```soil_moisture.stat``` | Soil moisture storage
+```[snow*]``` | optional output files from the snow routine, see [Table 5](#table-5)
 
 The output files ```daily_water_subbasin.out```, ```sediment_production.out``` and ```water_subbasin.out``` include the effect of the distributed reservoirs. All other remaining basic hydrological output files contain the raw output of the hillslope module (no reservoir effects). All above-mentioned files have the same structure, as shown by the example ```daily_actetranspiration.out``` below (the subdaily output files additionally contain the timestep number in the third column):
 
