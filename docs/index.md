@@ -348,7 +348,8 @@ contains maximum dimensions of spatial units
 
 Example: In the given example, no more than 3 LU may occur in one sub-basin (line 2). Analogously, no LU may contain more than 3 TCs (line 3) and no TC more than 4 SVCs (line 4). The number of horizons in a soil is limited to 6 (line 5). No more than 2 transpositions between sub-basins may exist. The last two lines are optional and valid only for computation of sedimentation patterns in strategic reservoirs (assumed 200, if missing).
 
-```part_class.dat```<br>
+```part_class.dat``` <br>
+some dummy
 optional \[can be generated with the LUMP package\]<br>
 The file ```part_class.dat``` is only necessary if sediment transport in multiple particle-size classes is to be modelled. If ```part_class.dat``` is missing, sediment transport will be modelled for a single particle-size class only. Otherwise, the file defines the number and the properties of the particle sizes that will be modelled. Please note that class numbering has to be continuous, starting with 1. The particle size classes must be ordered from fine to coarse.
 
@@ -365,7 +366,7 @@ Upper_limit: upper limit of particle size for the respective class \[mm\]<br>
 
 Example: The example file describes the 3 particle-size-classes clay, silt and sand (according to German classification) with clay particles up to 0.002 mm, silt (0.002 - 0.063 mm) and sand (0.063 - 2.0 mm).
 
-```outfiles.dat```<br>
+```outfiles.dat``` <br>
 optional<br>
 The file allows specifying, which output files are desired. Disabling unnecessary output files saves computation time and disk space. The file contains two headerlines, each following line contains a keyword, which is the filename of a possible output file (case insensitive, without the ```extension .out```). If a keyword for a certain output file is not contained in ```outfiles.dat``` the respective file is not created, any existing file of that name is deleted. Information on the content of output files can be found in the respective sections. If ```outfiles.dat``` is not found, WASA-SED creates a default set of output files. 
 
@@ -1686,6 +1687,7 @@ Output file | Content
 ```gw_storage.stat``` | Ground water storage
 ```intercept_storage.stat``` | Interception storage
 ```soil_moisture.stat``` | Soil moisture storage
+```[snow*]``` | optional output files from the snow routine, see [Table 5](#table-5)
 
 The output files ```daily_water_subbasin.out```, ```sediment_production.out``` and ```water_subbasin.out``` include the effect of the distributed reservoirs. All other remaining basic hydrological output files contain the raw output of the hillslope module (no reservoir effects). All above-mentioned files have the same structure, as shown by the example ```daily_actetranspiration.out``` below (the subdaily output files additionally contain the timestep number in the third column):
 
