@@ -200,7 +200,7 @@ storcap(:)=0.
 			fvol_over(i),damc(i),damd(i),elevbottom(i)
 
 	  IF (istate/=0) THEN
-		  WRITE (*,'(A,i0,A,A)') 'ERROR: Format error in reservoir.dat, line',j,':', fmtstr
+		  WRITE (*,'(A,i0,A,A)') 'ERROR: Format error in reservoir.dat, line ',j,':', fmtstr
 		  STOP
 	  END IF
 
