@@ -167,7 +167,8 @@ terrain component
 <a name="2-2-river-module"></a>
 ### 2.2 River module
 
-The river routing of the original WASA model ([Güntner 2002](#guentner-2002)) bases on daily linear response functions ([Bronstert et al. 1999](#bronstert-et-al-1999)) similar to a triangular unit hydrograph. Its implementation does not support output in hourly resolution (only daily is produced) and sediment transport. It was extended to include a spatially semi-distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network. The implemented water modelling approach is similar to the routing routines from the SWAT model (Soil Water Assessment Tool, [Neitsch et al. 2002](#neitsch-et-al-2002)) model and the SWIM model (Soil Water Integrated Modelling, [Krysanova et al. 2000](#krysanova-et-al-2000)). The new water routing is based on the Muskingum kinematic wave approximation. Suspended sediment transport and bedload is modelled using the transport capacity concept. The river module can be run with variable time steps. Transmission losses through riverbed infiltration and evaporation are accounted for. The main routing calculations as well as the initialisation and reading of the river input files are carried out in ```routing.f90```. The following sub-routines are called from ```routing.f90```:
+
+The river routing of the original WASA model ([Güntner 2002](#guentner-2002)) bases on daily linear response functions ([Bronstert et al. 1999](#bronstert-et-al-1999)) similar to a triangular unit hydrograph. Its implementation does not support output in hourly resolution (only daily is produced). It was extended to include a spatially semi-distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network. The implemented water modelling approach is similar to the routing routines from the SWAT model (Soil Water Assessment Tool, [Neitsch et al. 2002](#neitsch-et-al-2002)) model and the SWIM model (Soil Water Integrated Modelling, [Krysanova et al. 2000](#krysanova-et-al-2000)). The new water routing is based on the Muskingum kinematic wave approximation. Suspended sediment transport and bedload is modelled using the transport capacity concept. The river module can be run with variable time steps. Transmission losses through riverbed infiltration and evaporation are accounted for. The main routing calculations as well as the initialisation and reading of the river input files are carried out in ```routing.f90```. The following sub-routines are called from ```routing.f90```:
 
 ```muskingum.f90```: contains the flow calculation using the Muskingum method
 1. Calculation of water volume in reach
@@ -886,8 +887,9 @@ This file is optional and is in the subdirectory ```Others/```.
 
 Example: All values for saturated hydraulic conductivity of ALL soils (wildcard “-1”) are increased by factor 20. For soil 5, the values are additionally multiplied with 0.3.
 
-**13)** ```transposition.dat```<br>
-(optional)
+***13) ```transposition.dat``` ***<br>
+(optional) Currently only works for daily resolution. For sediments, abstraction from reservoirs assumes zero concentration, whereas abstraction from river uses river concentration.
+Abstractions are taken from the outlet of river reaches, and added to the inlet points of reaches.
 
 ```
 # Water transpositions via canals or pipes between sub-basins, in order of routing scheme
@@ -899,11 +901,11 @@ Start-Subasin-ID, Flag(reservoir/river), Flow(m3/s,) Loss(%), Destination-Subasi
 ```
 
 *Start-Subasin-ID*:		ID of subbasin (source of water abstraction)<br>
-*Flag(reservoir/river)*:		?<br>
+*Flag(reservoir/river)*:		water abstraction from: 1 (river) or 2 (reservoir)<br>
 *Flow(m3/s)*:			amount of re-routed water<br>
 *Loss(%)*:			transmission loss<br>
 *Destination-Subasin-ID*:		ID of subbasin (destination of water abstraction)
-*Flag (reservoir/river)*:		?<br>
+*Flag (reservoir/river)*:		water diversion to: 1 (river) or 2 (reservoir)<br>
 *begin\_year*:			start time of water abstraction
 
 This file is optional and is only read if dotrans (in ```do.dat```) is set to true. In this case, ```transposition.dat``` is expected in the subdirectory ```Others/```. <br>
