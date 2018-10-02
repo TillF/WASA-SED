@@ -25,9 +25,9 @@ These suggestions concern general recommendations for future enhancements. They 
 	•	fork the github-repository to your repository
 	•	sufficiently comment your code in English
 	•	provide short summary of your modifications when uploading your changes to the git-repository, especially noting if and where any changes in the model output are to be expected
-	•	Any modifications should be tested on test / tutorial datasets for side effects: They should be able to reproduce the output. If not, document why your version behaves differently. 
-	•	update the WASA-SED documentation file, if necessary
-	•	issue pull-request to the original repository, if you want your contribution to be merged into the main branch
+	•	Any modifications should be tested on test / tutorial datasets for side effects: They should be able to reproduce the original output. If not, document why your version behaves differently. 
+	•	update the WASA-SED documentation file index.md, if necessary
+	•	issue a pull-request to the original repository, if you want your contribution to be merged into the main branch
 	
 
 2.	input / output files
