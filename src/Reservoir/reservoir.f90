@@ -245,7 +245,7 @@ storcap(:)=0.
 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!lateral_inflow.dat not found
-	  write(*,*)pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat was not found. Run the model anyway.'
+	  write(*,*)'WARNING: '//pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat not found, using defaults'
       DO i=1,subasin
         latflow_res(i)=0
       ENDDO
@@ -306,7 +306,7 @@ storcap(:)=0.
 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/operat_rule.dat', IOSTAT=istate,STATUS='old')
   IF (istate/=0) THEN					!operat_rule.dat not found
-	write(*,*)pfadp(1:pfadj)// 'Reservoir/operat_rule.dat was not found. Run the model anyway.'
+	write(*,*)'WARNING: '//pfadp(1:pfadj)// 'Reservoir/operat_rule.dat not found, using defaults'
     DO i=1,subasin
 	  if (damq_frac(i) == -999.) then
 	    write(*,*)'ERROR: operat_rule.dat must be given [or change the value of the parameter damq_frac in reservoir.dat]'
@@ -328,7 +328,7 @@ storcap(:)=0.
 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/operat_bottom.dat', IOSTAT=istate,STATUS='old')
   IF (istate/=0) THEN					!operat_bottom.dat not found
-	write(*,*)pfadp(1:pfadj)// 'Reservoir/operat_bottom.dat was not found. Run the model anyway.'
+	write(*,*)'WARNING: '//pfadp(1:pfadj)// 'Reservoir/operat_bottom.dat not found, using defaults'
     DO i=1,subasin
 	  if (fvol_bottom(i) == -999.) then
 	    write(*,*)'ERROR: operat_bottom.dat must be given [or change the value of the parameter damq_frac in reservoir.dat]'
@@ -372,7 +372,7 @@ storcap(:)=0.
         END DO
     END DO
     if(sum(corr_column_intakes) == 0) then
-        write(*,*) '   File intake.dat does not contain relevant reservoir (i.e. subbasin) ids! Run the model anyway.'
+        write(*,*) '   File intake.dat does not contain relevant reservoir (i.e. subbasin) IDs! Run the model anyway.'
         close(101)
     else
         allocate(r_qintake(no_col_intake))
@@ -387,7 +387,7 @@ storcap(:)=0.
 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/cav.dat', IOSTAT=istate,STATUS='old')
   IF (istate/=0) THEN					!cav.dat not found
-	write(*,*)pfadp(1:pfadj)// 'Reservoir/cav.dat was not found. Run the model anyway.'
+	write(*,*)'WARNING: '//pfadp(1:pfadj)// 'Reservoir/cav.dat not found, using defaults'
 	flag_cav=0
   ELSE
 	flag_cav=1

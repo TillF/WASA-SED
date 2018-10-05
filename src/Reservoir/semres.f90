@@ -94,8 +94,8 @@ IF (STATUS == 0) THEN
   IF (reservoir_check == 1) THEN
 	OPEN(11,FILE=pfadp(1:pfadj)// 'part_class.dat', IOSTAT=k,STATUS='old')
 	IF (k/=0) THEN					!part_class.dat not found
-		write(*,*)pfadp(1:pfadj)// 'part_class.dat was not found. Run the model anyway. Sediment treated as one size class.'
-		n_sed_class=1				!treat one particle size class only
+		write(*,*)'WARNING: '//pfadp(1:pfadj)// 'part_class.dat not found, using defaults (one size class)'
+        n_sed_class=1				!treat one particle size class only
 		allocate(upper_limit(n_sed_class))
 		upper_limit(1)=2.		!set upper limit of sediment that is considered to 2 mm
 	else							!part_class.dat sucessfully opened
@@ -143,7 +143,7 @@ IF (STATUS == 0) THEN
   ENDDO
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/hydraul_param.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!hydraul_param.dat not found
-	  write(*,*)pfadp(1:pfadj)// 'Reservoir/hydraul_param.dat was not found. Run the model anyway.'
+	  write(*,*)'WARNING: '//pfadp(1:pfadj)// 'hydraul_param.dat not found, using defaults'
     ELSE
 	  READ(11,*);READ(11,*)
       READ(11,*,IOSTAT=ka) dummy1,dummy2
@@ -323,7 +323,7 @@ IF (STATUS == 0) THEN
       WRITE(subarea,*)id_subbas_extern(i)
       OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/original_sec_'//trim(adjustl(subarea))//'.dat', IOSTAT=istate,STATUS='old')
         IF (istate/=0) THEN					!original_sec_"subbasin".dat not found
-	      write(*,*)pfadp(1:pfadj)// 'Reservoir/original_sec'//trim(adjustl(subarea))//'.dat was not found. Run the model anyway.'
+          write(*,*)'WARNING: '//pfadp(1:pfadj)// 'original_sec.dat not found, using defaults'
           nbrsec1=nbrsec(i)
           DO j=1,nbrsec1
             DO m=1,npoints(j,i)
@@ -446,7 +446,7 @@ IF (STATUS == 0) THEN
 !Identification of main channel in the cross sections
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/main_channel.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!main_channel.dat not found
-	  write(*,*)pfadp(1:pfadj)// 'Reservoir/main_channel.dat was not found. Run the model anyway.'
+      write(*,*)'WARNING: '//pfadp(1:pfadj)// 'main_channel.dat not found, using defaults'
       DO i=1,subasin
 	    sed_flag(i)=0 !0 = changes on sideslope is not controlled
 	  ENDDO
