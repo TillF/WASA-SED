@@ -18,8 +18,8 @@ contains
             if (.not. doloadstate) return   !do not load files, if disabled
             call init_river_conds(trim(pfadn)//'river_storage.stat')    !Jose Miguel: load initial status of river storage
             if (dosediment) then
-               call init_sediment_conds(trim(pfadn)//'sediment_storage.stat')    !Jose Miguel: load initial status of sediment storage
-               call init_susp_sediment_conds(trim(pfadn)//'susp_sediment_storage.stat')    !Jose Miguel: load initial status of sediment storage
+               call init_sediment_conds(trim(pfadn)//'sediment_storage.stat')    !Jose Miguel: load initial status of deposited sediment storage
+               call init_susp_sediment_conds(trim(pfadn)//'susp_sediment_storage.stat')    !Jose Miguel: load initial status of suspended sediment storage
             endif
     end subroutine init_river_state
 
@@ -1262,6 +1262,10 @@ end subroutine init_interflow_conds
         integer :: subbas_id, iostatus, i, k
         real :: dummy1
 
+        if (river_transport == 1) then !UHG routing does not consider deposited sediment so far
+            return
+        end if
+        
         riverbed_storage(:,:)=-1. !indicator for "not read"
         OPEN(11,FILE=sediment_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
         if (i/=0) then
