@@ -1271,6 +1271,7 @@ end subroutine init_interflow_conds
         if (i/=0) then
             write(*,'(a,a,a)')'WARNING: Sediment storage file ''',trim(sediment_conds_file),''' not found, using defaults.'
             CLOSE(11)
+            riverbed_storage(:,:)=0. !indicator for "not read"
 			return
         end if
 
