@@ -150,7 +150,7 @@ contains
         end if
 
 
-        if (trim(sediment_conds_file)=='' .or. .not. dosediment) then        !don't do anything if an empty filename is specified
+        if (trim(sediment_conds_file)=='' .or. .not. dosediment .or. (river_transport == 1) ) then        !don't do anything if an empty filename is specified
             sediment_file_hdle=0
         else
             sediment_file_hdle=16
