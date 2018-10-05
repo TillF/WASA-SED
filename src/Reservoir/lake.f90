@@ -55,7 +55,7 @@ IF (STATUS == 0) THEN
 ! Read maximum fraction of volume of each hypothetical representative reservoir of class k (m3)
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lake_maxvol.dat',IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!lake_maxvol.dat not found
-	  write(*,*)pfadp(1:pfadj)// 'Reservoir/lake_maxvol.dat was not found. Run the model anyway using defaults.'
+	  write(*,*)'WARNING: '//pfadp(1:pfadj)// 'Reservoir/lake_maxvol.dat not found, using defaults'
       DO imun=1,subasin
 	    maxlake(imun,1)=.5*maxlake0(1)
 	    DO k=2,5
@@ -101,7 +101,7 @@ IF (STATUS == 0) THEN
   acudfloatyear(:,:,:)=-999.
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lake_year.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!lake_year.dat not found
-	  write(*,*)pfadp(1:pfadj)// 'Reservoir/lake_year.dat was not found. Run the model anyway.'
+	  write(*,*)'WARNING: '//pfadp(1:pfadj)// 'Reservoir/lake_year.dat not found, using defaults'
 	  doacudyear=.FALSE.
 	ELSE
 	  doacudyear=.TRUE.
@@ -162,7 +162,7 @@ IF (STATUS == 0) THEN
 ! Read ratio between the runoff contributing area of the reservoir class and the total runoff contributing area of the sub-basin (-)
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lake_frarea.dat',IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!lake_frarea.dat not found
-	  write(*,*)pfadp(1:pfadj)// 'Reservoir/lake_frarea.dat was not found. Run the model anyway using defaults.'
+	  write(*,*)'WARNING: '//pfadp(1:pfadj)// 'Reservoir/lake_frarea.dat not found, using defaults'
       lakefrarea(1:subasin,1:5)=.166
 	  dummy5(1:subasin)=id_subbas_extern(1:subasin)
 	ELSE

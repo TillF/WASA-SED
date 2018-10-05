@@ -289,6 +289,11 @@ INTEGER :: istate
 	if (f_river_susp_sediment_storage) allocate (river_susp_sediment_storage_t(366,nt,subasin),  STAT = istate)
 	if (istate/=0) write(*,'(A,i0,a)')'Memory allocation error (',istate,') in river-module.'
 
+    if (ntrans>0) then
+        allocate(trans_start(2, ntrans), STAT = istate)
+        allocate(trans_end  (2, ntrans), STAT = istate)
+        if (istate/=0) write(*,'(A,i0,a)')'Memory allocation error (',istate,') in river-module.'
+    end if    
 
 END subroutine allocate_routing
 

@@ -6,9 +6,13 @@ save
 integer, allocatable :: upbasin(:), downbasin(:)
 ! qin: river inflow into the Sub-basins [m**3/s]
 real, allocatable :: qin(:)
+! qin: river inflow into the Sub-basins [m**3/s]
+real, allocatable :: qin_sed(:)
 ! qout: runoff out of the Sub-basin [m**3/s]
 !Allocatable      real qout (372,nmun)
 real, pointer :: qout(:,:)
+! qout: sediment output of the Sub-basin [t/timestep]
+!real, pointer :: qout_sed(:,:)
 !river inflow (m3/s) at time t and t+1 (2,subasin)
 real, allocatable :: r_qin(:,:)
 !river outflow (m3/s) at time t and t+1 (2,subasin)
@@ -90,7 +94,7 @@ real, allocatable :: sediment_in(:,:)
 real, allocatable :: sediment_out(:,:)
 !! total sediment leaving reach (sum of all size classes) (tons/timestep)
 real, pointer :: qsediment2_t(:,:,:)
-!! daily total sediment output (tons/timestep) (372,subasin)
+!! daily total sediment output (tons/day) ([variable],subasin)
 !real, allocatable :: qsediment(:,:)
 !! sediment concentration leaving reach (sum of all size classes) (tons/timestep)
 real, allocatable :: r_sediment_concentration(:)
@@ -124,10 +128,12 @@ real, allocatable :: D50(:)
 ! VARIABLES FOR WATER TRANSPOSITIONS BETWEEN MUNIs OR EZGs
 ! Muni-ID of start Sub-basin of transposition
 ! and flag indicating source of water (1:from acude, 2:from river)
-INTEGER :: trans_start(2,2)
+!INTEGER :: trans_start(2,2)
+INTEGER, allocatable :: trans_start(:,:)
 ! Muni-ID of destination Sub-basin of transposition
 ! and flag indicating source (1:to acude, 2:to river)
-INTEGER :: trans_end(2,2)
+!INTEGER :: trans_end(2,2)
+INTEGER, allocatable :: trans_end(:,:)
 ! flow rate of transposition (m**3/s)
 REAL :: q_trans(2)
 ! transport losses of flow rate (% of input flow rate)

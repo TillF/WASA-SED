@@ -18,8 +18,8 @@ contains
             if (.not. doloadstate) return   !do not load files, if disabled
             call init_river_conds(trim(pfadn)//'river_storage.stat')    !Jose Miguel: load initial status of river storage
             if (dosediment) then
-               call init_sediment_conds(trim(pfadn)//'sediment_storage.stat')    !Jose Miguel: load initial status of sediment storage
-               call init_susp_sediment_conds(trim(pfadn)//'susp_sediment_storage.stat')    !Jose Miguel: load initial status of sediment storage
+               call init_sediment_conds(trim(pfadn)//'sediment_storage.stat')    !Jose Miguel: load initial status of deposited sediment storage
+               call init_susp_sediment_conds(trim(pfadn)//'susp_sediment_storage.stat')    !Jose Miguel: load initial status of suspended sediment storage
             endif
     end subroutine init_river_state
 
@@ -84,7 +84,7 @@ contains
         character(len=*),intent(in):: soil_conds_file, gw_conds_file, ic_conds_file,interflow_conds_file, snow_conds_file, lake_conds_file,river_conds_file,sediment_conds_file,susp_sediment_conds_file,summary_file        !files to save to
         logical,intent(in), optional:: start
 
-        INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter,h,acud_class, k, tt, digits    ! counters
+        INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter,h,acud_class, i, k, tt, digits    ! counters
         INTEGER :: i_lu,id_tc_type,i_svc,i_soil,i_veg        ! ids of components in work
         INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
         REAL    :: total_storage_soil, total_storage_gw, total_storage_intercept, total_storage_lake(5), total_storage_river, total_storage_interflow, total_storage_snow  !, total_storage_sediment,total_storage_suspsediment    !total amount of water stored  [m3]
@@ -150,7 +150,7 @@ contains
         end if
 
 
-        if (trim(sediment_conds_file)=='' .or. .not. dosediment) then        !don't do anything if an empty filename is specified
+        if (trim(sediment_conds_file)=='' .or. .not. dosediment .or. (river_transport == 1) ) then        !don't do anything if an empty filename is specified
             sediment_file_hdle=0
         else
             sediment_file_hdle=16
@@ -325,9 +325,24 @@ contains
             end if
             DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
                 if (susp_sediment_file_hdle/=0) then
-                    do k=1, n_sed_class
-                         WRITE(susp_sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9), sed_storage(sb_counter,k) !print each sediment class
-                    enddo
+                    if (river_transport == 1) then !UHG routing
+                        tt = size(hrout,dim=1)-1 !length of UHG minus 1
+                        digits=ceiling(log10(max(1.0,maxval(qsediment2_t(d:d+tt,1,1:subasin)))))+1    !Till: number of pre-decimal digits required
+                        if (digits<10) then
+                            write(fmtstr,'(A1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
+                        else
+                            fmtstr='E12.5' !for large numbers, use exponential notation
+                        end if
+                        write(fmtstr2,*) '(I0,A1,I0,',tt,'(A1,',trim(fmtstr),'))'        !generate format string
+                        
+                        do k=1, n_sed_class
+                             WRITE(susp_sediment_file_hdle,fmtstr2)id_subbas_extern(sb_counter), char(9), k, (char(9), qsediment2_t(d+i-1,1,sb_counter)/n_sed_class, i=1, tt) !print each sediment class
+                        enddo
+                    else !Muskingum routing
+                        do k=1, n_sed_class
+                             WRITE(susp_sediment_file_hdle,fmtstr)id_subbas_extern(sb_counter), char(9), k, char(9), sed_storage(sb_counter,k) !print each sediment class
+                        enddo
+                    end if    
                 endif
                 !total_storage_suspsediment=total_storage_suspsediment+sum(sed_storage(sb_counter,:)) !sum up total storage
             END DO
@@ -1247,11 +1262,16 @@ end subroutine init_interflow_conds
         integer :: subbas_id, iostatus, i, k
         real :: dummy1
 
+        if (river_transport == 1) then !UHG routing does not consider deposited sediment so far
+            return
+        end if
+        
         riverbed_storage(:,:)=-1. !indicator for "not read"
         OPEN(11,FILE=sediment_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
         if (i/=0) then
             write(*,'(a,a,a)')'WARNING: Sediment storage file ''',trim(sediment_conds_file),''' not found, using defaults.'
             CLOSE(11)
+            riverbed_storage(:,:)=0. !set to default
 			return
         end if
 
