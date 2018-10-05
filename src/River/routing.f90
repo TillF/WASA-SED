@@ -137,6 +137,7 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 
     DO i=1,subasin
         itl = ceiling (prout(i,1)) !index to position in hrout where peak will be located
+        itl = max(1,itl) !prevent 0 index
         j   = ceiling   ( prout(i,1)+prout(i,2) ) !                   (integer index to end of triangle)
 
     if(itl > 1) then
@@ -148,17 +149,24 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
     end if 
   
     !peak interval
-
-    temp2 = (itl-1) / prout(i,1) !value AT interval border before itl
-    temp4 = 1 -(itl - prout(i,1))  !fraction of rising limb in interval of peak !!r
-
-    hrout_intern(itl,i) =   (temp2 + 1)/2 * temp4
-
+    if (prout(i,1) /= 0.) then
+        temp2 = (itl-1) / prout(i,1) !value AT interval border before itl
+        temp4 = 1 -(itl - prout(i,1))  !fraction of rising limb in interval of peak !!r
+        hrout_intern(itl,i) =   (temp2 + 1)/2 * temp4
+     else   
+        temp4 = 0  
+        hrout_intern(itl,i) =   1
+     end if
+     
     temp3 = 1- temp4 - max(0., (itl - (prout(i,1) + prout(i,2)))) !fraction of falling limb in interval of peak 
 
-    temp2 = 1 - temp3 / prout(i,2) !value AT interval border after itl (or end of triangle) 
-
-    hrout       (itl,i) =   (1 + temp2)/2 * temp3 
+    if (prout(i,1) /= 0.) then
+        temp2 = 1 - temp3 / prout(i,2) !value AT interval border after itl (or end of triangle) 
+        hrout       (itl,i) =   (1 + temp2)/2 * temp3 
+    else
+        hrout       (itl,i) =   1
+    end if
+    
     hrout_intern(itl,i) =  hrout_intern(itl,i)  + hrout       (itl,i)
 
     !recession part - do fully covered intervals only
@@ -171,15 +179,17 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
     end if
 
     !remaining part of triangle that ends midway in interval
-    temp4 = j - (prout(i,1) + prout(i,2)) !fraction of interval covered by triangle tail
-    if (temp4 == 0) temp4=1 !special case: triangle ends exactly at interval border
+    if (prout(i,2) /= 0.) then
+        temp4 = j - (prout(i,1) + prout(i,2)) !fraction of interval covered by triangle tail
+        if (temp4 == 0) temp4=1 !special case: triangle ends exactly at interval border
     
-             temp2 = 1 - (j-1-prout(i,1)) / prout(i,2) !value AT interval border before j
+            temp2 = 1 - (j-1-prout(i,1)) / prout(i,2) !value AT interval border before j
          
-             temp3 =   (temp2 + 0)/2 * temp4
-             hrout_intern(j,i) = temp3  !recession parts of internal and external UHG are identical
-             hrout       (j,i) = temp3
-    
+            temp3 =   (temp2 + 0)/2 * temp4
+            hrout_intern(j,i) = temp3  !recession parts of internal and external UHG are identical
+            hrout       (j,i) = temp3
+    end if
+            
     hrout(:,i)        = hrout(:,i)        / sum(hrout(:,i))          !normalize response function
     hrout_intern(:,i) = hrout_intern(:,i) / sum(hrout_intern(:,i))   !normalize response function
 
