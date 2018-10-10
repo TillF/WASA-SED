@@ -30,22 +30,31 @@ build: off
  #disables MSBuild funcitonality
 
   
-for:
+# for:
+# - ps: |
+    # if ($isLinux) {
+      # Write-Host "This is Linux!"
+    # } else {
+      # Write-Host "This is NOT a Linux!"
+    # }
+
+  # matrix:
+    # only:
+      # - image: Ubuntu
+
+  # build_script:
+  
+  
 - ps: |
     if ($isLinux) {
       Write-Host "This is Linux!"
     } else {
       Write-Host "This is NOT a Linux!"
-    }
-
-  matrix:
-    only:
-      - image: Ubuntu
-
-  build_script:
-  - echo Ubuntu build script
-  - cmd: ECHO this is batch-build2
-  - sh: echo this is shell-build2
+    }  
+  
+- echo Ubuntu build script
+- cmd: ECHO this is batch-build2
+- sh: echo this is shell-build2
 
 
 #- cmd: cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
