@@ -16,11 +16,11 @@ cmmt="(local modifications)"
 fi
 
 # Absolute path to this script
-SCRIPT=$(readlink -f $0)
-SCRIPTPATH=`dirname $SCRIPT`
+# SCRIPT=$(readlink -f $0)
+# SCRIPTPATH=`dirname $SCRIPT`
 
 REP_DATE=`git show -s --format=%ci`
 DATE=` date +%Y-%m-%d" "%H:%M`
-echo "!this file is updated by update_revision_no.sh/.bat" > $SCRIPTPATH/General/svn_rev.f90
-echo "rev_string1='$gitstr $cmmt'" >> $SCRIPTPATH/General/svn_rev.f90
-echo "rev_string2='repository date $REP_DATE, built $DATE'" >> $SCRIPTPATH/General/svn_rev.f90
+echo "!this file is updated by update_revision_no.sh/.bat" > $1/General/svn_rev.f90
+echo "rev_string1='$gitstr $cmmt'" >> $1/General/svn_rev.f90
+echo "rev_string2='repository date $REP_DATE, built $DATE'" >> $1/General/svn_rev.f90

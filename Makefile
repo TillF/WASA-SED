@@ -3,8 +3,13 @@
 # Variables
 #-------------------------------------------------------------------------
 
+#enable compilation in debug mode?
 ifndef DEBUG
 DEBUG=0
+endif
+
+ifndef OUTDIR
+OUTDIR=build
 endif
 
 # installation path
@@ -12,23 +17,14 @@ PREFIX=/usr/local
 
 # source code and build main dirs
 SRCDIR=src
-OUTDIR=build
 
 # adjust according to DEBUG
 ifeq ($(DEBUG),1)
-EXEC=wasa_dbg
-    ifeq ($(OS),Windows_NT)
-        OBJDIR=$(OUTDIR)\obj\debug
-    else
-        OBJDIR=$(OUTDIR)/obj/debug
-    endif
+    EXEC=wasa_dbg
+    OBJDIR=$(OUTDIR)/obj/debug
 else
     EXEC=wasa
-    ifeq ($(OS),Windows_NT)
-        OBJDIR=$(OUTDIR)\obj\release
-    else
-        OBJDIR=$(OUTDIR)/obj/release
-    endif
+    OBJDIR=$(OUTDIR)/obj/release
 endif
 
 # script for updating revision number according to platform
@@ -217,8 +213,9 @@ distclean:
 prepare:
 	@echo "Output directories will be created (if they do not exist) ..."
 ifeq ($(OS),Windows_NT)
-	-@mkdir $(OUTDIR)\bin
 	-@mkdir $(OUTDIR) 
+	-@mkdir $(OUTDIR)/bin
+	-@mkdir $(OUTDIR)/obj
 	-@mkdir $(OBJDIR)
 else
 	-@mkdir -p $(OUTDIR) $(OBJDIR) $(OUTDIR)/bin
@@ -226,6 +223,7 @@ endif
 	
 update_rev:
 	@echo "Updating revision number ..."
+	@echo $(UPDATE_SCRIPT)
 	@$(UPDATE_SCRIPT) $(SRCDIR)
 	@echo "Compiling model source code ..."
 
