@@ -45,12 +45,12 @@ build: off
   # build_script:
   
   
-- ps: |
-    if ($isLinux) {
-      Write-Host "This is Linux!"
-    } else {
-      Write-Host "This is NOT a Linux!"
-    }  
+# - ps: |
+    # if ($isLinux) {
+      # Write-Host "This is Linux!"
+    # } else {
+      # Write-Host "This is NOT a Linux!"
+    # }  
   
 - echo Ubuntu build script
 - cmd: ECHO this is batch-build2
