@@ -226,14 +226,7 @@ endif
 	
 update_rev:
 	@echo "Updating revision number ..."
-	pwd
-	cd $(SRCDIR)
-	pwd
-	cd src
-	pwd
 	@$(UPDATE_SCRIPT) $(SRCDIR)
-	cd ..
-	pwd
 	@echo "Compiling model source code ..."
 
 $(OUTDIR)/bin/$(EXEC): $(OBJ)
