@@ -22,5 +22,5 @@ install:
 #- sh: cmake ..
 #
 #- cmake --build .
-- make install
+- make all
 #test_script: ctest -V
