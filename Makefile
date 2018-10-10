@@ -189,6 +189,7 @@ all: prepare update_rev $(OUTDIR)/bin/$(EXEC)
 install:
 	@echo Installing the model into $(PREFIX)/bin ...
 	-@mkdir -p $(PREFIX)/bin
+	@echo copying
 	-@cp $(OUTDIR)/bin/$(EXEC) $(PREFIX)/bin/$(EXEC)
 	@echo FINISHED!
 
@@ -225,8 +226,15 @@ endif
 	
 update_rev:
 	@echo "Updating revision number ..."
-	@echo "Compiling model source code ..."
+	pwd
+	cd $(SRCDIR)
+	pwd
+	cd src
+	pwd
 	@$(UPDATE_SCRIPT) $(SRCDIR)
+	cd ..
+	pwd
+	@echo "Compiling model source code ..."
 
 $(OUTDIR)/bin/$(EXEC): $(OBJ)
 	@echo "Linking code ..."

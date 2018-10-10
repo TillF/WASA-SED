@@ -282,9 +282,11 @@ IF (STATUS == 2) THEN !regular call during timestep
           if (dosediment) then
             !qtemp_sed = qsediment(d,irout) * qtemp/86400. / qout(d,irout)  ![t/d] assume homogenous mixing, abstract the same fraction of sediment as water
             qtemp_sed = sediment_out(irout,:) * qtemp/86400. / qout(d,irout)  ! assume homogenous mixing, abstract the same fraction of sediment as water for every particle size class [t/d]
+            
+            sediment_out(irout,:) =  sediment_out(irout,:) -  qtemp_sed  ! assume homogenous mixing, abstract the same fraction of sediment as water for every particle size class [t/d]
         
-            qsediment2_t(d,1,irout) = qsediment2_t(d,1,irout) - sum(qtemp_sed)  !abstract sediment from source (total over all particle size classes)
-            qsediment2_t(d,1,irout)=MAX(qsediment2_t(d,1,irout),0.)   !prevent negative values (is this necessary?)
+            !qsediment2_t(d,1,irout) = qsediment2_t(d,1,irout) - sum(qtemp_sed)  !abstract sediment from source (total over all particle size classes)
+            !qsediment2_t(d,1,irout)=MAX(qsediment2_t(d,1,irout),0.)   !prevent negative values (is this necessary?)
           end if    
 !    from acude (there must be a large acude in this muni !)
         ELSE IF (trans_start(2,i) == 1) THEN
