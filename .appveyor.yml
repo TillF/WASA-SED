@@ -50,8 +50,10 @@ install:
       # Write-Host "This is NOT a Linux!"
     # }  
   
-- echo Ubuntu build script
+#- echo Ubuntu build script
 - cmd: ECHO this is batch-build2
+- cmd: make --version
+- cmd: make all OUTDIR=build_win
 - sh: echo this is shell-build2
 
 
@@ -66,12 +68,21 @@ install:
 
 artifacts:
   - path: build/bin
-    name: WASA-SED executable
+    name: WASA-SEDexec_ubuntu
+    type: zip
+
+  - path: build_win/bin
+    name: WASA-SEDexec_windows
     type: zip
 
 deploy:
 - provider: Environment
-  name: production
+  name: WASA-SEDexec_ubuntu
   on:
-    branch: unit_sedigraph # only this will work
+    branch: unit_sedigraph
+- provider: Environment
+  name: WASA-SEDexec_windows
+  on:
+    branch: unit_sedigraph # only this will trigger a deploymentplatform
+    platform: x86
 #    APPVEYOR_REPO_TAG: true # condition will never be evaluated for annotated tag
