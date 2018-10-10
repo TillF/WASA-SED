@@ -2,15 +2,18 @@ image:
 - Visual Studio 2017
 - Ubuntu
 
-#environment:
-#  MINGW_DIR: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin
+environment:
+  MINGW_DIR: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin
+#so Windows finds the MINGW-files
 
 #clone_depth: 3
 
 #build: off
 
 init:
-#- cmd: set PATH=%MINGW_DIR%;%PATH%
+- cmd: set PATH=%MINGW_DIR%;%PATH%
+- cmd: set
+
 #- sh: sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test" > /dev/null
 #- sh: sudo apt-get -yq update > /dev/null
 #- sh: sudo apt-get install -yq --no-install-suggests --no-install-recommends gfortran-6 > /dev/null
@@ -23,13 +26,19 @@ install:
 - sh: echo this is shell
 - sh: gfortran --version
 
+build:
+- cmd: ECHO this is batch-build
+- sh: echo this is shell-build
+
+
 #- cmd: cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
 #- sh: cmake ..
 #
 #- cmake --build .
-- make --version
-- make all
+- sh: make --version
+- sh: make all
 #test_script: ctest -V
+
 
 artifacts:
   - path: build/bin
