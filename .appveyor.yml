@@ -8,7 +8,8 @@ environment:
 
 #clone_depth: 3
 
-#build: off
+build: off
+ #disables MSBuild functionality
 
 init:
 - cmd: set PATH=%MINGW_DIR%;%PATH%
@@ -19,8 +20,6 @@ init:
 #- sh: sudo apt-get install -yq --no-install-suggests --no-install-recommends gfortran-6 > /dev/null
 #- sh: export FC=/usr/bin/gfortran-6
   
-build: off
- #disables MSBuild functionality
 
  install:
 - cmd: ECHO this is batch
