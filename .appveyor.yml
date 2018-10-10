@@ -34,8 +34,8 @@ install:
 artifacts:
   - path: build/bin
     name: WASA-SED executable
-	type: zip
-	
+    type: zip
+
 deploy:
 - provider: Environment
   name: production
