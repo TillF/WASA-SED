@@ -29,8 +29,6 @@ install:
 build: off
  #disables MSBuild funcitonality
 
- - cmd: ECHO this is batch-build2
- - sh: echo this is shell-build2
   
 for:
 - ps: |

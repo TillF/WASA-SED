@@ -33,7 +33,7 @@ endif
 
 # script for updating revision number according to platform
 ifeq ($(OS),Windows_NT)
-    UPDATE_SCRIPT=$(SRCDIR)\update_revision_no.bat
+    UPDATE_SCRIPT=$(SRCDIR)\\update_revision_no.bat
 else
     UPDATE_SCRIPT=$(SRCDIR)/update_revision_no.sh
 endif
