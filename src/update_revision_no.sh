@@ -22,7 +22,5 @@ SCRIPTPATH=`dirname $SCRIPT`
 REP_DATE=`git show -s --format=%ci`
 DATE=` date +%Y-%m-%d" "%H:%M`
 echo "!this file is updated by update_revision_no.sh/.bat" > $SCRIPTPATH/General/svn_rev.f90
-rev_string1="$gitstr $cmmt"
-rev_string2="repository date $REP_DATE, built $DATE"
-echo $rev_string1 >> $SCRIPTPATH/General/svn_rev.f90
-echo $rev_string2 >> $SCRIPTPATH/General/svn_rev.f90
+echo "rev_string1='$gitstr $cmmt'" >> $SCRIPTPATH/General/svn_rev.f90
+echo "rev_string2='repository date $REP_DATE, built $DATE'" >> $SCRIPTPATH/General/svn_rev.f90
