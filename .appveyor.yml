@@ -14,14 +14,12 @@ build: off
 init:
 - cmd: set PATH=%MINGW_DIR%;%PATH%
 - cmd: set
-
 #- sh: sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test" > /dev/null
 #- sh: sudo apt-get -yq update > /dev/null
 #- sh: sudo apt-get install -yq --no-install-suggests --no-install-recommends gfortran-6 > /dev/null
 #- sh: export FC=/usr/bin/gfortran-6
-  
 
- install:
+install:
 - cmd: ECHO this is batch
 - ps: Write-Host "This is PowerShell"
 #- cmd: gfortran --version #doesn't work
