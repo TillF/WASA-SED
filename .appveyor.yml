@@ -19,15 +19,16 @@ init:
 #- sh: sudo apt-get install -yq --no-install-suggests --no-install-recommends gfortran-6 > /dev/null
 #- sh: export FC=/usr/bin/gfortran-6
   
-install:
+build: off
+ #disables MSBuild functionality
+
+ install:
 - cmd: ECHO this is batch
 - ps: Write-Host "This is PowerShell"
 #- cmd: gfortran --version #doesn't work
 - sh: echo this is shell
 - sh: gfortran --version
 
-build: off
- #disables MSBuild funcitonality
 
   
 # for:
