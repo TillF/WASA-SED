@@ -19,8 +19,8 @@ init:
 install:
 - cmd: ECHO this is batch
 - ps: Write-Host "This is PowerShell"
-- cmd: gfortran --version
-- sh: ECHO this is shell
+#- cmd: gfortran --version #doesn't work
+- sh: echo this is shell
 - sh: gfortran --version
 
 #- cmd: cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
