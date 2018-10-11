@@ -9,9 +9,9 @@ platform:
 
 environment:
   MINGW_DIR: C:\MinGW\bin 
-  MSYS_DIR: C:\MinGW\msys\1.0 
-  MINGW64_DIR: C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0 
-  MSYS2_DIR: C:\msys64 
+  MSYS_DIR: C:\MinGW\msys\1.0\bin 
+  MINGW64_DIR: C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64 
+  MSYS2_DIR: C:\msys64\mingw32 
 
   #APPVEYOR_RDP_PASSWORD: aA45-#nuto
   #so Windows finds the MINGW-files
@@ -88,6 +88,7 @@ install:
 # - cmd: make all OUTDIR=build_win
 
 #fails (make too old?)
+  #- cmd: mingw32-make.exe all OUTDIR=build_win
   - cmd: mingw32-make.exe all OUTDIR=build_win
 
 
@@ -124,8 +125,8 @@ deploy:
   release: myproduct-v$(appveyor_build_version)
   description: 'Release description'
   provider: GitHub
-#  auth_token:
-#    secure: <your encrypted token> # your encrypted token from GitHub
+  auth_token:
+    secure: meYLNf3tmP33dPMobNw70vtLNzgx5HiBEzPGSxl4575gHYEI2OtGgthLNxuz62xg
   artifact: tt.zip            
   draft: false
   prerelease: true
