@@ -8,11 +8,11 @@ platform:
 #  - Any CPU
 
 environment:
-  #MINGW_DIR: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin #doesn't seem to work
-  #MinGW bin directory
   MINGW_DIR: C:\MinGW\bin 
   APPVEYOR_RDP_PASSWORD: aA45-#nuto
 #so Windows finds the MINGW-files
+  #MINGW_DIR: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin #doesn't seem to work
+  #MinGW bin directory
 
 #clone_depth: 3
 
@@ -75,13 +75,13 @@ install:
 - cmd: ECHO this is batch-build2
 - cmd: make --version
 - cmd: make all OUTDIR=build_win
-- sh: echo this is shell-build2
 
 
 #- cmd: cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
 #- sh: cmake ..
 #
 #- cmake --build .
+- sh: Building binaries for Ubuntu...
 - sh: make --version
 - sh: make all
 #test_script: ctest -V
