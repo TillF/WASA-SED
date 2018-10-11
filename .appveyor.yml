@@ -60,7 +60,6 @@ install:
  - cmd: dir %MSYS_DIR%
  - cmd: dir %MINGW64_DIR%
  - cmd: dir %MSYS2_DIR%
- 
  - cmd: where mingw32-make.exe
  - cmd: %MSYS2_DIR%\bin\make --version
 
