@@ -42,12 +42,13 @@ install:
 - sh: touch tt
 - ps: Write-Host "This is PowerShell"
 - cmd: ECHO this is batch, checking path...
-- cmd: dir $MINGW_DIR
+- cmd: dir %MINGW_DIR%
 - ps: |
     if ($isLinux) {
       Write-Host "This is Linux!"
     } else {
       Write-Host "This is NOT a Linux!"
+      iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
     }
 
 # # # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
