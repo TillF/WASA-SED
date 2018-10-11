@@ -39,19 +39,16 @@ init:
   # # - cd build
   # # - cmake -DCMAKE_BUILD_TYPE=%CONFIGURATION% -G "%GENERATOR%" ..
 
- - ps: |
-    if ($isLinux) {
-      Write-Host "This is Linux!"
-    } else {
-      Write-Host "This is NOT a Linux!"
-      iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
-    }
-# #build_script: cmake --build . --config %CONFIGURATION%
-# - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
+ # - ps: |
+    # if ($isLinux) {
+      # Write-Host "This is Linux!"
+    # } else {
+      # Write-Host "This is NOT Linux!"
+      # iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
+    # }
 
 install:
   - sh: touch tt
-  - ps: Write-Host "This is PowerShell"
   - cmd: ECHO this is batch, checking path...
   #- cmd: dir
   #- cmd: dir %MINGW_DIR% #mingw32-make.exe GNU Make 3.82.90
@@ -91,23 +88,23 @@ install:
   # - cmd: mingw32-make.exe --version
   # - cmd: mingw32-make.exe all OUTDIR=build_win
  
- # #try mingw64 
-  # - cmd: set PATH=%MINGW64_DIR%;%PATH%
-  # - cmd: where mingw32-make.exe
-  # - cmd: mingw32-make.exe --version
-  # - cmd: mingw32-make.exe all OUTDIR=build_win
+ #try mingw64 
+  - cmd: set PATH=%MINGW64_DIR%;%PATH%
+  - cmd: where mingw32-make.exe
+  - cmd: mingw32-make.exe --version
+  - cmd: mingw32-make.exe all OUTDIR=build_win
   
- # #try msys 
-  # - cmd: set PATH=%MSYS_DIR%;%PATH%
-  # - cmd: where make.exe
-  # - cmd: make.exe --version
-  # - cmd: make.exe all OUTDIR=build_win
+ #try msys 
+  - cmd: set PATH=%MSYS_DIR%;%PATH%
+  - cmd: where make.exe
+  - cmd: make.exe --version
+  - cmd: make.exe all OUTDIR=build_win
 
-# #try msys2 
-  # - cmd: set PATH=%MSYS2_DIR%;%PATH%
-  # - cmd: where make.exe
-  # - cmd: make.exe --version
-  # - cmd: make.exe all OUTDIR=build_win
+#try msys2 
+  - cmd: set PATH=%MSYS2_DIR%;%PATH%
+  - cmd: where make.exe
+  - cmd: make.exe --version
+  - cmd: make.exe all OUTDIR=build_win
 
 
 
@@ -139,22 +136,22 @@ artifacts:
     # type: zip
 
 
-# deploy:
-  # environment: Ubuntu_binary  
-  # release: unit_sedigraph
-  # description: 'Release description from appveyor'
-  # provider: GitHub
-  # auth_token:
-    # secure: meYLNf3tmP33dPMobNw70vtLNzgx5HiBEzPGSxl4575gHYEI2OtGgthLNxuz62xg
-  # artifact: tt.zip            
-  # draft: false
-  # prerelease: true
-  # on:
-    # branch: unit_sedigraph                 # release from unit_sedigraph branch only
-# #    appveyor_repo_tag: true        # deploy on tag push only
+deploy:
+  environment: Ubuntu_binary  
+  release: unit_sedigraph
+  description: 'Release description from appveyor'
+  provider: GitHub
+  auth_token:
+    secure: meYLNf3tmP33dPMobNw70vtLNzgx5HiBEzPGSxl4575gHYEI2OtGgthLNxuz62xg
+  artifact: tt.zip            
+  draft: false
+  prerelease: true
+  on:
+    branch: unit_sedigraph                 # release from unit_sedigraph branch only
+#    appveyor_repo_tag: true        # deploy on tag push only
 
 #Error creating GitHub release: Provider setting not found or it's value is empty. If secure setting is used #please check that value was encrypted (or YAML was exported) while being logged under correct account.
 #Parameter name: auth_token
 
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# on_finish:
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
