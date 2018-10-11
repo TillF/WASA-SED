@@ -19,7 +19,7 @@ environment:
 build: off
  #disables MSBuild functionality
 
- init:
+init:
  - cmd: set PATH=%MINGW_DIR%;%PATH%
  - cmd: set
 # #- sh: sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test" > /dev/null
@@ -88,7 +88,11 @@ build: off
 
 
 
-# artifacts:
+artifacts:
+  - path: WASA-SED/README.md
+    name: readme_
+    type: zip
+
   # - path: build/bin
     # name: WASA-SEDexec_ubuntu
     # type: zip
