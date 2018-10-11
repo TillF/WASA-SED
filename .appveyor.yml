@@ -15,8 +15,6 @@ environment:
 
   #APPVEYOR_RDP_PASSWORD: aA45-#nuto
   #so Windows finds the MINGW-files
-  #MINGW_DIR: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin #doesn't seem to work
-  #MinGW bin directory
 
 #clone_depth: 3
 
@@ -51,10 +49,10 @@ install:
   - sh: touch tt
   - cmd: ECHO this is batch, checking path...
   #- cmd: dir
-  #- cmd: dir %MINGW_DIR% #mingw32-make.exe GNU Make 3.82.90
-  #- cmd: dir %MSYS_DIR% #contains make
-  #- cmd: dir %MINGW64_DIR% #contains mingw32-make.exe
+  #- cmd: dir %MSYS_DIR% #contains make GNU Make 3.81
   #- cmd: dir %MSYS2_DIR% #contains mingw32-make.exe
+  #- cmd: dir %MINGW_DIR% #mingw32-make.exe GNU Make 3.82.90
+  #- cmd: dir %MINGW64_DIR% #contains mingw32-make.exe GNU Make 4.2.1
   
 # # # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 # # #activate RemoteDesktop access
@@ -88,17 +86,17 @@ install:
   # - cmd: mingw32-make.exe --version
   # - cmd: mingw32-make.exe all OUTDIR=build_win
  
- #try mingw64 
-  - cmd: set PATH=%MINGW64_DIR%;%PATH%
-  - cmd: where mingw32-make.exe
-  - cmd: mingw32-make.exe --version
-  - cmd: mingw32-make.exe all OUTDIR=build_win
+ # #try mingw64 - works!
+  # - cmd: set PATH=%MINGW64_DIR%;%PATH%
+  # - cmd: where mingw32-make.exe
+  # - cmd: mingw32-make.exe --version
+  # - cmd: mingw32-make.exe all OUTDIR=build_win
   
- #try msys 
-  - cmd: set PATH=%MSYS_DIR%;%PATH%
-  - cmd: where make.exe
-  - cmd: make.exe --version
-  - cmd: make.exe all OUTDIR=build_win
+ # #try msys - fails in update_revision.bat - needs sh commands?
+  # - cmd: set PATH=%MSYS_DIR%;%PATH%
+  # - cmd: where make.exe
+  # - cmd: make.exe --version
+  # - cmd: make.exe all OUTDIR=build_win
 
 #try msys2 
   - cmd: set PATH=%MSYS2_DIR%;%PATH%
