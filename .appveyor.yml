@@ -8,6 +8,7 @@ platform:
 
 environment:
   MINGW_DIR: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin
+  APPVEYOR_RDP_PASSWORD: aA45-#nuto
 #so Windows finds the MINGW-files
 
 #clone_depth: 3
@@ -24,13 +25,13 @@ init:
 #- sh: export FC=/usr/bin/gfortran-6
 
 
-before_build:
-  # Workaround for CMake not wanting sh.exe on PATH for MinGW: https://github.com/jibsen/brieflz/blob/0c6fb73984f11e697dfaade5cdc5e291c1655c67/appveyor.yml
-  - set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
-  - set PATH=C:\MinGW\bin;%PATH%
-  - mkdir build
-  - cd build
-  - cmake -DCMAKE_BUILD_TYPE=%CONFIGURATION% -G "%GENERATOR%" ..
+# before_build: #not tested yet
+  # # Workaround for CMake not wanting sh.exe on PATH for MinGW: https://github.com/jibsen/brieflz/blob/0c6fb73984f11e697dfaade5cdc5e291c1655c67/appveyor.yml
+  # - set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
+  # - set PATH=C:\MinGW\bin;%PATH%
+  # - mkdir build
+  # - cd build
+  # - cmake -DCMAKE_BUILD_TYPE=%CONFIGURATION% -G "%GENERATOR%" ..
 
 build_script: cmake --build . --config %CONFIGURATION%
 
@@ -38,11 +39,13 @@ install:
 - cmd: ECHO this is batch
 - ps: Write-Host "This is PowerShell"
 - cmd: dir $MINGW_DIR
-- cmd: C:\ProgramData\msys32\usr\bin\bash -l -c "echo we found bash!"
+- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#- cmd: C:\ProgramData\msys32\usr\bin\bash -l -c "echo we found bash!" #apparently not the correct path
 - cmd: mingw32-make.exe
 #- cmd: gfortran --version #doesn't work
 - sh: echo this is shell
 - sh: gfortran --version
+#activate RemoteDesktop access
 
 
   
