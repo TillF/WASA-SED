@@ -21,7 +21,7 @@ build: off
 
 init:
  - cmd: set PATH=%MINGW_DIR%;%PATH%
- - cmd: set
+# - cmd: set
 # #- sh: sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test" > /dev/null
 # #- sh: sudo apt-get -yq update > /dev/null
 # #- sh: sudo apt-get install -yq --no-install-suggests --no-install-recommends gfortran-6 > /dev/null
@@ -36,13 +36,6 @@ init:
   # # - cd build
   # # - cmake -DCMAKE_BUILD_TYPE=%CONFIGURATION% -G "%GENERATOR%" ..
 
-# #build_script: cmake --build . --config %CONFIGURATION%
-
-install:
-- sh: touch tt
-- ps: Write-Host "This is PowerShell"
-- cmd: ECHO this is batch, checking path...
-- cmd: dir %MINGW_DIR%
 - ps: |
     if ($isLinux) {
       Write-Host "This is Linux!"
@@ -50,11 +43,21 @@ install:
       Write-Host "This is NOT a Linux!"
       iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
     }
+# #build_script: cmake --build . --config %CONFIGURATION%
+
+install:
+- sh: touch tt
+- ps: Write-Host "This is PowerShell"
+- cmd: ECHO this is batch, checking path...
+- cmd: dir
+- cmd: dir %MINGW_DIR%
+- cmd: dir C:\MinGW\msys\1.0
+- cmd: where mingw32-make.exe
+- cmd: mingw32-make.exe --version
 
 # # # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 # # #activate RemoteDesktop access
 # # #- cmd: C:\ProgramData\msys32\usr\bin\bash -l -c "echo we found bash!" #apparently not the correct path
-# - cmd: where mingw32-make.exe
 # #- cmd: gfortran --version #doesn't work
 # - sh: echo this is shell
 # - sh: gfortran --version
@@ -108,14 +111,16 @@ artifacts:
     # name: WASA-SEDexec_windows
     # type: zip
 
-# deploy:
-# - provider: Environment
-  # name: WASA-SEDexec_ubuntu
-  # on:
-    # branch: unit_sedigraph
-# - provider: Environment
-  # name: WASA-SEDexec_windows
-  # on:
-    # branch: unit_sedigraph # only this will trigger a deploymentplatform
-    # platform: x86
-# #    APPVEYOR_REPO_TAG: true # condition will never be evaluated for annotated tag
+
+deploy:
+  release: myproduct-v$(appveyor_build_version)
+  description: 'Release description'
+  provider: GitHub
+#  auth_token:
+#    secure: <your encrypted token> # your encrypted token from GitHub
+  artifact: tt.zip            # upload all NuGet packages to release assets
+  draft: false
+  prerelease: true
+#  on:
+#    branch: master                 # release from master branch only
+#    appveyor_repo_tag: true        # deploy on tag push only
