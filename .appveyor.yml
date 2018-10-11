@@ -14,7 +14,6 @@ environment:
   MSYS2_DIR: C:\msys64\mingw32\bin 
 
   #APPVEYOR_RDP_PASSWORD: aA45-#nuto
-  #so Windows finds the MINGW-files
 
 #clone_depth: 3
 
