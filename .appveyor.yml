@@ -46,19 +46,8 @@ init:
 
 install:
   - sh: touch tt.txt
-  - cmd: ECHO this is batch, checking path...
-  #- cmd: dir
-  #- cmd: dir %MSYS_DIR% #contains make GNU Make 3.81
-  #- cmd: dir %MSYS2_DIR% #contains mingw32-make.exe
-  #- cmd: dir %MINGW_DIR% #mingw32-make.exe GNU Make 3.82.90
-  #- cmd: dir %MINGW64_DIR% #contains mingw32-make.exe GNU Make 4.2.1
-  
-# # # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-# # #activate RemoteDesktop access
-# # #- cmd: C:\ProgramData\msys32\usr\bin\bash -l -c "echo we found bash!" #apparently not the correct path
-# #- cmd: gfortran --version #doesn't work
-# - sh: echo this is shell
-# - sh: gfortran --version
+#  - cmd: ECHO this is batch, checking path...
+
 
 # # for:
 # # - ps: |
@@ -68,11 +57,7 @@ install:
       # # Write-Host "This is NOT a Linux!"
     # # }
 
-  # # matrix:
-    # # only:
-      # # - image: Ubuntu
-
-   
+    
 # #- echo Ubuntu build script
   - cmd: ECHO this is batch-build2
 # - cmd: make --version
@@ -98,10 +83,11 @@ install:
   # - cmd: make.exe all OUTDIR=build_win
 
 #try msys2 - works!
-  - cmd: set PATH=%MSYS2_DIR%;%PATH%
-  - cmd: where mingw32-make.exe
-  - cmd: mingw32-make.exe --version
+#  - cmd: set PATH=%MSYS2_DIR%;%PATH%
+#  - cmd: where mingw32-make.exe
+#  - cmd: mingw32-make.exe --version
   - cmd: mingw32-make.exe all OUTDIR=build_win_msys2
+  - cmd: dir build_win_msys2\bin
 
 
 # #test_script: ctest -V
@@ -120,6 +106,10 @@ artifacts:
     name: WASA-SEDexec_windows_msys2
     type: zip
 
+  - path: WASA-SED\build_win_msys2\bin\*.*
+    name: WASA-SEDexec_windows_msys2_2
+    type: zip
+
 
 deploy:
   environment: Ubuntu_binary  
@@ -129,7 +119,7 @@ deploy:
   provider: GitHub
   auth_token:
     secure: meYLNf3tmP33dPMobNw70vtLNzgx5HiBEzPGSxl4575gHYEI2OtGgthLNxuz62xg
-  artifacts: tt, SEDexec_windows_msys2
+  artifacts: tt, SEDexec_windows_msys2, SEDexec_windows_msys2_2
   draft: true
   prerelease: true
   force_update: true
