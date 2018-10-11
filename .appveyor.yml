@@ -7,7 +7,9 @@ platform:
 #  - Any CPU
 
 environment:
-  MINGW_DIR: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin
+  #MINGW_DIR: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin #doesn't seem to work
+  #MinGW bin directory
+  MINGW_DIR: C:\MinGW\bin 
   APPVEYOR_RDP_PASSWORD: aA45-#nuto
 #so Windows finds the MINGW-files
 
@@ -36,16 +38,23 @@ init:
 build_script: cmake --build . --config %CONFIGURATION%
 
 install:
-- cmd: ECHO this is batch
 - ps: Write-Host "This is PowerShell"
+- cmd: ECHO this is batch, checking path:
 - cmd: dir $MINGW_DIR
+- ps: |
+    if ($isLinux) {
+      Write-Host "This is Linux!"
+    } else {
+      Write-Host "This is NOT a Linux!"
+    }
+
 - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#activate RemoteDesktop access
 #- cmd: C:\ProgramData\msys32\usr\bin\bash -l -c "echo we found bash!" #apparently not the correct path
-- cmd: mingw32-make.exe
+- cmd: where mingw32-make.exe
 #- cmd: gfortran --version #doesn't work
 - sh: echo this is shell
 - sh: gfortran --version
-#activate RemoteDesktop access
 
 
   
