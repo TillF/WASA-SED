@@ -45,7 +45,7 @@ init:
     # }
 
 install:
-  - sh: touch tt
+  - sh: touch tt.txt
   - cmd: ECHO this is batch, checking path...
   #- cmd: dir
   #- cmd: dir %MSYS_DIR% #contains make GNU Make 3.81
@@ -108,7 +108,7 @@ install:
 
 
 artifacts:
-  - path: tt
+  - path: tt.txt
     name: tt
     type: zip
 
@@ -116,7 +116,7 @@ artifacts:
     # name: WASA-SEDexec_ubuntu
     # type: zip
 
-  - path: WASA-SED/build_win/build_win_msys2
+  - path: WASA-SED/build_win_msys2/bin/*.*
     name: WASA-SEDexec_windows_msys2
     type: zip
 
@@ -129,7 +129,7 @@ deploy:
   provider: GitHub
   auth_token:
     secure: meYLNf3tmP33dPMobNw70vtLNzgx5HiBEzPGSxl4575gHYEI2OtGgthLNxuz62xg
-  artifact: tt.zip,/.*\.zip/            
+  artifacts: tt, SEDexec_windows_msys2
   draft: true
   prerelease: true
   force_update: true
