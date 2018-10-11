@@ -32,16 +32,18 @@ init:
     # }
 
 install:
-  - sh: touch tt.txt
-  - cmd: echo "Win" > tt.txt
-  - cmd: md build_win\bin
-  - cmd: copy tt.txt build_win\bin
+  - sh: echo Ubuntu > tt.txt
+  - cmd: echo Win > tt.txt
+  - cmd: md build_win_msys2\bin
+  - cmd: copy tt.txt build_win_msys2\bin
     
 # #- echo Ubuntu build script
-# - cmd: make --version
-# - cmd: make all OUTDIR=build_win
+  - sh: pltform=Ubuntu
+# - sh: make --version
+# - sh: make all OUTDIR=build_win
 
   - cmd: ECHO this is batch-build2
+  - cmd: set pltform=Win
 #try mingw
 #fails (make too old?)
   # - cmd: set PATH=%MINGW_DIR%;%PATH%
@@ -91,9 +93,9 @@ artifacts:
 
 
 deploy:
-  environment: Ubuntu_binary  
-  release: autorelease-v$(APPVEYOR_BUILD_VERSION)-t$(APPVEYOR_REPO_TAG_NAME)
-  tag: build_$(APPVEYOR_BUILD_VERSION)_$(APPVEYOR_BUILD_WORKER_IMAGE)
+  environment: All_binary  
+  release: rel-v$(APPVEYOR_BUILD_VERSION)-t$(APPVEYOR_REPO_TAG_NAME)-$(pltform)
+  tag: build_$(APPVEYOR_BUILD_VERSION)_$(APPVEYOR_BUILD_WORKER_IMAGE)_$(appveyor_build_worker_image)
   description: 'automatic build from Appveyor'
   provider: GitHub
   auth_token:
@@ -104,6 +106,26 @@ deploy:
   force_update: true
   on:
     branch: unit_sedigraph                 # release from unit_sedigraph branch only
+	on:
+    branch: master
+#    appveyor_repo_tag: true        # deploy on tag push only
+  
+  environment: Ubuntu_binary  
+  release: urel-v$(APPVEYOR_BUILD_VERSION)-t$(APPVEYOR_REPO_TAG_NAME)-$(pltform)
+  tag: build_$(APPVEYOR_BUILD_VERSION)_$(APPVEYOR_BUILD_WORKER_IMAGE)_$(appveyor_build_worker_image)
+  description: 'automatic build from Appveyor'
+  provider: GitHub
+  auth_token:
+    secure: meYLNf3tmP33dPMobNw70vtLNzgx5HiBEzPGSxl4575gHYEI2OtGgthLNxuz62xg
+  artifacts: tt
+  draft: true
+  prerelease: true
+  force_update: true
+  on:
+    branch: unit_sedigraph                 # release from unit_sedigraph branch only
+	on:
+    branch: master
+    pltform: Ubuntu
 #    appveyor_repo_tag: true        # deploy on tag push only
 
 #Error creating GitHub release: Provider setting not found or it's value is empty. If secure setting is used #please check that value was encrypted (or YAML was exported) while being logged under correct account.
