@@ -38,8 +38,8 @@ init:
 
 # #build_script: cmake --build . --config %CONFIGURATION%
 
-# install:
-# #- ps: Write-Host "This is PowerShell"
+install:
+- ps: Write-Host "This is PowerShell"
 # - cmd: ECHO this is batch, checking path:
 # - cmd: dir $MINGW_DIR
 # # - ps: |
@@ -89,8 +89,8 @@ init:
 
 
 artifacts:
-  - path: WASA-SED/README.md
-    name: readme_
+  - path: WASA-SED/src
+    name: src
     type: zip
 
   # - path: build/bin
