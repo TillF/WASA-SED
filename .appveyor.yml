@@ -41,14 +41,15 @@ init:
 install:
 - sh: touch tt
 - ps: Write-Host "This is PowerShell"
-- cmd: ECHO this is batch, checking path:
-# - cmd: dir $MINGW_DIR
-# - ps: |
-    # if ($isLinux) {
-      # Write-Host "This is Linux!"
-    # } else {
-      # Write-Host "This is NOT a Linux!"
-    # }
+- cmd: ECHO this is batch, checking path...
+- cmd: dir $MINGW_DIR
+- ps: |
+    if ($isLinux) {
+      Write-Host "This is Linux!"
+    } else {
+      Write-Host "This is NOT a Linux!"
+    }
+
 # # # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 # # #activate RemoteDesktop access
 # # #- cmd: C:\ProgramData\msys32\usr\bin\bash -l -c "echo we found bash!" #apparently not the correct path
