@@ -19,92 +19,92 @@ environment:
 build: off
  #disables MSBuild functionality
 
-init:
-- cmd: set PATH=%MINGW_DIR%;%PATH%
-- cmd: set
-#- sh: sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test" > /dev/null
-#- sh: sudo apt-get -yq update > /dev/null
-#- sh: sudo apt-get install -yq --no-install-suggests --no-install-recommends gfortran-6 > /dev/null
-#- sh: export FC=/usr/bin/gfortran-6
+# init:
+# - cmd: set PATH=%MINGW_DIR%;%PATH%
+# - cmd: set
+# #- sh: sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test" > /dev/null
+# #- sh: sudo apt-get -yq update > /dev/null
+# #- sh: sudo apt-get install -yq --no-install-suggests --no-install-recommends gfortran-6 > /dev/null
+# #- sh: export FC=/usr/bin/gfortran-6
 
 
-# before_build: #not tested yet
-  # # Workaround for CMake not wanting sh.exe on PATH for MinGW: https://github.com/jibsen/brieflz/blob/0c6fb73984f11e697dfaade5cdc5e291c1655c67/appveyor.yml
-  # - set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
-  # - set PATH=C:\MinGW\bin;%PATH%
-  # - mkdir build
-  # - cd build
-  # - cmake -DCMAKE_BUILD_TYPE=%CONFIGURATION% -G "%GENERATOR%" ..
+# # before_build: #not tested yet
+  # # # Workaround for CMake not wanting sh.exe on PATH for MinGW: https://github.com/jibsen/brieflz/blob/0c6fb73984f11e697dfaade5cdc5e291c1655c67/appveyor.yml
+  # # - set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
+  # # - set PATH=C:\MinGW\bin;%PATH%
+  # # - mkdir build
+  # # - cd build
+  # # - cmake -DCMAKE_BUILD_TYPE=%CONFIGURATION% -G "%GENERATOR%" ..
 
-#build_script: cmake --build . --config %CONFIGURATION%
+# #build_script: cmake --build . --config %CONFIGURATION%
 
-install:
-#- ps: Write-Host "This is PowerShell"
-- cmd: ECHO this is batch, checking path:
-- cmd: dir $MINGW_DIR
-# - ps: |
-    # if ($isLinux) {
-      # Write-Host "This is Linux!"
-    # } else {
-      # Write-Host "This is NOT a Linux!"
-    # }
-# - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-#activate RemoteDesktop access
-#- cmd: C:\ProgramData\msys32\usr\bin\bash -l -c "echo we found bash!" #apparently not the correct path
-- cmd: where mingw32-make.exe
-#- cmd: gfortran --version #doesn't work
-- sh: echo this is shell
-- sh: gfortran --version
+# install:
+# #- ps: Write-Host "This is PowerShell"
+# - cmd: ECHO this is batch, checking path:
+# - cmd: dir $MINGW_DIR
+# # - ps: |
+    # # if ($isLinux) {
+      # # Write-Host "This is Linux!"
+    # # } else {
+      # # Write-Host "This is NOT a Linux!"
+    # # }
+# # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# #activate RemoteDesktop access
+# #- cmd: C:\ProgramData\msys32\usr\bin\bash -l -c "echo we found bash!" #apparently not the correct path
+# - cmd: where mingw32-make.exe
+# #- cmd: gfortran --version #doesn't work
+# - sh: echo this is shell
+# - sh: gfortran --version
 
 
   
-# for:
-# - ps: |
-    # if ($isLinux) {
-      # Write-Host "This is Linux!"
-    # } else {
-      # Write-Host "This is NOT a Linux!"
-    # }
+# # for:
+# # - ps: |
+    # # if ($isLinux) {
+      # # Write-Host "This is Linux!"
+    # # } else {
+      # # Write-Host "This is NOT a Linux!"
+    # # }
 
-  # matrix:
-    # only:
-      # - image: Ubuntu
+  # # matrix:
+    # # only:
+      # # - image: Ubuntu
 
    
-#- echo Ubuntu build script
-- cmd: ECHO this is batch-build2
-- cmd: make --version
-- cmd: make all OUTDIR=build_win
+# #- echo Ubuntu build script
+# - cmd: ECHO this is batch-build2
+# - cmd: make --version
+# - cmd: make all OUTDIR=build_win
 
 
-#- cmd: cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
-#- sh: cmake ..
-#
-#- cmake --build .
-- sh: Building binaries for Ubuntu...
-- sh: make --version
-- sh: make all
-#test_script: ctest -V
+# #- cmd: cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
+# #- sh: cmake ..
+# #
+# #- cmake --build .
+# - sh: Building binaries for Ubuntu...
+# - sh: make --version
+# - sh: make all
+# #test_script: ctest -V
 
 
 
-artifacts:
-  - path: build/bin
-    name: WASA-SEDexec_ubuntu
-    type: zip
+# artifacts:
+  # - path: build/bin
+    # name: WASA-SEDexec_ubuntu
+    # type: zip
 
-  - path: build_win/bin
-    name: WASA-SEDexec_windows
-    type: zip
+  # - path: build_win/bin
+    # name: WASA-SEDexec_windows
+    # type: zip
 
-deploy:
-- provider: Environment
-  name: WASA-SEDexec_ubuntu
-  on:
-    branch: unit_sedigraph
-- provider: Environment
-  name: WASA-SEDexec_windows
-  on:
-    branch: unit_sedigraph # only this will trigger a deploymentplatform
-    platform: x86
-#    APPVEYOR_REPO_TAG: true # condition will never be evaluated for annotated tag
+# deploy:
+# - provider: Environment
+  # name: WASA-SEDexec_ubuntu
+  # on:
+    # branch: unit_sedigraph
+# - provider: Environment
+  # name: WASA-SEDexec_windows
+  # on:
+    # branch: unit_sedigraph # only this will trigger a deploymentplatform
+    # platform: x86
+# #    APPVEYOR_REPO_TAG: true # condition will never be evaluated for annotated tag
