@@ -9,7 +9,11 @@ platform:
 
 environment:
   MINGW_DIR: C:\MinGW\bin 
-  APPVEYOR_RDP_PASSWORD: aA45-#nuto
+  MSYS_DIR: C:\MinGW\msys\1.0 
+  MINGW64_DIR: C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0 
+  MSYS2_DIR: C:\msys64 
+
+  #APPVEYOR_RDP_PASSWORD: aA45-#nuto
   #so Windows finds the MINGW-files
   #MINGW_DIR: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin #doesn't seem to work
   #MinGW bin directory
@@ -52,8 +56,13 @@ install:
 #- cmd: dir
 #- cmd: dir %MINGW_DIR%
 #- cmd: dir C:\MinGW\msys\1.0
+
+- cmd: dir %MSYS_DIR%
+- cmd: dir %MINGW64_DIR%
+- cmd: dir %MSYS2_DIR%
+
 - cmd: where mingw32-make.exe
-- cmd: mingw32-make.exe --version
+- cmd: %MSYS2_DIR%\bin\make --version
 
 # # # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 # # #activate RemoteDesktop access
@@ -81,6 +90,8 @@ install:
 - cmd: ECHO this is batch-build2
 # - cmd: make --version
 # - cmd: make all OUTDIR=build_win
+
+#fails (make too old?)
 - cmd: mingw32-make.exe all OUTDIR=build_win
 
 
@@ -107,12 +118,13 @@ artifacts:
     # name: WASA-SEDexec_ubuntu
     # type: zip
 
-  - path: build_win/bin
-    name: WASA-SEDexec_windows
-    type: zip
+  # - path: build_win/bin
+    # name: WASA-SEDexec_windows
+    # type: zip
 
 
 deploy:
+  environment: Ubuntu_binary  
   release: myproduct-v$(appveyor_build_version)
   description: 'Release description'
   provider: GitHub
