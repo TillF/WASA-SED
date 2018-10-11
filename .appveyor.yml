@@ -1,6 +1,6 @@
 image:
-#Visual Studio 2017 does not contain some mingw installations
 - Visual Studio 2015 
+#Visual Studio 2017 does not contain some mingw installations
 - Ubuntu
 
 platform:
@@ -36,7 +36,7 @@ init:
   # - cd build
   # - cmake -DCMAKE_BUILD_TYPE=%CONFIGURATION% -G "%GENERATOR%" ..
 
-build_script: cmake --build . --config %CONFIGURATION%
+#build_script: cmake --build . --config %CONFIGURATION%
 
 install:
 #- ps: Write-Host "This is PowerShell"
@@ -70,16 +70,7 @@ install:
     # only:
       # - image: Ubuntu
 
-  # build_script:
-  
-  
-# - ps: |
-    # if ($isLinux) {
-      # Write-Host "This is Linux!"
-    # } else {
-      # Write-Host "This is NOT a Linux!"
-    # }  
-  
+   
 #- echo Ubuntu build script
 - cmd: ECHO this is batch-build2
 - cmd: make --version
@@ -94,8 +85,6 @@ install:
 - sh: make --version
 - sh: make all
 #test_script: ctest -V
-
-
 
 
 
