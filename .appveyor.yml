@@ -89,7 +89,7 @@ install:
   # - cmd: set PATH=%MINGW64_DIR%;%PATH%
   # - cmd: where mingw32-make.exe
   # - cmd: mingw32-make.exe --version
-  # - cmd: mingw32-make.exe all OUTDIR=build_win
+  # - cmd: mingw32-make.exe all OUTDIR=build_win_mingw64
   
  # #try msys - fails in update_revision.bat - needs sh commands?
   # - cmd: set PATH=%MSYS_DIR%;%PATH%
@@ -97,29 +97,17 @@ install:
   # - cmd: make.exe --version
   # - cmd: make.exe all OUTDIR=build_win
 
-#try msys2 
+#try msys2 - works!
   - cmd: set PATH=%MSYS2_DIR%;%PATH%
   - cmd: where mingw32-make.exe
   - cmd: mingw32-make.exe --version
-  - cmd: mingw32-make.exe all OUTDIR=build_win
+  - cmd: mingw32-make.exe all OUTDIR=build_win_msys2
 
 
-
-# #- cmd: cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
-# #- sh: cmake ..
-# #
-# #- cmake --build .
-# - sh: Building binaries for Ubuntu...
-# - sh: make --version
-# - sh: make all
 # #test_script: ctest -V
 
 
 artifacts:
-  - path: WASA-SED/src
-    name: src
-    type: zip
-
   - path: tt
     name: tt
     type: zip
@@ -128,9 +116,9 @@ artifacts:
     # name: WASA-SEDexec_ubuntu
     # type: zip
 
-  # - path: build_win/bin
-    # name: WASA-SEDexec_windows
-    # type: zip
+  - path: build_win/build_win_msys2
+    name: WASA-SEDexec_windows_msys2
+    type: zip
 
 
 deploy:
@@ -144,7 +132,7 @@ deploy:
   draft: false
   prerelease: true
   on:
-    branch: unit_sedigraph2                 # release from unit_sedigraph branch only
+    branch: unit_sedigraph                 # release from unit_sedigraph branch only
 #    appveyor_repo_tag: true        # deploy on tag push only
 
 #Error creating GitHub release: Provider setting not found or it's value is empty. If secure setting is used #please check that value was encrypted (or YAML was exported) while being logged under correct account.
