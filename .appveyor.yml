@@ -22,19 +22,6 @@ build: off
 
 init:
 # - cmd: set
-# #- sh: sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test" > /dev/null
-# #- sh: sudo apt-get -yq update > /dev/null
-# #- sh: sudo apt-get install -yq --no-install-suggests --no-install-recommends gfortran-6 > /dev/null
-# #- sh: export FC=/usr/bin/gfortran-6
-
-
-# # before_build: #not tested yet
-  # # # Workaround for CMake not wanting sh.exe on PATH for MinGW: https://github.com/jibsen/brieflz/blob/0c6fb73984f11e697dfaade5cdc5e291c1655c67/appveyor.yml
-  # # - set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
-  # # - set PATH=C:\MinGW\bin;%PATH%
-  # # - mkdir build
-  # # - cd build
-  # # - cmake -DCMAKE_BUILD_TYPE=%CONFIGURATION% -G "%GENERATOR%" ..
 
  # - ps: |
     # if ($isLinux) {
@@ -46,23 +33,13 @@ init:
 
 install:
   - sh: touch tt.txt
-#  - cmd: ECHO this is batch, checking path...
-
-
-# # for:
-# # - ps: |
-    # # if ($isLinux) {
-      # # Write-Host "This is Linux!"
-    # # } else {
-      # # Write-Host "This is NOT a Linux!"
-    # # }
 
     
 # #- echo Ubuntu build script
-  - cmd: ECHO this is batch-build2
 # - cmd: make --version
 # - cmd: make all OUTDIR=build_win
 
+  - cmd: ECHO this is batch-build2
 #try mingw
 #fails (make too old?)
   # - cmd: set PATH=%MINGW_DIR%;%PATH%
@@ -83,7 +60,7 @@ install:
   # - cmd: make.exe all OUTDIR=build_win
 
 #try msys2 - works!
-#  - cmd: set PATH=%MSYS2_DIR%;%PATH%
+  - cmd: set PATH=%MSYS2_DIR%;%PATH%
 #  - cmd: where mingw32-make.exe
 #  - cmd: mingw32-make.exe --version
   - cmd: mingw32-make.exe all OUTDIR=build_win_msys2
