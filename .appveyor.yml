@@ -1,5 +1,6 @@
 image:
-- Visual Studio 2017
+#Visual Studio 2017 does not contain some mingw installations
+- Visual Studio 2015 
 - Ubuntu
 
 platform:
@@ -38,7 +39,7 @@ init:
 build_script: cmake --build . --config %CONFIGURATION%
 
 install:
-- ps: Write-Host "This is PowerShell"
+#- ps: Write-Host "This is PowerShell"
 - cmd: ECHO this is batch, checking path:
 - cmd: dir $MINGW_DIR
 - ps: |
@@ -47,7 +48,6 @@ install:
     } else {
       Write-Host "This is NOT a Linux!"
     }
-
 - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 #activate RemoteDesktop access
 #- cmd: C:\ProgramData\msys32\usr\bin\bash -l -c "echo we found bash!" #apparently not the correct path
