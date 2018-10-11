@@ -93,21 +93,6 @@ artifacts:
 
 
 deploy:
-  environment: All_binary  
-  release: rel-v$(APPVEYOR_BUILD_VERSION)-t$(APPVEYOR_REPO_TAG_NAME)-$(pltform)
-  tag: build_$(APPVEYOR_BUILD_VERSION)_$(APPVEYOR_BUILD_WORKER_IMAGE)_$(appveyor_build_worker_image)
-  description: 'automatic build from Appveyor'
-  provider: GitHub
-  auth_token:
-    secure: meYLNf3tmP33dPMobNw70vtLNzgx5HiBEzPGSxl4575gHYEI2OtGgthLNxuz62xg
-  artifacts: tt, SEDexec_windows_msys2, SEDexec_windows_msys2_2
-  draft: true
-  prerelease: true
-  force_update: true
-  on:
-    branch: unit_sedigraph                 # release from unit_sedigraph branch only
-#    appveyor_repo_tag: true        # deploy on tag push only
-  
   environment: Ubuntu_binary  
   release: urel-v$(APPVEYOR_BUILD_VERSION)-t$(APPVEYOR_REPO_TAG_NAME)-$(pltform)
   tag: build_$(APPVEYOR_BUILD_VERSION)_$(APPVEYOR_BUILD_WORKER_IMAGE)_$(appveyor_build_worker_image)
@@ -123,7 +108,7 @@ deploy:
     branch: unit_sedigraph                 # release from unit_sedigraph branch only
 	on:
     branch: master
-    pltform: Ubuntu
+#    pltform: Ubuntu
 #    appveyor_repo_tag: true        # deploy on tag push only
 
 #Error creating GitHub release: Provider setting not found or it's value is empty. If secure setting is used #please check that value was encrypted (or YAML was exported) while being logged under correct account.
