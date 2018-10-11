@@ -9,9 +9,9 @@ platform:
 
 environment:
   MINGW_DIR: C:\MinGW\bin 
+  MINGW64_DIR: C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin 
   MSYS_DIR: C:\MinGW\msys\1.0\bin 
-  MINGW64_DIR: C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64 
-  MSYS2_DIR: C:\msys64\mingw32 
+  MSYS2_DIR: C:\msys64\mingw32\bin 
 
   #APPVEYOR_RDP_PASSWORD: aA45-#nuto
   #so Windows finds the MINGW-files
@@ -24,7 +24,6 @@ build: off
  #disables MSBuild functionality
 
 init:
- - cmd: set PATH=%MINGW_DIR%;%PATH%
 # - cmd: set
 # #- sh: sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test" > /dev/null
 # #- sh: sudo apt-get -yq update > /dev/null
@@ -45,6 +44,7 @@ init:
       Write-Host "This is Linux!"
     } else {
       Write-Host "This is NOT a Linux!"
+      iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
     }
 # #build_script: cmake --build . --config %CONFIGURATION%
 # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
@@ -59,9 +59,7 @@ install:
   - cmd: dir %MSYS_DIR%
   - cmd: dir %MINGW64_DIR%
   - cmd: dir %MSYS2_DIR%
-  - cmd: where mingw32-make.exe
-# - cmd: %MSYS2_DIR%\bin\make --version
-
+  
 # # # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 # # #activate RemoteDesktop access
 # # #- cmd: C:\ProgramData\msys32\usr\bin\bash -l -c "echo we found bash!" #apparently not the correct path
@@ -87,9 +85,31 @@ install:
 # - cmd: make --version
 # - cmd: make all OUTDIR=build_win
 
+#try mingw
 #fails (make too old?)
-  #- cmd: mingw32-make.exe all OUTDIR=build_win
+  - cmd: set PATH=%MINGW_DIR%;%PATH%
+  - cmd: where mingw32-make.exe
+  - cmd: mingw32-make.exe --version
   - cmd: mingw32-make.exe all OUTDIR=build_win
+ 
+ #try mingw64 
+  - cmd: set PATH=%MINGW64_DIR%;%PATH%
+  - cmd: where mingw32-make.exe
+  - cmd: mingw32-make.exe --version
+  - cmd: mingw32-make.exe all OUTDIR=build_win
+  
+ #try msys 
+  - cmd: set PATH=%MSYS_DIR%;%PATH%
+  - cmd: where make.exe
+  - cmd: make.exe --version
+  - cmd: make.exe all OUTDIR=build_win
+
+#try msys2 
+  - cmd: set PATH=%MSYS2_DIR%;%PATH%
+  - cmd: where make.exe
+  - cmd: make.exe --version
+  - cmd: make.exe all OUTDIR=build_win
+
 
 
 # #- cmd: cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
@@ -122,8 +142,8 @@ artifacts:
 
 deploy:
   environment: Ubuntu_binary  
-  release: myproduct-v$(appveyor_build_version)
-  description: 'Release description'
+  release: unit_sedigraph
+  description: 'Release description from appveyor'
   provider: GitHub
   auth_token:
     secure: meYLNf3tmP33dPMobNw70vtLNzgx5HiBEzPGSxl4575gHYEI2OtGgthLNxuz62xg
@@ -136,3 +156,6 @@ deploy:
 
 #Error creating GitHub release: Provider setting not found or it's value is empty. If secure setting is used #please check that value was encrypted (or YAML was exported) while being logged under correct account.
 #Parameter name: auth_token
+
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
