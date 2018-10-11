@@ -50,18 +50,17 @@ init:
 # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
 
 install:
- - sh: touch tt
- - ps: Write-Host "This is PowerShell"
- - cmd: ECHO this is batch, checking path...
- #- cmd: dir
- #- cmd: dir %MINGW_DIR%
- #- cmd: dir C:\MinGW\msys\1.0
- 
- - cmd: dir %MSYS_DIR%
- - cmd: dir %MINGW64_DIR%
- - cmd: dir %MSYS2_DIR%
- - cmd: where mingw32-make.exe
- - cmd: %MSYS2_DIR%\bin\make --version
+  - sh: touch tt
+  - ps: Write-Host "This is PowerShell"
+  - cmd: ECHO this is batch, checking path...
+  #- cmd: dir
+  #- cmd: dir %MINGW_DIR%
+  #- cmd: dir C:\MinGW\msys\1.0
+  - cmd: dir %MSYS_DIR%
+  - cmd: dir %MINGW64_DIR%
+  - cmd: dir %MSYS2_DIR%
+  - cmd: where mingw32-make.exe
+# - cmd: %MSYS2_DIR%\bin\make --version
 
 # # # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 # # #activate RemoteDesktop access
@@ -70,8 +69,6 @@ install:
 # - sh: echo this is shell
 # - sh: gfortran --version
 
-
-  
 # # for:
 # # - ps: |
     # # if ($isLinux) {
@@ -86,12 +83,12 @@ install:
 
    
 # #- echo Ubuntu build script
- - cmd: ECHO this is batch-build2
+  - cmd: ECHO this is batch-build2
 # - cmd: make --version
 # - cmd: make all OUTDIR=build_win
 
 #fails (make too old?)
- - cmd: mingw32-make.exe all OUTDIR=build_win
+  - cmd: mingw32-make.exe all OUTDIR=build_win
 
 
 # #- cmd: cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
