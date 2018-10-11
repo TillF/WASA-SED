@@ -33,7 +33,9 @@ init:
 
 install:
   - sh: touch tt.txt
-
+  - cmd: echo "Win" > tt.txt
+  - cmd: md build_win\bin
+  - cmd: copy tt.txt build_win\bin
     
 # #- echo Ubuntu build script
 # - cmd: make --version
@@ -59,12 +61,12 @@ install:
   # - cmd: make.exe --version
   # - cmd: make.exe all OUTDIR=build_win
 
-#try msys2 - works!
-  - cmd: set PATH=%MSYS2_DIR%;%PATH%
-#  - cmd: where mingw32-make.exe
-#  - cmd: mingw32-make.exe --version
-  - cmd: mingw32-make.exe all OUTDIR=build_win_msys2
-  - cmd: dir build_win_msys2\bin
+# #try msys2 - works!
+  # - cmd: set PATH=%MSYS2_DIR%;%PATH%
+# #  - cmd: where mingw32-make.exe
+# #  - cmd: mingw32-make.exe --version
+  # - cmd: mingw32-make.exe all OUTDIR=build_win_msys2
+  # - cmd: dir build_win_msys2\bin
 
 
 # #test_script: ctest -V
@@ -90,8 +92,8 @@ artifacts:
 
 deploy:
   environment: Ubuntu_binary  
-  release: autorelease-v$(appveyor_build_version)-t$(APPVEYOR_REPO_TAG_NAME)
-  tag: build_$(appveyor_build_version)
+  release: autorelease-v$(APPVEYOR_BUILD_VERSION)-t$(APPVEYOR_REPO_TAG_NAME)
+  tag: build_$(APPVEYOR_BUILD_VERSION)_$(APPVEYOR_BUILD_WORKER_IMAGE)
   description: 'automatic build from Appveyor'
   provider: GitHub
   auth_token:
@@ -109,3 +111,8 @@ deploy:
 
 # on_finish:
   # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+  
+#  to do: check wasa.exe is compiled with necessary libraries so it runs standalone
+#  package all assets into the same release
+# zip assets
