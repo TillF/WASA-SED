@@ -87,9 +87,9 @@ artifacts:
     name: WASA-SEDexec_windows_msys2
     type: zip
 
-  - path: build_win_msys2\bin\*.*
-    name: WASA-SEDexec_windows_msys2_2
-    type: zip
+  # - path: build_win_msys2\bin\*.*
+    # name: WASA-SEDexec_windows_msys2_2
+    # type: zip
 
 
 deploy:
