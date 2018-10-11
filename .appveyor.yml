@@ -19,9 +19,9 @@ environment:
 build: off
  #disables MSBuild functionality
 
-# init:
-# - cmd: set PATH=%MINGW_DIR%;%PATH%
-# - cmd: set
+ init:
+ - cmd: set PATH=%MINGW_DIR%;%PATH%
+ - cmd: set
 # #- sh: sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test" > /dev/null
 # #- sh: sudo apt-get -yq update > /dev/null
 # #- sh: sudo apt-get install -yq --no-install-suggests --no-install-recommends gfortran-6 > /dev/null
