@@ -69,15 +69,14 @@ install:
   - cmd: set ORG_PATH=%PATH%
 
  #try mingw
-#fails "recipe for target ...failed" (make too old?)
+#fails "recipe for target ...failed" (make too old?) GNU Make 3.82.90
   # - cmd: set PATH=%MINGW_DIR%;%ORG_PATH%
 # #  - cmd: where make.exe
-  # #GNU Make 3.82.90
   # - cmd: mingw32-make.exe --version 
   # - cmd: mingw32-make.exe all OUTDIR=build_win_mingw
   # - cmd: build_win_mingw\bin\wasa.exe
  
- #try mingw64 - works!
+ #try mingw64 - works! GNU Make 4.2.1
   - cmd: set PATH=%MINGW64_DIR%;%ORG_PATH%
 #  - cmd: where mingw32-make.exe
   - cmd: mingw32-make.exe --version
@@ -90,7 +89,7 @@ install:
   # - cmd: make.exe --version
   # - cmd: make.exe all OUTDIR=build_win
 
-#try msys2 - works!
+#try msys2 - works! GNU Make 4.2.1
   - cmd: set PATH=%MSYS2_DIR%;%ORG_PATH%
   #- cmd: where mingw32-make.exe
   - cmd: mingw32-make.exe --version
@@ -112,9 +111,9 @@ artifacts:
     # name: WASA-SEDexec_ubuntu
     # type: zip
 
-  - path: build_win_mingw/bin
-    name: WASA-SEDexec_windows_mingw
-    type: zip
+  # - path: build_win_mingw/bin
+    # name: WASA-SEDexec_windows_mingw
+    # type: zip
  
   - path: build_win_msys2/bin
     name: WASA-SEDexec_windows_msys2
@@ -138,7 +137,7 @@ deploy:
   provider: GitHub
   auth_token:
     secure: meYLNf3tmP33dPMobNw70vtLNzgx5HiBEzPGSxl4575gHYEI2OtGgthLNxuz62xg
-  artifacts: WASA-SEDexec_windows_msys2,WASA-SEDexec_mingw64,WASA-SEDexec_mingw
+  artifacts: WASA-SEDexec_windows_msys2,WASA-SEDexec_mingw64
   draft: true
   prerelease: true
   force_update: true
