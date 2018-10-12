@@ -129,7 +129,9 @@ OBJ=$(OBJ_FILES:%.f90=$(OBJDIR)/%.o)
 
 FC=gfortran
 CDFLAGS=-g -fcheck=all -Wall -Wextra -ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -fbacktrace -ffpe-trap=invalid,zero,overflow,underflow
-CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s
+#CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s
+CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s -static
+#CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s -static-libgfortran -static-libgcc
 LFLAGS=
 
 ifeq ($(DEBUG),1)
