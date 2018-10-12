@@ -14,7 +14,14 @@ environment:
   MSYS2_DIR: C:\msys64\mingw32\bin 
 
   #APPVEYOR_RDP_PASSWORD: aA45-#nuto
-
+  # matrix:
+    # - PYTHON: "C:\\Python27-x64"
+      # TOX_ENV: "py27"
+      # should_deploy: yes
+    # - PYTHON: "C:\\Python26-x64"
+      # TOX_ENV: "py26"
+  
+  
 #clone_depth: 3
 
 build: off
@@ -39,7 +46,9 @@ init:
 
 install:
   - sh: echo Ubuntu > tt.txt
+  - sh: echo Ubuntu > ubuntu.txt
   - sh: echo Ubuntu > tt2.txt
+  - cmd: echo Win > win.txt
   - cmd: echo Win > tt.txt
   - cmd: echo Win > tt2.txt
   - sh: echo $pltform
@@ -86,9 +95,13 @@ install:
 
 
 artifacts:
-  # - path: tt.txt
-    # name: tt
-    # type: zip
+  - path: ubuntu.txt
+    name: ubuntu
+    type: zip
+
+  - path: win.txt
+    name: win
+    type: zip
 
   - path: tt2.txt
     name: tt2
@@ -105,10 +118,11 @@ artifacts:
   # - path: build_win_msys2\bin\*.*
     # name: WASA-SEDexec_windows_msys2_2
     # type: zip
-	
-foreach ($artifactName in $artifacts.keys) {
-  $artifacts[$artifactName]
-}
+
+after_build:	
+- ps: foreach ($artifactName in $artifacts.keys) {
+      Write-Host $artifacts[$artifactName]
+      }
 
 
 deploy:
@@ -119,14 +133,14 @@ deploy:
   provider: GitHub
   auth_token:
     secure: meYLNf3tmP33dPMobNw70vtLNzgx5HiBEzPGSxl4575gHYEI2OtGgthLNxuz62xg
-  artifacts: tt2,tt
+  artifacts: tt2,tt,ubuntu,win
   draft: true
   prerelease: true
   force_update: true
   on:
     branch: unit_sedigraph                 # release from unit_sedigraph branch only
 #    pltform: Ubuntu
-     appveyor_repo_tag: true        # deploy on tag push only
+#    appveyor_repo_tag: true        # deploy on tag push only
 
 #Error creating GitHub release: Provider setting not found or it's value is empty. If secure setting is used #please check that value was encrypted (or YAML was exported) while being logged under correct account.
 #Parameter name: auth_token
