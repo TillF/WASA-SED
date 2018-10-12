@@ -68,9 +68,10 @@ install:
 #try mingw
 #fails (make too old?)
   - cmd: set PATH=%MINGW_DIR%;%ORG_PATH%
-  - cmd: where mingw32-make.exe
-  - cmd: mingw32-make.exe --version
-  - cmd: mingw32-make.exe all OUTDIR=build_win_mingw
+  - cmd: dir %MINGW_DIR%
+  - cmd: where make.exe
+  - cmd: make.exe --version
+  - cmd: make.exe all OUTDIR=build_win_mingw
   - cmd: build_win_mingw\bin\wasa.exe
  
   - cmd: set ORG_PATH=%PATH%
@@ -141,7 +142,6 @@ deploy:
   force_update: true
   on:
     branch: unit_sedigraph                 # release from unit_sedigraph branch only
-#    pltform: Ubuntu
     appveyor_repo_tag: true        # deploy on tag push only
 
 # on_finish:
