@@ -39,6 +39,7 @@ init:
 
 install:
   - sh: echo Ubuntu > tt.txt
+  - sh: echo Ubuntu > tt2.txt
   - cmd: echo Win > tt.txt
   - cmd: echo Win > tt2.txt
   - sh: echo $pltform
@@ -85,9 +86,9 @@ install:
 
 
 artifacts:
-  - path: tt.txt
-    name: tt
-    type: zip
+  # - path: tt.txt
+    # name: tt
+    # type: zip
 
   - path: tt2.txt
     name: tt2
@@ -97,31 +98,35 @@ artifacts:
     # name: WASA-SEDexec_ubuntu
     # type: zip
 
-  - path: build_win_msys2/bin/*.*
+  - path: build_win_msys2/bin
     name: WASA-SEDexec_windows_msys2
     type: zip
 
   # - path: build_win_msys2\bin\*.*
     # name: WASA-SEDexec_windows_msys2_2
     # type: zip
+	
+foreach ($artifactName in $artifacts.keys) {
+  $artifacts[$artifactName]
+}
 
 
 deploy:
   environment: Ubuntu_binary  
-  release: urel-v$(APPVEYOR_BUILD_VERSION)-t$(APPVEYOR_REPO_TAG_NAME)-$(pltform)
-  tag: build_$(APPVEYOR_BUILD_VERSION)_$(APPVEYOR_BUILD_WORKER_IMAGE)_$(appveyor_build_worker_image)
-  description: 'automatic build from Appveyor'
+  release: urel-v$(APPVEYOR_BUILD_VERSION)-t$(APPVEYOR_REPO_TAG_NAME)-$(APPVEYOR_BUILD_WORKER_IMAGE)
+  tag: build_$(APPVEYOR_BUILD_VERSION)_$(APPVEYOR_BUILD_WORKER_IMAGE)
+  description: 'automatic build from Appveyor ($(APPVEYOR_REPO_COMMIT_TIMESTAMP))'
   provider: GitHub
   auth_token:
     secure: meYLNf3tmP33dPMobNw70vtLNzgx5HiBEzPGSxl4575gHYEI2OtGgthLNxuz62xg
-  artifacts: tt
+  artifacts: tt2,tt
   draft: true
   prerelease: true
   force_update: true
   on:
     branch: unit_sedigraph                 # release from unit_sedigraph branch only
 #    pltform: Ubuntu
-#    appveyor_repo_tag: true        # deploy on tag push only
+     appveyor_repo_tag: true        # deploy on tag push only
 
 #Error creating GitHub release: Provider setting not found or it's value is empty. If secure setting is used #please check that value was encrypted (or YAML was exported) while being logged under correct account.
 #Parameter name: auth_token
