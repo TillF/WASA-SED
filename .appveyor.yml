@@ -65,19 +65,20 @@ install:
 # - sh: make all OUTDIR=build_win
 
   - cmd: ECHO this is batch-build2
-#try mingw
+  #maintain original value of PATH variable
+  - cmd: set ORG_PATH=%PATH%
+
+ #try mingw
 #fails (make too old?)
   - cmd: set PATH=%MINGW_DIR%;%ORG_PATH%
-  - cmd: dir %MINGW_DIR%
-  - cmd: where make.exe
-  - cmd: make.exe --version
+#  - cmd: where make.exe
+  - cmd: mingw32-make.exe --version
   - cmd: make.exe all OUTDIR=build_win_mingw
   - cmd: build_win_mingw\bin\wasa.exe
  
-  - cmd: set ORG_PATH=%PATH%
  #try mingw64 - works!
   - cmd: set PATH=%MINGW64_DIR%;%ORG_PATH%
-  - cmd: where mingw32-make.exe
+#  - cmd: where mingw32-make.exe
   - cmd: mingw32-make.exe --version
   - cmd: mingw32-make.exe all OUTDIR=build_win_mingw64
   - cmd: build_win_mingw64\bin\wasa.exe
@@ -90,8 +91,8 @@ install:
 
 #try msys2 - works!
   - cmd: set PATH=%MSYS2_DIR%;%ORG_PATH%
-  - cmd: where mingw32-make.exe
-#  - cmd: mingw32-make.exe --version
+  #- cmd: where mingw32-make.exe
+  - cmd: mingw32-make.exe --version
   - cmd: mingw32-make.exe all OUTDIR=build_win_msys2
   - cmd: dir build_win_msys2\bin
   - cmd: build_win_msys2\bin\wasa.exe
