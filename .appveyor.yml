@@ -1,5 +1,5 @@
 image:
-- Ubuntu
+#- Ubuntu #no use distributing Ubuntu binaries, may be used later for testing
 - Visual Studio 2015 
 #Visual Studio 2017 does not contain some mingw installations
 
@@ -29,12 +29,12 @@ build: off
 
 init:
 # - cmd: set
-  - sh: pltform="Ubuntu"
-  - sh: echo $pltform
-  - sh: echo $PLATFORM
-  - cmd: set pltform=Win
-  - cmd: echo %pltform%
-  - cmd: echo %PLATFORM%
+  # - sh: pltform="Ubuntu"
+  # - sh: echo $pltform
+  # - sh: echo $PLATFORM
+  # - cmd: set pltform=Win
+  # - cmd: echo %pltform%
+  # - cmd: echo %PLATFORM%
 
  # - ps: |
     # if ($isLinux) {
@@ -45,19 +45,20 @@ init:
     # }
 
 install:
-  - sh: echo Ubuntu > tt.txt
-  - sh: echo Ubuntu > ubuntu.txt
-  - sh: echo Ubuntu > tt2.txt
-  - cmd: echo Win > win.txt
-  - cmd: echo Win > tt.txt
-  - cmd: echo Win > tt2.txt
-  - sh: echo $pltform
-  - sh: echo $PLATFORM
-  - cmd: echo %pltform%
-  - cmd: echo %PLATFORM%
+  # - sh: echo Ubuntu > tt.txt
+  # - sh: echo Ubuntu > ubuntu.txt
+  # - sh: echo Ubuntu > tt2.txt
+  # - cmd: echo Win > win.txt
+  # - cmd: echo Win > tt.txt
+  # - cmd: echo Win > tt2.txt
+  # - sh: echo $pltform
+  # - sh: echo $PLATFORM
+  # - cmd: echo %pltform%
+  # - cmd: echo %PLATFORM%
   
-  - cmd: md build_win_msys2\bin
-  - cmd: copy tt.txt build_win_msys2\bin
+  #test packaging functionality
+  # - cmd: md build_win_msys2\bin
+  # - cmd: copy tt.txt build_win_msys2\bin
     
 # #- echo Ubuntu build script
 # - sh: make --version
@@ -71,11 +72,11 @@ install:
   # - cmd: mingw32-make.exe --version
   # - cmd: mingw32-make.exe all OUTDIR=build_win
  
- # #try mingw64 - works!
-  # - cmd: set PATH=%MINGW64_DIR%;%PATH%
-  # - cmd: where mingw32-make.exe
-  # - cmd: mingw32-make.exe --version
-  # - cmd: mingw32-make.exe all OUTDIR=build_win_mingw64
+ #try mingw64 - works!
+  - cmd: set PATH=%MINGW64_DIR%;%PATH%
+  - cmd: where mingw32-make.exe
+  - cmd: mingw32-make.exe --version
+  - cmd: mingw32-make.exe all OUTDIR=build_win_mingw64
   
  # #try msys - fails in update_revision.bat - needs sh commands?
   # - cmd: set PATH=%MSYS_DIR%;%PATH%
@@ -83,25 +84,18 @@ install:
   # - cmd: make.exe --version
   # - cmd: make.exe all OUTDIR=build_win
 
-# #try msys2 - works!
-  # - cmd: set PATH=%MSYS2_DIR%;%PATH%
-# #  - cmd: where mingw32-make.exe
-# #  - cmd: mingw32-make.exe --version
-  # - cmd: mingw32-make.exe all OUTDIR=build_win_msys2
-  # - cmd: dir build_win_msys2\bin
+#try msys2 - works!
+  - cmd: set PATH=%MSYS2_DIR%;%PATH%
+#  - cmd: where mingw32-make.exe
+#  - cmd: mingw32-make.exe --version
+  - cmd: mingw32-make.exe all OUTDIR=build_win_msys2
+  - cmd: dir build_win_msys2\bin
 
 
 # #test_script: ctest -V
 
 
 artifacts:
-  - path: ubuntu.txt
-    name: ubuntu
-    type: zip
-
-  - path: win.txt
-    name: win
-    type: zip
 
   - path: tt2.txt
     name: tt2
@@ -114,26 +108,28 @@ artifacts:
   - path: build_win_msys2/bin
     name: WASA-SEDexec_windows_msys2
     type: zip
+ 
+  - path: build_win_mingw64/bin
+    name: WASA-SEDexec_mingw64
+    type: zip
 
-  # - path: build_win_msys2\bin\*.*
-    # name: WASA-SEDexec_windows_msys2_2
-    # type: zip
+ 
 
-after_build:	
-- ps: foreach ($artifactName in $artifacts.keys) {
-      Write-Host $artifacts[$artifactName]
-      }
+# after_build:	
+# - ps: foreach ($artifactName in $artifacts.keys) {
+      # Write-Host $artifacts[$artifactName]
+      # }
 
 
 deploy:
   environment: Ubuntu_binary  
-  release: urel-v$(APPVEYOR_BUILD_VERSION)-t$(APPVEYOR_REPO_TAG_NAME)-$(APPVEYOR_BUILD_WORKER_IMAGE)
-  tag: build_$(APPVEYOR_BUILD_VERSION)_$(APPVEYOR_BUILD_WORKER_IMAGE)
-  description: 'automatic build from Appveyor ($(APPVEYOR_REPO_COMMIT_TIMESTAMP))'
+  release: rel$(APPVEYOR_REPO_TAG_NAME)-v$(APPVEYOR_BUILD_VERSION)
+  tag: build_$(APPVEYOR_REPO_TAG_NAME)-v$(APPVEYOR_BUILD_VERSION)
+  description: 'Windows binaries build on Appveyor ($(APPVEYOR_REPO_COMMIT_TIMESTAMP))'
   provider: GitHub
   auth_token:
     secure: meYLNf3tmP33dPMobNw70vtLNzgx5HiBEzPGSxl4575gHYEI2OtGgthLNxuz62xg
-  artifacts: tt2,tt,ubuntu,win
+  artifacts: WASA-SEDexec_windows_msys2,WASA-SEDexec_mingw64
   draft: true
   prerelease: true
   force_update: true
