@@ -1,7 +1,7 @@
 image:
+- Ubuntu
 - Visual Studio 2015 
 #Visual Studio 2017 does not contain some mingw installations
-- Ubuntu
 
 platform:
   - x86
@@ -22,6 +22,12 @@ build: off
 
 init:
 # - cmd: set
+  - sh: pltform="Ubuntu"
+  - sh: echo $pltform
+  - sh: echo $PLATFORM
+  - cmd: set pltform=Win
+  - cmd: echo %pltform%
+  - cmd: echo %PLATFORM%
 
  # - ps: |
     # if ($isLinux) {
@@ -34,16 +40,20 @@ init:
 install:
   - sh: echo Ubuntu > tt.txt
   - cmd: echo Win > tt.txt
+  - cmd: echo Win > tt2.txt
+  - sh: echo $pltform
+  - sh: echo $PLATFORM
+  - cmd: echo %pltform%
+  - cmd: echo %PLATFORM%
+  
   - cmd: md build_win_msys2\bin
   - cmd: copy tt.txt build_win_msys2\bin
     
 # #- echo Ubuntu build script
-  - sh: pltform=Ubuntu
 # - sh: make --version
 # - sh: make all OUTDIR=build_win
 
   - cmd: ECHO this is batch-build2
-  - cmd: set pltform=Win
 #try mingw
 #fails (make too old?)
   # - cmd: set PATH=%MINGW_DIR%;%PATH%
@@ -78,6 +88,10 @@ artifacts:
   - path: tt.txt
     name: tt
     type: zip
+
+  - path: tt2.txt
+    name: tt2
+    type: Zip
 
   # - path: build/bin
     # name: WASA-SEDexec_ubuntu
