@@ -73,7 +73,7 @@ install:
   - cmd: set PATH=%MINGW_DIR%;%ORG_PATH%
 #  - cmd: where make.exe
   - cmd: mingw32-make.exe --version
-  - cmd: make.exe all OUTDIR=build_win_mingw
+  - cmd: mingw32-make.exe all OUTDIR=build_win_mingw
   - cmd: build_win_mingw\bin\wasa.exe
  
  #try mingw64 - works!
