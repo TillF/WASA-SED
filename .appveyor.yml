@@ -69,12 +69,13 @@ install:
   - cmd: set ORG_PATH=%PATH%
 
  #try mingw
-#fails (make too old?)
-  - cmd: set PATH=%MINGW_DIR%;%ORG_PATH%
-#  - cmd: where make.exe
-  - cmd: mingw32-make.exe --version
-  - cmd: mingw32-make.exe all OUTDIR=build_win_mingw
-  - cmd: build_win_mingw\bin\wasa.exe
+#fails "recipe for target ...failed" (make too old?)
+  # - cmd: set PATH=%MINGW_DIR%;%ORG_PATH%
+# #  - cmd: where make.exe
+  # #GNU Make 3.82.90
+  # - cmd: mingw32-make.exe --version 
+  # - cmd: mingw32-make.exe all OUTDIR=build_win_mingw
+  # - cmd: build_win_mingw\bin\wasa.exe
  
  #try mingw64 - works!
   - cmd: set PATH=%MINGW64_DIR%;%ORG_PATH%
