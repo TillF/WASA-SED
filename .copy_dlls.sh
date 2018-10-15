@@ -6,10 +6,12 @@ dlls_a=($dlls_l) #convert list to array
 dlls_l=`echo "${dlls_a[@]}" | tr ' ' '\n' | sort | uniq | tr '\n' ' '` #remove duplicates
 dlls_a=($dlls_l) #convert list to array
 
+
+
 while :
 do
-    # echo start loop 
-	# echo DLL: "${dlls_a[@]}"
+    echo start loop 
+	echo DLL: "${dlls_a[@]}"
 	# echo length: "${#dlls_a[@]}"
 	# echo DLL_l "$dlls_l"
 
@@ -17,7 +19,7 @@ do
 	for dll in $dlls_l
 	do
 	   #echo ""
-	   #echo Dependencies of $dll
+	   echo Dependencies of $dll
 	   full_path=`which $dll`
 	   further_dlls=`objdump -x $full_path |grep "DLL Name" | sed -e 's/^.* //g'` #find names of required DLLs
 	   #echo further: $further_dlls
@@ -52,6 +54,8 @@ do
 		dlls_a=($dlls_l) #convert list to array
 	fi
 done
+
+echo DLLs to copy: "$dlls_l"
 
 for dll in $dlls_l
 do
