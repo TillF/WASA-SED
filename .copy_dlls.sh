@@ -11,18 +11,21 @@ dlls_a=($dlls_l) #convert list to array
 while :
 do
     echo start loop 
-	echo DLL: "${dlls_a[@]}"
+	#echo DLL: "${dlls_a[@]}"
 	# echo length: "${#dlls_a[@]}"
-	# echo DLL_l "$dlls_l"
+	echo DLL_l "$dlls_l"
 
 	secondary_dependencies_l=$dlls_l #list of second-order dependencies, initialized with DLLs found so far
 	for dll in $dlls_l
 	do
-	   #echo ""
+	   echo ""
 	   echo Dependencies of $dll
 	   full_path=`which $dll`
+	   echo ""
+	   echo full path:$full_path
 	   further_dlls=`objdump -x $full_path |grep "DLL Name" | sed -e 's/^.* //g'` #find names of required DLLs
-	   #echo further: $further_dlls
+	   echo ""
+	   echo further: $further_dlls
 	   #further_dlls=$further_dlls 
 	   secondary_dependencies_l+=" $further_dlls" #collect further dependencies
 	   #echo ""
