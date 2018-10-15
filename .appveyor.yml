@@ -82,6 +82,8 @@ install:
   - cmd: mingw32-make.exe --version
   - cmd: mingw32-make.exe all OUTDIR=build_win_mingw64
   - cmd: build_win_mingw64\bin\wasa.exe
+  #collect DLL dependencies
+  - cmd: bash .copy_dlls.sh $build_win_mingw64/bin
   
  # #try msys - fails in update_revision.bat - needs sh commands?
   # - cmd: set PATH=%MSYS_DIR%;%ORG_PATH%
@@ -97,7 +99,10 @@ install:
   - cmd: dir build_win_msys2\bin
   - cmd: build_win_msys2\bin\wasa.exe
 
+  #collect DLL dependencies
+  - cmd: bash .copy_dlls.sh $build_win_msys2/bin
 
+  
 # #test_script: ctest -V
 
 
