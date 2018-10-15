@@ -64,7 +64,7 @@ install:
 # - sh: make --version
 # - sh: make all OUTDIR=build_win
 
-  - cmd: ECHO this is batch-build2
+  - cmd: ECHO this is batch-build
   #maintain original value of PATH variable
   - cmd: set ORG_PATH=%PATH%
 
@@ -81,9 +81,9 @@ install:
 #  - cmd: where mingw32-make.exe
   - cmd: mingw32-make.exe --version
   - cmd: mingw32-make.exe all OUTDIR=build_win_mingw64
-  - cmd: build_win_mingw64\bin\wasa.exe
+#  - cmd: build_win_mingw64\bin\wasa.exe
   #collect DLL dependencies
-  - cmd: bash .copy_dlls.sh $build_win_mingw64/bin
+  - cmd: bash .copy_dlls.sh build_win_mingw64/bin
   
  # #try msys - fails in update_revision.bat - needs sh commands?
   # - cmd: set PATH=%MSYS_DIR%;%ORG_PATH%
@@ -96,11 +96,10 @@ install:
   #- cmd: where mingw32-make.exe
   - cmd: mingw32-make.exe --version
   - cmd: mingw32-make.exe all OUTDIR=build_win_msys2
-  - cmd: dir build_win_msys2\bin
+#  - cmd: dir build_win_msys2\bin
   - cmd: build_win_msys2\bin\wasa.exe
-
   #collect DLL dependencies
-  - cmd: bash .copy_dlls.sh $build_win_msys2/bin
+  - cmd: bash .copy_dlls.sh build_win_msys2/bin
 
   
 # #test_script: ctest -V
