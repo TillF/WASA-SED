@@ -1,7 +1,7 @@
 #collect Windows dependencies (DLLs) to include in the deployment
 #dest_dir="./build/" #destination directory where to collect binary and DLLs
 dest_dir=$1 #destination directory where to collect binary and DLLs
-dlls=`objdump -x a.exe |grep "DLL Name" | sed -e 's/^.* //g'` #find names of required DLLs
+dlls=`objdump -x $dest_dir/wasa.exe |grep "DLL Name" | sed -e 's/^.* //g'` #find names of required DLLs
 for dll in $dlls
 do
    echo $dll
