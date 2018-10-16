@@ -13,7 +13,7 @@ environment:
   MSYS_DIR: C:\MinGW\msys\1.0\bin 
   MSYS2_DIR: C:\msys64\mingw32\bin 
 
-  #APPVEYOR_RDP_PASSWORD: aA45-#nuto
+  APPVEYOR_RDP_PASSWORD: aA45-#nuto
   # matrix:
     # - PYTHON: "C:\\Python27-x64"
       # TOX_ENV: "py27"
@@ -36,13 +36,14 @@ init:
   # - cmd: echo %pltform%
   # - cmd: echo %PLATFORM%
 
- # - ps: |
-    # if ($isLinux) {
-      # Write-Host "This is Linux!"
-    # } else {
-      # Write-Host "This is NOT Linux!"
-      # iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
-    # }
+  - ps: |
+     if ($isLinux) {
+       Write-Host "This is Linux!"
+     } else {
+       Write-Host "This is NOT Linux!"
+       iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
+     }
+#  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
 
 install:
   # - sh: echo Ubuntu > tt.txt
@@ -149,10 +150,8 @@ deploy:
     branch: unit_sedigraph                 # release from unit_sedigraph branch only
     appveyor_repo_tag: true        # deploy on tag push only
 
-# on_finish:
-  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+ on_finish:
+   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
   
 #  to do: check wasa.exe is compiled with necessary libraries so it runs standalone
-#  package all assets into the same release
-# zip assets
