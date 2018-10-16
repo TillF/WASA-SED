@@ -1,10 +1,10 @@
-#collect Windows dependencies (DLLs) to include in the deployment
+#collect Windows dependencies (DLLs) to include in the deployment  
 #dest_dir="./build/" #destination directory where to collect binary and DLLs
 dest_dir=$1 #destination directory where to collect binary and DLLs
 echo dest_dir: $dest_dir
 dlls_l=`objdump -x $dest_dir/wasa.exe |grep "DLL Name" | sed -e 's/^.* //g'` #find names of required DLLs
 dlls_a=($dlls_l) #convert list to array
-dlls_l=`echo "${dlls_a[@]}" | tr ' ' '\n' | sort | uniq | tr '\n' ' '` #remove duplicates
+dlls_l=`echo "${dlls_a[@]}" | xargs | tr ' ' '\n' | sort | uniq | tr '\n' ' ' | dos2unix` #remove duplicates
 dlls_a=($dlls_l) #convert list to array
 
 echo DLL_l_prior "$dlls_l"
@@ -35,7 +35,7 @@ do
 	done   
 	echo ""
 	secondary_dependencies_a=($secondary_dependencies_l) #convert list to array
-	secondary_dependencies_l=`echo "${secondary_dependencies_a[@]}" | xargs | tr ' ' '\n'  | sort | uniq | tr '\n' ' '` #remove duplicates
+	secondary_dependencies_l=`echo "${secondary_dependencies_a[@]}" | xargs | tr ' ' '\n'  | sort | uniq | tr '\n' ' ' | dos2unix` #remove duplicates
 	secondary_dependencies_a=($secondary_dependencies_l) #convert list to array
 		
 	# echo DLL: "${dlls_a[@]}"

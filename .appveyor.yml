@@ -1,4 +1,4 @@
-image:
+ image: 
 #- Ubuntu #no use distributing Ubuntu binaries, may be used later for testing
 - Visual Studio 2015 
 #Visual Studio 2017 does not contain some mingw installations
@@ -36,13 +36,13 @@ init:
   # - cmd: echo %pltform%
   # - cmd: echo %PLATFORM%
 
-  - ps: |
-     if ($isLinux) {
-       Write-Host "This is Linux!"
-     } else {
-       Write-Host "This is NOT Linux!"
-       iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
-     }
+  # - ps: |
+     # if ($isLinux) {
+       # Write-Host "This is Linux!"
+     # } else {
+       # Write-Host "This is NOT Linux!"
+       # iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
+     # }
 #  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
 
 install:
@@ -83,6 +83,17 @@ install:
   - cmd: mingw32-make.exe --version
   - cmd: mingw32-make.exe all OUTDIR=build_win_mingw64
   - cmd: build_win_mingw64\bin\wasa.exe
+  - cmd: copy C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin\libgfortran*.dll build_win_mingw64\bin
+  - cmd: copy C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin\libquadmath*.dll build_win_mingw64\bin
+  - cmd: copy C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin\libgcc_s_*.dll build_win_mingw64\bin
+  
+#test line ending behaviour  
+  - cmd: echo echo ^"  xargsdos2unix   ^" ^| xargs ^| dos2unix ^> build_win_mingw64/bin/tt.txt > build_win_mingw64\bin\winbash.txt
+  - cmd: echo echo ^"  xargs   ^" ^| xargs ^>^> build_win_mingw64/bin/tt.txt >> build_win_mingw64\bin\winbash.txt
+  - cmd: echo echo ^"  dos2unix   ^" ^| dos2unix ^>^> build_win_mingw64/bin/tt.txt >> build_win_mingw64\bin\winbash.txt
+  - cmd: bash build_win_mingw64/bin/winbash.txt
+  
+
   #collect DLL dependencies
   - cmd: bash .copy_dlls.sh build_win_mingw64/bin
   
@@ -102,6 +113,15 @@ install:
   # #collect DLL dependencies
   # - cmd: bash .copy_dlls.sh build_win_msys2/bin
 
+   # - cmd: echo echo without > build_win_mingw64/bin/win_cmd.txt
+   # - cmd: echo echo CR\n >> build_win_mingw64/bin/win_cmd.txt
+   # - cmd: echo echo CR\n\r >> build_win_mingw64/bin/win_cmd.txt
+   # - cmd: bash build_win_mingw64/bin/win_cmd.txt
+  # - sh: echo Ubuntu > ubuntu.txt
+  # - sh: echo Ubuntu > tt2.txt
+  # - cmd: echo Win > win.txt
+  # - cmd: echo Win > tt.txt
+  
   
 # #test_script: ctest -V
 
@@ -150,8 +170,8 @@ deploy:
     branch: unit_sedigraph                 # release from unit_sedigraph branch only
     appveyor_repo_tag: true        # deploy on tag push only
 
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# on_finish:
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
   
 #  to do: check wasa.exe is compiled with necessary libraries so it runs standalone
