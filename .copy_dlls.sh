@@ -1,7 +1,7 @@
 #collect Windows dependencies (DLLs) to include in the deployment
 #dest_dir="./build/" #destination directory where to collect binary and DLLs
 dest_dir=$1 #destination directory where to collect binary and DLLs
-echo $dest_dir
+echo dest_dir: $dest_dir
 dlls_l=`objdump -x $dest_dir/wasa.exe |grep "DLL Name" | sed -e 's/^.* //g'` #find names of required DLLs
 dlls_a=($dlls_l) #convert list to array
 dlls_l=`echo "${dlls_a[@]}" | tr ' ' '\n' | sort | uniq | tr '\n' ' '` #remove duplicates
