@@ -3,11 +3,14 @@
 dest_dir=$1 #destination directory where to collect binary and DLLs
 echo dest_dir: $dest_dir
 dlls_l=`objdump -x $dest_dir/wasa.exe |grep "DLL Name" | sed -e 's/^.* //g'` #find names of required DLLs
+echo DLL_l_prior1:
+echo "$dlls_l"x
 dlls_a=($dlls_l) #convert list to array
 dlls_l=`echo "${dlls_a[@]}" | xargs | tr ' ' '\n' | sort | uniq | tr '\n' ' ' | dos2unix` #remove duplicates
 dlls_a=($dlls_l) #convert list to array
 
-echo DLL_l_prior "$dlls_l"
+echo DLL_l_prior2:
+echo "$dlls_l"x
 
 
 while :
@@ -15,7 +18,8 @@ do
     echo start loop 
 	#echo DLL: "${dlls_a[@]}"
 	# echo length: "${#dlls_a[@]}"
-	echo DLL_l "$dlls_l"
+	echo DLL_l_prior3:
+    echo "$dlls_l"x
 
 	secondary_dependencies_l=$dlls_l #list of second-order dependencies, initialized with DLLs found so far
 	for dll in $dlls_l
@@ -62,6 +66,7 @@ done
 
 echo DLLs to copy: "$dlls_l"
 
+exit
 for dll in $dlls_l
 do
    echo $dll
