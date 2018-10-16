@@ -86,8 +86,10 @@ install:
   - cmd: copy C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin\libgfortran*.dll build_win_mingw64\bin
   - cmd: copy C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin\libquadmath*.dll build_win_mingw64\bin
   - cmd: copy C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin\libgcc_s_*.dll build_win_mingw64\bin
+  - cmd: copy C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin\libwinpthread*.dll build_win_mingw64\bin
   
 #test line ending behaviour  
+  - cmd: echo ls > build_win_mingw64\bin\winbash.txt
   - cmd: echo echo ^"  xargsdos2unix   ^" ^| xargs ^| dos2unix ^> build_win_mingw64/bin/tt.txt > build_win_mingw64\bin\winbash.txt
   - cmd: echo echo ^"  xargs   ^" ^| xargs ^>^> build_win_mingw64/bin/tt.txt >> build_win_mingw64\bin\winbash.txt
   - cmd: echo echo ^"  dos2unix   ^" ^| dos2unix ^>^> build_win_mingw64/bin/tt.txt >> build_win_mingw64\bin\winbash.txt
