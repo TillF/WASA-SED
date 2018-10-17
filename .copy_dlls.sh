@@ -6,7 +6,7 @@ dlls_l=`objdump -x $dest_dir/wasa.exe |grep "DLL Name" | sed -e 's/^.* //g'` #fi
 echo DLL_l_prior1:
 echo "$dlls_l"x
 dlls_a=($dlls_l) #convert list to array
-dlls_l=`echo "${dlls_a[@]}" | xargs | tr ' ' '\n' | sort | uniq | tr '\n' ' ' | dos2unix` #remove duplicates
+dlls_l=`echo "${dlls_a[@]}" | xargs | tr ' ' '\n' | sort | uniq | tr -s '\n\r' ' '` #remove duplicates
 dlls_a=($dlls_l) #convert list to array
 
 echo DLL_l_prior2:
@@ -39,7 +39,7 @@ do
 	done   
 	echo ""
 	secondary_dependencies_a=($secondary_dependencies_l) #convert list to array
-	secondary_dependencies_l=`echo "${secondary_dependencies_a[@]}" | xargs | tr ' ' '\n'  | sort | uniq | tr '\n' ' ' | dos2unix` #remove duplicates
+	secondary_dependencies_l=`echo "${secondary_dependencies_a[@]}" | xargs | tr ' ' '\n'  | sort | uniq | tr -s '\n\r' ' '` #remove duplicates
 	secondary_dependencies_a=($secondary_dependencies_l) #convert list to array
 		
 	# echo DLL: "${dlls_a[@]}"
