@@ -1,5 +1,5 @@
-!!!The executable (WASA.exe) is updated only infrequently, if at all.
-To use the latest version, you need to compile from source code. !!!
+!!!This repository contains the source code. For generating the executable, please use a Fortran compiler of your system.
+!!!Windows-users may try the binaries provided in the [release-section](https://github.com/TillF/WASA-SED/releases).
 
 
 WASA-SED Model
@@ -7,7 +7,7 @@ WASA-SED Model
 WASA-SED is a numerical model for simulation hydrological and sediment fluxes from meso-scale catchments (Mueller et al., 2010).
 This repository contains documentation, sample data set and source code.
 
-All rights under the stated license (see license.txt) of the WASA-SED code are with the SESAM-Project and successors, c/o Till Francke, Universität Potsdam, Karl-Liebknecht-Str. 24-25, 14473 Potsdam, Germany, please contact the maintainer of this repository, e.g. via the 'Issues' function.
+All rights under the stated license (see ```license.txt```) of the WASA-SED code are with the SESAM-Project and successors, c/o Till Francke, Universität Potsdam, Karl-Liebknecht-Str. 24-25, 14473 Potsdam, Germany, please contact the maintainer of this repository, e.g. via the 'Issues' function.
 
 ******************************
 WASA-SED is a large and complex hydrological and sediment transport model. It is not a polished point-and-click GUI tool. Extensive knowledge of its design, purpose, and limitations is required in order to apply it properly. See license.txt for terms of use.
@@ -30,17 +30,14 @@ Contents
 
 * README.md: THIS readme in markdown language
 
-* WASA.exe: Model executable for Windows (**only infrequently updated!**)
-
 * .gitignore: List of files / directories git shall ignore (only needed for model development)
 
 
 Installation
 --------
-To run the model, compile the source code on your own (recommended) or use the WASA.exe executable (Windows; **only infrequently updated!**). For compilation, a Makefile (adjusted to _GNU make_) is provided.
+To run the model, use the WASA.exe executable provided in the [release-section](https://github.com/TillF/WASA-SED/releases) (MS Windows only).
 
-For more information on how to compile and install the model, in a command line within the WASA-SED main directory type `make help`.
-
+Alternatively, compile the source code on your own (recommended). A Makefile (adjusted to _GNU make_, on Windows, use [MinGW](http://mingw.org/)) is provided. For more information on how to compile and install the model, type `make help` in the console within the WASA-SED main directory. 
 To specify your desired compiler or adjust the compiler flags, you have to alter the Makefile. By default, it runs with the _GNU fortran_ compiler _gfortran_. The compiler flags are adapted to version 5.x. For more information, see comments in the Makefile.
 
 Reference
