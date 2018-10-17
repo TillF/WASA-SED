@@ -1,15 +1,14 @@
-#collect Windows dependencies (DLLs) to include in the deployment  
-#dest_dir="./build/" #destination directory where to collect binary and DLLs
+#recursivel collect Windows dependencies (DLLs) to include in the deployment  
+#dest_dir="./build/bin" #destination directory where to collect binary and DLLs
 dest_dir=$1 #destination directory where to collect binary and DLLs
 echo dest_dir: $dest_dir
-dlls_l=`objdump -x $dest_dir/wasa.exe |grep "DLL Name" | sed -e 's/^.* //g'` #find names of required DLLs
-echo DLL_l_prior1:
-echo "$dlls_l"x
+dlls_l=`objdump -x "$dest_dir/wasa.exe" |grep "DLL Name" | sed -e 's/^.* //g'` #find names of required DLLs
+echo "First order: $dlls"
 dlls_a=($dlls_l) #convert list to array
 dlls_l=`echo "${dlls_a[@]}" | xargs | tr ' ' '\n' | sort | uniq | tr -s '\n\r' ' '` #remove duplicates
 dlls_a=($dlls_l) #convert list to array
 
-
+#recursively collect necessary DLLs
 while :
 do
     echo start loop 
@@ -26,7 +25,7 @@ do
 	   full_path=`which $dll`
 	   #echo ""
 	   #echo full path:$full_path
-	   further_dlls=`objdump -x $full_path |grep "DLL Name" | sed -e 's/^.* //g'` #find names of required DLLs
+	   further_dlls=`objdump -x "$full_path" |grep "DLL Name" | sed -e 's/^.* //g'` #find names of required DLLs
 	   #echo ""
 	   #echo further: $further_dlls
 	   #further_dlls=$further_dlls 
@@ -50,7 +49,7 @@ do
 	fi
 done
 
-echo DLLs to copy: "$dlls_l"
+echo Copy DLLs...
 
 for dll in $dlls_l
 do
@@ -58,7 +57,7 @@ do
    full_path=`which $dll`
    echo $full_path
    if echo $full_path | grep "Windows\|PowerShell" ; then
-     echo "is a windows, skipped."
+     echo "is a Windows/PowerShell  DLL, skipped."
    else
      echo "copying..."
      cp "$full_path" "$dest_dir" #not in windows directory, copy to collect

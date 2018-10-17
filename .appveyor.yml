@@ -5,36 +5,18 @@ image:
 
 platform:
   - x86
-#  - Any CPU
 
 environment:
   MINGW_DIR: C:\MinGW\bin 
   MINGW64_DIR: C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin 
   MSYS_DIR: C:\MinGW\msys\1.0\bin 
   MSYS2_DIR: C:\msys64\mingw32\bin 
-  APPVEYOR_RDP_PASSWORD: aA45-#nuto
-  # matrix:
-    # - PYTHON: "C:\\Python27-x64"
-      # TOX_ENV: "py27"
-      # should_deploy: yes
-    # - PYTHON: "C:\\Python26-x64"
-      # TOX_ENV: "py26"
+  #APPVEYOR_RDP_PASSWORD: aA45-#nuto
   
-  
-#clone_depth: 3
-
 build: off
  #disables MSBuild functionality
 
 init:
-# - cmd: set
-  # - sh: pltform="Ubuntu"
-  # - sh: echo $pltform
-  # - sh: echo $PLATFORM
-  # - cmd: set pltform=Win
-  # - cmd: echo %pltform%
-  # - cmd: echo %PLATFORM%
-
   # - ps: |
      # if ($isLinux) {
        # Write-Host "This is Linux!"
@@ -42,27 +24,13 @@ init:
        # Write-Host "This is NOT Linux!"
        # iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
      # }
-# #  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
 
 install:
-  # - sh: echo Ubuntu > tt.txt
-  # - sh: echo Ubuntu > ubuntu.txt
-  # - sh: echo Ubuntu > tt2.txt
-  # - cmd: echo Win > win.txt
-  # - cmd: echo Win > tt.txt
-  # - cmd: echo Win > tt2.txt
-  # - sh: echo $pltform
-  # - sh: echo $PLATFORM
-  # - cmd: echo %pltform%
-  # - cmd: echo %PLATFORM%
-  
-  #test packaging functionality
-  # - cmd: md build_win_msys2\bin
-  # - cmd: copy tt.txt build_win_msys2\bin
     
 # #- echo Ubuntu build script
+# - sh: ECHO this is sh-build
 # - sh: make --version
-# - sh: make all OUTDIR=build_win
+# - sh: make all OUTDIR=build_lin
 
   - cmd: ECHO this is batch-build
   #maintain original value of PATH variable
@@ -71,60 +39,33 @@ install:
  #try mingw
 #fails "recipe for target ...failed" (make too old?) GNU Make 3.82.90
   # - cmd: set PATH=%MINGW_DIR%;%ORG_PATH%
-# #  - cmd: where make.exe
   # - cmd: mingw32-make.exe --version 
   # - cmd: mingw32-make.exe all OUTDIR=build_win_mingw
   # - cmd: build_win_mingw\bin\wasa.exe
  
  #try mingw64 - works! GNU Make 4.2.1
   - cmd: set PATH=%MINGW64_DIR%;%ORG_PATH%
-#  - cmd: where mingw32-make.exe
   - cmd: mingw32-make.exe --version
   - cmd: mingw32-make.exe all OUTDIR=build_win_mingw64
   - cmd: build_win_mingw64\bin\wasa.exe
-#  - cmd: copy C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin\libgfortran*.dll build_win_mingw64\bin
-#  - cmd: copy C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin\libquadmath*.dll build_win_mingw64\bin
-#  - cmd: copy C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin\libgcc_s_*.dll build_win_mingw64\bin
-#  - cmd: copy C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin\libwinpthread*.dll build_win_mingw64\bin
-  
-# #test line ending behaviour  
-  # - cmd: echo ls > build_win_mingw64\bin\winbash.txt
-  # - cmd: echo echo ^"  xargsdos2unix   ^" ^| xargs ^| dos2unix ^> build_win_mingw64/bin/tt.txt > build_win_mingw64\bin\winbash.txt
-  # - cmd: echo echo ^"  xargs   ^" ^| xargs ^>^> build_win_mingw64/bin/tt.txt >> build_win_mingw64\bin\winbash.txt
-  # - cmd: echo echo ^"  dos2unix   ^" ^| dos2unix ^>^> build_win_mingw64/bin/tt.txt >> build_win_mingw64\bin\winbash.txt
-  # - cmd: bash build_win_mingw64/bin/winbash.txt
-  
 
   #collect DLL dependencies
   - cmd: bash .copy_dlls.sh build_win_mingw64/bin
+   #copies libgcc_s_seh-1.dll, libgfortran-4.dll, libquadmath-0.dll, libwinpthread-1.dll
   
  # #try msys - fails in update_revision.bat - needs sh commands?
   # - cmd: set PATH=%MSYS_DIR%;%ORG_PATH%
-  # - cmd: where make.exe
   # - cmd: make.exe --version
   # - cmd: make.exe all OUTDIR=build_win
 
 #try msys2 - works! GNU Make 4.2.1
   - cmd: set PATH=%MSYS2_DIR%;%ORG_PATH%
-  #- cmd: where mingw32-make.exe
   - cmd: mingw32-make.exe --version
   - cmd: mingw32-make.exe all OUTDIR=build_win_msys2
-#  - cmd: dir build_win_msys2\bin
   - cmd: build_win_msys2\bin\wasa.exe
   #collect DLL dependencies
   - cmd: bash .copy_dlls.sh build_win_msys2/bin
-
-   # - cmd: echo echo without > build_win_mingw64/bin/win_cmd.txt
-   # - cmd: echo echo CR\n >> build_win_mingw64/bin/win_cmd.txt
-   # - cmd: echo echo CR\n\r >> build_win_mingw64/bin/win_cmd.txt
-   # - cmd: bash build_win_mingw64/bin/win_cmd.txt
-  # - sh: echo Ubuntu > ubuntu.txt
-  # - sh: echo Ubuntu > tt2.txt
-  # - cmd: echo Win > win.txt
-  # - cmd: echo Win > tt.txt
-  
-  
-# #test_script: ctest -V
+   #copies libgcc_s_dw2-1.dll, libgfortran-4.dll, libquadmath-0.dll, libwinpthread-1.dll
 
 
 artifacts:
@@ -145,7 +86,7 @@ artifacts:
 
 
 deploy:
-  environment: Ubuntu_binary  
+  environment: Windows_binary  
   release: $(APPVEYOR_REPO_TAG_NAME)-build$(APPVEYOR_BUILD_VERSION)
   tag: $(APPVEYOR_REPO_TAG_NAME)-build$(APPVEYOR_BUILD_VERSION)
   description: 'Windows binaries built by Appveyor ($(APPVEYOR_REPO_COMMIT_TIMESTAMP))'
@@ -160,8 +101,7 @@ deploy:
     branch: unit_sedigraph                 # release from unit_sedigraph branch only
     appveyor_repo_tag: true        # deploy on tag push only
 
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# on_finish:
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
   
-#  to do: check wasa.exe is compiled with necessary libraries so it runs standalone
