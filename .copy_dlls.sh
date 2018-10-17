@@ -54,13 +54,13 @@ echo DLLs to copy: "$dlls_l"
 
 for dll in $dlls_l
 do
-   echo $dll
+   #echo $dll
    full_path=`which $dll`
    echo $full_path
-   if echo $full_path | grep Windows ; then
-     echo "is win"
+   if echo $full_path | grep "Windows\|PowerShell" ; then
+     echo "is a windows, skipped."
    else
-     echo "copy"
-     cp $full_path $dest_dir #not in windows directory, copy to collect
+     echo "copying..."
+     cp "$full_path" "$dest_dir" #not in windows directory, copy to collect
    fi
 done

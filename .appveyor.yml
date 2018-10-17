@@ -12,7 +12,6 @@ environment:
   MINGW64_DIR: C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin 
   MSYS_DIR: C:\MinGW\msys\1.0\bin 
   MSYS2_DIR: C:\msys64\mingw32\bin 
-
   APPVEYOR_RDP_PASSWORD: aA45-#nuto
   # matrix:
     # - PYTHON: "C:\\Python27-x64"
@@ -36,14 +35,14 @@ init:
   # - cmd: echo %pltform%
   # - cmd: echo %PLATFORM%
 
-  - ps: |
-     if ($isLinux) {
-       Write-Host "This is Linux!"
-     } else {
-       Write-Host "This is NOT Linux!"
-       iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
-     }
-#  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
+  # - ps: |
+     # if ($isLinux) {
+       # Write-Host "This is Linux!"
+     # } else {
+       # Write-Host "This is NOT Linux!"
+       # iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
+     # }
+# #  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) #cannot connect (firewall up?)
 
 install:
   # - sh: echo Ubuntu > tt.txt
@@ -105,15 +104,15 @@ install:
   # - cmd: make.exe --version
   # - cmd: make.exe all OUTDIR=build_win
 
-# #try msys2 - works! GNU Make 4.2.1
-  # - cmd: set PATH=%MSYS2_DIR%;%ORG_PATH%
-  # #- cmd: where mingw32-make.exe
-  # - cmd: mingw32-make.exe --version
-  # - cmd: mingw32-make.exe all OUTDIR=build_win_msys2
-# #  - cmd: dir build_win_msys2\bin
-  # - cmd: build_win_msys2\bin\wasa.exe
-  # #collect DLL dependencies
-  # - cmd: bash .copy_dlls.sh build_win_msys2/bin
+#try msys2 - works! GNU Make 4.2.1
+  - cmd: set PATH=%MSYS2_DIR%;%ORG_PATH%
+  #- cmd: where mingw32-make.exe
+  - cmd: mingw32-make.exe --version
+  - cmd: mingw32-make.exe all OUTDIR=build_win_msys2
+#  - cmd: dir build_win_msys2\bin
+  - cmd: build_win_msys2\bin\wasa.exe
+  #collect DLL dependencies
+  - cmd: bash .copy_dlls.sh build_win_msys2/bin
 
    # - cmd: echo echo without > build_win_mingw64/bin/win_cmd.txt
    # - cmd: echo echo CR\n >> build_win_mingw64/bin/win_cmd.txt
@@ -130,18 +129,7 @@ install:
 
 artifacts:
 
-  # - path: tt2.txt
-    # name: tt2
-    # type: Zip
-
-  # - path: build/bin
-    # name: WASA-SEDexec_ubuntu
-    # type: zip
-
-  # - path: build_win_mingw/bin
-    # name: WASA-SEDexec_windows_mingw
-    # type: zip
- 
+  
   - path: build_win_msys2/bin
     name: WASA-SEDexec_windows_msys2
     type: zip
