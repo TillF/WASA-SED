@@ -250,9 +250,9 @@ In order to perform the simulation of sediment transport in reservoirs, four imp
 \[[Table of contents](#toc)]
 ## 3 Input data
 
-The model runs as a Fortran console application for catchment from a few km² up to several 100,000 km²) on daily or hourly time steps. Climatic drivers are daily/hourly time series for precipitation, humidity, short-wave radiation and temperature. For model parameterisation, regional digital maps on soil associations, land-use and vegetation cover, a digital elevation model with a cell size of 100 metres (or smaller) and, optional, bathymetric surveys of the reservoirs are required. The soil, vegetation and terrain maps are processed with the LUMP tool (see above) to derive the spatial discretisation into soil-vegetation units, terrain components and landscape units. [Table 4](#table-4) summarises the input parameters for the climatic drivers and the hillslope, river and reservoir modules. The vegetation parameters may be derived with the comprehensive study of, for example, [Breuer et al. (2003)](#breuer-et-al-2003), the soil and erosion parameters with the data compilation of [FAO (1993,](#fao-1993) [2001)](#fao-2001), [Morgan (1995)](#morgan-1995), [Maidment (1993)](#maidment-1993) and [Antronico et al. (2005)](#antronico-et-al-2005).
+The model runs as a Fortran console application for catchment from a few km² up to several 100,000 km²) on daily or hourly time steps. Climatic drivers are daily/hourly time series for precipitation, humidity, short-wave radiation and temperature. For model parameterisation, regional digital maps on soil associations, land-use and vegetation cover, a digital elevation model with a cell size of 100 metres (or smaller) and, optional, bathymetric surveys of the reservoirs are required. The soil, vegetation and terrain maps are processed with the lumpR tool (see below) to derive the spatial discretisation into soil-vegetation units, terrain components and landscape units. [Table 4](#table-4) summarises the input parameters for the climatic drivers and the hillslope, river and reservoir modules. The vegetation parameters may be derived with the comprehensive study of, for example, [Breuer et al. (2003)](#breuer-et-al-2003), the soil and erosion parameters with the data compilation of [FAO (1993,](#fao-1993) [2001)](#fao-2001), [Morgan (1995)](#morgan-1995), [Maidment (1993)](#maidment-1993) and [Antronico et al. (2005)](#antronico-et-al-2005).
 
-For a semi-automated discretisation of the model domain into landscape units and terrain components, the software tool LUMP (Landscape Unit Mapping Program) is available ([Francke et al. 2008](#francke-et-al-2008)). LUMP incorporates an algorithm that delineates areas with similar hillslope characteristics by retrieving homogeneous catenas with regard to e.g. hillslope shape, flow length and slope (provided by a digital elevation model), and additional properties such as for soil and land-use and optionally for specific model parameters such as leaf area index, albedo or soil aggregate stability. The LUMP tool is linked with the WASA-SED parameterisation procedure through a databank management tool, which allows to process and store digital soil, vegetation and topographical data in a coherent way and facilitates the generation of the required input files for the model. LUMP and further WASA-SED pre-processing tools have been transferred to the package lumpR for the free software environment for statistical computing and graphics R which is available from https://github.com/tpilz/lumpR.
+For a semi-automated discretisation of the model domain into landscape units and terrain components, the LUMP-algorithm (Landscape Unit Mapping Program) is available ([Francke et al. 2008](#francke-et-al-2008)). This algorithm delineates areas with similar hillslope characteristics by retrieving homogeneous catenas with regard to e.g. hillslope shape, flow length and slope (provided by a digital elevation model), and additional properties such as for soil and land-use and optionally for specific model parameters such as leaf area index, albedo or soil aggregate stability. LUMP can be linked with the WASA-SED parameterisation procedure through a data base management tool, which allows to process and store digital soil, vegetation and topographical data in a coherent way and facilitates the generation of the required input files for the model. LUMP and further WASA-SED pre-processing tools have been transferred to the package lumpR ([Pilz et al. 2017](#pilz-et-al-2017)) for the free software environment for statistical computing and graphics R which is available from https://github.com/tpilz/lumpR.
 
 The input files for general purpose, the hillslope, river and reservoir routines are explained below with details on parameter type, units, data structure including examples of the parameterisation files.
 
@@ -276,9 +276,9 @@ Reservoir	| Longitudinal profile of reservoir \[m], Cross-section profiles of re
 Four parameter files control the data input and output and some internal settings:
 
 ```do.dat``` <br>
-\[can be generated with the LUMP package, manual completing required]
+\[can be generated with the lumpR package, manual adjustments required]
 
-The ```do.dat``` file is located in the folder WASA\Input and contains the main parameter specifications for the WASA-SED model. [Figure 1](#figure-1) displays an example file for the ```do.dat```. The first line of the ```do.dat``` contains the title. Line 2 and 3 specify the path for the location of WASA input and output folder. Relative paths are supported. The backslash “\” only works on Windows-platforms. The slash “/” is accepted on Windows and Unix/Linux systems. Make sure that both specified paths end with slash or backslash, respectively. Line 4 and 5 contain the start and the end year of the simulation, respectively. Line 6 and 7 contain the start and the end calendar month of the simulation, respectively. Optionally, the day of month for begin and end can be specified. Line 10 contains the number of sub-basins. The number in line 9 is given by the sum of the number of terrain components in each landscape-unit of each sub-basin (e.g. if the system has only two sub-basins, sub-basin A has 1 landscape unit with 3 terrain components, sub-basin B has 2 landscape units with 1 terrain component each, then the number of combinations is 5). Line 14 specifies if the reservoir module is switched on (.t.) or is switched off (.f.). The same issue for the calculations of networks of small reservoirs in line 15. Lines 16 – 19 allow customizing the way water and sediment is (re-)distributed within and among the TCs. Line 21 allows the setting of the simulation timestep (daily / hourly). This may become obsolete in future versions by setting the timestep directly in line 30. Line 24 allows specifying a correction factor for hydraulic conductivity to account for intra-daily rainfall intensities. Optionally, this factor can also be made a function of daily rainfall by specifying two more parameters (a and b) in the same line, so that kfkorr=kfkorr0\*(a\*1/daily_precip+b+1). In line 31 the erosion and sediment-transport routines may be switched on and off. Specify the number of grain size classes you want to model in line 32. Their limits must be specified in ```part_class.dat```, if more than one class is desired. Line 33 lets you choose the hillslope erosion model to be used in WASA. Currently, this parameter is disregarded, further options can be chosen in ```erosion.ctl```. Select the model for the river routing in line 34. Possible options are: (1) UHG routing (daily resolution only, (2) Muskingum and suspended sediment, (3) Muskingum and bedload transport. Choose the sediment model in the reservoir in line 35 among 4 sediment transport equations: (1) [Wu et al. (2000)](#wu-et-al-2000); (2) [Ashida and Michiue (1973)](#ashida-michiue-1973); (3) [Yang (1973,](#yang-1973) [1984)](#yang-1984); (4) [Ackers and White (1973)](#ackers-white-1973).
+The file ```do.dat``` contains the main parameter specifications for the WASA-SED model. By default, it is located in the folder WASA\Input, but any other location may be specified as a command line argument (e.g. ```wasa.exe my_own/do.dat```).  [Figure 1](#figure-1) displays an example. Line order is important; do not add nor delete any lines. The first line of the ```do.dat``` contains the title. Line 2 and 3 specify the path for the location of WASA input and output folder. Relative paths are supported. The backslash “\” only works on Windows-platforms. The slash “/” is accepted on Windows and Unix/Linux systems. Make sure that both specified paths end with slash or backslash, respectively. Line 4 and 5 contain the start and the end year of the simulation, respectively. Line 6 and 7 contain the start and the end calendar month of the simulation, respectively. Optionally, the day of month for begin and end can be specified. Line 10 contains the number of sub-basins. The number in line 9 is given by the sum of the number of terrain components in each landscape-unit of each sub-basin (e.g. if the system has only two sub-basins, sub-basin A has 1 landscape unit with 3 terrain components, sub-basin B has 2 landscape units with 1 terrain component each, then the number of combinations is 5). Line 14 specifies if the reservoir module is switched on (.t.) or is switched off (.f.). The same issue for the calculations of networks of small reservoirs in line 15. Lines 16 – 19 allow customizing the way water and sediment is (re-)distributed within and among the TCs. Line 21 allows the setting of the simulation timestep (daily / hourly). This may become obsolete in future versions by setting the timestep directly in line 30. Line 24 allows specifying a correction factor for hydraulic conductivity to account for intra-daily rainfall intensities. Optionally, this factor can also be made a function of daily rainfall by specifying two more parameters (a and b) in the same line, so that kfkorr=kfkorr0\*(a\*1/daily_precip+b+1). In line 31 the erosion and sediment-transport routines may be switched on and off. Specify the number of grain size classes you want to model in line 32. Their limits must be specified in ```part_class.dat```, if more than one class is desired. Line 33 lets you choose the hillslope erosion model to be used in WASA. Currently, this parameter is disregarded, further options can be chosen in ```erosion.ctl```. Select the model for the river routing in line 34. Possible options are: (1) UHG routing (daily resolution only, (2) Muskingum and suspended sediment, (3) Muskingum and bedload transport. Choose the sediment model in the reservoir in line 35 among 4 sediment transport equations: (1) [Wu et al. (2000)](#wu-et-al-2000); (2) [Ashida and Michiue (1973)](#ashida-michiue-1973); (3) [Yang (1973,](#yang-1973) [1984)](#yang-1984); (4) [Ackers and White (1973)](#ackers-white-1973).
 
 The optional lines 36 and 37 allow the saving/loading of state variables (i.e. groundwater, interception and soil storages) at the end/beginning of a model run (works only if ```svc.dat``` has been specified).
 
@@ -333,7 +333,7 @@ Line 38 (dosnow) defines, if the optional snow routine, implemented by [Rottler 
 **Figure 1:** WASA parameter specification file ```do.dat```.
 
 ```maxdim.dat``` <br>
-optional \[can be generated with the LUMP package\]<br>
+optional \[can be generated with the lumpR package\]<br>
 The file ```maxdim.dat``` serves to optimise memory management and thus improves computational performance. It is, however, optional and if not encountered, default values are assumed.
 
 ```
@@ -350,7 +350,7 @@ contains maximum dimensions of spatial units
 Example: In the given example, no more than 3 LU may occur in one sub-basin (line 2). Analogously, no LU may contain more than 3 TCs (line 3) and no TC more than 4 SVCs (line 4). The number of horizons in a soil is limited to 6 (line 5). No more than 2 transpositions between sub-basins may exist. The last two lines are optional and valid only for computation of sedimentation patterns in strategic reservoirs (assumed 200, if missing).
 
 ```part_class.dat``` <br>
-optional \[can be generated with the LUMP package\]<br>
+optional \[can be generated with the lumpR package\]<br>
 The file ```part_class.dat``` is only necessary if sediment transport in multiple particle-size classes is to be modelled. If ```part_class.dat``` is missing, sediment transport will be modelled for a single particle-size class only. Otherwise, the file defines the number and the properties of the particle sizes that will be modelled. Please note that class numbering has to be continuous, starting with 1. The particle size classes must be ordered from fine to coarse.
 
 ```
@@ -535,7 +535,7 @@ The spatial conceptualisation of the WASA model is explained in detail in [Günt
 The model domain is divided into sub-basins; each sub-basin has an individual Map-ID. This Map-ID has to be a unique number; the employed numbering scheme does not have to be continuous (i.e. with three sub-basins, they do not have to be named Map-ID 1, 2 and 3, but could be named e.g. 100, 500, 877). The following paragraphs explain each of the input files in turns.
 
 **1)** ```hymo.dat```<br>
-\[can be generated with the LUMP package]
+\[can be generated with the lumpR package\]
 
 ```
 # Specification of the sub-basins and their total number, type & areal fraction of LU units
@@ -563,7 +563,7 @@ Example: In ```do.dat```, it was specified that 10 sub-basins are simulated with
 Important: Any subbasin that is not listed in the file ```routing.dat``` will be ignored.
 
 **2)** ```soter.dat``` <br>
-\[can be generated with the LUMP package]
+\[can be generated with the lumpR package\]
 
 ```
 # Specification of LU units										
@@ -634,7 +634,7 @@ Modelling options | Groundwater regime, internal representation of processes | G
 III) Groundwater in soil zone. The initial depth of the groundwater surface below soil surface is defined by gw_dist in ```soter.dat```. A separate deep groundwater storage or bedrock is ignored. | Permanent groundwater in soil zone is assumed. The groundwater level may vary in time as a function of input by percolation and drainage into river. | 99 | meandep, maxdep, riverbed, gw_dist
 
 **3)** ```terrain.dat```<br> 
-\[can be generated with the LUMP package]
+\[can be generated with the lumpR package\]
 
 ```
 # Specification of terrain components
@@ -657,7 +657,7 @@ A fifth AND sixth column holding beta_fac and a sediment delivery ratio (SDR) fo
 SDRs are applied to raw erosion on TC-scale before transport capacity limitations. Normally, they should be used with USLE and without transport capacity limitation, otherwise deposition may be accounted for twice.
 
 **4)** ```svc.dat```<br>
-\[can be generated with the LUMP package] <br>
+\[can be generated with the lumpR package\] <br>
 (optional, mandatory for sediment module and saving/loading of model states)
 
 ```
@@ -681,7 +681,7 @@ ID,	soil_id,	veg_id	musle_k[(ton acre hr)/(acre ft-ton inch)],	musle_c[-],	musle
 Example: The SVC with the ID 11 consists of the soil with ID 13 (as specified in ```soil.dat```) and the vegetation/landuse with ID 21 (as specified in ```vegetation.dat```), resulting in the MUSLE-factors K, C, P of 0.13, 1.0 and 1.0, respectively. It contains 0.8 % coarse particles and has a surface roughness coefficient of 0.011.
 
 **5)** ```svc_in_tc.dat``` <br>
-\[can be generated with the LUMP package]
+\[can be generated with the lumpR package\]
 
 ```
 # Specification of which SVCs are contained in each TC
@@ -701,7 +701,7 @@ Note: The sum of “fraction” over a specific TC can be smaller than one as th
 Example: The TC with the ID 11 consists only of the SVC with the ID 12. The TC with the ID 12 is covered by the SCV 12 at 20 % of its area. The remaining 80 % of TC 12 consist of SVC 14.
 
 **6)** ```soil_vegetation.dat```<br>
-\[can be generated with the LUMP package]
+\[can be generated with the lumpR package\]
 
 ```
 # Specification of soil-vegetation components (links LU, terrain component, soil and vegetation properties) 
@@ -733,7 +733,7 @@ Example: The combination sub-basin Map-ID of 49, the LU-ID of 19 and the terrain
 The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs that was used in hymo.dat (due to computational reasons), in this case 49, 50, 1, 44, etc.; otherwise an error message occurs.
 
 **7)** ```soil.dat```<br>
-\[can be generated with the LUMP package]
+\[can be generated with the lumpR package\]
 
 ```
 # Specification of soil parameters
@@ -771,7 +771,7 @@ Soil-ID[-], number(horizons)[-], res[Vol-], PWP[-], FK2.5[-], FK1.8[-], nFK[-], 
 Example: The soil class with the ID 1 has 3 horizons in the soil profile. Consecutively within each row, first all horizon-specific attributes of horizon 1 are given, then those of horizon 2 and finally those of horizon 3. For example, the first horizon has a residual soil water content of 7.3 % (0.073), a water content at permanent wilting point of 10.2 % (0.102), a field capacity of 18.4 % (0.184), a field capacity \[63 %] of 27.0 % (0.270), a usable field capacity of 16.8 % (0.168), a saturated water content of 47.2 % (0.472), a thickness of 200 mm, etc… The values for the second horizon start again with a residual soil water content of 10.2 % (0.102), a water content at permanent wilting point of 16.0 % (0.160) etc. The very last two parameters of each row are the flags for bedrock and alluvium for the entire soil column. In the first line of the file dump above, the data belonging to one horizon have the same colour. All data for each individual soil ID must be given continuously in one line.
 
 **8)** ```soil_particles.dat``` <br>
-\[can be generated with the LUMP package]
+\[can be generated with the lumpR package\]
 
 ```
 # Particle size distribution of topmost horizons of soils
@@ -792,7 +792,7 @@ soil_id,	part_class_id,	fraction[-]
 Example: The topmost horizon of soil 1 contains 30 % of particles falling into the particle-size-class 1. Furthermore, it consists of 40 % of particles out of class 2 and of 30 % of particles out of class 3.
 
 **9)** ```vegetation.dat```<br>
-\[can be generated with the LUMP package]
+\[can be generated with the lumpR package\]
 
 ```
 # Specification of vegetation parameters
@@ -2125,6 +2125,9 @@ Mueller, E.N., Güntner, A., Francke, T., Mamede, G. (2010): Modelling sediment 
 <a name="neitsch-et-al-2002"></a>
 Neitsch, S.L., Arnold, J.G., Kiniry, J.R., Williams, J.R., King, K.W. (2002): Soil and Water Assessment Tool. Theoretical Documentation, Version 2000. Published by Texas Water Resources Institute, TWRI Report TR-191.
 
+<a name="pilz-et-al-2017"></a>
+Pilz, T., T. Francke, & A. Bronstert (2017): lumpR: An R package facilitating landscape discretisation for hillslope-based hydrological models, Geosci Model Dev, 10(8), 3001–3023, doi:https://doi.org/10.5194/gmd-10-3001-2017.
+
 <a name="rottler-2017"></a>
 Rottler, E. (2017): Implementation of a snow routine into the hydrological model WASA-SED and its validation in a mountainous catchment. MSc Thesis, University Potsdam, Germany. To be published on https://publishup.uni-potsdam.de/opus4-ubp/home).
 
@@ -2146,8 +2149,6 @@ Yang, C.T. (1984): Unit stream power equation for gravel. Journal of Hydraulic E
 Bronstert, A., Jaeger, A., Güntner, A., Hauschild, M., Döll, P., and Krol, M. (2000): Integrated modelling of water availability and water use in the semi-arid Northeast of Brazil, Physics and Chemistry of the Earth 25: 227-232.
 
 Mamede, G.L., Bronstert, A., Araujo, J.C., Batalla, R. J., Güntner, A., Mueller, E. N., Francke, T. (2006): 1D Process-Based Modelling of Reservoir Sedimentation: a Case Study for the Barasona Reservoir in Spain. Proceedings of the International Conference on Fluvial Hydraulics, Lisbon, Vol. 2: 1585-1594.
-
-Francke, T. (2005): LUMP package, Manual, Auxiliary software tool to generate the input files for the hillslope module of the WASA model, SESAM working reports on http://brandenburg.geoecology.uni-potsdam.de/projekte/sesam/publications.php.
 
 Güntner, A. (2003): Auswirkung von Klimaänderungen auf die Wasserverfügbarkeit in Trockengebieten - Ergebnisse und Unsicherheiten am Beispiel Nordost-Brasiliens. In H.-B.Kleeberg, editor, Hydrologische Wissenschaften - Fachgemeinschaft in der ATV-DVWK, pp. 205-214.
 
@@ -2186,6 +2187,6 @@ Güntner, A. and Bronstert, A. (2004): Representation of landscape variability a
 
 Francke, T., Güntner, A., Bronstert, A., Mamede, G., Müller, E. N. (2008): Automated catena-based discretisation of landscapes for the derivation of hydrological modelling units. International Journal of Geographical Information Science, 22: 111-132.
 
-**For LUMP package:**
+Pilz, T., T. Francke, & A. Bronstert (2017): lumpR: An R package facilitating landscape discretisation for hillslope-based hydrological models, Geosci Model Dev, 10(8), 3001–3023, doi:https://doi.org/10.5194/gmd-10-3001-2017.
 
 Pilz, T (2015): https://github.com/tpilz/LUMP.
