@@ -250,7 +250,8 @@ In order to perform the simulation of sediment transport in reservoirs, four imp
 \[[Table of contents](#toc)]
 ## 3 Input data
 
-The model runs as a Fortran console application for catchment from a few km² up to several 100,000 km²) on daily or hourly time steps. Climatic drivers are daily/hourly time series for precipitation, humidity, short-wave radiation and temperature. For model parameterisation, regional digital maps on soil associations, land-use and vegetation cover, a digital elevation model with a cell size of 100 metres (or smaller) and, optional, bathymetric surveys of the reservoirs are required. The soil, vegetation and terrain maps are processed with the lumpR tool (see below) to derive the spatial discretisation into soil-vegetation units, terrain components and landscape units. [Table 4](#table-4) summarises the input parameters for the climatic drivers and the hillslope, river and reservoir modules. The vegetation parameters may be derived with the comprehensive study of, for example, [Breuer et al. (2003)](#breuer-et-al-2003), the soil and erosion parameters with the data compilation of [FAO (1993,](#fao-1993) [2001)](#fao-2001), [Morgan (1995)](#morgan-1995), [Maidment (1993)](#maidment-1993) and [Antronico et al. (2005)](#antronico-et-al-2005).
+The model runs as a Fortran console application for catchment from a few km² up to several 100,000 km²) on daily or hourly time steps. Climatic drivers are daily/hourly time series for precipitation, humidity, short-wave radiation and temperature. For model parameterisation, regional digital maps on soil associations, land-use and vegetation cover, a digital elevation model with a cell size of 100 metres (or smaller) and, optional, bathymetric surveys of the reservoirs are required. Soil data can be obtained and preprocessed with SoilDataPrep-tool(#SoilDataPrep). 
+The soil, vegetation and terrain maps are processed with the lumpR tool (see below) to derive the spatial discretisation into soil-vegetation units, terrain components and landscape units. [Table 4](#table-4) summarises the input parameters for the climatic drivers and the hillslope, river and reservoir modules. The vegetation parameters may be derived with the comprehensive study of, for example, [Breuer et al. (2003)](#breuer-et-al-2003), the soil and erosion parameters with the data compilation of [FAO (1993,](#fao-1993) [2001)](#fao-2001), [Morgan (1995)](#morgan-1995), [Maidment (1993)](#maidment-1993) and [Antronico et al. (2005)](#antronico-et-al-2005).
 
 For a semi-automated discretisation of the model domain into landscape units and terrain components, the LUMP-algorithm (Landscape Unit Mapping Program) is available ([Francke et al. 2008](#francke-et-al-2008)). This algorithm delineates areas with similar hillslope characteristics by retrieving homogeneous catenas with regard to e.g. hillslope shape, flow length and slope (provided by a digital elevation model), and additional properties such as for soil and land-use and optionally for specific model parameters such as leaf area index, albedo or soil aggregate stability. LUMP can be linked with the WASA-SED parameterisation procedure through a data base management tool, which allows to process and store digital soil, vegetation and topographical data in a coherent way and facilitates the generation of the required input files for the model. LUMP and further WASA-SED pre-processing tools have been transferred to the package lumpR ([Pilz et al. 2017](#pilz-et-al-2017)) for the free software environment for statistical computing and graphics R which is available from https://github.com/tpilz/lumpR.
 
@@ -2144,7 +2145,7 @@ Yang, C.T. (1973): Incipient  motion  and  sediment transport.  Journal  of  the
 Yang, C.T. (1984): Unit stream power equation for gravel. Journal of Hydraulic Engineering, ASCE, 110 (12), pp. 1783-1797. 
 
 \[[Table of contents](#toc)]
-## 6 Further relevant literature for the WASA-SED model
+## 6 Further relevant literature and tools for the WASA-SED model
 
 Bronstert, A., Jaeger, A., Güntner, A., Hauschild, M., Döll, P., and Krol, M. (2000): Integrated modelling of water availability and water use in the semi-arid Northeast of Brazil, Physics and Chemistry of the Earth 25: 227-232.
 
@@ -2190,3 +2191,9 @@ Francke, T., Güntner, A., Bronstert, A., Mamede, G., Müller, E. N. (2008): Aut
 Pilz, T., T. Francke, & A. Bronstert (2017): lumpR: An R package facilitating landscape discretisation for hillslope-based hydrological models, Geosci Model Dev, 10(8), 3001–3023, doi:https://doi.org/10.5194/gmd-10-3001-2017.
 
 Pilz, T (2015): https://github.com/tpilz/LUMP.
+
+
+**Auxiliary Tools:**
+
+[SoilDataPrep](https://github.com/tillf/SoilDataPrep/SoilDataPrep))<a name="SoilDataPrep"></a> : soildata-preprocessing for WASA-SED
+[lumpR](https://github.com/tpilz/lumpR)) : Geodata-preprocessing for WASA-SED
