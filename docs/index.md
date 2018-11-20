@@ -928,7 +928,7 @@ transp_cap_b	1.807
 
 *Application scale*:		0: apply equations on TC-scale; 1: apply on subbasin-scale<br>
 *Erosion equation*:		erosion equation to be used 1: USLE, 2: Onstad-Foster, 3: MUSLE, 4: MUST<br>
-*ri\_05\_coeffs*:	needed for USLE and OF: coefficients for estimation of maximum half-hour rainfall intensity (ri\_05) from daily/hourly rainfall data (R\_dt): ri\_05=a\*R\_dt^b. <br>
+*ri\_05\_coeffs*:	needed for USLE and OF: coefficients for estimation of maximum half-hour rainfall intensity (ri\_05) from daily/hourly rainfall data (R\_dt): ri\_05=a\*R\_dt\<sup>b</sup>. <br>
 *transport\_limit\_mode*:		different modes how/if transport capacity of runoff is limited: 1: no transport capacity limit; 2: transport capacity according to Everaert (1991); 3: transport capacity computed from MUSLE with maximum erodibility<br>
 *transp\_cap\_a*:	empirical factor for computing suspended sediment transport capacity in river (a \* vel_peak \*\* b)<br>
 *transp\_cap\_b*:		empirical factor for computing suspended sediment transport capacity in river (a \* vel_peak \*\* b)
@@ -1301,11 +1301,11 @@ Subasin-ID, minlevel[m], maxlevel[m], vol0([1000m**3]; unknown=-999), storcap[10
 *maxdamarea*: Initial maximum area of the sub-basin’s reservoir \[ha]. Value varies because of the sediment accumulation <br>
 *damdead.*: Initial dead volume of the sub-basin’s reservoir \[10<sup>3</sup> m<sup>3</sup>]. Value varies because of the sediment accumulation. Influences actual values of damflow and qoutlet. <br>
 *damalert.*: Initial alert volume of the sub-basin’s reservoir \[10<sup>3</sup> m<sup>3</sup>]. Value varies because of the sediment accumulation. Influences damflow. Should be set to volume at the height of the barrage’s intake devices.<br>
-*dama, damb*:	Parameters of the area-volume relationship in the sub-basin’s reservoir (area=dama.Voldamb) \[-]. Values of reservoir area and volume are expressed in m<sup>2</sup> and m<sup>3</sup>, respectively. damb should be > 0 and <= 1.<br>
+*dama, damb*:	Parameters of the area-volume relationship in the sub-basin’s reservoir (area=dama.Vol<sup>damb</sup>) \[-]. Values of reservoir area and volume are expressed in m<sup>2</sup> and m<sup>3</sup>, respectively. damb should be > 0 and <= 1.<br>
 *qoutlet*:	Maximum outflow discharge released through the bottom outlets in the sub-basin’s reservoir \[m<sup>3</sup>/s]. Contributes to qbottom in output file ```res_*_watbal.out```. Set to zero if less than damdead or less than fvol_bottom\*storcap. <br>
 *fvol\_bottom*: Fraction of storage capacity that indicates the minimum storage volume for sediment release through the bottom outlets of the sub-basin's reservoir \[-]. Influences the actual value of qoutlet. <br>
 *fvol\_over*: flag to simulate the retention of reservoir overflow during spillway operation \[0 = without time delay; 1 = with time delay] <br>
-*damc, damd*: Parameters of the spillway rating curve in the sub-basin’s reservoir (Qout=damc.Hv\^damd) \[-]. Values of water height over the spillway (Hv) and overflow discharge (Qout) are expressed in m and m<sup>3</sup>/s, respectively <br>
+*damc, damd*: Parameters of the spillway rating curve in the sub-basin’s reservoir (Qout=damc.Hv\<sup>damd</sup>) \[-]. Values of water height over the spillway (Hv) and overflow discharge (Qout) are expressed in m and m<sup>3</sup>/s, respectively <br>
 *elevbottom*: bottom outlet elevation of the sub-basin's reservoir \[m]. Currently not used, fill in dummy values.
 
 
@@ -1509,8 +1509,8 @@ Reservoir_class-ID, maxlake0[m**3], lake_vol0_factor[-], lake_change[-], alpha_M
 *maxlake0*: Upper limit of reservoir size class in terms of volume \[m³] <br>
 *lake\_vol0\_factor*: Fraction of storage capacity that indicates the initial water volume in the reservoir size classes \[-] <br>
 *lake\_change*: Factor that indicates yearly variation in the number of reservoirs of the size classes \[-] <br>
-*alpha\_Molle, damk_Molle*: Parameters of the area-volume relationship in the reservoir size classes (Area=alpha.k.(Vol/k)alpha/(alpha-1)) \[-]. Values of reservoir area and volume are expressed in m² and m³, respectively <br>
-*damc\_hrr, damd\_hrr*: Parameters of the spillway rating curve in the reservoir size classes (Qout=damc\_hrr.Hvdamd\_hrr) \[-]. Values of water height over the spillway and overflow discharges are expressed in m and m³/s, respectively
+*alpha\_Molle, damk_Molle*: Parameters of the area-volume relationship in the reservoir size classes (Area=alpha.k.(Vol/k)<sup>alpha/(alpha-1)</sup>) \[-]. Values of reservoir area and volume are expressed in m² and m³, respectively <br>
+*damc\_hrr, damd\_hrr*: Parameters of the spillway rating curve in the reservoir size classes (Qout=damc\_hrr.Hv\<sup>damd\_hrr</sup>) \[-]. Values of water height over the spillway and overflow discharges are expressed in m and m³/s, respectively
 
 Example: The study area has a network of small reservoirs, which are grouped into five size classes according to their storage capacity (changes on the number of size classes are not available yet). The water and sediment balances of small reservoirs are computed for one hypothetical representative reservoir of mean characteristics. The size class 1 has reservoirs with storage capacity up to 5,000 m³, an initial water volume of 20% of the storage capacity, an yearly increase of 10% in the number of reservoirs for the simulation period (lake_increase set to zero means that the number of reservoirs remains constant), an area-volume relationship with parameters alpha_Molle and damk_Molle set to 2.7 and 1500, respectively, and a spillway rating curve with parameters damc_hrr and damd_hrr set to 7 and 1.5, respectively.
 
@@ -1840,7 +1840,7 @@ Subasin-ID, year, day, hour, deadvol(m**3), alertvol(m**3), storcap(m**3)
 *alertvol*: Alert volume in the sub-basin's reservoir \[m<sup>3</sup>] <br>
 *storvap*: Storage capacity in the sub-basin's reservoir \[m<sup>3</sup>]
 
-Example: After each time step, e.g. after one day, the reservoir of the sub-basin with the Map-ID 60 has a dead volume of 4,795,484.24 m<sup>3</sup>, an alert volume of 45,171,678.11 m<sup>3</sup>, and a alert volume of 91,744,848.62 m<sup>3</sup>. Currently, the model generates an output file for each reservoir considered in the simulation (e.g. ```res_60_watbal.out``` referred to sub-basin with Map-ID 60).
+Example: After each time step, e.g. after one day, the reservoir of the sub-basin with the Map-ID 60 has a dead volume of 4,795,484.24 m<sup>3</sup>, an alert volume of 45,171,678.11 m<sup>3</sup>, and an alert volume of 91,744,848.62 m<sup>3</sup>. Currently, the model generates an output file for each reservoir considered in the simulation (e.g. ```res_60_watbal.out``` referred to sub-basin with Map-ID 60).
 
 **3)** ```res_”Map-ID”_cav.out```
 
