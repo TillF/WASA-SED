@@ -1305,7 +1305,7 @@ Subasin-ID, minlevel[m], maxlevel[m], vol0([1000m**3]; unknown=-999), storcap[10
 *qoutlet*:	Maximum outflow discharge released through the bottom outlets in the sub-basin’s reservoir \[m<sup>3</sup>/s]. Contributes to qbottom in output file ```res_*_watbal.out```. Set to zero if less than damdead or less than fvol_bottom\*storcap. <br>
 *fvol\_bottom*: Fraction of storage capacity that indicates the minimum storage volume for sediment release through the bottom outlets of the sub-basin's reservoir \[-]. Influences the actual value of qoutlet. <br>
 *fvol\_over*: flag to simulate the retention of reservoir overflow during spillway operation \[0 = without time delay; 1 = with time delay] <br>
-*damc, damd*: Parameters of the spillway rating curve in the sub-basin’s reservoir (Qout=damc.Hvdamd) \[-]. Values of water height over the spillway and overflow discharges are expressed in m and m<sup>3</sup>/s, respectively <br>
+*damc, damd*: Parameters of the spillway rating curve in the sub-basin’s reservoir (Qout=damc.Hv\^damd) \[-]. Values of water height over the spillway (Hv) and overflow discharge (Qout) are expressed in m and m<sup>3</sup>/s, respectively <br>
 *elevbottom*: bottom outlet elevation of the sub-basin's reservoir \[m]. Currently not used, fill in dummy values.
 
 
