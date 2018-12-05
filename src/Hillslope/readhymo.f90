@@ -1699,12 +1699,8 @@ end if ! do_snow
 
     OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/'//inputfile_name,STATUS='old',IOSTAT=istate)
 
-    if (istate/=0) then        !no seasonality file found
-        allocate(node_days(1,1))
-        write(*,*) 'WARNING: ',inputfile_name,' not found, using defaults'
-        return
-    else
-        i = 0
+    i=0
+    if (istate==0) then        !seasonality file found
         k = 0
         DO WHILE (k==0) !count lines in file (maximum of memory required)
             READ(11,*,IOSTAT=k)
@@ -1712,7 +1708,13 @@ end if ! do_snow
         END DO
         rewind(11) !back to start of file
         i=i-3-1 !substract headerlines and last unsuccessful line
-
+    end if
+        
+    if (i <= 0) then    
+        allocate(node_days(1,1))
+        write(*,*) 'WARNING: ',inputfile_name,' not found or empty, using defaults'
+        return
+    else
         allocate(node_days(i, 3+4)) !accomodate all lines; per line: subbasin-id, (veg-id/SVC-id,), year, 4 doys      !!, last_line indicator (for calc_seasonality)
         node_days(:,:)=0
         READ(11,*); READ(11,*); READ(11,*)    !read headerlines
