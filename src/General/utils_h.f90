@@ -254,7 +254,7 @@ FUNCTION new_int_array2(old_pointer, newlength, dim_in)
     END FUNCTION new_int_array2
 
 FUNCTION new_real_array2(old_pointer, newlength, dim_in)
- !shrinks a given integer array (allocate new memory, copy contents, free old mem)
+ !shrinks a given real array (allocate new memory, copy contents, free old mem)
     IMPLICIT NONE
     real, pointer :: new_real_array2(:,:)
     real, pointer :: old_pointer(:,:)
@@ -277,9 +277,15 @@ FUNCTION new_real_array2(old_pointer, newlength, dim_in)
         stop
     end if
     if (change_dim==1) then
-        new_real_array2(1:newlength,:)=old_pointer(1:newlength,:)
+        do i=1,old_dims(2) 
+            new_real_array2(1:newlength, i)=old_pointer(1:newlength, i)
+        end do    
+        ! new_real_array2(1:newlength,:)=old_pointer(1:newlength,:) !can cause stack overflow in inter fortran compiler because of temporar copies
     else
-        new_real_array2(:,1:newlength)=old_pointer(:,1:newlength)
+        do i=1,old_dims(1) 
+            new_real_array2(i,1:newlength)=old_pointer(i,1:newlength)
+        end do    
+        !        new_real_array2(:,1:newlength)=old_pointer(:,1:newlength) !can cause stack overflow in inter fortran compiler because of temporar copies
     end if
 
     deallocate(old_pointer)
@@ -287,13 +293,13 @@ FUNCTION new_real_array2(old_pointer, newlength, dim_in)
     END FUNCTION new_real_array2
 
 FUNCTION new_real_array3(old_pointer, newlength, dim_in)
- !shrinks a given integer array (allocate new memory, copy contents, free old mem)
+ !shrinks a given real array (allocate new memory, copy contents, free old mem)
     IMPLICIT NONE
     real, pointer :: new_real_array3(:,:,:)
     real, pointer :: old_pointer(:,:,:)
     INTEGER, intent(in) :: newlength
     INTEGER, optional :: dim_in
-    INTEGER :: change_dim, old_dims(3), i
+    INTEGER :: change_dim, old_dims(3), i, k
 
     change_dim=1
     if (present(dim_in))   change_dim=dim_in
@@ -309,9 +315,30 @@ FUNCTION new_real_array3(old_pointer, newlength, dim_in)
         write(*,'(A,i0,a)')'ERROR: Memory allocation error (',i,') in new_array1. Try disabling some hourly output.'
         stop
     end if
-    if (change_dim==1) new_real_array3(1:newlength,:,:)=old_pointer(1:newlength,:,:)
-    if (change_dim==2) new_real_array3(:,1:newlength,:)=old_pointer(:,1:newlength,:)
-    if (change_dim==3) new_real_array3(:,:,1:newlength)=old_pointer(:,:,1:newlength)
+    if (change_dim==1) then
+        do i=1,old_dims(2) 
+            do k=1,old_dims(3) 
+                new_real_array3(1:newlength,i,k)=old_pointer(1:newlength,i,k) !can cause stack overflow in inter fortran compiler because of temporar copies
+            end do    
+        end do    
+        !new_real_array3(1:newlength,:,:)=old_pointer(1:newlength,:,:) !can cause stack overflow in inter fortran compiler because of temporar copies
+    end if
+    if (change_dim==2) then
+        do i=1,old_dims(1) 
+            do k=1,old_dims(3) 
+                new_real_array3(i, 1:newlength, k)=old_pointer(i, 1:newlength, k) !can cause stack overflow in inter fortran compiler because of temporar copies
+            end do    
+        end do                
+        !new_real_array3(:,1:newlength,:)=old_pointer(:,1:newlength,:) !can cause stack overflow in inter fortran compiler because of temporar copies
+    end if
+    if (change_dim==3) then
+        do i=1,old_dims(2) 
+            do k=1,old_dims(3) 
+                new_real_array3(1:newlength, i, k)=old_pointer(1:newlength, i, k) !can cause stack overflow in inter fortran compiler because of temporar copies
+            end do    
+        end do                
+        !new_real_array3(:,:,1:newlength)=old_pointer(:,:,1:newlength) !can cause stack overflow in inter fortran compiler because of temporar copies
+    end if     
 
     deallocate(old_pointer)
 
