@@ -1128,7 +1128,7 @@
         k = count(tcallid(id_sub_int,:,1)/=-1)
         if (k /= nbr_lu(id_sub_int)) then
             WRITE(*,'(a,i0,a,i0,a,i0)')'Error in soil_vegetation.dat: Expecting ',nbr_lu(id_sub_int),&
-                ' LUs for subbasin',id_subbas_extern(id_sub_int),', found ',k
+                ' LU(s) for subbasin ',id_subbas_extern(id_sub_int),', found ',k
             STOP
         END IF
 
@@ -1917,11 +1917,11 @@ end if ! do_snow
     use time_h
     use utils_h
     use erosion_h
+    use params_h
     IMPLICIT NONE
 
     INTEGER :: i,j,dc,istate
-    REAL :: dummy
-    INTEGER   :: columnheader(1000)    !Till: for storing column headings of input files
+    INTEGER   :: columnheader(2*subasin+10)    !Till: for storing column headings of input files
     CHARACTER(len=1000) :: linedummy
     CHARACTER(len=30) :: dstr    !Till: dummies for reading input header
     INTEGER,save  :: no_columns(2)        !number of columns of input files for the input file

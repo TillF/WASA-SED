@@ -392,7 +392,8 @@ RETURN
 
 contains
 	FUNCTION set_corr_column(input_header,inputfile_name)
-	!provide "pointer" to to match order of subbasins to that in hymo.dat
+	!provide "pointer" to to match order of subbasins to that in hymo.dat:
+    !return array with correponding index for each subbasin
 	use params_h
 	use hymo_h
 
@@ -405,26 +406,19 @@ contains
 		allocate(set_corr_column(subasin))
 		set_corr_column=0
 
-		DO i=1,subasin
-			 DO j=1,size(input_header)
-				IF(input_header(j) == id_subbas_extern(i)) THEN
-					set_corr_column(i)= j	!Till: for each subbasin, find position of corresponding column in input file
-					exit
-				END IF
-
-				! check if subbasin in time series file is specified in hymo.dat
-				if (associated(corr_column_pre_subbas_outflow)) then
-					k=which1(corr_column_pre_subbas_outflow==id_subbas_extern(i))
-				else
-					k=0
-				end if
-
-				if  (j==size(input_header) .AND. (k==0)) then
-					WRITE(*,'(a,i0,a,a,a)') 'ERROR: Sub-basin-ID ',id_subbas_extern(i),' not found in ',inputfile_name,', quitting.'
-					stop
-				end if
-
-			END DO
+		DO i=1,subasin !find correspondence for each subbasin
+            k = which1(input_header==id_subbas_extern(i))
+               
+            if (k /= 0) then !corresponding subbasin found in header
+                set_corr_column(i)= k 
+            else !corresponding subbasin not found in header
+                if (associated(corr_column_pre_subbas_outflow)) then
+					if (corr_column_pre_subbas_outflow(i) == 0) then ! check if contained in prespecified outflows, as these don't need climate data
+					    WRITE(*,'(a,i0,a,a,a)') 'ERROR: Sub-basin-ID ',id_subbas_extern(i),' not found in ',inputfile_name,', quitting.'
+					    stop
+                    end if
+                 end if   
+            end if    
 
 		END DO
 	END FUNCTION set_corr_column
