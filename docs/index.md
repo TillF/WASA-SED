@@ -519,7 +519,7 @@ Parameter File |	Content
 ```sdr_lu.dat``` (optional)	| LU-wise specification of sediment delivery ratio
 ```calib_wind.dat``` (optional)	| Calibration of wind speed (sensitive parameter for evapotranspiration)
 ```snow_params.ctl```(optional) | Options for the snow module
-<br>
+
 
 The spatial conceptualisation of the WASA model is explained in detail in [Güntner (2002)](#guentner-2002), and are only shortly summarised in this manual. The following spatial modelling units were identified ([Güntner 2002](#guentner-2002), p. 33):
 
@@ -592,19 +592,19 @@ LU-ID [-], No._of_TC[-], TC1[-], TC2[-], TC3[-], kfsu[mm/d], length[m], meandep[
 Example: The landscape unit with ID 1 has 3 terrain components with the IDs 7, 49 and 11, a hydraulic conductivity of bedrock of 100 mm/d, a mean slope length of 601 m, etc. The LU with ID 2 has only 1 terrain component with the ID-Number 2 (i.e. consisting only of one rather homogenous hillslope section, TC2 and TC3 are set to zero), a hydraulic conductivity of bedrock of 100 mm/d, a mean slope length of 1963.7 m, etc. The TCs within a LU can be listed in any order, their position in the toposequence is read from terrain.dat.
 LU-ids not lister in ```hymo.dat``` are ignored.
 
-Remarks concerning groundwater: In WASA-SED, the representation of groundwater is yet quite simplistic. The general groundwater regime is essentially controlled by the flag for groundwater (gw_flag) in ```soter.dat```. Currently, the three options for setting gw_flag are gwflag=0, 1 or 99 (see [Table 7](#table-7), [8](#table-8), [9](#table-9), respectively). This determines if the water that leaves the soil column is “lost” for the model (gwflag=0) or enters a linear storage (gwflag=1). Gw_flag=99 is an experimental modelling option which usually should not be chosen.
+Remarks concerning groundwater: In WASA-SED, the representation of groundwater is yet quite simplistic. The general groundwater regime is essentially controlled by the flag for groundwater (```gw_flag```) in ```soter.dat```. Currently, the three options for setting ```gw_flag``` are 0, 1 or 99 (see [Table 7](#table-7), [8](#table-8), [9](#table-9), respectively). This determines if the water that leaves the soil column is “lost” for the model (```gwflag=0```) or enters a linear storage (```gwflag=1```). ```gw_flag=99``` is an experimental modelling option which usually should not be chosen.
 
-Please note that the depth of the bedrock may be specified in two ways: In ```soil.dat```, the bedrock is assumed beneath the deepest soil horizon, if the bedrock flag is set (bedrock=1). Otherwise (bedrock=0), its depth is taken from the meandep (maxdep for alluvial soils) specification given in ```soter.dat```.
+Please note that the depth of the bedrock may be specified in two ways: In ```soil.dat```, the bedrock is assumed beneath the deepest soil horizon, if the bedrock flag is set (```bedrock=1```). Otherwise (```bedrock=0```), its depth is taken from the ```meandep``` (```maxdep``` for alluvial soils) specification given in ```soter.dat```.
 
-Please note that in the case of alluvial soils, for each option in Tables 1 or 2 below, maxdep as defined in ```soter.dat``` instead of meandep is used. maxdep usually should be set larger than meandep. The rationale behind this is that alluvial soils in the valley bottoms, in particular in crystalline bedrock environment, usually have larger soil depths (and thus higher water storage capacity) than average soils somewhere else (at the slopes) within the landscape unit. 
+Please note that in the case of alluvial soils, for each option in Tables 1 or 2 below, ```maxdep``` as defined in ```soter.dat``` instead of ```meandep``` is used. ```maxdep``` usually should be set larger than ```meandep```. The rationale behind this is that alluvial soils in the valley bottoms, in particular in crystalline bedrock environment, usually have larger soil depths (and thus higher water storage capacity) than average soils somewhere else (at the slopes) within the landscape unit. 
 
 IMPORTANT:
-In any of the above options, riverbed is to be defined in soter.dat. In WASA, only soil horizons of the lowest terrain component which are located at depths above the riverbed are allowed to exfiltrate into the river by lateral flow. Soil horizons below riverbed cannot lose water to the river, but only due to evapotranspiration or percolation to groundwater/bedrock.
+In any of the above options, ```riverbed``` is to be defined in ```soter.dat```. In WASA, only soil horizons of the lowest terrain component which are located at depths above the riverbed are allowed to exfiltrate into the river by lateral flow. Soil horizons below ```riverbed``` cannot lose water to the river, but only due to evapotranspiration or percolation to groundwater/bedrock.
 
 <a name="table-7"></a>
-**Table 7:** Groundwater option Gw_flag=0.
+**Table 7:** Groundwater option ```gw_flag=0```.
 
-Modelling options |	Groundwater regime, internal representation of processes | Gw flag (```soter.dat```) | Bed-rock (```soil.dat```) / Add. parameters (```soter.dat```)
+Modelling options |	Groundwater regime, internal representation of processes | gw flag (```soter.dat```) | Bed-rock (```soil.dat```) / Add. parameters (```soter.dat```)
 ---|---|---|---
 I) Groundwater below soil zone is ignored / not relevant for surface processes |	Soil water balance is modelled within the zone above bedrock. Water percolation out of the deepest soil horizon leaves the model domain	| 0	/ Select option 1.1 or 1.2 |
 I.1) No bedrock is taken into account | Water percolation out of the deepest soil horizon leaves the model domain. | 0	| Select option 1.1.1 or 1.1.2
@@ -615,7 +615,7 @@ I.2.1) Bedrock is given in ```soil.dat```	| See 1.2) | 0 | 1 / Kfsu, riverbed
 I.2.2) If bedrock is not given in ```soil.dat```, bedrock is assumed to be in the depth defined by meandep (or below deepest horizon given in ```soil.dat``` if its depth is greater than meandep) | See 1.2) |	0 | 0 / Meandep, maxdep, kfsu, riverbed
 
 <a name="table-8"></a>
-**Table 8:** Groundwater option Gw_flag=1.
+**Table 8:** Groundwater option ```gw_flag=1```.
 
 Modelling options | Groundwater regime, internal representation of processes | Gw flag (```soter.dat```) | Bed-rock (```soil.dat```) / Add. parameters (```soter.dat```)
 ---|---|---|---
@@ -626,7 +626,7 @@ II.2.1) Bedrock is given in ```soil.dat``` | See 2.2) | 1 | 1 / Kfsu, frgw_delay
 II.2.2) If bedrock is not given in soil.dat, bedrock is assumed to be in the depth defined by meandep (or below deepest horizon given in ```soil.dat``` if the profile depth is greater than meandep) | See 2.2) | 1 | 0 / Meandep, maxdep, kfsu, frgw_delay, riverbed
 
 <a name="table-9"></a>
-**Table 9:** Groundwater option Gw_flag=99.
+**Table 9:** Groundwater option ```gw_flag=99```.
 
 Experimental option, not verified!
 
