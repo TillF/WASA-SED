@@ -266,7 +266,7 @@ Climate |	Daily or hourly time series on rainfall \[mm/day, mm/h], Daily time se
 Vegetation	| Stomata resistance \[s/m], Minimum suction \[hPa], Maximum suction \[hPa], Height \[m], Root depth \[m], LAI \[-], Albedo \[-], Manning's n of hillslope \[-], USLE C \[-]
 Soil	| No. of horizons\*, Residual water content \[Vol. %], Water content at permanent wilting point \[Vol. %], Usable field capacity \[Vol. %], Saturated water content \[Vol. %], Saturated hydraulic conductivity (mm/h), Thickness \[mm], Suction at wetting front \[mm], Pore size index \[-], Bubble pressure \[cm], USLE K \[-]\*\*, Particle size distribution\*\*
 Terrain and river |	Hydraulic conductivity of bedrock \[mm/d], Mean maximum depth of soil zone \[mm], Depth of river bed below terrain component \[mm], Initial depth of groundwater below surface \[mm], Storage coefficient for groundwater outflow \[day], Bankful depth of river \[m], Bankful width of river \[m], Run to rise ratio of river banks \[-], Bottom width of floodplain \[m], Run to rise ratio of floodplain side slopes \[-], River length \[km], River slope \[m/m], D<sub>50</sub> (median sediment particle size) of riverbed \[m], Manning’s n for riverbed and floodplains \[-]
-Reservoir	| Longitudinal profile of reservoir \[m], Cross-section profiles of reservoir \[m], Stage-volume curves, Initial water storage and storage capacity volumes \[m3], Initial area of the reservoir \[ha], Maximal outflow through the bottom outlets \[m3/s], Manning’s roughness for reservoir bed, Depth of active layer \[m]
+Reservoir	| Longitudinal profile of reservoir \[m], Cross-section profiles of reservoir \[m], Stage-volume curves, Initial water storage and storage capacity volumes \[m<sup>3</sup>], Initial area of the reservoir \[ha], Maximal outflow through the bottom outlets \[m<sup>3</sup>/s], Manning’s roughness for reservoir bed, Depth of active layer \[m]
 
 \* for each soil horizon, all following parameters in the column are required <br>
 \** of topmost horizon
@@ -472,9 +472,9 @@ fluxNetS | Short-wave radiation balance \[W/m²]
 fluxNetL | Long-wave radiation balance \[W/m²]
 fluxSoil | Soil heat flux \[W/m²]
 fluxSens | Sensible heat flux \[W/m²]
-stoiPrec | Conversion factor mass and energy flux precipitation \[kJ/m3]
-stoiSubl | Conversion factor mass and energy flux sublimation \[kJ/m3]
-stoiFlow | Conversion factor mass and energy flux melt water \[kJ/m3]
+stoiPrec | Conversion factor mass and energy flux precipitation \[kJ/m<sup>3</sup>]
+stoiSubl | Conversion factor mass and energy flux sublimation \[kJ/m<sup>3</sup>]
+stoiFlow | Conversion factor mass and energy flux melt water \[kJ/m<sup>3</sup>]
 rateAlbe | Change rate snow albedo \[1/s]
 precipMod | Modified precipitation signal \[mm]
 cloudFrac | Cloud cover fraction \[-]
@@ -523,7 +523,7 @@ Parameter File |	Content
 
 The spatial conceptualisation of the WASA model is explained in detail in [Güntner (2002)](#guentner-2002), and are only shortly summarised in this manual. The following spatial modelling units were identified ([Güntner 2002](#guentner-2002), p. 33):
 
--	*Sub-Basins:* ca. 50-1000 km3, topologically referenced, defined e.g. by the location of river gauging stations, or large reservoirs with a storage capacity of more than 50x106 m3 and the confluence of major rivers;
+-	*Sub-Basins:* ca. 50-1000 km<sup>3</sup>, topologically referenced, defined e.g. by the location of river gauging stations, or large reservoirs with a storage capacity of more than 50x106 m<sup>3</sup> and the confluence of major rivers;
 
 -	*Landscape units (LUs):* based on the LU concept (e.g. SOil and TERrain digital database, [FAO, 1993](#fao-1993)), i.e. structure of the landscape according to geological, topographic and soil characteristics with similarity in major landform, general lithology, soil associations and toposequences, georeferenced;
 
@@ -905,7 +905,7 @@ Start-Subasin-ID, Flag(reservoir/river), Flow(m3/s,) Loss(%), Destination-Subasi
 
 *Start-Subasin-ID*:		ID of sub-basin (source of water abstraction)<br>
 *Flag(reservoir/river)*:		water abstraction from: 1 (river) or 2 (reservoir)<br>
-*Flow(m3/s)*:			amount of re-routed water<br>
+*Flow(m<sup>3</sup>/s)*:			amount of re-routed water<br>
 *Loss(%)*:			transmission loss<br>
 *Destination-Subasin-ID*:		ID of sub-basin (destination of water abstraction)
 *Flag (reservoir/river)*:		water diversion to: 1 (river) or 2 (reservoir)<br>
@@ -930,7 +930,7 @@ transp_cap_b	1.807
 
 *Application scale*:		0: apply equations on TC-scale; 1: apply on sub-basin-scale<br>
 *Erosion equation*:		erosion equation to be used 1: USLE, 2: Onstad-Foster, 3: MUSLE, 4: MUST<br>
-*ri\_05\_coeffs*:	needed for USLE and OF: coefficients for estimation of maximum half-hour rainfall intensity (ri\_05) from daily/hourly rainfall data (R\_dt): ri\_05=a\*R\_dt\<sup>b</sup>. <br>
+*ri\_05\_coeffs*:	needed for USLE and OF: coefficients for estimation of maximum half-hour rainfall intensity (ri\_05) from daily/hourly rainfall data (R\_dt): ri\_05=a\*R\_dt<sup>b</sup>. <br>
 *transport\_limit\_mode*:		different modes how/if transport capacity of runoff is limited: 1: no transport capacity limit; 2: transport capacity according to Everaert (1991); 3: transport capacity computed from MUSLE with maximum erodibility<br>
 *transp\_cap\_a*:	empirical factor for computing suspended sediment transport capacity in river (a \* vel_peak \*\* b)<br>
 *transp\_cap\_b*:		empirical factor for computing suspended sediment transport capacity in river (a \* vel_peak \*\* b)
@@ -1089,7 +1089,7 @@ a0, a1, kSatSnow,	densDrySnow,	specCapRet,	emissivitySnowMin,	emissivitySnowMax,
 *agingRate\_tAirPos*:	Aging rate for air temperatures > 0 (1/s)<br>
 *agingRate\_tAirNeg*:	Aging rate for air temperatures < 0 (1/s)<br>
 *soilDepth*:	Depth of interacting soil layer (m)<br>
-*soilDens*:	Density of soil (kg/m3)<br>
+*soilDens*:	Density of soil (kg/m<sup>3</sup>)<br>
 *soilSpecHeat*:	Spec. heat capacity of soil (kJ/kg/K)<br>
 *weightAirTemp*:	Weighting param. for air temp. (-) in 0...1<br>
 *lat*:	Latitude of centre of study area<br>
@@ -1169,7 +1169,7 @@ Subasin-ID, depth(m), width(m), side ratio (m/m), bottom width of floodplain (m)
 *baseflow*: baseflow alpha factor for bank storage (days) <br>
 *msk\_x*: Muskingum X weighting coefficient \[-] <br>
 *msk\_k*: Muskingum K storage time constant \[hours] <br>
-*Q\_Spring*: Initial conditions for headwater reaches (minimum discharge) \[m3/s]
+*Q\_Spring*: Initial conditions for headwater reaches (minimum discharge) \[m<sup>3</sup>/s]
 
 Example: The river stretch at the sub-basin with the Map-ID of 1 has a bankful depth of 1 m, a width of 5 metres, a site ratio of 2, a bottom width of the floodplain of 100 m, a side ratio on the floodplains of 4, a channel slope of 0.006 (or 0.6 %), a length of 7.4 km, a Manning’s n of 0.02 and a Manning’s n in the floodplain of 0.05, a Ksat of 25 mm/h, an erodibility factor of 0.1, a cover factor of 1, a riverbedrock factor of 0, a baseflowalphafactor of 0.1 days, a Muskingum X coefficient of 0.2, a Muskingum K factor of 4 hours and an initial condition of 0.1 m<sup>3</sup>/s. The dimensions of the trapezoidal channels including the floodplains are depicted in [Figure 2](#figure-2). The height of the wedge at the channel bottom (enables smooth transition of low flows) is fixed to 0.1 m.
  
@@ -1373,7 +1373,7 @@ Subasin-ID, nbr. points, 1st row: elevation [m], 2nd row: reservoir area [1000m*
 *Nbr. points*: Number of points from the stage-area and stage-volume curves of the sub-basin's reservoir <br>
 *1st row*: elevation	1st row of each sub-basin: water elevation from the stage-area and stage-volume curves of the sub-basin's reservoir \[m] <br>
 *2nd row*: reservoir area	2nd row of each sub-basin: reservoir area for a given elevation at the stage-area and stage-volume curves of the sub-basin's reservoir \[103 m2] <br>
-*3rd row*: reservoir volume	3rd row of each sub-basin: reservoir volume for a given elevation at the stage-area and stage-volume curves of the sub-basin's reservoir \[103 m3]
+*3rd row*: reservoir volume	3rd row of each sub-basin: reservoir volume for a given elevation at the stage-area and stage-volume curves of the sub-basin's reservoir \[10<sup>3</sup> m<sup>3</sup>]
 
 Example: This optional file allows specifying the stage-area and stage-volume curves of the sub-basin’s reservoir. If this file is not found in the folder reservoir, an area-volume relationship given in the file ```reservoir.dat``` is applied to the respective sub-basin’s reservoir. The reservoir located at the outlet point of the sub-basin with the Map-ID 60 has 36 points at the stage-area and stage-volume curves. The first row holds 36 values of water elevation at the stage-area and stage-volume curves (413.30 m, 415.00 m, 416.00 m, 417.00, etc). The second row holds 36 values of reservoir area for the given values of elevation at the stage-area and stage-volume curves (0.00 m2, 54.82 10³m², 96.10 10³m², 142.89 10³m², etc). Finally, the third row holds 36 values of reservoir volume for the given values of elevation at the stage-area and stage-volume curves (0.00 10³m³, 35.78 10³m³, 111.14 10³m³, 231.23 10³m³, etc). The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs as was used in ```hymo.dat``` (due to computational reasons); otherwise, an error message occurs. Sub-basins without outlet reservoirs or those without data on stage-area and stage-volume curves must not be entered in the file.
 
@@ -1423,7 +1423,7 @@ Subasin-ID, dry_dens[ton/m**3], factor_actlay[-]
 *dry\_dens*: Dry bulk density of the sediment deposited in the sub-basin's reservoir \[ton/m<sup>3</sup>] <br>
 *factor\_actlay*: Calibration parameter for the determination of the active layer thickness \[-]
 
-Example: At the outlet point of the sub-basin with the Map-ID 60 there is a reservoir with a dry bulk density of 1.5 ton/m3. The calibration parameter for the determination of the active layer thickness at that reservoir is equal to 1. It means that the default value of active layer thickness (set to 0.03 mm, derived from the simulation for the Barasona reservoir in Spain) is multiplied by a factor of 1. For the calculation of sediment balance using the simplified modelling approach, the third column with values of factor_actlay must not be entered in the file. The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs as was used in ```hymo.dat``` (due to computational reasons); otherwise, an error message occurs. Sub-basins without outlet reservoirs must not be entered in the file.
+Example: At the outlet point of the sub-basin with the Map-ID 60 there is a reservoir with a dry bulk density of 1.5 ton/m<sup>3</sup>. The calibration parameter for the determination of the active layer thickness at that reservoir is equal to 1. It means that the default value of active layer thickness (set to 0.03 mm, derived from the simulation for the Barasona reservoir in Spain) is multiplied by a factor of 1. For the calculation of sediment balance using the simplified modelling approach, the third column with values of factor_actlay must not be entered in the file. The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs as was used in ```hymo.dat``` (due to computational reasons); otherwise, an error message occurs. Sub-basins without outlet reservoirs must not be entered in the file.
 
 **9)** ```cross_sec_”Map-ID”.dat``` <br> 
 (optional)
@@ -1673,14 +1673,14 @@ Output file | Content
 ```daily_subsurface_runoff.out```	| daily total subsurface runoff \[m<sup>3</sup>/d] for all sub-basins 
 ```daily_theta.out```	| mean soil moisture in profile \[mm] for all sub-basins 
 ```daily_total_overlandflow.out``` | total overland flow \[m<sup>3</sup>] for all sub-basins 
-```daily_water_sub-basin.out``` | daily water contribution into river \[m3/s] for all sub-basins 
+```daily_water_sub-basin.out``` | daily water contribution into river \[m<sup>3</sup>/s] for all sub-basins 
 ```water_sub-basin.out``` | sub-daily contribution to river \[m<sup>3</sup>/s] for all sub-basins 
 ```sediment_production.out``` |	daily sediment production \[t] for all sub-basins  and particle classes
 ```Daily_gw_loss.out``` | daily water loss from model domain due to deep seepage in LU without GW
 ```deep_gw_discharge.out``` | total deep ground water discharge \[m<sup>3</sup>] for all sub-basins 
 ```deep_gw_recharge.out``` | total deep ground water recharge \[m<sup>3</sup>] for all sub-basins 
 ```actetranspiration.out``` |	Subdaily actual evapotranspiration \[mm] for all sub-basins  incl. river
-```qhorton.out``` | subdaily horton overland flow \[m3] for all sub-basins 
+```qhorton.out``` | subdaily horton overland flow \[m<sup>3</sup>] for all sub-basins 
 ```subsurface_runoff.out``` | subdaily total subsurface runoff \[m<sup>3</sup>/d] for all sub-basins 
 ```total_overlandflow.out``` | Subdaily total overland flow \[m<sup>3</sup>] for all sub-basins 
 ```gw_discharge.out``` | groundwater discharge \[m<sup>3</sup>/timestep] for all sub-basins 
@@ -1753,12 +1753,12 @@ Year  Day    dt   9          10             11
 2009     1     3         4.001         1.029         5.878             
     …
 ```
-
+    
 *Subasin-ID*: Map-ID of all sub-basins in the second line of the file <br>
 *Timestep*: Timestep as specified in the ```do.dat``` in \[hours] <br>
 *Time series*: water discharge in river stretch in m<sup>3</sup>/s
 
-Example: After each time step, e.g. hourly, the discharge is given for each sub-basin, e.g. Sub-basin No. 9 has a discharge of 6.313 m3/s, Sub-basin No. 10 of 1.797 m3/s and Sub-basin No. 11 of 8.922 m<sup>3</sup>/s after 1 hours.
+Example: After each time step, e.g. hourly, the discharge is given for each sub-basin, e.g. Sub-basin No. 9 has a discharge of 6.313 m<sup>3</sup>/s, Sub-basin No. 10 of 1.797 m<sup>3</sup>/s and Sub-basin No. 11 of 8.922 m<sup>3</sup>/s after 1 hours.
 
 <a name="4-3-output-of-the-reservoir-module"></a>
 ### 4.3 Output of the reservoir module
