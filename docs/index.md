@@ -1308,7 +1308,7 @@ Subasin-ID, minlevel[m], maxlevel[m], vol0([1000m**3]; unknown=-999), storcap[10
 *qoutlet*:	Maximum outflow discharge released through the bottom outlets in the sub-basin’s reservoir \[m<sup>3</sup>/s]. Contributes to qbottom in output file ```res_*_watbal.out```. Set to zero if less than damdead or less than fvol_bottom\*storcap. <br>
 *fvol\_bottom*: Fraction of storage capacity that indicates the minimum storage volume for sediment release through the bottom outlets of the sub-basin's reservoir \[-]. Influences the actual value of qoutlet. <br>
 *fvol\_over*: flag to simulate the retention of reservoir overflow during spillway operation \[0 = without time delay; 1 = with time delay] <br>
-*damc, damd*: Parameters of the spillway rating curve in the sub-basin’s reservoir (Qout=damc.Hv\<sup>damd</sup>) \[-]. Values of water height over the spillway (Hv) and overflow discharge (Qout) are expressed in m and m<sup>3</sup>/s, respectively <br>
+*damc, damd*: Parameters of the spillway rating curve in the sub-basin’s reservoir (Qout=damc.Hv<sup>damd</sup>) \[-]. Values of water height over the spillway (Hv) and overflow discharge (Qout) are expressed in m and m<sup>3</sup>/s, respectively <br>
 *elevbottom*: bottom outlet elevation of the sub-basin's reservoir \[m]. Currently not used, fill in dummy values.
 
 
@@ -1513,7 +1513,7 @@ Reservoir_class-ID, maxlake0[m**3], lake_vol0_factor[-], lake_change[-], alpha_M
 *lake\_vol0\_factor*: Fraction of storage capacity that indicates the initial water volume in the reservoir size classes \[-] <br>
 *lake\_change*: Factor that indicates yearly variation in the number of reservoirs of the size classes \[-] <br>
 *alpha\_Molle, damk_Molle*: Parameters of the area-volume relationship in the reservoir size classes (Area=alpha.k.(Vol/k)<sup>alpha/(alpha-1)</sup>) \[-]. Values of reservoir area and volume are expressed in m² and m³, respectively <br>
-*damc\_hrr, damd\_hrr*: Parameters of the spillway rating curve in the reservoir size classes (Qout=damc\_hrr.Hv\<sup>damd\_hrr</sup>) \[-]. Values of water height over the spillway and overflow discharges are expressed in m and m³/s, respectively
+*damc\_hrr, damd\_hrr*: Parameters of the spillway rating curve in the reservoir size classes (Qout=damc\_hrr.Hv<sup>damd\_hrr</sup>) \[-]. Values of water height over the spillway and overflow discharges are expressed in m and m³/s, respectively
 
 Example: The study area has a network of small reservoirs, which are grouped into five size classes according to their storage capacity (changes on the number of size classes are not available yet). The water and sediment balances of small reservoirs are computed for one hypothetical representative reservoir of mean characteristics. The size class 1 has reservoirs with storage capacity up to 5,000 m³, an initial water volume of 20% of the storage capacity, an yearly increase of 10% in the number of reservoirs for the simulation period (lake_increase set to zero means that the number of reservoirs remains constant), an area-volume relationship with parameters alpha_Molle and damk_Molle set to 2.7 and 1500, respectively, and a spillway rating curve with parameters damc_hrr and damd_hrr set to 7 and 1.5, respectively.
 
