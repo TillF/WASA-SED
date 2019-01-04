@@ -1730,7 +1730,7 @@ Output file | Content
 ```River_flowdepth.out```	| Flow depth in m
 ```River_Flow_dailyaverage.out``` | Daily averaged  flow in m<sup>3</sup>/s
 ```River_Sediment_total.out``` | Suspended sediment in tons/timestep
-```River_Sediment_Concentration.out``` | Suspended sediment conc. in g/l
+```River_Sediment_Concentration.out``` | Suspended sediment concentration in g/l
 ```River_Sediment_total_dailyaverage.out``` | Daily averaged sediment flux in tons/h
 ```River_Degradation.out``` | Degradation of sediment in riverbed in tons/stretch
 ```River_Deposition.out``` | Deposition of sediment in riverbed in tons/stretch
@@ -1742,8 +1742,6 @@ Output file | Content
 
 
 All above-mentioned files have the same structure, as shown by the example ```River_flow.out``` below:
-
-```River_flow.out```
 
 ```
 # Output files for river discharge q_out (m3/s) (with MAP IDs as in hymo.dat)
