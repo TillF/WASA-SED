@@ -5,15 +5,15 @@
 Eva Nora 
 Müller, Till Francke, George Mamede and Andreas Güntner
 
-**30.1.2018<br>
-WASA-SED rev. 255**
+**4.1.2019<br>
+WASA-SED rev_261**
 
 Developed within the SESAM-Project:<br>
 Sediment Export of Semi-Arid Catchment: Monitoring and Modelling 2005-2008<br>
 SESAM II 2010-2014,<br>
-2015-2018
+2015-2019
 
-Institute of Earth and Environmental Science, University of Potsdam, Potsdam,<br>
+Institute of Environmental Sciences and Geography, University of Potsdam, Potsdam,<br>
 Deutsches Geoforschungszentrum Potsdam,<br>
 Germany
 
@@ -32,7 +32,7 @@ http://uni-potsdam.de/sesam/
 
 Contact:<br>
 Till Francke<br>
-Institute of Earth and Environmental Sciences<br>
+Institute of Environmental Sciences and Geography<br>
 University of Potsdam<br>
 Karl-Liebknecht-Str. 24-25<br>
 14476 Potsdam, Germany<br>
@@ -385,10 +385,10 @@ daily_sediment_production
 daily_subsurface_runoff
 daily_theta
 daily_total_overlandflow
-daily_water_subbasin
+daily_water_sub-basin
 routing_response
 sediment_production
-water_subbasin
+water_sub-basin
 deep_gw_recharge
 deep_gw_discharge
 
@@ -554,14 +554,16 @@ Subasin-ID [-], Area[km**2],  nbr[-],  LU-IDs[-], areal fraction of LU[-]
 ```
 <br>
 *Subasin-ID*: Map-ID of sub-basin<br>
-*Area*:    Area of each sub-basin in \[km2\] (including reservoir areas)<br>
-*nbr*:     Number of LU units in each sub-basin<br>
-*LU-IDs*:      List of LU-Ids which occur in this specific sub-basin<br>
-*areal fraction*:	Fraction of each LU unit within each sub-basin \[-]
+*Area*:    Area of sub-basin in \[km²\] (including reservoir areas)<br>
+*nbr*:     Number of landscape units (LUs) in sub-basin<br>
+*LU-IDs*:      List of LU-ids which occur in this specific sub-basin<br>
+*areal fraction*:	Fraction of each LU within the sub-basin \[-]
 
-Example: In ```do.dat```, it was specified that 10 sub-basins are simulated with the WASA model. Accordingly, the file ```hymo.dat``` above contains the specification of 10 sub-basins, with the map IDs 49, 50,  1, … 29. The first sub-basin has a Map ID of 49 and an area of 10 km2. Within this sub-basin, four different landscape units can be identified with the LU-IDs 19, 87, 90 and 135.  The first LU (ID 19) covers an area of 35.7 % (0.357) of the total area of the sub-basin, the second one 14.7 %, the third one 21.4 % and the last one 28.2 % (total 100 %).
+Example: In ```do.dat```, it was specified that 10 sub-basins are to be simulated with the WASA model. Accordingly, the file ```hymo.dat``` above contains the specification of 10 sub-basins, with the map IDs 49, 50,  1, … 29. The first sub-basin has a Map ID of 49 and an area of 10 km². Within this sub-basin, four different landscape units can be identified with the LU-IDs 19, 87, 90 and 135.  The first LU (ID 19) covers an area of 35.7 % (0.357) of the total area of the sub-basin, the second one 14.7 %, the third one 21.4 % and the last one 28.2 % (total 100 %).
 
-Important: Any subbasin that is not listed in the file ```routing.dat``` will be ignored.
+Important: Any sub-basin that is not listed in the file ```routing.dat``` will be ignored.
+
+When the area of a sub-basin is set to zero, the soilwater-calculations in this basin are skipped. This may be useful when introducing dummy-basins for routing reasons.
 
 **2)** ```soter.dat``` <br>
 \[can be generated with the lumpR package\]
@@ -841,18 +843,18 @@ Subasin,	Veg_id,	Year,	DOY1,	DOY2,	DOY3,	DOY4
 
 Temporal dynamics of LAI, root depth, C-factor, etc. can be specified as a piecewise linear cycle with four segments. The ordinates (y-values, e.g. minimum, maximum and transitional LAIs) are listed in ```vegetation.dat``` and ```svc.dat```. They are time-invariant.
 
-The respective abscissa (x-values as day-of-year, DOY) are listed in ```*_seasons.dat```. They can be specified separately for each year, subbasin and (optionally) vegetation class.
+The respective abscissa (x-values as day-of-year, DOY) are listed in ```*_seasons.dat```. They can be specified separately for each year, sub-basin and (optionally) vegetation class.
 
-Eg. ```rainy_season.dat``` contains the points in time that serve as temporal nodes, between which the seasonal dynamics of LAI, vegetation height, root depth and albedo are linearly interpolated. The nodes are specified as julian days/DOYs in relation to the respective year. Negative values (previous) and values greater than 365/366 (next year) are allowed as long as they do not surpass the next adjacent node. Please make sure that all required rainy-seasons are specified (i.e. for all subbasins, all simulation years), otherwise an error message occurs. If not specified otherwise, values for days BEFORE the first / AFTER the last specified node are extrapolated with constant value.
+Eg. ```rainy_season.dat``` contains the points in time that serve as temporal nodes, between which the seasonal dynamics of LAI, vegetation height, root depth and albedo are linearly interpolated. The nodes are specified as julian days/DOYs in relation to the respective year. Negative values (previous) and values greater than 365/366 (next year) are allowed as long as they do not surpass the next adjacent node. Please make sure that all required rainy-seasons are specified (i.e. for all sub-basins, all simulation years), otherwise an error message occurs. If not specified otherwise, values for days BEFORE the first / AFTER the last specified node are extrapolated with constant value.
 
-“-1” can be used as a wildcard for subbasins, vegetation classes and years. The file is interpreted top to bottom, i.e. if multiple matches are found, the uppermost is used. Thus, a fallback specification (“all other cases”) should go into the last line (see example).
+“-1” can be used as a wildcard for sub-basins, vegetation classes and years. The file is interpreted top to bottom, i.e. if multiple matches are found, the uppermost is used. Thus, a fallback specification (“all other cases”) should go into the last line (see example).
 A standard (legacy) rainy_season.dat can be generated from rainfall data using the function rainy_season of the lumpR-package. If rainy_season.dat is missing or contains only the headerlines, only the first value in vegetation.dat is used (i.e. no seasonality).
 
 The optional files ```k_seasons.dat```, ```c_seasons.dat```, ```p_seasons.dat```, ```coarse_seasons.dat```, ```n_seasons.dat``` work analogously for the USLE factors K, C, P, the coarse fraction and Manning’s n. If any of these files is found, four respective columns (instead of the default one) must be given in ```svc.dat```.
 
-Example: The example file above is for two specific simulation years: 1980 and 1981. For vegetation class 2 in sub-basin 49, the rainy season in 1980 started on the 40th day (09.02.1980), and stopped on the 175th day (28.06.1980) (line 4). For all other vegetation classes, it started ten days later (DOY 20) (line 5). For subbasin 50, the dynamics are identical for all vegetation classes (line 6).
+Example: The example file above is for two specific simulation years: 1980 and 1981. For vegetation class 2 in sub-basin 49, the rainy season in 1980 started on the 40th day (09.02.1980), and stopped on the 175th day (28.06.1980) (line 4). For all other vegetation classes, it started ten days later (DOY 20) (line 5). For sub-basin 50, the dynamics are identical for all vegetation classes (line 6).
 
-In 1981, the same DOYs are used for all subbasins (line 7). All other subbasins, vegetation classes or years would use the values of the last line.
+In 1981, the same DOYs are used for all sub-basins (line 7). All other sub-basins, vegetation classes or years would use the values of the last line.
 
 **11)** ```scaling_factor.dat```<br>
 (optional)
@@ -869,7 +871,7 @@ Subasin-ID,	mean_kf-calib-factor
 
 This file is optional and is only read if doscale (in ```do.dat```) is set to “.T.”. In this case, ```scaling_factor.dat``` is expected in the subdirectory ```Others/```.
 
-Example: All values for saturated hydraulic conductivity during infiltration in subbasin 1 are modified by dividing them by 10. Maximum interception is adjusted by setting it to (0.340+0.647*10).
+Example: All values for saturated hydraulic conductivity during infiltration in sub-basin 1 are modified by dividing them by 10. Maximum interception is adjusted by setting it to (0.340+0.647*10).
 
 **12)** ```calibration.dat```<br>
 (optional)
@@ -901,11 +903,11 @@ Start-Subasin-ID, Flag(reservoir/river), Flow(m3/s,) Loss(%), Destination-Subasi
         30         1         2      0.02        29         2      1993
 ```
 
-*Start-Subasin-ID*:		ID of subbasin (source of water abstraction)<br>
+*Start-Subasin-ID*:		ID of sub-basin (source of water abstraction)<br>
 *Flag(reservoir/river)*:		water abstraction from: 1 (river) or 2 (reservoir)<br>
 *Flow(m3/s)*:			amount of re-routed water<br>
 *Loss(%)*:			transmission loss<br>
-*Destination-Subasin-ID*:		ID of subbasin (destination of water abstraction)
+*Destination-Subasin-ID*:		ID of sub-basin (destination of water abstraction)
 *Flag (reservoir/river)*:		water diversion to: 1 (river) or 2 (reservoir)<br>
 *begin\_year*:			start time of water abstraction
 
@@ -926,7 +928,7 @@ transp_cap_a	0.016111
 transp_cap_b	1.807	
 ```
 
-*Application scale*:		0: apply equations on TC-scale; 1: apply on subbasin-scale<br>
+*Application scale*:		0: apply equations on TC-scale; 1: apply on sub-basin-scale<br>
 *Erosion equation*:		erosion equation to be used 1: USLE, 2: Onstad-Foster, 3: MUSLE, 4: MUST<br>
 *ri\_05\_coeffs*:	needed for USLE and OF: coefficients for estimation of maximum half-hour rainfall intensity (ri\_05) from daily/hourly rainfall data (R\_dt): ri\_05=a\*R\_dt\<sup>b</sup>. <br>
 *transport\_limit\_mode*:		different modes how/if transport capacity of runoff is limited: 1: no transport capacity limit; 2: transport capacity according to Everaert (1991); 3: transport capacity computed from MUSLE with maximum erodibility<br>
@@ -941,57 +943,57 @@ This file and any of its entries are optional. If not present, default values ar
 
 ```
 # Ground water storage (for analysis or model re-start)
-Subbasin,	LU,	volume_[mm],	area_[m²]
+Sub-basin,	LU,	volume_[mm],	area_[m²]
 1 11111	39.51	1013437.4
 …
 ```
 
 ```
 # Interception storage (for analysis or model re-start)
-Subbasin,	LU,	TC,	SVC,	storage_[mm],	area_[m²]
+Sub-basin,	LU,	TC,	SVC,	storage_[mm],	area_[m²]
 1	11111	5	16010	    0.00	     73491.9
 …
 ```
 
 ```
 # Soil moisture status (for analysis or model re-start)
-Subbasin,	LU,	TC,	SVC,	horizon,	watercontent_[mm],	area_[m²]
+Sub-basin,	LU,	TC,	SVC,	horizon,	watercontent_[mm],	area_[m²]
 1	11111	5	16010	1	   26.70	     73491.9
 …
 ```
 
 ```
 # Interflow storage (for analysis or model re-start)
- Subbasin,	LU,	TC,	horizon,	storage_[m3]
+ Sub-basin,	LU,	TC,	horizon,	storage_[m3]
 1	1	3	1	   0.000
 ...
 ```
 
 ```
 #Snow storage (for analysis or model re-start)
-Subbasin,	LU,	horizon,	storage [m],	energy [kJ/m²],	albedo [-]
+Sub-basin,	LU,	horizon,	storage [m],	energy [kJ/m²],	albedo [-]
 1	2	10	0.000	0.000	0.880
 ```
 
 ```
 # Lake volume status (for analysis or model re-start)
-Subbasin	reservoir_size_class,	volume[m^3]
+Sub-basin	reservoir_size_class,	volume[m^3]
 1	1	       0.00
 ```
 
 ```
 # UHG routing: values of routed discharge per timestep of unit hydrograph
-Subbasin	[n_h x timestep]
+Sub-basin	[n_h x timestep]
 101	1.286	0.649	0.074
 ```
 
 ```
 # Muskingum routing: river reach volume status (for analysis or model re-start)
-Subbasin	volume[m^3]
+Sub-basin	volume[m^3]
 1	2033.808
 ```
 
-*subbasin*:		subbasin ID<br>
+*sub-basin*:		sub-basin ID<br>
 *LU*:		landscape unit ID<br>
 *TC*:		ID of terrain component<br>
 *SVC*:		ID of soil vegetation component<br>
@@ -1113,8 +1115,8 @@ Parameter File | Content
 ```river.dat```	| Specification of river parameters (for routing scheme 2 and 3)
 ```response.dat``` |	Specification of time response parameters (for routing scheme 1)
 ```bedload.dat```	| Specification of bedload data (for routing scheme 3)
-```subbasin_out.dat``` (optional) | pre-specification of outflow of selected sub-basins
-```subbasin_outsed.dat```	(optional) | pre-specification of sediment output of selected sub-basins
+```sub-basin_out.dat``` (optional) | pre-specification of outflow of selected sub-basins
+```sub-basin_outsed.dat```	(optional) | pre-specification of sediment output of selected sub-basins
 
 <br>
 
@@ -1139,7 +1141,7 @@ No., Subasin-ID(upstream), Subasin-ID(downstream)
 *Subasin-ID(upstream)*: Map-ID of sub-basin, which is located upstream of another sub-basin <br>
 *Subasin-ID(downstream)*:	Map-ID of sub-basin, which is located downstream of the previous sub-basin
 
-Example: This file defines the order of the calculation of the subbasins. All sub-basins must be listed before their corresponding outlet basins, otherwise an error is issued. For example, sub-basin No. 4 is upstream of sub-basin No. 10. Sub-basins No. 15 and 39 are also upstream of No. 10. The runoff of sub-basin No. 10 flows into sub-basin No. 50 etc. The subbasin at the outlet of the entire drainage system must drain to a subbasin labelled 999 or 9999.
+Example: This file defines the order of the calculation of the sub-basins. All sub-basins must be listed before their corresponding outlet basins, otherwise an error is issued. For example, sub-basin No. 4 is upstream of sub-basin No. 10. Sub-basins No. 15 and 39 are also upstream of No. 10. The runoff of sub-basin No. 10 flows into sub-basin No. 50 etc. The sub-basin at the outlet of the entire drainage system must drain to a sub-basin labelled 999 or 9999.
 
 **2)** ```river.dat```
 
@@ -1189,7 +1191,7 @@ Subasin-ID,lag time [d],retention[d]
 *lag time*: Lag time between runoff input to sub-basin and first runoff response at its outlet in \[days]<br>
 *retention*:	Retention specifies the maximum retention time in the sub-basin in \[days]
 
-Reference is midday, partial coverage of days is considered. Autochtonous runoff (riverflow generated inside a subbasin, not entering from upstream) is routed slightly different with zero lag time (triangular like this: /\ \_; tL\*=0, tR\*=tL+tR).
+Reference is midday, partial coverage of days is considered. Autochtonous runoff (riverflow generated inside a sub-basin, not entering from upstream) is routed slightly different with zero lag time (triangular like this: /\ \_; tL\*=0, tR\*=tL+tR).
 Example: The sub-basin with the Map-ID of 49 has a lag time of 0.5 days and a retention time of 2 days (i.e. its runoff will be delayed by 0.5 day, then stretched over another 2 days). The sub-basin with the Map-ID of 50 has a lag time of 1 day and a retention time of 1.5 days; etc.
 
 For a detailed description of the routing process and the linear response function, see [Güntner (2002)](#guentner-2002), p. 48 and [Bronstert et al. (1999)](#bronstert-et-al-1999). The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs as was used in ```hymo.dat``` (due to computational reasons); otherwise an error message occurs.
@@ -1210,12 +1212,12 @@ Subasin-ID, D50 (m)
 
 Example: The river stretch in the sub-basin with the Map-ID of 49 has a riverbed gradation with a D50 value of 0.048 m.
 
-**5)** ```subbasin_out.dat``` <br>
+**5)** ```sub-basin_out.dat``` <br>
 (optional)
 
 ```
 # Pre-specified mean daily river flow [m3/s] for selected sub-basins (MAP-IDs)		
-Date	Timestep	Subbasin-ID.
+Date	Timestep	Sub-basin-ID.
 0	0	4
 1092005	1	0.5
 2092005	1	0.3
@@ -1227,16 +1229,16 @@ Date	Timestep	Subbasin-ID.
 *Timestep*: timestep (not interpreted in daily resolution, 1..24 for hourly resolution)<br>
 *Subasin-ID*: Map-ID of sub-basin
 
-This optional file allows specifying the water output of selected subbasins. If this file is not found in the folder Time_series, all subbasins are treated regularly. Otherwise, any outflow that is specified in this file is used directly as an output of the respective subbasin – no computations are performed within this basin (evaporation, groundwater, river routing, etc.). WASA reads data from this file sequentially, starting from start of simulation and every calendar year (e.g. chunks of 365 days). The subsequent entries are assumed without gaps and not checked for completeness.
+This optional file allows specifying the water output of selected sub-basins. If this file is not found in the folder Time_series, all sub-basins are treated regularly. Otherwise, any outflow that is specified in this file is used directly as an output of the respective sub-basin – no computations are performed within this basin (evaporation, groundwater, river routing, etc.). WASA reads data from this file sequentially, starting from start of simulation and every calendar year (e.g. chunks of 365 days). The subsequent entries are assumed without gaps and not checked for completeness.
 
 Example: Sub-basin 4 has pre-specified discharge of 0.5 m³/s for 1 Sep 2005.
 
-**6)** ```subbasin_outsed.dat``` <br> 
+**6)** ```sub-basin_outsed.dat``` <br> 
 (optional)
 
 ```
 # Pre-specified daily sediment output [t] for selected  sub-basins (MAP-IDs), mean PSD: 0.3 0.2 0.5
-Date	Timestep	Subbasin-ID.
+Date	Timestep	Sub-basin-ID.
 0	0	4
 1092005	1	0.5
 2092005	1	0.3
@@ -1249,7 +1251,7 @@ Date	Timestep	Subbasin-ID.
 *Timestep*:	timestep (not interpreted in daily resolution, 1..24 for hourly resolution) <br>
 *Subasin-ID*: Map-ID of sub-basin
 
-This optional file allows specifying the sediment output of selected subbasins. If this file is not found in the folder ```Time_series```, all subbasins are treated regularly. Otherwise, any sediment output that is specified in this file is used directly as an output of the respective subbasin – no sediment related computations are performed within this basin. WASA reads data from this file sequentially, starting from start of simulation and every calendar year (e.g. chunks of 365 days). The subsequent entries are assumed without gaps and not checked for completeness.
+This optional file allows specifying the sediment output of selected sub-basins. If this file is not found in the folder ```Time_series```, all sub-basins are treated regularly. Otherwise, any sediment output that is specified in this file is used directly as an output of the respective sub-basin – no sediment related computations are performed within this basin. WASA reads data from this file sequentially, starting from start of simulation and every calendar year (e.g. chunks of 365 days). The subsequent entries are assumed without gaps and not checked for completeness.
 
 Example: Sub-basin 4 has pre-specified sediment output of 0.5 t/d for 1 Sep 2005, distributed among 3 particle size classes with the fractions 0.3, 0.2 and 0.5.
 
@@ -1282,6 +1284,7 @@ Nr. |Parameter File	| Content
 17 | ```lake_frarea.dat``` (optional) | Specification of runoff contributing area for the reservoir size classes
 
 **1)** ```reservoir.dat```
+\[can be generated with the lumpR package\]
 
 ```
 Specification of reservoir parameters
@@ -1417,7 +1420,7 @@ Subasin-ID, dry_dens[ton/m**3], factor_actlay[-]
 ```
 
 *Subasin-ID*: Map-ID of sub-basin <br>
-*dry\_dens*: Dry bulk density of the sediment deposited in the subbasin's reservoir \[ton/m<sup>3</sup>] <br>
+*dry\_dens*: Dry bulk density of the sediment deposited in the sub-basin's reservoir \[ton/m<sup>3</sup>] <br>
 *factor\_actlay*: Calibration parameter for the determination of the active layer thickness \[-]
 
 Example: At the outlet point of the sub-basin with the Map-ID 60 there is a reservoir with a dry bulk density of 1.5 ton/m3. The calibration parameter for the determination of the active layer thickness at that reservoir is equal to 1. It means that the default value of active layer thickness (set to 0.03 mm, derived from the simulation for the Barasona reservoir in Spain) is multiplied by a factor of 1. For the calculation of sediment balance using the simplified modelling approach, the third column with values of factor_actlay must not be entered in the file. The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs as was used in ```hymo.dat``` (due to computational reasons); otherwise, an error message occurs. Sub-basins without outlet reservoirs must not be entered in the file.
@@ -1670,8 +1673,8 @@ Output file | Content
 ```daily_subsurface_runoff.out```	| daily total subsurface runoff \[m<sup>3</sup>/d] for all sub-basins 
 ```daily_theta.out```	| mean soil moisture in profile \[mm] for all sub-basins 
 ```daily_total_overlandflow.out``` | total overland flow \[m<sup>3</sup>] for all sub-basins 
-```daily_water_subbasin.out``` | daily water contribution into river \[m3/s] for all sub-basins 
-```water_subbasin.out``` | sub-daily contribution to river \[m<sup>3</sup>/s] for all sub-basins 
+```daily_water_sub-basin.out``` | daily water contribution into river \[m3/s] for all sub-basins 
+```water_sub-basin.out``` | sub-daily contribution to river \[m<sup>3</sup>/s] for all sub-basins 
 ```sediment_production.out``` |	daily sediment production \[t] for all sub-basins  and particle classes
 ```Daily_gw_loss.out``` | daily water loss from model domain due to deep seepage in LU without GW
 ```deep_gw_discharge.out``` | total deep ground water discharge \[m<sup>3</sup>] for all sub-basins 
@@ -1691,7 +1694,7 @@ Output file | Content
 ```soil_moisture.stat``` | Soil moisture storage
 ```[snow*]``` | optional output files from the snow routine, see [Table 5](#table-5)
 
-The output files ```daily_water_subbasin.out```, ```sediment_production.out``` and ```water_subbasin.out``` include the effect of the distributed reservoirs. All other remaining basic hydrological output files contain the raw output of the hillslope module (no reservoir effects). All above-mentioned files have the same structure, as shown by the example ```daily_actetranspiration.out``` below (the subdaily output files additionally contain the timestep number in the third column):
+The output files ```daily_water_sub-basin.out```, ```sediment_production.out``` and ```water_sub-basin.out``` include the effect of the distributed reservoirs. All other remaining basic hydrological output files contain the raw output of the hillslope module (no reservoir effects). All above-mentioned files have the same structure, as shown by the example ```daily_actetranspiration.out``` below (the subdaily output files additionally contain the timestep number in the third column):
 
 ```
 # Daily actual evapotranspiration [mm/d]  for all sub-basins (MAP-IDs)
