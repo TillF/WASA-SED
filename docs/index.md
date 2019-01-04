@@ -1700,7 +1700,7 @@ The output files ```daily_water_sub-basin.out```, ```sediment_production.out``` 
 # Daily actual evapotranspiration [mm/d]  for all sub-basins (MAP-IDs)
 Year,    Day,      57,           15,           20,           60
 1980     1         3.495         2.974         3.258         3.412
-1980     2         3.504         3.076         3.424         3.436 
+1980     2         3.504         3.076         3.424         3.436
     …
 ```
     
@@ -1745,10 +1745,10 @@ All above-mentioned files have the same structure, as shown by the example ```Ri
 
 ```
 # Output files for river discharge q_out (m3/s) (with MAP IDs as in hymo.dat)
-Year  Day    dt   9          10             11            
-2009     1     1         6.313         1.797         8.922         
-2009     1     2         6.176         1.744         8.733         
-2009     1     3         4.001         1.029         5.878             
+Year  Day    dt   9          10             11
+2009     1     1         6.313         1.797         8.922
+2009     1     2         6.176         1.744         8.733
+2009     1     3         4.001         1.029         5.878
     …
 ```
     
