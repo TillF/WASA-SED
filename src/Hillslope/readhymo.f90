@@ -249,29 +249,29 @@
             stop
         end if
         if (kfsu(i) > 1000. .OR. kfsu(i)<0.) then
-            write(*,'(a,i0,a,f,a)')'ERROR (soter.dat): line ', i+2,': bedrock hydraulic conductivity (', kfsu(i),') out of range.'
+            write(*,'(a,i0,a,f0.0,a)')'ERROR (soter.dat): line ', i+2,': bedrock hydraulic conductivity (', kfsu(i),') out of range.'
             stop
         end if
         if (slength(i) > 20000. .OR. slength(i)<0.) then
-            write(*,'(a,i0,a,f,a)')'ERROR (soter.dat): line ', i+2,': LU length (', slength(i),') out of range.'
+            write(*,'(a,i0,a,f0.0,a)')'ERROR (soter.dat): line ', i+2,': LU length (', slength(i),') out of range.'
             stop
         end if
         if ((meandep(i) > 100000. .OR. meandep(i)<0.) .AND. meandep(i)/=-1.) then
-            write(*,'(a,i0,a,f,a)')'ERROR (soter.dat): line ', i+2,': mean soil depth (', meandep(i),') out of range.'
+            write(*,'(a,i0,a,f0.0,a)')'ERROR (soter.dat): line ', i+2,': mean soil depth (', meandep(i),') out of range.'
             stop
         end if
         if ((maxdep(i) > 100000. .OR. maxdep(i)<0.) .AND. maxdep(i)/=-1.) then
-            write(*,'(a,i0,a,f,a)')'ERROR (soter.dat): line ', i+2,': max soil depth (', maxdep(i),') out of range.'
+            write(*,'(a,i0,a,f0.0,a)')'ERROR (soter.dat): line ', i+2,': max soil depth (', maxdep(i),') out of range.'
             stop
         end if
         
         if (riverbed(i) > 100000. .OR. riverbed(i)<0.) then
-            write(*,'(a,i0,a,f,a)')'ERROR (soter.dat): line ', i+2,': depth to riverbed (', riverbed(i),') out of range.'
+            write(*,'(a,i0,a,f0.0,a)')'ERROR (soter.dat): line ', i+2,': depth to riverbed (', riverbed(i),') out of range.'
             stop
         end if
         
         if (gw_delay(i) > 100000. .OR. gw_delay(i)<0.) then
-            write(*,'(a,i0,a,f,a)')'ERROR (soter.dat): line ', i+2,': GW-delay (', gw_delay(i),') out of range.'
+            write(*,'(a,i0,a,f0.0,a)')'ERROR (soter.dat): line ', i+2,': GW-delay (', gw_delay(i),') out of range.'
             stop
         end if
     end do

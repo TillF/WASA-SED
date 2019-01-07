@@ -1097,7 +1097,7 @@ a0, a1, kSatSnow,	densDrySnow,	specCapRet,	emissivitySnowMin,	emissivitySnowMax,
 *do\_rad\_corr*:	Modification of radiation with aspect and slope (TRUE or FALSE)<br>
 *do\_alt\_corr*:	Modification of temperature with altitude of LU (TRUE or FALSE)<br>
 *tempLaps*:	Temperature lapse rate for modification depending on elevation of TC (°C/m)<br>
-*tempAmplitude*:	Temperature amplitude to simulate daily cycle (°C])<br>
+*tempAmplitude*:	Temperature amplitude to simulate daily cycle (°C))<br>
 *tempMaxOffset*:	Offset of daily temperature maximum from 12:00 (h)<br>
 *snowFracThresh*:	Threshold to determine when TC snow covered (m)
 
