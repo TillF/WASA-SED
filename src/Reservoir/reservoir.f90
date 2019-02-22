@@ -577,7 +577,10 @@ storcap(:)=0.
         IF (res_flag(i)) THEN
           WRITE(subarea,*)id_subbas_extern(i)
           OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_watbal.out',STATUS='replace')
-          WRITE(11,'(A)')'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), evap(m**3), prec(m**3), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), withdrawal(m**3/s), elevation(m), area(m**2), volume(m**3)'
+          WRITE(11,'(A)')'Subasin-ID'//char(9)//'year'//char(9)//'day'//char(9)//'hour'//char(9)//'qlateral(m**3/s)'//char(9)&
+              //'inflow(m**3/s)'//char(9)//'evap(m**3)'//char(9)//'prec(m**3)'//char(9)//'intake(m**3/s)'//char(9)//&
+              'overflow(m**3/s)'//char(9)//'qbottom(m**3/s)'//char(9)//'qout(m**3/s)'//char(9)//'withdrawal(m**3/s)'//char(9)//&
+              'elevation(m)'//char(9)//'area(m**2)'//char(9)//'volume(m**3)'
           CLOSE(11)
         ENDIF
       ENDDO
