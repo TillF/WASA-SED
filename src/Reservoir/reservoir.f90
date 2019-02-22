@@ -577,7 +577,7 @@ storcap(:)=0.
         IF (res_flag(i)) THEN
           WRITE(subarea,*)id_subbas_extern(i)
           OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_watbal.out',STATUS='replace')
-          WRITE(11,*)'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), evap(m**3), prec(m**3), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), withdrawal(m**3/s), elevation(m), area(m**2), volume(m**3)'
+          WRITE(11,'(A)')'Subasin-ID, year, day, hour, qlateral(m**3/s), inflow(m**3/s), evap(m**3), prec(m**3), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), withdrawal(m**3/s), elevation(m), area(m**2), volume(m**3)'
           CLOSE(11)
         ENDIF
       ENDDO
@@ -589,7 +589,7 @@ storcap(:)=0.
         IF (res_flag(i)) THEN
           WRITE(subarea,*)id_subbas_extern(i)
           OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_vollost.out',STATUS='replace')
-          WRITE(11,*)'Subasin-ID, year, day, hour, deadvol(m**3), alertvol(m**3), storcap(m**3)'
+          WRITE(11,'(A)')'Subasin-ID, year, day, hour, deadvol(m**3), alertvol(m**3), storcap(m**3)'
           CLOSE(11)
         ENDIF
       ENDDO
@@ -613,7 +613,7 @@ storcap(:)=0.
 !   DO i=1,subasin
 !    IF (storcap(i) /= 0.) THEN
 !	  OPEN(11,FILE=pfadn(1:pfadi)//'res_watbal_lake.out',STATUS='replace')
-!	    WRITE(11,*)'Subasin-ID, year, day, hour, inflow_classes(m**3), outflow_classes(m**3), retention_classes(m**3), volume_classes(m**3)'
+!	    WRITE(11,'(A)')'Subasin-ID, year, day, hour, inflow_classes(m**3), outflow_classes(m**3), retention_classes(m**3), volume_classes(m**3)'
 !      CLOSE(11)
 !	ENDIF
 !   ENDDO
@@ -621,7 +621,7 @@ storcap(:)=0.
 !    IF (dosediment) THEN
 !     IF (storcap(i) /= 0.) THEN
 !	  OPEN(11,FILE=pfadn(1:pfadi)//'res_sedbal_lake.out',STATUS='replace')
-!	    WRITE(11,*)'Subasin-ID, year, day, hour, sedinflow_classes(ton), sedoutflow_classes(ton), sedretention_classes(ton), sedimentation_class'
+!	    WRITE(11,'(A)')'Subasin-ID, year, day, hour, sedinflow_classes(ton), sedoutflow_classes(ton), sedretention_classes(ton), sedimentation_class'
 !      CLOSE(11)
 !	 ENDIF
 !	ENDIF
@@ -630,7 +630,7 @@ storcap(:)=0.
 !   DO i=1,subasin
 !    IF (storcap(i) /= 0.) THEN
 !	  OPEN(11,FILE=pfadn(1:pfadi)//'res_watbal_lake.out',STATUS='replace')
-!	    WRITE(11,*)'Subasin-ID, year, day, hour, inflow_strateg(m**3), outflow_strateg(m**3), retention_strateg(m**3), volume_strateg(m**3)'
+!	    WRITE(11,'(A)')'Subasin-ID, year, day, hour, inflow_strateg(m**3), outflow_strateg(m**3), retention_strateg(m**3), volume_strateg(m**3)'
 !      CLOSE(11)
 !	ENDIF
 !   ENDDO
@@ -638,7 +638,7 @@ storcap(:)=0.
 !    IF (dosediment) THEN
 !     IF (storcap(i) /= 0.) THEN
 !	  OPEN(11,FILE=pfadn(1:pfadi)//'res_sedbal_lake.out',STATUS='replace')
-!	    WRITE(11,*)'Subasin-ID, year, day, hour, sedinflow_strateg(ton), sedoutflow_strateg(ton), sedretention_strateg(ton), sedimentation_class'
+!	    WRITE(11,'(A)')'Subasin-ID, year, day, hour, sedinflow_strateg(ton), sedoutflow_strateg(ton), sedretention_strateg(ton), sedimentation_class'
 !      CLOSE(11)
 !	 ENDIF
 !	ENDIF
@@ -1633,9 +1633,10 @@ endif
 	      DO ih=1,nt
 		    hour=ih
             step=(d-1)*nt+hour
-	        WRITE(11,'(4I6,2f10.3,2f13.1,6f10.3,3f14.1)')id_subbas_extern(i),t,d,hour,qlateral(step,i),qinflow(step,i),etdam(step,i),precdam(step,i),  &
-				qintake(step,i),overflow(step,i),qbottom(step,i),res_qout(step,i),withdraw_out(step,i), &
-				daydamelevact(step,i),daydamareaact(step,i),volact(step,i)*1.e6
+	        WRITE(11,'(4(I6,a),2(f10.3,a),2(f13.1,a),6(f10.3,a),3(f14.1,a))')id_subbas_extern(i),char(9),&
+            t,char(9),d,char(9),hour,char(9),qlateral(step,i),char(9),qinflow(step,i),char(9),etdam(step,i),char(9),&
+            precdam(step,i),char(9),qintake(step,i),char(9),overflow(step,i),char(9),qbottom(step,i),char(9),&
+            res_qout(step,i),char(9),withdraw_out(step,i),char(9),daydamelevact(step,i),char(9),daydamareaact(step,i),char(9),volact(step,i)*1.e6,char(9)
 		  ENDDO
 		ENDDO
         CLOSE(11)
@@ -1667,9 +1668,6 @@ endif
 			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayelev_bat(step,j,i),j=1,nbrbat(i))
 			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayarea_bat(step,j,i),j=1,nbrbat(i))
 			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayvol_bat(step,j,i),j=1,nbrbat(i))
-!			WRITE(11,'(4I6,<nbrbat(i)>f15.2)')id_subbas_extern(i),t,d,hour,(dayelev_bat(step,j,i),j=1,nbrbat(i))
-!			WRITE(11,'(4I6,<nbrbat(i)>f15.2)')id_subbas_extern(i),t,d,hour,(dayarea_bat(step,j,i),j=1,nbrbat(i))
-!			WRITE(11,'(4I6,<nbrbat(i)>f15.2)')id_subbas_extern(i),t,d,hour,(dayvol_bat(step,j,i),j=1,nbrbat(i))
 		  ENDDO
 		ENDDO
         CLOSE(11)
@@ -1678,173 +1676,6 @@ endif
     ENDDO
   ENDIF
 
-!Check simulation results for the Bengue catchment
-!Grouping results on water and sediment balance of all reservoirs in the Bengue catchment into the reservoir classes
-!***************************************************************************************************************
-!  IF (reservoir_print == 1) THEN
-!   IF (.not. doacud) THEN
-!	DO d=1,dayyear
-!	  DO ih=1,nt
-!		hour=ih
-!        step=(d-1)*nt+hour
-!		inflow_class(1:6)=0.
-!		outflow_class(1:6)=0.
-!		retention_class(1:6)=0.
-!		volume_class(1:6)=0.
-!		sedinflow_class(1:6)=0.
-!		sedoutflow_class(1:6)=0.
-!		sedretention_class(1:6)=0.
-!		sedimentation_class(1:6)=0.
-!
-!		a1=0
-!		b1=0
-!		c1=0
-!		d1=0
-!		e1=0
-!		DO i=1,subasin
-!		  IF (storcap(i) /= 0 .and. t >= damyear(i)) THEN
-!	        IF (id_subbas_extern(i) /= 202 .and. id_subbas_extern(i) /= 203 .and. &
-!			    id_subbas_extern(i) /= 212 .and. id_subbas_extern(i) /= 215 .and. &
-!				id_subbas_extern(i) /= 219 .and. id_subbas_extern(i) /= 221 .and. &
-!				id_subbas_extern(i) /= 223 .and. id_subbas_extern(i) /= 224 .and. &
-!				id_subbas_extern(i) /= 227 .and. id_subbas_extern(i) /= 228 .and. &
-!				id_subbas_extern(i) /= 229) THEN
-!			  IF (storcap(i)*1.e6 <= 5000.) THEN
-!			    a1=a1+1
-!			    inflow_class(1)=inflow_class(1)+qinflow(step,i)*86400
-!				outflow_class(1)=outflow_class(1)+res_qout(step,i)*86400
-!				retention_class(1)=retention_class(1)+max((qinflow(step,i)-res_qout(step,i))*86400,0.)
-!				volume_class(1)=volume_class(1)+volact(step,i)*1.e6
-!			    if (dosediment) then
-!			     sedinflow_class(1)=sedinflow_class(1)+sed_inflow(step,i)
-!				 sedoutflow_class(1)=sedoutflow_class(1)+sed_outflow(step,i)
-!				 sedretention_class(1)=sedretention_class(1)+sedimentation(step,i)
-!				 sedimentation_class(1)=sedimentation_class(1)+daycumsed(step,i)
-!			    endif
-!			  ENDIF
-!			  IF (storcap(i)*1.e6 > 5000. .and. storcap(i)*1.e6 < 25000.) THEN
-!			    b1=b1+1
-!			    inflow_class(2)=inflow_class(2)+qinflow(step,i)*86400
-!				outflow_class(2)=outflow_class(2)+res_qout(step,i)*86400
-!				retention_class(2)=retention_class(2)+max((qinflow(step,i)-res_qout(step,i))*86400,0.)
-!				volume_class(2)=volume_class(2)+volact(step,i)*1.e6
-!			    if (dosediment) then
-!			     sedinflow_class(2)=sedinflow_class(2)+sed_inflow(step,i)
-!				 sedoutflow_class(2)=sedoutflow_class(2)+sed_outflow(step,i)
-!				 sedretention_class(2)=sedretention_class(2)+sedimentation(step,i)
-!				 sedimentation_class(2)=sedimentation_class(2)+daycumsed(step,i)
-!			    endif
-!			  ENDIF
-!			  IF (storcap(i)*1.e6 > 25000. .and. storcap(i)*1.e6 < 50000.) THEN
-!			    c1=c1+1
-!			    inflow_class(3)=inflow_class(3)+qinflow(step,i)*86400
-!				outflow_class(3)=outflow_class(3)+res_qout(step,i)*86400
-!				retention_class(3)=retention_class(3)+max((qinflow(step,i)-res_qout(step,i))*86400,0.)
-!				volume_class(3)=volume_class(3)+volact(step,i)*1.e6
-!			    if (dosediment) then
-!			     sedinflow_class(3)=sedinflow_class(3)+sed_inflow(step,i)
-!				 sedoutflow_class(3)=sedoutflow_class(3)+sed_outflow(step,i)
-!				 sedretention_class(3)=sedretention_class(3)+sedimentation(step,i)
-!				 sedimentation_class(3)=sedimentation_class(3)+daycumsed(step,i)
-!			    endif
-!			  ENDIF
-!			  IF (storcap(i)*1.e6 > 50000. .and. storcap(i)*1.e6 < 100000.) THEN
-!			    d1=d1+1
-!			    inflow_class(4)=inflow_class(4)+qinflow(step,i)*86400
-!				outflow_class(4)=outflow_class(4)+res_qout(step,i)*86400
-!				retention_class(4)=retention_class(4)+max((qinflow(step,i)-res_qout(step,i))*86400,0.)
-!				volume_class(4)=volume_class(4)+volact(step,i)*1.e6
-!			    if (dosediment) then
-!			     sedinflow_class(4)=sedinflow_class(4)+sed_inflow(step,i)
-!				 sedoutflow_class(4)=sedoutflow_class(4)+sed_outflow(step,i)
-!				 sedretention_class(4)=sedretention_class(4)+sedimentation(step,i)
-!				 sedimentation_class(4)=sedimentation_class(4)+daycumsed(step,i)
-!			    endif
-!			  ENDIF
-!			  IF (storcap(i)*1.e6 > 100000.) THEN
-!			    e1=e1+1
-!			    inflow_class(5)=inflow_class(5)+qinflow(step,i)*86400
-!				outflow_class(5)=outflow_class(5)+res_qout(step,i)*86400
-!				retention_class(5)=retention_class(5)+max((qinflow(step,i)-res_qout(step,i))*86400,0.)
-!				volume_class(5)=volume_class(5)+volact(step,i)*1.e6
-!			    if (dosediment) then
-!			     sedinflow_class(5)=sedinflow_class(5)+sed_inflow(step,i)
-!				 sedoutflow_class(5)=sedoutflow_class(5)+sed_outflow(step,i)
-!				 sedretention_class(5)=sedretention_class(5)+sedimentation(step,i)
-!				 sedimentation_class(5)=sedimentation_class(5)+daycumsed(step,i)
-!			    endif
-!			  ENDIF
-!			ELSE
-!			  inflow_class(6)=inflow_class(6)+qinflow(step,i)*86400
-!			  outflow_class(6)=outflow_class(6)+res_qout(step,i)*86400
-!			  retention_class(6)=retention_class(6)+max((qinflow(step,i)-res_qout(step,i))*86400,0.)
-!			  volume_class(6)=volume_class(6)+volact(step,i)*1.e6
-!			  if (dosediment) then
-!			    sedinflow_class(6)=sedinflow_class(6)+sed_inflow(step,i)
-!				sedoutflow_class(6)=sedoutflow_class(6)+sed_outflow(step,i)
-!				sedretention_class(6)=sedretention_class(6)+sedimentation(step,i)
-!				sedimentation_class(6)=sedimentation_class(6)+daycumsed(step,i)
-!			  endif
-!			ENDIF
-!		  ENDIF
-!		ENDDO
-!        OPEN(11,FILE=pfadn(1:pfadi)//'res_watbal_lake.out',STATUS='old',  &
-!				POSITION='append')
-!		WRITE(11,'(3I6,24F15.3)')t,d,hour,(inflow_class(k1),k1=1,6),(outflow_class(k1),k1=1,6),(retention_class(k1),k1=1,6),(volume_class(k1),k1=1,6)
-!		CLOSE(11)
-!		if (dosediment) then
-!         OPEN(11,FILE=pfadn(1:pfadi)//'res_sedbal_lake.out',STATUS='old',  &
-!				POSITION='append')
-!		 WRITE(11,'(3I6,24F15.3)')t,d,hour,(sedinflow_class(k1),k1=1,6),(sedoutflow_class(k1),k1=1,6),(sedretention_class(k1),k1=1,6),(sedimentation_class(k1),k1=1,6)
-!		 CLOSE(11)
-!		endif
-!	  ENDDO
-!	ENDDO
-!   ELSE
-!	DO d=1,dayyear
-!	  DO ih=1,nt
-!		hour=ih
-!        step=(d-1)*nt+hour
-!		inflow_class(6)=0.
-!		outflow_class(6)=0.
-!		retention_class(6)=0.
-!		volume_class(6)=0.
-!		sedinflow_class(6)=0.
-!		sedoutflow_class(6)=0.
-!		sedretention_class(6)=0.
-!		sedimentation_class(6)=0.
-!
-!		DO i=1,subasin
-!		  IF (storcap(i) /= 0 .and. t >= damyear(i)) THEN
-!	        IF (id_subbas_extern(i) /= 29) THEN
-!			  inflow_class(6)=inflow_class(6)+qinflow(step,i)*86400
-!			  outflow_class(6)=outflow_class(6)+res_qout(step,i)*86400
-!			  retention_class(6)=retention_class(6)+max((qinflow(step,i)-res_qout(step,i))*86400,0.)
-!			  volume_class(6)=volume_class(6)+volact(step,i)*1.e6
-!			  if (dosediment) then
-!			    sedinflow_class(6)=sedinflow_class(6)+sed_inflow(step,i)
-!			    sedoutflow_class(6)=sedoutflow_class(6)+sed_outflow(step,i)
-!			    sedretention_class(6)=sedretention_class(6)+sedimentation(step,i)
-!			    sedimentation_class(6)=sedimentation_class(6)+daycumsed(step,i)
-!			  endif
-!			ENDIF
-!		  ENDIF
-!		ENDDO
-!        OPEN(11,FILE=pfadn(1:pfadi)//'res_watbal_lake.out',STATUS='old',  &
-!				POSITION='append')
-!		WRITE(11,'(3I6,24F15.3)')t,d,hour,inflow_class(6),outflow_class(6),retention_class(6),volume_class(6)
-!		CLOSE(11)
-!		if (dosediment) then
-!         OPEN(11,FILE=pfadn(1:pfadi)//'res_sedbal_lake.out',STATUS='old',  &
-!				POSITION='append')
-!		 WRITE(11,'(3I6,24F15.3)')t,d,hour,sedinflow_class(6),sedoutflow_class(6),sedretention_class(6),sedimentation_class(6)
-!		 CLOSE(11)
-!		endif
-!	  ENDDO
-!	ENDDO
-!   ENDIF
-!  ENDIF
-!***************************************************************************************************************
 
   IF (dosediment) CALL semres (status,upstream)
 
