@@ -80,7 +80,7 @@ if (reservoir_check==0) reservoir_balance=1
 !Ge "volact" vector contains now only 365/366 values per annum
 !Ge others reservoir parameters have to be inserted
     DO id=1,dayyear*nt
-      volact(id,i) = 0. !actual stored volume in reservoir [10**6 m**3]
+      volact(id,i) = 0. !actual stored volume in reservoir [m**3 and 10**6 m**3]
       qinflow(id,i) = 0.
       qintake(id,i) = 0.
       overflow(id,i) = 0.
@@ -683,7 +683,7 @@ IF (STATUS == 1) THEN
 
      ELSE IF (t == damyear(i) .OR. (t > damyear(i) .AND. t == tstart)) THEN  !Andreas
        IF (vol0(i) /= -999.) THEN
-         volact(1,i)=vol0(i)
+         volact(1,i)=vol0(i) !Till: initial volume [1e6 m^3]
        ELSE
          volact(1,i)=storcap(i)/5.
        END IF
@@ -736,7 +736,7 @@ IF (STATUS == 1) THEN
 	  ENDDO
      ELSE
 	  if (volact(1,i) /= 0.) then
-		areahelp=dama(i)*((volact(1,i)*1.e6)**damb(i))
+		areahelp=dama(i)*((volact(1,i)*1.e6)**damb(i)) !Till: estimate surface area [m^2]
 	  else
         areahelp=0.
 	  endif
@@ -930,7 +930,7 @@ IF (STATUS == 2) THEN
   IF (res_flag(upstream) .and. t >= damyear(upstream)) THEN
     IF (reservoir_balance == 1) THEN
       IF (reservoir_check == 1) THEN
-	    qinflow(step,upstream)=qinflow(step,upstream)*(86400./nt)
+	    qinflow(step,upstream)=qinflow(step,upstream)*(86400./nt) !Till: convert m3/s to m3
 	  ELSE
         if (river_transport.eq.1)then ! old routing
 	      qinflow(step,upstream)=qout(step,upstream)*(86400./nt)
@@ -945,7 +945,7 @@ IF (STATUS == 2) THEN
 !if(step>20)qinflow(step,upstream)=storcap(upstream)*1.e6
 !if (step == 16 .and. t==2002) read(*,*)
 
-      volact(step,upstream)=volact(step,upstream)*1.e6
+      volact(step,upstream)=volact(step,upstream)*1.e6 !convert to m^3
       daymaxdamarea(step,upstream)=daymaxdamarea(step,upstream)*1.e4
       daystorcap(step,upstream)=daystorcap(step,upstream)*1.e6
       daydamalert(step,upstream)=daydamalert(step,upstream)*1.e6
@@ -959,8 +959,8 @@ IF (STATUS == 2) THEN
 
 
 ! 1) Calculation of the actual reservoir volume after water inflow
-	  help3=volact(step,upstream)+qinflow(step,upstream)
-	  help2=volact(step,upstream)
+	  help3=volact(step,upstream)+qinflow(step,upstream) !Till: m^3
+	  help2=volact(step,upstream) !Till: m^3
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),help3,volact(step,upstream),daystorcap(step,upstream),overflow(step,upstream)
       IF (help3 > daystorcap(step,upstream)) THEN
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),volact(step,upstream),help3,help,daystorcap(step,upstream)
@@ -971,7 +971,7 @@ IF (STATUS == 2) THEN
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),volact(step,upstream),help3,help,daystorcap(step,upstream)
 		ELSE
 		  help=daystorcap(step,upstream)
-		  overflow(step,upstream)=help3-daystorcap(step,upstream)
+		  overflow(step,upstream)=help3-daystorcap(step,upstream) !Till: spillover [m^3]
         END IF
 	    lakeret(step,upstream)=max(0.,help-volact(step,upstream))
         volact(step,upstream)=help
@@ -1059,7 +1059,7 @@ IF (STATUS == 2) THEN
         volact(step,upstream)=volhelp
 
       ELSE
-        evaphelp=MIN(volact(step,upstream),(res_pet(step,upstream)/1000.)*areahelp)
+        evaphelp=MIN(volact(step,upstream),(res_pet(step,upstream)/1000.)*areahelp) !??why zero?
         prechelp=(res_precip(step,upstream)/1000.)*areahelp
 !        infhelp=0. tp TODO not used=!
         volact(step,upstream)=volact(step,upstream)+ (prechelp-evaphelp) ! -infhelp) tp TODO not used
@@ -1580,7 +1580,7 @@ IF (STATUS == 2) THEN
 	ENDIF
 
 
-    volact(step,upstream)=volact(step,upstream)/1.e6
+    volact(step,upstream)=volact(step,upstream)/1.e6 !convert to 10^6 m3
 	daymaxdamarea(step,upstream)=daymaxdamarea(step,upstream)/1.e4
 	daystorcap(step,upstream)=daystorcap(step,upstream)/1.e6
 	daydamalert(step,upstream)=daydamalert(step,upstream)/1.e6
@@ -1590,7 +1590,7 @@ IF (STATUS == 2) THEN
 	withdrawal(upstream)=withdrawal(upstream)/(86400./nt)
 
 
-	IF (step < dayyear*nt) THEN
+	IF (step < dayyear*nt) THEN !Till: use current values to initialize the next timestep
 	  volact(step+1,upstream)=volact(step,upstream)
 	  daystorcap(step+1,upstream)=daystorcap(step,upstream)
 	  daydamalert(step+1,upstream)=daydamalert(step,upstream)
