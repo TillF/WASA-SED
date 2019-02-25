@@ -705,6 +705,11 @@ contains
                     cycle    !proceed with next line
                 end if
 
+                if (horithact_temp < 0) then    !ignore negative values
+                    write(error_msg,'(5i12)')line,i_subbasx,i_lux,i_tcx,h
+                    cycle    !proceed with next line
+                end if
+
                 latred(tcid_instance,h)=horithact_temp            !set interchange horizon water content
 
             END DO
@@ -740,6 +745,7 @@ contains
                 END DO
             END DO
         END DO
+        where (latred==-9999.) latred=0.    !remove unchecked* "not-read" markers to avoid later confusion (*: may happen for subbasins with prespecified outflow)
 
 
 end subroutine init_interflow_conds
