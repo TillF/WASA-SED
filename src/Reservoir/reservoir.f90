@@ -682,7 +682,7 @@ IF (STATUS == 1) THEN
 	   dayminlevel(1,i)=dayminlevel(daylastyear*nt,i)
 
      ELSE IF (t == damyear(i) .OR. (t > damyear(i) .AND. t == tstart)) THEN  !Andreas
-       IF (vol0(i) /= -999.) THEN
+       IF (vol0(i) /= -999. .and. vol0(i) /= -9999.) THEN
          volact(1,i)=vol0(i) !Till: initial volume [1e6 m^3]
        ELSE
          volact(1,i)=storcap(i)/5.

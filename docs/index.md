@@ -1295,7 +1295,7 @@ Subasin-ID, minlevel[m], maxlevel[m], vol0([1000m**3]; unknown=-999), storcap[10
 *Subasin-ID*: Map-ID of sub-basin <br>
 *minlevel*: Initial minimum level in the sub-basin’s reservoir \[m]. Value varies because of the sediment accumulation <br>
 *maxlevel*: Maximum water level in the sub-basin’s reservoir \[m] <br>
-*vol0*: Initial volume of the sub-basin’s reservoir \[10³ m³]. Value varies because of the sediment accumulation <br>
+*vol0*: Initial volume of the sub-basin’s reservoir \[10³ m³]. If set to ```-9999```, 20 % of ```storcap``` is assumed. Value varies because of the sediment accumulation <br>
 *storcap*: Initial storage capacity in the sub-basin’s reservoir \[10³ m³]. Value varies because of the sediment accumulation <br>
 *damflow*: Target release through the barrage’s intake devices of the sub-basin’s reservoir \[m<sup>3</sup>/s]. Contributes to intake in output file ```res_*_watbal.out```. Influenced by damq\_frac and further reduced if the reservoir’s actual storage volume is less than damalert. <br>
 *damq\_frac*: Maximum fraction of damflow which is released from the sub-basin’s reservoir \[-] <br>
