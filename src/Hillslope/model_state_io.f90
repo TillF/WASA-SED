@@ -495,8 +495,8 @@ contains
                 END IF
                 line=line+1
 
-                READ(linestr,*,  IOSTAT=i) i_subbasx,i_lux,i_tcx,i_svcx,h,horithact_temp, x
-                IF (i/=0) THEN    !format error
+                READ(linestr,*,  IOSTAT=i) i_subbasx, i_lux, i_tcx, i_svcx, h ,horithact_temp, x
+                IF (i/=0 .OR. isnan(0. + i_subbasx+i_lux+i_tcx+i_svcx+h+horithact_temp+x) ) THEN    !format error
                     write(error_msg,'(i12,1a12,a)')line,'-',trim(linestr)
                     cycle    !proceed with next line
                 END IF
@@ -664,7 +664,7 @@ contains
                 line=line+1
 
                 READ(linestr,*,  IOSTAT=i) i_subbasx,i_lux,i_tcx,h,horithact_temp
-                IF (i/=0) THEN    !format error
+                IF (i/=0  .OR. isnan(0. + i_subbasx+i_lux+i_tcx+h+horithact_temp)) THEN    !format error
                     write(*,'(A,i0,A2,a)')' Format error in line ', line,': ',trim(linestr)
                     cycle    !proceed with next line
                 END IF
@@ -796,7 +796,7 @@ end subroutine init_interflow_conds
                 line=line+1
 
                 READ(linestr,*,  IOSTAT=i) i_subbasx,i_lux,i_tcx,snowweqv_temp,snowetemp,albedo_temp
-                IF (i/=0) THEN    !format error
+                IF (i/=0 .OR. isnan(0. + i_subbasx+i_lux+i_tcx+snowweqv_temp+snowetemp+albedo_temp)) THEN    !format error
                     write(error_msg,'(i12,1a12,a)')line,'-',trim(linestr)
                     cycle    !proceed with next line
                 END IF
@@ -929,7 +929,7 @@ end subroutine init_interflow_conds
                 line=line+1
 
                 READ(linestr,*,  IOSTAT=i) i_subbasx,i_lux,i_tcx,i_svcx,int_temp, x
-                IF (i/=0) THEN    !format error
+                IF (i/=0 .OR. isnan(0. + i_subbasx+i_lux+i_tcx+i_svcx+int_temp+ x)) THEN    !format error
                     write(error_msg,'(i12,1a12,a)')line,'-',trim(linestr)
                     cycle    !proceed with next line
                 END IF
@@ -1093,7 +1093,7 @@ end subroutine init_interflow_conds
                 line=line+1
 
                 READ(linestr,*,  IOSTAT=i) i_subbasx,i_lux,gwvol_temp, x
-                IF (i/=0) THEN    !format error
+                IF (i/=0 .OR. isnan(0. + i_subbasx+i_lux + gwvol_temp + x)) THEN    !format error
                     write(error_msg,'(i12,1a12,a)')line,'-',trim(linestr)
                     cycle    !proceed with next line
                 END IF
@@ -1219,7 +1219,7 @@ end subroutine init_interflow_conds
            
             READ(linestr,*,IOSTAT=iostatus) i, dummy1
             
-            if (iostatus /=0) then
+            if (iostatus /=0 .or. isnan(dummy1)) then
 			    WRITE(*,'(a,i0,a)') 'WARNING: format error in line ', line,' of river_storage.stat, line ignored.'
                 cycle
             end if

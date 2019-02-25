@@ -147,7 +147,7 @@ storcap(:)=0.
 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/reservoir.dat',IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!reservoir.dat not found
-	  write(*,*) "ERROR: ", pfadp(1:pfadj)// 'Reservoir/reservoir.dat was not found, please provide it.'
+	  write(*,'(A)') "ERROR: ", pfadp(1:pfadj)// 'Reservoir/reservoir.dat was not found, please provide it.'
 	  stop
 	ENDIF
 
@@ -245,7 +245,7 @@ storcap(:)=0.
 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!lateral_inflow.dat not found
-	  write(*,*)'WARNING: '//pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat not found, using defaults'
+	  write(*,'(A)')'WARNING: '//pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat not found, using defaults'
       DO i=1,subasin
         latflow_res(i)=0
       ENDDO
@@ -278,7 +278,7 @@ storcap(:)=0.
           READ (11,*)dummy1,reservoir_down(i)
 
           IF (dummy1 /= id_subbas_extern(i)) THEN
-            WRITE(*,*) 'ERROR: Sub-basin-IDs in file lateral_inflow.dat must have the same ordering scheme as in hymo.dat'
+            WRITE(*,'(A)') 'ERROR: Sub-basin-IDs in file lateral_inflow.dat must have the same ordering scheme as in hymo.dat'
             STOP
           END IF
 
@@ -287,7 +287,7 @@ storcap(:)=0.
             DO WHILE (id_subbas_extern(j) /= reservoir_down(i))
               j=j+1
               IF (j > 500) THEN
-                WRITE (*,*) 'ERROR: downsbasin(i) loop in readhymo.f'
+                WRITE (*,'(A)') 'ERROR: downsbasin(i) loop in readhymo.f'
                 STOP
               END IF
             END DO
@@ -297,7 +297,7 @@ storcap(:)=0.
 		  dummy1=id_subbas_extern(i)
 		ENDIF
         IF (dummy1 /= id_subbas_extern(i)) THEN
-         WRITE(*,*) 'ERROR: Sub-basin-IDs in file operat_rule.dat must have the same ordering scheme as in hymo.dat'
+         WRITE(*,'(A)') 'ERROR: Sub-basin-IDs in file operat_rule.dat must have the same ordering scheme as in hymo.dat'
          STOP
         END IF
      ENDDO
@@ -306,10 +306,10 @@ storcap(:)=0.
 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/operat_rule.dat', IOSTAT=istate,STATUS='old')
   IF (istate/=0) THEN					!operat_rule.dat not found
-	write(*,*)'WARNING: '//pfadp(1:pfadj)// 'Reservoir/operat_rule.dat not found, using defaults'
+	write(*,'(A)')'WARNING: '//pfadp(1:pfadj)// 'Reservoir/operat_rule.dat not found, using defaults'
     DO i=1,subasin
 	  if (damq_frac(i) == -999.) then
-	    write(*,*)'ERROR: operat_rule.dat must be given [or change the value of the parameter damq_frac in reservoir.dat]'
+	    write(*,'(A)')'ERROR: operat_rule.dat must be given [or change the value of the parameter damq_frac in reservoir.dat]'
 		stop
 	  endif
 	ENDDO
@@ -320,7 +320,7 @@ storcap(:)=0.
 	  IF (damq_frac(i) == -999.) READ (11,*)dummy1,(dayexplot(i,s),s=1,4),(damq_frac_season(i,s),s=1,4)
 	  IF (damq_frac(i) /= -999.) dummy1=id_subbas_extern(i)
       IF (dummy1 /= id_subbas_extern(i)) THEN
-        WRITE(*,*) 'ERROR: Sub-basin-IDs in file operat_rule.dat must have the same ordering scheme as in hymo.dat'
+        WRITE(*,'(A)') 'ERROR: Sub-basin-IDs in file operat_rule.dat must have the same ordering scheme as in hymo.dat'
         STOP
       END IF
 	ENDDO
@@ -328,10 +328,10 @@ storcap(:)=0.
 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/operat_bottom.dat', IOSTAT=istate,STATUS='old')
   IF (istate/=0) THEN					!operat_bottom.dat not found
-	write(*,*)'WARNING: '//pfadp(1:pfadj)// 'Reservoir/operat_bottom.dat not found, using defaults'
+	write(*,'(A)')'WARNING: '//pfadp(1:pfadj)// 'Reservoir/operat_bottom.dat not found, using defaults'
     DO i=1,subasin
 	  if (fvol_bottom(i) == -999.) then
-	    write(*,*)'ERROR: operat_bottom.dat must be given [or change the value of the parameter damq_frac in reservoir.dat]'
+	    write(*,'(A)')'ERROR: operat_bottom.dat must be given [or change the value of the parameter damq_frac in reservoir.dat]'
 		stop
 	  endif
 	ENDDO
@@ -342,7 +342,7 @@ storcap(:)=0.
 	  IF (fvol_bottom(i) == -999.) READ (11,*)dummy1,operat_start(i),operat_stop(i),operat_elev(i)
 	  IF (fvol_bottom(i) /= -999.) dummy1=id_subbas_extern(i)
       IF (dummy1 /= id_subbas_extern(i)) THEN
-        WRITE(*,*) 'ERROR: Sub-basin-IDs in file operat_bottom.dat must have the same ordering scheme as in hymo.dat'
+        WRITE(*,'(A)') 'ERROR: Sub-basin-IDs in file operat_bottom.dat must have the same ordering scheme as in hymo.dat'
         STOP
       END IF
 	ENDDO
@@ -387,7 +387,7 @@ storcap(:)=0.
 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/cav.dat', IOSTAT=istate,STATUS='old')
   IF (istate/=0) THEN					!cav.dat not found
-	write(*,*)'WARNING: '//pfadp(1:pfadj)// 'Reservoir/cav.dat not found, using defaults'
+	write(*,'(A)')'WARNING: '//pfadp(1:pfadj)// 'Reservoir/cav.dat not found, using defaults'
 	flag_cav=0
   ELSE
 	flag_cav=1
@@ -890,7 +890,7 @@ IF (STATUS == 1) THEN
         ! read data for current day from intake.dat
         read(101, *, iostat=istate) dummy1,dummy2, r_qintake
         IF (istate/=0) THEN
-            write(*,*)'ERROR: Premature end of file intake.dat.'
+            write(*,'(A)')'ERROR: Premature end of file intake.dat.'
             stop
         END IF
         ! distribute values to qintake variable
