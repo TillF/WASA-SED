@@ -59,6 +59,7 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
   - [3.3 Input files for the river module](#3-3-input-files-for-the-river-module)<br>
   - [3.4 Input files for the reservoir module](#3-4-input-files-for-the-reservoir-module)<br>
   - [3.5 Input of climate data](#3-5-input-of-climate-data)<br>
+  - [3.6 Input/Output of state variables](#3-6-state-variables)<br>
 - [4 Output data](#4-output-data)<br>
   - [4.1 Output of the hillslope module](#4-1-output-of-the-hillslope-module)<br>
   - [4.2 Output of the river module](#4-2-output-of-the-river-module)<br>
@@ -82,9 +83,10 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 [Table 9](#table-9): Groundwater option Gw_flag=99.<br>
 [Table 10](#table-10): Input data files for the river component.<br>
 [Table 11](#table-11): Input data files for the reservoir component.<br>
-[Table 12](#table-12): Output files of the hillslope module.<br>
-[Table 13](#table-13): Output files of the river module.<br>
-[Table 14](#table-14): Output files of the reservoir module.
+[Table 12](#table-12): Input/Output of state variables.<br>
+[Table 13](#table-13): Output files of the hillslope module.<br>
+[Table 14](#table-14): Output files of the river module.<br>
+[Table 15](#table-15): Output files of the reservoir module.
 
 ## 1 Introduction
 
@@ -431,7 +433,7 @@ res_sedcomposition
 lake_inflow_r
 lake_outflow_r
 lake_retention_r
-lake_volume_r
+lake_storage_r
 lake_sedinflow_r
 lake_sedoutflow_r
 lake_sedretention_r
@@ -440,7 +442,7 @@ lake_watbal
 lake_sedbal
 lake_inflow
 lake_outflow
-lake_volume
+lake_storage
 lake_retention
 lake_vollost
 lake_sedinflow
@@ -509,16 +511,13 @@ Parameter File |	Content
 ```n_seasons.dat``` (optional)	 | Seasonality of Manning’s n
 ```scaling_factor.dat``` (optional)	| Scaling/calibration factors for hydraulic conductivity
 ```calibration.dat``` (optional)	| Calibration factors for hydraulic conductivity of soils
-```Transposition.dat``` (optional)	| Specification of additional water fluxes between sub-basins
 ```../erosion.ctl``` (optional)	| Options for the erosion module
-```gw_storage.stat``` (optional) | Initialisation of storage content of ground water
-```intercept_storage.stat``` (optional) | Initialisation of storage content of interception
-```soil_moisture.stat``` (optional)	| Initialisation of storage content of soil moisture
 ```frac_direct_gw.dat``` (optional)	| partitioning of groundwater into river and alluvia
 ```beta_fac_lu.dat``` (optional) |  Correction factors for beta (USLE L-factor computation)
 ```sdr_lu.dat``` (optional)	| LU-wise specification of sediment delivery ratio
 ```calib_wind.dat``` (optional)	| Calibration of wind speed (sensitive parameter for evapotranspiration)
 ```snow_params.ctl```(optional) | Options for the snow module
+```gw_storage.stat, intercept_storage.stat, soil_moisture.stat, snow_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
 
 
 The spatial conceptualisation of the WASA model is explained in detail in [Güntner (2002)](#guentner-2002), and are only shortly summarised in this manual. The following spatial modelling units were identified ([Güntner 2002](#guentner-2002), p. 33):
@@ -890,31 +889,7 @@ This file is optional and is in the subdirectory ```Others/```.
 
 Example: All values for saturated hydraulic conductivity of ALL soils (wildcard “-1”) are increased by factor 20. For soil 5, the values are additionally multiplied with 0.3.
 
-***13) ```transposition.dat``` ***<br>
-(optional) Currently only works for daily resolution. For sediments, abstraction from reservoirs assumes zero concentration, whereas abstraction from river uses river concentration.
-Abstractions are taken from the outlet of river reaches, and added to the inlet points of reaches.
-
-```
-# Water transpositions via canals or pipes between sub-basins, in order of routing scheme
-Start-Subasin-ID, Flag(reservoir/river), Flow(m3/s,) Loss(%), Destination-Subasin-ID, Flag (reservoir/river), begin_year
-        91         1      1.75      0.01        96         1      1965
-        67         2       2.4       0.1        31         1      1997
-        31         1         2      0.06        30         1      1993
-        30         1         2      0.02        29         2      1993
-```
-
-*Start-Subasin-ID*:		ID of sub-basin (source of water abstraction)<br>
-*Flag(reservoir/river)*:		water abstraction from: 1 (river) or 2 (reservoir)<br>
-*Flow(m<sup>3</sup>/s)*:			amount of re-routed water<br>
-*Loss(%)*:			transmission loss<br>
-*Destination-Subasin-ID*:		ID of sub-basin (destination of water abstraction)
-*Flag (reservoir/river)*:		water diversion to: 1 (river) or 2 (reservoir)<br>
-*begin\_year*:			start time of water abstraction
-
-This file is optional and is only read if dotrans (in ```do.dat```) is set to true. In this case, ```transposition.dat``` is expected in the subdirectory ```Others/```. <br>
-WARNING: The transposition of sediment has not yet been implemented.
-
-**14)** ```erosion.ctl```<br>
+**13)** ```erosion.ctl```<br>
 (optional)
 
 ```
@@ -937,76 +912,7 @@ transp_cap_b	1.807
 
 This file and any of its entries are optional. If not present, default values are used (Application scale=0; Erosion equation=3, ri\_05\_coeffs = (a\_i30=1.1630; b\_i30=0.667981 for daily resolution;  a\_i30=1; b\_i30=1 for hourly resolution); transport\_limit\_mode=2, transp\_cap\_a=0.016111, transp\_cap\_b=1.707).
 
-**15)** ```gw_storage.stat, intercept_storage.stat, soil_moisture.stat, interflow_storage.stat, snow_storage.stat```<br>
-```lake_volume.stat, river_storage.stat```<br>
-(optional)
-
-```
-# Ground water storage (for analysis or model re-start)
-Sub-basin,	LU,	volume_[mm],	area_[m²]
-1 11111	39.51	1013437.4
-…
-```
-
-```
-# Interception storage (for analysis or model re-start)
-Sub-basin,	LU,	TC,	SVC,	storage_[mm],	area_[m²]
-1	11111	5	16010	    0.00	     73491.9
-…
-```
-
-```
-# Soil moisture status (for analysis or model re-start)
-Sub-basin,	LU,	TC,	SVC,	horizon,	watercontent_[mm],	area_[m²]
-1	11111	5	16010	1	   26.70	     73491.9
-…
-```
-
-```
-# Interflow storage (for analysis or model re-start)
- Sub-basin,	LU,	TC,	horizon,	storage_[m3]
-1	1	3	1	   0.000
-...
-```
-
-```
-#Snow storage (for analysis or model re-start)
-Sub-basin,	LU,	horizon,	storage [m],	energy [kJ/m²],	albedo [-]
-1	2	10	0.000	0.000	0.880
-```
-
-```
-# Lake volume status (for analysis or model re-start)
-Sub-basin	reservoir_size_class,	volume[m^3]
-1	1	       0.00
-```
-
-```
-# UHG routing: values of routed discharge per timestep of unit hydrograph
-Sub-basin	[n_h x timestep]
-101	1.286	0.649	0.074
-```
-
-```
-# Muskingum routing: river reach volume status (for analysis or model re-start)
-Sub-basin	volume[m^3]
-1	2033.808
-```
-
-*sub-basin*:		sub-basin ID<br>
-*LU*:		landscape unit ID<br>
-*TC*:		ID of terrain component<br>
-*SVC*:		ID of soil vegetation component<br>
-*Horizon*:	position of horizon (numbering from top)<br>
-*Volume*/:	storage content \[mm]<br>
-*Storage*/<br>
-*Watercontent*<br>
-*Area*:		\[ignored, for external analysis only]
-
-These files are optional. If not present, default values are used (currently, 100 % relative saturation for the soils, 0 for all others). These files are expected in the WASA-SED output directory. WASA overwrites them at the end of each simulation year. See also section [Output data](#output-data). Any existing files at the start of the simulation will be renamed to ```*.*_start```.
-The structure of ```river_storage.stat``` depends on the routing option chosen (UHG or Muskingum, see examples above).
-
-**16)** ```frac_direct_gw.dat```<br>
+**14)** ```frac_direct_gw.dat```<br>
 (optional)
 
 ```
@@ -1017,7 +923,7 @@ This file contains a single value x that specifies the fraction of the groundwat
 
 ```frac_direct_gw.dat``` resides in the root of the WASA-SED input-directory as specified in ```do.dat```.
 
-**17)** ```beta_fac_lu.dat```<br>
+**15)** ```beta_fac_lu.dat```<br>
 (optional)
 
 ```
@@ -1038,7 +944,7 @@ Default value (for non-specified LUs) is 1. Common values are 0.5 for a low (low
 
 A row with an lu_id of -1 (wild card) will set all unset LUs to the specified value.
 
-**18)** ```sdr_lu.dat```<br>
+**16)** ```sdr_lu.dat```<br>
 (optional)
 
 ```
@@ -1060,12 +966,12 @@ If this correction factor is already specified for the TC-scale in ```terrain.da
 
 Warning: Using SDR should be used without a transport capacity limitation, otherwise, deposition is considered twice.
 
-**19)** ```calib_wind.dat```<br> 
+**17)** ```calib_wind.dat```<br> 
 (optional) 
 
 This file contains a single value which will be used as static wind speed value (in m/s) within the model. If this file is not given, a value of 1 m/s is used by default. As this is a very sensitive parameter, it can be used for calibration of evapotranspiration.
 
-**27)** ```snow_params.ctl```<br>
+**18** ```snow_params.ctl```<br>
 (optional)
 
 The two logical parameters do_rad_corr and do_alt_corr allow controlling, whether radiation correction for aspect and slope, and height-depended temperature modifications, respectively, are applied.
@@ -1117,6 +1023,8 @@ Parameter File | Content
 ```bedload.dat```	| Specification of bedload data (for routing scheme 3)
 ```sub-basin_out.dat``` (optional) | pre-specification of outflow of selected sub-basins
 ```sub-basin_outsed.dat```	(optional) | pre-specification of sediment output of selected sub-basins
+```transposition.dat``` (optional)	| Specification of additional water fluxes between sub-basins
+```river_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
 
 <br>
 
@@ -1255,10 +1163,34 @@ This optional file allows specifying the sediment output of selected sub-basins.
 
 Example: Sub-basin 4 has pre-specified sediment output of 0.5 t/d for 1 Sep 2005, distributed among 3 particle size classes with the fractions 0.3, 0.2 and 0.5.
 
+***7) ```transposition.dat``` ***<br>
+(optional) Currently only works for daily resolution. For sediments, abstraction from reservoirs assumes zero concentration, whereas abstraction from river uses river concentration.
+Abstractions are taken from the outlet of river reaches, and added to the inlet points of reaches.
+
+```
+# Water transpositions via canals or pipes between sub-basins, in order of routing scheme
+Start-Subasin-ID, Flag(reservoir/river), Flow(m3/s,) Loss(%), Destination-Subasin-ID, Flag (reservoir/river), begin_year
+        91         1      1.75      0.01        96         1      1965
+        67         2       2.4       0.1        31         1      1997
+        31         1         2      0.06        30         1      1993
+        30         1         2      0.02        29         2      1993
+```
+
+*Start-Subasin-ID*:		ID of sub-basin (source of water abstraction)<br>
+*Flag(reservoir/river)*:		water abstraction from: 1 (river) or 2 (reservoir)<br>
+*Flow(m<sup>3</sup>/s)*:			amount of re-routed water<br>
+*Loss(%)*:			transmission loss<br>
+*Destination-Subasin-ID*:		ID of sub-basin (destination of water abstraction)
+*Flag (reservoir/river)*:		water diversion to: 1 (river) or 2 (reservoir)<br>
+*begin\_year*:			start time of water abstraction
+
+This file is optional. It is only read if ```dotrans``` (in ```do.dat```) is set to ```.true.```. In this case, ```transposition.dat``` is expected in the subdirectory ```Others/```. <br>
+WARNING: The transposition of sediment has not yet been implemented.
+
 <a name="3-4-input-files-for-the-reservoir-module"></a>
 ### 3.4 Input files for the reservoir module
 
-The input files for the reservoir module are located in the folder ```Input\\[case_study]\Reservoir``` and are summarised in [Table 11](#table-11). The files listed below are required according to the simulation option defined in the file ```do.dat```. Reservoirs are considered in the model simulations if the option doreservoir is switched on. For simulations of reservoir water balance the file ```reservoir.dat``` (file 1) is required. Nevertheless, additional files can be given to improve the model results (files 2 to 6). For calculations of reservoir sediment balance, the options doreservoir and dosediment must be switched on. The reservoir sedimentation model consists of two modelling approaches, which may be applied according to reservoir size and data availability. For reservoirs with information about their geometric features (reservoir topography, stage-area and stage-volume curves) and physical properties of sediment deposits, such as deposition thickness, grain size distribution of sediment deposits and sediment densities, a detailed modelling approach to reservoir sedimentation may be applied (files 7 to 9 are required; and files 10 to 12 are used to improve model results). For reservoirs without those characteristics, a simplified modelling approach is used (file 8 is required). Networks of small reservoirs are considered in the model simulations if the option doacudes is switched on. For simulations of water and sediment routing through the reservoir networks the file 13 and 16 are required (files 14, 15 and 17 are used to improve model results).
+The input files for the reservoir module are located in the folder ```Input\\[case_study]\Reservoir``` and are summarised in [Table 11](#table-11). The files listed below are required according to the simulation option defined in the file ```do.dat```. Reservoirs are considered in the model simulations if the option ```doreservoir``` is switched on. For simulations of reservoir water balance the file ```reservoir.dat``` (file 1) is required. Nevertheless, additional files can be given to improve the model results (files 2 to 6). For calculations of reservoir sediment balance, the options ```doreservoir``` and ```dosediment``` must be switched on. The reservoir sedimentation model consists of two modelling approaches, which may be applied according to reservoir size and data availability. For reservoirs with information about their geometric features (reservoir topography, stage-area and stage-volume curves) and physical properties of sediment deposits, such as deposition thickness, grain size distribution of sediment deposits and sediment densities, a detailed modelling approach to reservoir sedimentation may be applied (files 7 to 9 are required; and files 10 to 12 are used to improve model results). For reservoirs without those characteristics, a simplified modelling approach is used (file 8 is required). Networks of small reservoirs are considered in the model simulations if the option doacudes is switched on. For simulations of water and sediment routing through the reservoir networks the file 13 and 16 are required (files 14, 15 and 17 are used to improve model results).
 
 <a name="table-11"></a>
 **Table 11:** Input data files for the reservoir component.
@@ -1282,6 +1214,8 @@ Nr. |Parameter File	| Content
 15 | ```lake_year.dat``` (optional) | Specification of changes on the number of reservoirs in the size classes
 16 | ```lake_number.dat``` | Specification of total number of reservoirs in the size classes
 17 | ```lake_frarea.dat``` (optional) | Specification of runoff contributing area for the reservoir size classes
+18 | ```lake_storage.stat, reservoir_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
+
 
 **1)** ```reservoir.dat```
 \[can be generated with the lumpR package\]
@@ -1648,8 +1582,103 @@ Extra-terrestrial shortwave radiation as monthly mean daily value in [W/m2]
 447
 …
 ```
-
 This file specifies the extraterrestrial incoming shortwave radiation at the top of the atmosphere \[W/m2]. The values are daily averages for each month from January until December (12 values). 
+
+<a name="3-6-state-variables"></a>
+### 3.6 Input/Output of state variables (optional)
+The state of (some) system variables can be stored in files. This allows their later analysis and resuming runs from them. Thus, any of these files can be generated by the model, and used as an input in a successive call. These capabilities can be enabled in ```do.dat``` lines 36-37 (see [Figure 1](#figure-1)).
+These files are optional. If not present, default values are used (e.g., 100 % relative saturation for the soils, 0 for most other entities). These files are expected in the WASA-SED output directory with the extension ```stat```. If present and enabled in ```do.dat```, WASA-SED loads them at model startup. It will then generate files with the extension ```stat_start```, that describe the status of the model in the beginning of the simulation (these should be identical to the ```stat``` which existed before). New ```stat``` files are written at the the end of each simulation year. .
+
+
+<a name="table-12"></a>
+**Table 12:** Input/Output of state variables.
+
+Parameter File |	Content
+---|---
+```gw_storage.stat``` | Initialisation of storage content of ground water
+```intercept_storage.stat``` (optional) | Initialisation of storage content of interception
+```soil_moisture.stat``` | Initialisation of storage content of soil moisture
+```gw_storage.stat``` | Ground water storage
+```interflow_storage.stat``` | state of intra-hillslope subsurface flow
+```snow_storage.stat``` | Snow storage
+```river_storage.stat``` | river storages
+```lake_storage.stat``` | small reservoirs
+```reservoir_storage.stat``` | strategic reservoirs
+```sediment_storage.stat'    ``` | sediment storage in riverbed (deposited)
+```susp_sediment_storage.stat``` | sediment storage in riverbed (suspended)
+```storage.stats``` | Summary of storages 
+
+gw_storage.stat:
+```
+# Ground water storage (for analysis or model re-start)
+Sub-basin,	LU,	volume_[mm],	area_[m²]
+1 11111	39.51	1013437.4
+…
+```
+
+intercept_storage.stat:
+```
+# Interception storage (for analysis or model re-start)
+Sub-basin,	LU,	TC,	SVC,	storage_[mm],	area_[m²]
+1	11111	5	16010	    0.00	     73491.9
+…
+```
+soil_moisture.stat:
+```
+# Soil moisture status (for analysis or model re-start)
+Sub-basin,	LU,	TC,	SVC,	horizon,	watercontent_[mm],	area_[m²]
+1	11111	5	16010	1	   26.70	     73491.9
+…
+```
+
+interflow_storage.stat:
+```
+# Interflow storage (for analysis or model re-start)
+ Sub-basin,	LU,	TC,	horizon,	storage_[m3]
+1	1	3	1	   0.000
+...
+```
+
+snow_storage.stat:
+```
+#Snow storage (for analysis or model re-start)
+Sub-basin,	LU,	horizon,	storage [m],	energy [kJ/m²],	albedo [-]
+1	2	10	0.000	0.000	0.880
+...
+```
+
+river_storage.stat:
+The structure of ```river_storage.stat``` depends on the routing option chosen (UHG or Muskingum, see examples above).
+```
+# UHG routing: values of routed discharge per timestep of unit hydrograph
+Sub-basin	[n_h x timestep]
+101	1.286	0.649	0.074
+...
+```
+
+```
+# Muskingum routing: river reach volume status (for analysis or model re-start)
+Sub-basin	volume[m^3]
+1	2033.808
+...
+```
+
+lake_storage.stat:
+```
+# Lake volume status (for analysis or model re-start)
+Sub-basin	reservoir_size_class,	volume[m^3]
+1	1	       0.00
+...
+```
+
+reservoir_storage.stat:
+```
+Reservoir volume status (for analysis or model re-start)
+Subbasin	volume[m^3]
+221	 25500.000
+231	 30000.000
+```
+
 
 \[[Table of contents](#toc)]
 ## 4 Output data
@@ -1659,10 +1688,10 @@ The location of the output folder is specified in the ```do.dat```. By default, 
 <a name="4-1-output-of-the-hillslope-module"></a>
 ### 4.1 Output of the hillslope module
 
-The output files generated by the hillslope routine are shown in [Table 12](#table-12).
+The output files generated by the hillslope routine are shown in [Table 13](#table-13).
 
-<a name="table-12"></a>
-**Table 12:** Output files of the hillslope module.
+<a name="table-13"></a>
+**Table 13:** Output files of the hillslope module.
 
 Output file | Content
 ---|---
@@ -1687,12 +1716,8 @@ Output file | Content
 ```potetranspiration.out``` | Subdaily potential evapotranspiration \[mm/d] for all sub-basins 
 ```gw_loss.out``` | model loss (deep seepage) \[m<sup>3</sup>/timestep] for all sub-basins  
 ```gw_recharge.out``` | groundwater recharge \[m<sup>3</sup>/timestep] for all sub-basins 
-```storage.stats_start``` | Summary of storages (Groundwater, soil, interception) at start of simulation
-```storage.stats``` | Summary of storages (Groundwater, soil, interception) at end of simulation
-```gw_storage.stat``` | Ground water storage
-```intercept_storage.stat``` | Interception storage
-```soil_moisture.stat``` | Soil moisture storage
-```[snow*]``` | optional output files from the snow routine, see [Table 5](#table-5)
+```*.stat```| various files containing state of system variables at end of simulation, see ...
+```snow*``` | optional output files from the snow routine, see [Table 5](#table-5)
 
 The output files ```daily_water_sub-basin.out```, ```sediment_production.out``` and ```water_sub-basin.out``` include the effect of the distributed reservoirs. All other remaining basic hydrological output files contain the raw output of the hillslope module (no reservoir effects). All above-mentioned files have the same structure, as shown by the example ```daily_actetranspiration.out``` below (the subdaily output files additionally contain the timestep number in the third column):
 
@@ -1717,10 +1742,10 @@ Beware: all other output files are overwritten in this case. For file structure,
 <a name="4-2-output-of-the-river-module"></a>
 ### 4.2 Output of the river module
 
-The river routine calculates the water and sediment discharge in each river stretch. Currently, the output comprises the water discharge and storage values for each timestep, and the linear response function, when river routing scheme 1 is selected. The following files (see [Table 13](#table-13)) are generated as daily time series, if enabled and depending on the selected routing scheme.
+The river routine calculates the water and sediment discharge in each river stretch. Currently, the output comprises the water discharge and storage values for each timestep, and the linear response function, when river routing scheme 1 is selected. The following files (see [Table 14](#table-14)) are generated as daily time series, if enabled and depending on the selected routing scheme.
 
-<a name="table-13"></a>
-**Table 13:** Output files of the river module.
+<a name="table-14"></a>
+**Table 14:** Output files of the river module.
 
 Output file | Content
 ---|---
@@ -1761,10 +1786,10 @@ Example: After each time step, e.g. hourly, the discharge is given for each sub-
 <a name="4-3-output-of-the-reservoir-module"></a>
 ### 4.3 Output of the reservoir module
 
-The reservoir module simulates the water and sediment transport through the reservoirs located in the study area. Currently, the output comprises results on water balance, hydraulic calculations, sediment transport and bed elevation changes for all reservoirs located at the outlet point of the sub-basins. The results are printed for all outlet reservoirs separately, identified by the Map-ID of the sub-basin where it is located. Additional files are also printed for the reservoir size classes. [Table 14](#table-14) shows the generated files.
+The reservoir module simulates the water and sediment transport through the reservoirs located in the study area. Currently, the output comprises results on water balance, hydraulic calculations, sediment transport and bed elevation changes for all reservoirs located at the outlet point of the sub-basins. The results are printed for all outlet reservoirs separately, identified by the Map-ID of the sub-basin where it is located. Additional files are also printed for the reservoir size classes. [Table 15](#table-15) shows the generated files.
 
-<a name="table-14"></a>
-**Table 14:** Output files of the reservoir module.
+<a name="table-15"></a>
+**Table 15:** Output files of the reservoir module.
 
 Nr. |Output file | Content
 ---|---|---
@@ -1779,7 +1804,7 @@ Nr. |Output file | Content
 9 | ```lake_inflow_r.out``` | Water inflow discharges into the reservoir size classes<sup>1</sup>
 10 | ```lake_outflow_r.out``` | Water outflow discharges from the reservoir size classes<sup>1</sup>
 11 | ```lake_retention_r.out``` | Water retention in the reservoir size classes<sup>1</sup>
-12 | ```lake_volume_r.out``` | Water volume of the reservoir size classes<sup>1</sup>
+12 | ```lake_storage_r.out``` | Water volume of the reservoir size classes<sup>1</sup>
 13 | ```lake_sedinflow_r.out``` | Sediment inflow discharges into the reservoir size classes<sup>1</sup>
 14 | ```lake_sedoutflow_r.out``` | Sediment outflow discharges from the reservoir size classes<sup>1</sup>
 15 | ```lake_sedretention_r.out``` | Sediment retention in the reservoir size classes<sup>1</sup>
@@ -1788,7 +1813,7 @@ Nr. |Output file | Content
 18 | ```lake_sedbal.out``` | Sediment balance components of all upstream reservoirs<sup>2</sup>
 19 | ```lake_inflow.out``` | Water inflow discharges into the reservoir size classes<sup>3</sup>
 20 | ```lake_outflow.out``` | Water outflow discharges from the reservoir size classes<sup>3</sup>
-21 | ```lake_volume.out``` | Water volume of the reservoir size classes<sup>3</sup>
+21 | ```lake_storage.out``` | Water volume of the reservoir size classes<sup>3</sup>
 22 | ```lake_retention.out``` | Water retention in the reservoir size classes<sup>3</sup>
 23 | ```lake_vollost.out``` | Sediment retention in the reservoir size classes<sup>3</sup>
 24 | ```lake_sedinflow.out``` | Sediment inflow discharges into the reservoir size classes<sup>3</sup>

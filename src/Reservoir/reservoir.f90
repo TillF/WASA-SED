@@ -658,22 +658,19 @@ IF (STATUS == 1) THEN
 ! initialize ...
 
 !Ge initialization of parameters
-  DO i=1,subasin
-    DO id=1,dayyear*nt
-      overflow(id,i)=0.
-      qintake(id,i)=0.
-      qinflow(id,i)=0.
-	  qbottom(id,i)=0.
-	  qlateral(id,i)=0.
-	  volact(1,i)=0.
-    END DO
-    damareaact(i)=0.
-  END DO
+    overflow=0.
+    qintake=0.
+    qinflow=0.
+    qbottom=0.
+    qlateral=0.
+ !   volact(1,:)=0. !Till: already initialized in model_state_io
+    damareaact=0.
+  
 
   !IF (t > tstart) THEN !Andreas
   DO i=1,subasin !Andreas
    IF (res_flag(i)) THEN
-     IF (t > damyear(i) .AND. t > tstart) THEN  !Andreas
+     IF (t > damyear(i) .AND. t > tstart) THEN  !continuing simulations
        volact(1,i)=volact(daylastyear*nt,i)
        daystorcap(1,i)=daystorcap(daylastyear*nt,i)
        daydamalert(1,i)=daydamalert(daylastyear*nt,i)
@@ -682,17 +679,19 @@ IF (STATUS == 1) THEN
 	   dayminlevel(1,i)=dayminlevel(daylastyear*nt,i)
 
      ELSE IF (t == damyear(i) .OR. (t > damyear(i) .AND. t == tstart)) THEN  !Andreas
-       IF (vol0(i) /= -999. .and. vol0(i) /= -9999.) THEN
-         volact(1,i)=vol0(i) !Till: initial volume [1e6 m^3]
-       ELSE
-         volact(1,i)=storcap(i)/5.
-       END IF
+       if (volact(1,i)== -1) then !only initialize those that have not been initialized by loading from file
+           IF (vol0(i) /= -999. .and. vol0(i) /= -9999.) THEN 
+             volact(1,i)=vol0(i) !Till: initial volume [1e6 m^3]
+           ELSE
+             volact(1,i)=storcap(i)/5.
+           END IF
+       end if    
        daystorcap(1,i)=storcap(i)
        daydamalert(1,i)=damalert(i)
        daydamdead(1,i)=damdead(i)
        daymaxdamarea(1,i)=maxdamarea(i)
 	   dayminlevel(1,i)=minlevel(i)
-     ELSE
+     ELSE  !no reservoirs or not-yet built
        volact(1,i)=0.
        daystorcap(1,i)=0.
        daydamalert(1,i)=0.
@@ -701,7 +700,6 @@ IF (STATUS == 1) THEN
        dayminlevel(1,i)=0.
 	 ENDIF
    END IF
-!write(*,*)id_subbas_extern(i),volact(1,i),storcap(i),vol0(i)
   END DO !Andreas
 
 
