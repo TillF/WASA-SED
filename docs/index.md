@@ -376,6 +376,7 @@ The file allows specifying, which output files are desired. Disabling unnecessar
 ```
 # This file describes which output files are generated
 # put any character before the files you don't want to be created
+//hillslope
 daily_actetranspiration
 #daily_potetranspiration
 #daily_qhorton
@@ -388,13 +389,22 @@ daily_subsurface_runoff
 daily_theta
 daily_total_overlandflow
 daily_water_sub-basin
-routing_response
 sediment_production
 water_sub-basin
 deep_gw_recharge
 deep_gw_discharge
-
 tc_theta
+qhorton
+actetranspiration
+subsurface_runoff
+total_overlandflow
+gw_discharge
+potetranspiration
+gw_loss
+gw_recharge
+
+//river
+routing_response
 river_degradation
 river_deposition
 river_flow
@@ -413,15 +423,7 @@ tc_surfflow
 tc_sedout
 lu_sedout
 
-actetranspiration
-qhorton
-subsurface_runoff
-total_overlandflow
-gw_discharge
-potetranspiration
-gw_loss
-gw_recharge
-
+//reservoir
 res_watbal
 res_vollost
 res_cav
@@ -452,8 +454,7 @@ lake_sizedistoutflow
 
 Example: The output files ```daily_actetranspiration.out``` and ```daily_qhorton.out``` will be created. The creation of ```daily_potetranspiration.dat``` is omitted.
 
-The output files of the snow routine ([Rottler, 2017](#rottler-2017)) are also defined in the control file ```outfiles.dat```. 
-Output files can be generated for all state variables and mass and energy fluxes related to the snow routine. The filenames of the desired output files have to be added as keyword to activate their creation. A list of possible output files with corresponding keyword is given in [Table 5](#table-5). The output is created TC-wise. For each time step, values for each TC of each LU get exported.
+The output files of the snow routine ([Rottler, 2017](#rottler-2017)) are also defined in the control file ```outfiles.dat```. These files can be generated for all state variables and mass and energy fluxes related to the snow routine. A list of possible output files with corresponding keyword is given in [Table 5](#table-5). The output is created TC-wise. For each time step, values for each TC of each LU get exported.
 
 <a name="table-5"></a>
 **Table 5**: Keywords and descriptions optional outfiles related to the snow routine.
@@ -1648,7 +1649,7 @@ Sub-basin,	LU,	horizon,	storage [m],	energy [kJ/m²],	albedo [-]
 ```
 
 river_storage.stat:
-The structure of ```river_storage.stat``` depends on the routing option chosen (UHG or Muskingum, see examples above).
+The structure of ```river_storage.stat``` depends on the routing option chosen (UHG or Muskingum, see examples below).
 ```
 # UHG routing: values of routed discharge per timestep of unit hydrograph
 Sub-basin	[n_h x timestep]
@@ -1718,6 +1719,7 @@ Output file | Content
 ```gw_recharge.out``` | groundwater recharge \[m<sup>3</sup>/timestep] for all sub-basins 
 ```*.stat```| various files containing state of system variables at end of simulation, see ...
 ```snow*``` | optional output files from the snow routine, see [Table 5](#table-5)
+```gw_storage.stat, intercept_storage.stat, soil_moisture.stat, snow_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
 
 The output files ```daily_water_sub-basin.out```, ```sediment_production.out``` and ```water_sub-basin.out``` include the effect of the distributed reservoirs. All other remaining basic hydrological output files contain the raw output of the hillslope module (no reservoir effects). All above-mentioned files have the same structure, as shown by the example ```daily_actetranspiration.out``` below (the subdaily output files additionally contain the timestep number in the third column):
 
@@ -1764,6 +1766,7 @@ Output file | Content
 ```River_Sediment_storage.out``` | Deposited sediment stored in river reach in t
 ```River_Susp_Sediment_storage.out``` | Suspended sediment stored in river reach in t
 ```River_Infiltration.out``` | Infiltration of river stretches
+```river_storage.stat, sediment_storage.stat, susp_sediment_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
 
 
 All above-mentioned files have the same structure, as shown by the example ```River_flow.out``` below:
@@ -1819,6 +1822,7 @@ Nr. |Output file | Content
 24 | ```lake_sedinflow.out``` | Sediment inflow discharges into the reservoir size classes<sup>3</sup>
 25 | ```lake_sedoutflow.out``` | Sediment outflow discharges from the reservoir size classes<sup>3</sup>
 26 | ```lake_sizedistoutflow.out``` | Effluent grain size distribution of the reservoir size classes <sup>4</sup>
+27 | ```lake_storage.stat, reservoir_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
 
 <sup>1</sup> Results are displayed for the whole catchment after grouping them by reservoir size classes (one value for the whole catchment and each reservoir size class) <br>
 <sup>2</sup> Results are displayed for the whole catchment without distinguishing between size classes (one value for the whole catchment) <br>
@@ -1866,7 +1870,7 @@ Subasin-ID, year, day, hour, deadvol(m**3), alertvol(m**3), storcap(m**3)
 *alertvol*: Alert volume in the sub-basin's reservoir \[m<sup>3</sup>] <br>
 *storvap*: Storage capacity in the sub-basin's reservoir \[m<sup>3</sup>]
 
-Example: After each time step, e.g. after one day, the reservoir of the sub-basin with the Map-ID 60 has a dead volume of 4,795,484.24 m<sup>3</sup>, an alert volume of 45,171,678.11 m<sup>3</sup>, and an alert volume of 91,744,848.62 m<sup>3</sup>. Currently, the model generates an output file for each reservoir considered in the simulation (e.g. ```res_60_watbal.out``` referred to sub-basin with Map-ID 60).
+Example: After each time step, e.g. after one day, the reservoir of the sub-basin with the Map-ID 60 has a dead volume of 4,795,484.24 m<sup>3</sup>, an alert volume of 45,171,678.11 m<sup>3</sup>, and an alert volume of 91,744,848.62 m<sup>3</sup>. Currently, the model generates an output file for each reservoir considered in the simulation (e.g. ```res_60_watbal.out``` refers to sub-basin with Map-ID 60).
 
 **3)** ```res_”Map-ID”_cav.out```
 
@@ -2221,5 +2225,8 @@ Pilz, T (2015): https://github.com/tpilz/LUMP.
 
 **Auxiliary Tools:**
 
-[SoilDataPrep](https://github.com/tillf/SoilDataPrep/SoilDataPrep))<a name="SoilDataPrep"></a> : soildata-preprocessing for WASA-SED
-[lumpR](https://github.com/tpilz/lumpR)) : Geodata-preprocessing for WASA-SED
+[SoilDataPrep](https://github.com/tillf/SoilDataPrep)<a name="SoilDataPrep"></a> : soildata-preprocessing for WASA-SED
+
+[lumpR](https://github.com/tpilz/lumpR) : Geodata-preprocessing for WASA-SED
+
+[SoilDataPrep](https://github.com/TillF/MMEMO)<a name="MMEMO"></a> : assess the impact of various model enhancements, including routines for calibration. 
