@@ -969,11 +969,12 @@ SUBROUTINE hymo_all(STATUS)
                         gw_recharge(d,i_subbas)= gw_recharge(d,i_subbas)+rtemp                            !Till: for output of gw-recharge
                         if (f_gw_recharge)       deep_gw_recharge_t(d,timestep_counter,i_subbas) = deep_gw_recharge_t(d,timestep_counter,i_subbas) + rtemp
 
-                        !rtemp=0. !George: disable groundwater discharge: enable this line, outcomment next line
-                        rtemp=min(deepgw(i_subbas,lu_counter),deepgw(i_subbas,lu_counter)/gw_delay(i_lu) / (dt/24.) )        !Till: compute gw-discharge [m3], at maximum this equals the entire stored volume
-                        if (isnan(rtemp)) then
-                            rtemp=1
-                            end if
+                        !rtemp=0. !George: disable groundwater discharge: enable this line, outcomment next block
+                        if (gw_delay(i_lu)==0.) then
+                            rtemp = 1.
+                        else    
+                            rtemp = min(deepgw(i_subbas,lu_counter),deepgw(i_subbas,lu_counter)/gw_delay(i_lu) / (dt/24.) )        !Till: compute gw-discharge [m3], at maximum this equals the entire stored volume
+                        end if
 
                         if ((rtemp>0.) .AND. (frac_direct_gw<1.)) then !Till: ground water discharge is (partially) routed into interflow of lowermost tc
                             dummy=min(INT(maxval(sum(horiz_thickness(tcid_instance,:,:),2))/500.)+1,size(latred, DIM = 2)  ) !Till: compute number of horizon layers needed for storing the subsurface flow
@@ -1134,7 +1135,7 @@ SUBROUTINE hymo_all(STATUS)
             IF (doacud) THEN
                 CALL lake(2,i_subbas)
             ELSE
-                IF (doreservoir) THEN
+                IF (doreservoir .and. area(i_subbas) /= 0. ) THEN
                     water_subbasin (d,i_subbas)=water_subbasin(d,i_subbas)*(1.-((damareaact(i_subbas)/1.e6)/area(i_subbas)))
                 END IF
             END IF

@@ -32,6 +32,7 @@ CALL climo(0)
 if (river_transport.eq.1) CALL routing(0)
 if (river_transport.ne.1) CALL routing_new(0)
 call init_river_state
+call init_reservoir_lake_state
 
 CALL save_model_state(doloadstate, .TRUE.) !Till: do backups of state files if loaded from them, and save only summary on initial storage
 

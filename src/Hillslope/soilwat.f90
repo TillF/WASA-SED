@@ -150,6 +150,23 @@
 
     ! character(len=80):: errstring
 
+    if (tcarea2 == 0.) then !for dummy basins, don't do calculations
+        !set all output arguments to zero (otherwise, they may end up some as undefined value)
+        thactroot = 0.
+        q_surf_out = 0.
+        q_sub_out = 0.
+        qgw = 0.
+        deepqgw = 0.
+        hortf = 0.
+        tcaet = 0.
+        tclai = 0.
+        tcsoilet = 0.
+        tcintc = 0.
+        bal = 0.
+        sed_out_tc(:) = 0.
+        return   
+    end if    
+    
     !** ------------------------------------------------------
     !** (0) Initialization
     !** Soil water content at end of last timestep (mm)

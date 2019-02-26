@@ -64,7 +64,7 @@ real, allocatable :: outflow_last(:)
 !tp not used
 !effective water extraction (consumptive use) from the Sub-basin's reservoir [m**3]
 !real, allocatable :: damex(:,:)
-!initial storage capacity in the sub-basin's reservoir [10**3 m**3 and 10**6 m**3]
+!initial storage capacity in the sub-basin's reservoir [read as 10**3 m**3, later converted into 10**6 m**3]
 real, allocatable :: storcap(:)
 !initial dead volume of the sub-basin's reservoir [10**3 m**3]
 real, allocatable :: damdead(:)
@@ -82,7 +82,7 @@ real, allocatable :: damflow(:)
 real, allocatable :: damq_frac(:)
 !percentage of Q90 released from the sub-basin's reservoir in different seasons in the sub-basin's reservoir [-]
 real, allocatable :: damq_frac_season(:,:)
-!actual stored volume in the subbasin's reservoir [m**3]
+!actual stored volume in the subbasin's reservoir [m^3 and 10^6 m**3]
 real, allocatable :: volact(:,:)
 !precipitation into the subbasin's reservoir [m**3]
 real, allocatable :: precdam(:,:)
@@ -132,7 +132,7 @@ real, allocatable :: vol_bat(:,:)
 real, allocatable :: vol0(:)
 !lateral inflow discharge into the subbasin's reservoir [m**3/s]
 real, allocatable :: qlateral(:,:)
-!inflow discharge into the subbasin's reservoir [m**3/s]
+!inflow discharge into the subbasin's reservoir [m**3/s and m³]
 real, allocatable :: qinflow(:,:)
 !overflow discharge out the sub-basin's reservoir [m**3/s]
 real, allocatable :: overflow(:,:)

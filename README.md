@@ -45,3 +45,7 @@ Reference
 
 E. Mueller, A. Güntner, T. Francke (2010): Modelling sediment export, retention and reservoir sedimentation in drylands with the WASA-SED model Geosci. Model Dev., 275-291, 3(1) , url: http://www.geosci-model-dev.net/3/275/2010/, doi:10.5194/gmd-3-275-2010
 
+Auxiliary Tools
+---------
+[SoilDataPrep](https://github.com/tillf/SoilDataPrep/SoilDataPrep)) : soildata-preprocessing for WASA-SED
+[lumpR](https://github.com/tpilz/lumpR)) : Geodata-preprocessing for WASA-SED

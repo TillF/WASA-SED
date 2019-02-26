@@ -366,6 +366,7 @@ module hymo_h
     ! average soil moisture of every terrain component (mm)
     !Allocatable      real soilwater(366,nmunsutc)
     real, pointer :: soilwater(:,:)
+    
     ! soil moisture in every horizon of each SVC in each TC in each LU in each subbasin (mm)
     !Allocatable      real horithact(nmunsutc,maxsoil,maxhori)
     real, pointer ::  horithact(:,:,:)

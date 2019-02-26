@@ -183,6 +183,7 @@
     id_terrain_intern=0
     id_terrain_extern=0
 
+    kfsu(:) = -1. !flag as "not read"
     i=1
     DO WHILE (.TRUE.)
         cdummy=''
@@ -239,6 +240,42 @@
         i=i+1
     END DO
     CLOSE(11)
+    
+    !plausibility checks
+    
+    do i=1,nsoter
+        if (nbrterrain(i) < 0.) then
+            write(*,'(a,i0,a,i0,a)')'ERROR (soter.dat): line ', i+2,': number of TCs (', nbrterrain(i),') out of range.'
+            stop
+        end if
+        if (kfsu(i) > 1000. .OR. kfsu(i)<0.) then
+            write(*,'(a,i0,a,f0.0,a)')'ERROR (soter.dat): line ', i+2,': bedrock hydraulic conductivity (', kfsu(i),') out of range.'
+            stop
+        end if
+        if (slength(i) > 20000. .OR. slength(i)<0.) then
+            write(*,'(a,i0,a,f0.0,a)')'ERROR (soter.dat): line ', i+2,': LU length (', slength(i),') out of range.'
+            stop
+        end if
+        if ((meandep(i) > 100000. .OR. meandep(i)<0.) .AND. meandep(i)/=-1.) then
+            write(*,'(a,i0,a,f0.0,a)')'ERROR (soter.dat): line ', i+2,': mean soil depth (', meandep(i),') out of range.'
+            stop
+        end if
+        if ((maxdep(i) > 100000. .OR. maxdep(i)<0.) .AND. maxdep(i)/=-1.) then
+            write(*,'(a,i0,a,f0.0,a)')'ERROR (soter.dat): line ', i+2,': max soil depth (', maxdep(i),') out of range.'
+            stop
+        end if
+        
+        if (riverbed(i) > 100000. .OR. riverbed(i)<0.) then
+            write(*,'(a,i0,a,f0.0,a)')'ERROR (soter.dat): line ', i+2,': depth to riverbed (', riverbed(i),') out of range.'
+            stop
+        end if
+        
+        if (gw_delay(i) > 100000. .OR. gw_delay(i)<0.) then
+            write(*,'(a,i0,a,f0.0,a)')'ERROR (soter.dat): line ', i+2,': GW-delay (', gw_delay(i),') out of range.'
+            stop
+        end if
+    end do
+    
     gw_delay=max(1.,gw_delay)    !Till: gw_delay cannot be less than 1 (=all GW leaves LU immediately)
 
     !** read terrain component parameters
@@ -1091,7 +1128,7 @@
         k = count(tcallid(id_sub_int,:,1)/=-1)
         if (k /= nbr_lu(id_sub_int)) then
             WRITE(*,'(a,i0,a,i0,a,i0)')'Error in soil_vegetation.dat: Expecting ',nbr_lu(id_sub_int),&
-                ' LUs for subbasin',id_subbas_extern(id_sub_int),', found ',k
+                ' LU(s) for subbasin ',id_subbas_extern(id_sub_int),', found ',k
             STOP
         END IF
 
@@ -1699,12 +1736,8 @@ end if ! do_snow
 
     OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/'//inputfile_name,STATUS='old',IOSTAT=istate)
 
-    if (istate/=0) then        !no seasonality file found
-        allocate(node_days(1,1))
-        write(*,*) 'WARNING: ',inputfile_name,' not found, using defaults'
-        return
-    else
-        i = 0
+    i=0
+    if (istate==0) then        !seasonality file found
         k = 0
         DO WHILE (k==0) !count lines in file (maximum of memory required)
             READ(11,*,IOSTAT=k)
@@ -1712,7 +1745,13 @@ end if ! do_snow
         END DO
         rewind(11) !back to start of file
         i=i-3-1 !substract headerlines and last unsuccessful line
-
+    end if
+        
+    if (i <= 0) then    
+        allocate(node_days(1,1))
+        write(*,*) 'WARNING: ',inputfile_name,' not found or empty, using defaults'
+        return
+    else
         allocate(node_days(i, 3+4)) !accomodate all lines; per line: subbasin-id, (veg-id/SVC-id,), year, 4 doys      !!, last_line indicator (for calc_seasonality)
         node_days(:,:)=0
         READ(11,*); READ(11,*); READ(11,*)    !read headerlines
@@ -1878,11 +1917,11 @@ end if ! do_snow
     use time_h
     use utils_h
     use erosion_h
+    use params_h
     IMPLICIT NONE
 
     INTEGER :: i,j,dc,istate
-    REAL :: dummy
-    INTEGER   :: columnheader(1000)    !Till: for storing column headings of input files
+    INTEGER   :: columnheader(2*subasin+10)    !Till: for storing column headings of input files
     CHARACTER(len=1000) :: linedummy
     CHARACTER(len=30) :: dstr    !Till: dummies for reading input header
     INTEGER,save  :: no_columns(2)        !number of columns of input files for the input file

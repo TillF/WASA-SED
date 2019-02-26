@@ -29,7 +29,7 @@ SUBROUTINE readgen(path2do_dat)
         path2do_dat='./Input/do.dat'    !Till: use default, if no command line argument was specified
         custompath=''
     else
-        write(*,*)'reading runtime parameters from ',path2do_dat
+        write(*,'(A)')'reading runtime parameters from ',path2do_dat
         i=len_trim(path2do_dat)
 
         do while (i>0)
