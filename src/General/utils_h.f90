@@ -318,7 +318,7 @@ FUNCTION new_real_array3(old_pointer, newlength, dim_in)
     if (change_dim==1) then
         do i=1,old_dims(2) 
             do k=1,old_dims(3) 
-                new_real_array3(1:newlength,i,k)=old_pointer(1:newlength,i,k) !can cause stack overflow in inter fortran compiler because of temporar copies
+                new_real_array3(1:newlength,i,k)=old_pointer(1:newlength,i,k) 
             end do    
         end do    
         !new_real_array3(1:newlength,:,:)=old_pointer(1:newlength,:,:) !can cause stack overflow in inter fortran compiler because of temporar copies
@@ -344,5 +344,31 @@ FUNCTION new_real_array3(old_pointer, newlength, dim_in)
 
 END FUNCTION new_real_array3
 
+
+function unique2d(val) !return unique values in array "val"
+    implicit none
+    integer :: i = 0, min_val, max_val
+    integer, pointer   :: val(:,:) 
+    integer  :: unique_tt(size(val))
+    !integer, pointer :: unique_tt 
+    integer, pointer ::  unique2d(:)
+    
+
+    !allocate(unique_tt(size(val))   
+    min_val = minval(val)-1
+    max_val = maxval(val)
+    do while (min_val<max_val)
+        i = i+1
+        min_val = minval(val, mask=val>min_val)
+        unique_tt(i) = min_val
+    enddo
+    !allocate(unique2d(i), STAT = min_val)
+    allocate(unique2d(i), source=unique_tt(1:i), STAT = min_val)   
+    if (min_val/=0) then
+        write(*,'(A,i0,a)')'ERROR: Memory allocation error (',min_val,') in unique2d().'
+        stop
+    end if
+    !unique2d(1:i) = unique_tt(1:i)
+end function unique2d
 
 END MODULE utils_h

@@ -23,6 +23,7 @@
     INTEGER :: dummy1, loop
     INTEGER ::id_sub_int,id_lu_int,id_lu_ext,id_tc_int,id_soil_int,test
     INTEGER :: idummy2(20),tausch,istate
+    integer, pointer :: unique_vals(:)
     REAL :: temp1,temp2, maxthickness
     REAL :: sortier(maxterrain),tauschr
     CHARACTER (LEN=8000) :: cdummy
@@ -545,12 +546,12 @@
         READ(11,'(a)',IOSTAT=istate) cdummy
 
         if (istate == -1 ) then
-            if ((trim(cdummy)=='') .and. j < nveg) then
-                write(*,'(a,i0,a,i0)')'ERROR: vegetation.dat, expected ', nveg, ' valid entries, found ',j
-                stop
-            else
+!            if ((trim(cdummy)=='') .and. j < nveg) then
+!                write(*,'(a,i0,a,i0)')'ERROR: vegetation.dat, expected ', nveg, ' valid entries, found ',j
+!                stop
+!            else
                 exit
-            end if
+!            end if
         end if
         
          if ((trim(cdummy)/='') .and. j > nveg) then
@@ -584,8 +585,22 @@
 
     END DO
     CLOSE(11)
+    
+    
+    if (j < nveg) then !less 
+        unique_vals => unique2d(id_veg_intern) !get unique IDs loaded from soil_vegetation.dat
+        do i=1, size(unique_vals)
+           if (unique_vals(i)==0) cycle
+            if (.not. (any (id_veg_extern== unique_vals(i)))) then !check if the all vegetation-ID from soil_vegetation.dat have been found
+              write(*,'(a,i0,a,i0,a,i0)')'ERROR: vegetation.dat, expected ', nveg, ' valid entries, found ',j,', e.g. missing class ',unique_vals(i)
+              stop
+           end if    
+        end do
+        nveg = j !decrease actual number of vegetation classes
+    end if
+    
+    
     rootdep(:,:)=rootdep(:,:)*1000.
-
     !!** read key points for temporal distribution of vegetation
     !!   characteristics within year (end/begin of rainy season)
     period => seasonality_array2('rainy_season.dat')
