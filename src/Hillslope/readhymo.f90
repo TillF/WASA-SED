@@ -185,6 +185,7 @@
 
     kfsu(:) = -1. !flag as "not read"
     i=1
+    k=0 !count "unused" but specified LUs
     DO WHILE (.TRUE.)
         cdummy=''
         READ(11,'(a)',IOSTAT=istate) cdummy
@@ -211,7 +212,8 @@
 
         if (.NOT. any(id_lu_intern==dummy1)) then
             !WRITE(*,'(a, I0, a, I0, a)') 'LU ',dummy1,' not listed in hymo.dat, ignored.'
-            cycle
+            !k=k+1
+            !cycle
         end if
 
         ! IDs are read into id_terrain_intern - conversion to internal id is done later
@@ -243,7 +245,7 @@
     
     !plausibility checks
     
-    do i=1,nsoter
+    do i=1,nsoter-k
         if (nbrterrain(i) < 0.) then
             write(*,'(a,i0,a,i0,a)')'ERROR (soter.dat): line ', i+2,': number of TCs (', nbrterrain(i),') out of range.'
             stop
@@ -550,6 +552,11 @@
                 exit
             end if
         end if
+        
+         if ((trim(cdummy)/='') .and. j > nveg) then
+            write(*,'(a,i0,a)')'WARNING: found more than the expected ', nveg, ' entries in vegetation.dat, ignored.'
+            exit
+         END if
 
         READ(cdummy,*, IOSTAT=istate) id_veg_extern(j),resist(j),wstressmin(j),wstressmax(j),  &
             (height(j,i),i=1,4),(rootdep(j,i),i=1,4), (lai(j,i),i=1,4),(alb(j,i),i=1,4)
@@ -562,7 +569,7 @@
         h=h+1
 
 
-        if (.not. (any (id_veg_intern == id_veg_extern(j)))) then
+        if (.not. (any (id_veg_intern == id_veg_extern(j)))) then !check if the vegetation-ID occurred in soil_vegetation.dat
             !if (  size(pack(id_veg_intern, id_veg_extern(j) == id_veg_intern(:,:))) == 0  ) then
             write(*,'(a,i0,a,i0,a)')'WARNING: unused vegetation-id ',id_veg_extern(j),' in vegetation.dat, line ',h-1
             cycle !ii: we should not cycle this here, otherwise later errors in reading SVCs may occur (?)
@@ -1749,7 +1756,7 @@ end if ! do_snow
         
     if (i <= 0) then    
         allocate(node_days(1,1))
-        write(*,*) 'WARNING: ',inputfile_name,' not found or empty, using defaults'
+        write(*,'(a)') 'WARNING: '//trim(inputfile_name)//' not found or empty, using defaults'
         return
     else
         allocate(node_days(i, 3+4)) !accomodate all lines; per line: subbasin-id, (veg-id/SVC-id,), year, 4 doys      !!, last_line indicator (for calc_seasonality)
