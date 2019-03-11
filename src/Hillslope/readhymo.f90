@@ -53,7 +53,7 @@
     !Till: Read routing.dat, which determines which of the given subbasins are to be modelled
     OPEN(11,FILE=pfadp(1:pfadj)// 'River/routing.dat',STATUS='old',IOSTAT=istate)    ! upbasin: MAP ID of upstream sub-basin (MAP IDs);! downbasin: MAP ID of downstream sub-basin (MAP IDs)
     IF (istate/=0) THEN
-        write(*,*)'Error: Input file ',pfadp(1:pfadj)// 'River/routing.dat',' not found, aborting.'
+        write(*,'(a)')'Error: Input file '//pfadp(1:pfadj)// 'River/routing.dat'//' not found, aborting.'
         stop
     END IF
 
@@ -73,7 +73,7 @@
         end if
         READ (cdummy,*,IOSTAT=istate)  idummy, upbasin(i),downbasin(i)
         if (istate /= 0) then
-            write(*,*)'ERROR: Format error in routing.dat.'
+            write(*,'(a)')'ERROR: Format error in routing.dat.'
             stop
         end if
     END DO
@@ -111,7 +111,7 @@
     !** read subbasin parameters
     OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/hymo.dat',STATUS='old',IOSTAT=istate)
     IF (istate/=0) THEN
-        write(*,*)'Error: Input file ',pfadp(1:pfadj)// 'Hillslope/hymo.dat',' not found, aborting.'
+        write(*,'(a)')'Error: Input file '//pfadp(1:pfadj)// 'Hillslope/hymo.dat'//' not found, aborting.'
         stop
     END IF
 
@@ -163,12 +163,12 @@
     CLOSE(11)
 
     if (c<subasin) then    !less subbasins found than expected
-        write(*,*)'ERROR: hymo.dat: expected ',subasin,' subbasins, found ',c
+        write(*,'(a,i0,a,i0)')'ERROR: hymo.dat: expected ',subasin,' subbasins, found ',c
         stop
     end if
 
     if (size(whichn(id_subbas_intern(1:subasin)==0,0))>0) then    !check if there are subbasins read from routing.dat that were not found in hymo.dat
-        write(*,*)'ERROR: The following subbasins have been listed in routing.dat, but are missing in hymo.dat:'
+        write(*,'(a)')'ERROR: The following subbasins have been listed in routing.dat, but are missing in hymo.dat:'
         write(*,*)id_subbas_extern(whichn(id_subbas_intern(1:subasin)==0,0))
         stop
     end if
@@ -403,7 +403,7 @@
 
         dummy1=GetNumberOfSubstrings(cdummy)-5 !Till: count number of fields (ie SVCs) specified for this combination
         if (dummy1 > maxsoil) then
-            write (*,*)'ERROR: Line ',h,' in soil_vegetation.dat contains ',dummy1,' soil types - more than specified in maxdim.dat or assumed by default.'
+            write (*,'(a,i0,a,i0,a)')'ERROR: Line ',h,' in soil_vegetation.dat contains ',dummy1,' soil types - more than specified in maxdim.dat or assumed by default.'
             stop
         end if
         k=0
@@ -440,7 +440,7 @@
     cdummy=''
     READ(11,'(a)', IOSTAT=istate) cdummy
     if (trim(cdummy)/='') then
-        write(*,*)'ERROR: in soil_vegetation.dat: more than the expected 3 x ',ntcinst,', lines found.'
+        write(*,'(a,i0,a)')'ERROR: in soil_vegetation.dat: more than the expected 3 x ',ntcinst,', lines found.'
         stop
     end if
 
@@ -458,9 +458,9 @@
     READ(11,'(a)') cdummy
     c=MOD(GetNumberOfSubstrings(cdummy),13) !Till: count number of fields to decide if this is an older input file version
     if (c==3) then
-        write(*,*)'WARNING: old version of soil.dat without alluvial_flag. Soils 1-3 assumed to be alluvial.'
+        write(*,'(a)')'WARNING: old version of soil.dat without alluvial_flag. Soils 1-3 assumed to be alluvial.'
     elseif (c/=4) then
-        write(*,*)'ERROR: unknown version of soil.dat'
+        write(*,'(a)')'ERROR: unknown version of soil.dat'
         stop
     end if
 
@@ -478,7 +478,7 @@
 
         READ(11,'(a)',IOSTAT=istate) cdummy
         if ((istate/=0).OR. (trim(cdummy)=='')) then
-            write(*,*)'ERROR: in soil.dat: Expected ',nsoil,', found ',j-1,' soil types.'
+            write(*,'(a,i0,a,i0,a)')'ERROR: in soil.dat: Expected ',nsoil,', found ',j-1,' soil types.'
             stop
         end if
 
@@ -512,7 +512,7 @@
 
         DO k=1,nbrhori(j)
             if (coarse(j,k)>1.) then
-                write(*,*)'ERROR: coarse fraction cannot be larger than 1. Check soil.dat in line ', j+2
+                write(*,'(a,i0)')'ERROR: coarse fraction cannot be larger than 1. Check soil.dat in line ', j+2
                 stop
             end if
         END DO
@@ -604,7 +604,7 @@
         !** read SVC information (numbering scheme, erosion properties)
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/svc.dat', IOSTAT=istate,STATUS='old')
         IF (istate/=0) THEN
-            write(*,*) "ERROR: ", pfadp(1:pfadj)// 'Hillslope/svc.dat could not be opened. Supply this file or disable sediment modelling or loading/saving states. Aborting.'
+            write(*,'(a)') "ERROR: "//pfadp(1:pfadj)// 'Hillslope/svc.dat could not be opened. Supply this file or disable sediment modelling or loading/saving states. Aborting.'
             stop
         END IF
         READ(11,*)
@@ -737,7 +737,7 @@
         !** read particle size classes
         OPEN(11,FILE=pfadp(1:pfadj)// 'part_class.dat', IOSTAT=istate,STATUS='old')
         IF (istate/=0) THEN                    !part_class.dat not found
-            write(*,*)pfadp(1:pfadj)// 'part_class.dat could not be opened. Sediment treated as one size class.'
+            write(*,'(a)')pfadp(1:pfadj)// 'part_class.dat could not be opened. Sediment treated as one size class.'
             n_sed_class=1                !treat one particle size class only
             allocate(upper_limit(n_sed_class))    !allocate memory for particle size classes to be read
             allocate(particle_classes(n_sed_class))    !allocate memory for particle size classes to be read
@@ -787,7 +787,7 @@
             OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/soil_particles.dat', IOSTAT=istate,STATUS='old')
         END IF
         IF (istate/=0) THEN    !file could not be opened
-            write(*,*)pfadp(1:pfadj)// 'soil_particles.dat could not be opened. Evenly distributed particle-size fractions assumed.'
+            write(*,'(a)')pfadp(1:pfadj)// 'soil_particles.dat could not be opened. Evenly distributed particle-size fractions assumed.'
         END IF
         IF ((istate/=0).OR.(n_sed_class == 1)) THEN    !only 1 size class or file could not be opened
             allocate(soil_particles(nsoil, n_sed_class))    !allocate memory for particle-size distributions of soil surfaces
@@ -832,7 +832,7 @@
         !** read SVC relations towards TCs
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/svc_in_tc.dat', IOSTAT=istate,STATUS='old')
         IF (istate/=0) THEN
-            write(*,*) "ERROR: ", pfadp(1:pfadj)// 'Hillslope/svc_in_tc.dat could not be opened. Aborting.'
+            write(*,'(a)') "ERROR: ", pfadp(1:pfadj)// 'Hillslope/svc_in_tc.dat could not be opened. Aborting.'
             stop
         END IF
         READ(11,*)
@@ -959,16 +959,12 @@
         DO WHILE (id_subbas_extern(n) /= id_subbas_intern(i))    !search until the current external ID has been found...
             n=n+1
             if (n>subasin) then
-                write(*,*)
+                write(*,*)'ERROR: Subbasin-ID mismatch.'
                 stop
             end if
         END DO
-        !Eva id_subbas_intern is sorted (1 - no. of subasin), id_subbas_extern contains the original Map IDs
         id_subbas_intern(i)=n
     END DO
-
-    !   IDs of landscape units
-    !Eva id_lu_extern(subasin) is sorted (as was id_subbas_intern), and id_lu_intern(j,subasin) contains j LU IDs
 
     DO i=1,subasin
         j=1
@@ -1552,7 +1548,7 @@
                     WRITE (*,*) 'trans_start(1,i) loop in readhymo.f'
                 END IF
             END DO
-            trans_start(1,i)=j
+            trans_start(1,i)=j !ii: do this more elegantly
         END DO
         DO i=1,ntrans
             j=1
@@ -1562,7 +1558,7 @@
                     WRITE (*,*) 'trans_end(1,i) loop in readhymo.f'
                 END IF
             END DO
-            trans_end(1,i)=j
+            trans_end(1,i)=j !ii: do this more elegantly
         END DO
 
     END IF
@@ -1576,7 +1572,7 @@
         READ(11,*,IOSTAT=istate)frac_direct_gw
         CLOSE(11)
         IF ((frac_direct_gw>1.).OR.(frac_direct_gw<0.)) THEN
-            write(*,*)'WARNING: frac_direct_gw was outside [0..1], assumed to be 1.'
+            write(*,'(a)')'WARNING: frac_direct_gw was outside [0..1], assumed to be 1.'
             frac_direct_gw=1.
         END IF
     ELSE
@@ -1604,7 +1600,7 @@
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/sdr_lu.dat',IOSTAT=istate,STATUS='old')
         IF (istate==0) THEN
             if (allocated(sdr_tc)) then
-                write(*,*)'WARNING: SDRs for TCs found in terrain.dat, contents of sdr_lu.dat ignored.'
+                write(*,'(a)')'WARNING: SDRs for TCs found in terrain.dat, contents of sdr_lu.dat ignored.'
             else
                 allocate(sdr_lu(nsoter))
                 sdr_lu=1.    !default value: all sediment is delivered
@@ -1628,14 +1624,14 @@
         END IF
 
         if ((allocated(sdr_tc) .OR. allocated(sdr_tc)) .AND. erosion_equation /=1) then
-            write(*,*)'WARNING: Usage of pre-specified SDRs (terrain.dat or sdr_lu.dat) and not using USLE may not be appriate.'
+            write(*,'(a)')'WARNING: Usage of pre-specified SDRs (terrain.dat or sdr_lu.dat) and not using USLE may not be appriate.'
         end if
 
         !Till: eg implementing highly erodible surface such as badlands
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/beta_fac_lu.dat',IOSTAT=istate,STATUS='old')
         IF (istate==0) THEN
             if (allocated(beta_fac_tc)) then
-                write(*,*)'WARNING: Beta values for TCs found in terrain.dat, contents of beta_fac_lu.dat ignored.'
+                write(*,'(a)')'WARNING: Beta values for TCs found in terrain.dat, contents of beta_fac_lu.dat ignored.'
             else
                 allocate(beta_fac(nsoter))
                 beta_fac=1.    !default value: no correction of beta
@@ -1803,7 +1799,7 @@ end if ! do_snow
         if (size(node_days,1) > irow) then         !less memory needed than expected, free it
             if (irow == 0) then
                 allocate(n2(1, 1))   !no valid seasonality found
-                write(*,*) 'WARNING: no valid seasonal data found in ',inputfile_name,', using defaults.'
+                write(*,'(a)') 'WARNING: no valid seasonal data found in '//trim(inputfile_name)//', using defaults.'
             else
                 allocate(n2(irow, 3+4))   !accomodate all lines; per line: subbasin-id, (veg-id,), year, 4 doys, last_line indicator (for calc_seasonality)
             end if
@@ -1938,7 +1934,7 @@ end if ! do_snow
         do_pre_outflow=.FALSE.
         OPEN(91,FILE=pfadp(1:pfadj)// '/Time_series/subbasin_out.dat',IOSTAT=i,STATUS='old')
         IF (i==0) THEN
-            write(*,*)'Reading pre-specified subbasin outflow from file...'
+            write(*,'(a)')'Reading pre-specified subbasin outflow from file...'
 
             READ(91,*)        !skip headerlines
             READ(91,*)
@@ -1956,7 +1952,7 @@ end if ! do_snow
                 do_pre_outflow=.TRUE.
             ENDWHERE
             if (sum(corr_column_pre_subbas_outflow)==0) then
-                write(*,*)'   File subbasin_out.dat does not contain relevant subbasins, omitted.' !ii: free pre_subbas_outflow, as it is not needed
+                write(*,'(a)')'   File subbasin_out.dat does not contain relevant subbasins, omitted.' 
                 deallocate(pre_subbas_outflow)
             else
                 call date_seek(91,tstart,mstart, dstart, 'subbasin_out.dat')    !set internal filepointer to correct line in file
@@ -1975,7 +1971,7 @@ end if ! do_snow
             do_pre_outsed=.FALSE.
             OPEN(92,FILE=pfadp(1:pfadj)// '/Time_series/subbasin_outsed.dat',IOSTAT=i,STATUS='old')
             IF (i==0) THEN
-                write(*,*)'Reading pre-specified subbasin sediment output from file...'
+                write(*,'(a)')'Reading pre-specified subbasin sediment output from file...'
 
                 allocate (pre_psd(n_sed_class))    !allocate storage for mean particle size distribution
 
@@ -2004,7 +2000,7 @@ end if ! do_snow
                 READ (linedummy,*) dstr, dstr, (columnheader(i), i=1,no_columns(2))    !Till: extract column headers
                 corr_column_pre_subbas_outsed=>set_corr_column(columnheader, 'subbasin_outsed.dat')
                 if (sum(corr_column_pre_subbas_outsed)==0) then
-                    write(*,*)'   File subbasin_outsed.dat does not contain relevant subbasins, omitted.'
+                    write(*,'(a)')'   File subbasin_outsed.dat does not contain relevant subbasins, omitted.'
                     deallocate(pre_subbas_outsed)
                 else
                     do_pre_outsed=.TRUE.
@@ -2025,7 +2021,7 @@ end if ! do_snow
             pre_subbas_outflow(:,:,:)=-1.
             READ(91, *, IOSTAT=istate) ((dstr,dstr,(pre_subbas_outflow(dc,j,i),i=1,no_columns(1)),j=1,nt),dc=1,dayyear)        !Reads in daily time series for pre-specified outflow from upstream basins
             IF (istate/=0) THEN
-                write(*,*)'ERROR: Premature end of file subbasin_out.dat.'
+                write(*,'(a)')'ERROR: Premature end of file subbasin_out.dat.'
                 stop
             END IF
 
@@ -2044,7 +2040,7 @@ end if ! do_snow
             if (do_pre_outsed) then
                 READ(92, *, IOSTAT=istate) ((dstr,dstr,(pre_subbas_outsed(dc,j,i),i=1,no_columns(2)),j=1,nt),dc=1,dayyear)        !Reads in daily time series for pre-specified outflow from upstream basins
                 IF (istate/=0) THEN
-                    write(*,*)'ERROR: Premature end of file subbasin_outsed.dat.'
+                    write(*,'(a)')'ERROR: Premature end of file subbasin_outsed.dat.'
                     stop
                 END IF
 
