@@ -50,7 +50,6 @@
 
     REAL    :: wind_t
 
-
     !Till: Read routing.dat, which determines which of the given subbasins are to be modelled
     OPEN(11,FILE=pfadp(1:pfadj)// 'River/routing.dat',STATUS='old',IOSTAT=istate)    ! upbasin: MAP ID of upstream sub-basin (MAP IDs);! downbasin: MAP ID of downstream sub-basin (MAP IDs)
     IF (istate/=0) THEN
@@ -170,7 +169,9 @@
 
     if (count(id_subbas_intern(1:subasin)==0) >0) then !check if there are subbasins read from routing.dat that were not found in hymo.dat
         write(*,'(a)')'ERROR: The following subbasins have been listed in routing.dat, but are missing in hymo.dat:'
-        write(*,*)id_subbas_extern(whichn(id_subbas_intern(1:subasin)==0,0)) !this line seems to crash the Intel compiler when compiling with option "check for NUll pointers and allocatable arrays"
+        do i=1,subasin
+            if (id_subbas_intern(i)==0) write(*,*)id_subbas_extern(i) 
+        end do    
         stop
     end if
 
@@ -1862,8 +1863,6 @@ end if ! do_snow
                     end if
                 END DO
 
-                !missing = whichn(test_ar==tiny(test_ar), 1) !caused crashes in gfortran, not sure why
-
                 IF (missing(1) /= 0) then        !found subbasin/veg_id for which no seasonality data has been read
                     write(fmtstr,*)'(a, I0, a, ', n_missing,'(I0,A), a, I0)' !generate format string
                     WRITE(*,fmtstr) inputfile_name//': Sub-basin ', id_subbas_extern(j),', SVC/vegetation-ID(s) ', (external_ids(missing(k)),", ", k=1, n_missing),&
@@ -1909,7 +1908,6 @@ end if ! do_snow
             end if
         end do    
 
-        !s2 = seasonality_array(whichn(obsolete_lines == 0, 0), :) !this statement apparently leads to compiler / runtime crashes
         deallocate(seasonality_array)
         seasonality_array => s2           !point to cleansed array
     end if
@@ -2073,7 +2071,6 @@ end if ! do_snow
 
 
     RETURN
-
 
 
     contains

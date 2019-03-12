@@ -594,8 +594,11 @@ contains
             dy=365
         ENDIF
 
-
-        allocate(calc_seasonality2(size(support_values,dim=1)))
+        allocate(calc_seasonality2(size(support_values,dim=1)), STAT = d)
+        if (d/=0) then
+            write(*,'(A,i0,a)')'ERROR: Memory allocation error (',d,') in calc_seasonality2. Contact the authors.'
+            stop
+        end if
 
         if (size(seasonality_array)==1) then !no seasonality for this parameter
             calc_seasonality2=support_values(:,1)    !use single value

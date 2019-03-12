@@ -102,25 +102,6 @@ integer:: i
 	end if
 end function which1
 
-function whichn(boolarray, return0) result(indexarray)
-!returns indices of the ALL elements that are TRUE in the input array
-!return0: determine, if empty array or 0 is returned when entire array is false
-implicit none
-logical,dimension(:),intent(in):: boolarray
-integer,intent(in):: return0
-integer,dimension(max(count(boolarray), return0)) :: indexarray
-integer:: i
-
-	if (count(boolarray) == 0) then
-		if (return0 == 1) then
-			indexarray= 0	 !return 0 when entire boolarray is false
-		end if
-	else
-	  indexarray(:)= pack((/(i,i=1,size(boolarray))/),boolarray)
-	end if
-end function whichn
-
-
 
 subroutine pause1
 !wrapper for pause command (doesn't work on all platforms, so disable here)
