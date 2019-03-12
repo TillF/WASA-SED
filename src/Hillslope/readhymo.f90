@@ -1901,10 +1901,15 @@ end if ! do_snow
         allocate(s2(  size(seasonality_array, dim=1) - sum(obsolete_lines), &
             size(seasonality_array, dim=2)))    !allocate new space for cleansed seasonality
 
+        j=1
+        do i=1,size(obsolete_lines)
+            if (obsolete_lines(i) == 0) then
+                s2(j,:) = seasonality_array(obsolete_lines(i), :)     
+                j=j+1
+            end if
+        end do    
 
-
-
-        s2 = seasonality_array(whichn(obsolete_lines == 0, 0), :)
+        !s2 = seasonality_array(whichn(obsolete_lines == 0, 0), :) !this statement apparently leads to compiler / runtime crashes
         deallocate(seasonality_array)
         seasonality_array => s2           !point to cleansed array
     end if

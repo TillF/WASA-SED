@@ -401,7 +401,7 @@ contains
 		integer, pointer :: set_corr_column(:)
 		INTEGER, INTENT(IN)                  :: input_header(:)	!order of subbasins in input file
 		character(len=*), INTENT(IN)                  :: inputfile_name	!name of input file
-		integer	:: i,j,k
+		integer	:: i,k
 
 		allocate(set_corr_column(subasin))
 		set_corr_column=0

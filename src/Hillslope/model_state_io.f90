@@ -624,7 +624,7 @@ contains
                             if (horithact(tcid_instance,svc_counter,h)==-9999.) then            !not yet set?
                                 if (file_read==1) then                        !but this should have been done before
                                     if (errors==0) then    !produce header before first warning only
-                                        write(*,'(A,f4.2,a,/,5a12)')' Following entities not initialised, using defaults '// &
+                                        write(*,'(A,f5.2,a,/,5a12)')' Following entities not initialised, using defaults '// &
                                             '(rel.saturation=', default_rel_sat,'):','subbasin','LU','TC','SVC','horizon'
                                     end if
                                     errors=errors+1
@@ -900,7 +900,7 @@ end subroutine init_interflow_conds
                     if (snowWaterEquiv(1,1,tcid_instance)==-9999.) then            !not yet set?
                         if (file_read==1) then                        !but this should have been done before
                             if (errors==0) then    !produce header before first warning only
-                                write(*,'(A,f4.2,a,/,4a12)')' Following entities not initialised, using defaults '// &
+                                write(*,'(A,f5.2,a,/,4a12)')' Following entities not initialised, using defaults '// &
                                     '(content=0):','subbasin','LU','TC'
                             end if
                             errors=errors+1
@@ -1060,7 +1060,7 @@ end subroutine init_interflow_conds
                         if (intercept(tcid_instance,svc_counter)==-9999.) then            !not yet set?
                             if (file_read==1) then                        !but this should have been done before
                                 if (errors==0) then    !produce header before first warning only
-                                    write(*,'(A,f4.2,a,/,4a12)')' Following entities not initialised, using defaults '// &
+                                    write(*,'(A,f5.2,a,/,4a12)')' Following entities not initialised, using defaults '// &
                                         '(intercept=', 0.,'):','subbasin','LU','TC','SVC'
                                 end if
                                 errors=errors+1
