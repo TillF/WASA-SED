@@ -575,8 +575,10 @@ contains
         !Error	in readhymo:	 error #6678: When the target is an expression it must deliver a pointer result.	E:\till\uni\wasa\wasa_svn_comp\Hillslope\readhymo.f90	1695
         !real, pointer :: calc_seasonality2(size(support_values,dim=1))    !return value: a single value for each class (e.g. vegetation)
         !error: ALLOCATABLE or POINTER attribute dictates a deferred-shape-array   [CALC_SEASONALITY2]
-
-        real, pointer :: calc_seasonality2(:)    !return value: a single value for each class (e.g. vegetation)
+        real :: calc_seasonality2(size(support_values,dim=1))    !return value: a single value for each class (e.g. vegetation)
+        
+        
+        !real, pointer :: calc_seasonality2(:)    !return value: a single value for each class (e.g. vegetation)
         integer    :: k, irow, search_year
         integer :: d        !distance between start node and current day (in days)
         integer :: d_nodes        !distance between start node and end_node (in days)
@@ -594,11 +596,12 @@ contains
             dy=365
         ENDIF
 
-        allocate(calc_seasonality2(size(support_values,dim=1)), STAT = d)
-        if (d/=0) then
-            write(*,'(A,i0,a)')'ERROR: Memory allocation error (',d,') in calc_seasonality2. Contact the authors.'
-            stop
-        end if
+!        d_nodes=size(support_values,dim=1) !get required size of array
+!        allocate(calc_seasonality2(d_nodes), STAT = d)
+!        if (d/=0) then
+!            write(*,'(A,i0,a)')'ERROR: Memory allocation error (',d,') in calc_seasonality2. Contact the authors.'
+!            stop
+!        end if
 
         if (size(seasonality_array)==1) then !no seasonality for this parameter
             calc_seasonality2=support_values(:,1)    !use single value
