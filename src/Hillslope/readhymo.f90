@@ -598,6 +598,12 @@
            end if    
         end do
         nveg = j !decrease actual number of vegetation classes
+        id_veg_extern => new_int_array1(id_veg_extern, nveg, 1) !shrink array size
+        rootdep    => new_real_array2(rootdep, nveg, 1) 
+        lai        => new_real_array2(lai,     nveg, 1)  
+        alb        => new_real_array2(alb,     nveg, 1)   
+        height     => new_real_array2(height,  nveg, 1)  
+        
     end if
     
     
