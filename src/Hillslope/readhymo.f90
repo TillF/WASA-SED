@@ -168,9 +168,9 @@
         stop
     end if
 
-    if (size(whichn(id_subbas_intern(1:subasin)==0,0))>0) then    !check if there are subbasins read from routing.dat that were not found in hymo.dat
+    if (count(id_subbas_intern(1:subasin)==0) >0) then !check if there are subbasins read from routing.dat that were not found in hymo.dat
         write(*,'(a)')'ERROR: The following subbasins have been listed in routing.dat, but are missing in hymo.dat:'
-        write(*,*)id_subbas_extern(whichn(id_subbas_intern(1:subasin)==0,0))
+        write(*,*)id_subbas_extern(whichn(id_subbas_intern(1:subasin)==0,0)) !this line seems to crash the Intel compiler when compiling with option "check for NUll pointers and allocatable arrays"
         stop
     end if
 
