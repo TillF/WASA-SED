@@ -1958,7 +1958,7 @@ end if ! do_snow
         do_pre_outflow=.FALSE.
         OPEN(91,FILE=pfadp(1:pfadj)// '/Time_series/subbasin_out.dat',IOSTAT=i,STATUS='old')
         IF (i==0) THEN
-            write(*,'(a)')'Reading pre-specified subbasin outflow from file...'
+            write(*,'(a)', advance='no')'Reading pre-specified subbasin outflow from subbasin_out.dat...'
 
             READ(91,*)        !skip headerlines
             READ(91,*)
@@ -1976,9 +1976,14 @@ end if ! do_snow
                 do_pre_outflow=.TRUE.
             ENDWHERE
             if (sum(corr_column_pre_subbas_outflow)==0) then
-                write(*,'(a)')'   File subbasin_out.dat does not contain relevant subbasins, omitted.' 
+                write(*,'(a)')'no relevant subbasins found.' 
                 deallocate(pre_subbas_outflow)
             else
+                write(*,'(a)', advance='no')'found subbasin(s): ' 
+                DO i=1, subasin
+                    if (corr_column_pre_subbas_outflow(i) /=0) write(*,"(i0, A)", advance='no') id_subbas_extern(i),", "
+                END DO
+                write(*,'(a)')'.' !end line of output
                 call date_seek(91,tstart,mstart, dstart, 'subbasin_out.dat')    !set internal filepointer to correct line in file
             end if
         END IF
@@ -1995,7 +2000,7 @@ end if ! do_snow
             do_pre_outsed=.FALSE.
             OPEN(92,FILE=pfadp(1:pfadj)// '/Time_series/subbasin_outsed.dat',IOSTAT=i,STATUS='old')
             IF (i==0) THEN
-                write(*,'(a)')'Reading pre-specified subbasin sediment output from file...'
+                write(*,'(a)', advance='no')'Reading pre-specified subbasin sediment output from subbasin_outsed.dat...'
 
                 allocate (pre_psd(n_sed_class))    !allocate storage for mean particle size distribution
 
@@ -2024,10 +2029,15 @@ end if ! do_snow
                 READ (linedummy,*) dstr, dstr, (columnheader(i), i=1,no_columns(2))    !Till: extract column headers
                 corr_column_pre_subbas_outsed=>set_corr_column(columnheader, 'subbasin_outsed.dat')
                 if (sum(corr_column_pre_subbas_outsed)==0) then
-                    write(*,'(a)')'   File subbasin_outsed.dat does not contain relevant subbasins, omitted.'
+                    write(*,'(a)')'no relevant subbasins found.' 
                     deallocate(pre_subbas_outsed)
                 else
                     do_pre_outsed=.TRUE.
+                    write(*,'(a)', advance='no')'found subbasin(s): ' 
+                    DO i=1, subasin
+                        if (corr_column_pre_subbas_outsed(i) /=0) write(*,"(i0, A)", advance='no') id_subbas_extern(i),", "
+                    END DO
+                    write(*,'(a)')'.' !end line of output
                     call date_seek(92,tstart,mstart,dstart, 'subbasin_outsed.dat')    !set internal filepointer to correct line in file
                 end if
             END IF
