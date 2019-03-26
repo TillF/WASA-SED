@@ -5,7 +5,7 @@
 Eva Nora 
 Müller, Till Francke, George Mamede and Andreas Güntner
 
-**4.1.2019<br>
+**26.3.2019<br>
 WASA-SED rev_261**
 
 Developed within the SESAM-Project:<br>
@@ -291,6 +291,8 @@ Line 37 may additionally contain a second logical variable (save_states_yearly),
 
 Line 38 (dosnow) defines, if the optional snow routine, implemented by [Rottler (2017)](#rottler-2017), is included. If set to 1, the snow routine is active and all related calculations are performed. If set to 0, the snow routine remains inactive.
 
+The line numbers in the following template are for reference only, they must be removed in the actual file!
+
 <a name="figure-1"></a>
 ```
  1   Parameter specification for the WASA Model (SESAM-Project)
@@ -328,7 +330,7 @@ Line 38 (dosnow) defines, if the optional snow routine, implemented by [Rottler 
 33   1     // type of sediment transport model at the hillslope	
 34   1     //type of water / sediment model in the river: (1) UHG routing, (2) Muskingum & ss transport, (3) Muskingum & bedload modelling
 35   1     //type of sediment model in the reservoir: choose sediment transport …
-36   .t.   //load state of storages from files (if present) at start (optional)
+36   .t. .f.  //load state of storages from files (if present) at start (optional); second flag: append output
 37   .f.   //save state of storages to files after simulation period (optional)
 38   .t.   //dosnow: activate snow routine
 ```
@@ -1519,21 +1521,10 @@ Example: This optional file allows specifying data on runoff contributing area f
 <a name="3-5-input-of-climate-data"></a>
 ### 3.5 Input of climate data
 
-The WASA model requires time series with a temporal resolution of one hour or one day for precipitation, short wave radiation, humidity and temperature. The input files are located in the folder ```Input\[case_study]\Time_series``` and are summarised below.
+The WASA model requires time series for precipitation (daily or hourly), short wave radiation, humidity and temperature (daily). The input files are located in the folder ```Input\[case_study]\Time_series``` and are summarised below.
 
-**1)** ```temperature.dat```
 
-```
-# Daily average temperature (in degree Celcius) for each subasin, ordered according to Map-IDs
-Date,	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID
-0	0	49	50	1	44	10	4	15	39	3	29
-01011980	1	15	15	15	15	15	15	15	15	15	15
-02011980	2	15	15	15	15	15	15	15	15	15	15
-03011980	3	15	15	15	15	15	15	15	15	15	15
-…
-```
-
-**2)** ```rain_daily.dat```
+**1)** ```rain_daily.dat``` (only needed when run in daily resolution)
 
 ```
 # Daily average precipitation [mm/d] for each subasin, ordered according to Map-IDs				
@@ -1545,7 +1536,34 @@ Date,	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, S
 …
 ```
 
-**3)** ```humidity.dat```
+**2)** ```rain_hourly.dat``` (only needed when run in hourly resolution)
+
+```
+hourly rainfall				
+Date	No. of timestep	Subbasin-ID.		
+0	0	1	2	3
+13092006	20	0	0	0
+13092006	21	0	0	0
+13092006	32	0	0	0
+13092006	23	0.2	0.3	0.1
+14092006	0	0	0.1	0
+14092006	1	0.4	0.2	0
+…
+```
+
+**3)** ```temperature.dat```
+
+```
+# Daily average temperature (in degree Celcius) for each subasin, ordered according to Map-IDs
+Date,	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID
+0	0	49	50	1	44	10	4	15	39	3	29
+01011980	1	15	15	15	15	15	15	15	15	15	15
+02011980	2	15	15	15	15	15	15	15	15	15	15
+03011980	3	15	15	15	15	15	15	15	15	15	15
+…
+```
+
+**4)** ```humidity.dat```
 
 ```
 # Daily average humidity [in %] for each subasin, ordered according to Map-IDs
@@ -1557,7 +1575,7 @@ Date,	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, S
 …
 ```
 
-**4)** ```radiation.dat```
+**5)** ```radiation.dat```
 
 ```
 # Daily average shortwave radiation [in W/m2] for each subasin, ordered according to Map-IDs
@@ -1575,7 +1593,7 @@ Date,	No. of days, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, Subasin-ID, S
 
 Example: The four files are organised in the same manner. Here they are given for three days: 01.01.1980 until 03.01.1980. In the examples above, the time series are uniform for each sub-basin, however, it is possible to assign different time series to individual sub-basins. 
 
-**5)** ```extraterrestrial_radiation.dat```
+**6)** ```extraterrestrial_radiation.dat```
 
 ```
 Extra-terrestrial shortwave radiation as monthly mean daily value in [W/m2]
