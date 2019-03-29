@@ -520,6 +520,7 @@ Parameter File |	Content
 ```sdr_lu.dat``` (optional)	| LU-wise specification of sediment delivery ratio
 ```calib_wind.dat``` (optional)	| Calibration of wind speed (sensitive parameter for evapotranspiration)
 ```snow_params.ctl```(optional) | Options for the snow module
+```lu2.dat```(optional) | LU-properties for the snow module
 ```gw_storage.stat, intercept_storage.stat, soil_moisture.stat, snow_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
 
 
@@ -974,11 +975,11 @@ Warning: Using SDR should be used without a transport capacity limitation, other
 
 This file contains a single value which will be used as static wind speed value (in m/s) within the model. If this file is not given, a value of 1 m/s is used by default. As this is a very sensitive parameter, it can be used for calibration of evapotranspiration.
 
-**18** ```snow_params.ctl```<br>
 (optional)
 
 The two logical parameters do_rad_corr and do_alt_corr allow controlling, whether radiation correction for aspect and slope, and height-depended temperature modifications, respectively, are applied.
 
+**18** ```snow_params.ctl```<br>
 ```
 # WASA-control file for snow routines
 a0, a1, kSatSnow,	densDrySnow,	specCapRet,	emissivitySnowMin,	emissivitySnowMax,	tempAir_crit,	albedoMin,	albedoMax,	agingRate_tAirPos,	agingRate_tAirNeg,	soilDepth,	soilDens,	soilSpecHeat,	weightAirTemp,	lat,	lon,	do_rad_corr,	do_alt_corr,	tempLaps,	tempAmplitude,	tempMaxOffset,	snowFracThresh   
@@ -1009,6 +1010,20 @@ a0, a1, kSatSnow,	densDrySnow,	specCapRet,	emissivitySnowMin,	emissivitySnowMax,
 *tempAmplitude*:	Temperature amplitude to simulate daily cycle (°C))<br>
 *tempMaxOffset*:	Offset of daily temperature maximum from 12:00 (h)<br>
 *snowFracThresh*:	Threshold to determine when TC snow covered (m)
+
+**19** ```lu2.dat```<br>
+(optional)
+
+Required when using the snow module. Hold LU-specific parameters.
+
+```
+Specification of landscape units, snow parameters		
+LU-ID[id]	aspect[deg]	mean_altitude_over_subbas_mean[m]
+1	104.620873988632	-169.42
+2	-34.3803447238449	-111.23
+3	-123.69006752598	-80.39
+4	-6.84277341263094	-47.46
+```
 
 <a name="3-3-input-files-for-the-river-module"></a>
 ### 3.3 Input files for the river module

@@ -1695,7 +1695,7 @@ if (dosnow) then
             h=h+1 !count lines
 		    k=id_ext2int(j, id_lu_extern)    !get internal id of this LU
                 IF (k==-1) THEN    !specified LU not found
-                    write(*,'(a,i0,a,i0,a)')'ERROR in lu2.dat, line ',h,': Unknown LU ', j,' (not in soter.dat).'
+                    write(*,'(a,i0,a,i0,a)')'lu2.dat, line ',h,': Unknown LU ', j,' (not in soter.dat).'
                     cycle
                 END IF
 
@@ -1709,7 +1709,7 @@ if (dosnow) then
 
         DO i=1,nsoter !check completeness
             if (lu_aspect(i)==-999 .OR. lu_alt(i)==-999) then
-                WRITE(*,'(a, I3, a)') 'ERROR: lu2.dat: LU ', id_lu_extern(i), ' is data for aspect or altitude.'
+                WRITE(*,'(a, I0, a)') 'ERROR: lu2.dat: LU ', id_lu_extern(i), ' needs data for aspect and/or altitude.'
                 STOP
             END IF
         END DO
