@@ -293,7 +293,7 @@ contains
         endif !interflow output
 
         !write snow storage state to .stat file
-        if (trim(snow_conds_file)=='' .OR. dosnow == 0) then        !don't do anything if an empty filename is specified
+        if (trim(snow_conds_file)=='' .OR. .not. dosnow) then        !don't do anything if an empty filename is specified
             snow_file_hdle=0
         else
             snow_file_hdle=15

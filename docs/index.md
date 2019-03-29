@@ -289,7 +289,7 @@ Line 36 may additionally contain a second logical variable (append_output), allo
 
 Line 37 may additionally contain a second logical variable (save_states_yearly), determining if the model states are saved (and overwritten) at the end of each simulation year. Default is .TRUE.
 
-Line 38 (dosnow) defines, if the optional snow routine, implemented by [Rottler (2017)](#rottler-2017), is included. If set to 1, the snow routine is active and all related calculations are performed. If set to 0, the snow routine remains inactive.
+Line 38 (dosnow) defines, if the optional snow routine, implemented by [Rottler (2017)](#rottler-2017), is included. If set to .TRUE., the snow routine is active and all related calculations are performed. If set to .FALSE., the snow routine remains inactive.
 
 The line numbers in the following template are for reference only, they must be removed in the actual file!
 

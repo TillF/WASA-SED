@@ -43,7 +43,7 @@ module common_h
     INTEGER :: river_transport      !type of river sediment transport
     INTEGER :: reservoir_transport   !type of reservoir sediment transport
     INTEGER :: nt               !number of timesteps per day (computed as 24/dt)
-    INTEGER :: dosnow               !snow module to be used: 0 => NO; 1 => YES
+    logical :: dosnow               !enable snow module
     INTEGER :: julian_day ! julian day
 
     real, allocatable :: upper_limit(:)         !upper limits of particle size class intervalls (mm)

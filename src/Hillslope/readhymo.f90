@@ -1677,11 +1677,8 @@
         END IF
 END IF !dosediments
 
-if (dosnow /= 0) then
+if (dosnow) then
     call allocate_snow()
-end if
-
-if (dosnow /= 0) then
      !** read Landscape units parameters related to snow
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/lu2.dat',STATUS='old')
         READ(11,*,IOSTAT=istate); READ (11,*,IOSTAT=istate)

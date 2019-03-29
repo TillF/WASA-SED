@@ -1315,7 +1315,7 @@ SUBROUTINE hymo_all(STATUS)
         CALL write_subdaily_output_TC(f_radiMod,'radiMod.out', radiMod)
         CALL write_subdaily_output_TC(f_temperaMod,'temperaMod.out', temperaMod)
 
-        if(dosnow >= 1 .AND. dprev >= dayyear) then
+        if(dosnow .AND. dprev >= dayyear) then
 
         snowEnergyCont(1, 1, : ) = snowEnergyCont(dprev, nt, : )
         snowWaterEquiv(1, 1, : ) = snowWaterEquiv(dprev, nt, : )

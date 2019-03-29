@@ -775,7 +775,7 @@
     !SNOW MODULE
     !Physically-based simulations based on energy balance method of ECHSE (Eco-hydrological Simulation Environment)
 
-    if(dosnow > 0) then
+    if(dosnow) then
 
         temperature   =   temp(day,i_subbas2)
         radiation     =   rad( day,i_subbas2)
