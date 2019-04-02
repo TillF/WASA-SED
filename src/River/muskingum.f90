@@ -159,7 +159,11 @@ else !revised routing
     !------------------------------------------------------------
 
     !Till: do Muskingum routing 
-
+    if (r_qin(2,i) == -1) then !no data (from pre-specified outflow)
+        r_qout(2,i)  = -1
+        return
+    end if    
+    
       !! Compute coefficients
         yy = dt / msk_k(i)
         c0 = yy  + 2. * (1. - msk_x(i))
