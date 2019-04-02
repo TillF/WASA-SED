@@ -302,7 +302,7 @@ contains
             WRITE(snow_file_hdle,'(11a)')'Subbasin', char(9),'LU', char(9), 'horizon' , char(9),&
                 'storage [m]', char(9), 'energy [kJ/m²]', char(9), 'albedo [-]'         !tab separated output
 
-            digits=ceiling(log10(max(1.0,maxval(latred))))+1    !Till: number of pre-decimal digits required
+            digits=ceiling(log10(max(1.0, maxval(snowWaterEquiv), maxval(snowEnergyCont), maxval(snowAlbedo))))+1    !Till: number of pre-decimal digits required
             if (digits<10) then
                 write(fmtstr,'(A1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
             else
@@ -900,7 +900,7 @@ end subroutine init_interflow_conds
                     if (snowWaterEquiv(1,1,tcid_instance)==-9999.) then            !not yet set?
                         if (file_read==1) then                        !but this should have been done before
                             if (errors==0) then    !produce header before first warning only
-                                write(*,'(A,f5.2,a,/,4a12)')' Following entities not initialised, using defaults '// &
+                                write(*,'(A,/,4a12)')' Following entities not initialised, using defaults '// &
                                     '(content=0):','subbasin','LU','TC'
                             end if
                             errors=errors+1

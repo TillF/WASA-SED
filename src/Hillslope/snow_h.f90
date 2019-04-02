@@ -99,7 +99,7 @@ contains
         real                                 :: lapse_prec = 0. !Lapse rate for precipitation modification according to elevation
         
         real                                 :: slope_rad, aspect  !slope, aspect of TC [rad]
-        integer                              :: lu_id,i
+        integer                              :: lu_id,i, tc_type_id
         real,parameter                       :: S_C = 1366.944 !Solar constant [W/(m^2)]
         real                                 :: E_0     !Eccentricity of Earth orbit
         real                                 :: Gamma   !day angle [rad]
@@ -119,16 +119,19 @@ contains
 
 
         !Modification precipitaion using simple, lapse-rate-based approach
-           prec_mod = prec_mod + lapse_prec * rel_elevation(tcallid(sb_counter, lu_counter2, tc_counter2))
+        lu_id=id_lu_intern(lu_counter2, sb_counter)
+        tc_type_id=id_terrain_intern(tc_counter2, lu_id)
+        prec_mod = prec_mod + lapse_prec * rel_elevation(tc_type_id)
+!        prec_mod = prec_mod + lapse_prec * rel_elevation(tcallid(sb_counter, lu_counter2, tc_counter2))
 
         !Modification temperature using simple, lapse-rate-based approach, if activated
         if (do_alt_corr) then
             if(dohour) then!if hourly run only modification according to altitude
-               temp_mod = temp_mod + lapse_temp * rel_elevation(tcallid(sb_counter, lu_counter2, tc_counter2))
+               temp_mod = temp_mod + lapse_temp * rel_elevation(tc_type_id)
                temperature_tc(1:24) = temp_mod !all 24 values equal; in snow compute only first taken when hourly
 
             else !if daily altitudinal modification + daily cycle
-               temp_mod = temp_mod + lapse_temp * rel_elevation(tcallid(sb_counter, lu_counter2, tc_counter2))
+               temp_mod = temp_mod + lapse_temp * rel_elevation(tc_type_id)
 
                DO i=1,24
                   temperature_tc(i) = temp_mod + sin(-pi/2 + (i-tempMaxOff)*(abs(-pi/2)+abs(3*pi/2))/24) * tempAmpli/2

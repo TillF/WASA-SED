@@ -1341,7 +1341,7 @@ SUBROUTINE hymo_all(STATUS)
                             id_subbas_extern(sb_counter), char(9), &
                             id_lu_extern(lu_counter), char(9), &
                             id_terrain_extern(id_terrain_intern(tc_counter,i_lu)), char(9), &
-                            rel_elevation(tcallid(sb_counter, lu_counter, tc_counter))
+                            rel_elevation(id_terrain_intern(tc_counter, i_lu))
                     END DO
                 END DO
             END DO
