@@ -352,4 +352,16 @@ function unique2d(val) !return unique values in array "val"
     !unique2d(1:i) = unique_tt(1:i)
 end function unique2d
 
+function add_ifnot_nodata(val1, val2) !adds two values, unless any of them is -1 (nodata)
+    real, intent(in) :: val1, val2
+    real :: add_ifnot_nodata
+
+    if (val1 == -1 .or. val2== -1) then
+        add_ifnot_nodata =  -1
+    else
+        add_ifnot_nodata =  val1 + val2
+    end if
+    return
+end function add_ifnot_nodata
+
 END MODULE utils_h

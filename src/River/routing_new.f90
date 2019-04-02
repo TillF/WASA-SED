@@ -342,6 +342,9 @@ DO h=1,nt
 
    if (log_temp) then		!Till: if water outflow from upstream subbasins is given
      r_qout(2,upstream)=water_subbasin_t(d,h,upstream)
+     if (water_subbasin_t(d,h,upstream) == -1) then
+        log_temp = .FALSE.
+        end if
    else
      call muskingum (upstream, h)								!normal routing !ii:neither flow nor r_area is used further
    end if
@@ -391,20 +394,20 @@ DO h=1,nt
          IF (downstream /= 9999 .AND. downstream /= 999) THEN
 !George res_qout(step,upstream) instead qout(d,upstream)
 !write(*,*)step,id_subbas_extern(upstream),"case 1a"
-           r_qin(2,downstream)=r_qin(2,downstream)+res_qout(step,upstream)
+           r_qin(2,downstream)=add_ifnot_nodata(r_qin(2,downstream), res_qout(step,upstream))
 	       if(dosediment) then
-	         do k=1,n_sed_class
-	           sediment_in(downstream,k)=sediment_in(downstream,k)+res_sediment_out(upstream,k)
-	         enddo
+                do k=1,n_sed_class
+	                sediment_in(downstream,k)=add_ifnot_nodata(sediment_in(downstream,k), res_sediment_out(upstream,k))
+                enddo
 	       endif
          END IF
 	   ELSE
          IF (downstream /= 9999 .AND. downstream /= 999) THEN !George
 !write(*,*)step,id_subbas_extern(upstream),"case 1b"
-           r_qin(2,downstream)=r_qin(2,downstream) + r_qout(2,upstream) !George
+           r_qin(2,downstream)=add_ifnot_nodata(r_qin(2,downstream), r_qout(2,upstream)) !George
 	       if(dosediment.and.river_transport.eq.2) then !George
 	         do k=1,n_sed_class !George
-		       sediment_in(downstream, k)=sediment_in(downstream,k) + sediment_out(upstream,k) !George
+		       sediment_in(downstream, k)=add_ifnot_nodata(sediment_in(downstream,k), sediment_out(upstream,k)) !George
 	         enddo !George
 	       endif !George
          END IF !George
@@ -413,19 +416,19 @@ DO h=1,nt
        IF (storcap(upstream) > 0. .and. t >= damyear(upstream)) THEN
          IF (storcap(reservoir_down(upstream)) > 0. .and. t >= damyear(reservoir_down(upstream))) THEN
 !write(*,*)step,id_subbas_extern(upstream),"case 2a"
-           qlateral(step,reservoir_down(upstream))=qlateral(step,reservoir_down(upstream))+res_qout(step,upstream)
+           qlateral(step,reservoir_down(upstream))=add_ifnot_nodata(qlateral(step,reservoir_down(upstream)), res_qout(step,upstream))
 	       if(dosediment) then
 	         do k=1,n_sed_class
-	           sed_qlateral(reservoir_down(upstream),k)=sed_qlateral(reservoir_down(upstream),k)+res_sediment_out(upstream,k)
+	           sed_qlateral(reservoir_down(upstream),k) = add_ifnot_nodata(sed_qlateral(reservoir_down(upstream),k), res_sediment_out(upstream,k))
 	         enddo
 	       endif
 		 ELSE
            IF (downstream /= 9999 .AND. downstream /= 999) THEN !George
 !write(*,*)step,id_subbas_extern(upstream),"case 2b"
-             r_qin(2,downstream)=r_qin(2,downstream) + res_qout(step,upstream) !George
+             r_qin(2,downstream) = add_ifnot_nodata(r_qin(2,downstream), res_qout(step,upstream)) !George
 	         if(dosediment.and.river_transport.eq.2) then !George
 	           do k=1,n_sed_class !George
-		         sediment_in(downstream, k)=sediment_in(downstream,k) + res_sediment_out(upstream,k) !George
+		         sediment_in(downstream, k) = add_ifnot_nodata(sediment_in(downstream,k), res_sediment_out(upstream,k)) !George
 	           enddo !George
 	         endif !George
            END IF !George
@@ -433,19 +436,19 @@ DO h=1,nt
 	   ELSE
          IF (storcap(reservoir_down(upstream)) > 0. .and. t >= damyear(reservoir_down(upstream))) THEN
 !write(*,*)step,id_subbas_extern(upstream),"case 3a"
-           qlateral(step,reservoir_down(upstream))=qlateral(step,reservoir_down(upstream))+r_qout(2,upstream)
+           qlateral(step,reservoir_down(upstream)) = add_ifnot_nodata(qlateral(step,reservoir_down(upstream)), r_qout(2,upstream))
 	       if(dosediment) then
 	         do k=1,n_sed_class
-	           sed_qlateral(reservoir_down(upstream),k)=sed_qlateral(reservoir_down(upstream),k)+sediment_out(upstream,k)
+	           sed_qlateral(reservoir_down(upstream),k) = add_ifnot_nodata(sed_qlateral(reservoir_down(upstream),k), sediment_out(upstream,k))
 	         enddo
 	       endif
 		 ELSE
            IF (downstream /= 9999 .AND. downstream /= 999) THEN !George
 !write(*,*)step,id_subbas_extern(upstream),"case 3b"
-             r_qin(2,downstream)=r_qin(2,downstream) + r_qout(2,upstream) !George
+             r_qin(2,downstream) = add_ifnot_nodata(r_qin(2,downstream), r_qout(2,upstream)) !George
 	         if(dosediment.and.river_transport.eq.2) then !George
 	           do k=1,n_sed_class !George
-		         sediment_in(downstream, k)=sediment_in(downstream,k) + sediment_out(upstream,k) !George
+		         sediment_in(downstream, k) = add_ifnot_nodata(sediment_in(downstream,k), sediment_out(upstream,k)) !George
 	           enddo !George
 	         endif !George
            END IF !George
@@ -453,12 +456,13 @@ DO h=1,nt
 	   ENDIF
 	 ENDIF
    ELSE
-     IF (downstream /= 9999 .AND. downstream /= 999) THEN !George
+     IF (downstream /= 9999 .AND. downstream /= 999) THEN !if this is not the outle basin
 !write(*,*)step,id_subbas_extern(upstream),"case 4"
-       r_qin(2,downstream)=r_qin(2,downstream) + r_qout(2,upstream) !George
+        r_qin(2,downstream) = add_ifnot_nodata(r_qin(2,downstream), r_qout(2,upstream) )
+       
 	   if(dosediment.and.river_transport.eq.2) then !George
 	     do k=1,n_sed_class !George
-		   sediment_in(downstream, k)=sediment_in(downstream,k) + sediment_out(upstream,k) !George
+		   sediment_in(downstream, k) = add_ifnot_nodata(sediment_in(downstream,k), sediment_out(upstream,k)) !George
 	     enddo !George
 	   endif !George
      END IF !George
@@ -472,7 +476,7 @@ DO h=1,nt
    if (dosediment) then
 	 do k=1,n_sed_class !George
 	  IF (doreservoir) THEN
-       sedinflow_g(step,upstream,k)=sediment_in(upstream,k)+sed_qlateral(upstream,k)
+       sedinflow_g(step,upstream,k) = add_ifnot_nodata(sediment_in(upstream,k), sed_qlateral(upstream,k))
        IF (storcap(upstream) > 0. .and. t >= damyear(upstream)) THEN
          sedoutflow_g(step,upstream,k)=res_sediment_out(upstream,k)
 	   ELSE

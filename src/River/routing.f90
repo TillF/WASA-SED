@@ -350,14 +350,25 @@ IF (STATUS == 2) THEN !regular call during timestep
     if (.NOT. do_pre_outflow(i))  then        !if water outflow from current subbasins is NOT given
 
 ! Route inflow from upstream sub-basins (qin) through current sub-basin within nn days
+        if (qin(upstream) == -1) then !nodata in (prespecified) outflow of subbasin
+            qout(d:(d-1+size(hrout,dim=1)),upstream) = -1 !set entire effected period to "no data"
+            cycle
+        end if
+        
         DO ih=1,size(hrout,dim=1)
-          qout(d+ih-1,upstream)=qin(upstream)*hrout(ih,upstream)  &
+          if (qout(d+ih-1,upstream) /= -1) then !only do computation if this timestep is not affected by prior nodata
+            qout(d+ih-1,upstream)=qin(upstream)*hrout(ih,upstream)  &
               + qout(d+ih-1,upstream)
+          end if 
           
           if (dosediment) then
-              qsediment2_t(d+ih-1,1,upstream)=qin_sed(upstream)*hrout(ih,upstream)  &
+              if (qsediment2_t(d+ih-1,1,upstream) /= -1) then !only do computation if this timestep is not affected by prior nodata
+                qsediment2_t(d+ih-1,1,upstream)=qin_sed(upstream)*hrout(ih,upstream)  &
                   + qsediment2_t(d+ih-1,1,upstream)
-          end if
+               end if 
+           end if
+              
+        if (qout(d+ih-1,upstream) == -1) cycle !no data, don't do further calculations
 ! Transmission losses by evaporation in river
 ! river width for given discharge (estimated according to global
 ! relationship given by Leopold, 1994 (Fig 8.10) [m]
@@ -381,7 +392,7 @@ IF (STATUS == 2) THEN !regular call during timestep
 
 ! Assign outflow as inflow into the next downstream sub-basin
 ! and add possible inflow from other upstream sub-basins
-        IF (doreservoir) THEN
+        IF (doreservoir .AND. qout(d,upstream)/= -1) THEN
           CALL reservoir (2,upstream,idummy)
           qout(d,upstream) = res_qout(d,upstream) ! replace qout with reservoir outflow
         END IF
@@ -389,9 +400,17 @@ IF (STATUS == 2) THEN !regular call during timestep
     END IF ! water outflow from current subbasin given?
 
 	IF (downstream /= 9999 .AND. downstream /= 999) THEN
-      qin(downstream)=qin(downstream) + qout(d,upstream) !the downstream subbasin receives what has been computed for the upstream basin
+        if (qout(d,upstream)/= -1 .AND. qin(downstream)/=1 ) then
+            qin(downstream)=qin(downstream) + qout(d,upstream) !the downstream subbasin receives what has been computed for the upstream basin
+        else
+            qin(downstream) = -1 !mark as "no data"
+        end if
       if (dosediment) then
-        qin_sed(downstream)=qin_sed(downstream) + qsediment2_t(d,1,upstream) 
+        if (qsediment2_t(d,1,upstream)/= -1 .AND. qin_sed(downstream)/=1 ) then
+         qin_sed(downstream)=qin_sed(downstream) + qsediment2_t(d,1,upstream) 
+        else
+         qin_sed(downstream)= -1  !mark as "no data" 
+        end if 
       end if
     END IF
 

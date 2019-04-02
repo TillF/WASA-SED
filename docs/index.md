@@ -1032,8 +1032,8 @@ Parameter File | Content
 ```river.dat```	| Specification of river parameters (for routing scheme 2 and 3)
 ```response.dat``` |	Specification of time response parameters (for routing scheme 1)
 ```bedload.dat```	| Specification of bedload data (for routing scheme 3)
-```sub-basin_out.dat``` (optional) | pre-specification of outflow of selected sub-basins
-```sub-basin_outsed.dat```	(optional) | pre-specification of sediment output of selected sub-basins
+```subbasin_out.dat``` (optional) | pre-specification of outflow of selected sub-basins
+```subbasin_outsed.dat```	(optional) | pre-specification of sediment output of selected sub-basins
 ```transposition.dat``` (optional)	| Specification of additional water fluxes between sub-basins
 ```river_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
 
@@ -1131,7 +1131,7 @@ Subasin-ID, D50 (m)
 
 Example: The river stretch in the sub-basin with the Map-ID of 49 has a riverbed gradation with a D50 value of 0.048 m.
 
-**5)** ```sub-basin_out.dat``` <br>
+**5)** ```subbasin_out.dat``` <br>
 (optional)
 
 ```
@@ -1148,11 +1148,11 @@ Date	Timestep	Sub-basin-ID.
 *Timestep*: timestep (not interpreted in daily resolution, 1..24 for hourly resolution)<br>
 *Subasin-ID*: Map-ID of sub-basin
 
-This optional file allows specifying the water output of selected sub-basins. If this file is not found in the folder Time_series, all sub-basins are treated regularly. Otherwise, any outflow that is specified in this file is used directly as an output of the respective sub-basin – no computations are performed within this basin (evaporation, groundwater, river routing, etc.). WASA reads data from this file sequentially, starting from start of simulation and every calendar year (e.g. chunks of 365 days). The subsequent entries are assumed without gaps and not checked for completeness.
+This optional file allows specifying the water output of selected sub-basins. If this file is not found in the folder Time_series, all sub-basins are treated regularly. Otherwise, any outflow that is specified in this file is used directly as an output of the respective sub-basin – no computations are performed within this basin (evaporation, groundwater, river routing, etc.). WASA reads data from this file sequentially, starting from start of simulation and every calendar year (e.g. chunks of 365 days). Warning: The subsequent rows are assumed without gaps and not checked for completeness in the time series. "-1" is regarded as "no data" and will lead to "no data" in the riverflow in all affected downstream subbasins.
 
 Example: Sub-basin 4 has pre-specified discharge of 0.5 m³/s for 1 Sep 2005.
 
-**6)** ```sub-basin_outsed.dat``` <br> 
+**6)** ```subbasin_outsed.dat``` <br> 
 (optional)
 
 ```
@@ -1170,7 +1170,7 @@ Date	Timestep	Sub-basin-ID.
 *Timestep*:	timestep (not interpreted in daily resolution, 1..24 for hourly resolution) <br>
 *Subasin-ID*: Map-ID of sub-basin
 
-This optional file allows specifying the sediment output of selected sub-basins. If this file is not found in the folder ```Time_series```, all sub-basins are treated regularly. Otherwise, any sediment output that is specified in this file is used directly as an output of the respective sub-basin – no sediment related computations are performed within this basin. WASA reads data from this file sequentially, starting from start of simulation and every calendar year (e.g. chunks of 365 days). The subsequent entries are assumed without gaps and not checked for completeness.
+This optional file allows specifying the sediment output of selected sub-basins. If this file is not found in the folder ```Time_series```, all sub-basins are treated regularly. Otherwise, any sediment output that is specified in this file is used directly as an output of the respective sub-basin – no sediment related computations are performed within this basin. WASA reads data from this file sequentially, starting from start of simulation and every calendar year (e.g. chunks of 365 days). Warning: The subsequent rows are assumed without gaps and not checked for completeness in the time series. "-1" is regarded as "no data" and will lead to "no data" in the sediment flux in all affected downstream subbasins.
 
 Example: Sub-basin 4 has pre-specified sediment output of 0.5 t/d for 1 Sep 2005, distributed among 3 particle size classes with the fractions 0.3, 0.2 and 0.5.
 
