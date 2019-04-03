@@ -299,7 +299,7 @@ contains
             snow_file_hdle=15
             OPEN(snow_file_hdle,FILE=snow_conds_file//trim(suffix), STATUS='replace')
             WRITE(snow_file_hdle,'(a)') 'snow storage (for analysis or model re-start)'
-            WRITE(snow_file_hdle,'(11a)')'Subbasin', char(9),'LU', char(9), 'horizon' , char(9),&
+            WRITE(snow_file_hdle,'(11a)')'Subbasin', char(9),'LU', char(9), 'TC' , char(9),&
                 'storage [m]', char(9), 'energy [kJ/m²]', char(9), 'albedo [-]'         !tab separated output
 
             digits=ceiling(log10(max(1.0, maxval(snowWaterEquiv), maxval(snowEnergyCont), maxval(snowAlbedo))))+1    !Till: number of pre-decimal digits required
