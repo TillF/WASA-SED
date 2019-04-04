@@ -1491,7 +1491,7 @@ contains
         end if
         IF (f_flag) THEN    !if output file is enabled
             WRITE(11,'(a)') headerline
-            WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep'//char(9)//'Subbasin'//char(9)//'LU'//char(9)//'TC'char(9)//'value'
+            WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep'//char(9)//'Subbasin'//char(9)//'LU'//char(9)//'TC'//char(9)//'value'
             CLOSE(11)
         ELSE                !delete any existing file, if no output is desired
             CLOSE(11,status='delete')
