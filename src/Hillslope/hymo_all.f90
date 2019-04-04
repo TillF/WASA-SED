@@ -486,12 +486,12 @@ SUBROUTINE hymo_all(STATUS)
         !TC-wise output
         CALL open_subdaily_output_TC(f_snowEnergyCont,'snowEnergyCont.out','Output file TC-wise snow energy content (kJ/m2)')
         CALL open_subdaily_output_TC(f_snowWaterEquiv,'snowWaterEquiv.out','Output file TC-wise snow water equivalent (m)')
-        CALL open_subdaily_output_TC(f_snowAlbedo,'snowAlbedo.out','Output file TC-wise fraction of liquid water (-)')
-        CALL open_subdaily_output_TC(f_snowCover,'snowCover.out','Output file TC-wise fraction of liquid water (-)')
+        CALL open_subdaily_output_TC(f_snowAlbedo,'snowAlbedo.out','Output file TC-wise fraction albedo (-)')
+        CALL open_subdaily_output_TC(f_snowCover,'snowCover.out','Output file TC-wise areal fraction of snow cover (-)')
 
         CALL open_subdaily_output_TC(f_snowTemp,'snowTemp.out','Output file TC-wise snow temperature (°C)')
         CALL open_subdaily_output_TC(f_surfTemp,'surfTemp.out','Output file TC-wise snow surface temperature (°C)')
-        CALL open_subdaily_output_TC(f_liquFrac,'liquFrac.out','Output file TC-wise fraction of liquid water (-)')
+        CALL open_subdaily_output_TC(f_liquFrac,'liquFrac.out','Output file TC-wise fraction of liquid water in snowpack (-)')
         CALL open_subdaily_output_TC(f_fluxPrec,'fluxPrec.out','Output file TC-wise precipitation mass flux (m/s)')
         CALL open_subdaily_output_TC(f_fluxSubl,'fluxSubl.out','Output file TC-wise sublimation mass flux (m/s)')
         CALL open_subdaily_output_TC(f_fluxFlow,'fluxFlow.out','Output file TC-wise meltwater flux (m/s)')
@@ -513,12 +513,7 @@ SUBROUTINE hymo_all(STATUS)
 
     !-------------------------------------------------------------------
     IF (STATUS == 1) THEN
-        !  DO i_subbas=1,subasin
-        !!** Initialization for one year
-        !!** Initialize seaflow variables
-        !    seaflow(i_subbas) = 0.        !Till: never used
-        !  END DO
-        if (doacud) CALL lake(1,dummy)
+         if (doacud) CALL lake(1,dummy)
         !Till: set all arrays that contain (daily) data of the whole year to zero (all refer to subbasins?)
         sediment_subbasin_t=0.
         water_subbasin_t=0.
@@ -1496,7 +1491,7 @@ contains
         end if
         IF (f_flag) THEN    !if output file is enabled
             WRITE(11,'(a)') headerline
-            WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep'//char(9)//'Subbasin'//char(9)//'LU'//char(9)//'TC'
+            WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep'//char(9)//'Subbasin'//char(9)//'LU'//char(9)//'TC'char(9)//'value'
             CLOSE(11)
         ELSE                !delete any existing file, if no output is desired
             CLOSE(11,status='delete')

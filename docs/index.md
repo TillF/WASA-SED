@@ -469,7 +469,7 @@ snowAlbedo | Snow albedo \[-]
 snowCover | Snow cover \[-]
 snowTemp | Snow temperature \[°C]
 surfTemp | Snow surface temperature \[°C]
-liquFrac | Fraction of liquid water \[-]
+liquFrac | Fraction of liquid water in snowpack \[-]
 fluxPrec | Precipitation flux \[m/s]
 fluxFlow | Melt water flux \[m/s]
 fluxSubl | Sublimation flux \[m/s]
@@ -524,25 +524,25 @@ Parameter File |	Content
 ```gw_storage.stat, intercept_storage.stat, soil_moisture.stat, snow_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
 
 
-The spatial conceptualisation of the WASA model is explained in detail in [Güntner (2002)](#guentner-2002), and are only shortly summarised in this manual. The following spatial modelling units were identified ([Güntner 2002](#guentner-2002), p. 33):
+The spatial conceptualisation of the WASA model is explained in detail in [Güntner (2002), p. 33](#guentner-2002). The following spatial modelling units are used identified:
 
--	*Sub-Basins:* ca. 50-1000 km<sup>3</sup>, topologically referenced, defined e.g. by the location of river gauging stations, or large reservoirs with a storage capacity of more than 50x106 m<sup>3</sup> and the confluence of major rivers;
+-	*Sub-basins:* ca. 50-1000 km<sup>3</sup>, topologically referenced, defined e.g. by the location of river gauging stations, or large reservoirs with a storage capacity of more than 50x10<sup>6</sup> m<sup>3</sup> and the confluence of major rivers;
 
--	*Landscape units (LUs):* based on the LU concept (e.g. SOil and TERrain digital database, [FAO, 1993](#fao-1993)), i.e. structure of the landscape according to geological, topographic and soil characteristics with similarity in major landform, general lithology, soil associations and toposequences, georeferenced;
+-	*Landscape units (LUs):* based on the LU concept (e.g. SOil and TERrain digital database, [FAO, 1993](#fao-1993)), i.e. structure of the landscape according to geological, topographic and soil characteristics with similarity in major landform, general lithology, soil associations and toposequences. Characterized only by their fractions in each sub-basin, not georeferenced;
 
--	*Terrain components (TCs):* fraction of area of a landscape unit with similarity in slope gradients, position within toposequence (highlands, slopes and valley bottoms), soil association;
+-	*Terrain components (TCs):* part of a landscape unit with similarity in slope gradients, position within toposequence (e.g. highlands, slopes and valley bottoms), soil association; Characterized only by their fractions and position along hillslope in each landscape unit, not georeferenced;
 
--	*Soil vegetation components (SVCs):* fraction of area of a terrain component, characterised by specific combination of soil type, and vegetation/land-cover class 
+-	*Soil vegetation components (SVCs):* part of a terrain component with specific combination of soil type, and vegetation/land-cover class; characterized only by their fractions in each TC, not georeferenced; 
 
--	*Soil profile:* descriptions of characteristic soil horizons.
+-	*Soil profile:* descriptions of characteristic sequence of soil horizons.
 
-The model domain is divided into sub-basins; each sub-basin has an individual Map-ID. This Map-ID has to be a unique number; the employed numbering scheme does not have to be continuous (i.e. with three sub-basins, they do not have to be named Map-ID 1, 2 and 3, but could be named e.g. 100, 500, 877). The following paragraphs explain each of the input files in turns.
+The model domain is divided into sub-basins; each sub-basin has an individual Map-ID. This Map-ID has to be a unique number; the employed numbering scheme does not have to be continuous. The following paragraphs explain each of the respective input files.
 
 **1)** ```hymo.dat```<br>
 \[can be generated with the lumpR package\]
 
 ```
-# Specification of the sub-basins and their total number, type & areal fraction of LU units
+# Specification of the sub-basins and their total number, type & areal fraction of LUs
 Subbasin-ID [-], Area[km**2],  nbr[-],  LU-IDs[-], areal fraction of LU[-]
 49	  10    4   19   87   90  135  0.357  0.147  0.214  0.282
 50	  15    2   19   87   0.827  0.173
@@ -572,7 +572,7 @@ When the area of a sub-basin is set to zero, the soilwater-calculations in this 
 \[can be generated with the lumpR package\]
 
 ```
-# Specification of LU units										
+# Specification of LUs										
 LU-ID [-], No._of_TC[-], TC1[-], TC2[-], TC3[-], kfsu[mm/d], length[m], meandep[mm], maxdep[mm], riverbed[mm], gwflag[0/1], gw_dist[mm], frgw_delay[day]
 1	3	7	49	   11	100	601	  -1	-1	1500	0	0	1
 2	1	2	100	1963.7   -1	 -1	1500	 0	   0	1
@@ -586,11 +586,11 @@ LU-ID [-], No._of_TC[-], TC1[-], TC2[-], TC3[-], kfsu[mm/d], length[m], meandep[
 *TC3*:			ID of a third terrain component<br>
 ...			    more TC-IDs according to field 2<br>
 *kfsu*:			Hydraulic conductivity of bedrock \[mm/d]<br>
-*length*:			Mean  slope length in LU unit \[m]<br>
+*length*:			Mean  slope length in LU\[m]<br>
 *meandep*:		Mean maximum depth of soil zone \[mm]<br>
 *maxdep*:			Maximum depth of alluvial soil zone \[mm]<br>
 *riverbed*:		Depth of river bed below terrain component \[mm]<br>
-*gw_flag*:		Flag for LU unit \[0: no groundwater, 1: with groundwater] <br>
+*gw_flag*:		Flag for LU \[0: no groundwater, 1: with groundwater] <br>
 *gw_dist*:			Initial depth of groundwater below surface \[mm] (ignored, unless gw_flag=99)<br>
 *frgw_delay*:		Storage coefficient for groundwater outflow \[day]<br>
 
@@ -1770,7 +1770,7 @@ Beware: all other output files are overwritten in this case. For file structure,
 <a name="4-2-output-of-the-river-module"></a>
 ### 4.2 Output of the river module
 
-The river routine calculates the water and sediment discharge in each river stretch. Currently, the output comprises the water discharge and storage values for each timestep, and the linear response function, when river routing scheme 1 is selected. The following files (see [Table 14](#table-14)) are generated as daily time series, if enabled and depending on the selected routing scheme.
+The river routine calculates the water and sediment discharge in each river stretch. The following files (see [Table 14](#table-14)) are generated as time series, if enabled, depending on the selected routing scheme.
 
 <a name="table-14"></a>
 **Table 14:** Output files of the river module.

@@ -46,7 +46,7 @@ module snow_h
 
     real, pointer :: snowTemp(:,:,:)               !Mean temperatur of the snow pack [°C]
     real, pointer :: surfTemp(:,:,:)               !Snow surface temperature [°C]
-    real, pointer :: liquFrac(:,:,:)               !Fraction of liquid water (mass water / (mass water + mass ice)); Unit: Dimensionless, range 0...1
+    real, pointer :: liquFrac(:,:,:)               !Fraction of liquid water in snowpack (mass water / (mass water + mass ice)); Unit: Dimensionless, range 0...1
     real, pointer :: fluxPrec(:,:,:)               !Precipitation mass flux [m/s]
     real, pointer :: fluxSubl(:,:,:)               !Sublimation mass flux [m/s]
     real, pointer :: fluxFlow(:,:,:)               !Meltwater flux [m/s]
