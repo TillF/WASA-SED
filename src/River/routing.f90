@@ -180,24 +180,27 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 
     !remaining part of triangle that ends midway in interval
     if (prout(i,2) /= 0.) then
-        temp4 = j - (prout(i,1) + prout(i,2)) !fraction of interval covered by triangle tail
-        if (temp4 == 0) temp4=1 !special case: triangle ends exactly at interval border
+        !temp4 = j - (prout(i,1) + prout(i,2)) !fraction of interval covered by triangle tail
+        !strange effect in release mode: 7.63 and 20.37 produce wrong result 
+        temp4 =  - (prout(i,1) + prout(i,2)-j) !fraction of interval covered by triangle tail
+        
+        if (temp4 == 0) temp4=1. !special case: triangle ends exactly at interval border
     
-            temp2 = 1 - (j-1-prout(i,1)) / prout(i,2) !value AT interval border before j
+        temp2 = 1 - (j-1-prout(i,1)) / prout(i,2) !value AT interval border before j
          
-            temp3 =   (temp2 + 0)/2 * temp4
-            hrout_intern(j,i) = temp3  !recession parts of internal and external UHG are identical
-            hrout       (j,i) = temp3
+        temp3 =   (temp2 + 0)/2 * temp4
+     
+        hrout_intern(j,i) = temp3  !recession parts of internal and external UHG are identical
+        hrout       (j,i) = temp3
     end if
             
     hrout(:,i)        = hrout(:,i)        / sum(hrout(:,i))          !normalize response function
     hrout_intern(:,i) = hrout_intern(:,i) / sum(hrout_intern(:,i))   !normalize response function
 
-
-        if (sum(hrout(:,i))==0 .OR. sum(hrout_intern(:,i))==0 .OR. any(hrout<0) .OR. any(hrout_intern<0)) then
-            write(*,*) "Error when computing response functions: Please send response.dat to the developers."
-            stop
-        end if
+    if (sum(hrout(:,i))==0 .OR. sum(hrout_intern(:,i))==0 .OR. any(hrout(:,i)<0) .OR. any(hrout_intern(:,i)<0)) then
+        write(*,"(A)") "Error when computing response functions: Please send response.dat to the developers."
+        stop
+    end if
 
   END DO
 
@@ -219,7 +222,8 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
 	        WRITE (11,fmtstr)  &
             id_subbas_extern(i),prout(i,1),prout(i,2),(hrout_intern(ih,i),ih=1, size(hrout_intern,dim=1))
       END DO
-   end if
+  end if
+
 
 ! CALL Reservoir Sedimentation and Management Modules
   IF (doreservoir) THEN
