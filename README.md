@@ -43,7 +43,7 @@ To specify your desired compiler or adjust the compiler flags, you have to alter
 Reference
 ---------
 
-E. Mueller, A. Güntner, T. Francke (2010): Modelling sediment export, retention and reservoir sedimentation in drylands with the WASA-SED model Geosci. Model Dev., 275-291, 3(1) , url: http://www.geosci-model-dev.net/3/275/2010/, doi:10.5194/gmd-3-275-2010
+E.N. Mueller, A. Güntner, T. Francke, G. Mamede (2010): Modelling sediment export, retention and reservoir sedimentation in drylands with the WASA-SED model Geosci. Model Dev., 275-291, 3(1) , url: http://www.geosci-model-dev.net/3/275/2010/, doi:10.5194/gmd-3-275-2010
 
 Auxiliary Tools
 ---------
