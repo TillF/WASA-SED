@@ -1361,7 +1361,7 @@ Example: This optional file allows specifying hydraulic parameters for the calcu
 ```
 # Specification of sedimentation parameters of the sub-basin’s reservoir
 Subbasin-ID, dry_dens[ton/m**3], factor_actlay[-]
-60	1.5	1	42
+60	1.5	1
 ```
 
 *Subbasin-ID*: Map-ID of sub-basin <br>
@@ -1810,7 +1810,7 @@ Year  Day    dt   9          10             11
 *Timestep*: Timestep as specified in the ```do.dat``` in \[hours] <br>
 *Time series*: water discharge in river stretch in m<sup>3</sup>/s
 
-Example: After each time step, e.g. hourly, the discharge is given for each sub-basin, e.g. Sub-basin No. 9 has a discharge of 6.313 m<sup>3</sup>/s, Sub-basin No. 10 of 1.797 m<sup>3</sup>/s and Sub-basin No. 11 of 8.922 m<sup>3</sup>/s after 1 hours.
+Example: After each time step (i.e. hour or day), the discharge is given for each sub-basin, e.g. Sub-basin No. 9 has a discharge of 6.313 m<sup>3</sup>/s, Sub-basin No. 10 of 1.797 m<sup>3</sup>/s and Sub-basin No. 11 of 8.922 m<sup>3</sup>/s after 1 hours.
 
 <a name="4-3-output-of-the-reservoir-module"></a>
 ### 4.3 Output of the reservoir module
