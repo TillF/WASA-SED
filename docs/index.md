@@ -765,8 +765,8 @@ Soil-ID[-], number(horizons)[-], res[Vol-], PWP[-], FK2.5[-], FK1.8[-], nFK[-], 
 *saturated*:	saturated water content (*horizons*) \[Vol. fraction]<br>
 *depth*:	thickness of soil horizon (*horizons*) \[mm]<br>
 *ks*:		saturated hydraulic conductivity (*horizons*) \[mm/d]<br>
-*suction*:	suction at the wetting front (*horizons*) \[mm]<br>
-*pore-size-index*:	pore-size index (*horizons*) \[-]<br>
+*suction*:	suction at the wetting front (after Green & Ampt) (*horizons*) \[mm]<br>
+*pore-size-index*:	pore-size index (after Green & Ampt) (*horizons*) \[-]<br>
 *bubblepressure*:		bubbling pressure (=1/alpha of van Genuchten) (*horizons*) \[cm]<br>
 *coarse\_frag*:		fraction of coarse fragments (*horizons*) \[Vol. fraction]<sup>1</sup><br>
 *shrinks*:		flag for soil structure (*horizons*) \[0/1, currently not used, set to 0]<br>
