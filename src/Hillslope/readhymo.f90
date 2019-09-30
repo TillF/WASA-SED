@@ -31,7 +31,7 @@
     INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
     INTEGER :: soilid            !internal id of current soil
     INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter    ! counters
-    INTEGER :: i_lu,id_tc_type !, svc_id,i_subbas,i_svc,i_soil,i_veg        ! ids of components in work
+    INTEGER :: i_lu,id_tc_type, check1, check2, check3 !, svc_id,i_subbas,i_svc,i_soil,i_veg        ! ids of components in work
 
     INTEGER :: lu_temp(maxsoter)        !auxiliary arrays for reading
     REAL    :: frac_lu_temp(maxsoter)
@@ -358,9 +358,13 @@
     i=1
     DO WHILE (.TRUE.) !read till end of file
         READ(11,'(a)',IOSTAT=istate) cdummy
-        if (istate/=0) then
-            if ((h-4<ntcinst)  ) then    !premature end of file
-                write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' x 3 lines (#TC-LU-SUBBAS-combinations) expected'
+        if (k /= 0) then
+            if ((k == 7)  ) then    !inconsistent line scheme
+                write(*,'(a,i0,a,i0,a)')'ERROR (soil_vegetation.dat): Inconsistent IDs in block lines ', h-3,' - ', h-1,'. Check IDs and 3 headerlines.'
+                stop
+            endif    
+            if ((h-4 < ntcinst)  ) then    !premature end of file
+                write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ', ntcinst,' x 3 lines (#TC-LU-SUBBAS-combinations) + 3 headerlines expected'
                 stop
             else
                 if (i-1/=ntcinst) then    !less entities read than expected
@@ -405,7 +409,7 @@
 
         dummy1=GetNumberOfSubstrings(cdummy)-5 !Till: count number of fields (ie SVCs) specified for this combination
         if (dummy1 > maxsoil) then
-            write (*,'(a,i0,a,i0,a)')'ERROR: Line ',h,' in soil_vegetation.dat contains ',dummy1,' soil types - more than specified in maxdim.dat or assumed by default.'
+            write (*,'(a,i0,a,i0,a)')'ERROR: Line ',h,' in soil_vegetation.dat contains ', dummy1,' soil types - more than specified in maxdim.dat or assumed by default.'
             stop
         end if
         k=0
@@ -420,13 +424,18 @@
             READ(cdummy,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
                 rocky(i),nbr_svc(i),(id_soil_intern(c,i),c=1,dummy1)    !!ii: nbr_svc, rocky, id_soil_intern sind feststehende Parameter für einen TC-Typ und sollten nur einmal pro TC-typ gespeichert werden
             k=k+istate
-            READ(11,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
+            READ(11,*,IOSTAT=istate) check1, check2, check3,  &
                 rocky(i),nbr_svc(i),(id_veg_intern(c,i),c=1,dummy1)
             k=k+istate
+            if (check1 /= luse_subbas(i) .OR. check2 /= luse_lu(i) .OR. check3 /= luse_tc(i)) k = 7 !flag an error if there is an inconsistency of IDs in first three cols
+            
             h=h+1 !count lines
-            READ(11,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
+   
+            READ(11,*,IOSTAT=istate) check1, check2, check3, &
                 rocky(i),nbr_svc(i),(frac_svc(c,i),c=1,dummy1)
             k=k+istate
+            if (check1 /= luse_subbas(i) .OR. check2 /= luse_lu(i) .OR. check3 /= luse_tc(i)) k = 7 !flag an error if there is an inconsistency of IDs in first three cols
+            
             h=h+1 !count lines
             i=i+1 !count instances that have been read
         end if
@@ -435,7 +444,6 @@
             write(*,'(a,i0)')'ERROR (soil_vegetation.dat): Format error or unexpected end in line ',h
             stop
         end if
-
 
     END DO
 
