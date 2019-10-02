@@ -355,7 +355,7 @@
     id_soil_intern=0
     id_veg_intern =0
 
-    i=1
+    i=1 !count instances that have been read
     DO WHILE (.TRUE.) !read till end of file
         READ(11,'(a)',IOSTAT=istate) cdummy
         if (k /= 0) then
@@ -401,8 +401,8 @@
             end if
         end if
 
-        if (i > ntcinst  ) then    !more lines than expected
-            write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ',ntcinst,' x 3 lines (#TC-LU-SUBBAS-combinations) expected'
+        if (i-1 > ntcinst  ) then    !more lines than expected
+            write(*,'(a,i0,a)')'ERROR (soil_vegetation.dat): ', ntcinst,' x 3 lines (#TC-LU-SUBBAS-combinations) expected, found more'
             stop
         end if
 
