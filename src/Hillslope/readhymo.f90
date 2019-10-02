@@ -358,7 +358,7 @@
     i=1 !count instances that have been read
     DO WHILE (.TRUE.) !read till end of file
         READ(11,'(a)',IOSTAT=istate) cdummy
-        if (k /= 0) then
+        if (k /= 0 .or. istate /=0) then
             if ((k == 7)  ) then    !inconsistent line scheme
                 write(*,'(a,i0,a,i0,a)')'ERROR (soil_vegetation.dat): Inconsistent IDs in block lines ', h-3,' - ', h-1,'. Check IDs and 3 headerlines.'
                 stop
