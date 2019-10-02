@@ -13,14 +13,14 @@ subroutine allocate_general()
 
     INTEGER :: istate
    	allocate( &
-     temp(366,subasin), &
-	 precip(366,subasin), &
-	 preciph(366*24,subasin), &
-	 pet(366,subasin), &
-	 rad(366,subasin), &
-	 rhum(366,subasin), &
-	 wind(366,subasin), &
-	 do_pre_outflow(subasin), &
+     temp(366,subasin), & !ab r
+	 precip(366,subasin), & !ab r
+	 preciph(366*24,subasin), & !abc r
+	 pet(366,subasin), & !ab r
+	 rad(366,subasin), & !ab r
+	 rhum(366,subasin), & !ab r
+	 wind(366,subasin), & !ab r
+	 do_pre_outflow(subasin), & !a r
       STAT = istate)
 
 	if (istate/=0) then
@@ -28,6 +28,22 @@ subroutine allocate_general()
 		stop
 	end if
     do_pre_outflow=.true.
+
+    contains
+    subroutine mem_usage() !estimate required memory and identify most important saving options
+        integer(kind=4) :: total_required !kbytes required
+        integer(kind=4) a, ab, abc !auxiliary variables for computing similarly structured variables
+
+        if (.not. do_mem_diagnostics) return
+        a = subasin
+        ab = a * 366
+        abc = ab * 24
+        total_required = nint(  (1.0 * a + 6 * ab + 1 * abc) * SIZEOF(1.1) / 1024) !size in kBytes
+        write(*,*) 'Memory requirements general [kB]: ', total_required
+        write(*,*) ' influence rates:'
+        write(*,*) '   number of subbasins : ', nint ((1.0 + 6*ab/a + 1*abc/a)* SIZEOF(1.1) /a )
+
+    end subroutine mem_usage
 
 end subroutine allocate_general
 
