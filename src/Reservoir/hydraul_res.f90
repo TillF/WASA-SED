@@ -79,11 +79,12 @@ IF (reservoir_balance == 1) THEN
         vol_bat(l,upstream))/(vol_bat(l+1,upstream)- vol_bat(l,upstream))*  &
         (elev_bat(l+1,upstream)-elev_bat(l,upstream))
     END IF
-    if (damelev0(step,upstream) == -1.) then !flag as "not set"
-        write(*,*)"ERROR: actual volume beyond range of cav.dat"
-        stop
-    end if
   END DO
+  if (damelev0(step,upstream) == -1.) then !flag as "not set"
+    write(*,*)"ERROR: actual volume beyond range of cav.dat"
+    !damelev0(step,upstream)= 1.
+    stop
+  end if
 ENDIF
 
 damelev=(damelevact(upstream)+damelev0(step,upstream))/2.

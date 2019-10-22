@@ -205,7 +205,7 @@ storcap(:)=0.
 	  END IF
 
 	  ! check parameters
-	  if(vol0(i) < 0 .and. vol0(i) /= -999.  .and. vol0(i) /= -9999.) then
+	  if(vol0(i) < 0 .and. vol0(i) /= -999.) then
         write(*,'(A,i3,A)') 'ERROR: Parameter vol0 in reservoir.dat is outside of plausible range (0 < vol0) for reservoir / subbasin id ', id_subbas_extern(i), '!'
         stop
 	  end if
@@ -240,11 +240,11 @@ storcap(:)=0.
 
       forma_factor(i)=1.e3*storcap(i)/((maxlevel(i)-minlevel(i))**3)
       IF (vol0(i) /= -999.) THEN
-        vol0(i)=vol0(i)/1.e3
+        vol0(i)=vol0(i)/1.e3 !convert in 10**6 m**3
       END IF
-      storcap(i)=storcap(i)/1.e3
-      damdead(i)=damdead(i)/1.e3
-      damalert(i)=damalert(i)/1.e3
+      storcap(i)=storcap(i)/1.e3 !convert in 10**6 m**3
+      damdead(i)=damdead(i)/1.e3 !convert in 10**6 m**3
+      damalert(i)=damalert(i)/1.e3 !convert in 10**6 m**3
   END DO
   CLOSE (11)
 
@@ -691,7 +691,7 @@ IF (STATUS == 1) THEN
            IF (vol0(i) /= -999. .and. vol0(i) /= -9999.) THEN 
              volact(1,i)=vol0(i) !Till: initial volume [1e6 m^3]
            ELSE
-             volact(1,i)=storcap(i)/5.
+             volact(1,i)=storcap(i)/5. !Till: initial volume as 20% of storage cap [1e6 m^3]
            END IF
        end if    
        daystorcap(1,i)=storcap(i)
