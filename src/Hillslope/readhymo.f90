@@ -1850,14 +1850,17 @@ end if ! do_snow
     integer, INTENT(IN) :: external_ids(:) !array holding external IDs of entities to check (e.g. SVCs, vegetation classes, ...)
     integer  :: missing(size(external_ids, dim=1)), n_missing = 0, k
     real  :: dummy(size(external_ids, dim=1), 4)
-    real :: test_ar(nveg)
+    !real, pointer :: test_ar(:)
+    real :: test_ar(max(nveg, nsvc))
 
 
     dummy = .0
 
     DO i = tstart, tstop !check completeness
         DO j=1,subasin
-            test_ar = calc_seasonality2(j, i, 1, seasonality_array, dummy)            !compute rootdep of first day (actual values are not important, therefore we simply use dummy)
+            test_ar=0.
+            !test_ar => calc_seasonality2(j, i, 1, seasonality_array, dummy)            !compute seasonal value of first day (actual values are not important, therefore we simply use dummy)
+            test_ar(1:size(external_ids, dim=1)) = calc_seasonality2(j, i, 1, seasonality_array, dummy)            !compute seasonal value of first day (actual values are not important, therefore we simply use dummy)
 
             IF (any(test_ar == tiny(test_ar))) then
                 IF (all(test_ar == tiny(test_ar))) then

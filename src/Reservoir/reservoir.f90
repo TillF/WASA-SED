@@ -180,6 +180,8 @@ storcap(:)=0.
   READ(11,*)
   istate=0
   j=2 !for counting lines
+  n_reservoir=0
+  res_index = 0
 
   DO WHILE (.TRUE.)
 	  READ (11,'(A)', IOSTAT=istate)fmtstr
@@ -187,7 +189,7 @@ storcap(:)=0.
 	  j=j+1
 	  READ (fmtstr,*, IOSTAT=istate)dummy1
 
-      i=which1(id_subbas_extern == dummy1)
+      i=which1(id_subbas_extern == dummy1) !find corresponding internal subbasin ID
 
 	  IF (i==0) THEN
 		  WRITE (*,'(A,I0,A)') 'WARNING: unknown upstream subbasin ID ', dummy1,' in reservoir.dat, ignored.'
@@ -205,10 +207,18 @@ storcap(:)=0.
 	  END IF
 
 	  ! check parameters
+	  if(vol0(i) < 0 .and. vol0(i) /= -999.) then
+        write(*,'(A,i3,A)') 'ERROR: Parameter vol0 in reservoir.dat is outside of plausible range (0 < vol0) for reservoir / subbasin id ', id_subbas_extern(i), '!'
+        stop
+	  end if
+	  if(vol0(i) > storcap(i)) then
+        write(*,'(A,i3,A)') 'ERROR: Parameter vol0 in reservoir.dat must not be larger than storage capacity for reservoir / subbasin id ', id_subbas_extern(i), '!'
+        stop
+      end if
 	  if(damb(i) > .9 .or. damb(i) < 0.) then
         write(*,'(A,i3,A)') 'ERROR: Parameter damb in reservoir.dat is outside of plausible range (0 < damb <= 0.9) for reservoir / subbasin id ', id_subbas_extern(i), '!'
         stop
-	  end if
+      end if
       if(damq_frac(i) > 1. .or. (damq_frac(i) < 0. .and. damq_frac(i) > -998.)) then
         write(*,'(A,i3,A)') 'WARNING: Parameter damq_frac in reservoir.dat is outside of plausible range (0 <= damq_frac <= 1 or eq. -999) for reservoir / subbasin id ', id_subbas_extern(i), '! During calibration this might make sense.'
 	  end if
@@ -224,7 +234,9 @@ storcap(:)=0.
 	  end if
 
 	  ! set reservoir flag indicating that for subbasin i a reservoir exists and has been initialised
-	  res_flag(i) = .true.
+	  res_flag(i)  = .true.
+	  n_reservoir  = n_reservoir+1 !count reservoirs
+	  res_index(i) = n_reservoir  !note indices to corresponding entries in large arrays
 
 !Ge "storcap" and "vol0" are read in 1000m**3 and after that they are converted into 10**6 m**3  &
 !Ge damarea renamed to maxdamarea  &
@@ -232,13 +244,23 @@ storcap(:)=0.
 
       forma_factor(i)=1.e3*storcap(i)/((maxlevel(i)-minlevel(i))**3)
       IF (vol0(i) /= -999.) THEN
-        vol0(i)=vol0(i)/1.e3
+        vol0(i)=vol0(i)/1.e3 !convert in 10**6 m**3
       END IF
-      storcap(i)=storcap(i)/1.e3
-      damdead(i)=damdead(i)/1.e3
-      damalert(i)=damalert(i)/1.e3
+      storcap(i)=storcap(i)/1.e3 !convert in 10**6 m**3
+      damdead(i)=damdead(i)/1.e3 !convert in 10**6 m**3
+      damalert(i)=damalert(i)/1.e3 !convert in 10**6 m**3
   END DO
   CLOSE (11)
+
+! allocate reservoir arrays, now that their required dimension is known
+ allocate( &
+  dayvol_bat(366*nt,nxsection_res,n_reservoir), &
+         STAT = istate)
+    if (istate/=0) then
+        write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in reservoir-module, second allocation.'
+        stop
+    end if
+
 
 ! Check lateral inflow directly into the subbasins' reservoir
   latflow_res(1:subasin)=0
@@ -679,11 +701,11 @@ IF (STATUS == 1) THEN
 	   dayminlevel(1,i)=dayminlevel(daylastyear*nt,i)
 
      ELSE IF (t == damyear(i) .OR. (t > damyear(i) .AND. t == tstart)) THEN  !Andreas
-       if (volact(1,i)== -1) then !only initialize those that have not been initialized by loading from file
+       if (volact(1,i)== -1) then !only initialize those that have not been initialized by loading from stat-file
            IF (vol0(i) /= -999. .and. vol0(i) /= -9999.) THEN 
              volact(1,i)=vol0(i) !Till: initial volume [1e6 m^3]
            ELSE
-             volact(1,i)=storcap(i)/5.
+             volact(1,i)=storcap(i)/5. !Till: initial volume as 20% of storage cap [1e6 m^3]
            END IF
        end if    
        daystorcap(1,i)=storcap(i)
@@ -1573,7 +1595,7 @@ IF (STATUS == 2) THEN
 	 DO j=1,nbrbat(upstream)
 	   dayelev_bat(step,j,upstream)=elev_bat(j,upstream)
 	   dayarea_bat(step,j,upstream)=area_bat(j,upstream)
-	   dayvol_bat(step,j,upstream)=vol_bat(j,upstream)
+	   dayvol_bat(step,j,res_index(upstream))=vol_bat(j,upstream)
 	 ENDDO
 	ENDIF
 
@@ -1668,7 +1690,7 @@ endif
             step=(d-1)*nt+hour
 			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayelev_bat(step,j,i),j=1,nbrbat(i))
 			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayarea_bat(step,j,i),j=1,nbrbat(i))
-			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayvol_bat(step,j,i),j=1,nbrbat(i))
+			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayvol_bat(step,j,res_index(i)),j=1,nbrbat(i))
 		  ENDDO
 		ENDDO
         CLOSE(11)

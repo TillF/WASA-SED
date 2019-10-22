@@ -71,7 +71,8 @@ END DO
 
 ! Mean reservoir level (m)
 IF (reservoir_balance == 1) THEN
-  DO l=1,nbrbat(upstream)
+  damelev0(step,upstream)= -1. !flag as "not set"
+  DO l=1,(nbrbat(upstream)-1)
     IF (damvol0(upstream) >= vol_bat(l,upstream).AND.  &
         damvol0(upstream) <= vol_bat(l+1,upstream)) THEN
       damelev0(step,upstream)=elev_bat(l,upstream)+(damvol0(upstream)-  &
@@ -79,6 +80,11 @@ IF (reservoir_balance == 1) THEN
         (elev_bat(l+1,upstream)-elev_bat(l,upstream))
     END IF
   END DO
+  if (damelev0(step,upstream) == -1.) then !flag as "not set"
+    write(*,*)"ERROR: actual volume beyond range of cav.dat"
+    !damelev0(step,upstream)= 1.
+    stop
+  end if
 ENDIF
 
 damelev=(damelevact(upstream)+damelev0(step,upstream))/2.
@@ -747,17 +753,24 @@ IF (k /= 0) THEN
           END IF
         END DO
 
-        hydrad_sec(k+1-p,upstream)=area_sec(k+1-p,upstream)/  &
-            wetper_sec(k+1-p,upstream)
-        meanvel_sec(k+1-p,upstream)=discharge_sec(k+1-p,upstream)/  &
-            area_sec(k+1-p,upstream)
-        dynhead_sec(k+1-p,upstream)=(meanvel_sec(k+1-p,upstream)**2.)  &
-            /(2.*9.807)
-        tothead_sec(k+1-p,upstream)=watelev_sec(k+1-p,upstream)+  &
-            dynhead_sec(k+1-p,upstream)
-        energslope_sec(k+1-p,upstream)=(meanvel_sec(k+1-p,upstream)  &
-            **2.)*(manning_sec(k+1-p,upstream)**2.)  &
-            /(hydrad_sec(k+1-p,upstream)**(4./3.))
+        if (wetper_sec(k+1-p,upstream) == 0. .OR. area_sec(k+1-p,upstream) ==0.) then
+            !no water in cross section
+            hydrad_sec(k+1-p,upstream)= 1.
+            meanvel_sec(k+1-p,upstream)= 0.
+            energslope_sec(k+1-p,upstream) = 1e-5 !use very small value as a quick and dirty fix
+        else !regular case
+            hydrad_sec(k+1-p,upstream)=area_sec(k+1-p,upstream)/  &
+                wetper_sec(k+1-p,upstream)
+            meanvel_sec(k+1-p,upstream)=discharge_sec(k+1-p,upstream)/  &
+                area_sec(k+1-p,upstream)
+            energslope_sec(k+1-p,upstream)=(meanvel_sec(k+1-p,upstream)  &
+                **2.)*(manning_sec(k+1-p,upstream)**2.)  &
+                /(hydrad_sec(k+1-p,upstream)**(4./3.))
+         end if
+         dynhead_sec(k+1-p,upstream)=(meanvel_sec(k+1-p,upstream)**2.)  &
+                /(2.*9.807)
+         tothead_sec(k+1-p,upstream)=watelev_sec(k+1-p,upstream)+  &
+                dynhead_sec(k+1-p,upstream)
 
 		if (bedslope_sec(k+1-p,upstream) < crslope_sec(k+1-p,upstream)) then
 		  if (watelev_sec(k+1-p,upstream) >= normalelev_sec(k+1-p,upstream)) then !M1
@@ -796,10 +809,15 @@ dummy1=22
           loclosscoef=0.
         END IF
 
+        if ( area_sec(k+1-p,upstream) == 0. .or. area_sec(k+2-p,upstream) == 0.) then
+            locloss_sec(k+1-p,upstream) = 0. !Till: quick fix for dry section
+        else
+            !regular case
         locloss_sec(k+1-p,upstream)=(loclosscoef/(2.*9.807))*  &
             (discharge_sec(k+1-p,upstream)**2.)*  &
             ABS((1./(area_sec(k+1-p,upstream)**2.))  &
             -(1./(area_sec(k+2-p,upstream)**2.)))
+        end if
 
         coef=1.
 

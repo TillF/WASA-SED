@@ -25,6 +25,11 @@ INTEGER :: reservoir_print		!option to print the output files within the timeste
 integer :: step
 !hour (on day)
 integer :: hour
+
+integer :: n_reservoir !number of reservoirs (subbasins with reservoirs)
+
+integer, allocatable :: res_index(:) !indices for each subbasin to the corresponding entry in the reservoir arrays
+
 ! temporary array for reading of data from intake.dat
 real, allocatable :: r_qintake(:)
 ! number of columns in intake.dat
@@ -429,8 +434,7 @@ real, allocatable :: totvol_actlay0(:,:)
 !!bed changes at the x-axis for each point in the cross section of the reservoir
 !(from left to right, seen from upstream) [m]
 real, allocatable :: x_sec(:,:,:)
-!!bed changes at the y-axis for each point in the cross section of the reservoir
-!(from left to right, seen from upstream) [m]
+!X-coordinate of bed changes for each point in the cross section of the reservoir (from left to right, seen from upstream)
 real, allocatable :: y_sec(:,:,:)
 !active layer elevation for each cross section in the sub-basin's reservoir [m]
 real, allocatable :: y_actlay(:,:,:)

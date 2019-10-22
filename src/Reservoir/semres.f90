@@ -250,6 +250,7 @@ IF (STATUS == 0) THEN
 !stop
 
 ! cross sections geometry / initial bed elevation
+  g=0 !flag for indicating file coherence
   DO i=1,subasin
     IF (nbrsec(i) /= 0) THEN
       WRITE(subarea,*)id_subbas_extern(i)
@@ -257,12 +258,27 @@ IF (STATUS == 0) THEN
 		READ(11,*);READ(11,*)
         nbrsec1=nbrsec(i)
         DO j=1,nbrsec1
-          READ(11,*) dummy1,dummy2,npoints(j,i),  &
+          READ(11,*, IOSTAT=istate) dummy1,dummy2,npoints(j,i),  &
             (x_sec0(m,j,i),y_sec0(m,j,i),m=1,npoints(j,i))
+            IF (istate/=0) THEN
+                write(*,"(A)")"ERROR: Premature end of file in cross_sec_"//trim(adjustl(subarea))//".dat. Check specs in hydraul_param.dat."
+                stop
+            end if
+            do m=1,npoints(j,i)-1 !check for increasing x-coordinates
+               if (x_sec0(m,j,i) >= x_sec0(m+1,j,i)) then
+                    write(*,'(A,i0,A,i0,A,f6.1,A)')"ERROR: x-coordinates in reservoir cross-section must be increasing (line ", j+2,", point ", m,", x=", x_sec0(m,j,i), ",). "
+                    g=1 !indicate error
+               end if
+            end do
+
 		  id_sec_extern(j,i)=dummy2
 !write(*,*)dummy1,dummy2,npoints(j,i),(x_sec0(m,j,i),y_sec0(m,j,i),m=1,npoints(j,i))
         END DO
       CLOSE(11)
+      if (g == 1) then
+            write(*,*)"Increase floating point precision or decrease resolution."
+            stop
+       end if
 	ENDIF
   ENDDO
 
@@ -1095,7 +1111,7 @@ end if
 		else
 		  dummy5=.0
 		endif
-		dummy6=thickness_act(j)*(1.-((1.-(dummy5))**2.9))
+		dummy6=thickness_act(j)*(1.-((1.-dummy5)**2.9))
 !dummy6=dummy(j)
         y_actlay(m,j,upstream)=max(y_sec(m,j,upstream)-dummy6,y_original(m,j,upstream))
 !if(j<20)write(*,'(4I4,5F12.6)')t,d,j,m,y_actlay(m,j,upstream),y_sec(m,j,upstream),dummy6,(1.-((1.-(dummy5))**2.9)),dummy5
@@ -1458,10 +1474,16 @@ end if
 	      factor_bottom2=factor_bottom2/dummy4
 	      factor_intake2=factor_intake2/dummy4
 	      factor_over2=factor_over2/dummy4
-	    ELSE
-	      factor_bottom2=qbottom(step,upstream)/res_qout(step,upstream)
-	      factor_intake2=qintake(step,upstream)/res_qout(step,upstream)
-	      factor_over2=overflow(step,upstream)/res_qout(step,upstream)
+	    ELSE !Till: compute partitioning of sediment outflow (?)
+	      if (res_qout(step,upstream) ==0) then
+	        factor_bottom2=0.
+            factor_intake2=0.
+            factor_over2  =0.
+          else
+	        factor_bottom2=qbottom(step,upstream)/res_qout(step,upstream)
+	        factor_intake2=qintake(step,upstream)/res_qout(step,upstream)
+	        factor_over2=overflow(step,upstream)/res_qout(step,upstream)
+	      end if
 	    ENDIF
 !write(*,'(2I4,6F12.6)')j,g,factor_bottom2,factor_intake2,factor_over2,factor_over2+factor_intake2+factor_bottom2
 	  ENDIF
@@ -2058,7 +2080,7 @@ IF (STATUS == 3) THEN
         IF (f_res_longitudunal) THEN
 		OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_longitudunal.out', &
 			STATUS='old',POSITION='append')
-		write(fmtstr,'(a,i0,a)')'(5I6,',nbrsec1,'F15.6)'		!generate format string
+		write(fmtstr,'(a,i0,a)')'(5I6,',nbrsec(i),'F15.6)'		!generate format string
 		DO d=1,dayyear
 	      DO ih=1,nt
 		    hour=ih

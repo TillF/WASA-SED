@@ -399,7 +399,8 @@ subroutine allocate_reservoir()
 
     IF (doreservoir) THEN
 	    allocate( &
-	      f_intake_obs(subasin), &
+	      res_index(subasin), &
+          f_intake_obs(subasin), &
           corr_column_intakes(subasin), &
           res_flag(subasin), &
    	      fcav(subasin), &
@@ -625,7 +626,8 @@ subroutine allocate_reservoir()
 	      daydamareaact(366*nt,subasin), &
 	      dayelev_bat(366*nt,nxsection_res,subasin), &
 	      dayarea_bat(366*nt,nxsection_res,subasin), &
-	      dayvol_bat(366*nt,nxsection_res,subasin), &
+!         dayvol_bat(366*nt,nxsection_res,subasin), &
+
 
 
 	     STAT = istate)
