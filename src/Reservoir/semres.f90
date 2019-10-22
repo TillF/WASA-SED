@@ -250,6 +250,7 @@ IF (STATUS == 0) THEN
 !stop
 
 ! cross sections geometry / initial bed elevation
+  g=0 !flag for indicating file coherence
   DO i=1,subasin
     IF (nbrsec(i) /= 0) THEN
       WRITE(subarea,*)id_subbas_extern(i)
@@ -259,10 +260,21 @@ IF (STATUS == 0) THEN
         DO j=1,nbrsec1
           READ(11,*) dummy1,dummy2,npoints(j,i),  &
             (x_sec0(m,j,i),y_sec0(m,j,i),m=1,npoints(j,i))
+            do m=1,npoints(j,i)-1 !check for increasing x-coordinates
+               if (x_sec0(m,j,i) >= x_sec0(m+1,j,i)) then
+                    write(*,'(A,i0,A)')"ERROR: x-coordinates in reservoir cross-section must be increasing (line ", j+2,"). "
+                    g=1 !indicate error
+               end if
+            end do
+
 		  id_sec_extern(j,i)=dummy2
 !write(*,*)dummy1,dummy2,npoints(j,i),(x_sec0(m,j,i),y_sec0(m,j,i),m=1,npoints(j,i))
         END DO
       CLOSE(11)
+      if (g == 1) then
+            write(*,*)"Increase floating point precision or decrease resolution."
+            stop
+       end if
 	ENDIF
   ENDDO
 

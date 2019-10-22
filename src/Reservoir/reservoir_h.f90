@@ -429,8 +429,7 @@ real, allocatable :: totvol_actlay0(:,:)
 !!bed changes at the x-axis for each point in the cross section of the reservoir
 !(from left to right, seen from upstream) [m]
 real, allocatable :: x_sec(:,:,:)
-!!bed changes at the y-axis for each point in the cross section of the reservoir
-!(from left to right, seen from upstream) [m]
+!X-coordinate of bed changes for each point in the cross section of the reservoir (from left to right, seen from upstream)
 real, allocatable :: y_sec(:,:,:)
 !active layer elevation for each cross section in the sub-basin's reservoir [m]
 real, allocatable :: y_actlay(:,:,:)
