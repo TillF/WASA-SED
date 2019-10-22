@@ -575,11 +575,12 @@ contains
         !Error	in readhymo:	 error #6678: When the target is an expression it must deliver a pointer result.	E:\till\uni\wasa\wasa_svn_comp\Hillslope\readhymo.f90	1695
         !real, pointer :: calc_seasonality2(size(support_values,dim=1))    !return value: a single value for each class (e.g. vegetation)
         !error: ALLOCATABLE or POINTER attribute dictates a deferred-shape-array   [CALC_SEASONALITY2]
-        real :: calc_seasonality2(size(support_values,dim=1))    !return value: a single value for each class (e.g. vegetation)
+        real :: calc_seasonality2(size(support_values,dim=1))    !failure for some, return value: a single value for each class (e.g. vegetation)
         
-        
+        !REAL, allocatable :: calc_seasonality2(:) !fails during allocation
         !real, pointer :: calc_seasonality2(:)    !return value: a single value for each class (e.g. vegetation)
-        integer    :: k, irow, search_year
+
+        integer    :: k, irow, search_year, istate
         integer :: d        !distance between start node and current day (in days)
         integer :: d_nodes        !distance between start node and end_node (in days)
         real :: node1_value, node2_value        !parameter values at nodepoints (start and end-point of interpolation)
@@ -589,6 +590,12 @@ contains
         integer :: dy !number of days in the current year (365 or 366 in leap years)
 
 
+        !allocate(calc_seasonality2(size(support_values,dim=1)), STAT = istate)
+        !if (istate/=0) then
+        !    write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in hymo-module, seasonality computation. Try reducing nmber of SVCs or vegetation classes or disable seasonality.'
+        !    stop
+        !end if
+
         !handling of leap years
         IF (MOD((year),4) == 0)  THEN
             dy=366
@@ -596,12 +603,6 @@ contains
             dy=365
         ENDIF
 
-!        d_nodes=size(support_values,dim=1) !get required size of array
-!        allocate(calc_seasonality2(d_nodes), STAT = d)
-!        if (d/=0) then
-!            write(*,'(A,i0,a)')'ERROR: Memory allocation error (',d,') in calc_seasonality2. Contact the authors.'
-!            stop
-!        end if
 
         if (size(seasonality_array)==1) then !no seasonality for this parameter
             calc_seasonality2=support_values(:,1)    !use single value
