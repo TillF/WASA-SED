@@ -210,7 +210,7 @@ storcap(:)=0.
         stop
 	  end if
 	  if(vol0(i) > storcap(i)) then
-        write(*,'(A,i3,A)') 'ERROR: Parameter vol0 in reservoir.dat mustn't be larger than storage capacity for reservoir / subbasin id ', id_subbas_extern(i), '!'
+        write(*,'(A,i3,A)') 'ERROR: Parameter vol0 in reservoir.dat must not be larger than storage capacity for reservoir / subbasin id ', id_subbas_extern(i), '!'
         stop
       end if
 	  if(damb(i) > .9 .or. damb(i) < 0.) then
