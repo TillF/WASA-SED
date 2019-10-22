@@ -188,7 +188,7 @@ contains
                 tt = (d-2)*nt+hour !index to last valid value
                 if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. José, please check this
                 
-                digits=ceiling(log10(max(1.0,maxval(volact(tt,:)*1.e6))))+1    !Till: number of pre-decimal digits required
+                digits=ceiling(log10(max(1.0,maxval(abs(volact(tt,:)))*1.e6)))+2    !Till: number of pre-decimal digits required
                 if (digits<10) then
                     write(fmtstr,'(A1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
                 else

@@ -205,10 +205,18 @@ storcap(:)=0.
 	  END IF
 
 	  ! check parameters
+	  if(vol0(i) < 0 .and. vol0(i) /= -999.  .and. vol0(i) /= -9999.) then
+        write(*,'(A,i3,A)') 'ERROR: Parameter vol0 in reservoir.dat is outside of plausible range (0 < vol0) for reservoir / subbasin id ', id_subbas_extern(i), '!'
+        stop
+	  end if
+	  if(vol0(i) > storcap(i)) then
+        write(*,'(A,i3,A)') 'ERROR: Parameter vol0 in reservoir.dat mustn't be larger than storage capacity for reservoir / subbasin id ', id_subbas_extern(i), '!'
+        stop
+      end if
 	  if(damb(i) > .9 .or. damb(i) < 0.) then
         write(*,'(A,i3,A)') 'ERROR: Parameter damb in reservoir.dat is outside of plausible range (0 < damb <= 0.9) for reservoir / subbasin id ', id_subbas_extern(i), '!'
         stop
-	  end if
+      end if
       if(damq_frac(i) > 1. .or. (damq_frac(i) < 0. .and. damq_frac(i) > -998.)) then
         write(*,'(A,i3,A)') 'WARNING: Parameter damq_frac in reservoir.dat is outside of plausible range (0 <= damq_frac <= 1 or eq. -999) for reservoir / subbasin id ', id_subbas_extern(i), '! During calibration this might make sense.'
 	  end if
@@ -679,7 +687,7 @@ IF (STATUS == 1) THEN
 	   dayminlevel(1,i)=dayminlevel(daylastyear*nt,i)
 
      ELSE IF (t == damyear(i) .OR. (t > damyear(i) .AND. t == tstart)) THEN  !Andreas
-       if (volact(1,i)== -1) then !only initialize those that have not been initialized by loading from file
+       if (volact(1,i)== -1) then !only initialize those that have not been initialized by loading from stat-file
            IF (vol0(i) /= -999. .and. vol0(i) /= -9999.) THEN 
              volact(1,i)=vol0(i) !Till: initial volume [1e6 m^3]
            ELSE

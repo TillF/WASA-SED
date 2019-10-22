@@ -71,13 +71,18 @@ END DO
 
 ! Mean reservoir level (m)
 IF (reservoir_balance == 1) THEN
-  DO l=1,nbrbat(upstream)
+  damelev0(step,upstream)= -1. !flag as "not set"
+  DO l=1,(nbrbat(upstream)-1)
     IF (damvol0(upstream) >= vol_bat(l,upstream).AND.  &
         damvol0(upstream) <= vol_bat(l+1,upstream)) THEN
       damelev0(step,upstream)=elev_bat(l,upstream)+(damvol0(upstream)-  &
         vol_bat(l,upstream))/(vol_bat(l+1,upstream)- vol_bat(l,upstream))*  &
         (elev_bat(l+1,upstream)-elev_bat(l,upstream))
     END IF
+    if (damelev0(step,upstream) == -1.) then !flag as "not set"
+        write(*,*)"ERROR: actual volume beyond range of cav.dat"
+        stop
+    end if
   END DO
 ENDIF
 
