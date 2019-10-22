@@ -266,7 +266,7 @@ IF (STATUS == 0) THEN
             end if
             do m=1,npoints(j,i)-1 !check for increasing x-coordinates
                if (x_sec0(m,j,i) >= x_sec0(m+1,j,i)) then
-                    write(*,'(A,i0,A)')"ERROR: x-coordinates in reservoir cross-section must be increasing (line ", j+2,"). "
+                    write(*,'(A,i0,A,i0,A,f6.1,A)')"ERROR: x-coordinates in reservoir cross-section must be increasing (line ", j+2,", point ", m,", x=", x_sec0(m,j,i), ",). "
                     g=1 !indicate error
                end if
             end do
