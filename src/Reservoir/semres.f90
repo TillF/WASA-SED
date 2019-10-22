@@ -1111,7 +1111,7 @@ end if
 		else
 		  dummy5=.0
 		endif
-		dummy6=thickness_act(j)*(1.-((1.-(dummy5))**2.9))
+		dummy6=thickness_act(j)*(1.-((1.-dummy5)**2.9))
 !dummy6=dummy(j)
         y_actlay(m,j,upstream)=max(y_sec(m,j,upstream)-dummy6,y_original(m,j,upstream))
 !if(j<20)write(*,'(4I4,5F12.6)')t,d,j,m,y_actlay(m,j,upstream),y_sec(m,j,upstream),dummy6,(1.-((1.-(dummy5))**2.9)),dummy5
@@ -1474,10 +1474,16 @@ end if
 	      factor_bottom2=factor_bottom2/dummy4
 	      factor_intake2=factor_intake2/dummy4
 	      factor_over2=factor_over2/dummy4
-	    ELSE
-	      factor_bottom2=qbottom(step,upstream)/res_qout(step,upstream)
-	      factor_intake2=qintake(step,upstream)/res_qout(step,upstream)
-	      factor_over2=overflow(step,upstream)/res_qout(step,upstream)
+	    ELSE !Till: compute partitioning of sediment outflow (?)
+	      if (res_qout(step,upstream) ==0) then
+	        factor_bottom2=0.
+            factor_intake2=0.
+            factor_over2  =0.
+          else
+	        factor_bottom2=qbottom(step,upstream)/res_qout(step,upstream)
+	        factor_intake2=qintake(step,upstream)/res_qout(step,upstream)
+	        factor_over2=overflow(step,upstream)/res_qout(step,upstream)
+	      end if
 	    ENDIF
 !write(*,'(2I4,6F12.6)')j,g,factor_bottom2,factor_intake2,factor_over2,factor_over2+factor_intake2+factor_bottom2
 	  ENDIF
@@ -2074,7 +2080,7 @@ IF (STATUS == 3) THEN
         IF (f_res_longitudunal) THEN
 		OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_longitudunal.out', &
 			STATUS='old',POSITION='append')
-		write(fmtstr,'(a,i0,a)')'(5I6,',nbrsec1,'F15.6)'		!generate format string
+		write(fmtstr,'(a,i0,a)')'(5I6,',nbrsec(i),'F15.6)'		!generate format string
 		DO d=1,dayyear
 	      DO ih=1,nt
 		    hour=ih
