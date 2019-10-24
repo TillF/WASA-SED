@@ -1978,15 +1978,15 @@ end if
 
 	ELSE
       DO j=1,nbrsec(upstream)
-	  	daydepth_sec(step,j,upstream)=depth_sec(j,upstream)
-	  	daywatelev_sec(step,j,upstream)=watelev_sec(j,upstream)
-	  	dayarea_sec(step,j,upstream)=area_sec(j,upstream)
-	  	daytopwidth_sec(step,j,upstream)=topwidth_sec(j,upstream)
-	  	dayenergslope_sec(step,j,upstream)=energslope_sec(j,upstream)
-	  	dayhydrad_sec(step,j,upstream)=hydrad_sec(j,upstream)
-	  	daymeanvel_sec(step,j,upstream)=meanvel_sec(j,upstream)
-	  	daydischarge_sec(step,j,upstream)=discharge_sec(j,upstream)
-		dayminelev_sec(step,j,upstream)=minelev_sec(j,upstream)
+	  	daydepth_sec(step,j,res_index(upstream))=depth_sec(j,upstream)
+	  	daywatelev_sec(step,j,res_index(upstream))=watelev_sec(j,upstream)
+	  	dayarea_sec(step,j,res_index(upstream))=area_sec(j,upstream)
+	  	daytopwidth_sec(step,j,res_index(upstream))=topwidth_sec(j,upstream)
+	  	dayenergslope_sec(step,j,res_index(upstream))=energslope_sec(j,upstream)
+	  	dayhydrad_sec(step,j,res_index(upstream))=hydrad_sec(j,upstream)
+	  	daymeanvel_sec(step,j,res_index(upstream))=meanvel_sec(j,upstream)
+	  	daydischarge_sec(step,j,res_index(upstream))=discharge_sec(j,upstream)
+		dayminelev_sec(step,j,res_index(upstream))=minelev_sec(j,upstream)
 		DO m=1,npoints(j,upstream)
 		  dayy_sec(step,m,j,res_index(upstream))=y_sec(m,j,res_index(upstream))
 		ENDDO
@@ -2023,9 +2023,9 @@ end if
    CLOSE(11)
    ENDIF
   ELSE
-   daycumsed(step,upstream)=cum_sedimentation(upstream)
+   daycumsed(step,res_index(upstream))=cum_sedimentation(upstream)
    DO g=1,n_sed_class
-     dayfrsediment_out(step,upstream,g)=frsediment_out(upstream,g)
+     dayfrsediment_out(step,res_index(upstream),g)=frsediment_out(upstream,g)
    ENDDO
   ENDIF
 
@@ -2050,10 +2050,10 @@ IF (STATUS == 3) THEN
             step=(d-1)*nt+hour
 	        DO j=1,nbrsec(i)
 			  WRITE(11,'(5I6,4F15.3,E15.3E2,3F15.6)')id_subbas_extern(i),t,d,hour,id_sec_extern(j,i),  &
-				daydepth_sec(step,j,i),daywatelev_sec(step,j,i),  &
-				dayarea_sec(step,j,i),daytopwidth_sec(step,j,i),  &
-				dayenergslope_sec(step,j,i),dayhydrad_sec(step,j,i),  &
-				daymeanvel_sec(step,j,i),daydischarge_sec(step,j,i)
+				daydepth_sec(step,j,res_index(i)),daywatelev_sec(step,j,res_index(i)),  &
+				dayarea_sec(step,j,res_index(i)),daytopwidth_sec(step,j,res_index(i)),  &
+				dayenergslope_sec(step,j,res_index(i)),dayhydrad_sec(step,j,res_index(i)),  &
+				daymeanvel_sec(step,j,res_index(i)),daydischarge_sec(step,j,res_index(i))
 			ENDDO
 		  ENDDO
 		ENDDO
@@ -2071,7 +2071,7 @@ IF (STATUS == 3) THEN
 		      hour=ih
               step=(d-1)*nt+hour
 			  WRITE(11,fmtstr)id_subbas_extern(i),id_sec_extern(j,i),t,d,hour,npt,  &
-				(dayy_sec(step,m,j,i),m=1,npoints(j,i))
+				(dayy_sec(step,m,j,res_index(i)),m=1,npoints(j,i))
 		    ENDDO
 		  ENDDO
           CLOSE(11)
@@ -2086,7 +2086,7 @@ IF (STATUS == 3) THEN
 		    hour=ih
             step=(d-1)*nt+hour
 			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,nbrsec1, &
-				(dayminelev_sec(step,j,i),j=1,nbrsec1)
+				(dayminelev_sec(step,j,res_index(i)),j=1,nbrsec1)
 		  ENDDO
 		ENDDO
         CLOSE(11)
@@ -2098,7 +2098,7 @@ IF (STATUS == 3) THEN
 		    hour=ih
             step=(d-1)*nt+hour
 			WRITE(11,'(4I6,4F15.3)')id_subbas_extern(i),t,d,hour,sed_inflow(step,i),sed_outflow(step,i), &
-				sedimentation(step,i),daycumsed(step,i)
+				sedimentation(step,i),daycumsed(step,res_index(i))
 		  ENDDO
 		ENDDO
         CLOSE(11)
@@ -2111,7 +2111,7 @@ IF (STATUS == 3) THEN
 		    hour=ih
             step=(d-1)*nt+hour
 			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,n_sed_class, &
-				(dayfrsediment_out(step,i,g),g=1,n_sed_class)
+				(dayfrsediment_out(step,res_index(i),g),g=1,n_sed_class)
 !			WRITE(11,'(5I6,<n_sed_class>F15.3)')id_subbas_extern(i),t,d,hour,n_sed_class, &
 !				(dayfrsediment_out(step,i,g),g=1,n_sed_class)
 		  ENDDO
@@ -2126,7 +2126,7 @@ IF (STATUS == 3) THEN
 		    hour=ih
             step=(d-1)*nt+hour
 			WRITE(11,'(4I6,4F15.3)')id_subbas_extern(i),t,d,hour,sed_inflow(step,i),sed_outflow(step,i), &
-				sedimentation(step,i),daycumsed(step,i)
+				sedimentation(step,i),daycumsed(step,res_index(i))
 		  ENDDO
 		ENDDO
         CLOSE(11)
@@ -2139,7 +2139,7 @@ IF (STATUS == 3) THEN
 		    hour=ih
             step=(d-1)*nt+hour
 			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,n_sed_class, &
-				(dayfrsediment_out(step,i,g),g=1,n_sed_class)
+				(dayfrsediment_out(step,res_index(i),g),g=1,n_sed_class)
 !			WRITE(11,'(5I6,<n_sed_class>F15.3)')id_subbas_extern(i),t,d,hour,n_sed_class, &
 !				(dayfrsediment_out(step,i,g),g=1,n_sed_class)
 		  ENDDO

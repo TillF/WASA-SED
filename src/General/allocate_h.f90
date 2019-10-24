@@ -645,30 +645,30 @@ subroutine allocate_reservoir()
 	    end if
 
 
+!Anne moved reservoir sediment variables from allocate_h to reservoir.f90
+!A	    if (dosediment) then
+!A		    allocate( &
 
-	    if (dosediment) then
-		    allocate( &
+!A		      daydepth_sec(366*nt,nxsection_res,subasin), &
+!A		      daywatelev_sec(366*nt,nxsection_res,subasin), &
+!A		      dayarea_sec(366*nt,nxsection_res,subasin), &
+!A		      daytopwidth_sec(366*nt,nxsection_res,subasin), &
+!A		      dayenergslope_sec(366*nt,nxsection_res,subasin), &
+!A		      dayhydrad_sec(366*nt,nxsection_res,subasin), &
+!A		      daymeanvel_sec(366*nt,nxsection_res,subasin), &
+!A		      daydischarge_sec(366*nt,nxsection_res,subasin), &
+!A		      dayminelev_sec(366*nt,nxsection_res,subasin), &
+!A		      dayy_sec(366*nt,npointsxsect,nxsection_res,subasin), &
+!A		      daycumsed(366*nt,subasin), &
+!A		      dayfrsediment_out(366*nt,subasin,n_sed_class), &
+!A		    STAT = istate)
 
-		      daydepth_sec(366*nt,nxsection_res,subasin), &
-		      daywatelev_sec(366*nt,nxsection_res,subasin), &
-		      dayarea_sec(366*nt,nxsection_res,subasin), &
-		      daytopwidth_sec(366*nt,nxsection_res,subasin), &
-		      dayenergslope_sec(366*nt,nxsection_res,subasin), &
-		      dayhydrad_sec(366*nt,nxsection_res,subasin), &
-		      daymeanvel_sec(366*nt,nxsection_res,subasin), &
-		      daydischarge_sec(366*nt,nxsection_res,subasin), &
-		      dayminelev_sec(366*nt,nxsection_res,subasin), &
-		      dayy_sec(366*nt,npointsxsect,nxsection_res,subasin), &
-		      daycumsed(366*nt,subasin), &
-		      dayfrsediment_out(366*nt,subasin,n_sed_class), &
-		    STAT = istate)
+!A		    if (istate/=0) then
+!A			    write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in reservoir-module (sediments).'
+!A			    stop
+!A		    end if
 
-		    if (istate/=0) then
-			    write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in reservoir-module (sediments).'
-			    stop
-		    end if
-
-	    end if
+!A	    end if
 
 
 

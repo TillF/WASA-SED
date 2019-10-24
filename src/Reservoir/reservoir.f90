@@ -461,7 +461,31 @@ storcap(:)=0.
     end if
 
     
+!Anne moved reservoir sediment variables from allocate_h to reservoir.f90
     
+    if (dosediment) then
+		    allocate( &
+
+		      daydepth_sec(366*nt,nxsection_res,n_reservoir), &
+		      daywatelev_sec(366*nt,nxsection_res,n_reservoir), &
+		      dayarea_sec(366*nt,nxsection_res,n_reservoir), &
+		      daytopwidth_sec(366*nt,nxsection_res,n_reservoir), &
+		      dayenergslope_sec(366*nt,nxsection_res,n_reservoir), &
+		      dayhydrad_sec(366*nt,nxsection_res,n_reservoir), &
+		      daymeanvel_sec(366*nt,nxsection_res,n_reservoir), &
+		      daydischarge_sec(366*nt,nxsection_res,n_reservoir), &
+		      dayminelev_sec(366*nt,nxsection_res,n_reservoir), &
+		      dayy_sec(366*nt,npointsxsect,nxsection_res,n_reservoir), &
+		      daycumsed(366*nt,n_reservoir), &
+		      dayfrsediment_out(366*nt,n_reservoir,n_sed_class), &
+		    STAT = istate)
+    
+		    if (istate/=0) then
+			    write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in reservoir-module (sediments), second allocation in reservoir.f90.'
+			    stop
+		    end if
+    
+	    end if
     
     
 
