@@ -285,12 +285,12 @@ IF (STATUS == 0) THEN
   DO i=1,subasin
    IF (sed_flag(i)==1) THEN
     IF (nbrsec(i) /= 0) THEN
-	  pt_long0(i)=0			!pt_long0(i) should be read in the file sed.dat (not implemented)
-	  pt_long(i)=pt_long0(i)
+	  pt_long0(res_index(i))=0			!pt_long0(i) should be read in the file sed.dat (not implemented)
+	  pt_long(res_index(i))=pt_long0(res_index(i)) !Anne changed i to res_index(i)
       nbrsec1=nbrsec(i)
 	  dummy3=0.
 	  dummy4=0.
-	  dummy1=pt_long0(i)
+	  dummy1=pt_long0(res_index(i))
 	  length_plunge(i)=cumlength_sec(dummy1,i)
 	  IF (nbrsec1>1 .and. dummy1/=nbrsec1) then
 	    dummy3=y_sec0(1,dummy1,i)
@@ -300,7 +300,7 @@ IF (STATUS == 0) THEN
           IF (dummy3 > y_sec0(m,dummy1,i)) dummy3=y_sec0(m,dummy1,i)
           IF (dummy4 > y_sec0(m,dummy1+1,i)) dummy4=y_sec0(m,dummy1+1,i)
 		ENDDO
-	    slope_long(i)=min((dummy3-dummy4)/dist_sec(dummy1,i),0.005)
+	    slope_long(res_index(i))=min((dummy3-dummy4)/dist_sec(dummy1,i),0.005)  !A
 	  ENDIF
 	  IF (nbrsec1>1 .and. dummy1==nbrsec1) then
 	    dummy3=y_sec0(1,dummy1-1,i)
@@ -309,7 +309,7 @@ IF (STATUS == 0) THEN
           IF (dummy3 > y_sec0(m,dummy1-1,i)) dummy3=y_sec0(m,dummy1-1,i)
           IF (dummy4 > y_sec0(m,dummy1,i)) dummy4=y_sec0(m,dummy1,i)
 		ENDDO
-	    slope_long(i)=min((dummy3-dummy4)/dist_sec(dummy1-1,i),0.005)
+	    slope_long(res_index(i))=min((dummy3-dummy4)/dist_sec(dummy1-1,i),0.005) !A
 	  ENDIF
 !write(*,*) dummy1,dummy1,dummy3,dummy4,slope_long(i)
      ENDIF
@@ -323,8 +323,8 @@ IF (STATUS == 0) THEN
     IF (nbrsec(i) /= 0) THEN
       DO j=1,nbrsec1
         DO m=1,npoints(j,i)
-          x_sec(m,j,i)=x_sec0(m,j,i)
-          y_sec(m,j,i)=y_sec0(m,j,i)
+          x_sec(m,j,res_index(i))=x_sec0(m,j,i)
+          y_sec(m,j,res_index(i))=y_sec0(m,j,i)
         END DO
 !write(*,*)j,npoints(j,i),(x_sec0(m,j,i),y_sec0(m,j,i),m=1,npoints(j,i))
       END DO
@@ -343,14 +343,14 @@ IF (STATUS == 0) THEN
           nbrsec1=nbrsec(i)
           DO j=1,nbrsec1
             DO m=1,npoints(j,i)
-              y_original(m,j,i)=y_sec0(m,j,i)
+              y_original(m,j,res_index(i))=y_sec0(m,j,i)
 			ENDDO
 		  ENDDO
 		  dummy2=0
 	    ELSE
 	      READ(11,*);READ(11,*)
           DO j=1,nbrsec1
-		    READ(11,*)dummy1,dummy2,(y_original(m,j,i),m=1,npoints(j,i))
+		    READ(11,*)dummy1,dummy2,(y_original(m,j,res_index(i)),m=1,npoints(j,i))
 		  ENDDO
 		  dummy2=1
 	    ENDIF
@@ -358,14 +358,14 @@ IF (STATUS == 0) THEN
 	  IF (dummy2==0) THEN
         DO j=1,nbrsec1
           DO g=1,n_sed_class
-            frac_actlay(g,j,i)=0.
+            frac_actlay(g,j,res_index(i))=0.
 		  ENDDO
 		ENDDO
 	  ELSE
         OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/sizedist_'//trim(adjustl(subarea))//'.dat', STATUS='unknown')
 	      READ(11,*);READ(11,*)
           DO j=1,nbrsec1
-            READ(11,*)dummy1,dummy2,(frac_actlay(g,j,i),g=1,n_sed_class)
+            READ(11,*)dummy1,dummy2,(frac_actlay(g,j,res_index(i)),g=1,n_sed_class)
 		  ENDDO
 		CLOSE(11)
 	  ENDIF
@@ -377,7 +377,7 @@ IF (STATUS == 0) THEN
       DO j=1,nbrsec1
         DO m=1,npoints(j,i)
 !write(*,*)j,m,y_original(m,j,i),y_sec0(m,j,i)
-	      IF (y_original(m,j,i) > y_sec0(m,j,i)) THEN
+	      IF (y_original(m,j,res_index(i)) > y_sec0(m,j,i)) THEN
 		    write(*,*)'ERROR - original bed elevation over the initial bed elevation:'
 			write(*,*)'    subbasin=',id_subbas_extern(i),'section=',id_sec_extern(j,i)
 		    stop
@@ -395,9 +395,9 @@ IF (STATUS == 0) THEN
 	    area_sedim(j,i)=0.
         DO m=2,npoints(j,i)
           area_sedim(j,i)=area_sedim(j,i)+  &
-			(x_sec(m,j,i)-x_sec(m-1,j,i))*  &
- 			((y_sec(m-1,j,i)-y_original(m-1,j,i))+ &
- 			(y_sec(m,j,i)-y_original(m,j,i)))/2.
+			(x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))*  &
+ 			((y_sec(m-1,j,res_index(i))-y_original(m-1,j,res_index(i)))+ &
+ 			(y_sec(m,j,res_index(i))-y_original(m,j,res_index(i))))/2.
 !write(*,*)m,y_sec(m,j,i),y_original(m,j,i),area_sedim(j,i)
 	    ENDDO
 	  ENDDO
@@ -434,7 +434,7 @@ IF (STATUS == 0) THEN
       DO j=1,nbrsec1
         npt=npoints(j,i)
         DO m=1,npt
-          y_actlay(m,j,i)=y_sec0(m,j,i)
+          y_actlay(m,j,res_index(i))=y_sec0(m,j,i)
         END DO
       END DO
     END IF
@@ -445,10 +445,10 @@ IF (STATUS == 0) THEN
       DO j=1,nbrsec1
 	    totvol_actlay0(j,i)=0.
         DO g=1,n_sed_class
-          frac_comlay(g,j,i)=frac_actlay(g,j,i)
-          frac_toplay(g,j,i)=0.
-          frac_susp(g,j,i)=0.
-	      frvol_actlay(g,j,i)=frac_actlay(g,j,i)*vol_sedim(j,i)
+          frac_comlay(g,j,res_index(i))=frac_actlay(g,j,res_index(i))
+          frac_toplay(g,j,res_index(i))=0.
+          frac_susp(g,j,res_index(i))=0.
+	      frvol_actlay(g,j,i)=frac_actlay(g,j,res_index(i))*vol_sedim(j,i)
 	      frvol_actlay0(g,j,i)=frvol_actlay(g,j,i)
           totvol_actlay0(j,i)=totvol_actlay0(j,i)+frvol_actlay0(g,j,i)
 !write(*,'(2I4,5F15.4)')id_subbas_extern(i),j,vol_sedim(j,i),frac_actlay(g,j,i),frvol_actlay(g,j,i),totvol_actlay(j,i)
@@ -472,8 +472,8 @@ IF (STATUS == 0) THEN
  	    sed_flag(i)=1 !changes on sideslope is controlled avoiding steeper slopes by erosion processes
         nbrsec1=nbrsec(i)
         IF (nbrbat(i) /= 0 .AND. nbrsec(i) /= 0) THEN
-          READ(11,*) dummy1,dummy2,(pt1(j,i),j=1,nbrsec1)
-          READ(11,*) dummy1,dummy2,(pt2(j,i),j=1,nbrsec1)
+          READ(11,*) dummy1,dummy2,(pt1(j,res_index(i)),j=1,nbrsec1)
+          READ(11,*) dummy1,dummy2,(pt2(j,res_index(i)),j=1,nbrsec1)    !A
         ELSE IF (nbrbat(i) == 0.AND.nbrsec(i) /= 0) THEN
           WRITE(*,*)'ERROR - if sections are defined, the file cav.dat must be given'
           WRITE(*,*)'subasin:',id_subbas_extern(i)
@@ -495,34 +495,34 @@ IF (STATUS == 0) THEN
      IF (nbrsec(i) /= 0) THEN
       DO j=1,nbrsec1
 	    npt=npoints(j,i)
-		p1=pt1(j,i)
-		p2=pt2(j,i)
+		p1=pt1(j,res_index(i))
+		p2=pt2(j,res_index(i))
 	    if (p1/=-999) then
-		  sideslope_pt1(j,i)=abs(y_sec(p1,j,i)-y_sec(p1+1,j,i))/abs(x_sec(p1,j,i)-x_sec(p1+1,j,i))
-		  sideslope_pt1(j,i)=max(sideslope_pt1(j,i),.05)
+		  sideslope_pt1(j,res_index(i))=abs(y_sec(p1,j,res_index(i))-y_sec(p1+1,j,res_index(i)))/abs(x_sec(p1,j,res_index(i))-x_sec(p1+1,j,res_index(i)))   !A changed i to res_index(i)
+		  sideslope_pt1(j,res_index(i))=max(sideslope_pt1(j,res_index(i)),.05)                                  !A
 !		  elev=y_sec(p1,j,i)+2.
-		  elev=y_sec(p1,j,i)+(min(y_sec(1,j,i),y_sec(npt,j,i))-y_sec(p1,j,i))/2.
+		  elev=y_sec(p1,j,res_index(i))+(min(y_sec(1,j,res_index(i)),y_sec(npt,j,res_index(i)))-y_sec(p1,j,res_index(i)))/2.
           DO m=2,npoints(j,i)-1
-            if (y_sec(m,j,i) < elev) then
-		      pt3(j,i)=m-1
+            if (y_sec(m,j,res_index(i)) < elev) then
+		      pt3(j,res_index(i))=m-1
 		      exit
 		    endif
 	      ENDDO
 		else
-		  pt3(j,i)=-999
+		  pt3(j,res_index(i))=-999
 		endif
 	    if (p2/=-999) then
-	      sideslope_pt2(j,i)=abs(y_sec(p2,j,i)-y_sec(p2-1,j,i))/abs(x_sec(p2,j,i)-x_sec(p2-1,j,i))
-		  sideslope_pt2(j,i)=max(sideslope_pt1(j,i),.05)
+	      sideslope_pt2(j,res_index(i))=abs(y_sec(p2,j,res_index(i))-y_sec(p2-1,j,res_index(i)))/abs(x_sec(p2,j,res_index(i))-x_sec(p2-1,j,res_index(i)))   !A
+		  sideslope_pt2(j,res_index(i))=max(sideslope_pt1(j,res_index(i)),.05)                                  !A
 !		  elev=y_sec(p2,j,i)+2.
-		  elev=y_sec(p2,j,i)+(min(y_sec(1,j,i),y_sec(npt,j,i))-y_sec(p2,j,i))/2.
+		  elev=y_sec(p2,j,res_index(i))+(min(y_sec(1,j,res_index(i)),y_sec(npt,j,res_index(i)))-y_sec(p2,j,res_index(i)))/2.
           DO m=1,npoints(j,i)
-            if (y_sec(m,j,i) < elev) then
-		      pt4(j,i)=m+1
+            if (y_sec(m,j,res_index(i)) < elev) then
+		      pt4(j,res_index(i))=m+1
 		    endif
 	      ENDDO
 		else
-		  pt4(j,i)=-999
+		  pt4(j,res_index(i))=-999
 		endif
 !write(*,'(6I5,8F15.4)')id_subbas_extern(i),j,pt1(j,i),pt2(j,i),pt3(j,i),pt4(j,i),sideslope_pt1(j,i),sideslope_pt2(j,i),elev
       END DO
@@ -543,30 +543,30 @@ IF (STATUS == 0) THEN
 
         npt=npoints(j,i)
         DO m=2,npt
-		  IF (elevhelp >= y_sec(m-1,j,i)  &
-			.AND.elevhelp >= y_sec(m,j,i)) THEN
-			areasec2(j)=areasec2(j)+(x_sec(m,j,i)-x_sec(m-1,j,i))  &
-				*(elevhelp-(y_sec(m,j,i)+y_sec(m-1,j,i))/2.)
+		  IF (elevhelp >= y_sec(m-1,j,res_index(i))  &
+			.AND.elevhelp >= y_sec(m,j,res_index(i))) THEN
+			areasec2(j)=areasec2(j)+(x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))  &
+				*(elevhelp-(y_sec(m,j,res_index(i))+y_sec(m-1,j,res_index(i)))/2.)
 			widthsec2(j)=widthsec2(j)+  &
-				(x_sec(m,j,i)-x_sec(m-1,j,i))
-		  ELSE IF (elevhelp < y_sec(m-1,j,i)  &
-			.AND.elevhelp >= y_sec(m,j,i)) THEN
-			areasec2(j)=areasec2(j)+(((elevhelp-y_sec(m,j,i))**2.)/ &
-				(2.*ABS(y_sec(m,j,i)-y_sec(m-1,j,i))/  &
-				(x_sec(m,j,i)-x_sec(m-1,j,i))))
+				(x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))
+		  ELSE IF (elevhelp < y_sec(m-1,j,res_index(i))  &
+			.AND.elevhelp >= y_sec(m,j,res_index(i))) THEN
+			areasec2(j)=areasec2(j)+(((elevhelp-y_sec(m,j,res_index(i)))**2.)/ &
+				(2.*ABS(y_sec(m,j,res_index(i))-y_sec(m-1,j,res_index(i)))/  &
+				(x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))))
 			widthsec2(j)=widthsec2(j)+  &
-				((x_sec(m,j,i)-x_sec(m-1,j,i))*  &
-				(elevhelp-y_sec(m,j,i))/  &
-				(y_sec(m-1,j,i)-y_sec(m,j,i)))
-		  ELSE IF (elevhelp >= y_sec(m-1,j,i)  &
-			.AND.elevhelp < y_sec(m,j,i)) THEN
-			areasec2(j)=areasec2(j)+(((elevhelp-y_sec(m-1,j,i))**2.)/ &
-				(2.*ABS(y_sec(m,j,i)-y_sec(m-1,j,i))/  &
-				(x_sec(m,j,i)-x_sec(m-1,j,i))))
+				((x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))*  &
+				(elevhelp-y_sec(m,j,res_index(i)))/  &
+				(y_sec(m-1,j,res_index(i))-y_sec(m,j,res_index(i))))
+		  ELSE IF (elevhelp >= y_sec(m-1,j,res_index(i))  &
+			.AND.elevhelp < y_sec(m,j,res_index(i))) THEN
+			areasec2(j)=areasec2(j)+(((elevhelp-y_sec(m-1,j,res_index(i)))**2.)/ &
+				(2.*ABS(y_sec(m,j,res_index(i))-y_sec(m-1,j,res_index(i)))/  &
+				(x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))))
 			widthsec2(j)=widthsec2(j)+  &
-				((x_sec(m,j,i)-x_sec(m-1,j,i))*  &
-				(elevhelp-y_sec(m-1,j,i))/  &
-				(y_sec(m,j,i)-y_sec(m-1,j,i)))
+				((x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))*  &
+				(elevhelp-y_sec(m-1,j,res_index(i)))/  &
+				(y_sec(m,j,res_index(i))-y_sec(m-1,j,res_index(i))))
 		  END IF
 	    END DO
 	   END DO
@@ -871,9 +871,9 @@ end if
 ! cross section provided by size distribution of sediment input
 	do g=1,n_sed_class
 	  if (sed_inflow(step,upstream) > 0.) then
-	    frac_toplay(g,1,upstream)=frsediment_in(upstream,g)
+	    frac_toplay(g,1,res_index(upstream))=frsediment_in(upstream,g)
 	  else
-	    frac_toplay(g,1,upstream)=0.
+	    frac_toplay(g,1,res_index(upstream))=0.
 	  endif
 	enddo
 
@@ -888,7 +888,7 @@ end if
     DO j=1,nbrsec(upstream)
 	 accum2=0.
      DO g=1,n_sed_class
-	   accum2=accum2+frac_actlay(g,j,upstream)
+	   accum2=accum2+frac_actlay(g,j,res_index(upstream))
 	 ENDDO
 !write(*,'(2I4,<n_sed_class>F7.3)')upstream,j,(frac_actlay(g,j,upstream),g=1,n_sed_class)
 
@@ -907,7 +907,7 @@ end if
           if (accum2 <= gsize(c)) then
             dummy14=dummy14+1
             accum1=accum2
-            accum2=accum2+frac_actlay(g,j,upstream)
+            accum2=accum2+frac_actlay(g,j,res_index(upstream))
 !write(*,'(4I4,4F14.6)')upstream,j,g,dummy14,accum1,accum2
 !read(*,*)
 		  else
@@ -958,16 +958,16 @@ end if
 	 if (p == 0) then
 !	if (qbottom(step,upstream) /= 0.) then
       dummy4=0.
-	  DO j=pt_long(upstream),pt_long0(upstream)
+	  DO j=pt_long(res_index(upstream)),pt_long0(res_index(upstream))
 	    dummy4=dummy4+dist_sec(j,upstream)
 	  ENDDO
 !write(*,*)dummy4
 
-      dummy3=(minelev_sec(pt_long(upstream),upstream)-minelev_sec(pt_long0(upstream)+1,upstream))/dummy4
+      dummy3=(minelev_sec(pt_long(res_index(upstream)),upstream)-minelev_sec(pt_long0(res_index(upstream))+1,upstream))/dummy4
 !write(*,*)cumlength_sec(pt_long(upstream),upstream),cumlength_sec(pt_long0(upstream)+1,upstream),dummy4,dummy3 !(cumlength_sec(pt_long(upstream),upstream)-cumlength_sec(pt_long0(upstream)+1,upstream)),dist_sec(pt_long0(upstream),upstream)
-      IF (dummy3 > slope_long(upstream)) THEN
-	    pt_long(upstream)=max(pt_long(upstream)-1,42)		!the section 42 of the Barasona reservoir was assumed to be the upstream limit (variable pt_long_min(upstream) should be read in the file sed.dat
-        length_plunge(upstream)=cumlength_sec(max(pt_long(upstream),1),upstream)
+      IF (dummy3 > slope_long(res_index(upstream))) THEN   !A
+	    pt_long(res_index(upstream))=max(pt_long(res_index(upstream))-1,42)		!the section 42 of the Barasona reservoir was assumed to be the upstream limit (variable pt_long_min(upstream) should be read in the file sed.dat
+        length_plunge(upstream)=cumlength_sec(max(pt_long(res_index(upstream)),1),upstream)
 	  ENDIF
 !write(*,'(2I6,F10.2,2F10.6,4F10.2)')pt_long0(upstream),pt_long(upstream),length_plunge(upstream),dummy3,slope_long(upstream),minelev_sec(pt_long0(upstream),upstream),minelev_sec(pt_long0(upstream)+1,upstream),cumlength_sec(pt_long(upstream)&
 !,upstream)-cumlength_sec(pt_long0(upstream)+1,upstream)
@@ -982,8 +982,8 @@ end if
       area_toplay(j,upstream)=0.
 
       DO m=1,npoints(j,upstream)
-	    partarea_actlay(m,j,upstream)=0.
-	    partarea_toplay(m,j,upstream)=0.
+	    partarea_actlay(m,j,res_index(upstream))=0.     !A changed upstream to res_index(upstream)
+	    partarea_toplay(m,j,res_index(upstream))=0.
 	  ENDDO
 
 !	  elev=maxelev_sec(j,upstream)
@@ -999,49 +999,49 @@ end if
         p1=-999
         p2=-999
 	  else if (sed_flag(upstream) == 1) then
-        p1=pt1(j,upstream)
-        p2=pt2(j,upstream)
+        p1=pt1(j,res_index(upstream))
+        p2=pt2(j,res_index(upstream))
 	  endif
 
 	  npt=npoints(j,upstream)
 
 !write(*,'(3I6,6F10.3)')id_sec_extern(j,upstream),p1,p2,elev,watelev_sec(j,upstream)
 
-	  if (p1/=-999 .and. y_sec(p1,j,upstream)>watelev_sec(j,upstream)) then !main channel was defined for each cross section
-        x_p1=x_sec(p1,j,upstream)
-	    side_p1=abs(y_sec(p1,j,upstream)-y_sec(p1+1,j,upstream))/abs(x_sec(p1,j,upstream)-x_sec(p1+1,j,upstream))
-	    if (side_p1>sideslope_pt1(j,upstream)) then
-		  p1=max(pt3(j,upstream),p1-1)
-		  x_p1=x_sec(p1,j,upstream)
-	      pt1(j,upstream)=p1
+	  if (p1/=-999 .and. y_sec(p1,j,res_index(upstream))>watelev_sec(j,upstream)) then !main channel was defined for each cross section
+        x_p1=x_sec(p1,j,res_index(upstream))
+	    side_p1=abs(y_sec(p1,j,res_index(upstream))-y_sec(p1+1,j,res_index(upstream)))/abs(x_sec(p1,j,res_index(upstream))-x_sec(p1+1,j,res_index(upstream)))
+	    if (side_p1>sideslope_pt1(j,res_index(upstream))) then      !A changed upstream to res_index(upstream)
+		  p1=max(pt3(j,res_index(upstream)),p1-1)
+		  x_p1=x_sec(p1,j,res_index(upstream))
+	      pt1(j,res_index(upstream))=p1
 		endif
-		elev=max(y_sec(p1,j,upstream),elev)
+		elev=max(y_sec(p1,j,res_index(upstream)),elev)
       else
         DO m=2,npoints(j,upstream)-1
-          if (y_sec(m,j,upstream) < elev) then
+          if (y_sec(m,j,res_index(upstream)) < elev) then
 		    p1=m-1
 		    exit
 		  endif
 	    ENDDO
 	  endif
-	  if (p2/=-999 .and. y_sec(p2,j,upstream)>watelev_sec(j,upstream)) then !main channel was defined for each cross section
-        x_p2=x_sec(p2,j,upstream)
-	    side_p2=abs(y_sec(p2,j,upstream)-y_sec(p2-1,j,upstream))/abs(x_sec(p2,j,upstream)-x_sec(p2-1,j,upstream))
-	    if (side_p2>sideslope_pt2(j,upstream)) then
-		  p2=min(pt4(j,upstream),p2+1)
-		  x_p2=x_sec(p2,j,upstream)
-	      pt2(j,upstream)=p2
+	  if (p2/=-999 .and. y_sec(p2,j,res_index(upstream))>watelev_sec(j,upstream)) then !main channel was defined for each cross section
+        x_p2=x_sec(p2,j,res_index(upstream))
+	    side_p2=abs(y_sec(p2,j,res_index(upstream))-y_sec(p2-1,j,res_index(upstream)))/abs(x_sec(p2,j,res_index(upstream))-x_sec(p2-1,j,res_index(upstream)))
+	    if (side_p2>sideslope_pt2(j,res_index(upstream))) then              !A changed upstream to res_index(upstream)
+		  p2=min(pt4(j,res_index(upstream)),p2+1)
+		  x_p2=x_sec(p2,j,res_index(upstream))
+	      pt2(j,res_index(upstream))=p2
 		endif
-		elev=max(y_sec(p2,j,upstream),elev)
+		elev=max(y_sec(p2,j,res_index(upstream)),elev)
 	  else
         DO m=1,npoints(j,upstream)
-          if (y_sec(m,j,upstream) < elev) then
+          if (y_sec(m,j,res_index(upstream)) < elev) then
 		    p2=m+1
 		  endif
 	    ENDDO
 	  endif
 
-      erosion_level(j,upstream)=elev
+      erosion_level(j,res_index(upstream))=elev
 
 !write(*,'(3I6,6F10.3)')id_sec_extern(j,upstream),p1,p2,elev,watelev_sec(j,upstream)
 !if(step==2)stop
@@ -1056,7 +1056,7 @@ end if
 !write(*,*)id_sec_extern(j,upstream),elev,watelev_sec(j,upstream)
 
       DO m=1,npoints(j,upstream)
-        IF (elev > y_sec(m,j,upstream)) THEN
+        IF (elev > y_sec(m,j,res_index(upstream))) THEN
           geom(m,j)=1
 		ELSE
 		  geom(m,j)=0
@@ -1070,9 +1070,9 @@ end if
 			.OR. geom(m-1,j) == 2  .AND. geom(m,j) == 1 .AND. geom(m+1,j) == 0) THEN
 		  geom(m,j)=3
 		ENDIF
-        IF (elev < y_sec(m-1,j,upstream)  &
-              .AND. elev > y_sec(m,j,upstream)  &
-			  .AND. elev < y_sec(m+1,j,upstream)) THEN
+        IF (elev < y_sec(m-1,j,res_index(upstream))  &
+              .AND. elev > y_sec(m,j,res_index(upstream))  &
+			  .AND. elev < y_sec(m+1,j,res_index(upstream))) THEN
 		  geom(m,j)=4
 		ENDIF
 	  ENDDO
@@ -1104,16 +1104,16 @@ end if
 
 !Ge erosion height using a normalized distance along the wetted perimeter
       DO m=1,npoints(j,upstream)
-	    if(x_sec(m,j,upstream)>x_sec(p1,j,upstream) .and. x_sec(m,j,upstream)<=x_minelev(j,upstream)) then
-		  dummy5=(x_sec(m,j,upstream)-x_sec(p1,j,upstream))/(x_minelev(j,upstream)-x_sec(p1,j,upstream))
-		else if(x_sec(m,j,upstream)<x_sec(p2,j,upstream) .and. x_sec(m,j,upstream)>x_minelev(j,upstream)) then
-		  dummy5=(x_sec(p2,j,upstream)-x_sec(m,j,upstream))/(x_sec(p2,j,upstream)-x_minelev(j,upstream))
+	    if(x_sec(m,j,res_index(upstream))>x_sec(p1,j,res_index(upstream)) .and. x_sec(m,j,res_index(upstream))<=x_minelev(j,upstream)) then
+		  dummy5=(x_sec(m,j,res_index(upstream))-x_sec(p1,j,res_index(upstream)))/(x_minelev(j,upstream)-x_sec(p1,j,res_index(upstream)))
+		else if(x_sec(m,j,res_index(upstream))<x_sec(p2,j,res_index(upstream)) .and. x_sec(m,j,res_index(upstream))>x_minelev(j,upstream)) then
+		  dummy5=(x_sec(p2,j,res_index(upstream))-x_sec(m,j,res_index(upstream)))/(x_sec(p2,j,res_index(upstream))-x_minelev(j,upstream))
 		else
 		  dummy5=.0
 		endif
 		dummy6=thickness_act(j)*(1.-((1.-dummy5)**2.9))
 !dummy6=dummy(j)
-        y_actlay(m,j,upstream)=max(y_sec(m,j,upstream)-dummy6,y_original(m,j,upstream))
+        y_actlay(m,j,res_index(upstream))=max(y_sec(m,j,res_index(upstream))-dummy6,y_original(m,j,res_index(upstream)))
 !if(j<20)write(*,'(4I4,5F12.6)')t,d,j,m,y_actlay(m,j,upstream),y_sec(m,j,upstream),dummy6,(1.-((1.-(dummy5))**2.9)),dummy5
 !if(d==2 .and. j==10)stop
       ENDDO
@@ -1134,37 +1134,37 @@ end if
 
       DO m=2,npoints(j,upstream)-1
         IF (geom(m,j) == 1) THEN
-          partarea_actlay(m,j,upstream)=(y_sec(m,j,upstream)-y_actlay(m,j,upstream))* &
-		      (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))/2.
-          partarea_toplay(m,j,upstream)=(((elev-y_sec(m,j,upstream))**2.)/ &
-		      (2.*ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))))
-	      area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,upstream)
+          partarea_actlay(m,j,res_index(upstream))=(y_sec(m,j,res_index(upstream))-y_actlay(m,j,res_index(upstream)))* &
+		      (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))/2.
+          partarea_toplay(m,j,res_index(upstream))=(((elev-y_sec(m,j,res_index(upstream)))**2.)/ &
+		      (2.*ABS(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/(x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))))
+	      area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,res_index(upstream))
 	    ELSE IF (geom(m,j) == 2) THEN
-          partarea_actlay(m,j,upstream)=((y_sec(m,j,upstream)-y_actlay(m,j,upstream))+ &
-			  (y_sec(m-1,j,upstream)-y_actlay(m-1,j,upstream)))*  &
-              (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))/2.
-          partarea_toplay(m,j,upstream)=(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))  &
-              *(2.*elev-(y_sec(m,j,upstream)+y_sec(m-1,j,upstream)))/2.
-          area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,upstream)
+          partarea_actlay(m,j,res_index(upstream))=((y_sec(m,j,res_index(upstream))-y_actlay(m,j,res_index(upstream)))+ &
+			  (y_sec(m-1,j,res_index(upstream))-y_actlay(m-1,j,res_index(upstream))))*  &
+              (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))/2.
+          partarea_toplay(m,j,res_index(upstream))=(x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))  &
+              *(2.*elev-(y_sec(m,j,res_index(upstream))+y_sec(m-1,j,res_index(upstream))))/2.
+          area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,res_index(upstream))
 	    ELSE IF (geom(m,j) == 3) THEN
-          partarea_actlay(m,j,upstream)=((y_sec(m,j,upstream)-y_actlay(m,j,upstream))+ &
-			  (y_sec(m-1,j,upstream)-y_actlay(m-1,j,upstream)))*  &
-              (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))/2.+ &
-			  (y_sec(m,j,upstream)-y_actlay(m,j,upstream))* &
-		      (x_sec(m+1,j,upstream)-x_sec(m,j,upstream))/2.
-          partarea_toplay(m,j,upstream)=(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))  &
-              *(2.*elev- (y_sec(m,j,upstream)+y_sec(m-1,j,upstream)))/2.+ &
-			  (((elev-y_sec(m,j,upstream))**2.)/ &
-			  (2.*ABS(y_sec(m+1,j,upstream)-y_sec(m,j,upstream))/(x_sec(m+1,j,upstream)-x_sec(m,j,upstream))))
-          area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,upstream)
+          partarea_actlay(m,j,res_index(upstream))=((y_sec(m,j,res_index(upstream))-y_actlay(m,j,res_index(upstream)))+ &
+			  (y_sec(m-1,j,res_index(upstream))-y_actlay(m-1,j,res_index(upstream))))*  &
+              (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))/2.+ &
+			  (y_sec(m,j,res_index(upstream))-y_actlay(m,j,res_index(upstream)))* &
+		      (x_sec(m+1,j,res_index(upstream))-x_sec(m,j,res_index(upstream)))/2.
+          partarea_toplay(m,j,res_index(upstream))=(x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))  &
+              *(2.*elev- (y_sec(m,j,res_index(upstream))+y_sec(m-1,j,res_index(upstream))))/2.+ &
+			  (((elev-y_sec(m,j,res_index(upstream)))**2.)/ &
+			  (2.*ABS(y_sec(m+1,j,res_index(upstream))-y_sec(m,j,res_index(upstream)))/(x_sec(m+1,j,res_index(upstream))-x_sec(m,j,res_index(upstream)))))
+          area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,res_index(upstream))
 	    ELSE IF (geom(m,j) == 4) THEN
-          partarea_actlay(m,j,upstream)=(y_sec(m,j,upstream)-y_actlay(m,j,upstream))* &
-		      (x_sec(m+1,j,upstream)-x_sec(m-1,j,upstream))/2.
-          partarea_toplay(m,j,upstream)=(((elev-y_sec(m,j,upstream))**2.)/ &
-			  (2.*ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))))+ &
-              (((elev-y_sec(m,j,upstream))**2.)/ &
-			  (2.*ABS(y_sec(m+1,j,upstream)-y_sec(m,j,upstream))/(x_sec(m+1,j,upstream)-x_sec(m,j,upstream))))
-          area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,upstream)
+          partarea_actlay(m,j,res_index(upstream))=(y_sec(m,j,res_index(upstream))-y_actlay(m,j,res_index(upstream)))* &
+		      (x_sec(m+1,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))/2.
+          partarea_toplay(m,j,res_index(upstream))=(((elev-y_sec(m,j,res_index(upstream)))**2.)/ &
+			  (2.*ABS(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/(x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))))+ &
+              (((elev-y_sec(m,j,res_index(upstream)))**2.)/ &
+			  (2.*ABS(y_sec(m+1,j,res_index(upstream))-y_sec(m,j,res_index(upstream)))/(x_sec(m+1,j,res_index(upstream))-x_sec(m,j,res_index(upstream)))))
+          area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,res_index(upstream))
 		ENDIF
 	  ENDDO
 
@@ -1215,7 +1215,7 @@ end if
 ! Fractional sediment availability at the active layer (ton)
     DO j=1,nbrsec(upstream)
       DO g=1,n_sed_class
-        frsedavailab(g,j)=vol_actlay(j,upstream)*frac_actlay(g,j,upstream)*dry_dens(upstream)
+        frsedavailab(g,j)=vol_actlay(j,upstream)*frac_actlay(g,j,res_index(upstream))*dry_dens(upstream)
 !if(j<10)write(*,'(2I4,10F15.2)')j,g,frsedavailab(g,j),vol_actlay(j,upstream),frac_actlay(g,j,upstream),dry_dens(upstream)
       END DO
     END DO
@@ -1287,7 +1287,7 @@ end if
 !*************************************************************************
 ! Computation of fractional erosion for each cross section
         IF (j > 1) THEN
-		  frac_toplay(g,j,upstream)=frac_toplay(g,j-1,upstream)
+		  frac_toplay(g,j,res_index(upstream))=frac_toplay(g,j-1,res_index(upstream))
 		ENDIF
 
 ! The weighting factor to include incoming sediment into the carrying capacity has to be read in do.dat
@@ -1295,8 +1295,8 @@ end if
         weigth_factor=0.9
 		fr_capacity(g,j)=fr_capacity(g,j)*dry_dens(upstream)
         IF (fr_capacity(g,j) > 0.) THEN
-          fr_capacity(g,j)=fr_capacity(g,j)*(weigth_factor*frac_actlay(g,j,upstream)+ &
-			   (1.-weigth_factor)*frac_toplay(g,j,upstream))
+          fr_capacity(g,j)=fr_capacity(g,j)*(weigth_factor*frac_actlay(g,j,res_index(upstream))+ &
+			   (1.-weigth_factor)*frac_toplay(g,j,res_index(upstream)))
         ELSE
           fr_capacity(g,j)=0.
         END IF
@@ -1310,7 +1310,7 @@ end if
 !        IF (upper_limit(g) <= .0055) setvel(g)=0.000022
 !write(*,'(2I4,2F15.6)')j,g,upper_limit(g),setvel(g)*1000
         IF (j == 1) THEN
-          loadincoming=sed_inflow(step,upstream)*frac_toplay(g,j,upstream)
+          loadincoming=sed_inflow(step,upstream)*frac_toplay(g,j,res_index(upstream))
         ELSE
           loadincoming=frtotal_discharge(g,j-1)
         END IF
@@ -1318,8 +1318,8 @@ end if
         if (discharge(j) /= 0.) then
 	      IF (j == 1) THEN
 !write(*,*)j,g,loadincoming
-		    if (conc_inflow*frac_toplay(g,j,upstream)-fr_capacity(g,j)>=0.)recov=.25
-		    if (conc_inflow*frac_toplay(g,j,upstream)-fr_capacity(g,j)<0.)recov=1.
+		    if (conc_inflow*frac_toplay(g,j,res_index(upstream))-fr_capacity(g,j)>=0.)recov=.25
+		    if (conc_inflow*frac_toplay(g,j,res_index(upstream))-fr_capacity(g,j)<0.)recov=1.
 !george		    frconc(g,j)=fr_capacity(g,j)+((conc_inflow*frac_toplay(g,j,upstream))-fr_capacity(g,j))*  &
 !george					exp(-recov*setvel(g)*length_sec(j,upstream)*topwidth(j)/discharge(j))
 !write(*,*)j,g,fr_capacity(g,j),loadincoming,recov,setvel(g),length_sec(j,upstream),topwidth(j),discharge(j)
@@ -1490,9 +1490,9 @@ end if
 
       DO g=1,n_sed_class
         IF (totalload(j,upstream) /= 0.) THEN
-	      frac_toplay(g,j,upstream)=frtotal_discharge(g,j)/totalload(j,upstream)
+	      frac_toplay(g,j,res_index(upstream))=frtotal_discharge(g,j)/totalload(j,upstream)
 	    ELSE
-	      frac_toplay(g,j,upstream)=0.
+	      frac_toplay(g,j,res_index(upstream))=0.
 	    ENDIF
 !		write(*,*)j,g,frac_toplay(g,j,upstream),frtotal_discharge(g,j),totalload(j,upstream)
 	  ENDDO
@@ -1558,9 +1558,9 @@ end if
     DO j=1,nbrsec(upstream)
       DO g=1,n_sed_class
         IF (totvol_actlay(j,upstream) /= 0.) THEN
-          frac_actlay(g,j,upstream)=frvol_actlay(g,j,upstream)/totvol_actlay(j,upstream)
+          frac_actlay(g,j,res_index(upstream))=frvol_actlay(g,j,upstream)/totvol_actlay(j,upstream)
         ELSE
-          frac_actlay(g,j,upstream)=0.
+          frac_actlay(g,j,res_index(upstream))=0.
         END IF
       END DO
     END DO
@@ -1598,7 +1598,7 @@ end if
 ! Cross section geometry before bed elevtion change
     DO j=1,nbrsec(upstream)
       DO m=1,npoints(j,upstream)
-        y_laststep(m,j,upstream)=y_sec(m,j,upstream)
+        y_laststep(m,j,res_index(upstream))=y_sec(m,j,res_index(upstream))
 	  ENDDO
 	ENDDO
 
@@ -1682,7 +1682,7 @@ end if
 ! Calculation of total sediment release (ton)
 	j=nbrsec(upstream)
     DO g=1,n_sed_class
-	  frsediment_out(upstream,g)=frac_toplay(g,j,upstream)
+	  frsediment_out(upstream,g)=frac_toplay(g,j,res_index(upstream))
 	enddo
 
 
@@ -1700,53 +1700,53 @@ end if
 
         npt=npoints(j,upstream)
         DO m=2,npt
-		  IF (elevhelp >= y_sec(m-1,j,upstream)  &
-			.AND.elevhelp >= y_sec(m,j,upstream)) THEN
-		    areasec(j)=areasec(j)+(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))  &
-				*(elevhelp-(y_sec(m,j,upstream)+y_sec(m-1,j,upstream))/2.)
+		  IF (elevhelp >= y_sec(m-1,j,res_index(upstream))  &
+			.AND.elevhelp >= y_sec(m,j,res_index(upstream))) THEN
+		    areasec(j)=areasec(j)+(x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))  &
+				*(elevhelp-(y_sec(m,j,res_index(upstream))+y_sec(m-1,j,res_index(upstream)))/2.)
 			widthsec(j)=widthsec(j)+  &
-				(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))
+				(x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
 			IF (fcav(upstream)==0) THEN
-			 areasec2(j)=areasec2(j)+(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))  &
-				*(elevhelp-(y_laststep(m,j,upstream)+y_laststep(m-1,j,upstream))/2.)
+			 areasec2(j)=areasec2(j)+(x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))  &
+				*(elevhelp-(y_laststep(m,j,res_index(upstream))+y_laststep(m-1,j,res_index(upstream)))/2.)
 			 widthsec2(j)=widthsec2(j)+  &
-				(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))
+				(x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
 			ENDIF
-		  ELSE IF (elevhelp < y_sec(m-1,j,upstream)  &
-			.AND.elevhelp >= y_sec(m,j,upstream)) THEN
-			areasec(j)=areasec(j)+(((elevhelp-y_sec(m,j,upstream))**2.)/ &
-				(2.*ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/  &
-				(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))))
+		  ELSE IF (elevhelp < y_sec(m-1,j,res_index(upstream))  &
+			.AND.elevhelp >= y_sec(m,j,res_index(upstream))) THEN
+			areasec(j)=areasec(j)+(((elevhelp-y_sec(m,j,res_index(upstream)))**2.)/ &
+				(2.*ABS(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/  &
+				(x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))))
 			widthsec(j)=widthsec(j)+  &
-				((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
-				(elevhelp-y_sec(m,j,upstream))/  &
-				(y_sec(m-1,j,upstream)-y_sec(m,j,upstream)))
+				((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
+				(elevhelp-y_sec(m,j,res_index(upstream)))/  &
+				(y_sec(m-1,j,res_index(upstream))-y_sec(m,j,res_index(upstream))))
 			IF (fcav(upstream)==0) THEN
-			 areasec2(j)=areasec2(j)+(((elevhelp-y_laststep(m,j,upstream))**2.)/ &
-				(2.*ABS(y_laststep(m,j,upstream)-y_laststep(m-1,j,upstream))/  &
-				(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))))
+			 areasec2(j)=areasec2(j)+(((elevhelp-y_laststep(m,j,res_index(upstream)))**2.)/ &
+				(2.*ABS(y_laststep(m,j,res_index(upstream))-y_laststep(m-1,j,res_index(upstream)))/  &
+				(x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))))
 			 widthsec2(j)=widthsec2(j)+  &
-				((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
-				(elevhelp-y_laststep(m,j,upstream))/  &
-				(y_laststep(m-1,j,upstream)-y_laststep(m,j,upstream)))
+				((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
+				(elevhelp-y_laststep(m,j,res_index(upstream)))/  &
+				(y_laststep(m-1,j,res_index(upstream))-y_laststep(m,j,res_index(upstream))))
 			ENDIF
-		  ELSE IF (elevhelp >= y_sec(m-1,j,upstream)  &
-			.AND.elevhelp < y_sec(m,j,upstream)) THEN
-			areasec(j)=areasec(j)+(((elevhelp-y_sec(m-1,j,upstream))**2.)/ &
-				(2.*ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/  &
-				(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))))
+		  ELSE IF (elevhelp >= y_sec(m-1,j,res_index(upstream))  &
+			.AND.elevhelp < y_sec(m,j,res_index(upstream))) THEN
+			areasec(j)=areasec(j)+(((elevhelp-y_sec(m-1,j,res_index(upstream)))**2.)/ &
+				(2.*ABS(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/  &
+				(x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))))
 			widthsec(j)=widthsec(j)+  &
-				((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
-				(elevhelp-y_sec(m-1,j,upstream))/  &
-				(y_sec(m,j,upstream)-y_sec(m-1,j,upstream)))
+				((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
+				(elevhelp-y_sec(m-1,j,res_index(upstream)))/  &
+				(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream))))
 			IF (fcav(upstream)==0) THEN
-			 areasec2(j)=areasec2(j)+(((elevhelp-y_laststep(m-1,j,upstream))**2.)/ &
-				(2.*ABS(y_laststep(m,j,upstream)-y_laststep(m-1,j,upstream))/  &
-				(x_sec(m,j,upstream)-x_sec(m-1,j,upstream))))
+			 areasec2(j)=areasec2(j)+(((elevhelp-y_laststep(m-1,j,res_index(upstream)))**2.)/ &
+				(2.*ABS(y_laststep(m,j,res_index(upstream))-y_laststep(m-1,j,res_index(upstream)))/  &
+				(x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))))
 			 widthsec2(j)=widthsec2(j)+  &
-				((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
-				(elevhelp-y_laststep(m-1,j,upstream))/  &
-				(y_laststep(m,j,upstream)-y_laststep(m-1,j,upstream)))
+				((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
+				(elevhelp-y_laststep(m-1,j,res_index(upstream)))/  &
+				(y_laststep(m,j,res_index(upstream))-y_laststep(m-1,j,res_index(upstream))))
 			ENDIF
 		  END IF
 	    END DO
@@ -1825,11 +1825,11 @@ end if
 ! Minimum elevation for each cross_section (m)
      j=nbrsec(upstream)
      dummy5=minelev_sec(j,upstream)
-	 minelev_sec(j,upstream)=y_sec(1,j,upstream)
+	 minelev_sec(j,upstream)=y_sec(1,j,res_index(upstream))
 	 npt=npoints(j,upstream)
 	 DO m=2,npt
-	   IF (minelev_sec(j,upstream) > y_sec(m,j,upstream)) THEN
-		 minelev_sec(j,upstream)=y_sec(m,j,upstream)
+	   IF (minelev_sec(j,upstream) > y_sec(m,j,res_index(upstream))) THEN
+		 minelev_sec(j,upstream)=y_sec(m,j,res_index(upstream))
 	   END IF
 	 END DO
 	 dummy4=minelev_sec(j,upstream)-dummy5
@@ -1956,7 +1956,7 @@ end if
 			'_bedchange.out',STATUS='old',POSITION='append')
          write(fmtstr,'(a,i0,a)')'(6I6,',npt,'F15.6)'		!generate format string
 		 WRITE(11,fmtstr)id_subbas_extern(upstream),id_sec_extern(j,upstream),t,d,hour,npt,  &
-			(y_sec(m,j,upstream),m=1,npoints(j,upstream))
+			(y_sec(m,j,res_index(upstream)),m=1,npoints(j,upstream))
 		 !WRITE(11,'(6I6,<npt>F15.6)')id_subbas_extern(upstream),id_sec_extern(j,upstream),t,d,hour,npt,  &
 		!	(y_sec(m,j,upstream),m=1,npoints(j,upstream))
       CLOSE(11)
@@ -1988,7 +1988,7 @@ end if
 	  	daydischarge_sec(step,j,upstream)=discharge_sec(j,upstream)
 		dayminelev_sec(step,j,upstream)=minelev_sec(j,upstream)
 		DO m=1,npoints(j,upstream)
-		  dayy_sec(step,m,j,upstream)=y_sec(m,j,upstream)
+		  dayy_sec(step,m,j,res_index(upstream))=y_sec(m,j,res_index(upstream))
 		ENDDO
 	  ENDDO
 	ENDIF

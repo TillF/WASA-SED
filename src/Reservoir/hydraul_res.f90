@@ -93,12 +93,12 @@ damelev_mean(step,upstream)=damelev
 
 ! Minimum elevation for each cross_section (m)
 DO j=1,nbrsec(upstream)
-  minelev_sec(j,upstream)=y_sec(1,j,upstream)
+  minelev_sec(j,upstream)=y_sec(1,j,res_index(upstream))
   npt=npoints(j,upstream)
   DO m=2,npt
-    IF (minelev_sec(j,upstream) > y_sec(m,j,upstream)) THEN
-      minelev_sec(j,upstream)=y_sec(m,j,upstream)
-	  x_minelev(j,upstream)=x_sec(m,j,upstream)
+    IF (minelev_sec(j,upstream) > y_sec(m,j,res_index(upstream))) THEN
+      minelev_sec(j,upstream)=y_sec(m,j,res_index(upstream))
+	  x_minelev(j,upstream)=x_sec(m,j,res_index(upstream))
     END IF
   END DO
 END DO
@@ -122,26 +122,26 @@ END DO
 DO j=1,nbrsec(upstream)
   maxarea_sec(j,upstream)=0.
   npt=npoints(j,upstream)
-  maxelev_sec(j,upstream)=MIN(y_sec(1,j,upstream), y_sec(npt,j,upstream))
+  maxelev_sec(j,upstream)=MIN(y_sec(1,j,res_index(upstream)), y_sec(npt,j,res_index(upstream)))
   maxdepth_sec(j,upstream)=maxelev_sec(j,upstream)- minelev_sec(j,upstream)
 
   DO m=2,npt
-    TAN=ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/  &
-        (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))
-    IF (maxelev_sec(j,upstream) >= y_sec(m-1,j,upstream)  &
-          .AND.maxelev_sec(j,upstream) >= y_sec(m,j,upstream)) THEN
+    TAN=ABS(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/  &
+        (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
+    IF (maxelev_sec(j,upstream) >= y_sec(m-1,j,res_index(upstream))  &
+          .AND.maxelev_sec(j,upstream) >= y_sec(m,j,res_index(upstream))) THEN
       maxarea_sec(j,upstream)=maxarea_sec(j,upstream)+  &
-          (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))  &
+          (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))  &
           *(maxelev_sec(j,upstream)-  &
-          (y_sec(m,j,upstream)+y_sec(m-1,j,upstream))/2.)
-    ELSE IF (maxelev_sec(j,upstream) < y_sec(m-1,j,upstream)  &
-          .AND.maxelev_sec(j,upstream) >= y_sec(m,j,upstream)) THEN
+          (y_sec(m,j,res_index(upstream))+y_sec(m-1,j,res_index(upstream)))/2.)
+    ELSE IF (maxelev_sec(j,upstream) < y_sec(m-1,j,res_index(upstream))  &
+          .AND.maxelev_sec(j,upstream) >= y_sec(m,j,res_index(upstream))) THEN
       maxarea_sec(j,upstream)=maxarea_sec(j,upstream)+  &
-          (((maxelev_sec(j,upstream)-y_sec(m,j,upstream))**2.)/ (2.*TAN))
-    ELSE IF (maxelev_sec(j,upstream) >= y_sec(m-1,j,upstream)  &
-          .AND.maxelev_sec(j,upstream) < y_sec(m,j,upstream)) THEN
+          (((maxelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))**2.)/ (2.*TAN))
+    ELSE IF (maxelev_sec(j,upstream) >= y_sec(m-1,j,res_index(upstream))  &
+          .AND.maxelev_sec(j,upstream) < y_sec(m,j,res_index(upstream))) THEN
       maxarea_sec(j,upstream)=maxarea_sec(j,upstream)+  &
-          (((maxelev_sec(j,upstream)-y_sec(m-1,j,upstream))**2.)/ (2.*TAN))
+          (((maxelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))**2.)/ (2.*TAN))
     END IF
   END DO
 END DO
@@ -175,21 +175,21 @@ DO j=1,nbrsec(upstream)
     resarea_sec(j,upstream)=0.
     npt=npoints(j,upstream)
     DO m=2,npt
-      TAN=ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/  &
-          (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))
-      IF (damelev >= y_sec(m-1,j,upstream).AND.damelev >=  &
-            y_sec(m,j,upstream)) THEN
+      TAN=ABS(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/  &
+          (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
+      IF (damelev >= y_sec(m-1,j,res_index(upstream)).AND.damelev >=  &
+            y_sec(m,j,res_index(upstream))) THEN
         resarea_sec(j,upstream)=resarea_sec(j,upstream)+  &
-            (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*(damelev-  &
-            (y_sec(m,j,upstream)+y_sec(m-1,j,upstream))/2.)
-      ELSE IF (damelev < y_sec(m-1,j,upstream).AND.damelev >=  &
-            y_sec(m,j,upstream)) THEN
+            (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*(damelev-  &
+            (y_sec(m,j,res_index(upstream))+y_sec(m-1,j,res_index(upstream)))/2.)
+      ELSE IF (damelev < y_sec(m-1,j,res_index(upstream)).AND.damelev >=  &
+            y_sec(m,j,res_index(upstream))) THEN
         resarea_sec(j,upstream)=resarea_sec(j,upstream)+  &
-            (((damelev-y_sec(m,j,upstream))**2.)/(2.*TAN))
-      ELSE IF (damelev >= y_sec(m-1,j,upstream).AND.damelev <  &
-            y_sec(m,j,upstream)) THEN
+            (((damelev-y_sec(m,j,res_index(upstream)))**2.)/(2.*TAN))
+      ELSE IF (damelev >= y_sec(m-1,j,res_index(upstream)).AND.damelev <  &
+            y_sec(m,j,res_index(upstream))) THEN
         resarea_sec(j,upstream)=resarea_sec(j,upstream)+  &
-            (((damelev-y_sec(m-1,j,upstream))**2.)/(2.*TAN))
+            (((damelev-y_sec(m-1,j,res_index(upstream)))**2.)/(2.*TAN))
       END IF
     END DO
 
@@ -292,41 +292,41 @@ DO j=1,nbrsec(upstream)
       END IF
 
       DO m=2,npt
-        TAN=ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/  &
-            (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))
-        IF (watelev_sec(j,upstream) >= y_sec(m-1,j,upstream).AND.  &
-              watelev_sec(j,upstream) >= y_sec(m,j,upstream)) THEN
+        TAN=ABS(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/  &
+            (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
+        IF (watelev_sec(j,upstream) >= y_sec(m-1,j,res_index(upstream)).AND.  &
+              watelev_sec(j,upstream) >= y_sec(m,j,res_index(upstream))) THEN
           area_sec(j,upstream)=area_sec(j,upstream)+  &
-              (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
+              (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
               (watelev_sec(j,upstream)-  &
-              (y_sec(m,j,upstream)+y_sec(m-1,j,upstream))/2.)
+              (y_sec(m,j,res_index(upstream))+y_sec(m-1,j,res_index(upstream)))/2.)
           topwidth_sec(j,upstream)=topwidth_sec(j,upstream)+  &
-              (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))
+              (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
           wetper_sec(j,upstream)=wetper_sec(j,upstream)+  &
-              SQRT((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))**2.  &
-              +(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))**2.)
-        ELSE IF (watelev_sec(j,upstream) < y_sec(m-1,j,upstream)  &
-              .AND.watelev_sec(j,upstream) >= y_sec(m,j,upstream)) THEN
+              SQRT((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))**2.  &
+              +(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))**2.)
+        ELSE IF (watelev_sec(j,upstream) < y_sec(m-1,j,res_index(upstream))  &
+              .AND.watelev_sec(j,upstream) >= y_sec(m,j,res_index(upstream))) THEN
           area_sec(j,upstream)=area_sec(j,upstream)+  &
-              (((watelev_sec(j,upstream)-y_sec(m,j,upstream))**2.)/ (2.*TAN))
+              (((watelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))**2.)/ (2.*TAN))
           topwidth_sec(j,upstream)=topwidth_sec(j,upstream)+  &
-              ((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
-              (watelev_sec(j,upstream)-y_sec(m,j,upstream))/  &
-              (y_sec(m-1,j,upstream)-y_sec(m,j,upstream)))
+              ((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
+              (watelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))/  &
+              (y_sec(m-1,j,res_index(upstream))-y_sec(m,j,res_index(upstream))))
           wetper_sec(j,upstream)=wetper_sec(j,upstream)+  &
-              SQRT(((watelev_sec(j,upstream)-y_sec(m,j,upstream))/TAN)  &
-              **2+(watelev_sec(j,upstream)-y_sec(m,j,upstream))**2.)
-        ELSE IF (watelev_sec(j,upstream) >= y_sec(m-1,j,upstream)  &
-              .AND.watelev_sec(j,upstream) < y_sec(m,j,upstream)) THEN
+              SQRT(((watelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))/TAN)  &
+              **2+(watelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))**2.)
+        ELSE IF (watelev_sec(j,upstream) >= y_sec(m-1,j,res_index(upstream))  &
+              .AND.watelev_sec(j,upstream) < y_sec(m,j,res_index(upstream))) THEN
           area_sec(j,upstream)=area_sec(j,upstream)+  &
-              (((watelev_sec(j,upstream)-y_sec(m-1,j,upstream))**2.)/ (2.*TAN))
+              (((watelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))**2.)/ (2.*TAN))
           topwidth_sec(j,upstream)=topwidth_sec(j,upstream)+  &
-              ((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
-              (watelev_sec(j,upstream)-y_sec(m-1,j,upstream))/  &
-              (y_sec(m,j,upstream)-y_sec(m-1,j,upstream)))
+              ((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
+              (watelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))/  &
+              (y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream))))
           wetper_sec(j,upstream)=wetper_sec(j,upstream)+  &
-              SQRT(((watelev_sec(j,upstream)-y_sec(m-1,j,upstream))/TAN)  &
-              **2+(watelev_sec(j,upstream)-y_sec(m-1,j,upstream))**2.)
+              SQRT(((watelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))/TAN)  &
+              **2+(watelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))**2.)
         END IF
       END DO
 
@@ -449,41 +449,41 @@ DO j=1,nbrsec(upstream)
       END IF
 
       DO m=2,npt
-        TAN=ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/  &
-            (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))
-        IF (crwatelev_sec(j,upstream) >= y_sec(m-1,j,upstream).AND.  &
-              crwatelev_sec(j,upstream) >= y_sec(m,j,upstream)) THEN
+        TAN=ABS(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/  &
+            (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
+        IF (crwatelev_sec(j,upstream) >= y_sec(m-1,j,res_index(upstream)).AND.  &
+              crwatelev_sec(j,upstream) >= y_sec(m,j,res_index(upstream))) THEN
           crarea_sec(j,upstream)=crarea_sec(j,upstream)+  &
-              (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
+              (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
               (crwatelev_sec(j,upstream)-  &
-              (y_sec(m,j,upstream)+y_sec(m-1,j,upstream))/2.)
+              (y_sec(m,j,res_index(upstream))+y_sec(m-1,j,res_index(upstream)))/2.)
           crtopwidth_sec(j,upstream)=crtopwidth_sec(j,upstream)+  &
-              (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))
+              (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
           crwetper_sec(j,upstream)=crwetper_sec(j,upstream)+  &
-              SQRT((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))**2.  &
-              +(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))**2.)
-        ELSE IF (crwatelev_sec(j,upstream) < y_sec(m-1,j,upstream)  &
-              .AND.crwatelev_sec(j,upstream) >= y_sec(m,j,upstream)) THEN
+              SQRT((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))**2.  &
+              +(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))**2.)
+        ELSE IF (crwatelev_sec(j,upstream) < y_sec(m-1,j,res_index(upstream))  &
+              .AND.crwatelev_sec(j,upstream) >= y_sec(m,j,res_index(upstream))) THEN
           crarea_sec(j,upstream)=crarea_sec(j,upstream)+  &
-              (((crwatelev_sec(j,upstream)-y_sec(m,j,upstream))**2.)/ (2.*TAN))
+              (((crwatelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))**2.)/ (2.*TAN))
           crtopwidth_sec(j,upstream)=crtopwidth_sec(j,upstream)+  &
-              ((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
-              (crwatelev_sec(j,upstream)-y_sec(m,j,upstream))/  &
-              (y_sec(m-1,j,upstream)-y_sec(m,j,upstream)))
+              ((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
+              (crwatelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))/  &
+              (y_sec(m-1,j,res_index(upstream))-y_sec(m,j,res_index(upstream))))
           crwetper_sec(j,upstream)=crwetper_sec(j,upstream)+  &
-              SQRT(((crwatelev_sec(j,upstream)-y_sec(m,j,upstream))/TAN)  &
-              **2+(crwatelev_sec(j,upstream)-y_sec(m,j,upstream))**2.)
-        ELSE IF (crwatelev_sec(j,upstream) >= y_sec(m-1,j,upstream)  &
-              .AND.crwatelev_sec(j,upstream) < y_sec(m,j,upstream)) THEN
+              SQRT(((crwatelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))/TAN)  &
+              **2+(crwatelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))**2.)
+        ELSE IF (crwatelev_sec(j,upstream) >= y_sec(m-1,j,res_index(upstream))  &
+              .AND.crwatelev_sec(j,upstream) < y_sec(m,j,res_index(upstream))) THEN
           crarea_sec(j,upstream)=crarea_sec(j,upstream)+  &
-              (((crwatelev_sec(j,upstream)-y_sec(m-1,j,upstream))**2.)/ (2.*TAN))
+              (((crwatelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))**2.)/ (2.*TAN))
           crtopwidth_sec(j,upstream)=crtopwidth_sec(j,upstream)+  &
-              ((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
-              (crwatelev_sec(j,upstream)-y_sec(m-1,j,upstream))/  &
-              (y_sec(m,j,upstream)-y_sec(m-1,j,upstream)))
+              ((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
+              (crwatelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))/  &
+              (y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream))))
           crwetper_sec(j,upstream)=crwetper_sec(j,upstream)+  &
-              SQRT(((crwatelev_sec(j,upstream)-y_sec(m-1,j,upstream))/TAN)  &
-              **2+(crwatelev_sec(j,upstream)-y_sec(m-1,j,upstream))**2.)
+              SQRT(((crwatelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))/TAN)  &
+              **2+(crwatelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))**2.)
         END IF
       END DO
 
@@ -592,33 +592,33 @@ DO j=1,nbrsec(upstream)
 	  wetper_sec(j,upstream)=0.
 
       DO m=2,npt
-        TAN=ABS(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))/  &
-            (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))
-        IF (watelev_sec(j,upstream) >= y_sec(m-1,j,upstream).AND.  &
-              watelev_sec(j,upstream) >= y_sec(m,j,upstream)) THEN
+        TAN=ABS(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/  &
+            (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
+        IF (watelev_sec(j,upstream) >= y_sec(m-1,j,res_index(upstream)).AND.  &
+              watelev_sec(j,upstream) >= y_sec(m,j,res_index(upstream))) THEN
           topwidth_sec(j,upstream)=topwidth_sec(j,upstream)+  &
-              (x_sec(m,j,upstream)-x_sec(m-1,j,upstream))
+              (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
           wetper_sec(j,upstream)=wetper_sec(j,upstream)+  &
-              SQRT((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))**2.  &
-              +(y_sec(m,j,upstream)-y_sec(m-1,j,upstream))**2.)
-        ELSE IF (watelev_sec(j,upstream) < y_sec(m-1,j,upstream)  &
-              .AND.watelev_sec(j,upstream) >= y_sec(m,j,upstream)) THEN
+              SQRT((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))**2.  &
+              +(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))**2.)
+        ELSE IF (watelev_sec(j,upstream) < y_sec(m-1,j,res_index(upstream))  &
+              .AND.watelev_sec(j,upstream) >= y_sec(m,j,res_index(upstream))) THEN
           topwidth_sec(j,upstream)=topwidth_sec(j,upstream)+  &
-              ((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
-              (watelev_sec(j,upstream)-y_sec(m,j,upstream))/  &
-              (y_sec(m-1,j,upstream)-y_sec(m,j,upstream)))
+              ((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
+              (watelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))/  &
+              (y_sec(m-1,j,res_index(upstream))-y_sec(m,j,res_index(upstream))))
           wetper_sec(j,upstream)=wetper_sec(j,upstream)+  &
-              SQRT(((watelev_sec(j,upstream)-y_sec(m,j,upstream))/TAN)  &
-              **2.+(watelev_sec(j,upstream)-y_sec(m,j,upstream))**2.)
-        ELSE IF (watelev_sec(j,upstream) >= y_sec(m-1,j,upstream)  &
-              .AND.watelev_sec(j,upstream) < y_sec(m,j,upstream)) THEN
+              SQRT(((watelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))/TAN)  &
+              **2.+(watelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))**2.)
+        ELSE IF (watelev_sec(j,upstream) >= y_sec(m-1,j,res_index(upstream))  &
+              .AND.watelev_sec(j,upstream) < y_sec(m,j,res_index(upstream))) THEN
           topwidth_sec(j,upstream)=topwidth_sec(j,upstream)+  &
-              ((x_sec(m,j,upstream)-x_sec(m-1,j,upstream))*  &
-              (watelev_sec(j,upstream)-y_sec(m-1,j,upstream))/  &
-              (y_sec(m,j,upstream)-y_sec(m-1,j,upstream)))
+              ((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
+              (watelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))/  &
+              (y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream))))
           wetper_sec(j,upstream)=wetper_sec(j,upstream)+  &
-              SQRT(((watelev_sec(j,upstream)-y_sec(m-1,j,upstream))/TAN)  &
-              **2.+(watelev_sec(j,upstream)-y_sec(m-1,j,upstream))**2.)
+              SQRT(((watelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))/TAN)  &
+              **2.+(watelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))**2.)
         END IF
       END DO
       hydrad_sec(j,upstream)=area_sec(j,upstream)/ wetper_sec(j,upstream)
@@ -709,47 +709,47 @@ IF (k /= 0) THEN
 		enddo
 
         DO m=2,npt
-          TAN=ABS(y_sec(m,k+1-p,upstream)-y_sec(m-1,k+1-p,upstream))/  &
-              (x_sec(m,k+1-p,upstream)-x_sec(m-1,k+1-p,upstream))
-          IF (watelev_sec(k+1-p,upstream) >= y_sec(m-1,k+1-p,upstream)  &
-                .AND.watelev_sec(k+1-p,upstream) >= y_sec(m,k+1-p,upstream)) THEN
-			area_part(m,k+1-p)=(x_sec(m,k+1-p,upstream)-x_sec(m-1,k+1-p,upstream))*  &
+          TAN=ABS(y_sec(m,k+1-p,res_index(upstream))-y_sec(m-1,k+1-p,res_index(upstream)))/  &
+              (x_sec(m,k+1-p,res_index(upstream))-x_sec(m-1,k+1-p,res_index(upstream)))
+          IF (watelev_sec(k+1-p,upstream) >= y_sec(m-1,k+1-p,res_index(upstream))  &
+                .AND.watelev_sec(k+1-p,upstream) >= y_sec(m,k+1-p,res_index(upstream))) THEN
+			area_part(m,k+1-p)=(x_sec(m,k+1-p,res_index(upstream))-x_sec(m-1,k+1-p,res_index(upstream)))*  &
                 (watelev_sec(k+1-p,upstream)-  &
-                (y_sec(m,k+1-p,upstream)+y_sec(m-1,k+1-p,upstream))/2.)
+                (y_sec(m,k+1-p,res_index(upstream))+y_sec(m-1,k+1-p,res_index(upstream)))/2.)
             area_sec(k+1-p,upstream)=area_sec(k+1-p,upstream)+area_part(m,k+1-p)
             topwidth_sec(k+1-p,upstream)=topwidth_sec(k+1-p,upstream)+  &
-                (x_sec(m,k+1-p,upstream)-x_sec(m-1,k+1-p,upstream))
+                (x_sec(m,k+1-p,res_index(upstream))-x_sec(m-1,k+1-p,res_index(upstream)))
             wetper_sec(k+1-p,upstream)=wetper_sec(k+1-p,upstream)+  &
-                SQRT((x_sec(m,k+1-p,upstream)-x_sec(m-1,k+1-p,upstream))**2.  &
-                +(y_sec(m,k+1-p,upstream)-y_sec(m-1,k+1-p,upstream))**2.)
+                SQRT((x_sec(m,k+1-p,res_index(upstream))-x_sec(m-1,k+1-p,res_index(upstream)))**2.  &
+                +(y_sec(m,k+1-p,res_index(upstream))-y_sec(m-1,k+1-p,res_index(upstream)))**2.)
           ELSE IF (watelev_sec(k+1-p,upstream) <  &
-                y_sec(m-1,k+1-p,upstream).AND.watelev_sec(k+1-p,upstream)  &
-                 >= y_sec(m,k+1-p,upstream)) THEN
+                y_sec(m-1,k+1-p,res_index(upstream)).AND.watelev_sec(k+1-p,upstream)  &
+                 >= y_sec(m,k+1-p,res_index(upstream))) THEN
             area_part(m,k+1-p)=(((watelev_sec(k+1-p,upstream)-  &
-                y_sec(m,k+1-p,upstream))**2.)/(2.*TAN))
+                y_sec(m,k+1-p,res_index(upstream)))**2.)/(2.*TAN))
             area_sec(k+1-p,upstream)=area_sec(k+1-p,upstream)+area_part(m,k+1-p)
             topwidth_sec(k+1-p,upstream)=topwidth_sec(k+1-p,upstream)+  &
-                ((x_sec(m,k+1-p,upstream)-x_sec(m-1,k+1-p,upstream))*  &
-                (watelev_sec(k+1-p,upstream)-y_sec(m,k+1-p,upstream))/  &
-                (y_sec(m-1,k+1-p,upstream)-y_sec(m,k+1-p,upstream)))
+                ((x_sec(m,k+1-p,res_index(upstream))-x_sec(m-1,k+1-p,res_index(upstream)))*  &
+                (watelev_sec(k+1-p,upstream)-y_sec(m,k+1-p,res_index(upstream)))/  &
+                (y_sec(m-1,k+1-p,res_index(upstream))-y_sec(m,k+1-p,res_index(upstream))))
             wetper_sec(k+1-p,upstream)=wetper_sec(k+1-p,upstream)+  &
-                SQRT(((watelev_sec(k+1-p,upstream)-y_sec(m,k+1-p,upstream))  &
+                SQRT(((watelev_sec(k+1-p,upstream)-y_sec(m,k+1-p,res_index(upstream)))  &
                 /TAN)**2.+(watelev_sec(k+1-p,upstream)-  &
-                y_sec(m,k+1-p,upstream))**2.)
+                y_sec(m,k+1-p,res_index(upstream)))**2.)
           ELSE IF (watelev_sec(k+1-p,upstream) >=  &
-                y_sec(m-1,k+1-p,upstream).AND.watelev_sec(k+1-p,upstream)  &
-                 < y_sec(m,k+1-p,upstream)) THEN
+                y_sec(m-1,k+1-p,res_index(upstream)).AND.watelev_sec(k+1-p,upstream)  &
+                 < y_sec(m,k+1-p,res_index(upstream))) THEN
             area_part(m,k+1-p)=(((watelev_sec(k+1-p,upstream)-  &
-                y_sec(m-1,k+1-p,upstream))**2.)/(2.*TAN))
+                y_sec(m-1,k+1-p,res_index(upstream)))**2.)/(2.*TAN))
             area_sec(k+1-p,upstream)=area_sec(k+1-p,upstream)+area_part(m,k+1-p)
             topwidth_sec(k+1-p,upstream)=topwidth_sec(k+1-p,upstream)+  &
-                ((x_sec(m,k+1-p,upstream)-x_sec(m-1,k+1-p,upstream))*  &
-                (watelev_sec(k+1-p,upstream)-y_sec(m-1,k+1-p,upstream))/  &
-                (y_sec(m,k+1-p,upstream)-y_sec(m-1,k+1-p,upstream)))
+                ((x_sec(m,k+1-p,res_index(upstream))-x_sec(m-1,k+1-p,res_index(upstream)))*  &
+                (watelev_sec(k+1-p,upstream)-y_sec(m-1,k+1-p,res_index(upstream)))/  &
+                (y_sec(m,k+1-p,res_index(upstream))-y_sec(m-1,k+1-p,res_index(upstream))))
             wetper_sec(k+1-p,upstream)=wetper_sec(k+1-p,upstream)+  &
                 SQRT(((watelev_sec(k+1-p,upstream)-  &
-                y_sec(m-1,k+1-p,upstream))/TAN)**2.+  &
-                (watelev_sec(k+1-p,upstream)- y_sec(m-1,k+1-p,upstream))**2.)
+                y_sec(m-1,k+1-p,res_index(upstream)))/TAN)**2.+  &
+                (watelev_sec(k+1-p,upstream)- y_sec(m-1,k+1-p,res_index(upstream)))**2.)
           END IF
         END DO
 
@@ -976,47 +976,47 @@ dummy1=22
         END IF
 
         DO m=2,npt
-          TAN=ABS(y_sec(m,p,upstream)-y_sec(m-1,p,upstream))/  &
-              (x_sec(m,p,upstream)-x_sec(m-1,p,upstream))
-          IF (watelev_sec(p,upstream) >= y_sec(m-1,p,upstream)  &
-                .AND.watelev_sec(p,upstream) >= y_sec(m,p,upstream)) THEN
-            area_part(m,p)=(x_sec(m,p,upstream)-x_sec(m-1,p,upstream))*  &
+          TAN=ABS(y_sec(m,p,res_index(upstream))-y_sec(m-1,p,res_index(upstream)))/  &
+              (x_sec(m,p,res_index(upstream))-x_sec(m-1,p,res_index(upstream)))
+          IF (watelev_sec(p,upstream) >= y_sec(m-1,p,res_index(upstream))  &
+                .AND.watelev_sec(p,upstream) >= y_sec(m,p,res_index(upstream))) THEN
+            area_part(m,p)=(x_sec(m,p,res_index(upstream))-x_sec(m-1,p,res_index(upstream)))*  &
                 (watelev_sec(p,upstream)-  &
-                (y_sec(m,p,upstream)+y_sec(m-1,p,upstream))/2.)
+                (y_sec(m,p,res_index(upstream))+y_sec(m-1,p,res_index(upstream)))/2.)
 			area_sec(p,upstream)=area_sec(p,upstream)+area_part(m,p)
             topwidth_sec(p,upstream)=topwidth_sec(p,upstream)+  &
-                (x_sec(m,p,upstream)-x_sec(m-1,p,upstream))
+                (x_sec(m,p,res_index(upstream))-x_sec(m-1,p,res_index(upstream)))
             wetper_sec(p,upstream)=wetper_sec(p,upstream)+  &
-                SQRT((x_sec(m,p,upstream)-x_sec(m-1,p,upstream))**2.  &
-                +(y_sec(m,p,upstream)-y_sec(m-1,p,upstream))**2.)
+                SQRT((x_sec(m,p,res_index(upstream))-x_sec(m-1,p,res_index(upstream)))**2.  &
+                +(y_sec(m,p,res_index(upstream))-y_sec(m-1,p,res_index(upstream)))**2.)
           ELSE IF (watelev_sec(p,upstream) <  &
-                y_sec(m-1,p,upstream).AND.watelev_sec(p,upstream)  &
-                 >= y_sec(m,p,upstream)) THEN
+                y_sec(m-1,p,res_index(upstream)).AND.watelev_sec(p,upstream)  &
+                 >= y_sec(m,p,res_index(upstream))) THEN
             area_part(m,p)=(((watelev_sec(p,upstream)-  &
-                y_sec(m,p,upstream))**2.)/(2.*TAN))
+                y_sec(m,p,res_index(upstream)))**2.)/(2.*TAN))
 			area_sec(p,upstream)=area_sec(p,upstream)+area_part(m,p)
             topwidth_sec(p,upstream)=topwidth_sec(p,upstream)+  &
-                ((x_sec(m,p,upstream)-x_sec(m-1,p,upstream))*  &
-                (watelev_sec(p,upstream)-y_sec(m,p,upstream))/  &
-                (y_sec(m-1,p,upstream)-y_sec(m,p,upstream)))
+                ((x_sec(m,p,res_index(upstream))-x_sec(m-1,p,res_index(upstream)))*  &
+                (watelev_sec(p,upstream)-y_sec(m,p,res_index(upstream)))/  &
+                (y_sec(m-1,p,res_index(upstream))-y_sec(m,p,res_index(upstream))))
             wetper_sec(p,upstream)=wetper_sec(p,upstream)+  &
-                SQRT(((watelev_sec(p,upstream)-y_sec(m,p,upstream))  &
+                SQRT(((watelev_sec(p,upstream)-y_sec(m,p,res_index(upstream)))  &
                 /TAN)**2.+(watelev_sec(p,upstream)-  &
-                y_sec(m,p,upstream))**2.)
+                y_sec(m,p,res_index(upstream)))**2.)
           ELSE IF (watelev_sec(p,upstream) >=  &
-                y_sec(m-1,p,upstream).AND.watelev_sec(p,upstream)  &
-                 < y_sec(m,p,upstream)) THEN
+                y_sec(m-1,p,res_index(upstream)).AND.watelev_sec(p,upstream)  &
+                 < y_sec(m,p,res_index(upstream))) THEN
             area_part(m,p)=(((watelev_sec(p,upstream)-  &
-                y_sec(m-1,p,upstream))**2.)/(2.*TAN))
+                y_sec(m-1,p,res_index(upstream)))**2.)/(2.*TAN))
 			area_sec(p,upstream)=area_sec(p,upstream)+area_part(m,p)
             topwidth_sec(p,upstream)=topwidth_sec(p,upstream)+  &
-                ((x_sec(m,p,upstream)-x_sec(m-1,p,upstream))*  &
-                (watelev_sec(p,upstream)-y_sec(m-1,p,upstream))/  &
-                (y_sec(m,p,upstream)-y_sec(m-1,p,upstream)))
+                ((x_sec(m,p,res_index(upstream))-x_sec(m-1,p,res_index(upstream)))*  &
+                (watelev_sec(p,upstream)-y_sec(m-1,p,res_index(upstream)))/  &
+                (y_sec(m,p,res_index(upstream))-y_sec(m-1,p,res_index(upstream))))
             wetper_sec(p,upstream)=wetper_sec(p,upstream)+  &
                 SQRT(((watelev_sec(p,upstream)-  &
-                y_sec(m-1,p,upstream))/TAN)**2.+  &
-                (watelev_sec(p,upstream)- y_sec(m-1,p,upstream))**2.)
+                y_sec(m-1,p,res_index(upstream)))/TAN)**2.+  &
+                (watelev_sec(p,upstream)- y_sec(m-1,p,res_index(upstream)))**2.)
           END IF
         END DO
 

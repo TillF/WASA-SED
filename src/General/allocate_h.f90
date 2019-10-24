@@ -553,12 +553,12 @@ subroutine allocate_reservoir()
 	      normalelev_sec(nxsection_res,subasin), &
 	      normalarea_sec(nxsection_res,subasin), &
 
-
 	      setvel(n_sed_class), &
     !	  point1_sub(nxsection_res,subasin), &
     !	  point2_sub(nxsection_res,subasin), &
     !	  point1_bank(nxsection_res,subasin), &
     !	  point2_bank(nxsection_res,subasin), &
+            
 	      area_actlay(nxsection_res,subasin), &
 	      area_toplay(nxsection_res,subasin), &
 	      vol_actlay(nxsection_res,subasin), &
@@ -567,20 +567,26 @@ subroutine allocate_reservoir()
 	      frerosion(n_sed_class,nxsection_res), &
 	      frdeposition(n_sed_class,nxsection_res), &
 	      frretention(n_sed_class,nxsection_res), &
+            
     !	  frsuspension(n_sed_class,nxsection_res), &
     !	  frbed_discharge(n_sed_class,nxsection_res), &
     !	  frsusp_discharge(n_sed_class,nxsection_res), &
+            
 	      frtotal_discharge(n_sed_class,nxsection_res), &
 	      erosion(nxsection_res,subasin), &
 	      deposition(nxsection_res,subasin), &
 	      retention(nxsection_res,subasin), &
+            
     !	  suspension(nxsection_res,subasin), &
+            
 	      totalload(nxsection_res,subasin), &
 	      bed_frtransp(n_sed_class,nxsection_res), &
 	      susp_frtransp(n_sed_class,nxsection_res), &
 	      fr_capacity(n_sed_class,nxsection_res), &
+            
     !	  dheight_sed(nxsection_res,subasin), &
-	      darea_sed(nxsection_res,subasin), &
+	      
+          darea_sed(nxsection_res,subasin), &
 	      dvol_sed(nxsection_res,subasin), &
 	      frvol_actlay(n_sed_class,nxsection_res,subasin), &
 	      totvol_actlay(nxsection_res,subasin), &
@@ -598,35 +604,36 @@ subroutine allocate_reservoir()
 	      frvol_actlay0(n_sed_class,nxsection_res,subasin), &
 	      totvol_actlay0(nxsection_res,subasin), &
 
-	      x_sec(npointsxsect,nxsection_res,subasin), &
-	      y_sec(npointsxsect,nxsection_res,subasin), &
-	      y_actlay(npointsxsect,nxsection_res,subasin), &
-	      y_original(npointsxsect,nxsection_res,subasin), &
-	      frac_actlay(n_sed_class,nxsection_res,subasin), &
-	      frac_toplay(n_sed_class,nxsection_res,subasin), &
-	      frac_comlay(n_sed_class,nxsection_res,subasin), &
-	      frac_susp(n_sed_class,nxsection_res,subasin), &
-	      partarea_actlay(npointsxsect,nxsection_res,subasin), &
-	      partarea_toplay(npointsxsect,nxsection_res,subasin), &
+!A	      x_sec(npointsxsect,nxsection_res,subasin), &
+!A	      y_sec(npointsxsect,nxsection_res,subasin), &
+!A	      y_actlay(npointsxsect,nxsection_res,subasin), &
+!A	      y_original(npointsxsect,nxsection_res,subasin), &
+!A	      frac_actlay(n_sed_class,nxsection_res,subasin), &
+!A	      frac_toplay(n_sed_class,nxsection_res,subasin), &
+!A	      frac_comlay(n_sed_class,nxsection_res,subasin), &
+!A	      frac_susp(n_sed_class,nxsection_res,subasin), &
+!A	      partarea_actlay(npointsxsect,nxsection_res,subasin), &
+!A	      partarea_toplay(npointsxsect,nxsection_res,subasin), &        
     !	  weightfac_actlay(npointsxsect,nxsection_res,subasin), &
     !	  weightfac_toplay(npointsxsect,nxsection_res,subasin), &
-	      y_laststep(npointsxsect,nxsection_res,subasin), &
-	      erosion_level(nxsection_res,subasin), &
-	      pt1(nxsection_res,subasin), &
-	      pt2(nxsection_res,subasin), &
-	      pt3(nxsection_res,subasin), &
-	      pt4(nxsection_res,subasin), &
-	      pt_long0(subasin), &
-	      pt_long(subasin), &
-	      sideslope_pt1(nxsection_res,subasin), &
-	      sideslope_pt2(nxsection_res,subasin), &
-	      slope_long(subasin), &
+	      
+!A        y_laststep(npointsxsect,nxsection_res,subasin), &
+!A	      erosion_level(nxsection_res,subasin), &
+!A	      pt1(nxsection_res,subasin), &
+!A	      pt2(nxsection_res,subasin), &
+!A	      pt3(nxsection_res,subasin), &
+!A	      pt4(nxsection_res,subasin), &
+!A	      pt_long0(subasin), &
+!A	      pt_long(subasin), &
+!A	      sideslope_pt1(nxsection_res,subasin), &
+!A	      sideslope_pt2(nxsection_res,subasin), &
+!A	      slope_long(subasin), &
 
-	      daydamelevact(366*nt,subasin), &
-	      daydamareaact(366*nt,subasin), &
-	      dayelev_bat(366*nt,nxsection_res,subasin), &
-	      dayarea_bat(366*nt,nxsection_res,subasin), &
-!         dayvol_bat(366*nt,nxsection_res,subasin), &
+!A	      daydamelevact(366*nt,subasin), &
+!A	      daydamareaact(366*nt,subasin), &
+!A	      dayelev_bat(366*nt,nxsection_res,subasin), &
+!A	      dayarea_bat(366*nt,nxsection_res,subasin), &
+!A        dayvol_bat(366*nt,nxsection_res,subasin), &   !Anne: moved to reservoir.h & changed subasin to n_reservoir
 
 
 

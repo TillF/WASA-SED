@@ -89,9 +89,9 @@ DO j=1,nbrsec(upstream)
     hidp(g)=0.
 	expp(g)=0.
     DO h=1,n_sed_class
-      IF (frac_actlay(g,j,upstream) /= 0.) THEN
-        hidp(g)=hidp(g)+frac_actlay(h,j,upstream)* (diam(h)/(diam(g)+diam(h)))
-        expp(g)=expp(g)+frac_actlay(h,j,upstream)* (diam(g)/(diam(g)+diam(h)))
+      IF (frac_actlay(g,j,res_index(upstream)) /= 0.) THEN
+        hidp(g)=hidp(g)+frac_actlay(h,j,res_index(upstream))* (diam(h)/(diam(g)+diam(h)))
+        expp(g)=expp(g)+frac_actlay(h,j,res_index(upstream))* (diam(g)/(diam(g)+diam(h)))
       ELSE
         hidp(g)=1.
         expp(g)=1.

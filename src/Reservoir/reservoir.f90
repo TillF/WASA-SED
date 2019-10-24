@@ -252,15 +252,218 @@ storcap(:)=0.
   END DO
   CLOSE (11)
 
-! allocate reservoir arrays, now that their required dimension is known
+! allocate reservoir arrays, now that their required dimension is known 
  allocate( &
-  dayvol_bat(366*nt,nxsection_res,n_reservoir), &
-         STAT = istate)
+    
+       !   res_index(n_reservoir), &
+       !   f_intake_obs(n_reservoir), &
+       !   corr_column_intakes(n_reservoir), &
+       !   res_flag(n_reservoir), &
+   	   !   fcav(n_reservoir), &
+	      !fvol_over(n_reservoir), &
+       !   latflow_res(n_reservoir), &
+       !   reservoir_down(n_reservoir), &
+ 	     ! damyear(n_reservoir), &
+	      !nbrbat(n_reservoir), &
+	      !dayexplot(n_reservoir,4), &
+	      !operat_start(n_reservoir), &
+	      !operat_stop(n_reservoir), &
+	      !operat_elev(n_reservoir), &
+       !   hmax(n_reservoir), &
+       !   volume_last(n_reservoir), &
+       !   outflow_last(n_reservoir), &
+       !
+	      !storcap(n_reservoir), &
+	      !damdead(n_reservoir), &
+	      !elevdead(n_reservoir), &
+	      !damalert(n_reservoir), &
+	      !elevalert(n_reservoir), &
+	      !elevbottom(n_reservoir), &
+	      !damflow(n_reservoir), &
+	      !damq_frac(n_reservoir), &
+	      !damq_frac_season(n_reservoir,4), &
+	      !volact(366*nt,n_reservoir), &
+	      !precdam(366*nt,n_reservoir), &
+       !   etdam(366*nt,n_reservoir), &
+       !
+	      !maxdamarea(n_reservoir), &
+	      !damareaact(n_reservoir), &
+	      !alpha_over(n_reservoir), &
+	      !k_over(n_reservoir), &
+	      !dama(n_reservoir), &
+	      !damb(n_reservoir), &
+	      !damc(n_reservoir), &
+	      !damd(n_reservoir), &
+	      !forma_factor(n_reservoir), &
+	      !qoutlet(n_reservoir), &
+	      !fvol_bottom(n_reservoir), &
+	      !withdrawal(n_reservoir), &
+	      !lakeret(366*nt,n_reservoir), &
+       !
+	      !vol0(n_reservoir), &
+	      !qlateral(366*nt,n_reservoir), &
+	      !qinflow(366*nt,n_reservoir), &
+	      !overflow(366*nt,n_reservoir), &
+	      !qintake(366*nt,n_reservoir), &
+	      !qbottom(366*nt,n_reservoir), &
+	      !withdraw_out(366*nt,n_reservoir), &
+	      !daystorcap(366*nt,n_reservoir), &
+	      !daymaxdamarea(366*nt,n_reservoir), &
+	      !daydamdead(366*nt,n_reservoir), &
+	      !daydamalert(366*nt,n_reservoir), &
+	      !dayminlevel(366*nt,n_reservoir), &
+	      !damelevact(n_reservoir), &
+	      !maxlevel(n_reservoir), &
+	      !minlevel(n_reservoir), &
+	      !damvol0(n_reservoir), &
+	      !damelev0(366*nt,n_reservoir), &
+	      !damelev1(366*nt,n_reservoir), &
+	      !resreach_vol(n_reservoir), &
+	      !res_precip(366*nt,n_reservoir), &
+	      !res_pet(366*nt,n_reservoir), &
+	      !res_qout(366*nt,n_reservoir), &
+       !
+	      !id_sec_extern(nxsection_res,n_reservoir), &
+	      !nbrsec(n_reservoir), &
+	      !npoints(nxsection_res,n_reservoir), &
+	      
+	      !decvolact(366*nt,n_reservoir), &
+	      !decstorcap(366*nt,n_reservoir), &
+	      !decmaxdamarea(366*nt,n_reservoir), &
+	      !decdamdead(366*nt,n_reservoir), &
+	      !decdamalert(366*nt,n_reservoir), &
+	      !manning_sec(nxsection_res,n_reservoir), &
+	      !dist_sec(nxsection_res,n_reservoir), &
+	      !x_sec0(npointsxsect,nxsection_res,n_reservoir), &
+	      !y_sec0(npointsxsect,nxsection_res,n_reservoir), &
+       !
+	      !sed_ret(366*nt,n_reservoir), &
+	      !sed_overflow(366*nt,n_reservoir), &
+	      !sed_intake(366*nt,n_reservoir), &
+	      !sed_bottom(366*nt,n_reservoir), &
+	      !sed_qlateral(n_reservoir,n_sed_class), &
+	      !sed_inflow(366*nt,n_reservoir), &
+	      !sed_outflow(366*nt,n_reservoir), &
+	    
+	      !sedimentation(366*nt,n_reservoir), &
+	      !cum_sedimentation(n_reservoir), &
+       !
+	      !res_sediment_out(n_reservoir,n_sed_class), &
+	      !frsediment_in(n_reservoir,n_sed_class), &
+	      !frsediment_out(n_reservoir,n_sed_class), &
+	      !dry_dens(n_reservoir), &
+	      !factor_actlay(n_reservoir), &
+	      !sed_flag(n_reservoir), &
+	      !sed_routing_flag(n_reservoir), &
+       !
+	      !sedinflow_g(366*nt,n_reservoir,n_sed_class), &
+	      !sedoutflow_g(366*nt,n_reservoir,n_sed_class), &
+       !
+	      !damelev_mean(366*nt,n_reservoir), &
+	      !x_minelev(nxsection_res,n_reservoir), &
+	      !minelev_sec(nxsection_res,n_reservoir), &
+	      !bedslope_sec(nxsection_res,n_reservoir), &
+	      !area_sec(nxsection_res,n_reservoir), &
+	      !resarea_sec(nxsection_res,n_reservoir), &
+	      !resvol_sec(nxsection_res,n_reservoir), &
+	      !resvol(n_reservoir), &
+	      !topwidth_sec(nxsection_res,n_reservoir), &
+	      !weight_sec(nxsection_res,n_reservoir), &
+	      !discharge_sec(nxsection_res,n_reservoir), &
+	      !depth_sec(nxsection_res,n_reservoir), &
+	      !watelev_sec(nxsection_res,n_reservoir), &
+	      !wetper_sec(nxsection_res,n_reservoir), &
+	      !hydrad_sec(nxsection_res,n_reservoir), &
+	      !meanvel_sec(nxsection_res,n_reservoir), &
+	      !energslope_sec(nxsection_res,n_reservoir), &
+	      !dynhead_sec(nxsection_res,n_reservoir), &
+	      !tothead_sec(nxsection_res,n_reservoir), &
+	      !headloss_sec(nxsection_res,n_reservoir), &
+	      !locloss_sec(nxsection_res,n_reservoir), &
+	      !calctothead_sec(nxsection_res,n_reservoir), &
+	      !maxarea_sec(nxsection_res,n_reservoir), &
+	      !maxelev_sec(nxsection_res,n_reservoir), &
+	      !maxdepth_sec(nxsection_res,n_reservoir), &
+	      !crdepth_sec(nxsection_res,n_reservoir), &
+	      !crwatelev_sec(nxsection_res,n_reservoir), &
+	      !crarea_sec(nxsection_res,n_reservoir), &
+	      !crtopwidth_sec(nxsection_res,n_reservoir), &
+	      !crwetper_sec(nxsection_res,n_reservoir), &
+	      !crslope_sec(nxsection_res,n_reservoir), &
+	      !crvel_sec(nxsection_res,n_reservoir), &
+	      !crhydrad_sec(nxsection_res,n_reservoir), &
+	      !normalelev_sec(nxsection_res,n_reservoir), &
+	      !normalarea_sec(nxsection_res,n_reservoir), &
+       
+	      !area_actlay(nxsection_res,n_reservoir), &
+	      !area_toplay(nxsection_res,n_reservoir), &
+	      !vol_actlay(nxsection_res,n_reservoir), &
+	      !vol_toplay(nxsection_res,n_reservoir), &
+       !               
+	      !erosion(nxsection_res,n_reservoir), &
+	      !deposition(nxsection_res,n_reservoir), &
+	      !retention(nxsection_res,n_reservoir), &
+       !     
+	      !totalload(nxsection_res,n_reservoir), &
+	
+       !   darea_sed(nxsection_res,n_reservoir), &
+	      !dvol_sed(nxsection_res,n_reservoir), &
+	      !frvol_actlay(n_sed_class,nxsection_res,n_reservoir), &
+	      !totvol_actlay(nxsection_res,n_reservoir), &
+	      !conc(nxsection_res,n_reservoir), &
+	      
+	      !area_sedim(nxsection_res,n_reservoir), &
+	      !vol_sedim(nxsection_res,n_reservoir), &
+	      !volbed0(n_reservoir), &
+	      !length_plunge(n_reservoir), &
+	      !cumlength_sec(nxsection_res,n_reservoir), &
+	      !length_sec(nxsection_res,n_reservoir), &
+	      !d50_actlay(nxsection_res,n_reservoir), &
+	      !d90_actlay(nxsection_res,n_reservoir), &
+	      !frsedinflow(366*nt,n_reservoir,n_sed_class), &
+	      !frvol_actlay0(n_sed_class,nxsection_res,n_reservoir), &
+	      !totvol_actlay0(nxsection_res,n_reservoir), &
+       
+    x_sec(npointsxsect,nxsection_res,n_reservoir), &
+    y_sec(npointsxsect,nxsection_res,n_reservoir), &
+    y_actlay(npointsxsect,nxsection_res,n_reservoir), &
+    y_original(npointsxsect,nxsection_res,n_reservoir), &
+    frac_actlay(n_sed_class,nxsection_res,n_reservoir), &
+    frac_toplay(n_sed_class,nxsection_res,n_reservoir), &
+    frac_comlay(n_sed_class,nxsection_res,n_reservoir), &
+    frac_susp(n_sed_class,nxsection_res,n_reservoir), &
+    partarea_actlay(npointsxsect,nxsection_res,n_reservoir), &
+    partarea_toplay(npointsxsect,nxsection_res,n_reservoir), & 
+     
+    y_laststep(npointsxsect,nxsection_res,n_reservoir), &
+    erosion_level(nxsection_res,n_reservoir), &
+    pt1(nxsection_res,n_reservoir), &
+    pt2(nxsection_res,n_reservoir), &
+    pt3(nxsection_res,n_reservoir), &
+    pt4(nxsection_res,n_reservoir), &
+    pt_long0(n_reservoir), &
+    pt_long(n_reservoir), &
+    sideslope_pt1(nxsection_res,n_reservoir), & 
+    sideslope_pt2(nxsection_res,n_reservoir), &
+    slope_long(n_reservoir), &
+     
+    daydamelevact(366*nt,n_reservoir), & 
+    daydamareaact(366*nt,n_reservoir), & 
+    dayelev_bat(366*nt,nxsection_res,n_reservoir), & 
+    dayarea_bat(366*nt,nxsection_res,n_reservoir), &
+    dayvol_bat(366*nt,nxsection_res,n_reservoir), &
+        
+     STAT = istate)
+    
     if (istate/=0) then
-        write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in reservoir-module, second allocation.'
+        write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in reservoir-module, second allocation in reservoir.f90.'
         stop
     end if
 
+    
+    
+    
+    
 
 ! Check lateral inflow directly into the subbasins' reservoir
   latflow_res(1:subasin)=0
@@ -1590,12 +1793,12 @@ IF (STATUS == 2) THEN
 	  ENDIF
 	 ENDIF
     ELSE
-	 daydamelevact(step,upstream)=damelevact(upstream)
-	 daydamareaact(step,upstream)=damareaact(upstream)
+	 daydamelevact(step,res_index(upstream))=damelevact(upstream) !A
+	 daydamareaact(step,res_index(upstream))=damareaact(upstream) !A
 	 DO j=1,nbrbat(upstream)
-	   dayelev_bat(step,j,upstream)=elev_bat(j,upstream)
-	   dayarea_bat(step,j,upstream)=area_bat(j,upstream)
-	   dayvol_bat(step,j,res_index(upstream))=vol_bat(j,upstream)
+	   dayelev_bat(step,j,res_index(upstream))=elev_bat(j,upstream) !A
+	   dayarea_bat(step,j,res_index(upstream))=area_bat(j,upstream) !A
+	   dayvol_bat(step,j,res_index(upstream))=vol_bat(j,upstream) !Anne: changed "upstream" to "res_index(upstream)" to save memory
 	 ENDDO
 	ENDIF
 
@@ -1659,7 +1862,8 @@ endif
 	        WRITE(11,'(4(I6,a),2(f10.3,a),2(f13.1,a),6(f10.3,a),3(f14.1,a))')id_subbas_extern(i),char(9),&
             t,char(9),d,char(9),hour,char(9),qlateral(step,i),char(9),qinflow(step,i),char(9),etdam(step,i),char(9),&
             precdam(step,i),char(9),qintake(step,i),char(9),overflow(step,i),char(9),qbottom(step,i),char(9),&
-            res_qout(step,i),char(9),withdraw_out(step,i),char(9),daydamelevact(step,i),char(9),daydamareaact(step,i),char(9),volact(step,i)*1.e6,char(9)
+    !Anne changed, eg., daydamareaact(step,i) to daydamareaact(step,res_index(i))
+            res_qout(step,i),char(9),withdraw_out(step,i),char(9),daydamelevact(step,res_index(i)),char(9),daydamareaact(step,res_index(i)),char(9),volact(step,i)*1.e6,char(9)
 		  ENDDO
 		ENDDO
         CLOSE(11)
@@ -1688,9 +1892,9 @@ endif
 	      DO ih=1,nt
 		    hour=ih
             step=(d-1)*nt+hour
-			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayelev_bat(step,j,i),j=1,nbrbat(i))
-			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayarea_bat(step,j,i),j=1,nbrbat(i))
-			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayvol_bat(step,j,res_index(i)),j=1,nbrbat(i))
+			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayelev_bat(step,j,res_index(i)),j=1,nbrbat(i))
+			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayarea_bat(step,j,res_index(i)),j=1,nbrbat(i))
+			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayvol_bat(step,j,res_index(i)),j=1,nbrbat(i)) !Anne: changed i to res_index(i) to save memory
 		  ENDDO
 		ENDDO
         CLOSE(11)
