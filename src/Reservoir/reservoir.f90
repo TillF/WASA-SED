@@ -420,9 +420,9 @@ storcap(:)=0.
 	      !length_sec(nxsection_res,n_reservoir), &
 	      !d50_actlay(nxsection_res,n_reservoir), &
 	      !d90_actlay(nxsection_res,n_reservoir), &
-	      !frsedinflow(366*nt,n_reservoir,n_sed_class), &
-	      !frvol_actlay0(n_sed_class,nxsection_res,n_reservoir), &
-	      !totvol_actlay0(nxsection_res,n_reservoir), &
+    frsedinflow(366*nt,n_reservoir,n_sed_class), &
+    frvol_actlay0(n_sed_class,nxsection_res,n_reservoir), &
+    totvol_actlay0(nxsection_res,n_reservoir), &
        
     x_sec(npointsxsect,nxsection_res,n_reservoir), &
     y_sec(npointsxsect,nxsection_res,n_reservoir), &

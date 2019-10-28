@@ -443,14 +443,14 @@ IF (STATUS == 0) THEN
     nbrsec1=nbrsec(i)
     IF (nbrsec(i) /= 0) THEN
       DO j=1,nbrsec1
-	    totvol_actlay0(j,i)=0.
+	    totvol_actlay0(j,res_index(i))=0.
         DO g=1,n_sed_class
           frac_comlay(g,j,res_index(i))=frac_actlay(g,j,res_index(i))
           frac_toplay(g,j,res_index(i))=0.
           frac_susp(g,j,res_index(i))=0.
 	      frvol_actlay(g,j,i)=frac_actlay(g,j,res_index(i))*vol_sedim(j,i)
-	      frvol_actlay0(g,j,i)=frvol_actlay(g,j,i)
-          totvol_actlay0(j,i)=totvol_actlay0(j,i)+frvol_actlay0(g,j,i)
+	      frvol_actlay0(g,j,res_index(i))=frvol_actlay(g,j,i)
+          totvol_actlay0(j,res_index(i))=totvol_actlay0(j,res_index(i))+frvol_actlay0(g,j,res_index(i))
 !write(*,'(2I4,5F15.4)')id_subbas_extern(i),j,vol_sedim(j,i),frac_actlay(g,j,i),frvol_actlay(g,j,i),totvol_actlay(j,i)
 !write(*,'(2I4,5F15.4)')id_subbas_extern(i),j,totvol_actlay0(j,i),frvol_actlay0(g,j,i)
         END DO
@@ -732,7 +732,7 @@ IF (STATUS == 1) THEN
             READ(11,*)
           END DO
           DO id=1,dayyear*nt
-            READ(11,*) dummy1,dummy2,(frsedinflow(id,i,g),g=1,n_sed_class)
+            READ(11,*) dummy1,dummy2,(frsedinflow(id,res_index(i),g),g=1,n_sed_class)
 !write(*,'(2I4,<n_sed_class>F10.4)')dummy1,dummy2,(frsedinflow(id,i,g),g=1,n_sed_class)
 !write(*,*)dummy1,dummy2,(frsedinflow(id,i,g),g=1,n_sed_class)
 !if (id==70 .and. id_subbas_extern(i)==21)stop
@@ -755,7 +755,7 @@ IF (STATUS == 2) THEN
 
   IF (reservoir_check == 1) THEN
     DO g=1,n_sed_class
-      sediment_in(upstream,g)=frsedinflow(step,upstream,g)
+      sediment_in(upstream,g)=frsedinflow(step,res_index(upstream),g)
 !write(*,*)step,upstream,frsedinflow(step,upstream,g),sediment_in(upstream,g)
 	ENDDO
   ENDIF

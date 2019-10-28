@@ -600,9 +600,9 @@ subroutine allocate_reservoir()
 	      length_sec(nxsection_res,subasin), &
 	      d50_actlay(nxsection_res,subasin), &
 	      d90_actlay(nxsection_res,subasin), &
-	      frsedinflow(366*nt,subasin,n_sed_class), &
-	      frvol_actlay0(n_sed_class,nxsection_res,subasin), &
-	      totvol_actlay0(nxsection_res,subasin), &
+!A	      frsedinflow(366*nt,subasin,n_sed_class), &
+!A	      frvol_actlay0(n_sed_class,nxsection_res,subasin), &
+!A	      totvol_actlay0(nxsection_res,subasin), &
 
 !A	      x_sec(npointsxsect,nxsection_res,subasin), &
 !A	      y_sec(npointsxsect,nxsection_res,subasin), &
