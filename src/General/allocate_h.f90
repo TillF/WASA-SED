@@ -588,7 +588,7 @@ subroutine allocate_reservoir()
 	      
           darea_sed(nxsection_res,subasin), &
 	      dvol_sed(nxsection_res,subasin), &
-!A	      frvol_actlay(n_sed_class,nxsection_res,subasin), &
+!	      frvol_actlay(n_sed_class,nxsection_res,subasin), &
 !A	      totvol_actlay(nxsection_res,subasin), &
 !A	      conc(nxsection_res,subasin), &
 	      frconc(n_sed_class,nxsection_res), &
