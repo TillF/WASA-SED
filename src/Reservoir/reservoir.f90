@@ -399,15 +399,14 @@ storcap(:)=0.
 	      !area_toplay(nxsection_res,n_reservoir), &
 	      !vol_actlay(nxsection_res,n_reservoir), &
 	      !vol_toplay(nxsection_res,n_reservoir), &
-       !               
-	      !erosion(nxsection_res,n_reservoir), &
-	      !deposition(nxsection_res,n_reservoir), &
-	      !retention(nxsection_res,n_reservoir), &
-       !     
-	      !totalload(nxsection_res,n_reservoir), &
-	
-       !   darea_sed(nxsection_res,n_reservoir), &
-	      !dvol_sed(nxsection_res,n_reservoir), &
+                     
+    erosion(nxsection_res,n_reservoir), &
+    deposition(nxsection_res,n_reservoir), &
+    retention(nxsection_res,n_reservoir), &      
+    totalload(nxsection_res,n_reservoir), &	
+    darea_sed(nxsection_res,n_reservoir), &
+    dvol_sed(nxsection_res,n_reservoir), &
+
     frvol_actlay(n_sed_class,nxsection_res,n_reservoir), &
     totvol_actlay(nxsection_res,n_reservoir), &
     conc(nxsection_res,n_reservoir), &      

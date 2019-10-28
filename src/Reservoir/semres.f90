@@ -1244,7 +1244,7 @@ end if
 	dummy9=1.
 !write(*,'(2I4,2F11.1,F11.6)')d,upstream,discharge_sec(j,upstream),vol_toplay(j,upstream),dummy9
     DO j=1,nbrsec(upstream)
-      totalload(j,upstream)=0.
+      totalload(j,res_index(upstream))=0.
 
 !	  call ssc_function(j,upstream,dummy9)
 
@@ -1453,7 +1453,7 @@ end if
 !write(*,'(I4,4F15.3)')j,factor_over2+factor_intake2+factor_bottom2,dummy4,frtotal_discharge(g,j),retent(g)
 !write(*,'(2I4,5F10.3)')j,g,loadincoming,frdeposition(g,j),frerosion(g,j),frtotal_discharge(g,j),retent(g)
 		  endif
-	      totalload(j,upstream)=totalload(j,upstream)+frtotal_discharge(g,j)
+	      totalload(j,res_index(upstream))=totalload(j,res_index(upstream))+frtotal_discharge(g,j)
 		else
           if (j==nbrsec(upstream)) then
 		    retent(g)=loadincoming
@@ -1461,7 +1461,7 @@ end if
 !george		    retent(g)=0.
 		  endif
 		  frconc(g,j)=0.
-	      totalload(j,upstream)=0.
+	      totalload(j,res_index(upstream))=0.
 		endif
 !if(j<20)write(*,'(2I4,6F11.3)')j,g,frconc(g,j),frtotal_discharge(g,j),frsedavailab(g,j),frerosion(g,j),frdeposition(g,j),retent(g)
 
@@ -1469,7 +1469,7 @@ end if
 
 	  IF (j==nbrsec(upstream)) THEN
 !write(*,'(2I4,6F15.6)')j,g,factor_bottom2,factor_intake2,factor_over2,factor_bottom2+factor_intake2+factor_over2,factor_intake2/(factor_bottom2+factor_intake2+factor_over2)
-        IF (totalload(j,upstream) /= 0.) THEN
+        IF (totalload(j,res_index(upstream)) /= 0.) THEN
 		  dummy4=factor_bottom2+factor_intake2+factor_over2
 	      factor_bottom2=factor_bottom2/dummy4
 	      factor_intake2=factor_intake2/dummy4
@@ -1489,8 +1489,8 @@ end if
 	  ENDIF
 
       DO g=1,n_sed_class
-        IF (totalload(j,upstream) /= 0.) THEN
-	      frac_toplay(g,j,res_index(upstream))=frtotal_discharge(g,j)/totalload(j,upstream)
+        IF (totalload(j,res_index(upstream)) /= 0.) THEN
+	      frac_toplay(g,j,res_index(upstream))=frtotal_discharge(g,j)/totalload(j,res_index(upstream))
 	    ELSE
 	      frac_toplay(g,j,res_index(upstream))=0.
 	    ENDIF
@@ -1535,7 +1535,7 @@ end if
 !temp		else
 !temp	      conc(j,upstream)=(totalload(j,upstream)*1000)/(discharge(j)*(86400./nt))
 !temp		endif
-        conc(j,res_index(upstream))=(totalload(j,upstream)*1000.)/(discharge(j)*(86400./nt))
+        conc(j,res_index(upstream))=(totalload(j,res_index(upstream))*1000.)/(discharge(j)*(86400./nt))
 	  else
 	    conc(j,res_index(upstream))=0.
 	  endif
@@ -1567,32 +1567,32 @@ end if
 
 ! Computation of total erosion and total deposition for each cross section (ton/timestep)
     DO j=1,nbrsec(upstream)
-      erosion(j,upstream)=0.
-      deposition(j,upstream)=0.
-	  retention(j,upstream)=0.
+      erosion(j,res_index(upstream))=0.
+      deposition(j,res_index(upstream))=0.
+	  retention(j,res_index(upstream))=0.
       DO g=1,n_sed_class
-        erosion(j,upstream)=erosion(j,upstream)+frerosion(g,j)
-        deposition(j,upstream)=deposition(j,upstream)+ frdeposition(g,j)
-		retention(j,upstream)=retention(j,upstream)+frretention(g,j)
+        erosion(j,res_index(upstream))=erosion(j,res_index(upstream))+frerosion(g,j)
+        deposition(j,res_index(upstream))=deposition(j,res_index(upstream))+ frdeposition(g,j)
+		retention(j,res_index(upstream))=retention(j,res_index(upstream))+frretention(g,j)
 !write(*,'(2I4,6F11.3)')j,g,frsedavailab(g,j),frerosion(g,j),erosion(j,upstream),deposition(j,upstream),retention(j,upstream)
       END DO
     END DO
 
 ! Computation of sediment volume variation at the reservoir bed for each cross section
     DO j=1,nbrsec(upstream)
-	  dvol_sed(j,upstream)=(deposition(j,upstream)-erosion(j,upstream)+retention(j,upstream))/dry_dens(upstream)
+	  dvol_sed(j,res_index(upstream))=(deposition(j,res_index(upstream))-erosion(j,res_index(upstream))+retention(j,res_index(upstream)))/dry_dens(upstream)
 !write(*,'(I4,4F15.3)')j,deposition(j,upstream),erosion(j,upstream),retention(j,upstream),dvol_sed(j,upstream)
     END DO
 !if(step==290)stop
 ! Computation of sediment area variation at the reservoir bed for each cross section
     DO j=1,nbrsec(upstream)
-      darea_sed(j,upstream)=abs(dvol_sed(j,upstream)/  &
+      darea_sed(j,res_index(upstream))=abs(dvol_sed(j,res_index(upstream))/  &
             length_sec(j,res_index(upstream)))
     END DO
 
 ! Daily sediment retention in the subbasin's reservoir [ton/timestep]
     DO j=1,nbrsec(upstream)
-      sed_ret(step,upstream)=sed_ret(step,upstream)+retention(j,upstream)
+      sed_ret(step,upstream)=sed_ret(step,upstream)+retention(j,res_index(upstream))
 	enddo
 
 ! Cross section geometry before bed elevtion change
@@ -1604,7 +1604,7 @@ end if
 
 ! 2d) Calculation of reservoir bed elevation changes
     DO j=1,nbrsec(upstream)
-      IF (dvol_sed(j,upstream) /= 0.) THEN
+      IF (dvol_sed(j,res_index(upstream)) /= 0.) THEN
 	    CALL change_sec(j,upstream)
 	  ENDIF
 	ENDDO
@@ -1636,11 +1636,11 @@ end if
 
 ! Sediment outflow (ton/time step)
     j=nbrsec(upstream)
-	if (totalload(j,upstream) /= 0.) then
-	  sed_overflow(step,upstream)=totalload(j,upstream)*factor_over2
-	  sed_intake(step,upstream)=totalload(j,upstream)*factor_intake2
-	  sed_bottom(step,upstream)=totalload(j,upstream)*factor_bottom2
-	  sed_outflow(step,upstream)=totalload(j,upstream)
+	if (totalload(j,res_index(upstream)) /= 0.) then
+	  sed_overflow(step,upstream)=totalload(j,res_index(upstream))*factor_over2
+	  sed_intake(step,upstream)=totalload(j,res_index(upstream))*factor_intake2
+	  sed_bottom(step,upstream)=totalload(j,res_index(upstream))*factor_bottom2
+	  sed_outflow(step,upstream)=totalload(j,res_index(upstream))
 !temp	  sed_overflow(step,upstream)=max(0.,totalload(j,upstream)*overflow(step,upstream)/(res_qout(step,upstream)))
 !temp	  sed_intake(step,upstream)=max(0.,totalload(j,upstream)*qintake(step,upstream)/(res_qout(step,upstream)))
 !temp	  sed_bottom(step,upstream)=max(0.,totalload(j,upstream)*qbottom(step,upstream)/(res_qout(step,upstream)))
@@ -1661,7 +1661,7 @@ end if
 	sedimentation(step,upstream)=0.
     DO j=1,nbrsec(upstream)
 !2010      cum_sedimentation(upstream)=cum_sedimentation(upstream)+vol_sedim(j,upstream)
-	  sedimentation(step,upstream)=sedimentation(step,upstream)+dvol_sed(j,upstream)
+	  sedimentation(step,upstream)=sedimentation(step,upstream)+dvol_sed(j,res_index(upstream))
 	ENDDO
 !write(*,*)cum_sedimentation(upstream)
 ! Revised cumulative sedimentation, i.e. sedimentation above the initial bed elevation (m3)

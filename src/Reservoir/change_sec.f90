@@ -36,7 +36,7 @@ real :: wfactor(200),dummy5
 ! 1) erosion
 !dummy1=0
 
-IF (dvol_sed(j1,upstream) < 0.) THEN
+IF (dvol_sed(j1,res_index(upstream)) < 0.) THEN
   elev=erosion_level(j1,res_index(upstream))
 !  elev=maxelev_sec(j1,upstream)
 !  elev=watelev_sec(j1,upstream)
@@ -78,7 +78,7 @@ IF (dvol_sed(j1,upstream) < 0.) THEN
 !if(j1<30)write(*,'(3I4,4F10.2)')j1,m,geom(m,j1),dummy3
   enddo
   
-  dummy4=darea_sed(j1,upstream)/dummy3
+  dummy4=darea_sed(j1,res_index(upstream))/dummy3
   DO m=2,npoints(j1,upstream)-1
 	y_laststep(m,j1,res_index(upstream))=y_sec(m,j1,res_index(upstream))
 	IF (geom(m,j1) /= 0)y_sec(m,j1,res_index(upstream))=y_sec(m,j1,res_index(upstream))-dummy4*wfactor(m)	
@@ -89,7 +89,7 @@ IF (dvol_sed(j1,upstream) < 0.) THEN
 !if(d==2)stop
 
 ! 2) deposition
-ELSE IF (dvol_sed(j1,upstream) > 0.) THEN
+ELSE IF (dvol_sed(j1,res_index(upstream)) > 0.) THEN
 
   DO m=1,npoints(j1,upstream)
     if(y_sec(m,j1,res_index(upstream))<watelev_sec(j1,upstream)) then
@@ -119,7 +119,7 @@ ELSE IF (dvol_sed(j1,upstream) > 0.) THEN
 !if(j1<30)write(*,'(3I4,4F10.2)')j1,m,geom(m,j1),dummy3
   enddo
   
-  dummy4=darea_sed(j1,upstream)/dummy3
+  dummy4=darea_sed(j1,res_index(upstream))/dummy3
   DO m=2,npoints(j1,upstream)-1
 	y_laststep(m,j1,res_index(upstream))=y_sec(m,j1,res_index(upstream))
 	IF (geom(m,j1) /= 0)y_sec(m,j1,res_index(upstream))=y_sec(m,j1,res_index(upstream))+dummy4*wfactor(m)	
@@ -161,7 +161,7 @@ DO m=1,npoints(j1,upstream)
 ENDDO
 
 
-IF (dvol_sed(j1,upstream) < 0.) THEN
+IF (dvol_sed(j1,res_index(upstream)) < 0.) THEN
 
 if (j1/=nbrsec(upstream)) then
 !write(*,'(I4,4F10.2,A10)')j1,minelev_sec(j1,upstream),dheight_sed(j1,upstream),minelev_sec(j1,upstream)-dheight_sed(j1,upstream),minelev_sec(j1+1,upstream)+(mean_slope*dist_sec(j1,upstream)),'eros'

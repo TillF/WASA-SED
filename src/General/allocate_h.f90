@@ -573,22 +573,22 @@ subroutine allocate_reservoir()
     !	  frsusp_discharge(n_sed_class,nxsection_res), &
             
 	      frtotal_discharge(n_sed_class,nxsection_res), &
-	      erosion(nxsection_res,subasin), &
-	      deposition(nxsection_res,subasin), &
-	      retention(nxsection_res,subasin), &
+!A	      erosion(nxsection_res,subasin), &
+!A	      deposition(nxsection_res,subasin), &
+!A	      retention(nxsection_res,subasin), &
             
     !	  suspension(nxsection_res,subasin), &
             
-	      totalload(nxsection_res,subasin), &
+!A	      totalload(nxsection_res,subasin), &
 	      bed_frtransp(n_sed_class,nxsection_res), &
 	      susp_frtransp(n_sed_class,nxsection_res), &
 	      fr_capacity(n_sed_class,nxsection_res), &
             
     !	  dheight_sed(nxsection_res,subasin), &
 	      
-          darea_sed(nxsection_res,subasin), &
-	      dvol_sed(nxsection_res,subasin), &
-!	      frvol_actlay(n_sed_class,nxsection_res,subasin), &
+!A        darea_sed(nxsection_res,subasin), &
+!A	      dvol_sed(nxsection_res,subasin), &
+!A	      frvol_actlay(n_sed_class,nxsection_res,subasin), &
 !A	      totvol_actlay(nxsection_res,subasin), &
 !A	      conc(nxsection_res,subasin), &
 	      frconc(n_sed_class,nxsection_res), &
