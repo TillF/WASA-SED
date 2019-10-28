@@ -192,9 +192,9 @@ IF (STATUS == 0) THEN
     nbrsec1=nbrsec(i)
     IF (nbrsec(i) /= 0) THEN
       DO j=1,nbrsec1
-	    cumlength_sec(j,i)=0.
+	    cumlength_sec(j,res_index(i))=0.
 	    DO j1=j,nbrsec1
-		  cumlength_sec(j,i)=cumlength_sec(j,i)+dist_sec(j1,i)
+		  cumlength_sec(j,res_index(i))=cumlength_sec(j,res_index(i))+dist_sec(j1,i)
 		ENDDO
 !write(*,'(2I4,2F15.3)')id_subbas_extern(i),j,dist_sec(j,i),cumlength_sec(j,i)
 	  ENDDO
@@ -207,11 +207,11 @@ IF (STATUS == 0) THEN
     IF (nbrsec(i) /= 0) THEN
       DO j=1,nbrsec1
         IF (j == 1) THEN
-          length_sec(j,i)=dist_sec(j,i)
+          length_sec(j,res_index(i))=dist_sec(j,i)
         ELSE IF (j == nbrsec(i)) THEN
-          length_sec(j,i)=dist_sec(j,i)+(dist_sec(j-1,i)/2.)
+          length_sec(j,res_index(i))=dist_sec(j,i)+(dist_sec(j-1,i)/2.)
         ELSE
-          length_sec(j,i)=(dist_sec(j,i)+dist_sec(j-1,i))/2.
+          length_sec(j,res_index(i))=(dist_sec(j,i)+dist_sec(j-1,i))/2.
         END IF
       END DO
     endif
@@ -291,7 +291,7 @@ IF (STATUS == 0) THEN
 	  dummy3=0.
 	  dummy4=0.
 	  dummy1=pt_long0(res_index(i))
-	  length_plunge(i)=cumlength_sec(dummy1,i)
+	  length_plunge(i)=cumlength_sec(dummy1,res_index(i))
 	  IF (nbrsec1>1 .and. dummy1/=nbrsec1) then
 	    dummy3=y_sec0(1,dummy1,i)
 	    dummy4=y_sec0(1,dummy1+1,i)
@@ -409,7 +409,7 @@ IF (STATUS == 0) THEN
     nbrsec1=nbrsec(i)
     IF (nbrsec(i) /= 0) THEN
       DO j=1,nbrsec1
-        vol_sedim(j,i)=area_sedim(j,i)*length_sec(j,i)
+        vol_sedim(j,i)=area_sedim(j,i)*length_sec(j,res_index(i))
 !write(*,'(2I4,5F15.1)')id_subbas_extern(i),j,area_sedim(j,i),length_sec(j,i),vol_sedim(j,i)
 
       ENDDO
@@ -893,8 +893,8 @@ end if
 !write(*,'(2I4,<n_sed_class>F7.3)')upstream,j,(frac_actlay(g,j,upstream),g=1,n_sed_class)
 
      IF (accum2==0.) THEN
-	  d50_actlay(j,upstream)=0.
-	  d90_actlay(j,upstream)=0.
+	  d50_actlay(j,res_index(upstream))=0.
+	  d90_actlay(j,res_index(upstream))=0.
 	 ELSE
       gsize(1)=.5
 	  gsize(2)=.9
@@ -924,8 +924,8 @@ end if
 		    dummy15=dummy15/1000.
 		  ENDIF
 		ENDIF
-	    IF (c == 1) d50_actlay(j,upstream)=dummy15
-	    IF (c == 2) d90_actlay(j,upstream)=dummy15
+	    IF (c == 1) d50_actlay(j,res_index(upstream))=dummy15
+	    IF (c == 2) d90_actlay(j,res_index(upstream))=dummy15
 !IF (c == 1)write(*,'(3I4,4F14.6)')upstream,j,dummy14,accum1,accum2,d50_actlay(j,upstream)*1000.
 !IF (c == 2)write(*,'(3I4,4F14.6)')upstream,j,dummy14,accum1,accum2,d90_actlay(j,upstream)*1000.
 	  ENDDO
@@ -967,7 +967,7 @@ end if
 !write(*,*)cumlength_sec(pt_long(upstream),upstream),cumlength_sec(pt_long0(upstream)+1,upstream),dummy4,dummy3 !(cumlength_sec(pt_long(upstream),upstream)-cumlength_sec(pt_long0(upstream)+1,upstream)),dist_sec(pt_long0(upstream),upstream)
       IF (dummy3 > slope_long(res_index(upstream))) THEN   !A
 	    pt_long(res_index(upstream))=max(pt_long(res_index(upstream))-1,42)		!the section 42 of the Barasona reservoir was assumed to be the upstream limit (variable pt_long_min(upstream) should be read in the file sed.dat
-        length_plunge(upstream)=cumlength_sec(max(pt_long(res_index(upstream)),1),upstream)
+        length_plunge(upstream)=cumlength_sec(max(pt_long(res_index(upstream)),1),res_index(upstream))
 	  ENDIF
 !write(*,'(2I6,F10.2,2F10.6,4F10.2)')pt_long0(upstream),pt_long(upstream),length_plunge(upstream),dummy3,slope_long(upstream),minelev_sec(pt_long0(upstream),upstream),minelev_sec(pt_long0(upstream)+1,upstream),cumlength_sec(pt_long(upstream)&
 !,upstream)-cumlength_sec(pt_long0(upstream)+1,upstream)
@@ -1092,8 +1092,8 @@ end if
 	  if (sed_routing_flag(upstream) == 0) then
         thickness_act(j)=.03*factor_actlay(upstream)*(24./nt)	!0,03 value of active layer thickness along the reservoir derived from the simulation without sediment management technique for the Barasona reservoir
 	  else if (sed_routing_flag(upstream) == 1) then
-	    if (length_plunge(upstream) > cumlength_sec(j,upstream)) then !0,25 value of active layer thickness close to the dam derived from the simulation with sediment management technique for the Barasona reservoir
-          thickness_act(j)=max(.03*factor_actlay(upstream),(.25**factor_actlay(upstream))*(length_plunge(upstream)-cumlength_sec(j,upstream))/length_plunge(upstream))
+	    if (length_plunge(upstream) > cumlength_sec(j,res_index(upstream))) then !0,25 value of active layer thickness close to the dam derived from the simulation with sediment management technique for the Barasona reservoir
+          thickness_act(j)=max(.03*factor_actlay(upstream),(.25**factor_actlay(upstream))*(length_plunge(upstream)-cumlength_sec(j,res_index(upstream)))/length_plunge(upstream))
 		else
           thickness_act(j)=.03*factor_actlay(upstream)
 		endif
@@ -1191,8 +1191,8 @@ end if
 
 ! Active layer volume (m3)
     DO j=1,nbrsec(upstream)
-      vol_actlay(j,upstream)=area_actlay(j,upstream)*length_sec(j,upstream)
-      vol_toplay(j,upstream)=area_toplay(j,upstream)*length_sec(j,upstream)
+      vol_actlay(j,upstream)=area_actlay(j,upstream)*length_sec(j,res_index(upstream))
+      vol_toplay(j,upstream)=area_toplay(j,upstream)*length_sec(j,res_index(upstream))
     END DO
 
 ! Determination of water volume of the reservoir reach by summing up all cross sections' volume
@@ -1324,13 +1324,13 @@ end if
 !george					exp(-recov*setvel(g)*length_sec(j,upstream)*topwidth(j)/discharge(j))
 !write(*,*)j,g,fr_capacity(g,j),loadincoming,recov,setvel(g),length_sec(j,upstream),topwidth(j),discharge(j)
 		    frconc(g,j)=fr_capacity(g,j)+(loadincoming-fr_capacity(g,j))*  & !george
-				exp(-recov*setvel(g)*length_sec(j,upstream)*topwidth(j)/discharge(j)) !george
+				exp(-recov*setvel(g)*length_sec(j,res_index(upstream))*topwidth(j)/discharge(j)) !george
 		  else
 		    if (frconc(g,j-1)-fr_capacity(g,j)>=0.)recov=.25
 		    if (frconc(g,j-1)-fr_capacity(g,j)<0.)recov=1.
 !write(*,*)j,g,fr_capacity(g,j),loadincoming,recov,setvel(g),length_sec(j,upstream),topwidth(j),discharge(j)
 		    frconc(g,j)=fr_capacity(g,j)+(frconc(g,j-1)-fr_capacity(g,j))* &
-				exp(-recov*setvel(g)*length_sec(j,upstream)*topwidth(j)/discharge(j))
+				exp(-recov*setvel(g)*length_sec(j,res_index(upstream))*topwidth(j)/discharge(j))
 		  endif
 		else
 		  frconc(g,j)=0.
@@ -1587,7 +1587,7 @@ end if
 ! Computation of sediment area variation at the reservoir bed for each cross section
     DO j=1,nbrsec(upstream)
       darea_sed(j,upstream)=abs(dvol_sed(j,upstream)/  &
-            length_sec(j,upstream))
+            length_sec(j,res_index(upstream)))
     END DO
 
 ! Daily sediment retention in the subbasin's reservoir [ton/timestep]

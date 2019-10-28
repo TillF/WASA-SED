@@ -416,10 +416,10 @@ storcap(:)=0.
 	      !vol_sedim(nxsection_res,n_reservoir), &
 	      !volbed0(n_reservoir), &
 	      !length_plunge(n_reservoir), &
-	      !cumlength_sec(nxsection_res,n_reservoir), &
-	      !length_sec(nxsection_res,n_reservoir), &
-	      !d50_actlay(nxsection_res,n_reservoir), &
-	      !d90_actlay(nxsection_res,n_reservoir), &
+    cumlength_sec(nxsection_res,n_reservoir), &
+    length_sec(nxsection_res,n_reservoir), &
+    d50_actlay(nxsection_res,n_reservoir), &
+    d90_actlay(nxsection_res,n_reservoir), &
     frsedinflow(366*nt,n_reservoir,n_sed_class), &
     frvol_actlay0(n_sed_class,nxsection_res,n_reservoir), &
     totvol_actlay0(nxsection_res,n_reservoir), &

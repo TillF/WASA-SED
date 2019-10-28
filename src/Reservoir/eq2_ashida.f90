@@ -64,7 +64,7 @@ DO j=1,nbrsec(upstream)
  if (discharge(j) /= 0.) then
   
 !Ge mean diameter has to be calculated from the grain size distribution
-  dummy2=d50_actlay(j,upstream)
+  dummy2=d50_actlay(j,res_index(upstream))
 
 ! 1) BED LOAD FORMULA
   
