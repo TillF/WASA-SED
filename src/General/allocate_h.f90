@@ -588,15 +588,15 @@ subroutine allocate_reservoir()
 	      
           darea_sed(nxsection_res,subasin), &
 	      dvol_sed(nxsection_res,subasin), &
-	      frvol_actlay(n_sed_class,nxsection_res,subasin), &
-	      totvol_actlay(nxsection_res,subasin), &
-	      conc(nxsection_res,subasin), &
+!A	      frvol_actlay(n_sed_class,nxsection_res,subasin), &
+!A	      totvol_actlay(nxsection_res,subasin), &
+!A	      conc(nxsection_res,subasin), &
 	      frconc(n_sed_class,nxsection_res), &
-	      area_sedim(nxsection_res,subasin), &
-	      vol_sedim(nxsection_res,subasin), &
-	      volbed0(subasin), &
-	      
+!A	      area_sedim(nxsection_res,subasin), &
+!A	      vol_sedim(nxsection_res,subasin), &
+	      volbed0(subasin), &	      
           length_plunge(subasin), &
+            
 !A	      cumlength_sec(nxsection_res,subasin), &
 !A	      length_sec(nxsection_res,subasin), &
 !A	      d50_actlay(nxsection_res,subasin), &

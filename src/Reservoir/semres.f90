@@ -392,9 +392,9 @@ IF (STATUS == 0) THEN
     nbrsec1=nbrsec(i)
     IF (nbrsec(i) /= 0) THEN
       DO j=1,nbrsec1
-	    area_sedim(j,i)=0.
+	    area_sedim(j,res_index(i))=0.
         DO m=2,npoints(j,i)
-          area_sedim(j,i)=area_sedim(j,i)+  &
+          area_sedim(j,res_index(i))=area_sedim(j,res_index(i))+  &
 			(x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))*  &
  			((y_sec(m-1,j,res_index(i))-y_original(m-1,j,res_index(i)))+ &
  			(y_sec(m,j,res_index(i))-y_original(m,j,res_index(i))))/2.
@@ -409,7 +409,7 @@ IF (STATUS == 0) THEN
     nbrsec1=nbrsec(i)
     IF (nbrsec(i) /= 0) THEN
       DO j=1,nbrsec1
-        vol_sedim(j,i)=area_sedim(j,i)*length_sec(j,res_index(i))
+        vol_sedim(j,res_index(i))=area_sedim(j,res_index(i))*length_sec(j,res_index(i))
 !write(*,'(2I4,5F15.1)')id_subbas_extern(i),j,area_sedim(j,i),length_sec(j,i),vol_sedim(j,i)
 
       ENDDO
@@ -422,7 +422,7 @@ IF (STATUS == 0) THEN
     nbrsec1=nbrsec(i)
     IF (nbrsec(i) /= 0) THEN
       DO j=1,nbrsec1
-        volbed0(i)=volbed0(i)+vol_sedim(j,i)
+        volbed0(i)=volbed0(i)+vol_sedim(j,res_index(i))
 !write(*,'(2I4,5F18.3)')id_subbas_extern(i),j,vol_sedim(j,i),volbed0(i)
       ENDDO
 	ENDIF
@@ -448,8 +448,8 @@ IF (STATUS == 0) THEN
           frac_comlay(g,j,res_index(i))=frac_actlay(g,j,res_index(i))
           frac_toplay(g,j,res_index(i))=0.
           frac_susp(g,j,res_index(i))=0.
-	      frvol_actlay(g,j,i)=frac_actlay(g,j,res_index(i))*vol_sedim(j,i)
-	      frvol_actlay0(g,j,res_index(i))=frvol_actlay(g,j,i)
+	      frvol_actlay(g,j,res_index(i))=frac_actlay(g,j,res_index(i))*vol_sedim(j,res_index(i))
+	      frvol_actlay0(g,j,res_index(i))=frvol_actlay(g,j,res_index(i))
           totvol_actlay0(j,res_index(i))=totvol_actlay0(j,res_index(i))+frvol_actlay0(g,j,res_index(i))
 !write(*,'(2I4,5F15.4)')id_subbas_extern(i),j,vol_sedim(j,i),frac_actlay(g,j,i),frvol_actlay(g,j,i),totvol_actlay(j,i)
 !write(*,'(2I4,5F15.4)')id_subbas_extern(i),j,totvol_actlay0(j,i),frvol_actlay0(g,j,i)
@@ -1535,21 +1535,21 @@ end if
 !temp		else
 !temp	      conc(j,upstream)=(totalload(j,upstream)*1000)/(discharge(j)*(86400./nt))
 !temp		endif
-        conc(j,upstream)=(totalload(j,upstream)*1000.)/(discharge(j)*(86400./nt))
+        conc(j,res_index(upstream))=(totalload(j,upstream)*1000.)/(discharge(j)*(86400./nt))
 	  else
-	    conc(j,upstream)=0.
+	    conc(j,res_index(upstream))=0.
 	  endif
     END DO
 !*****************************************************************************
 
 ! Calculation of the actual sediment volume at the active layer for each cross section
     DO j=1,nbrsec(upstream)
-	  totvol_actlay(j,upstream)=0.
+	  totvol_actlay(j,res_index(upstream))=0.
       DO g=1,n_sed_class
-	    frvol_actlay(g,j,upstream)=frvol_actlay(g,j,upstream)+ &
+	    frvol_actlay(g,j,res_index(upstream))=frvol_actlay(g,j,res_index(upstream))+ &
 			(frdeposition(g,j)-frerosion(g,j)+frretention(g,j))/dry_dens(upstream)
-		frvol_actlay(g,j,upstream)=MAX(frvol_actlay(g,j,upstream),0.)
-        totvol_actlay(j,upstream)=totvol_actlay(j,upstream)+frvol_actlay(g,j,upstream)
+		frvol_actlay(g,j,res_index(upstream))=MAX(frvol_actlay(g,j,res_index(upstream)),0.)
+        totvol_actlay(j,res_index(upstream))=totvol_actlay(j,res_index(upstream))+frvol_actlay(g,j,res_index(upstream))
 !write(*,'(2I4,5F15.4)')id_subbas_extern(upstream),j,frvol_actlay(g,j,upstream),totvol_actlay(j,upstream)
       END DO
     END DO
@@ -1557,8 +1557,8 @@ end if
 ! Computation of the actual bed composition
     DO j=1,nbrsec(upstream)
       DO g=1,n_sed_class
-        IF (totvol_actlay(j,upstream) /= 0.) THEN
-          frac_actlay(g,j,res_index(upstream))=frvol_actlay(g,j,upstream)/totvol_actlay(j,upstream)
+        IF (totvol_actlay(j,res_index(upstream)) /= 0.) THEN
+          frac_actlay(g,j,res_index(upstream))=frvol_actlay(g,j,res_index(upstream))/totvol_actlay(j,res_index(upstream))
         ELSE
           frac_actlay(g,j,res_index(upstream))=0.
         END IF

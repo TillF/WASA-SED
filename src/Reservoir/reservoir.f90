@@ -408,14 +408,14 @@ storcap(:)=0.
 	
        !   darea_sed(nxsection_res,n_reservoir), &
 	      !dvol_sed(nxsection_res,n_reservoir), &
-	      !frvol_actlay(n_sed_class,nxsection_res,n_reservoir), &
-	      !totvol_actlay(nxsection_res,n_reservoir), &
-	      !conc(nxsection_res,n_reservoir), &
-	      
-	      !area_sedim(nxsection_res,n_reservoir), &
-	      !vol_sedim(nxsection_res,n_reservoir), &
+    frvol_actlay(n_sed_class,nxsection_res,n_reservoir), &
+    totvol_actlay(nxsection_res,n_reservoir), &
+    conc(nxsection_res,n_reservoir), &      
+    area_sedim(nxsection_res,n_reservoir), &
+    vol_sedim(nxsection_res,n_reservoir), &
 	      !volbed0(n_reservoir), &
 	      !length_plunge(n_reservoir), &
+    
     cumlength_sec(nxsection_res,n_reservoir), &
     length_sec(nxsection_res,n_reservoir), &
     d50_actlay(nxsection_res,n_reservoir), &
