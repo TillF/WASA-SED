@@ -376,10 +376,11 @@ storcap(:)=0.
 	      !hydrad_sec(nxsection_res,n_reservoir), &
 	      !meanvel_sec(nxsection_res,n_reservoir), &
 	      !energslope_sec(nxsection_res,n_reservoir), &
-	      !dynhead_sec(nxsection_res,n_reservoir), &
-	      !tothead_sec(nxsection_res,n_reservoir), &
-	      !headloss_sec(nxsection_res,n_reservoir), &
-	      !locloss_sec(nxsection_res,n_reservoir), &
+    dynhead_sec(nxsection_res,n_reservoir), &
+    tothead_sec(nxsection_res,n_reservoir), &
+    headloss_sec(nxsection_res,n_reservoir), &
+    locloss_sec(nxsection_res,n_reservoir), &
+     
     calctothead_sec(nxsection_res,n_reservoir), &
     maxarea_sec(nxsection_res,n_reservoir), &
     maxelev_sec(nxsection_res,n_reservoir), &

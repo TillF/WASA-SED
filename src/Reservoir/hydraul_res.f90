@@ -54,10 +54,10 @@ DO j=1,nbrsec(upstream)
   wetper_sec(j,upstream)=0.
   meanvel_sec(j,upstream)=0.
   energslope_sec(j,upstream)=0.
-  dynhead_sec(j,upstream)=0.
-  tothead_sec(j,upstream)=0.
-  headloss_sec(j,upstream)=0.
-  locloss_sec(j,upstream)=0.
+  dynhead_sec(j,res_index(upstream))=0.
+  tothead_sec(j,res_index(upstream))=0.
+  headloss_sec(j,res_index(upstream))=0.
+  locloss_sec(j,res_index(upstream))=0.
   calctothead_sec(j,res_index(upstream))=0.
   maxarea_sec(j,res_index(upstream))=0.
   maxelev_sec(j,res_index(upstream))=0.
@@ -623,11 +623,11 @@ DO j=1,nbrsec(upstream)
       END DO
       hydrad_sec(j,upstream)=area_sec(j,upstream)/ wetper_sec(j,upstream)
       meanvel_sec(j,upstream)=discharge_sec(j,upstream)/ area_sec(j,upstream)
-      dynhead_sec(j,upstream)=(meanvel_sec(j,upstream)**2.) /(2.*9.807)
-      tothead_sec(j,upstream)=watelev_sec(j,upstream)+ dynhead_sec(j,upstream)
+      dynhead_sec(j,res_index(upstream))=(meanvel_sec(j,upstream)**2.) /(2.*9.807)
+      tothead_sec(j,res_index(upstream))=watelev_sec(j,upstream)+ dynhead_sec(j,res_index(upstream))
       energslope_sec(j,upstream)=(meanvel_sec(j,upstream)**2.)*  &
           (manning_sec(j,upstream)**2.)/ (hydrad_sec(j,upstream)**(4./3.))
-      calctothead_sec(j,res_index(upstream))=tothead_sec(j,upstream)
+      calctothead_sec(j,res_index(upstream))=tothead_sec(j,res_index(upstream))
   END IF
 
 !if (t.eq.1986.and.d.eq.8.and.j.eq.24) then
@@ -666,8 +666,8 @@ IF (k /= 0) THEN
     area_sec(k,upstream)=crarea_sec(k,res_index(upstream))
 	hydrad_sec(k,upstream)=crarea_sec(k,res_index(upstream))/ crwetper_sec(k,res_index(upstream))
     meanvel_sec(k,upstream)=discharge_sec(k,upstream)/ crarea_sec(k,res_index(upstream))
-    dynhead_sec(k,upstream)=(meanvel_sec(k,upstream)**2.) /(2.*9.807)
-    tothead_sec(k,upstream)=crwatelev_sec(k,res_index(upstream))+ dynhead_sec(k,upstream)
+    dynhead_sec(k,res_index(upstream))=(meanvel_sec(k,upstream)**2.) /(2.*9.807)
+    tothead_sec(k,res_index(upstream))=crwatelev_sec(k,res_index(upstream))+ dynhead_sec(k,res_index(upstream))
     energslope_sec(k,upstream)=(meanvel_sec(k,upstream)**2.)*  &
 		(manning_sec(k,upstream)**2.)/ (hydrad_sec(k,upstream)**(4./3.))
     calctothead_sec(k,res_index(upstream))=tothead_sec(k,upstream)
@@ -767,34 +767,34 @@ IF (k /= 0) THEN
                 **2.)*(manning_sec(k+1-p,upstream)**2.)  &
                 /(hydrad_sec(k+1-p,upstream)**(4./3.))
          end if
-         dynhead_sec(k+1-p,upstream)=(meanvel_sec(k+1-p,upstream)**2.)  &
+         dynhead_sec(k+1-p,res_index(upstream))=(meanvel_sec(k+1-p,upstream)**2.)  &
                 /(2.*9.807)
-         tothead_sec(k+1-p,upstream)=watelev_sec(k+1-p,upstream)+  &
-                dynhead_sec(k+1-p,upstream)
+         tothead_sec(k+1-p,res_index(upstream))=watelev_sec(k+1-p,upstream)+  &
+                dynhead_sec(k+1-p,res_index(upstream))
 
 		if (bedslope_sec(k+1-p,upstream) < crslope_sec(k+1-p,res_index(upstream))) then
 		  if (watelev_sec(k+1-p,upstream) >= normalelev_sec(k+1-p,res_index(upstream))) then !M1
-		    headloss_sec(k+1-p,upstream)=dist_sec(k+1-p,upstream)*((2.*discharge_sec(k+1-p,upstream)/((discharge_sec(k+1-p,upstream)/sqrt(energslope_sec(k+1-p,upstream)))+ &
+		    headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,upstream)*((2.*discharge_sec(k+1-p,upstream)/((discharge_sec(k+1-p,upstream)/sqrt(energslope_sec(k+1-p,upstream)))+ &
 				(discharge_sec(k+2-p,upstream)/sqrt(energslope_sec(k+2-p,upstream)))))**2.)
 dummy1=11
 		  else if (watelev_sec(k+1-p,upstream) < crwatelev_sec(k+1-p,res_index(upstream))) then !M3
-			headloss_sec(k+1-p,upstream)=(1./2.)*dist_sec(k+1-p,upstream)*  &
+			headloss_sec(k+1-p,res_index(upstream))=(1./2.)*dist_sec(k+1-p,upstream)*  &
 				(energslope_sec(k+1-p,upstream)+ energslope_sec(k+2-p,upstream))
 dummy1=13
 		  else !M2
-			headloss_sec(k+1-p,upstream)=dist_sec(k+1-p,upstream)*sqrt(energslope_sec(k+1-p,upstream)*energslope_sec(k+2-p,upstream))
+			headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,upstream)*sqrt(energslope_sec(k+1-p,upstream)*energslope_sec(k+2-p,upstream))
 dummy1=12
           endif
 		else
 		  if (watelev_sec(k+1-p,upstream) >= crwatelev_sec(k+1-p,res_index(upstream))) then !S1
-			headloss_sec(k+1-p,upstream)=dist_sec(k+1-p,upstream)*sqrt(energslope_sec(k+1-p,upstream)*energslope_sec(k+2-p,upstream))
+			headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,upstream)*sqrt(energslope_sec(k+1-p,upstream)*energslope_sec(k+2-p,upstream))
 dummy1=21
 		  else if (watelev_sec(k+1-p,upstream) < normalelev_sec(k+1-p,res_index(upstream))) then !S3
-			headloss_sec(k+1-p,upstream)=(1./2.)*dist_sec(k+1-p,upstream)*  &
+			headloss_sec(k+1-p,res_index(upstream))=(1./2.)*dist_sec(k+1-p,upstream)*  &
 				(energslope_sec(k+1-p,upstream)+ energslope_sec(k+2-p,upstream))
 dummy1=23
 		  else !S2
-		    headloss_sec(k+1-p,upstream)=dist_sec(k+1-p,upstream)*((2.*discharge_sec(k+1-p,upstream)/((discharge_sec(k+1-p,upstream)/sqrt(energslope_sec(k+1-p,upstream)))+ &
+		    headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,upstream)*((2.*discharge_sec(k+1-p,upstream)/((discharge_sec(k+1-p,upstream)/sqrt(energslope_sec(k+1-p,upstream)))+ &
 				(discharge_sec(k+2-p,upstream)/sqrt(energslope_sec(k+2-p,upstream)))))**2.)
 dummy1=22
           endif
@@ -810,10 +810,10 @@ dummy1=22
         END IF
 
         if ( area_sec(k+1-p,upstream) == 0. .or. area_sec(k+2-p,upstream) == 0.) then
-            locloss_sec(k+1-p,upstream) = 0. !Till: quick fix for dry section
+            locloss_sec(k+1-p,res_index(upstream)) = 0. !Till: quick fix for dry section
         else
             !regular case
-        locloss_sec(k+1-p,upstream)=(loclosscoef/(2.*9.807))*  &
+        locloss_sec(k+1-p,res_index(upstream))=(loclosscoef/(2.*9.807))*  &
             (discharge_sec(k+1-p,upstream)**2.)*  &
             ABS((1./(area_sec(k+1-p,upstream)**2.))  &
             -(1./(area_sec(k+2-p,upstream)**2.)))
@@ -821,20 +821,20 @@ dummy1=22
 
         coef=1.
 
-        calctothead_sec(k+1-p,res_index(upstream))=tothead_sec(k+2-p,upstream)+coef*(headloss_sec(k+1-p,upstream)  &
-            +locloss_sec(k+1-p,upstream))
+        calctothead_sec(k+1-p,res_index(upstream))=tothead_sec(k+2-p,res_index(upstream))+coef*(headloss_sec(k+1-p,res_index(upstream))  &
+            +locloss_sec(k+1-p,res_index(upstream)))
 
-        error=tothead_sec(k+1-p,upstream)-calctothead_sec(k+1-p,res_index(upstream))
+        error=tothead_sec(k+1-p,res_index(upstream))-calctothead_sec(k+1-p,res_index(upstream))
 
 		if (e>20 .and. ABS(error1)>0.1) exit
 		if (e>30) exit
         IF (watelev_sec(k+1-p,upstream) == maxelev_sec(k+1-p,res_index(upstream))  &
               .AND.calctothead_sec(k+1-p,res_index(upstream)) <  &
-              tothead_sec(k+1-p,upstream) &
+              tothead_sec(k+1-p,res_index(upstream)) &
 			  .and. lowlim == 0. .and. toplim == 0.) exit
         IF (watelev_sec(k+1-p,upstream) == maxelev_sec(k+1-p,res_index(upstream))  &
               .AND.calctothead_sec(k+1-p,res_index(upstream)) <  &
-              tothead_sec(k+1-p,upstream)) THEN
+              tothead_sec(k+1-p,res_index(upstream))) THEN
           WRITE(*,*)'ERROR: the water discharge overflows the cross section ', k+1-p
           STOP
         END IF
@@ -907,10 +907,10 @@ dummy1=22
 				crwetper_sec(k+1-p,res_index(upstream))
 		meanvel_sec(k+1-p,upstream)=discharge_sec(k+1-p,upstream)/  &
 				crarea_sec(k+1-p,res_index(upstream))
-		dynhead_sec(k+1-p,upstream)=(meanvel_sec(k+1-p,upstream)**2.)  &
+		dynhead_sec(k+1-p,res_index(upstream))=(meanvel_sec(k+1-p,upstream)**2.)  &
 				/(2.*9.807)
-		tothead_sec(k+1-p,upstream)=watelev_sec(k+1-p,upstream)+  &
-				dynhead_sec(k+1-p,upstream)
+		tothead_sec(k+1-p,res_index(upstream))=watelev_sec(k+1-p,upstream)+  &
+				dynhead_sec(k+1-p,res_index(upstream))
 		energslope_sec(k+1-p,upstream)=(meanvel_sec(k+1-p,upstream)  &
 				**2.)*(manning_sec(k+1-p,upstream)**2.)  &
 				/(hydrad_sec(k+1-p,upstream)**(4./3.))
@@ -938,8 +938,8 @@ dummy1=22
   area_sec(1,upstream)=crarea_sec(1,res_index(upstream))
   hydrad_sec(1,upstream)=crarea_sec(1,res_index(upstream))/ crwetper_sec(1,res_index(upstream))
   meanvel_sec(1,upstream)=discharge_sec(1,upstream)/ crarea_sec(1,res_index(upstream))
-  dynhead_sec(1,upstream)=(meanvel_sec(1,upstream)**2.) /(2.*9.807)
-  tothead_sec(1,upstream)=crwatelev_sec(1,res_index(upstream))+ dynhead_sec(1,upstream)
+  dynhead_sec(1,res_index(upstream))=(meanvel_sec(1,upstream)**2.) /(2.*9.807)
+  tothead_sec(1,res_index(upstream))=crwatelev_sec(1,res_index(upstream))+ dynhead_sec(1,res_index(upstream))
   energslope_sec(1,upstream)=(meanvel_sec(1,upstream)**2.)*  &
 		(manning_sec(1,upstream)**2.)/ (hydrad_sec(1,upstream)**(4./3.))
   calctothead_sec(1,res_index(upstream))=tothead_sec(1,upstream)
@@ -1024,37 +1024,37 @@ dummy1=22
             wetper_sec(p,upstream)
         meanvel_sec(p,upstream)=discharge_sec(p,upstream)/  &
             area_sec(p,upstream)
-        dynhead_sec(p,upstream)=(meanvel_sec(p,upstream)**2.)  &
+        dynhead_sec(p,res_index(upstream))=(meanvel_sec(p,upstream)**2.)  &
             /(2.*9.807)
-        tothead_sec(p,upstream)=watelev_sec(p,upstream)+  &
-            dynhead_sec(p,upstream)
+        tothead_sec(p,res_index(upstream))=watelev_sec(p,upstream)+  &
+            dynhead_sec(p,res_index(upstream))
         energslope_sec(p,upstream)=(meanvel_sec(p,upstream)  &
             **2.)*(manning_sec(p,upstream)**2.)  &
             /(hydrad_sec(p,upstream)**(4./3.))
 
 		if (bedslope_sec(p,upstream) < crslope_sec(p,res_index(upstream))) then
 		  if (watelev_sec(p,upstream) >= normalelev_sec(p,res_index(upstream))) then !M1
-		    headloss_sec(p,upstream)=dist_sec(p,upstream)*((2.*discharge_sec(p,upstream)/((discharge_sec(p,upstream)/sqrt(energslope_sec(p,upstream)))+ &
+		    headloss_sec(p,res_index(upstream))=dist_sec(p,upstream)*((2.*discharge_sec(p,upstream)/((discharge_sec(p,upstream)/sqrt(energslope_sec(p,upstream)))+ &
 				(discharge_sec(p-1,upstream)/sqrt(energslope_sec(p-1,upstream)))))**2.)
 dummy1=11
 		  else if (watelev_sec(p,upstream) < crwatelev_sec(p,res_index(upstream))) then !M3
-			headloss_sec(p,upstream)=(1./2.)*dist_sec(p,upstream)*  &
+			headloss_sec(p,res_index(upstream))=(1./2.)*dist_sec(p,upstream)*  &
 				(energslope_sec(p,upstream)+ energslope_sec(p-1,upstream))
 dummy1=13
 		  else !M2
-			headloss_sec(p,upstream)=dist_sec(p,upstream)*sqrt(energslope_sec(p,upstream)*energslope_sec(p-1,upstream))
+			headloss_sec(p,res_index(upstream))=dist_sec(p,upstream)*sqrt(energslope_sec(p,upstream)*energslope_sec(p-1,upstream))
 dummy1=12
           endif
 		else
 		  if (watelev_sec(p,upstream) >= crwatelev_sec(p,res_index(upstream))) then !S1
-			headloss_sec(p,upstream)=dist_sec(p,upstream)*sqrt(energslope_sec(p,upstream)*energslope_sec(p-1,upstream))
+			headloss_sec(p,res_index(upstream))=dist_sec(p,upstream)*sqrt(energslope_sec(p,upstream)*energslope_sec(p-1,upstream))
 dummy1=21
 		  else if (watelev_sec(p,upstream) < normalelev_sec(p,res_index(upstream))) then !S3
-			headloss_sec(p,upstream)=(1./2.)*dist_sec(p,upstream)*  &
+			headloss_sec(p,res_index(upstream))=(1./2.)*dist_sec(p,upstream)*  &
 				(energslope_sec(p,upstream)+ energslope_sec(p-1,upstream))
 dummy1=23
 		  else !S2
-		    headloss_sec(p,upstream)=dist_sec(p,upstream)*((2.*discharge_sec(p,upstream)/((discharge_sec(p,upstream)/sqrt(energslope_sec(p,upstream)))+ &
+		    headloss_sec(p,res_index(upstream))=dist_sec(p,upstream)*((2.*discharge_sec(p,upstream)/((discharge_sec(p,upstream)/sqrt(energslope_sec(p,upstream)))+ &
 				(discharge_sec(p-1,upstream)/sqrt(energslope_sec(p-1,upstream)))))**2.)
 dummy1=22
           endif
@@ -1069,27 +1069,27 @@ dummy1=22
           loclosscoef=0.
         END IF
 
-        locloss_sec(p,upstream)=(loclosscoef/(2.*9.807))*  &
+        locloss_sec(p,res_index(upstream))=(loclosscoef/(2.*9.807))*  &
             (discharge_sec(p,upstream)**2.)*  &
             ABS((1./(area_sec(p,upstream)**2.))  &
             -(1./(area_sec(p-1,upstream)**2.)))
 
         coef=-1.
 
-        calctothead_sec(p,res_index(upstream))=tothead_sec(p-1,upstream)+coef*(headloss_sec(p,upstream)  &
-            +locloss_sec(p,upstream))
+        calctothead_sec(p,res_index(upstream))=tothead_sec(p-1,upstream)+coef*(headloss_sec(p,res_index(upstream))  &
+            +locloss_sec(p,res_index(upstream)))
 
-        error=tothead_sec(p,upstream)-calctothead_sec(p,res_index(upstream))
+        error=tothead_sec(p,res_index(upstream))-calctothead_sec(p,res_index(upstream))
 
 		if (e>20 .and. ABS(error1)>0.1) exit
 		if (e>30) exit
         IF (watelev_sec(p,upstream) == maxelev_sec(p,res_index(upstream))  &
               .AND.calctothead_sec(p,res_index(upstream)) <  &
-              tothead_sec(p,upstream) &
+              tothead_sec(p,res_index(upstream)) &
 			  .and. lowlim == 0. .and. toplim == 0.) exit
         IF (watelev_sec(p,upstream) == maxelev_sec(p,res_index(upstream))  &
               .AND.calctothead_sec(p,res_index(upstream)) <  &
-              tothead_sec(p,upstream)) THEN
+              tothead_sec(p,res_index(upstream))) THEN
           WRITE(*,*)'ERROR: the water discharge overflows the cross section ', p
           STOP
         END IF
@@ -1163,10 +1163,10 @@ dummy1=22
 				crwetper_sec(p,res_index(upstream))
 		meanvel_sec(p,upstream)=discharge_sec(p,upstream)/  &
 				crarea_sec(p,res_index(upstream))
-		dynhead_sec(p,upstream)=(meanvel_sec(p,upstream)**2.)  &
+		dynhead_sec(p,res_index(upstream))=(meanvel_sec(p,upstream)**2.)  &
 				/(2.*9.807)
-		tothead_sec(p,upstream)=watelev_sec(p,upstream)+  &
-				dynhead_sec(p,upstream)
+		tothead_sec(p,res_index(upstream))=watelev_sec(p,upstream)+  &
+				dynhead_sec(p,res_index(upstream))
 		energslope_sec(p,upstream)=(meanvel_sec(p,upstream)  &
 				**2.)*(manning_sec(p,upstream)**2.)  &
 				/(hydrad_sec(p,upstream)**(4./3.))

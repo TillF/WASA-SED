@@ -309,7 +309,7 @@ real, allocatable :: energslope_sec(:,:)
 real, allocatable :: dynhead_sec(:,:)
 !total head of each cross section in the sub-basin's reservoir [m]
 real, allocatable :: tothead_sec(:,:)
-!head loss between two adjacent cross sections in the sub-basin's reservoir due friction[m]
+!head loss between two adjacent cross sections in the sub-basin's reservoir due to friction[m]
 real, allocatable :: headloss_sec(:,:)
 !local head loss between two adjacent cross sections in the sub-basin's reservoir [m]
 real, allocatable :: locloss_sec(:,:)

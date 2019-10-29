@@ -534,10 +534,10 @@ subroutine allocate_reservoir()
 	      hydrad_sec(nxsection_res,subasin), &
 	      meanvel_sec(nxsection_res,subasin), &
 	      energslope_sec(nxsection_res,subasin), &
-	      dynhead_sec(nxsection_res,subasin), &
-	      tothead_sec(nxsection_res,subasin), &
-	      headloss_sec(nxsection_res,subasin), &
-	      locloss_sec(nxsection_res,subasin), &
+!A	      dynhead_sec(nxsection_res,subasin), &
+!A	      tothead_sec(nxsection_res,subasin), &
+!A	      headloss_sec(nxsection_res,subasin), &
+!A	      locloss_sec(nxsection_res,subasin), &
 !A	      calctothead_sec(nxsection_res,subasin), &
 !A	      maxarea_sec(nxsection_res,subasin), &
 !A	      maxelev_sec(nxsection_res,subasin), &
