@@ -58,10 +58,10 @@ DO j=1,nbrsec(upstream)
   tothead_sec(j,upstream)=0.
   headloss_sec(j,upstream)=0.
   locloss_sec(j,upstream)=0.
-  calctothead_sec(j,upstream)=0.
-  maxarea_sec(j,upstream)=0.
-  maxelev_sec(j,upstream)=0.
-  maxdepth_sec(j,upstream)=0.
+  calctothead_sec(j,res_index(upstream))=0.
+  maxarea_sec(j,res_index(upstream))=0.
+  maxelev_sec(j,res_index(upstream))=0.
+  maxdepth_sec(j,res_index(upstream))=0.
   crdepth_sec(j,res_index(upstream))=0.
   crwatelev_sec(j,res_index(upstream))=0.
   crarea_sec(j,res_index(upstream))=0.
@@ -120,35 +120,35 @@ END DO
 
 ! Computation of maximum wetted surface of cross sections
 DO j=1,nbrsec(upstream)
-  maxarea_sec(j,upstream)=0.
+  maxarea_sec(j,res_index(upstream))=0.
   npt=npoints(j,upstream)
-  maxelev_sec(j,upstream)=MIN(y_sec(1,j,res_index(upstream)), y_sec(npt,j,res_index(upstream)))
-  maxdepth_sec(j,upstream)=maxelev_sec(j,upstream)- minelev_sec(j,upstream)
+  maxelev_sec(j,res_index(upstream))=MIN(y_sec(1,j,res_index(upstream)), y_sec(npt,j,res_index(upstream)))
+  maxdepth_sec(j,res_index(upstream))=maxelev_sec(j,res_index(upstream))- minelev_sec(j,upstream)
 
   DO m=2,npt
     TAN=ABS(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/  &
         (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
-    IF (maxelev_sec(j,upstream) >= y_sec(m-1,j,res_index(upstream))  &
-          .AND.maxelev_sec(j,upstream) >= y_sec(m,j,res_index(upstream))) THEN
-      maxarea_sec(j,upstream)=maxarea_sec(j,upstream)+  &
+    IF (maxelev_sec(j,res_index(upstream)) >= y_sec(m-1,j,res_index(upstream))  &
+          .AND.maxelev_sec(j,res_index(upstream)) >= y_sec(m,j,res_index(upstream))) THEN
+      maxarea_sec(j,res_index(upstream))=maxarea_sec(j,res_index(upstream))+  &
           (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))  &
-          *(maxelev_sec(j,upstream)-  &
+          *(maxelev_sec(j,res_index(upstream))-  &
           (y_sec(m,j,res_index(upstream))+y_sec(m-1,j,res_index(upstream)))/2.)
-    ELSE IF (maxelev_sec(j,upstream) < y_sec(m-1,j,res_index(upstream))  &
-          .AND.maxelev_sec(j,upstream) >= y_sec(m,j,res_index(upstream))) THEN
-      maxarea_sec(j,upstream)=maxarea_sec(j,upstream)+  &
-          (((maxelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))**2.)/ (2.*TAN))
-    ELSE IF (maxelev_sec(j,upstream) >= y_sec(m-1,j,res_index(upstream))  &
-          .AND.maxelev_sec(j,upstream) < y_sec(m,j,res_index(upstream))) THEN
-      maxarea_sec(j,upstream)=maxarea_sec(j,upstream)+  &
-          (((maxelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))**2.)/ (2.*TAN))
+    ELSE IF (maxelev_sec(j,res_index(upstream)) < y_sec(m-1,j,res_index(upstream))  &
+          .AND.maxelev_sec(j,res_index(upstream)) >= y_sec(m,j,res_index(upstream))) THEN
+      maxarea_sec(j,res_index(upstream))=maxarea_sec(j,res_index(upstream))+  &
+          (((maxelev_sec(j,res_index(upstream))-y_sec(m,j,res_index(upstream)))**2.)/ (2.*TAN))
+    ELSE IF (maxelev_sec(j,res_index(upstream)) >= y_sec(m-1,j,res_index(upstream))  &
+          .AND.maxelev_sec(j,res_index(upstream)) < y_sec(m,j,res_index(upstream))) THEN
+      maxarea_sec(j,res_index(upstream))=maxarea_sec(j,res_index(upstream))+  &
+          (((maxelev_sec(j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))**2.)/ (2.*TAN))
     END IF
   END DO
 END DO
 
 ! Check if the cross sections are completely sedimented
 DO j=1,nbrsec(upstream)
-  if (maxarea_sec(j,upstream) == 0.) then
+  if (maxarea_sec(j,res_index(upstream)) == 0.) then
     WRITE(*,*)'ERROR: cross section ',j
     WRITE(*,*)'is completely sedimented'
     STOP
@@ -164,7 +164,7 @@ n=0
 ! from a weighted averaged value using the river inflow and the reservoir outflow discharges
 DO j=1,nbrsec(upstream)
   IF (damelev >= minelev_sec(j,upstream)) THEN
-    IF (damelev > maxelev_sec(j,upstream)) THEN
+    IF (damelev > maxelev_sec(j,res_index(upstream))) THEN
       WRITE(*,*)'ERROR: the water discharge overflows the cross section geometry ',j
       STOP
     END IF
@@ -286,9 +286,9 @@ DO j=1,nbrsec(upstream)
       topwidth_sec(j,upstream)=0.
       wetper_sec(j,upstream)=0.
 
-      IF (watelev_sec(j,upstream) > maxelev_sec(j,upstream)) THEN
-        watelev_sec(j,upstream)=maxelev_sec(j,upstream)
-        depth_sec(j,upstream)=maxdepth_sec(j,upstream)
+      IF (watelev_sec(j,upstream) > maxelev_sec(j,res_index(upstream))) THEN
+        watelev_sec(j,upstream)=maxelev_sec(j,res_index(upstream))
+        depth_sec(j,upstream)=maxdepth_sec(j,res_index(upstream))
       END IF
 
       DO m=2,npt
@@ -339,7 +339,7 @@ DO j=1,nbrsec(upstream)
 
       error=discharge_calc-discharge_sec(j,upstream)
 
-      IF (watelev_sec(j,upstream) == maxelev_sec(j,upstream).AND.  &
+      IF (watelev_sec(j,upstream) == maxelev_sec(j,res_index(upstream)).AND.  &
             discharge_calc < discharge_sec(j,upstream) .AND. a/=1) THEN
         WRITE(*,*)'ERROR: the water discharge overflows the cross section ',j
         STOP
@@ -443,9 +443,9 @@ DO j=1,nbrsec(upstream)
       crtopwidth_sec(j,res_index(upstream))=0.
       crwetper_sec(j,res_index(upstream))=0.
 
-      IF (watelev_sec(j,upstream) > maxelev_sec(j,upstream)) THEN
-        crwatelev_sec(j,res_index(upstream))=maxelev_sec(j,upstream)
-        crdepth_sec(j,res_index(upstream))=maxdepth_sec(j,upstream)
+      IF (watelev_sec(j,upstream) > maxelev_sec(j,res_index(upstream))) THEN
+        crwatelev_sec(j,res_index(upstream))=maxelev_sec(j,res_index(upstream))
+        crdepth_sec(j,res_index(upstream))=maxdepth_sec(j,res_index(upstream))
       END IF
 
       DO m=2,npt
@@ -494,7 +494,7 @@ DO j=1,nbrsec(upstream)
       error=discharge_calc-discharge_sec(j,upstream)
 
 
-      IF (crwatelev_sec(j,res_index(upstream)) == maxelev_sec(j,upstream).AND.  &
+      IF (crwatelev_sec(j,res_index(upstream)) == maxelev_sec(j,res_index(upstream)).AND.  &
             discharge_calc < discharge_sec(j,upstream)) THEN
         WRITE(*,*)'ERROR: the water discharge overflows the cross section ',j
         STOP
@@ -562,7 +562,7 @@ DO j=1,nbrsec(upstream)
 !write(*,'(2I4,7F10.5)')j,dummy(j),crdepth_sec(j,upstream),dep, &
 !     crwatelev_sec(j,upstream),crarea_sec(j,upstream),crwetper_sec(j,upstream),hydrad_sec(j,upstream),error
 
-    if(crwatelev_sec(j,res_index(upstream))>maxelev_sec(j,upstream)) then
+    if(crwatelev_sec(j,res_index(upstream))>maxelev_sec(j,res_index(upstream))) then
       WRITE(*,*)'ERROR: the water discharge overflows the cross section ',j
       STOP
     END IF
@@ -627,7 +627,7 @@ DO j=1,nbrsec(upstream)
       tothead_sec(j,upstream)=watelev_sec(j,upstream)+ dynhead_sec(j,upstream)
       energslope_sec(j,upstream)=(meanvel_sec(j,upstream)**2.)*  &
           (manning_sec(j,upstream)**2.)/ (hydrad_sec(j,upstream)**(4./3.))
-      calctothead_sec(j,upstream)=tothead_sec(j,upstream)
+      calctothead_sec(j,res_index(upstream))=tothead_sec(j,upstream)
   END IF
 
 !if (t.eq.1986.and.d.eq.8.and.j.eq.24) then
@@ -670,7 +670,7 @@ IF (k /= 0) THEN
     tothead_sec(k,upstream)=crwatelev_sec(k,res_index(upstream))+ dynhead_sec(k,upstream)
     energslope_sec(k,upstream)=(meanvel_sec(k,upstream)**2.)*  &
 		(manning_sec(k,upstream)**2.)/ (hydrad_sec(k,upstream)**(4./3.))
-    calctothead_sec(k,upstream)=tothead_sec(k,upstream)
+    calctothead_sec(k,res_index(upstream))=tothead_sec(k,upstream)
 	k=k-1
   endif
 
@@ -699,9 +699,9 @@ IF (k /= 0) THEN
         wetper_sec(k+1-p,upstream)=0.
 
 
-        IF (watelev_sec(k+1-p,upstream) > maxelev_sec(k+1-p,upstream)) THEN
-          watelev_sec(k+1-p,upstream)=maxelev_sec(k+1-p,upstream)
-          depth_sec(k+1-p,upstream)=maxdepth_sec(k+1-p,upstream)
+        IF (watelev_sec(k+1-p,upstream) > maxelev_sec(k+1-p,res_index(upstream))) THEN
+          watelev_sec(k+1-p,upstream)=maxelev_sec(k+1-p,res_index(upstream))
+          depth_sec(k+1-p,upstream)=maxdepth_sec(k+1-p,res_index(upstream))
         END IF
 
         DO m=1,npt
@@ -821,19 +821,19 @@ dummy1=22
 
         coef=1.
 
-        calctothead_sec(k+1-p,upstream)=tothead_sec(k+2-p,upstream)+coef*(headloss_sec(k+1-p,upstream)  &
+        calctothead_sec(k+1-p,res_index(upstream))=tothead_sec(k+2-p,upstream)+coef*(headloss_sec(k+1-p,upstream)  &
             +locloss_sec(k+1-p,upstream))
 
-        error=tothead_sec(k+1-p,upstream)-calctothead_sec(k+1-p,upstream)
+        error=tothead_sec(k+1-p,upstream)-calctothead_sec(k+1-p,res_index(upstream))
 
 		if (e>20 .and. ABS(error1)>0.1) exit
 		if (e>30) exit
-        IF (watelev_sec(k+1-p,upstream) == maxelev_sec(k+1-p,upstream)  &
-              .AND.calctothead_sec(k+1-p,upstream) <  &
+        IF (watelev_sec(k+1-p,upstream) == maxelev_sec(k+1-p,res_index(upstream))  &
+              .AND.calctothead_sec(k+1-p,res_index(upstream)) <  &
               tothead_sec(k+1-p,upstream) &
 			  .and. lowlim == 0. .and. toplim == 0.) exit
-        IF (watelev_sec(k+1-p,upstream) == maxelev_sec(k+1-p,upstream)  &
-              .AND.calctothead_sec(k+1-p,upstream) <  &
+        IF (watelev_sec(k+1-p,upstream) == maxelev_sec(k+1-p,res_index(upstream))  &
+              .AND.calctothead_sec(k+1-p,res_index(upstream)) <  &
               tothead_sec(k+1-p,upstream)) THEN
           WRITE(*,*)'ERROR: the water discharge overflows the cross section ', k+1-p
           STOP
@@ -917,7 +917,7 @@ dummy1=22
 !write(*,*)'warning! forced critical flow regime at cross section',k+1-p
 	  endif
 
-      if(watelev_sec(k+1-p,upstream)>maxelev_sec(k+1-p,upstream)) then
+      if(watelev_sec(k+1-p,upstream)>maxelev_sec(k+1-p,res_index(upstream))) then
         WRITE(*,*)'ERROR: the water discharge overflows the cross section ',k+1-p
         STOP
       END IF
@@ -942,7 +942,7 @@ dummy1=22
   tothead_sec(1,upstream)=crwatelev_sec(1,res_index(upstream))+ dynhead_sec(1,upstream)
   energslope_sec(1,upstream)=(meanvel_sec(1,upstream)**2.)*  &
 		(manning_sec(1,upstream)**2.)/ (hydrad_sec(1,upstream)**(4./3.))
-  calctothead_sec(1,upstream)=tothead_sec(1,upstream)
+  calctothead_sec(1,res_index(upstream))=tothead_sec(1,upstream)
 
   if (k>1) then
 !write(*,*)'Step (3.2b)'
@@ -970,9 +970,9 @@ dummy1=22
         wetper_sec(p,upstream)=0.
 
 
-        IF (watelev_sec(p,upstream) > maxelev_sec(p,upstream)) THEN
-          watelev_sec(p,upstream)=maxelev_sec(p,upstream)
-          depth_sec(p,upstream)=maxdepth_sec(p,upstream)
+        IF (watelev_sec(p,upstream) > maxelev_sec(p,res_index(upstream))) THEN
+          watelev_sec(p,upstream)=maxelev_sec(p,res_index(upstream))
+          depth_sec(p,upstream)=maxdepth_sec(p,res_index(upstream))
         END IF
 
         DO m=2,npt
@@ -1076,19 +1076,19 @@ dummy1=22
 
         coef=-1.
 
-        calctothead_sec(p,upstream)=tothead_sec(p-1,upstream)+coef*(headloss_sec(p,upstream)  &
+        calctothead_sec(p,res_index(upstream))=tothead_sec(p-1,upstream)+coef*(headloss_sec(p,upstream)  &
             +locloss_sec(p,upstream))
 
-        error=tothead_sec(p,upstream)-calctothead_sec(p,upstream)
+        error=tothead_sec(p,upstream)-calctothead_sec(p,res_index(upstream))
 
 		if (e>20 .and. ABS(error1)>0.1) exit
 		if (e>30) exit
-        IF (watelev_sec(p,upstream) == maxelev_sec(p,upstream)  &
-              .AND.calctothead_sec(p,upstream) <  &
+        IF (watelev_sec(p,upstream) == maxelev_sec(p,res_index(upstream))  &
+              .AND.calctothead_sec(p,res_index(upstream)) <  &
               tothead_sec(p,upstream) &
 			  .and. lowlim == 0. .and. toplim == 0.) exit
-        IF (watelev_sec(p,upstream) == maxelev_sec(p,upstream)  &
-              .AND.calctothead_sec(p,upstream) <  &
+        IF (watelev_sec(p,upstream) == maxelev_sec(p,res_index(upstream))  &
+              .AND.calctothead_sec(p,res_index(upstream)) <  &
               tothead_sec(p,upstream)) THEN
           WRITE(*,*)'ERROR: the water discharge overflows the cross section ', p
           STOP
@@ -1173,7 +1173,7 @@ dummy1=22
 !write(*,*)'warning! forced critical flow regime at the cross section',p
 	  endif
 
-      if(watelev_sec(p,upstream)>maxelev_sec(p,upstream)) then
+      if(watelev_sec(p,upstream)>maxelev_sec(p,res_index(upstream))) then
         WRITE(*,*)'ERROR: the water discharge overflows the cross section ',p
         STOP
       END IF

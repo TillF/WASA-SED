@@ -538,10 +538,10 @@ subroutine allocate_reservoir()
 	      tothead_sec(nxsection_res,subasin), &
 	      headloss_sec(nxsection_res,subasin), &
 	      locloss_sec(nxsection_res,subasin), &
-	      calctothead_sec(nxsection_res,subasin), &
-	      maxarea_sec(nxsection_res,subasin), &
-	      maxelev_sec(nxsection_res,subasin), &
-	      maxdepth_sec(nxsection_res,subasin), &
+!A	      calctothead_sec(nxsection_res,subasin), &
+!A	      maxarea_sec(nxsection_res,subasin), &
+!A	      maxelev_sec(nxsection_res,subasin), &
+!A	      maxdepth_sec(nxsection_res,subasin), &
 !A	      crdepth_sec(nxsection_res,subasin), &
 !A	      crwatelev_sec(nxsection_res,subasin), &
 !A	      crarea_sec(nxsection_res,subasin), &
