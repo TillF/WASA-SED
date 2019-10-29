@@ -542,11 +542,11 @@ subroutine allocate_reservoir()
 	      maxarea_sec(nxsection_res,subasin), &
 	      maxelev_sec(nxsection_res,subasin), &
 	      maxdepth_sec(nxsection_res,subasin), &
-	      crdepth_sec(nxsection_res,subasin), &
-	      crwatelev_sec(nxsection_res,subasin), &
-	      crarea_sec(nxsection_res,subasin), &
-	      crtopwidth_sec(nxsection_res,subasin), &
-	      crwetper_sec(nxsection_res,subasin), &
+!A	      crdepth_sec(nxsection_res,subasin), &
+!A	      crwatelev_sec(nxsection_res,subasin), &
+!A	      crarea_sec(nxsection_res,subasin), &
+!A	      crtopwidth_sec(nxsection_res,subasin), &
+!A	      crwetper_sec(nxsection_res,subasin), &
 !A	      crslope_sec(nxsection_res,subasin), &
 !A	      crvel_sec(nxsection_res,subasin), &
 !A	      crhydrad_sec(nxsection_res,subasin), &
