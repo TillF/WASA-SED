@@ -395,10 +395,10 @@ storcap(:)=0.
 	      !normalelev_sec(nxsection_res,n_reservoir), &
 	      !normalarea_sec(nxsection_res,n_reservoir), &
        
-	      !area_actlay(nxsection_res,n_reservoir), &
-	      !area_toplay(nxsection_res,n_reservoir), &
-	      !vol_actlay(nxsection_res,n_reservoir), &
-	      !vol_toplay(nxsection_res,n_reservoir), &
+    area_actlay(nxsection_res,n_reservoir), &
+    area_toplay(nxsection_res,n_reservoir), &
+    vol_actlay(nxsection_res,n_reservoir), &
+    vol_toplay(nxsection_res,n_reservoir), &
                      
     erosion(nxsection_res,n_reservoir), &
     deposition(nxsection_res,n_reservoir), &

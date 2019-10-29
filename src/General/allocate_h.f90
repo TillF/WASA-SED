@@ -559,10 +559,10 @@ subroutine allocate_reservoir()
     !	  point1_bank(nxsection_res,subasin), &
     !	  point2_bank(nxsection_res,subasin), &
             
-	      area_actlay(nxsection_res,subasin), &
-	      area_toplay(nxsection_res,subasin), &
-	      vol_actlay(nxsection_res,subasin), &
-	      vol_toplay(nxsection_res,subasin), &
+!A	      area_actlay(nxsection_res,subasin), &
+!A	      area_toplay(nxsection_res,subasin), &
+!A	      vol_actlay(nxsection_res,subasin), &
+!A	      vol_toplay(nxsection_res,subasin), &
 	      frsedavailab(n_sed_class,nxsection_res), &
 	      frerosion(n_sed_class,nxsection_res), &
 	      frdeposition(n_sed_class,nxsection_res), &

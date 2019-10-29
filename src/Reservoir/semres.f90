@@ -978,8 +978,8 @@ end if
 
 ! Calculation of sediment volume in the active layer
     DO j=1,nbrsec(upstream)
-      area_actlay(j,upstream)=0.
-      area_toplay(j,upstream)=0.
+      area_actlay(j,res_index(upstream))=0.
+      area_toplay(j,res_index(upstream))=0.
 
       DO m=1,npoints(j,upstream)
 	    partarea_actlay(m,j,res_index(upstream))=0.     !A changed upstream to res_index(upstream)
@@ -1138,14 +1138,14 @@ end if
 		      (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))/2.
           partarea_toplay(m,j,res_index(upstream))=(((elev-y_sec(m,j,res_index(upstream)))**2.)/ &
 		      (2.*ABS(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/(x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))))
-	      area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,res_index(upstream))
+	      area_actlay(j,res_index(upstream))=area_actlay(j,res_index(upstream))+partarea_actlay(m,j,res_index(upstream))
 	    ELSE IF (geom(m,j) == 2) THEN
           partarea_actlay(m,j,res_index(upstream))=((y_sec(m,j,res_index(upstream))-y_actlay(m,j,res_index(upstream)))+ &
 			  (y_sec(m-1,j,res_index(upstream))-y_actlay(m-1,j,res_index(upstream))))*  &
               (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))/2.
           partarea_toplay(m,j,res_index(upstream))=(x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))  &
               *(2.*elev-(y_sec(m,j,res_index(upstream))+y_sec(m-1,j,res_index(upstream))))/2.
-          area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,res_index(upstream))
+          area_actlay(j,res_index(upstream))=area_actlay(j,res_index(upstream))+partarea_actlay(m,j,res_index(upstream))
 	    ELSE IF (geom(m,j) == 3) THEN
           partarea_actlay(m,j,res_index(upstream))=((y_sec(m,j,res_index(upstream))-y_actlay(m,j,res_index(upstream)))+ &
 			  (y_sec(m-1,j,res_index(upstream))-y_actlay(m-1,j,res_index(upstream))))*  &
@@ -1156,7 +1156,7 @@ end if
               *(2.*elev- (y_sec(m,j,res_index(upstream))+y_sec(m-1,j,res_index(upstream))))/2.+ &
 			  (((elev-y_sec(m,j,res_index(upstream)))**2.)/ &
 			  (2.*ABS(y_sec(m+1,j,res_index(upstream))-y_sec(m,j,res_index(upstream)))/(x_sec(m+1,j,res_index(upstream))-x_sec(m,j,res_index(upstream)))))
-          area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,res_index(upstream))
+          area_actlay(j,res_index(upstream))=area_actlay(j,res_index(upstream))+partarea_actlay(m,j,res_index(upstream))
 	    ELSE IF (geom(m,j) == 4) THEN
           partarea_actlay(m,j,res_index(upstream))=(y_sec(m,j,res_index(upstream))-y_actlay(m,j,res_index(upstream)))* &
 		      (x_sec(m+1,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))/2.
@@ -1164,7 +1164,7 @@ end if
 			  (2.*ABS(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/(x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))))+ &
               (((elev-y_sec(m,j,res_index(upstream)))**2.)/ &
 			  (2.*ABS(y_sec(m+1,j,res_index(upstream))-y_sec(m,j,res_index(upstream)))/(x_sec(m+1,j,res_index(upstream))-x_sec(m,j,res_index(upstream)))))
-          area_actlay(j,upstream)=area_actlay(j,upstream)+partarea_actlay(m,j,res_index(upstream))
+          area_actlay(j,res_index(upstream))=area_actlay(j,res_index(upstream))+partarea_actlay(m,j,res_index(upstream))
 		ENDIF
 	  ENDDO
 
@@ -1175,7 +1175,7 @@ end if
 !		  weightfac_toplay(m,j,upstream)=0.
 	    ENDIF
 
-	    IF (area_actlay(j,upstream) /= 0.) THEN
+	    IF (area_actlay(j,res_index(upstream)) /= 0.) THEN
 !	      weightfac_actlay(m,j,upstream)=partarea_actlay(m,j,upstream)/area_actlay(j,upstream)
 	    ELSE
 !	      weightfac_actlay(m,j,upstream)=0.
@@ -1186,13 +1186,13 @@ end if
 
 
     DO j=1,nbrsec(upstream)
-      area_toplay(j,upstream)=area_sec(j,upstream)
+      area_toplay(j,res_index(upstream))=area_sec(j,upstream)
 	ENDDO
 
 ! Active layer volume (m3)
     DO j=1,nbrsec(upstream)
-      vol_actlay(j,upstream)=area_actlay(j,upstream)*length_sec(j,res_index(upstream))
-      vol_toplay(j,upstream)=area_toplay(j,upstream)*length_sec(j,res_index(upstream))
+      vol_actlay(j,res_index(upstream))=area_actlay(j,res_index(upstream))*length_sec(j,res_index(upstream))
+      vol_toplay(j,res_index(upstream))=area_toplay(j,res_index(upstream))*length_sec(j,res_index(upstream))
     END DO
 
 ! Determination of water volume of the reservoir reach by summing up all cross sections' volume
@@ -1204,7 +1204,7 @@ end if
 !george	ENDDO
 !george	if (p /=0 ) then
       DO j=1,nbrsec(upstream)
-	    resreach_vol(upstream)=resreach_vol(upstream)+vol_toplay(j,upstream)
+	    resreach_vol(upstream)=resreach_vol(upstream)+vol_toplay(j,res_index(upstream))
 !george	    if (j > p) resreach_vol(upstream)=resreach_vol(upstream)+vol_toplay(j,upstream)
 !write(*,'(2I4,4F15.3)')j,p,watelev_sec(j,upstream),damelev_mean(step,upstream),vol_toplay(j,upstream),resreach_vol(upstream)
 	  enddo
@@ -1215,7 +1215,7 @@ end if
 ! Fractional sediment availability at the active layer (ton)
     DO j=1,nbrsec(upstream)
       DO g=1,n_sed_class
-        frsedavailab(g,j)=vol_actlay(j,upstream)*frac_actlay(g,j,res_index(upstream))*dry_dens(upstream)
+        frsedavailab(g,j)=vol_actlay(j,res_index(upstream))*frac_actlay(g,j,res_index(upstream))*dry_dens(upstream)
 !if(j<10)write(*,'(2I4,10F15.2)')j,g,frsedavailab(g,j),vol_actlay(j,upstream),frac_actlay(g,j,upstream),dry_dens(upstream)
       END DO
     END DO
@@ -1508,7 +1508,7 @@ end if
     DO j=1,nbrsec(upstream)
       if (j > p .and. resreach_vol(upstream) /= 0.) then
 		if (j /= nbrsec(upstream)) then
-          weight=vol_toplay(j,upstream)/resreach_vol(upstream)
+          weight=vol_toplay(j,res_index(upstream))/resreach_vol(upstream)
 		else
           weight=max(0.,1.-dummy5)
 		endif
