@@ -547,11 +547,11 @@ subroutine allocate_reservoir()
 	      crarea_sec(nxsection_res,subasin), &
 	      crtopwidth_sec(nxsection_res,subasin), &
 	      crwetper_sec(nxsection_res,subasin), &
-	      crslope_sec(nxsection_res,subasin), &
-	      crvel_sec(nxsection_res,subasin), &
-	      crhydrad_sec(nxsection_res,subasin), &
-	      normalelev_sec(nxsection_res,subasin), &
-	      normalarea_sec(nxsection_res,subasin), &
+!A	      crslope_sec(nxsection_res,subasin), &
+!A	      crvel_sec(nxsection_res,subasin), &
+!A	      crhydrad_sec(nxsection_res,subasin), &
+!A	      normalelev_sec(nxsection_res,subasin), &
+!A	      normalarea_sec(nxsection_res,subasin), &
 
 	      setvel(n_sed_class), &
     !	  point1_sub(nxsection_res,subasin), &

@@ -389,11 +389,11 @@ storcap(:)=0.
 	      !crarea_sec(nxsection_res,n_reservoir), &
 	      !crtopwidth_sec(nxsection_res,n_reservoir), &
 	      !crwetper_sec(nxsection_res,n_reservoir), &
-	      !crslope_sec(nxsection_res,n_reservoir), &
-	      !crvel_sec(nxsection_res,n_reservoir), &
-	      !crhydrad_sec(nxsection_res,n_reservoir), &
-	      !normalelev_sec(nxsection_res,n_reservoir), &
-	      !normalarea_sec(nxsection_res,n_reservoir), &
+    crslope_sec(nxsection_res,n_reservoir), &
+    crvel_sec(nxsection_res,n_reservoir), &
+    crhydrad_sec(nxsection_res,n_reservoir), &
+    normalelev_sec(nxsection_res,n_reservoir), &
+    normalarea_sec(nxsection_res,n_reservoir), &
        
     area_actlay(nxsection_res,n_reservoir), &
     area_toplay(nxsection_res,n_reservoir), &
