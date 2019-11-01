@@ -358,14 +358,15 @@ storcap(:)=0.
        !
 	      !sedinflow_g(366*nt,n_reservoir,n_sed_class), &
 	      !sedoutflow_g(366*nt,n_reservoir,n_sed_class), &
-       !
 	      !damelev_mean(366*nt,n_reservoir), &
-	      !x_minelev(nxsection_res,n_reservoir), &
-	      !minelev_sec(nxsection_res,n_reservoir), &
-	      !bedslope_sec(nxsection_res,n_reservoir), &
-	      !area_sec(nxsection_res,n_reservoir), &
-	      !resarea_sec(nxsection_res,n_reservoir), &
-	      !resvol_sec(nxsection_res,n_reservoir), &
+     
+    x_minelev(nxsection_res,n_reservoir), &
+    minelev_sec(nxsection_res,n_reservoir), &
+    bedslope_sec(nxsection_res,n_reservoir), &
+    area_sec(nxsection_res,n_reservoir), &
+    resarea_sec(nxsection_res,n_reservoir), &
+    resvol_sec(nxsection_res,n_reservoir), &
+     
 	      !resvol(n_reservoir), &
     topwidth_sec(nxsection_res,n_reservoir), &
     weight_sec(nxsection_res,n_reservoir), &

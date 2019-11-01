@@ -95,7 +95,7 @@ ELSE IF (dvol_sed(j1,res_index(upstream)) > 0.) THEN
     if(y_sec(m,j1,res_index(upstream))<watelev_sec(j1,res_index(upstream))) then
 !	  dummy5=(watelev_sec(j1,upstream)-y_sec(m,j1,upstream))/(watelev_sec(j1,upstream)-minelev_sec(j1,upstream))
 !	  wfactor(m)=1.-((1.-(dummy5))**2.9)
-	  wfactor(m)=(watelev_sec(j1,res_index(upstream))-y_sec(m,j1,res_index(upstream)))/(watelev_sec(j1,res_index(upstream))-minelev_sec(j1,upstream))
+	  wfactor(m)=(watelev_sec(j1,res_index(upstream))-y_sec(m,j1,res_index(upstream)))/(watelev_sec(j1,res_index(upstream))-minelev_sec(j1,res_index(upstream)))
 	else
 !	  dummy5=0.
 	  wfactor(m)=0.

@@ -518,12 +518,12 @@ subroutine allocate_reservoir()
 	      sedoutflow_g(366*nt,subasin,n_sed_class), &
 
 	      damelev_mean(366*nt,subasin), &
-	      x_minelev(nxsection_res,subasin), &
-	      minelev_sec(nxsection_res,subasin), &
-	      bedslope_sec(nxsection_res,subasin), &
-	      area_sec(nxsection_res,subasin), &
-	      resarea_sec(nxsection_res,subasin), &
-	      resvol_sec(nxsection_res,subasin), &
+!A	      x_minelev(nxsection_res,subasin), &
+!A	      minelev_sec(nxsection_res,subasin), &
+!A	      bedslope_sec(nxsection_res,subasin), &
+!A	      area_sec(nxsection_res,subasin), &
+!A	      resarea_sec(nxsection_res,subasin), &
+!A	      resvol_sec(nxsection_res,subasin), &
 	      
           resvol(subasin), &
             

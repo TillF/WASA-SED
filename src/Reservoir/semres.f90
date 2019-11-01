@@ -963,7 +963,7 @@ end if
 	  ENDDO
 !write(*,*)dummy4
 
-      dummy3=(minelev_sec(pt_long(res_index(upstream)),upstream)-minelev_sec(pt_long0(res_index(upstream))+1,upstream))/dummy4
+      dummy3=(minelev_sec(pt_long(res_index(upstream)),res_index(upstream))-minelev_sec(pt_long0(res_index(upstream))+1,res_index(upstream)))/dummy4
 !write(*,*)cumlength_sec(pt_long(upstream),upstream),cumlength_sec(pt_long0(upstream)+1,upstream),dummy4,dummy3 !(cumlength_sec(pt_long(upstream),upstream)-cumlength_sec(pt_long0(upstream)+1,upstream)),dist_sec(pt_long0(upstream),upstream)
       IF (dummy3 > slope_long(res_index(upstream))) THEN   !A
 	    pt_long(res_index(upstream))=max(pt_long(res_index(upstream))-1,42)		!the section 42 of the Barasona reservoir was assumed to be the upstream limit (variable pt_long_min(upstream) should be read in the file sed.dat
@@ -1104,10 +1104,10 @@ end if
 
 !Ge erosion height using a normalized distance along the wetted perimeter
       DO m=1,npoints(j,upstream)
-	    if(x_sec(m,j,res_index(upstream))>x_sec(p1,j,res_index(upstream)) .and. x_sec(m,j,res_index(upstream))<=x_minelev(j,upstream)) then
-		  dummy5=(x_sec(m,j,res_index(upstream))-x_sec(p1,j,res_index(upstream)))/(x_minelev(j,upstream)-x_sec(p1,j,res_index(upstream)))
-		else if(x_sec(m,j,res_index(upstream))<x_sec(p2,j,res_index(upstream)) .and. x_sec(m,j,res_index(upstream))>x_minelev(j,upstream)) then
-		  dummy5=(x_sec(p2,j,res_index(upstream))-x_sec(m,j,res_index(upstream)))/(x_sec(p2,j,res_index(upstream))-x_minelev(j,upstream))
+	    if(x_sec(m,j,res_index(upstream))>x_sec(p1,j,res_index(upstream)) .and. x_sec(m,j,res_index(upstream))<=x_minelev(j,res_index(upstream))) then
+		  dummy5=(x_sec(m,j,res_index(upstream))-x_sec(p1,j,res_index(upstream)))/(x_minelev(j,res_index(upstream))-x_sec(p1,j,res_index(upstream)))
+		else if(x_sec(m,j,res_index(upstream))<x_sec(p2,j,res_index(upstream)) .and. x_sec(m,j,res_index(upstream))>x_minelev(j,res_index(upstream))) then
+		  dummy5=(x_sec(p2,j,res_index(upstream))-x_sec(m,j,res_index(upstream)))/(x_sec(p2,j,res_index(upstream))-x_minelev(j,res_index(upstream)))
 		else
 		  dummy5=.0
 		endif
@@ -1169,7 +1169,7 @@ end if
 	  ENDDO
 
 	  DO m=1,npoints(j,upstream)
-	    IF (area_sec(j,upstream) /= 0.) THEN
+	    IF (area_sec(j,res_index(upstream)) /= 0.) THEN
 !		  weightfac_toplay(m,j,upstream)=partarea_toplay(m,j,upstream)/area_sec(j,upstream)
 	    ELSE
 !		  weightfac_toplay(m,j,upstream)=0.
@@ -1186,7 +1186,7 @@ end if
 
 
     DO j=1,nbrsec(upstream)
-      area_toplay(j,res_index(upstream))=area_sec(j,upstream)
+      area_toplay(j,res_index(upstream))=area_sec(j,res_index(upstream))
 	ENDDO
 
 ! Active layer volume (m3)
@@ -1231,11 +1231,11 @@ end if
       if (j /= nbrsec(upstream)) then
         discharge(j)=(discharge_sec(j,res_index(upstream))+discharge_sec(j+1,res_index(upstream)))/2.
         topwidth(j)=(topwidth_sec(j,res_index(upstream))+topwidth_sec(j+1,res_index(upstream)))/2.
-		area_mean(j)=(area_sec(j,upstream)+area_sec(j+1,upstream))/2.
+		area_mean(j)=(area_sec(j,res_index(upstream))+area_sec(j+1,res_index(upstream)))/2.
       else
         discharge(j)=discharge_sec(j,res_index(upstream))
         topwidth(j)=topwidth_sec(j,res_index(upstream))
-		area_mean(j)=area_sec(j,upstream)
+		area_mean(j)=area_sec(j,res_index(upstream))
       endif
     enddo
 
@@ -1824,15 +1824,15 @@ end if
 
 ! Minimum elevation for each cross_section (m)
      j=nbrsec(upstream)
-     dummy5=minelev_sec(j,upstream)
-	 minelev_sec(j,upstream)=y_sec(1,j,res_index(upstream))
+     dummy5=minelev_sec(j,res_index(upstream))
+	 minelev_sec(j,res_index(upstream))=y_sec(1,j,res_index(upstream))
 	 npt=npoints(j,upstream)
 	 DO m=2,npt
-	   IF (minelev_sec(j,upstream) > y_sec(m,j,res_index(upstream))) THEN
-		 minelev_sec(j,upstream)=y_sec(m,j,res_index(upstream))
+	   IF (minelev_sec(j,res_index(upstream)) > y_sec(m,j,res_index(upstream))) THEN
+		 minelev_sec(j,res_index(upstream))=y_sec(m,j,res_index(upstream))
 	   END IF
 	 END DO
-	 dummy4=minelev_sec(j,upstream)-dummy5
+	 dummy4=minelev_sec(j,res_index(upstream))-dummy5
 	 dayminlevel(step,upstream)=min(dayminlevel(step,upstream)+dummy4,maxlevel(upstream))
 
 !write(*,'(2I4,3F15.3)')d,p,dummy4,dummy12,dayminlevel(step,upstream)
@@ -1940,7 +1940,7 @@ end if
       DO j=1,nbrsec(upstream)
         WRITE(11,'(5I6,4F15.3,E15.3E2,3F15.6)')id_subbas_extern(upstream),t,d,hour,id_sec_extern(j,upstream),  &
 			depth_sec(j,res_index(upstream)),watelev_sec(j,res_index(upstream)),  &
-			area_sec(j,upstream),topwidth_sec(j,res_index(upstream)),  &
+			area_sec(j,res_index(upstream)),topwidth_sec(j,res_index(upstream)),  &
 			energslope_sec(j,res_index(upstream)),hydrad_sec(j,res_index(upstream)),  &
 			meanvel_sec(j,res_index(upstream)),discharge_sec(j,res_index(upstream))
 	  END DO
@@ -1970,7 +1970,7 @@ end if
 		STATUS='old',POSITION='append')
        write(fmtstr,'(a,i0,a)')'(5I6,',nbrsec1,'F15.6)'		!generate format string
 	   WRITE(11,fmtstr)id_subbas_extern(upstream),t,d,hour,nbrsec1, &
-			(minelev_sec(j,upstream),j=1,nbrsec1)
+			(minelev_sec(j,res_index(upstream)),j=1,nbrsec1)
 	   !WRITE(11,'(5I6,<nbrsec1>F15.6)')id_subbas_extern(upstream),t,d,hour,nbrsec1, &
 		!	(minelev_sec(j,upstream),j=1,nbrsec1)
      CLOSE(11)
@@ -1980,13 +1980,13 @@ end if
       DO j=1,nbrsec(upstream)
 	  	daydepth_sec(step,j,res_index(upstream))=depth_sec(j,res_index(upstream))
 	  	daywatelev_sec(step,j,res_index(upstream))=watelev_sec(j,res_index(upstream))
-	  	dayarea_sec(step,j,res_index(upstream))=area_sec(j,upstream)
+	  	dayarea_sec(step,j,res_index(upstream))=area_sec(j,res_index(upstream))
 	  	daytopwidth_sec(step,j,res_index(upstream))=topwidth_sec(j,res_index(upstream))
 	  	dayenergslope_sec(step,j,res_index(upstream))=energslope_sec(j,res_index(upstream))
 	  	dayhydrad_sec(step,j,res_index(upstream))=hydrad_sec(j,res_index(upstream))
 	  	daymeanvel_sec(step,j,res_index(upstream))=meanvel_sec(j,res_index(upstream))
 	  	daydischarge_sec(step,j,res_index(upstream))=discharge_sec(j,res_index(upstream))
-		dayminelev_sec(step,j,res_index(upstream))=minelev_sec(j,upstream)
+		dayminelev_sec(step,j,res_index(upstream))=minelev_sec(j,res_index(upstream))
 		DO m=1,npoints(j,upstream)
 		  dayy_sec(step,m,j,res_index(upstream))=y_sec(m,j,res_index(upstream))
 		ENDDO
