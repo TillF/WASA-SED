@@ -343,14 +343,13 @@ storcap(:)=0.
 	      !sed_bottom(366*nt,n_reservoir), &
 	      !sed_qlateral(n_reservoir,n_sed_class), &
 	      !sed_inflow(366*nt,n_reservoir), &
-	      !sed_outflow(366*nt,n_reservoir), &
-	    
+	      !sed_outflow(366*nt,n_reservoir), &    
 	      !sedimentation(366*nt,n_reservoir), &
-	      !cum_sedimentation(n_reservoir), &
-       !
-	      !res_sediment_out(n_reservoir,n_sed_class), &
-	      !frsediment_in(n_reservoir,n_sed_class), &
-	      !frsediment_out(n_reservoir,n_sed_class), &
+     
+	      !cum_sedimentation(n_reservoir), &      
+    res_sediment_out(n_reservoir,n_sed_class), &
+    frsediment_in(n_reservoir,n_sed_class), &
+    frsediment_out(n_reservoir,n_sed_class), &
 	      !dry_dens(n_reservoir), &
 	      !factor_actlay(n_reservoir), &
 	      !sed_flag(n_reservoir), &

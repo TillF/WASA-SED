@@ -71,7 +71,7 @@ if (res_qout(step,upstream)/=0.) then
 ! affluent grain size distribution (-)
   dummy=0.
   DO g=1,n_sed_class
-    dummy=dummy+frsediment_in(upstream,g)
+    dummy=dummy+frsediment_in(res_index(upstream),g)
     cumfrsed_in(g)=dummy
 !write(*,*)g,cumfrsed_in(g)
   enddo
@@ -111,11 +111,11 @@ if (res_qout(step,upstream)/=0.) then
     trap_eff=1.-frac_finer
 	if (frac_finer == 1.) then
       DO g=1,n_sed_class
-	    frsediment_out(upstream,g)=frsediment_in(upstream,g)
+	    frsediment_out(res_index(upstream),g)=frsediment_in(res_index(upstream),g)
 	  enddo
 	else
       DO g=1,n_sed_class
-	    frsediment_out(upstream,g)=0.
+	    frsediment_out(res_index(upstream),g)=0.
 	  enddo
     endif
   else
@@ -219,8 +219,8 @@ if (res_qout(step,upstream)/=0.) then
 		  endif
 		enddo
 	  endif
-	  if (g==1) frsediment_out(upstream,g)=cumfrsed_out(g)
-	  if (g>1) frsediment_out(upstream,g)=cumfrsed_out(g)-cumfrsed_out(g-1)
+	  if (g==1) frsediment_out(res_index(upstream),g)=cumfrsed_out(g)
+	  if (g>1) frsediment_out(res_index(upstream),g)=cumfrsed_out(g)-cumfrsed_out(g-1)
 
 !write(*,'(I3,2F12.8)')g,frsediment_out(upstream,g),cumfrsed_out(g)
 	enddo

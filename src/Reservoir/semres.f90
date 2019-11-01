@@ -793,11 +793,11 @@ end if
 
   if (sed_inflow(step,upstream) > 0.) then
 	do g=1,n_sed_class
-	  frsediment_in(upstream,g)=(sediment_in(upstream,g)+sed_qlateral(upstream,g))/sed_inflow(step,upstream)
+	  frsediment_in(res_index(upstream),g)=(sediment_in(upstream,g)+sed_qlateral(upstream,g))/sed_inflow(step,upstream)
 	enddo
   else
 	do g=1,n_sed_class
-	  frsediment_in(upstream,g)=0.
+	  frsediment_in(res_index(upstream),g)=0.
 	enddo
   endif
 
@@ -859,7 +859,7 @@ end if
       cum_sedimentation(upstream)=cum_sedimentation(upstream)+sedimentation(step,upstream)
 	  decstorcap(step,upstream)=0.
 	  do g=1,n_sed_class
-		frsediment_out(upstream,g)=0.
+		frsediment_out(res_index(upstream),g)=0.
 	  enddo
 	ENDIF
 
@@ -871,7 +871,7 @@ end if
 ! cross section provided by size distribution of sediment input
 	do g=1,n_sed_class
 	  if (sed_inflow(step,upstream) > 0.) then
-	    frac_toplay(g,1,res_index(upstream))=frsediment_in(upstream,g)
+	    frac_toplay(g,1,res_index(upstream))=frsediment_in(res_index(upstream),g)
 	  else
 	    frac_toplay(g,1,res_index(upstream))=0.
 	  endif
@@ -1682,7 +1682,7 @@ end if
 ! Calculation of total sediment release (ton)
 	j=nbrsec(upstream)
     DO g=1,n_sed_class
-	  frsediment_out(upstream,g)=frac_toplay(g,j,res_index(upstream))
+	  frsediment_out(res_index(upstream),g)=frac_toplay(g,j,res_index(upstream))
 	enddo
 
 
@@ -1997,7 +1997,7 @@ end if
 
 ! Calculation of fractional sediment transport to the next dowstream sub-basin (ton/timestep)
   DO g=1,n_sed_class
-    res_sediment_out(upstream,g)=frsediment_out(upstream,g)*sed_outflow(step,upstream)
+    res_sediment_out(res_index(upstream),g)=frsediment_out(res_index(upstream),g)*sed_outflow(step,upstream)
   enddo
 
 
@@ -2017,7 +2017,7 @@ end if
    OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_sedcomposition.out',STATUS='old',POSITION='append')
     write(fmtstr,'(a,i0,a)')'(5I6,',n_sed_class,'F15.3)'		!generate format string
 	WRITE(11,fmtstr)id_subbas_extern(upstream),t,d,hour,n_sed_class, &
-		(frsediment_out(upstream,g),g=1,n_sed_class)
+		(frsediment_out(res_index(upstream),g),g=1,n_sed_class)
 	!WRITE(11,'(5I6,<n_sed_class>F15.3)')id_subbas_extern(upstream),t,d,hour,n_sed_class, &
 	!	(frsediment_out(upstream,g),g=1,n_sed_class)
    CLOSE(11)
@@ -2025,7 +2025,7 @@ end if
   ELSE
    daycumsed(step,res_index(upstream))=cum_sedimentation(upstream)
    DO g=1,n_sed_class
-     dayfrsediment_out(step,res_index(upstream),g)=frsediment_out(upstream,g)
+     dayfrsediment_out(step,res_index(upstream),g)=frsediment_out(res_index(upstream),g)
    ENDDO
   ENDIF
 

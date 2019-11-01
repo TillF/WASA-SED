@@ -397,7 +397,7 @@ DO h=1,nt
            r_qin(2,downstream)=add_ifnot_nodata(r_qin(2,downstream), res_qout(step,upstream))
 	       if(dosediment) then
                 do k=1,n_sed_class
-	                sediment_in(downstream,k)=add_ifnot_nodata(sediment_in(downstream,k), res_sediment_out(upstream,k))
+	                sediment_in(downstream,k)=add_ifnot_nodata(sediment_in(downstream,k), res_sediment_out(res_index(upstream),k))
                 enddo
 	       endif
          END IF
@@ -419,7 +419,7 @@ DO h=1,nt
            qlateral(step,reservoir_down(upstream))=add_ifnot_nodata(qlateral(step,reservoir_down(upstream)), res_qout(step,upstream))
 	       if(dosediment) then
 	         do k=1,n_sed_class
-	           sed_qlateral(reservoir_down(upstream),k) = add_ifnot_nodata(sed_qlateral(reservoir_down(upstream),k), res_sediment_out(upstream,k))
+	           sed_qlateral(reservoir_down(upstream),k) = add_ifnot_nodata(sed_qlateral(reservoir_down(upstream),k), res_sediment_out(res_index(upstream),k))
 	         enddo
 	       endif
 		 ELSE
@@ -428,7 +428,7 @@ DO h=1,nt
              r_qin(2,downstream) = add_ifnot_nodata(r_qin(2,downstream), res_qout(step,upstream)) !George
 	         if(dosediment.and.river_transport.eq.2) then !George
 	           do k=1,n_sed_class !George
-		         sediment_in(downstream, k) = add_ifnot_nodata(sediment_in(downstream,k), res_sediment_out(upstream,k)) !George
+		         sediment_in(downstream, k) = add_ifnot_nodata(sediment_in(downstream,k), res_sediment_out(res_index(upstream),k)) !George
 	           enddo !George
 	         endif !George
            END IF !George
@@ -478,7 +478,7 @@ DO h=1,nt
 	  IF (doreservoir) THEN
        sedinflow_g(step,res_index(upstream),k) = add_ifnot_nodata(sediment_in(upstream,k), sed_qlateral(upstream,k))
        IF (storcap(upstream) > 0. .and. t >= damyear(upstream)) THEN
-         sedoutflow_g(step,res_index(upstream),k)=res_sediment_out(upstream,k)
+         sedoutflow_g(step,res_index(upstream),k)=res_sediment_out(res_index(upstream),k)
 	   ELSE
          sedoutflow_g(step,res_index(upstream),k)=sedinflow_g(step,res_index(upstream),k)
 	   ENDIF

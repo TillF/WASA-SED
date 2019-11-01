@@ -501,9 +501,11 @@ subroutine allocate_reservoir()
     !	  min_conc(subasin), &
     !	  sed_conc0(subasin), &
     !	  wet_dens(subasin), &
-	      res_sediment_out(subasin,n_sed_class), &
-	      frsediment_in(subasin,n_sed_class), &
-	      frsediment_out(subasin,n_sed_class), &
+            
+!A	      res_sediment_out(subasin,n_sed_class), &
+!A	      frsediment_in(subasin,n_sed_class), &
+!A	      frsediment_out(subasin,n_sed_class), &
+            
 	      dry_dens(subasin), &
 	      factor_actlay(subasin), &
 	      sed_flag(subasin), &
