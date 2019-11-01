@@ -88,7 +88,7 @@ IF (reservoir_balance == 1) THEN
 ENDIF
 
 damelev=(damelevact(upstream)+damelev0(step,upstream))/2.
-damelev_mean(step,upstream)=damelev
+damelev_mean(step,res_index(upstream))=damelev
 !write(*,*)damelevact(upstream),damelev0(step,upstream),damelev_mean(step,upstream)
 
 ! Minimum elevation for each cross_section (m)

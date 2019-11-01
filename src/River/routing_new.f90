@@ -476,11 +476,11 @@ DO h=1,nt
    if (dosediment) then
 	 do k=1,n_sed_class !George
 	  IF (doreservoir) THEN
-       sedinflow_g(step,upstream,k) = add_ifnot_nodata(sediment_in(upstream,k), sed_qlateral(upstream,k))
+       sedinflow_g(step,res_index(upstream),k) = add_ifnot_nodata(sediment_in(upstream,k), sed_qlateral(upstream,k))
        IF (storcap(upstream) > 0. .and. t >= damyear(upstream)) THEN
-         sedoutflow_g(step,upstream,k)=res_sediment_out(upstream,k)
+         sedoutflow_g(step,res_index(upstream),k)=res_sediment_out(upstream,k)
 	   ELSE
-         sedoutflow_g(step,upstream,k)=sedinflow_g(step,upstream,k)
+         sedoutflow_g(step,res_index(upstream),k)=sedinflow_g(step,res_index(upstream),k)
 	   ENDIF
 	  ENDIF
 	 enddo

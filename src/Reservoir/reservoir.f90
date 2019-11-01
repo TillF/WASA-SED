@@ -355,10 +355,10 @@ storcap(:)=0.
 	      !factor_actlay(n_reservoir), &
 	      !sed_flag(n_reservoir), &
 	      !sed_routing_flag(n_reservoir), &
-       !
-	      !sedinflow_g(366*nt,n_reservoir,n_sed_class), &
-	      !sedoutflow_g(366*nt,n_reservoir,n_sed_class), &
-	      !damelev_mean(366*nt,n_reservoir), &
+    
+    sedinflow_g(366*nt,n_reservoir,n_sed_class), &
+    sedoutflow_g(366*nt,n_reservoir,n_sed_class), &
+    damelev_mean(366*nt,n_reservoir), &
      
     x_minelev(nxsection_res,n_reservoir), &
     minelev_sec(nxsection_res,n_reservoir), &

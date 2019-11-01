@@ -514,10 +514,11 @@ subroutine allocate_reservoir()
     !	  param_b(10,subasin), &
     !	  nbsizedist(subasin), &
     !	  Q_refer(10,subasin), &
-	      sedinflow_g(366*nt,subasin,n_sed_class), &
-	      sedoutflow_g(366*nt,subasin,n_sed_class), &
+            
+!A	      sedinflow_g(366*nt,subasin,n_sed_class), &
+!A	      sedoutflow_g(366*nt,subasin,n_sed_class), &
 
-	      damelev_mean(366*nt,subasin), &
+!A	      damelev_mean(366*nt,subasin), &
 !A	      x_minelev(nxsection_res,subasin), &
 !A	      minelev_sec(nxsection_res,subasin), &
 !A	      bedslope_sec(nxsection_res,subasin), &
