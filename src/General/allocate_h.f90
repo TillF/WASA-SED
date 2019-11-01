@@ -524,11 +524,13 @@ subroutine allocate_reservoir()
 	      area_sec(nxsection_res,subasin), &
 	      resarea_sec(nxsection_res,subasin), &
 	      resvol_sec(nxsection_res,subasin), &
-	      resvol(subasin), &
-	      topwidth_sec(nxsection_res,subasin), &
-	      weight_sec(nxsection_res,subasin), &
-	      discharge_sec(nxsection_res,subasin), &
-	      depth_sec(nxsection_res,subasin), &
+	      
+          resvol(subasin), &
+            
+!A	      topwidth_sec(nxsection_res,subasin), &
+!A	      weight_sec(nxsection_res,subasin), &
+!A	      discharge_sec(nxsection_res,subasin), &
+!A	      depth_sec(nxsection_res,subasin), &
 !A	      watelev_sec(nxsection_res,subasin), &
 !A	      wetper_sec(nxsection_res,subasin), &
 !A	      hydrad_sec(nxsection_res,subasin), &
@@ -563,16 +565,16 @@ subroutine allocate_reservoir()
 !A	      area_toplay(nxsection_res,subasin), &
 !A	      vol_actlay(nxsection_res,subasin), &
 !A	      vol_toplay(nxsection_res,subasin), &
+            
 	      frsedavailab(n_sed_class,nxsection_res), &
 	      frerosion(n_sed_class,nxsection_res), &
 	      frdeposition(n_sed_class,nxsection_res), &
-	      frretention(n_sed_class,nxsection_res), &
-            
+	      frretention(n_sed_class,nxsection_res), &           
     !	  frsuspension(n_sed_class,nxsection_res), &
     !	  frbed_discharge(n_sed_class,nxsection_res), &
-    !	  frsusp_discharge(n_sed_class,nxsection_res), &
-            
+    !	  frsusp_discharge(n_sed_class,nxsection_res), &           
 	      frtotal_discharge(n_sed_class,nxsection_res), &
+            
 !A	      erosion(nxsection_res,subasin), &
 !A	      deposition(nxsection_res,subasin), &
 !A	      retention(nxsection_res,subasin), &
@@ -580,10 +582,10 @@ subroutine allocate_reservoir()
     !	  suspension(nxsection_res,subasin), &
             
 !A	      totalload(nxsection_res,subasin), &
+            
 	      bed_frtransp(n_sed_class,nxsection_res), &
 	      susp_frtransp(n_sed_class,nxsection_res), &
-	      fr_capacity(n_sed_class,nxsection_res), &
-            
+	      fr_capacity(n_sed_class,nxsection_res), &            
     !	  dheight_sed(nxsection_res,subasin), &
 	      
 !A        darea_sed(nxsection_res,subasin), &
@@ -591,9 +593,12 @@ subroutine allocate_reservoir()
 !A	      frvol_actlay(n_sed_class,nxsection_res,subasin), &
 !A	      totvol_actlay(nxsection_res,subasin), &
 !A	      conc(nxsection_res,subasin), &
+            
 	      frconc(n_sed_class,nxsection_res), &
+            
 !A	      area_sedim(nxsection_res,subasin), &
 !A	      vol_sedim(nxsection_res,subasin), &
+            
 	      volbed0(subasin), &	      
           length_plunge(subasin), &
             
@@ -604,7 +609,6 @@ subroutine allocate_reservoir()
 !A	      frsedinflow(366*nt,subasin,n_sed_class), &
 !A	      frvol_actlay0(n_sed_class,nxsection_res,subasin), &
 !A	      totvol_actlay0(nxsection_res,subasin), &
-
 !A	      x_sec(npointsxsect,nxsection_res,subasin), &
 !A	      y_sec(npointsxsect,nxsection_res,subasin), &
 !A	      y_actlay(npointsxsect,nxsection_res,subasin), &
@@ -614,7 +618,8 @@ subroutine allocate_reservoir()
 !A	      frac_comlay(n_sed_class,nxsection_res,subasin), &
 !A	      frac_susp(n_sed_class,nxsection_res,subasin), &
 !A	      partarea_actlay(npointsxsect,nxsection_res,subasin), &
-!A	      partarea_toplay(npointsxsect,nxsection_res,subasin), &        
+!A	      partarea_toplay(npointsxsect,nxsection_res,subasin), & 
+            
     !	  weightfac_actlay(npointsxsect,nxsection_res,subasin), &
     !	  weightfac_toplay(npointsxsect,nxsection_res,subasin), &
 	      
@@ -629,14 +634,11 @@ subroutine allocate_reservoir()
 !A	      sideslope_pt1(nxsection_res,subasin), &
 !A	      sideslope_pt2(nxsection_res,subasin), &
 !A	      slope_long(subasin), &
-
 !A	      daydamelevact(366*nt,subasin), &
 !A	      daydamareaact(366*nt,subasin), &
 !A	      dayelev_bat(366*nt,nxsection_res,subasin), &
 !A	      dayarea_bat(366*nt,nxsection_res,subasin), &
 !A        dayvol_bat(366*nt,nxsection_res,subasin), &   !Anne: moved to reservoir.h & changed subasin to n_reservoir
-
-
 
 	     STAT = istate)
 

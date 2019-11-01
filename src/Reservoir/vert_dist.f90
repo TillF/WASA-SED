@@ -50,7 +50,7 @@ setvel(g)=SQRT((13.95*visc/diam(g))**2.+1.09*  &
 !if (upper_limit(g) <= .0025) setvel(g)=0.00000456
 if (upper_limit(g) <= .0040) setvel(g)=0.0000117
 
-if (discharge_sec(j,upstream) /= 0.) then
+if (discharge_sec(j,res_index(upstream)) /= 0.) then
 
 ! shear velocity (m/s)
   shear_vel=sqrt(9.807*hydrad_sec(j,res_index(upstream))*energslope_sec(j,res_index(upstream)))

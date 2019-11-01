@@ -367,10 +367,11 @@ storcap(:)=0.
 	      !resarea_sec(nxsection_res,n_reservoir), &
 	      !resvol_sec(nxsection_res,n_reservoir), &
 	      !resvol(n_reservoir), &
-	      !topwidth_sec(nxsection_res,n_reservoir), &
-	      !weight_sec(nxsection_res,n_reservoir), &
-	      !discharge_sec(nxsection_res,n_reservoir), &
-	      !depth_sec(nxsection_res,n_reservoir), &
+    topwidth_sec(nxsection_res,n_reservoir), &
+    weight_sec(nxsection_res,n_reservoir), &
+    discharge_sec(nxsection_res,n_reservoir), &
+    depth_sec(nxsection_res,n_reservoir), &
+     
     watelev_sec(nxsection_res,n_reservoir), &
     wetper_sec(nxsection_res,n_reservoir), &
     hydrad_sec(nxsection_res,n_reservoir), &

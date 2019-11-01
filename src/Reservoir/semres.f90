@@ -1229,12 +1229,12 @@ end if
 ! Calculation of hydraulic parameter at the outlet of sub-reaches represented by each cross section
     do j=1,nbrsec(upstream)
       if (j /= nbrsec(upstream)) then
-        discharge(j)=(discharge_sec(j,upstream)+discharge_sec(j+1,upstream))/2.
-        topwidth(j)=(topwidth_sec(j,upstream)+topwidth_sec(j+1,upstream))/2.
+        discharge(j)=(discharge_sec(j,res_index(upstream))+discharge_sec(j+1,res_index(upstream)))/2.
+        topwidth(j)=(topwidth_sec(j,res_index(upstream))+topwidth_sec(j+1,res_index(upstream)))/2.
 		area_mean(j)=(area_sec(j,upstream)+area_sec(j+1,upstream))/2.
       else
-        discharge(j)=discharge_sec(j,upstream)
-        topwidth(j)=topwidth_sec(j,upstream)
+        discharge(j)=discharge_sec(j,res_index(upstream))
+        topwidth(j)=topwidth_sec(j,res_index(upstream))
 		area_mean(j)=area_sec(j,upstream)
       endif
     enddo
@@ -1939,10 +1939,10 @@ end if
 		  POSITION='append')
       DO j=1,nbrsec(upstream)
         WRITE(11,'(5I6,4F15.3,E15.3E2,3F15.6)')id_subbas_extern(upstream),t,d,hour,id_sec_extern(j,upstream),  &
-			depth_sec(j,upstream),watelev_sec(j,res_index(upstream)),  &
-			area_sec(j,upstream),topwidth_sec(j,upstream),  &
+			depth_sec(j,res_index(upstream)),watelev_sec(j,res_index(upstream)),  &
+			area_sec(j,upstream),topwidth_sec(j,res_index(upstream)),  &
 			energslope_sec(j,res_index(upstream)),hydrad_sec(j,res_index(upstream)),  &
-			meanvel_sec(j,res_index(upstream)),discharge_sec(j,upstream)
+			meanvel_sec(j,res_index(upstream)),discharge_sec(j,res_index(upstream))
 	  END DO
 	 ENDIF
      CLOSE(11)
@@ -1978,14 +1978,14 @@ end if
 
 	ELSE
       DO j=1,nbrsec(upstream)
-	  	daydepth_sec(step,j,res_index(upstream))=depth_sec(j,upstream)
+	  	daydepth_sec(step,j,res_index(upstream))=depth_sec(j,res_index(upstream))
 	  	daywatelev_sec(step,j,res_index(upstream))=watelev_sec(j,res_index(upstream))
 	  	dayarea_sec(step,j,res_index(upstream))=area_sec(j,upstream)
-	  	daytopwidth_sec(step,j,res_index(upstream))=topwidth_sec(j,upstream)
+	  	daytopwidth_sec(step,j,res_index(upstream))=topwidth_sec(j,res_index(upstream))
 	  	dayenergslope_sec(step,j,res_index(upstream))=energslope_sec(j,res_index(upstream))
 	  	dayhydrad_sec(step,j,res_index(upstream))=hydrad_sec(j,res_index(upstream))
 	  	daymeanvel_sec(step,j,res_index(upstream))=meanvel_sec(j,res_index(upstream))
-	  	daydischarge_sec(step,j,res_index(upstream))=discharge_sec(j,upstream)
+	  	daydischarge_sec(step,j,res_index(upstream))=discharge_sec(j,res_index(upstream))
 		dayminelev_sec(step,j,res_index(upstream))=minelev_sec(j,upstream)
 		DO m=1,npoints(j,upstream)
 		  dayy_sec(step,m,j,res_index(upstream))=y_sec(m,j,res_index(upstream))
