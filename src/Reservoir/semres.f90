@@ -987,7 +987,7 @@ end if
 	  ENDDO
 
 !	  elev=maxelev_sec(j,upstream)
-	  elev=watelev_sec(j,upstream)
+	  elev=watelev_sec(j,res_index(upstream))
 !	  elev=min(minelev_sec(j,upstream)+(depth_sec(j,upstream)*1.5),maxelev_sec(j,upstream))
 !	  elev=watelev_sec(j,upstream)+((maxelev_sec(j,upstream)-watelev_sec(j,upstream))/20.)
 !if (id_sec_extern(j,upstream)==43) elev=max(elev,y_sec(11,j,upstream))
@@ -1007,7 +1007,7 @@ end if
 
 !write(*,'(3I6,6F10.3)')id_sec_extern(j,upstream),p1,p2,elev,watelev_sec(j,upstream)
 
-	  if (p1/=-999 .and. y_sec(p1,j,res_index(upstream))>watelev_sec(j,upstream)) then !main channel was defined for each cross section
+	  if (p1/=-999 .and. y_sec(p1,j,res_index(upstream))>watelev_sec(j,res_index(upstream))) then !main channel was defined for each cross section
         x_p1=x_sec(p1,j,res_index(upstream))
 	    side_p1=abs(y_sec(p1,j,res_index(upstream))-y_sec(p1+1,j,res_index(upstream)))/abs(x_sec(p1,j,res_index(upstream))-x_sec(p1+1,j,res_index(upstream)))
 	    if (side_p1>sideslope_pt1(j,res_index(upstream))) then      !A changed upstream to res_index(upstream)
@@ -1024,7 +1024,7 @@ end if
 		  endif
 	    ENDDO
 	  endif
-	  if (p2/=-999 .and. y_sec(p2,j,res_index(upstream))>watelev_sec(j,upstream)) then !main channel was defined for each cross section
+	  if (p2/=-999 .and. y_sec(p2,j,res_index(upstream))>watelev_sec(j,res_index(upstream))) then !main channel was defined for each cross section
         x_p2=x_sec(p2,j,res_index(upstream))
 	    side_p2=abs(y_sec(p2,j,res_index(upstream))-y_sec(p2-1,j,res_index(upstream)))/abs(x_sec(p2,j,res_index(upstream))-x_sec(p2-1,j,res_index(upstream)))
 	    if (side_p2>sideslope_pt2(j,res_index(upstream))) then              !A changed upstream to res_index(upstream)
@@ -1939,10 +1939,10 @@ end if
 		  POSITION='append')
       DO j=1,nbrsec(upstream)
         WRITE(11,'(5I6,4F15.3,E15.3E2,3F15.6)')id_subbas_extern(upstream),t,d,hour,id_sec_extern(j,upstream),  &
-			depth_sec(j,upstream),watelev_sec(j,upstream),  &
+			depth_sec(j,upstream),watelev_sec(j,res_index(upstream)),  &
 			area_sec(j,upstream),topwidth_sec(j,upstream),  &
-			energslope_sec(j,upstream),hydrad_sec(j,upstream),  &
-			meanvel_sec(j,upstream),discharge_sec(j,upstream)
+			energslope_sec(j,res_index(upstream)),hydrad_sec(j,res_index(upstream)),  &
+			meanvel_sec(j,res_index(upstream)),discharge_sec(j,upstream)
 	  END DO
 	 ENDIF
      CLOSE(11)
@@ -1979,12 +1979,12 @@ end if
 	ELSE
       DO j=1,nbrsec(upstream)
 	  	daydepth_sec(step,j,res_index(upstream))=depth_sec(j,upstream)
-	  	daywatelev_sec(step,j,res_index(upstream))=watelev_sec(j,upstream)
+	  	daywatelev_sec(step,j,res_index(upstream))=watelev_sec(j,res_index(upstream))
 	  	dayarea_sec(step,j,res_index(upstream))=area_sec(j,upstream)
 	  	daytopwidth_sec(step,j,res_index(upstream))=topwidth_sec(j,upstream)
-	  	dayenergslope_sec(step,j,res_index(upstream))=energslope_sec(j,upstream)
-	  	dayhydrad_sec(step,j,res_index(upstream))=hydrad_sec(j,upstream)
-	  	daymeanvel_sec(step,j,res_index(upstream))=meanvel_sec(j,upstream)
+	  	dayenergslope_sec(step,j,res_index(upstream))=energslope_sec(j,res_index(upstream))
+	  	dayhydrad_sec(step,j,res_index(upstream))=hydrad_sec(j,res_index(upstream))
+	  	daymeanvel_sec(step,j,res_index(upstream))=meanvel_sec(j,res_index(upstream))
 	  	daydischarge_sec(step,j,res_index(upstream))=discharge_sec(j,upstream)
 		dayminelev_sec(step,j,res_index(upstream))=minelev_sec(j,upstream)
 		DO m=1,npoints(j,upstream)

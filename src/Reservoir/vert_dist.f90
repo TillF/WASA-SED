@@ -53,7 +53,7 @@ if (upper_limit(g) <= .0040) setvel(g)=0.0000117
 if (discharge_sec(j,upstream) /= 0.) then
 
 ! shear velocity (m/s)
-  shear_vel=sqrt(9.807*hydrad_sec(j,upstream)*energslope_sec(j,upstream))
+  shear_vel=sqrt(9.807*hydrad_sec(j,res_index(upstream))*energslope_sec(j,res_index(upstream)))
 !  shear_vel=sqrt(9.807*hydrad_sec(j,upstream)*max(energslope_sec(j,upstream),.0001))
 !write(*,'(2I4,8E10.2)')j,g,a,hydrad_sec(j,upstream),energslope_sec(j,upstream),shear_vel
 

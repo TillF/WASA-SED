@@ -44,16 +44,16 @@ DO j=1,nbrsec(upstream)
   bedslope_sec(j,upstream)=0.
   area_sec(j,upstream)=0.
   resarea_sec(j,upstream)=0.
-  hydrad_sec(j,upstream)=0.
-  meanvel_sec(j,upstream)=0.
-  energslope_sec(j,upstream)=0.
+  hydrad_sec(j,res_index(upstream))=0.
+  meanvel_sec(j,res_index(upstream))=0.
+  energslope_sec(j,res_index(upstream))=0.
   topwidth_sec(j,upstream)=0.
   depth_sec(j,upstream)=0.
   discharge_sec(j,upstream)=0.
   weight_sec(j,upstream)=0.
-  wetper_sec(j,upstream)=0.
-  meanvel_sec(j,upstream)=0.
-  energslope_sec(j,upstream)=0.
+  wetper_sec(j,res_index(upstream))=0.
+  meanvel_sec(j,res_index(upstream))=0. 
+  energslope_sec(j,res_index(upstream))=0. 
   dynhead_sec(j,res_index(upstream))=0.
   tothead_sec(j,res_index(upstream))=0.
   headloss_sec(j,res_index(upstream))=0.
@@ -264,7 +264,7 @@ DO j=1,nbrsec(upstream)
   if (j==1) depth_sec(j,upstream)=1.
   if (j/=1) depth_sec(j,upstream)=depth_sec(j-1,upstream)
 
-  watelev_sec(j,upstream)=depth_sec(j,upstream)+ minelev_sec(j,upstream)
+  watelev_sec(j,res_index(upstream))=depth_sec(j,upstream)+ minelev_sec(j,upstream)
 
 ! trial-and-error
   error=1.
@@ -284,62 +284,62 @@ DO j=1,nbrsec(upstream)
 ! hydraulic parameters at the first cross section
       area_sec(j,upstream)=0.
       topwidth_sec(j,upstream)=0.
-      wetper_sec(j,upstream)=0.
+      wetper_sec(j,res_index(upstream))=0.
 
-      IF (watelev_sec(j,upstream) > maxelev_sec(j,res_index(upstream))) THEN
-        watelev_sec(j,upstream)=maxelev_sec(j,res_index(upstream))
+      IF (watelev_sec(j,res_index(upstream)) > maxelev_sec(j,res_index(upstream))) THEN
+        watelev_sec(j,res_index(upstream))=maxelev_sec(j,res_index(upstream))
         depth_sec(j,upstream)=maxdepth_sec(j,res_index(upstream))
       END IF
 
       DO m=2,npt
         TAN=ABS(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/  &
             (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
-        IF (watelev_sec(j,upstream) >= y_sec(m-1,j,res_index(upstream)).AND.  &
-              watelev_sec(j,upstream) >= y_sec(m,j,res_index(upstream))) THEN
+        IF (watelev_sec(j,res_index(upstream)) >= y_sec(m-1,j,res_index(upstream)).AND.  &
+              watelev_sec(j,res_index(upstream)) >= y_sec(m,j,res_index(upstream))) THEN
           area_sec(j,upstream)=area_sec(j,upstream)+  &
               (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
-              (watelev_sec(j,upstream)-  &
+              (watelev_sec(j,res_index(upstream))-  &
               (y_sec(m,j,res_index(upstream))+y_sec(m-1,j,res_index(upstream)))/2.)
           topwidth_sec(j,upstream)=topwidth_sec(j,upstream)+  &
               (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
-          wetper_sec(j,upstream)=wetper_sec(j,upstream)+  &
+          wetper_sec(j,res_index(upstream))=wetper_sec(j,res_index(upstream))+  &
               SQRT((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))**2.  &
               +(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))**2.)
-        ELSE IF (watelev_sec(j,upstream) < y_sec(m-1,j,res_index(upstream))  &
-              .AND.watelev_sec(j,upstream) >= y_sec(m,j,res_index(upstream))) THEN
+        ELSE IF (watelev_sec(j,res_index(upstream)) < y_sec(m-1,j,res_index(upstream))  &
+              .AND.watelev_sec(j,res_index(upstream)) >= y_sec(m,j,res_index(upstream))) THEN
           area_sec(j,upstream)=area_sec(j,upstream)+  &
-              (((watelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))**2.)/ (2.*TAN))
+              (((watelev_sec(j,res_index(upstream))-y_sec(m,j,res_index(upstream)))**2.)/ (2.*TAN))
           topwidth_sec(j,upstream)=topwidth_sec(j,upstream)+  &
               ((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
-              (watelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))/  &
+              (watelev_sec(j,res_index(upstream))-y_sec(m,j,res_index(upstream)))/  &
               (y_sec(m-1,j,res_index(upstream))-y_sec(m,j,res_index(upstream))))
-          wetper_sec(j,upstream)=wetper_sec(j,upstream)+  &
-              SQRT(((watelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))/TAN)  &
-              **2+(watelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))**2.)
-        ELSE IF (watelev_sec(j,upstream) >= y_sec(m-1,j,res_index(upstream))  &
-              .AND.watelev_sec(j,upstream) < y_sec(m,j,res_index(upstream))) THEN
+          wetper_sec(j,res_index(upstream))=wetper_sec(j,res_index(upstream))+  &
+              SQRT(((watelev_sec(j,res_index(upstream))-y_sec(m,j,res_index(upstream)))/TAN)  &
+              **2+(watelev_sec(j,res_index(upstream))-y_sec(m,j,res_index(upstream)))**2.)
+        ELSE IF (watelev_sec(j,res_index(upstream)) >= y_sec(m-1,j,res_index(upstream))  &
+              .AND.watelev_sec(j,res_index(upstream)) < y_sec(m,j,res_index(upstream))) THEN
           area_sec(j,upstream)=area_sec(j,upstream)+  &
-              (((watelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))**2.)/ (2.*TAN))
+              (((watelev_sec(j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))**2.)/ (2.*TAN))
           topwidth_sec(j,upstream)=topwidth_sec(j,upstream)+  &
               ((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
-              (watelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))/  &
+              (watelev_sec(j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/  &
               (y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream))))
-          wetper_sec(j,upstream)=wetper_sec(j,upstream)+  &
-              SQRT(((watelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))/TAN)  &
-              **2+(watelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))**2.)
+          wetper_sec(j,res_index(upstream))=wetper_sec(j,res_index(upstream))+  &
+              SQRT(((watelev_sec(j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/TAN)  &
+              **2+(watelev_sec(j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))**2.)
         END IF
       END DO
 
 
 ! check if there is neither inflow nor outflow at the reservoir
-      hydrad_sec(j,upstream)=area_sec(j,upstream)/ wetper_sec(j,upstream)
+      hydrad_sec(j,res_index(upstream))=area_sec(j,upstream)/ wetper_sec(j,res_index(upstream))
       discharge_calc=(1./(manning_sec(j,upstream)))*  &
-          SQRT(bedslope_sec(j,upstream))*hydrad_sec(j,upstream)**(2./3.)  &
+          SQRT(bedslope_sec(j,upstream))*hydrad_sec(j,res_index(upstream))**(2./3.)  &
           *area_sec(j,upstream)
 
       error=discharge_calc-discharge_sec(j,upstream)
 
-      IF (watelev_sec(j,upstream) == maxelev_sec(j,res_index(upstream)).AND.  &
+      IF (watelev_sec(j,res_index(upstream)) == maxelev_sec(j,res_index(upstream)).AND.  &
             discharge_calc < discharge_sec(j,upstream) .AND. a/=1) THEN
         WRITE(*,*)'ERROR: the water discharge overflows the cross section ',j
         STOP
@@ -347,9 +347,9 @@ DO j=1,nbrsec(upstream)
 
       if (dummy3==1) then
 	    error=0.00001
-        watelev_sec(j,upstream)=minelev_sec(j,upstream)+  &
+        watelev_sec(j,res_index(upstream))=minelev_sec(j,upstream)+  &
               depth_sec(j,upstream)
-		normalelev_sec(j,res_index(upstream))=watelev_sec(j,upstream)
+		normalelev_sec(j,res_index(upstream))=watelev_sec(j,res_index(upstream))
         exit
 	  endif
       IF (ABS(error) > 0.01) THEN
@@ -389,9 +389,9 @@ DO j=1,nbrsec(upstream)
 !		  write(*,*)'hidraulic calculation (step 1) and cross section',j
 		ENDIF
 
-        watelev_sec(j,upstream)=minelev_sec(j,upstream)+  &
+        watelev_sec(j,res_index(upstream))=minelev_sec(j,upstream)+  &
               depth_sec(j,upstream)
-		normalelev_sec(j,res_index(upstream))=watelev_sec(j,upstream)
+		normalelev_sec(j,res_index(upstream))=watelev_sec(j,res_index(upstream))
 		normalarea_sec(j,res_index(upstream))=area_sec(j,upstream)
       END IF
 
@@ -403,7 +403,7 @@ DO j=1,nbrsec(upstream)
     END DO
     IF (resarea_sec(j,upstream)==0.) k=k+1
     IF (resarea_sec(j,upstream)/=0.) then
-      if (watelev_sec(j,upstream)>damelev) k=k+1
+      if (watelev_sec(j,res_index(upstream))>damelev) k=k+1
 	ENDIF
 	normaldepth(j)=depth_sec(j,upstream)
 
@@ -420,7 +420,7 @@ DO j=1,nbrsec(upstream)
 
   npt=npoints(j,upstream)
   crdepth_sec(j,res_index(upstream))=depth_sec(j,upstream)
-  crwatelev_sec(j,res_index(upstream))=watelev_sec(j,upstream)
+  crwatelev_sec(j,res_index(upstream))=watelev_sec(j,res_index(upstream))
 
 ! trial-and-error
   error=1.
@@ -443,7 +443,7 @@ DO j=1,nbrsec(upstream)
       crtopwidth_sec(j,res_index(upstream))=0.
       crwetper_sec(j,res_index(upstream))=0.
 
-      IF (watelev_sec(j,upstream) > maxelev_sec(j,res_index(upstream))) THEN
+      IF (watelev_sec(j,res_index(upstream)) > maxelev_sec(j,res_index(upstream))) THEN
         crwatelev_sec(j,res_index(upstream))=maxelev_sec(j,res_index(upstream))
         crdepth_sec(j,res_index(upstream))=maxdepth_sec(j,res_index(upstream))
       END IF
@@ -586,47 +586,47 @@ DO j=1,nbrsec(upstream)
 
 	  area_sec(j,upstream)=resarea_sec(j,upstream)
       depth_sec(j,upstream)=damelev-minelev_sec(j,upstream)
-	  watelev_sec(j,upstream)=damelev
+	  watelev_sec(j,res_index(upstream))=damelev
 
 	  topwidth_sec(j,upstream)=0.
-	  wetper_sec(j,upstream)=0.
+	  wetper_sec(j,res_index(upstream))=0.
 
       DO m=2,npt
         TAN=ABS(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/  &
             (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
-        IF (watelev_sec(j,upstream) >= y_sec(m-1,j,res_index(upstream)).AND.  &
-              watelev_sec(j,upstream) >= y_sec(m,j,res_index(upstream))) THEN
+        IF (watelev_sec(j,res_index(upstream)) >= y_sec(m-1,j,res_index(upstream)).AND.  &
+              watelev_sec(j,res_index(upstream)) >= y_sec(m,j,res_index(upstream))) THEN
           topwidth_sec(j,upstream)=topwidth_sec(j,upstream)+  &
               (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
-          wetper_sec(j,upstream)=wetper_sec(j,upstream)+  &
+          wetper_sec(j,res_index(upstream))=wetper_sec(j,res_index(upstream))+  &
               SQRT((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))**2.  &
               +(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))**2.)
-        ELSE IF (watelev_sec(j,upstream) < y_sec(m-1,j,res_index(upstream))  &
-              .AND.watelev_sec(j,upstream) >= y_sec(m,j,res_index(upstream))) THEN
+        ELSE IF (watelev_sec(j,res_index(upstream)) < y_sec(m-1,j,res_index(upstream))  &
+              .AND.watelev_sec(j,res_index(upstream)) >= y_sec(m,j,res_index(upstream))) THEN
           topwidth_sec(j,upstream)=topwidth_sec(j,upstream)+  &
               ((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
-              (watelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))/  &
+              (watelev_sec(j,res_index(upstream))-y_sec(m,j,res_index(upstream)))/  &
               (y_sec(m-1,j,res_index(upstream))-y_sec(m,j,res_index(upstream))))
-          wetper_sec(j,upstream)=wetper_sec(j,upstream)+  &
-              SQRT(((watelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))/TAN)  &
-              **2.+(watelev_sec(j,upstream)-y_sec(m,j,res_index(upstream)))**2.)
-        ELSE IF (watelev_sec(j,upstream) >= y_sec(m-1,j,res_index(upstream))  &
-              .AND.watelev_sec(j,upstream) < y_sec(m,j,res_index(upstream))) THEN
+          wetper_sec(j,res_index(upstream))=wetper_sec(j,res_index(upstream))+  &
+              SQRT(((watelev_sec(j,res_index(upstream))-y_sec(m,j,res_index(upstream)))/TAN)  &
+              **2.+(watelev_sec(j,res_index(upstream))-y_sec(m,j,res_index(upstream)))**2.)
+        ELSE IF (watelev_sec(j,res_index(upstream)) >= y_sec(m-1,j,res_index(upstream))  &
+              .AND.watelev_sec(j,res_index(upstream)) < y_sec(m,j,res_index(upstream))) THEN
           topwidth_sec(j,upstream)=topwidth_sec(j,upstream)+  &
               ((x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))*  &
-              (watelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))/  &
+              (watelev_sec(j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/  &
               (y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream))))
-          wetper_sec(j,upstream)=wetper_sec(j,upstream)+  &
-              SQRT(((watelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))/TAN)  &
-              **2.+(watelev_sec(j,upstream)-y_sec(m-1,j,res_index(upstream)))**2.)
+          wetper_sec(j,res_index(upstream))=wetper_sec(j,res_index(upstream))+  &
+              SQRT(((watelev_sec(j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/TAN)  &
+              **2.+(watelev_sec(j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))**2.)
         END IF
       END DO
-      hydrad_sec(j,upstream)=area_sec(j,upstream)/ wetper_sec(j,upstream)
-      meanvel_sec(j,upstream)=discharge_sec(j,upstream)/ area_sec(j,upstream)
-      dynhead_sec(j,res_index(upstream))=(meanvel_sec(j,upstream)**2.) /(2.*9.807)
-      tothead_sec(j,res_index(upstream))=watelev_sec(j,upstream)+ dynhead_sec(j,res_index(upstream))
-      energslope_sec(j,upstream)=(meanvel_sec(j,upstream)**2.)*  &
-          (manning_sec(j,upstream)**2.)/ (hydrad_sec(j,upstream)**(4./3.))
+      hydrad_sec(j,res_index(upstream))=area_sec(j,upstream)/ wetper_sec(j,res_index(upstream))
+      meanvel_sec(j,res_index(upstream))=discharge_sec(j,upstream)/ area_sec(j,upstream)
+      dynhead_sec(j,res_index(upstream))=(meanvel_sec(j,res_index(upstream))**2.) /(2.*9.807)
+      tothead_sec(j,res_index(upstream))=watelev_sec(j,res_index(upstream))+ dynhead_sec(j,res_index(upstream))
+      energslope_sec(j,res_index(upstream))=(meanvel_sec(j,res_index(upstream))**2.)*  &
+          (manning_sec(j,upstream)**2.)/ (hydrad_sec(j,res_index(upstream))**(4./3.))
       calctothead_sec(j,res_index(upstream))=tothead_sec(j,res_index(upstream))
   END IF
 
@@ -660,16 +660,16 @@ IF (k /= 0) THEN
 
   IF (k == nbrsec(upstream)) THEN
     depth_sec(k,upstream)=crdepth_sec(k,res_index(upstream))
-	watelev_sec(k,upstream)=crwatelev_sec(k,res_index(upstream))
+	watelev_sec(k,res_index(upstream))=crwatelev_sec(k,res_index(upstream))
 	topwidth_sec(k,upstream)=crtopwidth_sec(k,res_index(upstream))
-    wetper_sec(k,upstream)=crwetper_sec(k,res_index(upstream))
+    wetper_sec(k,res_index(upstream))=crwetper_sec(k,res_index(upstream))
     area_sec(k,upstream)=crarea_sec(k,res_index(upstream))
-	hydrad_sec(k,upstream)=crarea_sec(k,res_index(upstream))/ crwetper_sec(k,res_index(upstream))
-    meanvel_sec(k,upstream)=discharge_sec(k,upstream)/ crarea_sec(k,res_index(upstream))
-    dynhead_sec(k,res_index(upstream))=(meanvel_sec(k,upstream)**2.) /(2.*9.807)
+	hydrad_sec(k,res_index(upstream))=crarea_sec(k,res_index(upstream))/ crwetper_sec(k,res_index(upstream))
+    meanvel_sec(k,res_index(upstream))=discharge_sec(k,upstream)/ crarea_sec(k,res_index(upstream))
+    dynhead_sec(k,res_index(upstream))=(meanvel_sec(k,res_index(upstream))**2.) /(2.*9.807)
     tothead_sec(k,res_index(upstream))=crwatelev_sec(k,res_index(upstream))+ dynhead_sec(k,res_index(upstream))
-    energslope_sec(k,upstream)=(meanvel_sec(k,upstream)**2.)*  &
-		(manning_sec(k,upstream)**2.)/ (hydrad_sec(k,upstream)**(4./3.))
+    energslope_sec(k,res_index(upstream))=(meanvel_sec(k,res_index(upstream))**2.)*  &
+		(manning_sec(k,upstream)**2.)/ (hydrad_sec(k,res_index(upstream))**(4./3.))
     calctothead_sec(k,res_index(upstream))=tothead_sec(k,upstream)
 	k=k-1
   endif
@@ -696,11 +696,11 @@ IF (k /= 0) THEN
 ! hydraulic parameters at the cross section j
         area_sec(k+1-p,upstream)=0.
         topwidth_sec(k+1-p,upstream)=0.
-        wetper_sec(k+1-p,upstream)=0.
+        wetper_sec(k+1-p,res_index(upstream))=0.
 
 
-        IF (watelev_sec(k+1-p,upstream) > maxelev_sec(k+1-p,res_index(upstream))) THEN
-          watelev_sec(k+1-p,upstream)=maxelev_sec(k+1-p,res_index(upstream))
+        IF (watelev_sec(k+1-p,res_index(upstream)) > maxelev_sec(k+1-p,res_index(upstream))) THEN
+          watelev_sec(k+1-p,res_index(upstream))=maxelev_sec(k+1-p,res_index(upstream))
           depth_sec(k+1-p,upstream)=maxdepth_sec(k+1-p,res_index(upstream))
         END IF
 
@@ -711,91 +711,91 @@ IF (k /= 0) THEN
         DO m=2,npt
           TAN=ABS(y_sec(m,k+1-p,res_index(upstream))-y_sec(m-1,k+1-p,res_index(upstream)))/  &
               (x_sec(m,k+1-p,res_index(upstream))-x_sec(m-1,k+1-p,res_index(upstream)))
-          IF (watelev_sec(k+1-p,upstream) >= y_sec(m-1,k+1-p,res_index(upstream))  &
-                .AND.watelev_sec(k+1-p,upstream) >= y_sec(m,k+1-p,res_index(upstream))) THEN
+          IF (watelev_sec(k+1-p,res_index(upstream)) >= y_sec(m-1,k+1-p,res_index(upstream))  &
+                .AND.watelev_sec(k+1-p,res_index(upstream)) >= y_sec(m,k+1-p,res_index(upstream))) THEN
 			area_part(m,k+1-p)=(x_sec(m,k+1-p,res_index(upstream))-x_sec(m-1,k+1-p,res_index(upstream)))*  &
-                (watelev_sec(k+1-p,upstream)-  &
+                (watelev_sec(k+1-p,res_index(upstream))-  &
                 (y_sec(m,k+1-p,res_index(upstream))+y_sec(m-1,k+1-p,res_index(upstream)))/2.)
             area_sec(k+1-p,upstream)=area_sec(k+1-p,upstream)+area_part(m,k+1-p)
             topwidth_sec(k+1-p,upstream)=topwidth_sec(k+1-p,upstream)+  &
                 (x_sec(m,k+1-p,res_index(upstream))-x_sec(m-1,k+1-p,res_index(upstream)))
-            wetper_sec(k+1-p,upstream)=wetper_sec(k+1-p,upstream)+  &
+            wetper_sec(k+1-p,res_index(upstream))=wetper_sec(k+1-p,res_index(upstream))+  &
                 SQRT((x_sec(m,k+1-p,res_index(upstream))-x_sec(m-1,k+1-p,res_index(upstream)))**2.  &
                 +(y_sec(m,k+1-p,res_index(upstream))-y_sec(m-1,k+1-p,res_index(upstream)))**2.)
-          ELSE IF (watelev_sec(k+1-p,upstream) <  &
-                y_sec(m-1,k+1-p,res_index(upstream)).AND.watelev_sec(k+1-p,upstream)  &
+          ELSE IF (watelev_sec(k+1-p,res_index(upstream)) <  &
+                y_sec(m-1,k+1-p,res_index(upstream)).AND.watelev_sec(k+1-p,res_index(upstream))  &
                  >= y_sec(m,k+1-p,res_index(upstream))) THEN
-            area_part(m,k+1-p)=(((watelev_sec(k+1-p,upstream)-  &
+            area_part(m,k+1-p)=(((watelev_sec(k+1-p,res_index(upstream))-  &
                 y_sec(m,k+1-p,res_index(upstream)))**2.)/(2.*TAN))
             area_sec(k+1-p,upstream)=area_sec(k+1-p,upstream)+area_part(m,k+1-p)
             topwidth_sec(k+1-p,upstream)=topwidth_sec(k+1-p,upstream)+  &
                 ((x_sec(m,k+1-p,res_index(upstream))-x_sec(m-1,k+1-p,res_index(upstream)))*  &
-                (watelev_sec(k+1-p,upstream)-y_sec(m,k+1-p,res_index(upstream)))/  &
+                (watelev_sec(k+1-p,res_index(upstream))-y_sec(m,k+1-p,res_index(upstream)))/  &
                 (y_sec(m-1,k+1-p,res_index(upstream))-y_sec(m,k+1-p,res_index(upstream))))
-            wetper_sec(k+1-p,upstream)=wetper_sec(k+1-p,upstream)+  &
-                SQRT(((watelev_sec(k+1-p,upstream)-y_sec(m,k+1-p,res_index(upstream)))  &
-                /TAN)**2.+(watelev_sec(k+1-p,upstream)-  &
+            wetper_sec(k+1-p,res_index(upstream))=wetper_sec(k+1-p,res_index(upstream))+  &
+                SQRT(((watelev_sec(k+1-p,res_index(upstream))-y_sec(m,k+1-p,res_index(upstream)))  &
+                /TAN)**2.+(watelev_sec(k+1-p,res_index(upstream))-  &
                 y_sec(m,k+1-p,res_index(upstream)))**2.)
-          ELSE IF (watelev_sec(k+1-p,upstream) >=  &
-                y_sec(m-1,k+1-p,res_index(upstream)).AND.watelev_sec(k+1-p,upstream)  &
+          ELSE IF (watelev_sec(k+1-p,res_index(upstream)) >=  &
+                y_sec(m-1,k+1-p,res_index(upstream)).AND.watelev_sec(k+1-p,res_index(upstream))  &
                  < y_sec(m,k+1-p,res_index(upstream))) THEN
-            area_part(m,k+1-p)=(((watelev_sec(k+1-p,upstream)-  &
+            area_part(m,k+1-p)=(((watelev_sec(k+1-p,res_index(upstream))-  &
                 y_sec(m-1,k+1-p,res_index(upstream)))**2.)/(2.*TAN))
             area_sec(k+1-p,upstream)=area_sec(k+1-p,upstream)+area_part(m,k+1-p)
             topwidth_sec(k+1-p,upstream)=topwidth_sec(k+1-p,upstream)+  &
                 ((x_sec(m,k+1-p,res_index(upstream))-x_sec(m-1,k+1-p,res_index(upstream)))*  &
-                (watelev_sec(k+1-p,upstream)-y_sec(m-1,k+1-p,res_index(upstream)))/  &
+                (watelev_sec(k+1-p,res_index(upstream))-y_sec(m-1,k+1-p,res_index(upstream)))/  &
                 (y_sec(m,k+1-p,res_index(upstream))-y_sec(m-1,k+1-p,res_index(upstream))))
-            wetper_sec(k+1-p,upstream)=wetper_sec(k+1-p,upstream)+  &
-                SQRT(((watelev_sec(k+1-p,upstream)-  &
+            wetper_sec(k+1-p,res_index(upstream))=wetper_sec(k+1-p,res_index(upstream))+  &
+                SQRT(((watelev_sec(k+1-p,res_index(upstream))-  &
                 y_sec(m-1,k+1-p,res_index(upstream)))/TAN)**2.+  &
-                (watelev_sec(k+1-p,upstream)- y_sec(m-1,k+1-p,res_index(upstream)))**2.)
+                (watelev_sec(k+1-p,res_index(upstream))- y_sec(m-1,k+1-p,res_index(upstream)))**2.)
           END IF
         END DO
 
-        if (wetper_sec(k+1-p,upstream) == 0. .OR. area_sec(k+1-p,upstream) ==0.) then
+        if (wetper_sec(k+1-p,res_index(upstream)) == 0. .OR. area_sec(k+1-p,upstream) ==0.) then
             !no water in cross section
-            hydrad_sec(k+1-p,upstream)= 1.
-            meanvel_sec(k+1-p,upstream)= 0.
-            energslope_sec(k+1-p,upstream) = 1e-5 !use very small value as a quick and dirty fix
+            hydrad_sec(k+1-p,res_index(upstream))= 1.
+            meanvel_sec(k+1-p,res_index(upstream))= 0.
+            energslope_sec(k+1-p,res_index(upstream)) = 1e-5 !use very small value as a quick and dirty fix
         else !regular case
-            hydrad_sec(k+1-p,upstream)=area_sec(k+1-p,upstream)/  &
-                wetper_sec(k+1-p,upstream)
-            meanvel_sec(k+1-p,upstream)=discharge_sec(k+1-p,upstream)/  &
+            hydrad_sec(k+1-p,res_index(upstream))=area_sec(k+1-p,upstream)/  &
+                wetper_sec(k+1-p,res_index(upstream))
+            meanvel_sec(k+1-p,res_index(upstream))=discharge_sec(k+1-p,upstream)/  &
                 area_sec(k+1-p,upstream)
-            energslope_sec(k+1-p,upstream)=(meanvel_sec(k+1-p,upstream)  &
+            energslope_sec(k+1-p,res_index(upstream))=(meanvel_sec(k+1-p,res_index(upstream))  &
                 **2.)*(manning_sec(k+1-p,upstream)**2.)  &
-                /(hydrad_sec(k+1-p,upstream)**(4./3.))
+                /(hydrad_sec(k+1-p,res_index(upstream))**(4./3.))
          end if
-         dynhead_sec(k+1-p,res_index(upstream))=(meanvel_sec(k+1-p,upstream)**2.)  &
+         dynhead_sec(k+1-p,res_index(upstream))=(meanvel_sec(k+1-p,res_index(upstream))**2.)  &
                 /(2.*9.807)
-         tothead_sec(k+1-p,res_index(upstream))=watelev_sec(k+1-p,upstream)+  &
+         tothead_sec(k+1-p,res_index(upstream))=watelev_sec(k+1-p,res_index(upstream))+  &
                 dynhead_sec(k+1-p,res_index(upstream))
 
 		if (bedslope_sec(k+1-p,upstream) < crslope_sec(k+1-p,res_index(upstream))) then
-		  if (watelev_sec(k+1-p,upstream) >= normalelev_sec(k+1-p,res_index(upstream))) then !M1
-		    headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,upstream)*((2.*discharge_sec(k+1-p,upstream)/((discharge_sec(k+1-p,upstream)/sqrt(energslope_sec(k+1-p,upstream)))+ &
-				(discharge_sec(k+2-p,upstream)/sqrt(energslope_sec(k+2-p,upstream)))))**2.)
+		  if (watelev_sec(k+1-p,res_index(upstream)) >= normalelev_sec(k+1-p,res_index(upstream))) then !M1
+		    headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,upstream)*((2.*discharge_sec(k+1-p,upstream)/((discharge_sec(k+1-p,upstream)/sqrt(energslope_sec(k+1-p,res_index(upstream))))+ &
+				(discharge_sec(k+2-p,upstream)/sqrt(energslope_sec(k+2-p,res_index(upstream))))))**2.)
 dummy1=11
-		  else if (watelev_sec(k+1-p,upstream) < crwatelev_sec(k+1-p,res_index(upstream))) then !M3
+		  else if (watelev_sec(k+1-p,res_index(upstream)) < crwatelev_sec(k+1-p,res_index(upstream))) then !M3
 			headloss_sec(k+1-p,res_index(upstream))=(1./2.)*dist_sec(k+1-p,upstream)*  &
-				(energslope_sec(k+1-p,upstream)+ energslope_sec(k+2-p,upstream))
+				(energslope_sec(k+1-p,res_index(upstream))+ energslope_sec(k+2-p,res_index(upstream)))
 dummy1=13
 		  else !M2
-			headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,upstream)*sqrt(energslope_sec(k+1-p,upstream)*energslope_sec(k+2-p,upstream))
+			headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,upstream)*sqrt(energslope_sec(k+1-p,res_index(upstream))*energslope_sec(k+2-p,res_index(upstream)))
 dummy1=12
           endif
 		else
-		  if (watelev_sec(k+1-p,upstream) >= crwatelev_sec(k+1-p,res_index(upstream))) then !S1
-			headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,upstream)*sqrt(energslope_sec(k+1-p,upstream)*energslope_sec(k+2-p,upstream))
+		  if (watelev_sec(k+1-p,res_index(upstream)) >= crwatelev_sec(k+1-p,res_index(upstream))) then !S1
+			headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,upstream)*sqrt(energslope_sec(k+1-p,res_index(upstream))*energslope_sec(k+2-p,res_index(upstream)))
 dummy1=21
-		  else if (watelev_sec(k+1-p,upstream) < normalelev_sec(k+1-p,res_index(upstream))) then !S3
+		  else if (watelev_sec(k+1-p,res_index(upstream)) < normalelev_sec(k+1-p,res_index(upstream))) then !S3
 			headloss_sec(k+1-p,res_index(upstream))=(1./2.)*dist_sec(k+1-p,upstream)*  &
-				(energslope_sec(k+1-p,upstream)+ energslope_sec(k+2-p,upstream))
+				(energslope_sec(k+1-p,res_index(upstream))+ energslope_sec(k+2-p,res_index(upstream)))
 dummy1=23
 		  else !S2
-		    headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,upstream)*((2.*discharge_sec(k+1-p,upstream)/((discharge_sec(k+1-p,upstream)/sqrt(energslope_sec(k+1-p,upstream)))+ &
-				(discharge_sec(k+2-p,upstream)/sqrt(energslope_sec(k+2-p,upstream)))))**2.)
+		    headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,upstream)*((2.*discharge_sec(k+1-p,upstream)/((discharge_sec(k+1-p,upstream)/sqrt(energslope_sec(k+1-p,res_index(upstream))))+ &
+				(discharge_sec(k+2-p,upstream)/sqrt(energslope_sec(k+2-p,res_index(upstream))))))**2.)
 dummy1=22
           endif
 		endif
@@ -828,11 +828,11 @@ dummy1=22
 
 		if (e>20 .and. ABS(error1)>0.1) exit
 		if (e>30) exit
-        IF (watelev_sec(k+1-p,upstream) == maxelev_sec(k+1-p,res_index(upstream))  &
+        IF (watelev_sec(k+1-p,res_index(upstream)) == maxelev_sec(k+1-p,res_index(upstream))  &
               .AND.calctothead_sec(k+1-p,res_index(upstream)) <  &
               tothead_sec(k+1-p,res_index(upstream)) &
 			  .and. lowlim == 0. .and. toplim == 0.) exit
-        IF (watelev_sec(k+1-p,upstream) == maxelev_sec(k+1-p,res_index(upstream))  &
+        IF (watelev_sec(k+1-p,res_index(upstream)) == maxelev_sec(k+1-p,res_index(upstream))  &
               .AND.calctothead_sec(k+1-p,res_index(upstream)) <  &
               tothead_sec(k+1-p,res_index(upstream))) THEN
           WRITE(*,*)'ERROR: the water discharge overflows the cross section ', k+1-p
@@ -841,7 +841,7 @@ dummy1=22
 
         if (dummy3==1) then
 	      error=0.00001
-          watelev_sec(k+1-p,upstream)=minelev_sec(k+1-p,upstream)+  &
+          watelev_sec(k+1-p,res_index(upstream))=minelev_sec(k+1-p,upstream)+  &
               depth_sec(k+1-p,upstream)
           exit
 	    endif
@@ -883,7 +883,7 @@ dummy1=22
 !		    write(*,*)'hidraulic calculation (step 3.2a) and cross section',k+1-p
 		  ENDIF
 
-          watelev_sec(k+1-p,upstream)=minelev_sec(k+1-p,upstream)+  &
+          watelev_sec(k+1-p,res_index(upstream))=minelev_sec(k+1-p,upstream)+  &
               depth_sec(k+1-p,upstream)
 
         END IF
@@ -899,25 +899,25 @@ dummy1=22
       END DO
 	  IF (depth_sec(k+1-p,upstream)<crdepth_sec(k+1-p,res_index(upstream)) .or. ABS(error1)>0.1 .or. e>30) then
 	    depth_sec(k+1-p,upstream)=crdepth_sec(k+1-p,res_index(upstream))
-		watelev_sec(k+1-p,upstream)=crwatelev_sec(k+1-p,res_index(upstream))
+		watelev_sec(k+1-p,res_index(upstream))=crwatelev_sec(k+1-p,res_index(upstream))
 	    topwidth_sec(k+1-p,upstream)=crtopwidth_sec(k+1-p,res_index(upstream))
-        wetper_sec(k+1-p,upstream)=crwetper_sec(k+1-p,res_index(upstream))
+        wetper_sec(k+1-p,res_index(upstream))=crwetper_sec(k+1-p,res_index(upstream))
         area_sec(k+1-p,upstream)=crarea_sec(k+1-p,res_index(upstream))
-        hydrad_sec(k+1-p,upstream)=crarea_sec(k+1-p,res_index(upstream))/  &
+        hydrad_sec(k+1-p,res_index(upstream))=crarea_sec(k+1-p,res_index(upstream))/  &
 				crwetper_sec(k+1-p,res_index(upstream))
-		meanvel_sec(k+1-p,upstream)=discharge_sec(k+1-p,upstream)/  &
+		meanvel_sec(k+1-p,res_index(upstream))=discharge_sec(k+1-p,upstream)/  &
 				crarea_sec(k+1-p,res_index(upstream))
-		dynhead_sec(k+1-p,res_index(upstream))=(meanvel_sec(k+1-p,upstream)**2.)  &
+		dynhead_sec(k+1-p,res_index(upstream))=(meanvel_sec(k+1-p,res_index(upstream))**2.)  &
 				/(2.*9.807)
-		tothead_sec(k+1-p,res_index(upstream))=watelev_sec(k+1-p,upstream)+  &
+		tothead_sec(k+1-p,res_index(upstream))=watelev_sec(k+1-p,res_index(upstream))+  &
 				dynhead_sec(k+1-p,res_index(upstream))
-		energslope_sec(k+1-p,upstream)=(meanvel_sec(k+1-p,upstream)  &
+		energslope_sec(k+1-p,res_index(upstream))=(meanvel_sec(k+1-p,res_index(upstream))  &
 				**2.)*(manning_sec(k+1-p,upstream)**2.)  &
-				/(hydrad_sec(k+1-p,upstream)**(4./3.))
+				/(hydrad_sec(k+1-p,res_index(upstream))**(4./3.))
 !write(*,*)'warning! forced critical flow regime at cross section',k+1-p
 	  endif
 
-      if(watelev_sec(k+1-p,upstream)>maxelev_sec(k+1-p,res_index(upstream))) then
+      if(watelev_sec(k+1-p,res_index(upstream))>maxelev_sec(k+1-p,res_index(upstream))) then
         WRITE(*,*)'ERROR: the water discharge overflows the cross section ',k+1-p
         STOP
       END IF
@@ -932,16 +932,16 @@ dummy1=22
  else
 ! for the case, which the reservoir is completely empty (simulation is not affected by the reservoir subreach)
   depth_sec(1,upstream)=crdepth_sec(1,res_index(upstream))
-  watelev_sec(1,upstream)=crwatelev_sec(1,res_index(upstream))
+  watelev_sec(1,res_index(upstream))=crwatelev_sec(1,res_index(upstream))
   topwidth_sec(1,upstream)=crtopwidth_sec(1,res_index(upstream))
-  wetper_sec(1,upstream)=crwetper_sec(1,res_index(upstream))
+  wetper_sec(1,res_index(upstream))=crwetper_sec(1,res_index(upstream))
   area_sec(1,upstream)=crarea_sec(1,res_index(upstream))
-  hydrad_sec(1,upstream)=crarea_sec(1,res_index(upstream))/ crwetper_sec(1,res_index(upstream))
-  meanvel_sec(1,upstream)=discharge_sec(1,upstream)/ crarea_sec(1,res_index(upstream))
-  dynhead_sec(1,res_index(upstream))=(meanvel_sec(1,upstream)**2.) /(2.*9.807)
+  hydrad_sec(1,res_index(upstream))=crarea_sec(1,res_index(upstream))/ crwetper_sec(1,res_index(upstream))
+  meanvel_sec(1,res_index(upstream))=discharge_sec(1,upstream)/ crarea_sec(1,res_index(upstream))
+  dynhead_sec(1,res_index(upstream))=(meanvel_sec(1,res_index(upstream))**2.) /(2.*9.807)
   tothead_sec(1,res_index(upstream))=crwatelev_sec(1,res_index(upstream))+ dynhead_sec(1,res_index(upstream))
-  energslope_sec(1,upstream)=(meanvel_sec(1,upstream)**2.)*  &
-		(manning_sec(1,upstream)**2.)/ (hydrad_sec(1,upstream)**(4./3.))
+  energslope_sec(1,res_index(upstream))=(meanvel_sec(1,res_index(upstream))**2.)*  &
+		(manning_sec(1,upstream)**2.)/ (hydrad_sec(1,res_index(upstream))**(4./3.))
   calctothead_sec(1,res_index(upstream))=tothead_sec(1,upstream)
 
   if (k>1) then
@@ -967,95 +967,95 @@ dummy1=22
 ! hydraulic parameters at the cross section j
         area_sec(p,upstream)=0.
         topwidth_sec(p,upstream)=0.
-        wetper_sec(p,upstream)=0.
+        wetper_sec(p,res_index(upstream))=0.
 
 
-        IF (watelev_sec(p,upstream) > maxelev_sec(p,res_index(upstream))) THEN
-          watelev_sec(p,upstream)=maxelev_sec(p,res_index(upstream))
+        IF (watelev_sec(p,res_index(upstream)) > maxelev_sec(p,res_index(upstream))) THEN
+          watelev_sec(p,res_index(upstream))=maxelev_sec(p,res_index(upstream))
           depth_sec(p,upstream)=maxdepth_sec(p,res_index(upstream))
         END IF
 
         DO m=2,npt
           TAN=ABS(y_sec(m,p,res_index(upstream))-y_sec(m-1,p,res_index(upstream)))/  &
               (x_sec(m,p,res_index(upstream))-x_sec(m-1,p,res_index(upstream)))
-          IF (watelev_sec(p,upstream) >= y_sec(m-1,p,res_index(upstream))  &
-                .AND.watelev_sec(p,upstream) >= y_sec(m,p,res_index(upstream))) THEN
+          IF (watelev_sec(p,res_index(upstream)) >= y_sec(m-1,p,res_index(upstream))  &
+                .AND.watelev_sec(p,res_index(upstream)) >= y_sec(m,p,res_index(upstream))) THEN
             area_part(m,p)=(x_sec(m,p,res_index(upstream))-x_sec(m-1,p,res_index(upstream)))*  &
-                (watelev_sec(p,upstream)-  &
+                (watelev_sec(p,res_index(upstream))-  &
                 (y_sec(m,p,res_index(upstream))+y_sec(m-1,p,res_index(upstream)))/2.)
 			area_sec(p,upstream)=area_sec(p,upstream)+area_part(m,p)
             topwidth_sec(p,upstream)=topwidth_sec(p,upstream)+  &
                 (x_sec(m,p,res_index(upstream))-x_sec(m-1,p,res_index(upstream)))
-            wetper_sec(p,upstream)=wetper_sec(p,upstream)+  &
+            wetper_sec(p,res_index(upstream))=wetper_sec(p,res_index(upstream))+  &
                 SQRT((x_sec(m,p,res_index(upstream))-x_sec(m-1,p,res_index(upstream)))**2.  &
                 +(y_sec(m,p,res_index(upstream))-y_sec(m-1,p,res_index(upstream)))**2.)
-          ELSE IF (watelev_sec(p,upstream) <  &
-                y_sec(m-1,p,res_index(upstream)).AND.watelev_sec(p,upstream)  &
+          ELSE IF (watelev_sec(p,res_index(upstream)) <  &
+                y_sec(m-1,p,res_index(upstream)).AND.watelev_sec(p,res_index(upstream))  &
                  >= y_sec(m,p,res_index(upstream))) THEN
-            area_part(m,p)=(((watelev_sec(p,upstream)-  &
+            area_part(m,p)=(((watelev_sec(p,res_index(upstream))-  &
                 y_sec(m,p,res_index(upstream)))**2.)/(2.*TAN))
 			area_sec(p,upstream)=area_sec(p,upstream)+area_part(m,p)
             topwidth_sec(p,upstream)=topwidth_sec(p,upstream)+  &
                 ((x_sec(m,p,res_index(upstream))-x_sec(m-1,p,res_index(upstream)))*  &
-                (watelev_sec(p,upstream)-y_sec(m,p,res_index(upstream)))/  &
+                (watelev_sec(p,res_index(upstream))-y_sec(m,p,res_index(upstream)))/  &
                 (y_sec(m-1,p,res_index(upstream))-y_sec(m,p,res_index(upstream))))
-            wetper_sec(p,upstream)=wetper_sec(p,upstream)+  &
-                SQRT(((watelev_sec(p,upstream)-y_sec(m,p,res_index(upstream)))  &
-                /TAN)**2.+(watelev_sec(p,upstream)-  &
+            wetper_sec(p,res_index(upstream))=wetper_sec(p,res_index(upstream))+  &
+                SQRT(((watelev_sec(p,res_index(upstream))-y_sec(m,p,res_index(upstream)))  &
+                /TAN)**2.+(watelev_sec(p,res_index(upstream))-  &
                 y_sec(m,p,res_index(upstream)))**2.)
-          ELSE IF (watelev_sec(p,upstream) >=  &
-                y_sec(m-1,p,res_index(upstream)).AND.watelev_sec(p,upstream)  &
+          ELSE IF (watelev_sec(p,res_index(upstream)) >=  &
+                y_sec(m-1,p,res_index(upstream)).AND.watelev_sec(p,res_index(upstream))  &
                  < y_sec(m,p,res_index(upstream))) THEN
-            area_part(m,p)=(((watelev_sec(p,upstream)-  &
+            area_part(m,p)=(((watelev_sec(p,res_index(upstream))-  &
                 y_sec(m-1,p,res_index(upstream)))**2.)/(2.*TAN))
 			area_sec(p,upstream)=area_sec(p,upstream)+area_part(m,p)
             topwidth_sec(p,upstream)=topwidth_sec(p,upstream)+  &
                 ((x_sec(m,p,res_index(upstream))-x_sec(m-1,p,res_index(upstream)))*  &
-                (watelev_sec(p,upstream)-y_sec(m-1,p,res_index(upstream)))/  &
+                (watelev_sec(p,res_index(upstream))-y_sec(m-1,p,res_index(upstream)))/  &
                 (y_sec(m,p,res_index(upstream))-y_sec(m-1,p,res_index(upstream))))
-            wetper_sec(p,upstream)=wetper_sec(p,upstream)+  &
-                SQRT(((watelev_sec(p,upstream)-  &
+            wetper_sec(p,res_index(upstream))=wetper_sec(p,res_index(upstream))+  &
+                SQRT(((watelev_sec(p,res_index(upstream))-  &
                 y_sec(m-1,p,res_index(upstream)))/TAN)**2.+  &
-                (watelev_sec(p,upstream)- y_sec(m-1,p,res_index(upstream)))**2.)
+                (watelev_sec(p,res_index(upstream))- y_sec(m-1,p,res_index(upstream)))**2.)
           END IF
         END DO
 
-        hydrad_sec(p,upstream)=area_sec(p,upstream)/  &
-            wetper_sec(p,upstream)
-        meanvel_sec(p,upstream)=discharge_sec(p,upstream)/  &
+        hydrad_sec(p,res_index(upstream))=area_sec(p,upstream)/  &
+            wetper_sec(p,res_index(upstream))
+        meanvel_sec(p,res_index(upstream))=discharge_sec(p,upstream)/  &
             area_sec(p,upstream)
-        dynhead_sec(p,res_index(upstream))=(meanvel_sec(p,upstream)**2.)  &
+        dynhead_sec(p,res_index(upstream))=(meanvel_sec(p,res_index(upstream))**2.)  &
             /(2.*9.807)
-        tothead_sec(p,res_index(upstream))=watelev_sec(p,upstream)+  &
+        tothead_sec(p,res_index(upstream))=watelev_sec(p,res_index(upstream))+  &
             dynhead_sec(p,res_index(upstream))
-        energslope_sec(p,upstream)=(meanvel_sec(p,upstream)  &
+        energslope_sec(p,res_index(upstream))=(meanvel_sec(p,res_index(upstream))  &
             **2.)*(manning_sec(p,upstream)**2.)  &
-            /(hydrad_sec(p,upstream)**(4./3.))
+            /(hydrad_sec(p,res_index(upstream))**(4./3.))
 
 		if (bedslope_sec(p,upstream) < crslope_sec(p,res_index(upstream))) then
-		  if (watelev_sec(p,upstream) >= normalelev_sec(p,res_index(upstream))) then !M1
-		    headloss_sec(p,res_index(upstream))=dist_sec(p,upstream)*((2.*discharge_sec(p,upstream)/((discharge_sec(p,upstream)/sqrt(energslope_sec(p,upstream)))+ &
-				(discharge_sec(p-1,upstream)/sqrt(energslope_sec(p-1,upstream)))))**2.)
+		  if (watelev_sec(p,res_index(upstream)) >= normalelev_sec(p,res_index(upstream))) then !M1
+		    headloss_sec(p,res_index(upstream))=dist_sec(p,upstream)*((2.*discharge_sec(p,upstream)/((discharge_sec(p,upstream)/sqrt(energslope_sec(p,res_index(upstream))))+ &
+				(discharge_sec(p-1,upstream)/sqrt(energslope_sec(p-1,res_index(upstream))))))**2.)
 dummy1=11
-		  else if (watelev_sec(p,upstream) < crwatelev_sec(p,res_index(upstream))) then !M3
+		  else if (watelev_sec(p,res_index(upstream)) < crwatelev_sec(p,res_index(upstream))) then !M3
 			headloss_sec(p,res_index(upstream))=(1./2.)*dist_sec(p,upstream)*  &
-				(energslope_sec(p,upstream)+ energslope_sec(p-1,upstream))
+				(energslope_sec(p,res_index(upstream))+ energslope_sec(p-1,res_index(upstream)))
 dummy1=13
 		  else !M2
-			headloss_sec(p,res_index(upstream))=dist_sec(p,upstream)*sqrt(energslope_sec(p,upstream)*energslope_sec(p-1,upstream))
+			headloss_sec(p,res_index(upstream))=dist_sec(p,upstream)*sqrt(energslope_sec(p,res_index(upstream))*energslope_sec(p-1,res_index(upstream)))
 dummy1=12
           endif
 		else
-		  if (watelev_sec(p,upstream) >= crwatelev_sec(p,res_index(upstream))) then !S1
-			headloss_sec(p,res_index(upstream))=dist_sec(p,upstream)*sqrt(energslope_sec(p,upstream)*energslope_sec(p-1,upstream))
+		  if (watelev_sec(p,res_index(upstream)) >= crwatelev_sec(p,res_index(upstream))) then !S1
+			headloss_sec(p,res_index(upstream))=dist_sec(p,upstream)*sqrt(energslope_sec(p,res_index(upstream))*energslope_sec(p-1,res_index(upstream)))
 dummy1=21
-		  else if (watelev_sec(p,upstream) < normalelev_sec(p,res_index(upstream))) then !S3
+		  else if (watelev_sec(p,res_index(upstream)) < normalelev_sec(p,res_index(upstream))) then !S3
 			headloss_sec(p,res_index(upstream))=(1./2.)*dist_sec(p,upstream)*  &
-				(energslope_sec(p,upstream)+ energslope_sec(p-1,upstream))
+				(energslope_sec(p,res_index(upstream))+ energslope_sec(p-1,res_index(upstream)))
 dummy1=23
 		  else !S2
-		    headloss_sec(p,res_index(upstream))=dist_sec(p,upstream)*((2.*discharge_sec(p,upstream)/((discharge_sec(p,upstream)/sqrt(energslope_sec(p,upstream)))+ &
-				(discharge_sec(p-1,upstream)/sqrt(energslope_sec(p-1,upstream)))))**2.)
+		    headloss_sec(p,res_index(upstream))=dist_sec(p,upstream)*((2.*discharge_sec(p,upstream)/((discharge_sec(p,upstream)/sqrt(energslope_sec(p,res_index(upstream))))+ &
+				(discharge_sec(p-1,upstream)/sqrt(energslope_sec(p-1,res_index(upstream))))))**2.)
 dummy1=22
           endif
 		endif
@@ -1083,11 +1083,11 @@ dummy1=22
 
 		if (e>20 .and. ABS(error1)>0.1) exit
 		if (e>30) exit
-        IF (watelev_sec(p,upstream) == maxelev_sec(p,res_index(upstream))  &
+        IF (watelev_sec(p,res_index(upstream)) == maxelev_sec(p,res_index(upstream))  &
               .AND.calctothead_sec(p,res_index(upstream)) <  &
               tothead_sec(p,res_index(upstream)) &
 			  .and. lowlim == 0. .and. toplim == 0.) exit
-        IF (watelev_sec(p,upstream) == maxelev_sec(p,res_index(upstream))  &
+        IF (watelev_sec(p,res_index(upstream)) == maxelev_sec(p,res_index(upstream))  &
               .AND.calctothead_sec(p,res_index(upstream)) <  &
               tothead_sec(p,res_index(upstream))) THEN
           WRITE(*,*)'ERROR: the water discharge overflows the cross section ', p
@@ -1096,7 +1096,7 @@ dummy1=22
 
         if (dummy3==1) then
 	      error=0.00001
-          watelev_sec(p,upstream)=minelev_sec(p,upstream)+  &
+          watelev_sec(p,res_index(upstream))=minelev_sec(p,upstream)+  &
               depth_sec(p,upstream)
           exit
 	    endif
@@ -1139,7 +1139,7 @@ dummy1=22
 !		    write(*,*)'hidraulic calculation (step 3.2a) and cross section',p
 		  ENDIF
 
-          watelev_sec(p,upstream)=minelev_sec(p,upstream)+  &
+          watelev_sec(p,res_index(upstream))=minelev_sec(p,upstream)+  &
               depth_sec(p,upstream)
         END IF
 
@@ -1155,25 +1155,25 @@ dummy1=22
 
 	  IF (depth_sec(p,upstream)<crdepth_sec(p,res_index(upstream)) .or. ABS(error1)>0.1 .or. e>30) then
 	    depth_sec(p,upstream)=crdepth_sec(p,res_index(upstream))
-		watelev_sec(p,upstream)=crwatelev_sec(p,res_index(upstream))
+		watelev_sec(p,res_index(upstream))=crwatelev_sec(p,res_index(upstream))
 	    topwidth_sec(p,upstream)=crtopwidth_sec(p,res_index(upstream))
-        wetper_sec(p,upstream)=crwetper_sec(p,res_index(upstream))
+        wetper_sec(p,res_index(upstream))=crwetper_sec(p,res_index(upstream))
         area_sec(p,upstream)=crarea_sec(p,res_index(upstream))
-        hydrad_sec(p,upstream)=crarea_sec(p,res_index(upstream))/  &
+        hydrad_sec(p,res_index(upstream))=crarea_sec(p,res_index(upstream))/  &
 				crwetper_sec(p,res_index(upstream))
-		meanvel_sec(p,upstream)=discharge_sec(p,upstream)/  &
+		meanvel_sec(p,res_index(upstream))=discharge_sec(p,upstream)/  &
 				crarea_sec(p,res_index(upstream))
-		dynhead_sec(p,res_index(upstream))=(meanvel_sec(p,upstream)**2.)  &
+		dynhead_sec(p,res_index(upstream))=(meanvel_sec(p,res_index(upstream))**2.)  &
 				/(2.*9.807)
-		tothead_sec(p,res_index(upstream))=watelev_sec(p,upstream)+  &
+		tothead_sec(p,res_index(upstream))=watelev_sec(p,res_index(upstream))+  &
 				dynhead_sec(p,res_index(upstream))
-		energslope_sec(p,upstream)=(meanvel_sec(p,upstream)  &
+		energslope_sec(p,res_index(upstream))=(meanvel_sec(p,res_index(upstream))  &
 				**2.)*(manning_sec(p,upstream)**2.)  &
-				/(hydrad_sec(p,upstream)**(4./3.))
+				/(hydrad_sec(p,res_index(upstream))**(4./3.))
 !write(*,*)'warning! forced critical flow regime at the cross section',p
 	  endif
 
-      if(watelev_sec(p,upstream)>maxelev_sec(p,res_index(upstream))) then
+      if(watelev_sec(p,res_index(upstream))>maxelev_sec(p,res_index(upstream))) then
         WRITE(*,*)'ERROR: the water discharge overflows the cross section ',p
         STOP
       END IF

@@ -529,11 +529,11 @@ subroutine allocate_reservoir()
 	      weight_sec(nxsection_res,subasin), &
 	      discharge_sec(nxsection_res,subasin), &
 	      depth_sec(nxsection_res,subasin), &
-	      watelev_sec(nxsection_res,subasin), &
-	      wetper_sec(nxsection_res,subasin), &
-	      hydrad_sec(nxsection_res,subasin), &
-	      meanvel_sec(nxsection_res,subasin), &
-	      energslope_sec(nxsection_res,subasin), &
+!A	      watelev_sec(nxsection_res,subasin), &
+!A	      wetper_sec(nxsection_res,subasin), &
+!A	      hydrad_sec(nxsection_res,subasin), &
+!A	      meanvel_sec(nxsection_res,subasin), &
+!A	      energslope_sec(nxsection_res,subasin), &
 !A	      dynhead_sec(nxsection_res,subasin), &
 !A	      tothead_sec(nxsection_res,subasin), &
 !A	      headloss_sec(nxsection_res,subasin), &
