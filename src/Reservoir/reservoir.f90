@@ -326,10 +326,10 @@ storcap(:)=0.
 	      !damelev0(366*nt,n_reservoir), &
 	      !damelev1(366*nt,n_reservoir), &
 	      !resreach_vol(n_reservoir), &
-	      !res_precip(366*nt,n_reservoir), &
-	      !res_pet(366*nt,n_reservoir), &
-    res_qout(366*nt,n_reservoir), &
-       
+    res_precip(366*nt,n_reservoir), &
+    res_pet(366*nt,n_reservoir), &
+     
+    res_qout(366*nt,n_reservoir), &      
     id_sec_extern(nxsection_res,n_reservoir), &
 	      !nbrsec(n_reservoir), &
     npoints(nxsection_res,n_reservoir), &
@@ -1071,29 +1071,34 @@ IF (STATUS == 1) THEN
 !	 ENDIF !Andreas
 !	ENDDO
 !   ENDIF
-  ELSE ! tobias: reservoir_check == 0 which is actually the only possible value for reservoir_check as it is hard-coded
-   DO i=1,subasin
+ ELSE ! tobias: reservoir_check == 0 which is actually the only possible value for reservoir_check as it is hard-coded
+    DO i=1,subasin
     IF (t >= damyear(i)) THEN !Andreas
      dummy1=0
-     DO id=1,dayyear
-	  if (river_transport.ne.1) then
-       DO h=1,nt
-	    dummy1=dummy1+1
-	    res_pet(dummy1,i)=pet(id,i)/nt
-       ENDDO
-	  else
-	   res_pet(id,i)=pet(id,i)
-	  endif
-	 ENDDO
+     if (res_index(i) /= 0) then !Anne inserted this line
+            DO id=1,dayyear
+	              if (river_transport.ne.1) then
+                   DO h=1,nt
+	                dummy1=dummy1+1
+	                res_pet(dummy1,res_index(i))=pet(id,i)/nt
+                   ENDDO
+	              else
+	               res_pet(id,res_index(i))=pet(id,i)
+                  endif             
+            ENDDO
+     endif    !Anne
     ENDIF !Andreas
-   ENDDO
+    ENDDO
+ 
    DO i=1,subasin
     IF (t >= damyear(i)) THEN !Andreas
 	 IF (dohour) THEN
 	  IF (river_transport.ne.1) THEN
-       DO id=1,dayyear*nt
-	    res_precip(id,i)=preciph(id,i)
-	   ENDDO
+          if (res_index(i) /= 0) then !Anne inserted this line
+               DO id=1,dayyear*nt
+	            res_precip(id,res_index(i))=preciph(id,i)
+               ENDDO
+          endif   !Anne  
 	  ENDIF
 	  IF (river_transport.eq.1) THEN
        DO id=1,dayyear
@@ -1101,18 +1106,19 @@ IF (STATUS == 1) THEN
 	    DO h=1,nt
 		  dummy4=dummy4+preciph(id,i)
 	    ENDDO
-	    res_precip(id,i)=dummy4
+	    res_precip(id,res_index(i))=dummy4
 	   ENDDO
 	  ENDIF
-	 ELSE
-      DO id=1,dayyear
-	    res_precip(id,i)=precip(id,i)
-	  ENDDO
+     ELSE
+         if (res_index(i) /= 0) then !Anne inserted this line
+              DO id=1,dayyear
+	            res_precip(id,res_index(i))=precip(id,i)
+              ENDDO
+          endif   !Anne     
 	 ENDIF
     ENDIF !Andreas
    ENDDO
  ENDIF
-
 
 ! begin block Andreas; changed by tobias
 ! Read daily data on (measured) regulated reservoir outflow to be considered in reservoir water balance
@@ -1271,7 +1277,7 @@ IF (STATUS == 2) THEN
       evaphelp2=0.
       IF (nbrbat(upstream) /= 0) THEN
         damelevact(upstream)=damelevact(upstream)+  &
-            (res_precip(step,upstream)-res_pet(step,upstream))/1000.
+            (res_precip(step,res_index(upstream))-res_pet(step,res_index(upstream)))/1000.
         IF (damelevact(upstream) < dayminlevel(step,upstream)) THEN
           evaphelp2=dayminlevel(step,upstream)-damelevact(upstream)
           damelevact(upstream)=dayminlevel(step,upstream)
@@ -1307,15 +1313,15 @@ IF (STATUS == 2) THEN
 ! Calculation of evaporation and precipitation using the truncated cone volume (m3)
 ! (using the morphologic parameter alpha)
         evaphelp=(areahelp+SQRT(areahelp*damareaact(upstream))+  &
-            damareaact(upstream))*res_pet(step,upstream)/1000.*1./3.
+            damareaact(upstream))*res_pet(step,res_index(upstream))/1000.*1./3.
         prechelp=(areahelp+SQRT(areahelp*damareaact(upstream))+  &
-            damareaact(upstream))*res_precip(step,upstream)/1000.*1./3.
+            damareaact(upstream))*res_precip(step,res_index(upstream))/1000.*1./3.
 !        infhelp=0. tp TODO not used=!
         volact(step,upstream)=volhelp
 
       ELSE
-        evaphelp=MIN(volact(step,upstream),(res_pet(step,upstream)/1000.)*areahelp) !??why zero?
-        prechelp=(res_precip(step,upstream)/1000.)*areahelp
+        evaphelp=MIN(volact(step,upstream),(res_pet(step,res_index(upstream))/1000.)*areahelp) !??why zero?
+        prechelp=(res_precip(step,res_index(upstream))/1000.)*areahelp
 !        infhelp=0. tp TODO not used=!
         volact(step,upstream)=volact(step,upstream)+ (prechelp-evaphelp) ! -infhelp) tp TODO not used
 
