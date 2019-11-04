@@ -225,21 +225,21 @@ if (res_qout(step,upstream)/=0.) then
 !write(*,'(I3,2F12.8)')g,frsediment_out(upstream,g),cumfrsed_out(g)
 	enddo
   endif
-  sed_outflow(step,upstream)=sed_inflow(step,upstream)*(1.-trap_eff)
+  sed_outflow(step,res_index(upstream))=sed_inflow(step,res_index(upstream))*(1.-trap_eff)
 else
-  sed_outflow(step,upstream)=0.
+  sed_outflow(step,res_index(upstream))=0.
 endif
 
 
 if (t==tstart .and. step==1) cum_sedimentation(upstream)=0.
 IF (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(upstream)=0.
-sedimentation(step,upstream)=max(sed_inflow(step,upstream)-sed_outflow(step,upstream),0.)
-cum_sedimentation(upstream)=cum_sedimentation(upstream)+sedimentation(step,upstream)
+sedimentation(step,res_index(upstream))=max(sed_inflow(step,res_index(upstream))-sed_outflow(step,res_index(upstream)),0.)
+cum_sedimentation(upstream)=cum_sedimentation(upstream)+sedimentation(step,res_index(upstream))
 !sed_susp(step,upstream)=0.
 
 
 ! storage capacity reduction (m3)
-decstorcap(step,upstream)=sedimentation(step,upstream)/dry_dens(upstream)
+decstorcap(step,upstream)=sedimentation(step,res_index(upstream))/dry_dens(upstream)
 
 
 !write(*,'(3I4,2F15.1)')t,d,upstream,sedimentation(step,upstream),cum_sedimentation(upstream)

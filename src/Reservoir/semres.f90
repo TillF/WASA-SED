@@ -73,11 +73,8 @@ character(len=1000) :: fmtstr	!string for formatting file output
 ! -----------------------------------------------------------------------
 IF (STATUS == 0) THEN
 
-  DO i=1,subasin
-    DO g=1,n_sed_class
-      sed_qlateral(i,g)=0.
-	ENDDO
-  ENDDO
+  sed_qlateral=0.
+  
   DO i=1,subasin
     DO id=1,dayyear*nt
       decvolact(id,i)=0.
@@ -708,16 +705,13 @@ IF (STATUS == 1) THEN
 ! initialize ...
 
 ! initialization of parameters
-  DO i=1,subasin
-    DO id=1,dayyear*nt
-!      sed_susp(id,i)=0.
-      sed_ret(id,i)=0.
-      sed_overflow(id,i)=0.
-      sed_intake(id,i)=0.
-      sed_inflow(id,i)=0.
-    END DO
-  END DO
-
+ 
+!      sed_susp=0.
+    sed_ret=0.
+    sed_overflow=0.
+    sed_intake=0.    
+    sed_inflow=0.
+    
 !Ge read daily data on reservoir level and outflow discharges
   IF (reservoir_check == 1) THEN
     DO i=1,subasin
@@ -765,7 +759,7 @@ IF (STATUS == 2) THEN
 
 ! Determination of total sediment inflow (ton/timestep) and inflow sediment concentration (g/l)
   do g=1,n_sed_class
-	sed_inflow(step,upstream)=sed_inflow(step,upstream)+sediment_in(upstream,g)+sed_qlateral(upstream,g)
+	sed_inflow(step,res_index(upstream))=sed_inflow(step,res_index(upstream))+sediment_in(upstream,g)+sed_qlateral(res_index(upstream),g)
 !write(*,'(2I4,3F15.3)')id_subbas_extern(upstream),g,sediment_in(upstream,g),sed_inflow(step,upstream),sed_qlateral(upstream,g)
 !write(*,*)upstream,g,sediment_in(upstream,g),sed_inflow(step,upstream),sed_qlateral(upstream,g)
   enddo
@@ -785,15 +779,15 @@ IF (STATUS == 2) THEN
 if (qinflow(step,upstream)==0.) then
     conc_inflow = 0. 
 else
-    conc_inflow=sed_inflow(step,upstream)/(qinflow(step,upstream)*(86400./nt)*.001)
+    conc_inflow=sed_inflow(step,res_index(upstream))/(qinflow(step,upstream)*(86400./nt)*.001)
 end if
 
 
 !write(*,*)step,upstream,(sediment_in(upstream,g),g=1,n_sed_class)
 
-  if (sed_inflow(step,upstream) > 0.) then
+  if (sed_inflow(step,res_index(upstream)) > 0.) then
 	do g=1,n_sed_class
-	  frsediment_in(res_index(upstream),g)=(sediment_in(upstream,g)+sed_qlateral(upstream,g))/sed_inflow(step,upstream)
+	  frsediment_in(res_index(upstream),g)=(sediment_in(upstream,g)+sed_qlateral(res_index(upstream),g))/sed_inflow(step,res_index(upstream))
 	enddo
   else
 	do g=1,n_sed_class
@@ -848,15 +842,15 @@ end if
 
   IF (nbrsec(upstream) == 0) THEN
 !write(*,'(2I4,10F15.6)') step,id_subbas_extern(upstream),sed_inflow(step,upstream)
-    IF (sed_inflow(step,upstream) /= 0.) then
+    IF (sed_inflow(step,res_index(upstream)) /= 0.) then
       call sedbal(upstream)
 	ELSE
-	  sed_outflow(step,upstream)=0.
-	  sedimentation(step,upstream)=0.
+	  sed_outflow(step,res_index(upstream))=0.
+	  sedimentation(step,res_index(upstream))=0.
       if (t==tstart .and. step==1) cum_sedimentation(upstream)=0.
       IF (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(upstream)=0.
 
-      cum_sedimentation(upstream)=cum_sedimentation(upstream)+sedimentation(step,upstream)
+      cum_sedimentation(upstream)=cum_sedimentation(upstream)+sedimentation(step,res_index(upstream))
 	  decstorcap(step,upstream)=0.
 	  do g=1,n_sed_class
 		frsediment_out(res_index(upstream),g)=0.
@@ -870,7 +864,7 @@ end if
 ! Determination of grain size distribution at the top layer of the most upstream
 ! cross section provided by size distribution of sediment input
 	do g=1,n_sed_class
-	  if (sed_inflow(step,upstream) > 0.) then
+	  if (sed_inflow(step,res_index(upstream)) > 0.) then
 	    frac_toplay(g,1,res_index(upstream))=frsediment_in(res_index(upstream),g)
 	  else
 	    frac_toplay(g,1,res_index(upstream))=0.
@@ -1310,7 +1304,7 @@ end if
 !        IF (upper_limit(g) <= .0055) setvel(g)=0.000022
 !write(*,'(2I4,2F15.6)')j,g,upper_limit(g),setvel(g)*1000
         IF (j == 1) THEN
-          loadincoming=sed_inflow(step,upstream)*frac_toplay(g,j,res_index(upstream))
+          loadincoming=sed_inflow(step,res_index(upstream))*frac_toplay(g,j,res_index(upstream))
         ELSE
           loadincoming=frtotal_discharge(g,j-1)
         END IF
@@ -1639,8 +1633,8 @@ end if
 	if (totalload(j,res_index(upstream)) /= 0.) then
 	  sed_overflow(step,upstream)=totalload(j,res_index(upstream))*factor_over2
 	  sed_intake(step,upstream)=totalload(j,res_index(upstream))*factor_intake2
-	  sed_bottom(step,upstream)=totalload(j,res_index(upstream))*factor_bottom2
-	  sed_outflow(step,upstream)=totalload(j,res_index(upstream))
+	  sed_bottom(step,res_index(upstream))=totalload(j,res_index(upstream))*factor_bottom2
+	  sed_outflow(step,res_index(upstream))=totalload(j,res_index(upstream))
 !temp	  sed_overflow(step,upstream)=max(0.,totalload(j,upstream)*overflow(step,upstream)/(res_qout(step,upstream)))
 !temp	  sed_intake(step,upstream)=max(0.,totalload(j,upstream)*qintake(step,upstream)/(res_qout(step,upstream)))
 !temp	  sed_bottom(step,upstream)=max(0.,totalload(j,upstream)*qbottom(step,upstream)/(res_qout(step,upstream)))
@@ -1648,8 +1642,8 @@ end if
 	else
 	  sed_overflow(step,upstream)=0.
 	  sed_intake(step,upstream)=0.
-	  sed_bottom(step,upstream)=0.
-	  sed_outflow(step,upstream)=0.
+	  sed_bottom(step,res_index(upstream))=0.
+	  sed_outflow(step,res_index(upstream))=0.
 	endif
 
 ! ***********************************************************
@@ -1658,24 +1652,24 @@ end if
 
 ! Calculation of daily sedimentation and cumulative sedimentation (m3)
 !2010    cum_sedimentation(upstream)=0.
-	sedimentation(step,upstream)=0.
+	sedimentation(step,res_index(upstream))=0.
     DO j=1,nbrsec(upstream)
 !2010      cum_sedimentation(upstream)=cum_sedimentation(upstream)+vol_sedim(j,upstream)
-	  sedimentation(step,upstream)=sedimentation(step,upstream)+dvol_sed(j,res_index(upstream))
+	  sedimentation(step,res_index(upstream))=sedimentation(step,res_index(upstream))+dvol_sed(j,res_index(upstream))
 	ENDDO
 !write(*,*)cum_sedimentation(upstream)
 ! Revised cumulative sedimentation, i.e. sedimentation above the initial bed elevation (m3)
 !2010    cum_sedimentation(upstream)=cum_sedimentation(upstream)-volbed0(upstream)
 !write(*,'(I4,3F13.1)')upstream,cum_sedimentation(upstream),volbed0(upstream)
 ! Storage capacity reduction (m3)
-    decstorcap(step,upstream)=sedimentation(step,upstream)
+    decstorcap(step,upstream)=sedimentation(step,res_index(upstream))
 
 ! Conversion (m3 to ton)
 !2010    cum_sedimentation(upstream)=cum_sedimentation(upstream)*dry_dens(upstream)
-	sedimentation(step,upstream)=sedimentation(step,upstream)*dry_dens(upstream)
+	sedimentation(step,res_index(upstream))=sedimentation(step,res_index(upstream))*dry_dens(upstream)
 	if (step==1 .and. t==tstart) cum_sedimentation(upstream)=cum_sedimentation(upstream)+volbed0(upstream) !2010
 	if (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(upstream)=cum_sedimentation(upstream)+volbed0(upstream) !2010
-    cum_sedimentation(upstream)=cum_sedimentation(upstream)+sedimentation(step,upstream) !2010
+    cum_sedimentation(upstream)=cum_sedimentation(upstream)+sedimentation(step,res_index(upstream)) !2010
 !write(*,'(2F18.3)')cum_sedimentation(upstream),sedimentation(step,upstream)
 !if (step==30)stop
 
@@ -1997,7 +1991,7 @@ end if
 
 ! Calculation of fractional sediment transport to the next dowstream sub-basin (ton/timestep)
   DO g=1,n_sed_class
-    res_sediment_out(res_index(upstream),g)=frsediment_out(res_index(upstream),g)*sed_outflow(step,upstream)
+    res_sediment_out(res_index(upstream),g)=frsediment_out(res_index(upstream),g)*sed_outflow(step,res_index(upstream))
   enddo
 
 
@@ -2007,8 +2001,8 @@ end if
    j=nbrsec(upstream)
    IF (f_res_sedbal) THEN
    OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_sedbal.out',STATUS='old',POSITION='append')
-    WRITE(11,'(4I6,4F15.3)')id_subbas_extern(upstream),t,d,hour,sed_inflow(step,upstream),sed_outflow(step,upstream), &
-		sedimentation(step,upstream),cum_sedimentation(upstream)
+    WRITE(11,'(4I6,4F15.3)')id_subbas_extern(upstream),t,d,hour,sed_inflow(step,res_index(upstream)),sed_outflow(step,res_index(upstream)), &
+		sedimentation(step,res_index(upstream)),cum_sedimentation(upstream)
    CLOSE(11)
    ENDIF
 
@@ -2097,8 +2091,8 @@ IF (STATUS == 3) THEN
 	      DO ih=1,nt
 		    hour=ih
             step=(d-1)*nt+hour
-			WRITE(11,'(4I6,4F15.3)')id_subbas_extern(i),t,d,hour,sed_inflow(step,i),sed_outflow(step,i), &
-				sedimentation(step,i),daycumsed(step,res_index(i))
+			WRITE(11,'(4I6,4F15.3)')id_subbas_extern(i),t,d,hour,sed_inflow(step,res_index(i)),sed_outflow(step,res_index(i)), &
+				sedimentation(step,res_index(i)),daycumsed(step,res_index(i))
 		  ENDDO
 		ENDDO
         CLOSE(11)
@@ -2125,8 +2119,8 @@ IF (STATUS == 3) THEN
 	      DO ih=1,nt
 		    hour=ih
             step=(d-1)*nt+hour
-			WRITE(11,'(4I6,4F15.3)')id_subbas_extern(i),t,d,hour,sed_inflow(step,i),sed_outflow(step,i), &
-				sedimentation(step,i),daycumsed(step,res_index(i))
+			WRITE(11,'(4I6,4F15.3)')id_subbas_extern(i),t,d,hour,sed_inflow(step,res_index(i)),sed_outflow(step,res_index(i)), &
+				sedimentation(step,res_index(i)),daycumsed(step,res_index(i))
 		  ENDDO
 		ENDDO
         CLOSE(11)

@@ -491,12 +491,13 @@ subroutine allocate_reservoir()
 	      sed_ret(366*nt,subasin), &
 	      sed_overflow(366*nt,subasin), &
 	      sed_intake(366*nt,subasin), &
-	      sed_bottom(366*nt,subasin), &
-	      sed_qlateral(subasin,n_sed_class), &
-	      sed_inflow(366*nt,subasin), &
-	      sed_outflow(366*nt,subasin), &
+!A	      sed_bottom(366*nt,subasin), &
+!A	      sed_qlateral(subasin,n_sed_class), &
+!A	      sed_inflow(366*nt,subasin), &
+!A	      sed_outflow(366*nt,subasin), &
 	      diam(n_sed_class), &
-	      sedimentation(366*nt,subasin), &
+!A	      sedimentation(366*nt,subasin), &
+            
 	      cum_sedimentation(subasin), &
     !	  min_conc(subasin), &
     !	  sed_conc0(subasin), &

@@ -340,11 +340,11 @@ storcap(:)=0.
 	      !sed_ret(366*nt,n_reservoir), &
 	      !sed_overflow(366*nt,n_reservoir), &
 	      !sed_intake(366*nt,n_reservoir), &
-	      !sed_bottom(366*nt,n_reservoir), &
-	      !sed_qlateral(n_reservoir,n_sed_class), &
-	      !sed_inflow(366*nt,n_reservoir), &
-	      !sed_outflow(366*nt,n_reservoir), &    
-	      !sedimentation(366*nt,n_reservoir), &
+    sed_bottom(366*nt,n_reservoir), &
+    sed_qlateral(n_reservoir,n_sed_class), &
+    sed_inflow(366*nt,n_reservoir), &
+    sed_outflow(366*nt,n_reservoir), &    
+    sedimentation(366*nt,n_reservoir), &
      
 	      !cum_sedimentation(n_reservoir), &      
     res_sediment_out(n_reservoir,n_sed_class), &

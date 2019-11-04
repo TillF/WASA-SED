@@ -419,7 +419,7 @@ DO h=1,nt
            qlateral(step,reservoir_down(upstream))=add_ifnot_nodata(qlateral(step,reservoir_down(upstream)), res_qout(step,upstream))
 	       if(dosediment) then
 	         do k=1,n_sed_class
-	           sed_qlateral(reservoir_down(upstream),k) = add_ifnot_nodata(sed_qlateral(reservoir_down(upstream),k), res_sediment_out(res_index(upstream),k))
+	           sed_qlateral(reservoir_down(res_index(upstream)),k) = add_ifnot_nodata(sed_qlateral(reservoir_down(res_index(upstream)),k), res_sediment_out(res_index(upstream),k))
 	         enddo
 	       endif
 		 ELSE
@@ -439,7 +439,7 @@ DO h=1,nt
            qlateral(step,reservoir_down(upstream)) = add_ifnot_nodata(qlateral(step,reservoir_down(upstream)), r_qout(2,upstream))
 	       if(dosediment) then
 	         do k=1,n_sed_class
-	           sed_qlateral(reservoir_down(upstream),k) = add_ifnot_nodata(sed_qlateral(reservoir_down(upstream),k), sediment_out(upstream,k))
+	           sed_qlateral(reservoir_down(res_index(upstream)),k) = add_ifnot_nodata(sed_qlateral(reservoir_down(res_index(upstream)),k), sediment_out(upstream,k))
 	         enddo
 	       endif
 		 ELSE
@@ -476,7 +476,7 @@ DO h=1,nt
    if (dosediment) then
 	 do k=1,n_sed_class !George
 	  IF (doreservoir) THEN
-       sedinflow_g(step,res_index(upstream),k) = add_ifnot_nodata(sediment_in(upstream,k), sed_qlateral(upstream,k))
+       sedinflow_g(step,res_index(upstream),k) = add_ifnot_nodata(sediment_in(upstream,k), sed_qlateral(res_index(upstream),k))
        IF (storcap(upstream) > 0. .and. t >= damyear(upstream)) THEN
          sedoutflow_g(step,res_index(upstream),k)=res_sediment_out(res_index(upstream),k)
 	   ELSE
