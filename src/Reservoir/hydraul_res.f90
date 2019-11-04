@@ -38,7 +38,7 @@ REAL :: dummy4
 ! -----------------------------------------------------------------------
 
 ! initialization of hydraulic parameters
-resvol(upstream)=0.
+resvol(res_index(upstream))=0.
 DO j=1,nbrsec(upstream)
   resvol_sec(j,res_index(upstream))=0.
   bedslope_sec(j,res_index(upstream))=0.
@@ -205,7 +205,7 @@ DO j=1,nbrsec(upstream)
           (resarea_sec(j,res_index(upstream))+resarea_sec(j-1,res_index(upstream))+  &
           SQRT(resarea_sec(j,res_index(upstream))*resarea_sec(j-1,res_index(upstream))))
     END IF
-    resvol(upstream)=resvol(upstream)+resvol_sec(j,res_index(upstream))
+    resvol(res_index(upstream))=resvol(res_index(upstream))+resvol_sec(j,res_index(upstream))
 
   ELSE
 ! RIVER SUBREACH
@@ -231,7 +231,7 @@ endif
 weight=0.
 DO j=1,nbrsec(upstream)
   IF (damelev >= minelev_sec(j,res_index(upstream))) THEN
-    weight=weight+resvol_sec(j,res_index(upstream))/resvol(upstream)
+    weight=weight+resvol_sec(j,res_index(upstream))/resvol(res_index(upstream))
     weight_sec(j,res_index(upstream))=weight
     IF (j == nbrsec(upstream)) THEN
       weight_sec(j,res_index(upstream))=1.

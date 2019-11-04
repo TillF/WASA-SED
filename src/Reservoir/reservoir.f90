@@ -372,7 +372,7 @@ storcap(:)=0.
     resarea_sec(nxsection_res,n_reservoir), &
     resvol_sec(nxsection_res,n_reservoir), &
      
-	      !resvol(n_reservoir), &
+    resvol(n_reservoir), &
     topwidth_sec(nxsection_res,n_reservoir), &
     weight_sec(nxsection_res,n_reservoir), &
     discharge_sec(nxsection_res,n_reservoir), &
@@ -442,7 +442,7 @@ storcap(:)=0.
     frac_comlay(n_sed_class,nxsection_res,n_reservoir), &
     frac_susp(n_sed_class,nxsection_res,n_reservoir), &
     partarea_actlay(npointsxsect,nxsection_res,n_reservoir), &
-    partarea_toplay(npointsxsect,nxsection_res,n_reservoir), & 
+    partarea_toplay(npointsxsect,nxsection_res,n_reservoir), &     
      
     y_laststep(npointsxsect,nxsection_res,n_reservoir), &
     erosion_level(nxsection_res,n_reservoir), &

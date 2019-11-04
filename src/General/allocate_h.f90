@@ -500,9 +500,7 @@ subroutine allocate_reservoir()
     !	  param_b(10,subasin), &
     !	  nbsizedist(subasin), &
     !	  Q_refer(10,subasin), &
-            	      
-          resvol(subasin), &
-    
+            	          
 	      setvel(n_sed_class), &
                         
 	      frsedavailab(n_sed_class,nxsection_res), &
@@ -519,11 +517,8 @@ subroutine allocate_reservoir()
 	      susp_frtransp(n_sed_class,nxsection_res), &
 	      fr_capacity(n_sed_class,nxsection_res), &            
     !	  dheight_sed(nxsection_res,subasin), &
-            
-	      frconc(n_sed_class,nxsection_res), &          
-!A	      volbed0(subasin), &	      
-!A        length_plunge(subasin), &
-               
+           
+	      frconc(n_sed_class,nxsection_res), &                        
     !	  weightfac_actlay(npointsxsect,nxsection_res,subasin), &
     !	  weightfac_toplay(npointsxsect,nxsection_res,subasin), &
 	      
