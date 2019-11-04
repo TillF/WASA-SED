@@ -353,7 +353,7 @@ storcap(:)=0.
     sed_inflow(366*nt,n_reservoir), &
     sed_outflow(366*nt,n_reservoir), &    
     sedimentation(366*nt,n_reservoir), &    
-	      !cum_sedimentation(n_reservoir), &      
+    cum_sedimentation(n_reservoir), &      
     res_sediment_out(n_reservoir,n_sed_class), &
     frsediment_in(n_reservoir,n_sed_class), &
     frsediment_out(n_reservoir,n_sed_class), &

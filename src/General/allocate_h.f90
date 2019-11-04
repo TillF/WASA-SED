@@ -478,28 +478,20 @@ subroutine allocate_reservoir()
 !A	      resreach_vol(subasin), &
             
 	      nbrsec(subasin), &
-
-	      geom(npointsxsect,nxsection_res), &
             
-    !	  sed_susp(366*nt,subasin), &
-            
+	      geom(npointsxsect,nxsection_res), &           
+    !	  sed_susp(366*nt,subasin), &           
 	      diam(n_sed_class), &
-            
-	      cum_sedimentation(subasin), &
+    
     !	  min_conc(subasin), &
     !	  sed_conc0(subasin), &
-    !	  wet_dens(subasin), &
-                       
-!A	      dry_dens(subasin), &
-!A	      factor_actlay(subasin), &
-
+    !	  wet_dens(subasin), &                      
     !	  numbeqs(subasin), &
     !	  Q_max(10,subasin), &
     !	  param_a(10,subasin), &
     !	  param_b(10,subasin), &
     !	  nbsizedist(subasin), &
-    !	  Q_refer(10,subasin), &
-            	          
+    !	  Q_refer(10,subasin), &          	          
 	      setvel(n_sed_class), &
                         
 	      frsedavailab(n_sed_class,nxsection_res), &

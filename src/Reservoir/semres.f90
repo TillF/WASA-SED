@@ -80,9 +80,8 @@ IF (STATUS == 0) THEN
   decstorcap=0.     !A
   decvolact=0.      !A
   
-  
+ cum_sedimentation=0. 
   DO i=1,subasin
-	cum_sedimentation(i)=0.
 	fcav(i)=0
   END DO
 
@@ -853,10 +852,10 @@ end if
 	ELSE
 	  sed_outflow(step,res_index(upstream))=0.
 	  sedimentation(step,res_index(upstream))=0.
-      if (t==tstart .and. step==1) cum_sedimentation(upstream)=0.
-      IF (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(upstream)=0.
+      if (t==tstart .and. step==1) cum_sedimentation(res_index(upstream))=0.
+      IF (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(res_index(upstream))=0.
 
-      cum_sedimentation(upstream)=cum_sedimentation(upstream)+sedimentation(step,res_index(upstream))
+      cum_sedimentation(res_index(upstream))=cum_sedimentation(res_index(upstream))+sedimentation(step,res_index(upstream))
 	  decstorcap(step,res_index(upstream))=0.
 	  do g=1,n_sed_class
 		frsediment_out(res_index(upstream),g)=0.
@@ -1673,9 +1672,9 @@ end if
 ! Conversion (m3 to ton)
 !2010    cum_sedimentation(upstream)=cum_sedimentation(upstream)*dry_dens(upstream)
 	sedimentation(step,res_index(upstream))=sedimentation(step,res_index(upstream))*dry_dens(res_index(upstream))
-	if (step==1 .and. t==tstart) cum_sedimentation(upstream)=cum_sedimentation(upstream)+volbed0(res_index(upstream)) !2010
-	if (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(upstream)=cum_sedimentation(upstream)+volbed0(res_index(upstream)) !2010
-    cum_sedimentation(upstream)=cum_sedimentation(upstream)+sedimentation(step,res_index(upstream)) !2010
+	if (step==1 .and. t==tstart) cum_sedimentation(res_index(upstream))=cum_sedimentation(res_index(upstream))+volbed0(res_index(upstream)) !2010
+	if (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(res_index(upstream))=cum_sedimentation(res_index(upstream))+volbed0(res_index(upstream)) !2010
+    cum_sedimentation(res_index(upstream))=cum_sedimentation(res_index(upstream))+sedimentation(step,res_index(upstream)) !2010
 !write(*,'(2F18.3)')cum_sedimentation(upstream),sedimentation(step,upstream)
 !if (step==30)stop
 
@@ -1853,7 +1852,7 @@ end if
 
 
 	IF (decstorcap(step,res_index(upstream)) >= daystorcap(step,upstream) .or.&
-	    cum_sedimentation(upstream)/dry_dens(res_index(upstream)) >= storcap(upstream)*1.e6) then
+	    cum_sedimentation(res_index(upstream))/dry_dens(res_index(upstream)) >= storcap(upstream)*1.e6) then
 	 storcap(upstream)=0.
 	 daystorcap(step,upstream)=0.
 
@@ -2008,7 +2007,7 @@ end if
    IF (f_res_sedbal) THEN
    OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_sedbal.out',STATUS='old',POSITION='append')
     WRITE(11,'(4I6,4F15.3)')id_subbas_extern(upstream),t,d,hour,sed_inflow(step,res_index(upstream)),sed_outflow(step,res_index(upstream)), &
-		sedimentation(step,res_index(upstream)),cum_sedimentation(upstream)
+		sedimentation(step,res_index(upstream)),cum_sedimentation(res_index(upstream))
    CLOSE(11)
    ENDIF
 
@@ -2023,7 +2022,7 @@ end if
    CLOSE(11)
    ENDIF
   ELSE
-   daycumsed(step,res_index(upstream))=cum_sedimentation(upstream)
+   daycumsed(step,res_index(upstream))=cum_sedimentation(res_index(upstream))
    DO g=1,n_sed_class
      dayfrsediment_out(step,res_index(upstream),g)=frsediment_out(res_index(upstream),g)
    ENDDO

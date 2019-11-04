@@ -231,10 +231,10 @@ else
 endif
 
 
-if (t==tstart .and. step==1) cum_sedimentation(upstream)=0.
-IF (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(upstream)=0.
+if (t==tstart .and. step==1) cum_sedimentation(res_index(upstream))=0.
+IF (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(res_index(upstream))=0.
 sedimentation(step,res_index(upstream))=max(sed_inflow(step,res_index(upstream))-sed_outflow(step,res_index(upstream)),0.)
-cum_sedimentation(upstream)=cum_sedimentation(upstream)+sedimentation(step,res_index(upstream))
+cum_sedimentation(res_index(upstream))=cum_sedimentation(res_index(upstream))+sedimentation(step,res_index(upstream))
 !sed_susp(step,upstream)=0.
 
 
