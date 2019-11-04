@@ -94,7 +94,7 @@ damelev_mean(step,res_index(upstream))=damelev
 ! Minimum elevation for each cross_section (m)
 DO j=1,nbrsec(upstream)
   minelev_sec(j,res_index(upstream))=y_sec(1,j,res_index(upstream))
-  npt=npoints(j,upstream)
+  npt=npoints(j,res_index(upstream))
   DO m=2,npt
     IF (minelev_sec(j,res_index(upstream)) > y_sec(m,j,res_index(upstream))) THEN
       minelev_sec(j,res_index(upstream))=y_sec(m,j,res_index(upstream))
@@ -121,7 +121,7 @@ END DO
 ! Computation of maximum wetted surface of cross sections
 DO j=1,nbrsec(upstream)
   maxarea_sec(j,res_index(upstream))=0.
-  npt=npoints(j,upstream)
+  npt=npoints(j,res_index(upstream))
   maxelev_sec(j,res_index(upstream))=MIN(y_sec(1,j,res_index(upstream)), y_sec(npt,j,res_index(upstream)))
   maxdepth_sec(j,res_index(upstream))=maxelev_sec(j,res_index(upstream))- minelev_sec(j,res_index(upstream))
 
@@ -173,7 +173,7 @@ DO j=1,nbrsec(upstream)
     n=n+1
 ! Cross section area
     resarea_sec(j,res_index(upstream))=0.
-    npt=npoints(j,upstream)
+    npt=npoints(j,res_index(upstream))
     DO m=2,npt
       TAN=ABS(y_sec(m,j,res_index(upstream))-y_sec(m-1,j,res_index(upstream)))/  &
           (x_sec(m,j,res_index(upstream))-x_sec(m-1,j,res_index(upstream)))
@@ -244,10 +244,10 @@ DO j=1,nbrsec(upstream)
   IF (resarea_sec(j,res_index(upstream)) /= 0.) THEN
 ! reservoir subreach
     discharge_sec(j,res_index(upstream))=qinflow(step,upstream)-  &
-        (qinflow(step,upstream)-res_qout(step,upstream))*weight_sec(j,res_index(upstream))
+        (qinflow(step,upstream)-res_qout(step,res_index(upstream)))*weight_sec(j,res_index(upstream))
   ELSE
 ! river subreach
-    discharge_sec(j,res_index(upstream))=(qinflow(step,upstream)+res_qout(step,upstream))/2.
+    discharge_sec(j,res_index(upstream))=(qinflow(step,upstream)+res_qout(step,res_index(upstream)))/2.
   END IF
 END DO
 
@@ -259,7 +259,7 @@ END DO
 k=0
 
 DO j=1,nbrsec(upstream)
-  npt=npoints(j,upstream)
+  npt=npoints(j,res_index(upstream))
 
   if (j==1) depth_sec(j,res_index(upstream))=1.
   if (j/=1) depth_sec(j,res_index(upstream))=depth_sec(j-1,res_index(upstream))
@@ -418,7 +418,7 @@ END DO
 DO j=1,nbrsec(upstream)
   if(j==k+1 .and. k/=nbrsec(upstream))exit
 
-  npt=npoints(j,upstream)
+  npt=npoints(j,res_index(upstream))
   crdepth_sec(j,res_index(upstream))=depth_sec(j,res_index(upstream))
   crwatelev_sec(j,res_index(upstream))=watelev_sec(j,res_index(upstream))
 
@@ -582,7 +582,7 @@ DO j=1,nbrsec(upstream)
 ! 3.1) computation of hydraulic parameters if the cross section j belongs to the reservoir subreach
   IF (resarea_sec(j,res_index(upstream)) /= 0.) THEN
 
-    npt=npoints(j,upstream)
+    npt=npoints(j,res_index(upstream))
 
 	  area_sec(j,res_index(upstream))=resarea_sec(j,res_index(upstream))
       depth_sec(j,res_index(upstream))=damelev-minelev_sec(j,res_index(upstream))
@@ -676,7 +676,7 @@ IF (k /= 0) THEN
 
 !write(*,*)'Step (3.2a)'
   DO p=1,k
-    npt=npoints(k+1-p,upstream)
+    npt=npoints(k+1-p,res_index(upstream))
 
 ! trial-and-error
     error=1.
@@ -947,7 +947,7 @@ dummy1=22
   if (k>1) then
 !write(*,*)'Step (3.2b)'
    DO p=2,k
-    npt=npoints(p,upstream)
+    npt=npoints(p,res_index(upstream))
 
 ! trial-and-error
     error=1.

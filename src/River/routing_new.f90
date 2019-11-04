@@ -394,7 +394,7 @@ DO h=1,nt
          IF (downstream /= 9999 .AND. downstream /= 999) THEN
 !George res_qout(step,upstream) instead qout(d,upstream)
 !write(*,*)step,id_subbas_extern(upstream),"case 1a"
-           r_qin(2,downstream)=add_ifnot_nodata(r_qin(2,downstream), res_qout(step,upstream))
+           r_qin(2,downstream)=add_ifnot_nodata(r_qin(2,downstream), res_qout(step,res_index(upstream)))
 	       if(dosediment) then
                 do k=1,n_sed_class
 	                sediment_in(downstream,k)=add_ifnot_nodata(sediment_in(downstream,k), res_sediment_out(res_index(upstream),k))
@@ -416,7 +416,7 @@ DO h=1,nt
        IF (storcap(upstream) > 0. .and. t >= damyear(upstream)) THEN
          IF (storcap(reservoir_down(upstream)) > 0. .and. t >= damyear(reservoir_down(upstream))) THEN
 !write(*,*)step,id_subbas_extern(upstream),"case 2a"
-           qlateral(step,reservoir_down(upstream))=add_ifnot_nodata(qlateral(step,reservoir_down(upstream)), res_qout(step,upstream))
+           qlateral(step,reservoir_down(upstream))=add_ifnot_nodata(qlateral(step,reservoir_down(upstream)), res_qout(step,res_index(upstream)))
 	       if(dosediment) then
 	         do k=1,n_sed_class
 	           sed_qlateral(reservoir_down(res_index(upstream)),k) = add_ifnot_nodata(sed_qlateral(reservoir_down(res_index(upstream)),k), res_sediment_out(res_index(upstream),k))
@@ -425,7 +425,7 @@ DO h=1,nt
 		 ELSE
            IF (downstream /= 9999 .AND. downstream /= 999) THEN !George
 !write(*,*)step,id_subbas_extern(upstream),"case 2b"
-             r_qin(2,downstream) = add_ifnot_nodata(r_qin(2,downstream), res_qout(step,upstream)) !George
+             r_qin(2,downstream) = add_ifnot_nodata(r_qin(2,downstream), res_qout(step,res_index(upstream))) !George
 	         if(dosediment.and.river_transport.eq.2) then !George
 	           do k=1,n_sed_class !George
 		         sediment_in(downstream, k) = add_ifnot_nodata(sediment_in(downstream,k), res_sediment_out(res_index(upstream),k)) !George

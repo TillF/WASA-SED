@@ -48,13 +48,13 @@ IF (dvol_sed(j1,res_index(upstream)) < 0.) THEN
 !  elev=min(watelev_sec(j1,upstream)+5.,maxelev_sec(j1,upstream))
 !  elev=min(watelev_sec(j1,upstream)+1.5,watelev_sec(j1,upstream)+((maxelev_sec(j1,upstream)-watelev_sec(j1,upstream))/5.))
   dummy5=0.
-  DO m=1,npoints(j1,upstream)
+  DO m=1,npoints(j1,res_index(upstream))
     if(y_sec(m,j1,res_index(upstream))<elev) then
 	  dummy5=dummy5+(y_sec(m,j1,res_index(upstream))-y_actlay(m,j1,res_index(upstream)))
 	endif
   enddo
 
-  DO m=1,npoints(j1,upstream)
+  DO m=1,npoints(j1,res_index(upstream))
     if(y_sec(m,j1,res_index(upstream))<elev .and. dummy5/=0.) then
 	  wfactor(m)=(y_sec(m,j1,res_index(upstream))-y_actlay(m,j1,res_index(upstream)))/dummy5
 	else
@@ -63,7 +63,7 @@ IF (dvol_sed(j1,res_index(upstream)) < 0.) THEN
   enddo
 
   dummy3=0.
-  DO m=2,npoints(j1,upstream)-1
+  DO m=2,npoints(j1,res_index(upstream))-1
     IF (geom(m,j1) == 1)dummy3=dummy3+(((x_sec(m,j1,res_index(upstream))-x_sec(m-1,j1,res_index(upstream)))*wfactor(m)*(1./2.))+ &
 							((x_sec(m+1,j1,res_index(upstream))-x_sec(m,j1,res_index(upstream)))*wfactor(m)*(3./8.))+ &
 							((x_sec(m+1,j1,res_index(upstream))-x_sec(m,j1,res_index(upstream)))*wfactor(m+1)*(1./8.)))
@@ -79,7 +79,7 @@ IF (dvol_sed(j1,res_index(upstream)) < 0.) THEN
   enddo
   
   dummy4=darea_sed(j1,res_index(upstream))/dummy3
-  DO m=2,npoints(j1,upstream)-1
+  DO m=2,npoints(j1,res_index(upstream))-1
 	y_laststep(m,j1,res_index(upstream))=y_sec(m,j1,res_index(upstream))
 	IF (geom(m,j1) /= 0)y_sec(m,j1,res_index(upstream))=y_sec(m,j1,res_index(upstream))-dummy4*wfactor(m)	
 !if(j1<20)write(*,'(2I4,3I3,6F12.6)')t,d,j1,m,geom(m,j1),y_sec(m,j1,upstream),y_laststep(m,j1,upstream),dummy4*wfactor(m),dummy4,wfactor(m)
@@ -91,7 +91,7 @@ IF (dvol_sed(j1,res_index(upstream)) < 0.) THEN
 ! 2) deposition
 ELSE IF (dvol_sed(j1,res_index(upstream)) > 0.) THEN
 
-  DO m=1,npoints(j1,upstream)
+  DO m=1,npoints(j1,res_index(upstream))
     if(y_sec(m,j1,res_index(upstream))<watelev_sec(j1,res_index(upstream))) then
 !	  dummy5=(watelev_sec(j1,upstream)-y_sec(m,j1,upstream))/(watelev_sec(j1,upstream)-minelev_sec(j1,upstream))
 !	  wfactor(m)=1.-((1.-(dummy5))**2.9)
@@ -104,7 +104,7 @@ ELSE IF (dvol_sed(j1,res_index(upstream)) > 0.) THEN
   enddo
     
   dummy3=0.
-  DO m=2,npoints(j1,upstream)-1
+  DO m=2,npoints(j1,res_index(upstream))-1
     IF (geom(m,j1) == 1)dummy3=dummy3+(((x_sec(m,j1,res_index(upstream))-x_sec(m-1,j1,res_index(upstream)))*wfactor(m)*(1./2.))+ &
 							((x_sec(m+1,j1,res_index(upstream))-x_sec(m,j1,res_index(upstream)))*wfactor(m)*(3./8.))+ &
 							((x_sec(m+1,j1,res_index(upstream))-x_sec(m,j1,res_index(upstream)))*wfactor(m+1)*(1./8.)))
@@ -120,7 +120,7 @@ ELSE IF (dvol_sed(j1,res_index(upstream)) > 0.) THEN
   enddo
   
   dummy4=darea_sed(j1,res_index(upstream))/dummy3
-  DO m=2,npoints(j1,upstream)-1
+  DO m=2,npoints(j1,res_index(upstream))-1
 	y_laststep(m,j1,res_index(upstream))=y_sec(m,j1,res_index(upstream))
 	IF (geom(m,j1) /= 0)y_sec(m,j1,res_index(upstream))=y_sec(m,j1,res_index(upstream))+dummy4*wfactor(m)	
 !if(j1<20)write(*,'(2I4,3I3,6F12.6)')t,d,j1,m,geom(m,j1),y_sec(m,j1,upstream),y_laststep(m,j1,upstream),dummy4*wfactor(m),dummy4,wfactor(m)
@@ -153,7 +153,7 @@ enddo
 !	dummy=y_actlay(m,j1,upstream)
 !  endif
 !enddo
-DO m=1,npoints(j1,upstream)
+DO m=1,npoints(j1,res_index(upstream))
 !  if (x_sec(m,j1,upstream) /= x_minelev(j1,upstream)) then
 !    y_actlay(m,j1,upstream)=max(y_sec(m,j1,upstream)-dummy2,y_original(m,j1,upstream))
 !  endif
@@ -179,7 +179,7 @@ endif
 
 endif
 
-DO m=1,npoints(j1,upstream)
+DO m=1,npoints(j1,res_index(upstream))
 !write(*,*)j1,y_sec(m,j1,upstream),y_laststep(m,j1,upstream)
 ENDDO
 

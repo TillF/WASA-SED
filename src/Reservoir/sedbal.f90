@@ -36,7 +36,7 @@ REAL :: tempres(step,upstream)
 
 ! -----------------------------------------------------------------------
 
-if (res_qout(step,upstream)/=0.) then
+if (res_qout(step,res_index(upstream))/=0.) then
 !Ge to include the DAILY mean temperature of the reservoir (celsius degree)
 !Ge tempres=20 C (temporarily)
   tempres(step,upstream)=20.
@@ -56,7 +56,7 @@ if (res_qout(step,upstream)/=0.) then
       0.00068*((tempres(step,upstream)-15.)**2.))*1.e-6
 
 ! Overflow rate  Vc (m/s)
-  overflow_rate=res_qout(step,upstream)/damareaact(upstream)
+  overflow_rate=res_qout(step,res_index(upstream))/damareaact(upstream)
 !  overflow_rate=0.00032
 
 ! calculation of the corresponding equivalent diameter (mm)

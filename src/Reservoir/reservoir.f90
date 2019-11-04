@@ -252,27 +252,34 @@ storcap(:)=0.
   END DO
   CLOSE (11)
 
+  
+!Anne & Till 2019 fix reservoir memory issue:
+        !to decrease array size & only do calculations for subbasins with reservoir,  
+        !moved all arrays with "subbasin" from allocate.h, line 400 ff to reservoir.f90 
+        !and substituted "subbasin" by "n_reservoir";
+        !plus inserted "res_index()", e.g.: dayarea_bat(step,j,i) changed to dayarea_bat(step,j,res_index(i))    
+  
 ! allocate reservoir arrays, now that their required dimension is known 
  allocate( &
     
-       !   res_index(n_reservoir), &
-       !   f_intake_obs(n_reservoir), &
-       !   corr_column_intakes(n_reservoir), &
-       !   res_flag(n_reservoir), &
-   	   !   fcav(n_reservoir), &
+          !res_index(n_reservoir), &
+          !f_intake_obs(n_reservoir), &
+          !corr_column_intakes(n_reservoir), &
+          !res_flag(n_reservoir), &
+   	      !fcav(n_reservoir), &
 	      !fvol_over(n_reservoir), &
-       !   latflow_res(n_reservoir), &
-       !   reservoir_down(n_reservoir), &
- 	     ! damyear(n_reservoir), &
+          !latflow_res(n_reservoir), &
+          !reservoir_down(n_reservoir), &
+ 	      !damyear(n_reservoir), &
 	      !nbrbat(n_reservoir), &
 	      !dayexplot(n_reservoir,4), &
 	      !operat_start(n_reservoir), &
 	      !operat_stop(n_reservoir), &
 	      !operat_elev(n_reservoir), &
-       !   hmax(n_reservoir), &
-       !   volume_last(n_reservoir), &
-       !   outflow_last(n_reservoir), &
-       !
+          !hmax(n_reservoir), &
+          !volume_last(n_reservoir), &
+          !outflow_last(n_reservoir), &
+       
 	      !storcap(n_reservoir), &
 	      !damdead(n_reservoir), &
 	      !elevdead(n_reservoir), &
@@ -284,8 +291,8 @@ storcap(:)=0.
 	      !damq_frac_season(n_reservoir,4), &
 	      !volact(366*nt,n_reservoir), &
 	      !precdam(366*nt,n_reservoir), &
-       !   etdam(366*nt,n_reservoir), &
-       !
+          !etdam(366*nt,n_reservoir), &
+       
 	      !maxdamarea(n_reservoir), &
 	      !damareaact(n_reservoir), &
 	      !alpha_over(n_reservoir), &
@@ -299,7 +306,7 @@ storcap(:)=0.
 	      !fvol_bottom(n_reservoir), &
 	      !withdrawal(n_reservoir), &
 	      !lakeret(366*nt,n_reservoir), &
-       !
+       
 	      !vol0(n_reservoir), &
 	      !qlateral(366*nt,n_reservoir), &
 	      !qinflow(366*nt,n_reservoir), &
@@ -321,18 +328,17 @@ storcap(:)=0.
 	      !resreach_vol(n_reservoir), &
 	      !res_precip(366*nt,n_reservoir), &
 	      !res_pet(366*nt,n_reservoir), &
-	      !res_qout(366*nt,n_reservoir), &
-       !
-	      !id_sec_extern(nxsection_res,n_reservoir), &
+    res_qout(366*nt,n_reservoir), &
+       
+    id_sec_extern(nxsection_res,n_reservoir), &
 	      !nbrsec(n_reservoir), &
-	      !npoints(nxsection_res,n_reservoir), &
+    npoints(nxsection_res,n_reservoir), &
 	      
     decvolact(366*nt,n_reservoir), &       !Anne variable seems to be unused
     decstorcap(366*nt,n_reservoir), &
     decmaxdamarea(366*nt,n_reservoir), &   !Anne variable seems to be unused & is set to 0 in semres.f90
     decdamdead(366*nt,n_reservoir), &      !Anne variable seems to be unused
-    decdamalert(366*nt,n_reservoir), &     !Anne variable seems to be unused
-     
+    decdamalert(366*nt,n_reservoir), &     !Anne variable seems to be unused   
     manning_sec(nxsection_res,n_reservoir), &
     dist_sec(nxsection_res,n_reservoir), &
     x_sec0(npointsxsect,nxsection_res,n_reservoir), &
@@ -1492,7 +1498,7 @@ IF (STATUS == 2) THEN
 !if (step==20)stop
 !if (step==41 .and. id_subbas_extern(upstream)==29) stop
 
-      res_qout(step,upstream)=qintake(step,upstream)+overflow(step,upstream)+qbottom(step,upstream)
+      res_qout(step,res_index(upstream))=qintake(step,upstream)+overflow(step,upstream)+qbottom(step,upstream)
 
 
 
@@ -1518,7 +1524,7 @@ IF (STATUS == 2) THEN
 
 !write(*,'(I4,4F15.4)')d,dayminlevel(step,upstream),elevhelp,forma_factor(upstream),areahelp
 
-      res_qout(step,upstream)=res_qout(step,upstream)/(86400./nt)
+      res_qout(step,res_index(upstream))=res_qout(step,res_index(upstream))/(86400./nt)
       qinflow(step,upstream)=qinflow(step,upstream)/(86400./nt)
       qintake(step,upstream)=qintake(step,upstream)/(86400./nt)
       overflow(step,upstream)=overflow(step,upstream)/(86400./nt)
@@ -1537,7 +1543,7 @@ IF (STATUS == 2) THEN
       daydamdead(step,upstream)=daydamdead(step,upstream)*1.e6
       damvol0(upstream)=volact(step,upstream)
 
-	  res_qout(step,upstream)=qintake(step,upstream)+overflow(step,upstream)+qbottom(step,upstream)
+	  res_qout(step,res_index(upstream))=qintake(step,upstream)+overflow(step,upstream)+qbottom(step,upstream)
 	  damelevact(upstream)=damelev1(step,upstream)
 
       IF (nbrbat(upstream) /= 0) THEN
@@ -1791,7 +1797,7 @@ IF (STATUS == 2) THEN
      OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_watbal.out',STATUS='old',  &
 		  POSITION='append')
 	 WRITE(11,'(4I6,2f10.3,2f13.1,6f10.3,3f14.1)')id_subbas_extern(upstream),t,d,hour,qlateral(step,upstream),qinflow(step,upstream),etdam(step,upstream),precdam(step,upstream),  &
-				qintake(step,upstream),overflow(step,upstream),qbottom(step,upstream),res_qout(step,upstream), &
+				qintake(step,upstream),overflow(step,upstream),qbottom(step,upstream),res_qout(step,res_index(upstream)), &
 				withdraw_out(step,upstream),damelevact(upstream),damareaact(upstream),volact(step,upstream)
      CLOSE(11)
 	 ENDIF
@@ -1851,14 +1857,16 @@ IF (STATUS == 2) THEN
 !write(*,'(2I4,3F15.4)')d,id_subbas_extern(upstream),dayminlevel(step,upstream),decstorcap(step,upstream)
 !if (d==4)stop
 
-  ELSE  ! reservoir does not (yet) exist
+ELSE  ! reservoir does not (yet) exist
 
-    if (river_transport.eq.1)then
-      res_qout(step,upstream)=qout(step,upstream)
-    else
-      res_qout(step,upstream)=r_qout(2,upstream)+qlateral(step,upstream)
+    if (res_index(upstream)/=0) then
+        if (river_transport.eq.1)then
+          res_qout(step,res_index(upstream))=qout(step,upstream)
+        else
+        res_qout(step,res_index(upstream))=r_qout(2,upstream)+qlateral(step,upstream)
+        endif
     endif
-
+        
   ENDIF
 
 ! END of STATUS = 2
@@ -1889,7 +1897,7 @@ endif
             t,char(9),d,char(9),hour,char(9),qlateral(step,i),char(9),qinflow(step,i),char(9),etdam(step,i),char(9),&
             precdam(step,i),char(9),qintake(step,i),char(9),overflow(step,i),char(9),qbottom(step,i),char(9),&
     !Anne changed, eg., daydamareaact(step,i) to daydamareaact(step,res_index(i))
-            res_qout(step,i),char(9),withdraw_out(step,i),char(9),daydamelevact(step,res_index(i)),char(9),daydamareaact(step,res_index(i)),char(9),volact(step,i)*1.e6,char(9)
+            res_qout(step,res_index(i)),char(9),withdraw_out(step,i),char(9),daydamelevact(step,res_index(i)),char(9),daydamareaact(step,res_index(i)),char(9),volact(step,i)*1.e6,char(9)
 		  ENDDO
 		ENDDO
         CLOSE(11)

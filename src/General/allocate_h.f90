@@ -399,6 +399,12 @@ subroutine allocate_reservoir()
 
     IF (doreservoir) THEN
 	    allocate( &
+            
+ !Anne & Till 2019 fix reservoir memory issue:
+        !to decrease array size & only do calculations for subbasins with reservoir,  
+        !moved all arrays with "subbasin" to reservoir.f90 and substituted by "n_reservoir";
+        !plus inserted "res_index()", e.g.: dayarea_bat(step,j,i) changed to dayarea_bat(step,j,res_index(i))   
+                  
 	      res_index(subasin), &
           f_intake_obs(subasin), &
           corr_column_intakes(subasin), &
@@ -472,42 +478,21 @@ subroutine allocate_reservoir()
 	      resreach_vol(subasin), &
 	      res_precip(366*nt,subasin), &
 	      res_pet(366*nt,subasin), &
-	      res_qout(366*nt,subasin), &
-
-	      id_sec_extern(nxsection_res,subasin), &
+!A	      res_qout(366*nt,subasin), &
+            
 	      nbrsec(subasin), &
-	      npoints(nxsection_res,subasin), &
+
 	      geom(npointsxsect,nxsection_res), &
-!A	      decvolact(366*nt,subasin), &
-!A	      decstorcap(366*nt,subasin), &
-!A	      decmaxdamarea(366*nt,subasin), &
-!A	      decdamdead(366*nt,subasin), &
-!A	      decdamalert(366*nt,subasin), &
-!A	      manning_sec(nxsection_res,subasin), &
-!A	      dist_sec(nxsection_res,subasin), &
-!A	      x_sec0(npointsxsect,nxsection_res,subasin), &
-!A	      y_sec0(npointsxsect,nxsection_res,subasin), &
+            
     !	  sed_susp(366*nt,subasin), &
             
-!A	      sed_ret(366*nt,subasin), &
-!A	      sed_overflow(366*nt,subasin), &
-!A	      sed_intake(366*nt,subasin), &
-!A	      sed_bottom(366*nt,subasin), &
-!A	      sed_qlateral(subasin,n_sed_class), &
-!A	      sed_inflow(366*nt,subasin), &
-!A	      sed_outflow(366*nt,subasin), &
 	      diam(n_sed_class), &
-!A	      sedimentation(366*nt,subasin), &
             
 	      cum_sedimentation(subasin), &
     !	  min_conc(subasin), &
     !	  sed_conc0(subasin), &
     !	  wet_dens(subasin), &
-            
-!A	      res_sediment_out(subasin,n_sed_class), &
-!A	      frsediment_in(subasin,n_sed_class), &
-!A	      frsediment_out(subasin,n_sed_class), &
-            
+                       
 	      dry_dens(subasin), &
 	      factor_actlay(subasin), &
 	      sed_flag(subasin), &
@@ -518,59 +503,11 @@ subroutine allocate_reservoir()
     !	  param_b(10,subasin), &
     !	  nbsizedist(subasin), &
     !	  Q_refer(10,subasin), &
-            
-!A	      sedinflow_g(366*nt,subasin,n_sed_class), &
-!A	      sedoutflow_g(366*nt,subasin,n_sed_class), &
-
-!A	      damelev_mean(366*nt,subasin), &
-!A	      x_minelev(nxsection_res,subasin), &
-!A	      minelev_sec(nxsection_res,subasin), &
-!A	      bedslope_sec(nxsection_res,subasin), &
-!A	      area_sec(nxsection_res,subasin), &
-!A	      resarea_sec(nxsection_res,subasin), &
-!A	      resvol_sec(nxsection_res,subasin), &
-	      
+            	      
           resvol(subasin), &
-            
-!A	      topwidth_sec(nxsection_res,subasin), &
-!A	      weight_sec(nxsection_res,subasin), &
-!A	      discharge_sec(nxsection_res,subasin), &
-!A	      depth_sec(nxsection_res,subasin), &
-!A	      watelev_sec(nxsection_res,subasin), &
-!A	      wetper_sec(nxsection_res,subasin), &
-!A	      hydrad_sec(nxsection_res,subasin), &
-!A	      meanvel_sec(nxsection_res,subasin), &
-!A	      energslope_sec(nxsection_res,subasin), &
-!A	      dynhead_sec(nxsection_res,subasin), &
-!A	      tothead_sec(nxsection_res,subasin), &
-!A	      headloss_sec(nxsection_res,subasin), &
-!A	      locloss_sec(nxsection_res,subasin), &
-!A	      calctothead_sec(nxsection_res,subasin), &
-!A	      maxarea_sec(nxsection_res,subasin), &
-!A	      maxelev_sec(nxsection_res,subasin), &
-!A	      maxdepth_sec(nxsection_res,subasin), &
-!A	      crdepth_sec(nxsection_res,subasin), &
-!A	      crwatelev_sec(nxsection_res,subasin), &
-!A	      crarea_sec(nxsection_res,subasin), &
-!A	      crtopwidth_sec(nxsection_res,subasin), &
-!A	      crwetper_sec(nxsection_res,subasin), &
-!A	      crslope_sec(nxsection_res,subasin), &
-!A	      crvel_sec(nxsection_res,subasin), &
-!A	      crhydrad_sec(nxsection_res,subasin), &
-!A	      normalelev_sec(nxsection_res,subasin), &
-!A	      normalarea_sec(nxsection_res,subasin), &
-
+    
 	      setvel(n_sed_class), &
-    !	  point1_sub(nxsection_res,subasin), &
-    !	  point2_sub(nxsection_res,subasin), &
-    !	  point1_bank(nxsection_res,subasin), &
-    !	  point2_bank(nxsection_res,subasin), &
-            
-!A	      area_actlay(nxsection_res,subasin), &
-!A	      area_toplay(nxsection_res,subasin), &
-!A	      vol_actlay(nxsection_res,subasin), &
-!A	      vol_toplay(nxsection_res,subasin), &
-            
+                        
 	      frsedavailab(n_sed_class,nxsection_res), &
 	      frerosion(n_sed_class,nxsection_res), &
 	      frdeposition(n_sed_class,nxsection_res), &
@@ -578,73 +515,21 @@ subroutine allocate_reservoir()
     !	  frsuspension(n_sed_class,nxsection_res), &
     !	  frbed_discharge(n_sed_class,nxsection_res), &
     !	  frsusp_discharge(n_sed_class,nxsection_res), &           
-	      frtotal_discharge(n_sed_class,nxsection_res), &
-            
-!A	      erosion(nxsection_res,subasin), &
-!A	      deposition(nxsection_res,subasin), &
-!A	      retention(nxsection_res,subasin), &
-            
+	      frtotal_discharge(n_sed_class,nxsection_res), &        
     !	  suspension(nxsection_res,subasin), &
-            
-!A	      totalload(nxsection_res,subasin), &
             
 	      bed_frtransp(n_sed_class,nxsection_res), &
 	      susp_frtransp(n_sed_class,nxsection_res), &
 	      fr_capacity(n_sed_class,nxsection_res), &            
     !	  dheight_sed(nxsection_res,subasin), &
-	      
-!A        darea_sed(nxsection_res,subasin), &
-!A	      dvol_sed(nxsection_res,subasin), &
-!A	      frvol_actlay(n_sed_class,nxsection_res,subasin), &
-!A	      totvol_actlay(nxsection_res,subasin), &
-!A	      conc(nxsection_res,subasin), &
             
-	      frconc(n_sed_class,nxsection_res), &
-            
-!A	      area_sedim(nxsection_res,subasin), &
-!A	      vol_sedim(nxsection_res,subasin), &
-            
+	      frconc(n_sed_class,nxsection_res), &          
 	      volbed0(subasin), &	      
           length_plunge(subasin), &
-            
-!A	      cumlength_sec(nxsection_res,subasin), &
-!A	      length_sec(nxsection_res,subasin), &
-!A	      d50_actlay(nxsection_res,subasin), &
-!A	      d90_actlay(nxsection_res,subasin), &
-!A	      frsedinflow(366*nt,subasin,n_sed_class), &
-!A	      frvol_actlay0(n_sed_class,nxsection_res,subasin), &
-!A	      totvol_actlay0(nxsection_res,subasin), &
-!A	      x_sec(npointsxsect,nxsection_res,subasin), &
-!A	      y_sec(npointsxsect,nxsection_res,subasin), &
-!A	      y_actlay(npointsxsect,nxsection_res,subasin), &
-!A	      y_original(npointsxsect,nxsection_res,subasin), &
-!A	      frac_actlay(n_sed_class,nxsection_res,subasin), &
-!A	      frac_toplay(n_sed_class,nxsection_res,subasin), &
-!A	      frac_comlay(n_sed_class,nxsection_res,subasin), &
-!A	      frac_susp(n_sed_class,nxsection_res,subasin), &
-!A	      partarea_actlay(npointsxsect,nxsection_res,subasin), &
-!A	      partarea_toplay(npointsxsect,nxsection_res,subasin), & 
-            
+               
     !	  weightfac_actlay(npointsxsect,nxsection_res,subasin), &
     !	  weightfac_toplay(npointsxsect,nxsection_res,subasin), &
 	      
-!A        y_laststep(npointsxsect,nxsection_res,subasin), &
-!A	      erosion_level(nxsection_res,subasin), &
-!A	      pt1(nxsection_res,subasin), &
-!A	      pt2(nxsection_res,subasin), &
-!A	      pt3(nxsection_res,subasin), &
-!A	      pt4(nxsection_res,subasin), &
-!A	      pt_long0(subasin), &
-!A	      pt_long(subasin), &
-!A	      sideslope_pt1(nxsection_res,subasin), &
-!A	      sideslope_pt2(nxsection_res,subasin), &
-!A	      slope_long(subasin), &
-!A	      daydamelevact(366*nt,subasin), &
-!A	      daydamareaact(366*nt,subasin), &
-!A	      dayelev_bat(366*nt,nxsection_res,subasin), &
-!A	      dayarea_bat(366*nt,nxsection_res,subasin), &
-!A        dayvol_bat(366*nt,nxsection_res,subasin), &   !Anne: moved to reservoir.h & changed subasin to n_reservoir
-
 	     STAT = istate)
 
 	    if (istate/=0) then
