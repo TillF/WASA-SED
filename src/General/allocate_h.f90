@@ -478,11 +478,11 @@ subroutine allocate_reservoir()
 	      nbrsec(subasin), &
 	      npoints(nxsection_res,subasin), &
 	      geom(npointsxsect,nxsection_res), &
-	      decvolact(366*nt,subasin), &
-	      decstorcap(366*nt,subasin), &
-	      decmaxdamarea(366*nt,subasin), &
-	      decdamdead(366*nt,subasin), &
-	      decdamalert(366*nt,subasin), &
+!A	      decvolact(366*nt,subasin), &
+!A	      decstorcap(366*nt,subasin), &
+!A	      decmaxdamarea(366*nt,subasin), &
+!A	      decdamdead(366*nt,subasin), &
+!A	      decdamalert(366*nt,subasin), &
 !A	      manning_sec(nxsection_res,subasin), &
 !A	      dist_sec(nxsection_res,subasin), &
 !A	      x_sec0(npointsxsect,nxsection_res,subasin), &

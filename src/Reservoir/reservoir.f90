@@ -327,11 +327,12 @@ storcap(:)=0.
 	      !nbrsec(n_reservoir), &
 	      !npoints(nxsection_res,n_reservoir), &
 	      
-	      !decvolact(366*nt,n_reservoir), &
-	      !decstorcap(366*nt,n_reservoir), &
-	      !decmaxdamarea(366*nt,n_reservoir), &
-	      !decdamdead(366*nt,n_reservoir), &
-	      !decdamalert(366*nt,n_reservoir), &
+    decvolact(366*nt,n_reservoir), &       !Anne variable seems to be unused
+    decstorcap(366*nt,n_reservoir), &
+    decmaxdamarea(366*nt,n_reservoir), &   !Anne variable seems to be unused & is set to 0 in semres.f90
+    decdamdead(366*nt,n_reservoir), &      !Anne variable seems to be unused
+    decdamalert(366*nt,n_reservoir), &     !Anne variable seems to be unused
+     
     manning_sec(nxsection_res,n_reservoir), &
     dist_sec(nxsection_res,n_reservoir), &
     x_sec0(npointsxsect,nxsection_res,n_reservoir), &
@@ -1569,11 +1570,11 @@ IF (STATUS == 2) THEN
 !write(*,'(2I4,3F15.4)')d,id_subbas_extern(upstream),decstorcap(step,upstream),dayminlevel(step,upstream),daystorcap(step,upstream)
 
 ! Calculation of storage capacity reduction
-      if (decstorcap(step,upstream)/=0.) then
+      if (decstorcap(step,res_index(upstream))/=0.) then
 
 ! CASE 1: stage-area-volume curve is not provided
        if (nbrbat(upstream) == 0) then
-	    if (decstorcap(step,upstream) >= daystorcap(step,upstream) .or. daystorcap(step,upstream) == 0.) then
+	    if (decstorcap(step,res_index(upstream)) >= daystorcap(step,upstream) .or. daystorcap(step,upstream) == 0.) then
 	     write(*,*) 'the resevoir located at the outlet point of sub-basin:',id_subbas_extern(upstream)
 	     write(*,*) 'lost its total storage capacity due to sediment deposition'
 		 storcap(upstream)=0.
@@ -1584,13 +1585,13 @@ IF (STATUS == 2) THEN
 		 enddo
         else
          volhelp=MAX(0.,daystorcap(step,upstream)  &
-			-decstorcap(step,upstream))
+			-decstorcap(step,res_index(upstream)))
 
 ! Calculation of minimum reservoir elevation
          if (daystorcap(step,upstream) == 0.) then
 	      dummy4=0.
 	     else
-	      dummy4=decstorcap(step,upstream)/daystorcap(step,upstream)
+	      dummy4=decstorcap(step,res_index(upstream))/daystorcap(step,upstream)
 	     endif
 
 	     elevhelp=max(0.,(maxlevel(upstream)-dayminlevel(step,upstream))*dummy4)
@@ -1623,7 +1624,7 @@ IF (STATUS == 2) THEN
 	   else
 ! CASE 2a: no detailed information of the reservoir geometry is provided (no cross section)
 	    if (nbrsec(upstream) == 0) then
-	     if (decstorcap(step,upstream) >= daystorcap(step,upstream) .or. daystorcap(step,upstream) == 0.) then
+	     if (decstorcap(step,res_index(upstream)) >= daystorcap(step,upstream) .or. daystorcap(step,upstream) == 0.) then
 	      write(*,*) 'the resevoir located at the outlet point of sub-basin:',id_subbas_extern(upstream)
 	      write(*,*) 'lost its total storage capacity due to sediment deposition'
 		  storcap(upstream)=0.
@@ -1635,7 +1636,7 @@ IF (STATUS == 2) THEN
          else
 
 	     daystorcap(step,upstream)=MAX(0.,daystorcap(step,upstream)  &
-			-decstorcap(step,upstream))
+			-decstorcap(step,res_index(upstream)))
 
 ! Change on stage-area-volume curve due to erosion and deposition processes
 ! Calculation of minimum reservoir elevation
@@ -1655,7 +1656,7 @@ IF (STATUS == 2) THEN
 		  endif
 !write(*,'(3I4,F15.5,3F15.2)')step,j,dummy1,dummy5,elev_bat(j,upstream),dayminlevel(step,upstream),maxlevel(upstream)
 !write(*,'(3I4,F15.5,4F15.2)')step,j,dummy1,dummy5,vol_bat(j,upstream),decstorcap(step,upstream)*dummy5,vol_bat(j,upstream)-(decstorcap(step,upstream)*dummy5)
-		  dummy5=max(0.,vol_bat(j,upstream)-(decstorcap(step,upstream)*dummy5))
+		  dummy5=max(0.,vol_bat(j,upstream)-(decstorcap(step,res_index(upstream))*dummy5))
 		  if (dummy5 == 0.)p=j
 		  if (j == p+1) then
            DO q=1,nbrbat(upstream)-1
@@ -1720,7 +1721,7 @@ IF (STATUS == 2) THEN
 
 ! CASE 2b: detailed information of the reservoir geometry is provided (cross sections)
        else
-	    if (decstorcap(step,upstream) >= daystorcap(step,upstream) .or. daystorcap(step,upstream) == 0.) then
+	    if (decstorcap(step,res_index(upstream)) >= daystorcap(step,upstream) .or. daystorcap(step,upstream) == 0.) then
 	     write(*,*) 'the resevoir located at the outlet point of sub-basin:',id_subbas_extern(upstream)
 	     write(*,*) 'lost its total storage capacity due to sediment deposition'
 		 storcap(upstream)=0.

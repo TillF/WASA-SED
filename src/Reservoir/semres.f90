@@ -74,15 +74,14 @@ character(len=1000) :: fmtstr	!string for formatting file output
 IF (STATUS == 0) THEN
 
   sed_qlateral=0.
+  decdamalert=0.    !Anne moved from DO-loop below; variable seems to be unused
+  decdamdead=0.     !A
+  decmaxdamarea=0.  !A
+  decstorcap=0.     !A
+  decvolact=0.      !A
+  
   
   DO i=1,subasin
-    DO id=1,dayyear*nt
-      decvolact(id,i)=0.
-      decstorcap(id,i)=0.
-      decdamalert(id,i)=0.
-      decdamdead(id,i)=0.
-      decmaxdamarea(id,i)=0.
-    END DO
 	cum_sedimentation(i)=0.
 	fcav(i)=0
   END DO
@@ -851,7 +850,7 @@ end if
       IF (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(upstream)=0.
 
       cum_sedimentation(upstream)=cum_sedimentation(upstream)+sedimentation(step,res_index(upstream))
-	  decstorcap(step,upstream)=0.
+	  decstorcap(step,res_index(upstream))=0.
 	  do g=1,n_sed_class
 		frsediment_out(res_index(upstream),g)=0.
 	  enddo
@@ -1662,7 +1661,7 @@ end if
 !2010    cum_sedimentation(upstream)=cum_sedimentation(upstream)-volbed0(upstream)
 !write(*,'(I4,3F13.1)')upstream,cum_sedimentation(upstream),volbed0(upstream)
 ! Storage capacity reduction (m3)
-    decstorcap(step,upstream)=sedimentation(step,res_index(upstream))
+    decstorcap(step,res_index(upstream))=sedimentation(step,res_index(upstream))
 
 ! Conversion (m3 to ton)
 !2010    cum_sedimentation(upstream)=cum_sedimentation(upstream)*dry_dens(upstream)
@@ -1683,7 +1682,7 @@ end if
 ! Change on stage-area-volume curve due to erosion and deposition processes
     dummy9=0.
 	nbrbat1=nbrbat(upstream)
-	if (decstorcap(step,upstream) < daystorcap(step,upstream) .and. decstorcap(step,upstream)/=0.) then
+	if (decstorcap(step,res_index(upstream)) < daystorcap(step,upstream) .and. decstorcap(step,res_index(upstream))/=0.) then
      DO b=1,nbrbat1
       elevhelp=elev_bat(b,upstream)
       DO j=1,nbrsec(upstream)
@@ -1802,7 +1801,7 @@ end if
 
      DO b=1,nbrbat(upstream)
 	   if (elev_bat(b,upstream) >= maxlevel(upstream)) THEN
-	     vol_bat(b,upstream)=max(vol_bat(b,upstream)-decstorcap(step,upstream),0.)
+	     vol_bat(b,upstream)=max(vol_bat(b,upstream)-decstorcap(step,res_index(upstream)),0.)
 	   else
 !	     dummy3=vol_bat(b,upstream)
 !write(*,'(2I4,3F13.1,2F13.3)')step,b,volhelp(b),dummy12*volhelp(b),vol_bat(b,upstream),dummy12,dummy9
@@ -1846,7 +1845,7 @@ end if
 	ENDIF
 
 
-	IF (decstorcap(step,upstream) >= daystorcap(step,upstream) .or.&
+	IF (decstorcap(step,res_index(upstream)) >= daystorcap(step,upstream) .or.&
 	    cum_sedimentation(upstream)/dry_dens(upstream) >= storcap(upstream)*1.e6) then
 	 storcap(upstream)=0.
 	 daystorcap(step,upstream)=0.

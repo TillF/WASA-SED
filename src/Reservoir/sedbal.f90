@@ -239,7 +239,7 @@ cum_sedimentation(upstream)=cum_sedimentation(upstream)+sedimentation(step,res_i
 
 
 ! storage capacity reduction (m3)
-decstorcap(step,upstream)=sedimentation(step,res_index(upstream))/dry_dens(upstream)
+decstorcap(step,res_index(upstream))=sedimentation(step,res_index(upstream))/dry_dens(upstream)
 
 
 !write(*,'(3I4,2F15.1)')t,d,upstream,sedimentation(step,upstream),cum_sedimentation(upstream)
