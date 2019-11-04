@@ -34,8 +34,8 @@ real :: manning(200),topwidth(200),meanvel(200)
 
 ! -----------------------------------------------------------------------
 
-do j=1,nbrsec(upstream)
-  if (j /= nbrsec(upstream)) then
+do j=1,nbrsec(res_index(upstream))
+  if (j /= nbrsec(res_index(upstream))) then
     discharge(j)=(discharge_sec(j,res_index(upstream))+discharge_sec(j+1,res_index(upstream)))/2.
     depth(j)=(depth_sec(j,res_index(upstream))+depth_sec(j+1,res_index(upstream)))/2.
     hydrad(j)=(hydrad_sec(j,res_index(upstream))+hydrad_sec(j+1,res_index(upstream)))/2.
@@ -57,7 +57,7 @@ enddo
 ! TOTAL LOAD FORMULA
 
 ! loop to calculate the sediment carrying capacity
-DO j=1,nbrsec(upstream)
+DO j=1,nbrsec(res_index(upstream))
 
   if (discharge(j) /= 0.) then
     DO g=1,n_sed_class

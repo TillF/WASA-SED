@@ -78,9 +78,9 @@ IF (STATUS == 0) THEN
   decdamdead=0.     !A
   decmaxdamarea=0.  !A
   decstorcap=0.     !A
-  decvolact=0.      !A
-  
- cum_sedimentation=0. 
+  decvolact=0.      !A  
+  cum_sedimentation=0. 
+ 
   DO i=1,subasin
 	fcav(i)=0
   END DO
@@ -133,9 +133,7 @@ IF (STATUS == 0) THEN
   ENDIF
 
 ! Read geometric parameters of the reservoir
-  DO i=1,subasin
-	nbrsec(i)=0
-  ENDDO
+nbrsec=0. 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/hydraul_param.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!hydraul_param.dat not found
 	  write(*,*)'WARNING: '//pfadp(1:pfadj)// 'hydraul_param.dat not found, using defaults'
@@ -144,7 +142,7 @@ IF (STATUS == 0) THEN
       READ(11,*,IOSTAT=ka) dummy1,dummy2
       DO i=1,subasin
         IF (dummy1==id_subbas_extern(i)) THEN
-          nbrsec(i)=dummy2
+          nbrsec(res_index(i))=dummy2
 	    ENDIF
 	  ENDDO
       DO WHILE (ka==0)
@@ -152,7 +150,7 @@ IF (STATUS == 0) THEN
         DO i=1,subasin
           IF (dummy1==id_subbas_extern(i)) THEN
 		    dummy1a=i
-            nbrsec(i)=dummy2
+            nbrsec(res_index(i))=dummy2
 		  ENDIF
 	    ENDDO
       END DO
@@ -163,62 +161,68 @@ IF (STATUS == 0) THEN
 	IF (istate==0) THEN
       READ(11,*);READ(11,*)
       DO i=1,subasin
-        nbrsec1=nbrsec(i)
-        IF (nbrbat(i) /= 0 .AND. nbrsec(i) /= 0) THEN
-          READ(11,*) dummy1,dummy2,(manning_sec(j,res_index(i)),j=1,nbrsec1)
-          READ(11,*) dummy1,dummy2,(dist_sec(j,res_index(i)),j=1,nbrsec1)
-        ELSE IF (nbrbat(i) == 0.AND.nbrsec(i) /= 0) THEN
-          WRITE(*,*)'ERROR - if sections are defined, the file cav.dat must be given'
-          WRITE(*,*)'subasin:',id_subbas_extern(i)
-          STOP
-        ELSE IF (nbrsec(i) == 0) THEN
-          dummy1=id_subbas_extern(i)
-        END IF
-        IF (dummy1 /= id_subbas_extern(i)) THEN
-          WRITE(*,*) 'ERROR: Sub-basin-IDs in file hydraul_param.dat must have the same ordering scheme as in hymo.dat'
-          STOP
-        END IF
+        if (res_index(i) /= 0.) then !Anne inserted this line
+            nbrsec1=nbrsec(res_index(i))
+            IF (nbrbat(i) /= 0 .AND. nbrsec(res_index(i)) /= 0) THEN
+              READ(11,*) dummy1,dummy2,(manning_sec(j,res_index(i)),j=1,nbrsec1)
+              READ(11,*) dummy1,dummy2,(dist_sec(j,res_index(i)),j=1,nbrsec1)
+            ELSE IF (nbrbat(i) == 0.AND.nbrsec(res_index(i)) /= 0) THEN
+              WRITE(*,*)'ERROR - if sections are defined, the file cav.dat must be given'
+              WRITE(*,*)'subasin:',id_subbas_extern(i)
+              STOP
+            ELSE IF (nbrsec(res_index(i)) == 0) THEN
+              dummy1=id_subbas_extern(i)
+            END IF
+            IF (dummy1 /= id_subbas_extern(i)) THEN
+              WRITE(*,*) 'ERROR: Sub-basin-IDs in file hydraul_param.dat must have the same ordering scheme as in hymo.dat'
+              STOP
+            END IF
+        endif	 !Anne    
       END DO
 	ENDIF
   CLOSE(11)
 
 !Distance from the cross section to the dam (m)
   DO i=1,subasin
-    nbrsec1=nbrsec(i)
-    IF (nbrsec(i) /= 0) THEN
-      DO j=1,nbrsec1
-	    cumlength_sec(j,res_index(i))=0.
-	    DO j1=j,nbrsec1
-		  cumlength_sec(j,res_index(i))=cumlength_sec(j,res_index(i))+dist_sec(j1,res_index(i))
-		ENDDO
-!write(*,'(2I4,2F15.3)')id_subbas_extern(i),j,dist_sec(j,i),cumlength_sec(j,i)
-	  ENDDO
-	ENDIF
+     if (res_index(i) /= 0.) then !Anne inserted this line 
+        nbrsec1=nbrsec(res_index(i))
+        IF (nbrsec(res_index(i)) /= 0) THEN
+          DO j=1,nbrsec1
+	        cumlength_sec(j,res_index(i))=0.
+	        DO j1=j,nbrsec1
+		      cumlength_sec(j,res_index(i))=cumlength_sec(j,res_index(i))+dist_sec(j1,res_index(i))
+		    ENDDO
+    !write(*,'(2I4,2F15.3)')id_subbas_extern(i),j,dist_sec(j,i),cumlength_sec(j,i)
+	      ENDDO
+        ENDIF
+     endif	 !Anne   
   ENDDO
 
 !Length of the reach represented by each cross section (m)
   DO i=1,subasin
-    nbrsec1=nbrsec(i)
-    IF (nbrsec(i) /= 0) THEN
-      DO j=1,nbrsec1
-        IF (j == 1) THEN
-          length_sec(j,res_index(i))=dist_sec(j,res_index(i))
-        ELSE IF (j == nbrsec(i)) THEN
-          length_sec(j,res_index(i))=dist_sec(j,res_index(i))+(dist_sec(j-1,res_index(i))/2.)
-        ELSE
-          length_sec(j,res_index(i))=(dist_sec(j,res_index(i))+dist_sec(j-1,res_index(i)))/2.
-        END IF
-      END DO
-    endif
-  enddo
+    if (res_index(i) /= 0.) then !Anne inserted this line 
+        nbrsec1=nbrsec(res_index(i))
+        IF (nbrsec(res_index(i)) /= 0) THEN
+          DO j=1,nbrsec1
+            IF (j == 1) THEN
+              length_sec(j,res_index(i))=dist_sec(j,res_index(i))
+            ELSE IF (j == nbrsec(res_index(i))) THEN
+              length_sec(j,res_index(i))=dist_sec(j,res_index(i))+(dist_sec(j-1,res_index(i))/2.)
+            ELSE
+              length_sec(j,res_index(i))=(dist_sec(j,res_index(i))+dist_sec(j-1,res_index(i)))/2.
+            END IF
+          END DO
+        ENDIF
+    endif	 !Anne  
+  ENDDO
 
 ! Read sedimentological parameters
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/sed.dat',STATUS='unknown')
   READ(11,*);READ(11,*)
   DO i=1,subasin
     IF (storcap(i) > 0.) THEN
-     IF (nbrsec(i) == 0) read(11,*) dummy1,dry_dens(res_index(i))
-     IF (nbrsec(i) /= 0) read(11,*) dummy1,dry_dens(res_index(i)),factor_actlay(res_index(i))
+     IF (nbrsec(res_index(i)) == 0) read(11,*) dummy1,dry_dens(res_index(i))
+     IF (nbrsec(res_index(i)) /= 0) read(11,*) dummy1,dry_dens(res_index(i)),factor_actlay(res_index(i))
 !     IF (nbrsec(i) /= 0) read(11,*) dummy1,dry_dens(i),sed_flag(i)
 	ENDIF
     IF (storcap(i) == 0.) dummy1=id_subbas_extern(i)
@@ -247,43 +251,45 @@ IF (STATUS == 0) THEN
 ! cross sections geometry / initial bed elevation
   g=0 !flag for indicating file coherence
   DO i=1,subasin
-    IF (nbrsec(i) /= 0) THEN
-      WRITE(subarea,*)id_subbas_extern(i)
-	  OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/cross_sec_'//trim(adjustl(subarea))//'.dat',STATUS='unknown')
-		READ(11,*);READ(11,*)
-        nbrsec1=nbrsec(i)
-        DO j=1,nbrsec1
-          READ(11,*, IOSTAT=istate) dummy1,dummy2,npoints(j,res_index(i)),  &
-            (x_sec0(m,j,res_index(i)),y_sec0(m,j,res_index(i)),m=1,npoints(j,res_index(i)))
-            IF (istate/=0) THEN
-                write(*,"(A)")"ERROR: Premature end of file in cross_sec_"//trim(adjustl(subarea))//".dat. Check specs in hydraul_param.dat."
-                stop
-            end if
-            do m=1,npoints(j,res_index(i))-1 !check for increasing x-coordinates
-               if (x_sec0(m,j,res_index(i)) >= x_sec0(m+1,j,res_index(i))) then
-                    write(*,'(A,i0,A,i0,A,f6.1,A)')"ERROR: x-coordinates in reservoir cross-section must be increasing (line ", j+2,", point ", m,", x=", x_sec0(m,j,res_index(i)), ",). "
-                    g=1 !indicate error
-               end if
-            end do
+     if (res_index(i) /= 0.) then !Anne inserted this line 
+        IF (nbrsec(res_index(i)) /= 0) THEN
+          WRITE(subarea,*)id_subbas_extern(i)
+	      OPEN(11,FILE=pfadp(1:pfadj)//'Reservoir/cross_sec_'//trim(adjustl(subarea))//'.dat',STATUS='unknown')
+		    READ(11,*);READ(11,*)
+            nbrsec1=nbrsec(res_index(i))
+            DO j=1,nbrsec1
+              READ(11,*, IOSTAT=istate) dummy1,dummy2,npoints(j,res_index(i)),  &
+                (x_sec0(m,j,res_index(i)),y_sec0(m,j,res_index(i)),m=1,npoints(j,res_index(i)))
+                IF (istate/=0) THEN
+                    write(*,"(A)")"ERROR: Premature end of file in cross_sec_"//trim(adjustl(subarea))//".dat. Check specs in hydraul_param.dat."
+                    stop
+                end if
+                do m=1,npoints(j,res_index(i))-1 !check for increasing x-coordinates
+                   if (x_sec0(m,j,res_index(i)) >= x_sec0(m+1,j,res_index(i))) then
+                        write(*,'(A,i0,A,i0,A,f6.1,A)')"ERROR: x-coordinates in reservoir cross-section must be increasing (line ", j+2,", point ", m,", x=", x_sec0(m,j,res_index(i)), ",). "
+                        g=1 !indicate error
+                   end if
+                end do
 
-		  id_sec_extern(j,res_index(i))=dummy2
-!write(*,*)dummy1,dummy2,npoints(j,i),(x_sec0(m,j,i),y_sec0(m,j,i),m=1,npoints(j,i))
-        END DO
-      CLOSE(11)
-      if (g == 1) then
-            write(*,*)"Increase floating point precision or decrease resolution."
-            stop
-       end if
-	ENDIF
+		      id_sec_extern(j,res_index(i))=dummy2
+    !write(*,*)dummy1,dummy2,npoints(j,i),(x_sec0(m,j,i),y_sec0(m,j,i),m=1,npoints(j,i))
+            END DO
+          CLOSE(11)
+          if (g == 1) then
+                write(*,*)"Increase floating point precision or decrease resolution."
+                stop
+           end if
+        ENDIF
+     endif	 !Anne   
   ENDDO
 
   DO i=1,subasin
    if (res_index(i) /= 0.) then !Anne inserted this line   
    IF (sed_flag(res_index(i))==1) THEN
-    IF (nbrsec(i) /= 0) THEN
+    IF (nbrsec(res_index(i)) /= 0) THEN
 	  pt_long0(res_index(i))=0			!pt_long0(i) should be read in the file sed.dat (not implemented)
 	  pt_long(res_index(i))=pt_long0(res_index(i)) !Anne changed i to res_index(i)
-      nbrsec1=nbrsec(i)
+      nbrsec1=nbrsec(res_index(i))
 	  dummy3=0.
 	  dummy4=0.
 	  dummy1=pt_long0(res_index(i))
@@ -316,144 +322,160 @@ IF (STATUS == 0) THEN
 
 ! initialization of the cross section geometry / actual bed elevation
   DO i=1,subasin
-    nbrsec1=nbrsec(i)
-    IF (nbrsec(i) /= 0) THEN
-      DO j=1,nbrsec1
-        DO m=1,npoints(j,res_index(i))
-          x_sec(m,j,res_index(i))=x_sec0(m,j,res_index(i))
-          y_sec(m,j,res_index(i))=y_sec0(m,j,res_index(i))
-        END DO
-!write(*,*)j,npoints(j,i),(x_sec0(m,j,i),y_sec0(m,j,i),m=1,npoints(j,i))
-      END DO
-    END IF
+    if (res_index(i) /= 0.) then !Anne inserted this line   
+        nbrsec1=nbrsec(res_index(i))
+        IF (nbrsec(res_index(i)) /= 0) THEN
+          DO j=1,nbrsec1
+            DO m=1,npoints(j,res_index(i))
+              x_sec(m,j,res_index(i))=x_sec0(m,j,res_index(i))
+              y_sec(m,j,res_index(i))=y_sec0(m,j,res_index(i))
+            END DO
+    !write(*,*)j,npoints(j,i),(x_sec0(m,j,i),y_sec0(m,j,i),m=1,npoints(j,i))
+          END DO
+        END IF
+   endif	 !Anne      
   END DO
 
 !Ge cross sections geometry / original bed elevation
 !Ge it represents the sediment layer thickness below the initial bed elevation
 !Ge y_original(m,j,i) <= y_sec0(m,j,i)
   DO i=1,subasin
-    IF (nbrsec(i) /= 0) THEN
-      WRITE(subarea,*)id_subbas_extern(i)
-      OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/original_sec_'//trim(adjustl(subarea))//'.dat', IOSTAT=istate,STATUS='old')
-        IF (istate/=0) THEN					!original_sec_"subbasin".dat not found
-          write(*,*)'WARNING: '//pfadp(1:pfadj)// 'original_sec.dat not found, using defaults'
-          nbrsec1=nbrsec(i)
-          DO j=1,nbrsec1
-            DO m=1,npoints(j,res_index(i))
-              y_original(m,j,res_index(i))=y_sec0(m,j,res_index(i))
-			ENDDO
-		  ENDDO
-		  dummy2=0
-	    ELSE
-	      READ(11,*);READ(11,*)
-          DO j=1,nbrsec1
-		    READ(11,*)dummy1,dummy2,(y_original(m,j,res_index(i)),m=1,npoints(j,res_index(i)))
-		  ENDDO
-		  dummy2=1
-	    ENDIF
-	  CLOSE(11)
-	  IF (dummy2==0) THEN
-        DO j=1,nbrsec1
-          DO g=1,n_sed_class
-            frac_actlay(g,j,res_index(i))=0.
-		  ENDDO
-		ENDDO
-	  ELSE
-        OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/sizedist_'//trim(adjustl(subarea))//'.dat', STATUS='unknown')
-	      READ(11,*);READ(11,*)
-          DO j=1,nbrsec1
-            READ(11,*)dummy1,dummy2,(frac_actlay(g,j,res_index(i)),g=1,n_sed_class)
-		  ENDDO
-		CLOSE(11)
-	  ENDIF
-	ENDIF
+     if (res_index(i) /= 0.) then !Anne inserted this line   
+        IF (nbrsec(res_index(i)) /= 0) THEN
+          WRITE(subarea,*)id_subbas_extern(i)
+          OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/original_sec_'//trim(adjustl(subarea))//'.dat', IOSTAT=istate,STATUS='old')
+            IF (istate/=0) THEN					!original_sec_"subbasin".dat not found
+              write(*,*)'WARNING: '//pfadp(1:pfadj)// 'original_sec.dat not found, using defaults'
+              nbrsec1=nbrsec(res_index(i))
+              DO j=1,nbrsec1
+                DO m=1,npoints(j,res_index(i))
+                  y_original(m,j,res_index(i))=y_sec0(m,j,res_index(i))
+			    ENDDO
+		      ENDDO
+		      dummy2=0
+	        ELSE
+	          READ(11,*);READ(11,*)
+              DO j=1,nbrsec1
+		        READ(11,*)dummy1,dummy2,(y_original(m,j,res_index(i)),m=1,npoints(j,res_index(i)))
+		      ENDDO
+		      dummy2=1
+	        ENDIF
+	      CLOSE(11)
+	      IF (dummy2==0) THEN
+            DO j=1,nbrsec1
+              DO g=1,n_sed_class
+                frac_actlay(g,j,res_index(i))=0.
+		      ENDDO
+		    ENDDO
+	      ELSE
+            OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/sizedist_'//trim(adjustl(subarea))//'.dat', STATUS='unknown')
+	          READ(11,*);READ(11,*)
+              DO j=1,nbrsec1
+                READ(11,*)dummy1,dummy2,(frac_actlay(g,j,res_index(i)),g=1,n_sed_class)
+		      ENDDO
+		    CLOSE(11)
+	      ENDIF
+        ENDIF
+      endif	 !Anne    
   ENDDO
   DO i=1,subasin
-    IF (nbrsec(i) /= 0) THEN
-	  nbrsec1=nbrsec(i)
-      DO j=1,nbrsec1
-        DO m=1,npoints(j,res_index(i))
-!write(*,*)j,m,y_original(m,j,i),y_sec0(m,j,i)
-	      IF (y_original(m,j,res_index(i)) > y_sec0(m,j,res_index(i))) THEN
-		    write(*,*)'ERROR - original bed elevation over the initial bed elevation:'
-			write(*,*)'    subbasin=',id_subbas_extern(i),'section=',id_sec_extern(j,res_index(i))
-		    stop
-		  ENDIF
-		ENDDO
-      ENDDO
-	ENDIF
+     if (res_index(i) /= 0.) then !Anne inserted this line  
+        IF (nbrsec(res_index(i)) /= 0) THEN
+	      nbrsec1=nbrsec(res_index(i))
+          DO j=1,nbrsec1
+            DO m=1,npoints(j,res_index(i))
+    !write(*,*)j,m,y_original(m,j,i),y_sec0(m,j,i)
+	          IF (y_original(m,j,res_index(i)) > y_sec0(m,j,res_index(i))) THEN
+		        write(*,*)'ERROR - original bed elevation over the initial bed elevation:'
+			    write(*,*)'    subbasin=',id_subbas_extern(i),'section=',id_sec_extern(j,res_index(i))
+		        stop
+		      ENDIF
+		    ENDDO
+          ENDDO
+        ENDIF
+       endif	 !Anne   
   ENDDO
 
 ! Initial deposition area of each cross section (m2)
   DO i=1,subasin
-    nbrsec1=nbrsec(i)
-    IF (nbrsec(i) /= 0) THEN
-      DO j=1,nbrsec1
-	    area_sedim(j,res_index(i))=0.
-        DO m=2,npoints(j,res_index(i))
-          area_sedim(j,res_index(i))=area_sedim(j,res_index(i))+  &
-			(x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))*  &
- 			((y_sec(m-1,j,res_index(i))-y_original(m-1,j,res_index(i)))+ &
- 			(y_sec(m,j,res_index(i))-y_original(m,j,res_index(i))))/2.
-!write(*,*)m,y_sec(m,j,i),y_original(m,j,i),area_sedim(j,i)
-	    ENDDO
-	  ENDDO
-	ENDIF
+     if (res_index(i) /= 0.) then !Anne inserted this line 
+        nbrsec1=nbrsec(res_index(i))
+        IF (nbrsec(res_index(i)) /= 0) THEN
+          DO j=1,nbrsec1
+	        area_sedim(j,res_index(i))=0.
+            DO m=2,npoints(j,res_index(i))
+              area_sedim(j,res_index(i))=area_sedim(j,res_index(i))+  &
+			    (x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))*  &
+ 			    ((y_sec(m-1,j,res_index(i))-y_original(m-1,j,res_index(i)))+ &
+ 			    (y_sec(m,j,res_index(i))-y_original(m,j,res_index(i))))/2.
+    !write(*,*)m,y_sec(m,j,i),y_original(m,j,i),area_sedim(j,i)
+	        ENDDO
+	      ENDDO
+        ENDIF
+     endif	 !Anne     
   ENDDO
 
 ! Initial deposition volume of each cros section (m3)
   DO i=1,subasin
-    nbrsec1=nbrsec(i)
-    IF (nbrsec(i) /= 0) THEN
-      DO j=1,nbrsec1
-        vol_sedim(j,res_index(i))=area_sedim(j,res_index(i))*length_sec(j,res_index(i))
-!write(*,'(2I4,5F15.1)')id_subbas_extern(i),j,area_sedim(j,i),length_sec(j,i),vol_sedim(j,i)
+    if (res_index(i) /= 0.) then !Anne inserted this line  
+        nbrsec1=nbrsec(res_index(i))
+        IF (nbrsec(res_index(i)) /= 0) THEN
+          DO j=1,nbrsec1
+            vol_sedim(j,res_index(i))=area_sedim(j,res_index(i))*length_sec(j,res_index(i))
+    !write(*,'(2I4,5F15.1)')id_subbas_extern(i),j,area_sedim(j,i),length_sec(j,i),vol_sedim(j,i)
 
-      ENDDO
-	ENDIF
+          ENDDO
+        ENDIF
+     endif	 !Anne     
   ENDDO
 
 ! Initial sediment volume of the sub-basins' reservoir (m3)
  volbed0=0.
   DO i=1,subasin
-    nbrsec1=nbrsec(i)
-    IF (nbrsec(i) /= 0) THEN
-      DO j=1,nbrsec1
-        volbed0(res_index(i))=volbed0(res_index(i))+vol_sedim(j,res_index(i))
-!write(*,'(2I4,5F18.3)')id_subbas_extern(i),j,vol_sedim(j,i),volbed0(i)
-      ENDDO
-	ENDIF
+    if (res_index(i) /= 0.) then !Anne inserted this line  
+        nbrsec1=nbrsec(res_index(i))
+        IF (nbrsec(res_index(i)) /= 0) THEN
+          DO j=1,nbrsec1
+            volbed0(res_index(i))=volbed0(res_index(i))+vol_sedim(j,res_index(i))
+    !write(*,'(2I4,5F18.3)')id_subbas_extern(i),j,vol_sedim(j,i),volbed0(i)
+          ENDDO
+        ENDIF
+    endif	 !Anne
   ENDDO
 
   DO i=1,subasin
-    nbrsec1=nbrsec(i)
-    IF (nbrsec(i) /= 0) THEN
-      DO j=1,nbrsec1
-        npt=npoints(j,res_index(i))
-        DO m=1,npt
-          y_actlay(m,j,res_index(i))=y_sec0(m,j,res_index(i))
-        END DO
-      END DO
-    END IF
+     if (res_index(i) /= 0.) then !Anne inserted this line 
+        nbrsec1=nbrsec(res_index(i))
+        IF (nbrsec(res_index(i)) /= 0) THEN
+          DO j=1,nbrsec1
+            npt=npoints(j,res_index(i))
+            DO m=1,npt
+              y_actlay(m,j,res_index(i))=y_sec0(m,j,res_index(i))
+            END DO
+          END DO
+        END IF
+      endif	 !Anne  
   END DO
   DO i=1,subasin
-    nbrsec1=nbrsec(i)
-    IF (nbrsec(i) /= 0) THEN
-      DO j=1,nbrsec1
-	    totvol_actlay0(j,res_index(i))=0.
-        DO g=1,n_sed_class
-          frac_comlay(g,j,res_index(i))=frac_actlay(g,j,res_index(i))
-          frac_toplay(g,j,res_index(i))=0.
-          frac_susp(g,j,res_index(i))=0.
-	      frvol_actlay(g,j,res_index(i))=frac_actlay(g,j,res_index(i))*vol_sedim(j,res_index(i))
-	      frvol_actlay0(g,j,res_index(i))=frvol_actlay(g,j,res_index(i))
-          totvol_actlay0(j,res_index(i))=totvol_actlay0(j,res_index(i))+frvol_actlay0(g,j,res_index(i))
-!write(*,'(2I4,5F15.4)')id_subbas_extern(i),j,vol_sedim(j,i),frac_actlay(g,j,i),frvol_actlay(g,j,i),totvol_actlay(j,i)
-!write(*,'(2I4,5F15.4)')id_subbas_extern(i),j,totvol_actlay0(j,i),frvol_actlay0(g,j,i)
-        END DO
-!write(*,'(2I4,5F15.4)')id_subbas_extern(i),j,totvol_actlay(j,i),dummy4,volbed0(i)
-      END DO
-    END IF
+     if (res_index(i) /= 0.) then !Anne inserted this line 
+            nbrsec1=nbrsec(res_index(i))
+            IF (nbrsec(res_index(i)) /= 0) THEN
+              DO j=1,nbrsec1
+	            totvol_actlay0(j,res_index(i))=0.
+                DO g=1,n_sed_class
+                  frac_comlay(g,j,res_index(i))=frac_actlay(g,j,res_index(i))
+                  frac_toplay(g,j,res_index(i))=0.
+                  frac_susp(g,j,res_index(i))=0.
+	              frvol_actlay(g,j,res_index(i))=frac_actlay(g,j,res_index(i))*vol_sedim(j,res_index(i))
+	              frvol_actlay0(g,j,res_index(i))=frvol_actlay(g,j,res_index(i))
+                  totvol_actlay0(j,res_index(i))=totvol_actlay0(j,res_index(i))+frvol_actlay0(g,j,res_index(i))
+        !write(*,'(2I4,5F15.4)')id_subbas_extern(i),j,vol_sedim(j,i),frac_actlay(g,j,i),frvol_actlay(g,j,i),totvol_actlay(j,i)
+        !write(*,'(2I4,5F15.4)')id_subbas_extern(i),j,totvol_actlay0(j,i),frvol_actlay0(g,j,i)
+                END DO
+        !write(*,'(2I4,5F15.4)')id_subbas_extern(i),j,totvol_actlay(j,i),dummy4,volbed0(i)
+              END DO
+            END IF
+       endif	 !Anne      
   END DO
 
 !Identification of main channel in the cross sections
@@ -468,15 +490,15 @@ IF (STATUS == 0) THEN
         DO i=1,subasin
         if (res_index(i) /= 0.) then !Anne inserted this line    
  	        sed_flag(res_index(i))=1 !changes on sideslope is controlled avoiding steeper slopes by erosion processes
-            nbrsec1=nbrsec(i)
-            IF (nbrbat(i) /= 0 .AND. nbrsec(i) /= 0) THEN
+            nbrsec1=nbrsec(res_index(i))
+            IF (nbrbat(i) /= 0 .AND. nbrsec(res_index(i)) /= 0) THEN
                 READ(11,*) dummy1,dummy2,(pt1(j,res_index(i)),j=1,nbrsec1)
                 READ(11,*) dummy1,dummy2,(pt2(j,res_index(i)),j=1,nbrsec1)    !A
-            ELSE IF (nbrbat(i) == 0.AND.nbrsec(i) /= 0) THEN
+            ELSE IF (nbrbat(i) == 0.AND.nbrsec(res_index(i)) /= 0) THEN
                 WRITE(*,*)'ERROR - if sections are defined, the file cav.dat must be given'
                 WRITE(*,*)'subasin:',id_subbas_extern(i)
                 STOP
-            ELSE IF (nbrsec(i) == 0) THEN
+            ELSE IF (nbrsec(res_index(i)) == 0) THEN
                 dummy1=id_subbas_extern(i)
             END IF
             IF (dummy1 /= id_subbas_extern(i)) THEN
@@ -490,10 +512,10 @@ IF (STATUS == 0) THEN
   
 
   DO i=1,subasin
-    nbrsec1=nbrsec(i)
-    if (res_index(i) /= 0.) then !Anne inserted this line
+    if (res_index(i) /= 0.) then !Anne inserted this line  
+    nbrsec1=nbrsec(res_index(i))
             IF (sed_flag(res_index(i))==1) THEN
-             IF (nbrsec(i) /= 0) THEN
+             IF (nbrsec(res_index(i)) /= 0) THEN
               DO j=1,nbrsec1
 	            npt=npoints(j,res_index(i))
 		        p1=pt1(j,res_index(i))
@@ -534,107 +556,113 @@ IF (STATUS == 0) THEN
 !stop
 
 ! stage-area and stage-vulume curves given in the file cav.dat is disregarded. Values derived from cross section are used instead
-  DO i=1,subasin
-    IF (nbrsec(i) /= 0) THEN
-	 nbrbat1=nbrbat(i)
-     DO b=1,nbrbat1
-      elevhelp=elev_bat(b,i)
-      DO j=1,nbrsec(i)
-        areasec2(j)=0.
-        widthsec2(j)=0.
+  DO i=1,subasin   
+    if (res_index(i) /= 0.) then !Anne inserted this line  
+        IF (nbrsec(res_index(i)) /= 0) THEN
+	     nbrbat1=nbrbat(i)
+         DO b=1,nbrbat1
+          elevhelp=elev_bat(b,i)
+          DO j=1,nbrsec(res_index(i))
+            areasec2(j)=0.
+            widthsec2(j)=0.
 
-        npt=npoints(j,res_index(i))
-        DO m=2,npt
-		  IF (elevhelp >= y_sec(m-1,j,res_index(i))  &
-			.AND.elevhelp >= y_sec(m,j,res_index(i))) THEN
-			areasec2(j)=areasec2(j)+(x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))  &
-				*(elevhelp-(y_sec(m,j,res_index(i))+y_sec(m-1,j,res_index(i)))/2.)
-			widthsec2(j)=widthsec2(j)+  &
-				(x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))
-		  ELSE IF (elevhelp < y_sec(m-1,j,res_index(i))  &
-			.AND.elevhelp >= y_sec(m,j,res_index(i))) THEN
-			areasec2(j)=areasec2(j)+(((elevhelp-y_sec(m,j,res_index(i)))**2.)/ &
-				(2.*ABS(y_sec(m,j,res_index(i))-y_sec(m-1,j,res_index(i)))/  &
-				(x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))))
-			widthsec2(j)=widthsec2(j)+  &
-				((x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))*  &
-				(elevhelp-y_sec(m,j,res_index(i)))/  &
-				(y_sec(m-1,j,res_index(i))-y_sec(m,j,res_index(i))))
-		  ELSE IF (elevhelp >= y_sec(m-1,j,res_index(i))  &
-			.AND.elevhelp < y_sec(m,j,res_index(i))) THEN
-			areasec2(j)=areasec2(j)+(((elevhelp-y_sec(m-1,j,res_index(i)))**2.)/ &
-				(2.*ABS(y_sec(m,j,res_index(i))-y_sec(m-1,j,res_index(i)))/  &
-				(x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))))
-			widthsec2(j)=widthsec2(j)+  &
-				((x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))*  &
-				(elevhelp-y_sec(m-1,j,res_index(i)))/  &
-				(y_sec(m,j,res_index(i))-y_sec(m-1,j,res_index(i))))
-		  END IF
-	    END DO
-	   END DO
+            npt=npoints(j,res_index(i))
+            DO m=2,npt
+		      IF (elevhelp >= y_sec(m-1,j,res_index(i))  &
+			    .AND.elevhelp >= y_sec(m,j,res_index(i))) THEN
+			    areasec2(j)=areasec2(j)+(x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))  &
+				    *(elevhelp-(y_sec(m,j,res_index(i))+y_sec(m-1,j,res_index(i)))/2.)
+			    widthsec2(j)=widthsec2(j)+  &
+				    (x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))
+		      ELSE IF (elevhelp < y_sec(m-1,j,res_index(i))  &
+			    .AND.elevhelp >= y_sec(m,j,res_index(i))) THEN
+			    areasec2(j)=areasec2(j)+(((elevhelp-y_sec(m,j,res_index(i)))**2.)/ &
+				    (2.*ABS(y_sec(m,j,res_index(i))-y_sec(m-1,j,res_index(i)))/  &
+				    (x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))))
+			    widthsec2(j)=widthsec2(j)+  &
+				    ((x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))*  &
+				    (elevhelp-y_sec(m,j,res_index(i)))/  &
+				    (y_sec(m-1,j,res_index(i))-y_sec(m,j,res_index(i))))
+		      ELSE IF (elevhelp >= y_sec(m-1,j,res_index(i))  &
+			    .AND.elevhelp < y_sec(m,j,res_index(i))) THEN
+			    areasec2(j)=areasec2(j)+(((elevhelp-y_sec(m-1,j,res_index(i)))**2.)/ &
+				    (2.*ABS(y_sec(m,j,res_index(i))-y_sec(m-1,j,res_index(i)))/  &
+				    (x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))))
+			    widthsec2(j)=widthsec2(j)+  &
+				    ((x_sec(m,j,res_index(i))-x_sec(m-1,j,res_index(i)))*  &
+				    (elevhelp-y_sec(m-1,j,res_index(i)))/  &
+				    (y_sec(m,j,res_index(i))-y_sec(m-1,j,res_index(i))))
+		      END IF
+	        END DO
+	       END DO
 
-       volhelp2(b)=0.
-       areahelp2(b)=0.
+           volhelp2(b)=0.
+           areahelp2(b)=0.
 
-       DO j=1,nbrsec(i)
-        IF (j /= nbrsec(i)) THEN
-	      volhelp2(b)=volhelp2(b)+(areasec2(j)+areasec2(j+1))*dist_sec(j,res_index(i))/2.
-	      areahelp2(b)=areahelp2(b)+(widthsec2(j)+widthsec2(j+1))*dist_sec(j,res_index(i))/2.
-        ELSE
-	      volhelp2(b)=volhelp2(b)+areasec2(j)*dist_sec(j,res_index(i))/2.
-	      areahelp2(b)=areahelp2(b)+widthsec2(j)*dist_sec(j,res_index(i))/2.
-        END IF
-!write(*,*)j,areasec2(j),dist_sec(j,i),areahelp2(b),volhelp2(b)
-	   END DO
-!write(*,*)j,areahelp2(b),volhelp2(b)
-     ENDDO
-     DO b=1,nbrbat1
-	   IF (elev_bat(b,i) >= maxlevel(i)) THEN
-!write(*,*)b,elev_bat(b,i),maxlevel(i)
-         vol_bat(b,i)=vol_bat0(b,i)
-         area_bat(b,i)=area_bat0(b,i)
-	   ELSE
-!write(*,*)b,areahelp2(b),volhelp2(b)
-	     vol_bat(b,i)=volhelp2(b)
-	     area_bat(b,i)=areahelp2(b)
-	   ENDIF
-!write(*,*)b,area_bat(b,i),vol_bat(b,i),elev_bat(b,i),maxlevel(i)
-	 ENDDO
-	ENDIF
+           DO j=1,nbrsec(res_index(i))
+            IF (j /= nbrsec(res_index(i))) THEN
+	          volhelp2(b)=volhelp2(b)+(areasec2(j)+areasec2(j+1))*dist_sec(j,res_index(i))/2.
+	          areahelp2(b)=areahelp2(b)+(widthsec2(j)+widthsec2(j+1))*dist_sec(j,res_index(i))/2.
+            ELSE
+	          volhelp2(b)=volhelp2(b)+areasec2(j)*dist_sec(j,res_index(i))/2.
+	          areahelp2(b)=areahelp2(b)+widthsec2(j)*dist_sec(j,res_index(i))/2.
+            END IF
+    !write(*,*)j,areasec2(j),dist_sec(j,i),areahelp2(b),volhelp2(b)
+	       END DO
+    !write(*,*)j,areahelp2(b),volhelp2(b)
+         ENDDO
+         DO b=1,nbrbat1
+	       IF (elev_bat(b,i) >= maxlevel(i)) THEN
+    !write(*,*)b,elev_bat(b,i),maxlevel(i)
+             vol_bat(b,i)=vol_bat0(b,i)
+             area_bat(b,i)=area_bat0(b,i)
+	       ELSE
+    !write(*,*)b,areahelp2(b),volhelp2(b)
+	         vol_bat(b,i)=volhelp2(b)
+	         area_bat(b,i)=areahelp2(b)
+	       ENDIF
+    !write(*,*)b,area_bat(b,i),vol_bat(b,i),elev_bat(b,i),maxlevel(i)
+	     ENDDO
+        ENDIF
+   endif !Anne
   ENDDO
 
 
 !Ge initialization of output files
 !Ge check if could be read in do.dat to print either general results or detailed results
   DO i=1,subasin
-    IF (nbrsec(i) /= 0) THEN
-      WRITE(subarea,*)id_subbas_extern(i)
-	  OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_hydraul.out',STATUS='replace')
-      IF (f_res_hydraul) then
-	    WRITE(11,*)'Subasin-ID, year, day, hour, section-ID, depth_sec(m), watelev_sec(m), area_sec(m**2), topwidth_sec(m), energslope_sec(-), hydrad_sec(m), meanvel_sec(m/s), discharge_sec(m**3/s)'
-        CLOSE(11)
-	  ELSE
-        CLOSE(11, status='delete') !delete any existing file, if no output is desired
-	  ENDIF
-	ENDIF
+    if (res_index(i) /= 0.) then !Anne inserted this line
+        IF (nbrsec(res_index(i)) /= 0) THEN
+          WRITE(subarea,*)id_subbas_extern(i)
+	      OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_hydraul.out',STATUS='replace')
+          IF (f_res_hydraul) then
+	        WRITE(11,*)'Subasin-ID, year, day, hour, section-ID, depth_sec(m), watelev_sec(m), area_sec(m**2), topwidth_sec(m), energslope_sec(-), hydrad_sec(m), meanvel_sec(m/s), discharge_sec(m**3/s)'
+            CLOSE(11)
+	      ELSE
+            CLOSE(11, status='delete') !delete any existing file, if no output is desired
+	      ENDIF
+        ENDIF
+     endif !Anne   
   ENDDO
 
   DO i=1,subasin
-    IF (nbrsec(i) /= 0) THEN
-      WRITE(subarea,*)id_subbas_extern(i)
+    if (res_index(i) /= 0.) then !Anne inserted this line   
+        IF (nbrsec(res_index(i)) /= 0) THEN
+          WRITE(subarea,*)id_subbas_extern(i)
 
-      DO j=1,nbrsec(i)
-        WRITE(section,*)id_sec_extern(j,res_index(i))
-	    OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_sec'//trim(adjustl(section))// &
-			'_bedchange.out',STATUS='replace')
-        IF (f_res_hydraul) then
-	      WRITE(11,*)'Subasin-ID, section-ID, year, day, hour, nbr. points, y-axis(m)'
-          CLOSE(11)
-	    ELSE
-          CLOSE(11, status='delete') !delete any existing file, if no output is desired
-	    ENDIF
-	  ENDDO
-	ENDIF
+          DO j=1,nbrsec(res_index(i))
+            WRITE(section,*)id_sec_extern(j,res_index(i))
+	        OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_sec'//trim(adjustl(section))// &
+			    '_bedchange.out',STATUS='replace')
+            IF (f_res_hydraul) then
+	          WRITE(11,*)'Subasin-ID, section-ID, year, day, hour, nbr. points, y-axis(m)'
+              CLOSE(11)
+	        ELSE
+              CLOSE(11, status='delete') !delete any existing file, if no output is desired
+	        ENDIF
+	      ENDDO
+        ENDIF
+      endif !Anne  
   ENDDO
 
   DO i=1,subasin
@@ -652,7 +680,7 @@ IF (STATUS == 0) THEN
 
   DO i=1,subasin
    IF (storcap(i) /= 0.) THEN
-    IF (nbrsec(i) /= 0) THEN
+    IF (nbrsec(res_index(i)) /= 0) THEN
       WRITE(subarea,*)id_subbas_extern(i)
 	  OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_longitudunal.out',STATUS='replace')
       IF (f_res_longitudunal) then
@@ -845,23 +873,22 @@ end if
 ! 1) calculation of the sediment balance in the reservoir without taking into account
 !    the longitudinal sediment transport processes (using pond performance modelling)
 
-  IF (nbrsec(upstream) == 0) THEN
-!write(*,'(2I4,10F15.6)') step,id_subbas_extern(upstream),sed_inflow(step,upstream)
-    IF (sed_inflow(step,res_index(upstream)) /= 0.) then
-      call sedbal(upstream)
-	ELSE
-	  sed_outflow(step,res_index(upstream))=0.
-	  sedimentation(step,res_index(upstream))=0.
-      if (t==tstart .and. step==1) cum_sedimentation(res_index(upstream))=0.
-      IF (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(res_index(upstream))=0.
+ IF (nbrsec(res_index(upstream)) == 0) THEN
+    !write(*,'(2I4,10F15.6)') step,id_subbas_extern(upstream),sed_inflow(step,upstream)
+        IF (sed_inflow(step,res_index(upstream)) /= 0.) then
+          call sedbal(upstream)
+	    ELSE
+	      sed_outflow(step,res_index(upstream))=0.
+	      sedimentation(step,res_index(upstream))=0.
+          if (t==tstart .and. step==1) cum_sedimentation(res_index(upstream))=0.
+              IF (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(res_index(upstream))=0.
 
-      cum_sedimentation(res_index(upstream))=cum_sedimentation(res_index(upstream))+sedimentation(step,res_index(upstream))
-	  decstorcap(step,res_index(upstream))=0.
-	  do g=1,n_sed_class
-		frsediment_out(res_index(upstream),g)=0.
-	  enddo
-	ENDIF
-
+              cum_sedimentation(res_index(upstream))=cum_sedimentation(res_index(upstream))+sedimentation(step,res_index(upstream))
+	          decstorcap(step,res_index(upstream))=0.
+	              do g=1,n_sed_class
+		            frsediment_out(res_index(upstream),g)=0.
+	              enddo
+	          ENDIF
 
 ! 2) calculation of the sediment balance in the reservoir taking into account
 !    the longitudinal sediment transport processes
@@ -874,8 +901,9 @@ end if
 	  else
 	    frac_toplay(g,1,res_index(upstream))=0.
 	  endif
-	enddo
+    enddo
 
+    
 ! 2a) determination of hydraulic parameters
     CALL hydraul_res(upstream)
 
@@ -884,7 +912,7 @@ end if
 
 !Ge Calculation of the sediment diameters D50 and D90 (m)
 !Ge mean diameter is calculated using the grain size distribution
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
 	 accum2=0.
      DO g=1,n_sed_class
 	   accum2=accum2+frac_actlay(g,j,res_index(upstream))
@@ -976,7 +1004,7 @@ end if
 !write(*,*)p
 
 ! Calculation of sediment volume in the active layer
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
       area_actlay(j,res_index(upstream))=0.
       area_toplay(j,res_index(upstream))=0.
 
@@ -1184,12 +1212,12 @@ end if
 	ENDDO
 
 
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
       area_toplay(j,res_index(upstream))=area_sec(j,res_index(upstream))
 	ENDDO
 
 ! Active layer volume (m3)
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
       vol_actlay(j,res_index(upstream))=area_actlay(j,res_index(upstream))*length_sec(j,res_index(upstream))
       vol_toplay(j,res_index(upstream))=area_toplay(j,res_index(upstream))*length_sec(j,res_index(upstream))
     END DO
@@ -1202,7 +1230,7 @@ end if
 !george      if (watelev_sec(j,upstream) /= damelev_mean(step,upstream)) p=j
 !george	ENDDO
 !george	if (p /=0 ) then
-      DO j=1,nbrsec(upstream)
+      DO j=1,nbrsec(res_index(upstream))
 	    resreach_vol(res_index(upstream))=resreach_vol(res_index(upstream))+vol_toplay(j,res_index(upstream))
 !george	    if (j > p) resreach_vol(upstream)=resreach_vol(upstream)+vol_toplay(j,upstream)
 !write(*,'(2I4,4F15.3)')j,p,watelev_sec(j,upstream),damelev_mean(step,upstream),vol_toplay(j,upstream),resreach_vol(upstream)
@@ -1212,7 +1240,7 @@ end if
 !george	endif
 
 ! Fractional sediment availability at the active layer (ton)
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
       DO g=1,n_sed_class
         frsedavailab(g,j)=vol_actlay(j,res_index(upstream))*frac_actlay(g,j,res_index(upstream))*dry_dens(res_index(upstream))
 !if(j<10)write(*,'(2I4,10F15.2)')j,g,frsedavailab(g,j),vol_actlay(j,upstream),frac_actlay(g,j,upstream),dry_dens(upstream)
@@ -1226,8 +1254,8 @@ end if
 ! 2c) Sediment balance for each cross section (ton)
 
 ! Calculation of hydraulic parameter at the outlet of sub-reaches represented by each cross section
-    do j=1,nbrsec(upstream)
-      if (j /= nbrsec(upstream)) then
+    do j=1,nbrsec(res_index(upstream))
+      if (j /= nbrsec(res_index(upstream))) then
         discharge(j)=(discharge_sec(j,res_index(upstream))+discharge_sec(j+1,res_index(upstream)))/2.
         topwidth(j)=(topwidth_sec(j,res_index(upstream))+topwidth_sec(j+1,res_index(upstream)))/2.
 		area_mean(j)=(area_sec(j,res_index(upstream))+area_sec(j+1,res_index(upstream)))/2.
@@ -1238,11 +1266,11 @@ end if
       endif
     enddo
 
-	j=nbrsec(upstream)
+	j=nbrsec(res_index(upstream))
 !    dummy9=discharge_sec(j,upstream)/vol_toplay(j,upstream)
 	dummy9=1.
 !write(*,'(2I4,2F11.1,F11.6)')d,upstream,discharge_sec(j,upstream),vol_toplay(j,upstream),dummy9
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
       totalload(j,res_index(upstream))=0.
 
 !	  call ssc_function(j,upstream,dummy9)
@@ -1359,10 +1387,10 @@ end if
 !        frsedavailab(g,j)=MAX(frsedavailab(g,j),0.)
 
 ! Computation of deposition at the cross section (fractional suspended load transport)
-        IF (fr_capacity(g,j) < loadincoming .and. j/=nbrsec(upstream)) THEN
+        IF (fr_capacity(g,j) < loadincoming .and. j/=nbrsec(res_index(upstream))) THEN
 		  frtotal_discharge(g,j)=fr_capacity(g,j)
           frdeposition(g,j)=MAX(loadincoming-fr_capacity(g,j),0.)
-        ELSE IF (fr_capacity(g,j) < loadincoming .and. j==nbrsec(upstream)) THEN
+        ELSE IF (fr_capacity(g,j) < loadincoming .and. j==nbrsec(res_index(upstream))) THEN
 		  IF (fr_capacity(g,j) /= 0.) THEN
 		    frtotal_discharge(g,j)=fr_capacity(g,j)
             frdeposition(g,j)=MAX(loadincoming-fr_capacity(g,j),0.)
@@ -1392,7 +1420,7 @@ end if
 		  frconc(g,j)=frtotal_discharge(g,j) !george
 !		  frconc(g,j)=frtotal_discharge(g,j)*1650/(discharge(j)*(86400./nt))
 
-          if (j==nbrsec(upstream)) then
+          if (j==nbrsec(res_index(upstream))) then
 !temp		    frconc(g,j)=frtotal_discharge(g,j)*1000/(discharge_mod(j)*(86400./nt))
 !temp		    frtotal_discharge(g,j)=frconc(g,j)*(discharge(j)*(86400./nt))/1000.
 !temp            if (frtotal_discharge(g,j) >= loadincoming) THEN
@@ -1454,7 +1482,7 @@ end if
 		  endif
 	      totalload(j,res_index(upstream))=totalload(j,res_index(upstream))+frtotal_discharge(g,j)
 		else
-          if (j==nbrsec(upstream)) then
+          if (j==nbrsec(res_index(upstream))) then
 		    retent(g)=loadincoming
 			frdeposition(g,j)=0.
 !george		    retent(g)=0.
@@ -1466,7 +1494,7 @@ end if
 
       END DO
 
-	  IF (j==nbrsec(upstream)) THEN
+	  IF (j==nbrsec(res_index(upstream))) THEN
 !write(*,'(2I4,6F15.6)')j,g,factor_bottom2,factor_intake2,factor_over2,factor_bottom2+factor_intake2+factor_over2,factor_intake2/(factor_bottom2+factor_intake2+factor_over2)
         IF (totalload(j,res_index(upstream)) /= 0.) THEN
 		  dummy4=factor_bottom2+factor_intake2+factor_over2
@@ -1504,9 +1532,9 @@ end if
 ! using a weighting factor based on the water volume represented by each cross section
     weight=0.
     dummy5=0.
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
       if (j > p .and. resreach_vol(res_index(upstream)) /= 0.) then
-		if (j /= nbrsec(upstream)) then
+		if (j /= nbrsec(res_index(upstream))) then
           weight=vol_toplay(j,res_index(upstream))/resreach_vol(res_index(upstream))
 		else
           weight=max(0.,1.-dummy5)
@@ -1527,7 +1555,7 @@ end if
 
 
 ! Calculation of suspended sediment concentration for each cross section (g/l)
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
 	  if (discharge(j) /= 0.) then
 !temp        if (j/=nbrsec(upstream)) then
 !temp	      conc(j,upstream)=(totalload(j,upstream)*1000)/(discharge_mod(j)*(86400./nt))
@@ -1542,7 +1570,7 @@ end if
 !*****************************************************************************
 
 ! Calculation of the actual sediment volume at the active layer for each cross section
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
 	  totvol_actlay(j,res_index(upstream))=0.
       DO g=1,n_sed_class
 	    frvol_actlay(g,j,res_index(upstream))=frvol_actlay(g,j,res_index(upstream))+ &
@@ -1554,7 +1582,7 @@ end if
     END DO
 
 ! Computation of the actual bed composition
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
       DO g=1,n_sed_class
         IF (totvol_actlay(j,res_index(upstream)) /= 0.) THEN
           frac_actlay(g,j,res_index(upstream))=frvol_actlay(g,j,res_index(upstream))/totvol_actlay(j,res_index(upstream))
@@ -1565,7 +1593,7 @@ end if
     END DO
 
 ! Computation of total erosion and total deposition for each cross section (ton/timestep)
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
       erosion(j,res_index(upstream))=0.
       deposition(j,res_index(upstream))=0.
 	  retention(j,res_index(upstream))=0.
@@ -1578,31 +1606,31 @@ end if
     END DO
 
 ! Computation of sediment volume variation at the reservoir bed for each cross section
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
 	  dvol_sed(j,res_index(upstream))=(deposition(j,res_index(upstream))-erosion(j,res_index(upstream))+retention(j,res_index(upstream)))/dry_dens(res_index(upstream))
 !write(*,'(I4,4F15.3)')j,deposition(j,upstream),erosion(j,upstream),retention(j,upstream),dvol_sed(j,upstream)
     END DO
 !if(step==290)stop
 ! Computation of sediment area variation at the reservoir bed for each cross section
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
       darea_sed(j,res_index(upstream))=abs(dvol_sed(j,res_index(upstream))/  &
             length_sec(j,res_index(upstream)))
     END DO
 
 ! Daily sediment retention in the subbasin's reservoir [ton/timestep]
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
       sed_ret(step,res_index(upstream))=sed_ret(step,res_index(upstream))+retention(j,res_index(upstream))
 	enddo
 
 ! Cross section geometry before bed elevtion change
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
       DO m=1,npoints(j,res_index(upstream))
         y_laststep(m,j,res_index(upstream))=y_sec(m,j,res_index(upstream))
 	  ENDDO
 	ENDDO
 
 ! 2d) Calculation of reservoir bed elevation changes
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
       IF (dvol_sed(j,res_index(upstream)) /= 0.) THEN
 	    CALL change_sec(j,upstream)
 	  ENDIF
@@ -1634,7 +1662,7 @@ end if
 !2010    END DO
 
 ! Sediment outflow (ton/time step)
-    j=nbrsec(upstream)
+    j=nbrsec(res_index(upstream))
 	if (totalload(j,res_index(upstream)) /= 0.) then
 	  sed_overflow(step,res_index(upstream))=totalload(j,res_index(upstream))*factor_over2
 	  sed_intake(step,res_index(upstream))=totalload(j,res_index(upstream))*factor_intake2
@@ -1658,7 +1686,7 @@ end if
 ! Calculation of daily sedimentation and cumulative sedimentation (m3)
 !2010    cum_sedimentation(upstream)=0.
 	sedimentation(step,res_index(upstream))=0.
-    DO j=1,nbrsec(upstream)
+    DO j=1,nbrsec(res_index(upstream))
 !2010      cum_sedimentation(upstream)=cum_sedimentation(upstream)+vol_sedim(j,upstream)
 	  sedimentation(step,res_index(upstream))=sedimentation(step,res_index(upstream))+dvol_sed(j,res_index(upstream))
 	ENDDO
@@ -1679,7 +1707,7 @@ end if
 !if (step==30)stop
 
 ! Calculation of total sediment release (ton)
-	j=nbrsec(upstream)
+	j=nbrsec(res_index(upstream))
     DO g=1,n_sed_class
 	  frsediment_out(res_index(upstream),g)=frac_toplay(g,j,res_index(upstream))
 	enddo
@@ -1691,7 +1719,7 @@ end if
 	if (decstorcap(step,res_index(upstream)) < daystorcap(step,upstream) .and. decstorcap(step,res_index(upstream))/=0.) then
      DO b=1,nbrbat1
       elevhelp=elev_bat(b,upstream)
-      DO j=1,nbrsec(upstream)
+      DO j=1,nbrsec(res_index(upstream))
         areasec(j)=0.
         widthsec(j)=0.
         areasec2(j)=0.
@@ -1756,8 +1784,8 @@ end if
        volhelp2(b)=0.
        areahelp2(b)=0.
 
-       DO j=1,nbrsec(upstream)
-        IF (j /= nbrsec(upstream)) THEN
+       DO j=1,nbrsec(res_index(upstream))
+        IF (j /= nbrsec(res_index(upstream))) THEN
 	      volhelp(b)=volhelp(b)+(areasec(j)+areasec(j+1))*dist_sec(j,res_index(upstream))/2.
 	      areahelp(b)=areahelp(b)+(widthsec(j)+widthsec(j+1))*dist_sec(j,res_index(upstream))/2.
 	      IF (fcav(upstream)==0) volhelp2(b)=volhelp2(b)+(areasec2(j)+areasec2(j+1))*dist_sec(j,res_index(upstream))/2.
@@ -1822,7 +1850,7 @@ end if
 !if (step==21)stop
 
 ! Minimum elevation for each cross_section (m)
-     j=nbrsec(upstream)
+     j=nbrsec(res_index(upstream))
      dummy5=minelev_sec(j,res_index(upstream))
 	 minelev_sec(j,res_index(upstream))=y_sec(1,j,res_index(upstream))
 	 npt=npoints(j,res_index(upstream))
@@ -1936,7 +1964,7 @@ end if
 	 IF (f_res_hydraul) THEN
      OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_hydraul.out',STATUS='old',  &
 		  POSITION='append')
-      DO j=1,nbrsec(upstream)
+      DO j=1,nbrsec(res_index(upstream))
         WRITE(11,'(5I6,4F15.3,E15.3E2,3F15.6)')id_subbas_extern(upstream),t,d,hour,id_sec_extern(j,res_index(upstream)),  &
 			depth_sec(j,res_index(upstream)),watelev_sec(j,res_index(upstream)),  &
 			area_sec(j,res_index(upstream)),topwidth_sec(j,res_index(upstream)),  &
@@ -1947,7 +1975,7 @@ end if
      CLOSE(11)
 
 ! Print results on bed elevation change of each cross section of the sub-basin's reservoir
-     DO j=1,nbrsec(upstream)
+     DO j=1,nbrsec(res_index(upstream))
 	  npt=npoints(j,res_index(upstream))
       WRITE(section,*)id_sec_extern(j,res_index(upstream))
 	  IF (f_res_bedchange) THEN
@@ -1963,7 +1991,7 @@ end if
 	 ENDDO
 
 ! Print results on bed elevation change of the longitudinal profile of the sub-basin's reservoir
-     nbrsec1=nbrsec(upstream)
+     nbrsec1=nbrsec(res_index(upstream))
      IF (f_res_longitudunal) THEN
 	 OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_longitudunal.out', &
 		STATUS='old',POSITION='append')
@@ -1976,7 +2004,7 @@ end if
 	 ENDIF
 
 	ELSE
-      DO j=1,nbrsec(upstream)
+      DO j=1,nbrsec(res_index(upstream))
 	  	daydepth_sec(step,j,res_index(upstream))=depth_sec(j,res_index(upstream))
 	  	daywatelev_sec(step,j,res_index(upstream))=watelev_sec(j,res_index(upstream))
 	  	dayarea_sec(step,j,res_index(upstream))=area_sec(j,res_index(upstream))
@@ -2003,7 +2031,7 @@ end if
 ! Print results on bed elevation change of the longitudinal profile of the sub-basin's reservoir
   IF (reservoir_print == 0) THEN
    WRITE(subarea,*)id_subbas_extern(upstream)
-   j=nbrsec(upstream)
+   j=nbrsec(res_index(upstream))
    IF (f_res_sedbal) THEN
    OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_sedbal.out',STATUS='old',POSITION='append')
     WRITE(11,'(4I6,4F15.3)')id_subbas_extern(upstream),t,d,hour,sed_inflow(step,res_index(upstream)),sed_outflow(step,res_index(upstream)), &
@@ -2039,7 +2067,7 @@ IF (STATUS == 3) THEN
     DO i=1,subasin
      IF (storcap(i) /= 0. .and. t >= damyear(i)) THEN
       WRITE(subarea,*)id_subbas_extern(i)
-      IF (nbrsec(i) /= 0) THEN
+      IF (nbrsec(res_index(i)) /= 0) THEN
         IF (f_res_hydraul) THEN
 		OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_hydraul.out',STATUS='old',  &
 			POSITION='append')
@@ -2047,7 +2075,7 @@ IF (STATUS == 3) THEN
 	      DO ih=1,nt
 		    hour=ih
             step=(d-1)*nt+hour
-	        DO j=1,nbrsec(i)
+	        DO j=1,nbrsec(res_index(i))
 			  WRITE(11,'(5I6,4F15.3,E15.3E2,3F15.6)')id_subbas_extern(i),t,d,hour,id_sec_extern(j,res_index(i)),  &
 				daydepth_sec(step,j,res_index(i)),daywatelev_sec(step,j,res_index(i)),  &
 				dayarea_sec(step,j,res_index(i)),daytopwidth_sec(step,j,res_index(i)),  &
@@ -2058,7 +2086,7 @@ IF (STATUS == 3) THEN
 		ENDDO
         CLOSE(11)
 		ENDIF
-        DO j=1,nbrsec(i)
+        DO j=1,nbrsec(res_index(i))
 	      npt=npoints(j,res_index(i))
 		  WRITE(section,*)id_sec_extern(j,res_index(i))
           IF (f_res_bedchange) THEN
@@ -2079,7 +2107,7 @@ IF (STATUS == 3) THEN
         IF (f_res_longitudunal) THEN
 		OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_longitudunal.out', &
 			STATUS='old',POSITION='append')
-		write(fmtstr,'(a,i0,a)')'(5I6,',nbrsec(i),'F15.6)'		!generate format string
+		write(fmtstr,'(a,i0,a)')'(5I6,',nbrsec(res_index(i)),'F15.6)'		!generate format string
 		DO d=1,dayyear
 	      DO ih=1,nt
 		    hour=ih

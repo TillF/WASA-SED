@@ -332,7 +332,7 @@ storcap(:)=0.
     res_pet(366*nt,n_reservoir), &   
     res_qout(366*nt,n_reservoir), &      
     id_sec_extern(nxsection_res,n_reservoir), &
-	      !nbrsec(n_reservoir), &
+    nbrsec(n_reservoir), &
     npoints(nxsection_res,n_reservoir), &
 	      
     decvolact(366*nt,n_reservoir), &       !Anne variable seems to be unused
@@ -1636,7 +1636,7 @@ IF (STATUS == 2) THEN
 ! CASE 2: stage-area-volume curve is provided
 	   else
 ! CASE 2a: no detailed information of the reservoir geometry is provided (no cross section)
-	    if (nbrsec(upstream) == 0) then
+	    if (nbrsec(res_index(upstream)) == 0) then
 	     if (decstorcap(step,res_index(upstream)) >= daystorcap(step,upstream) .or. daystorcap(step,upstream) == 0.) then
 	      write(*,*) 'the resevoir located at the outlet point of sub-basin:',id_subbas_extern(upstream)
 	      write(*,*) 'lost its total storage capacity due to sediment deposition'

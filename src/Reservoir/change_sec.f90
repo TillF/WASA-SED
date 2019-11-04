@@ -163,7 +163,7 @@ ENDDO
 
 IF (dvol_sed(j1,res_index(upstream)) < 0.) THEN
 
-if (j1/=nbrsec(upstream)) then
+if (j1/=nbrsec(res_index(upstream))) then
 !write(*,'(I4,4F10.2,A10)')j1,minelev_sec(j1,upstream),dheight_sed(j1,upstream),minelev_sec(j1,upstream)-dheight_sed(j1,upstream),minelev_sec(j1+1,upstream)+(mean_slope*dist_sec(j1,upstream)),'eros'
 else
 !write(*,'(I4,4F10.2,A10)')j1,minelev_sec(j1,upstream),dheight_sed(j1,upstream),minelev_sec(j1,upstream)-dheight_sed(j1,upstream),minelev_sec(j1-1,upstream)-(mean_slope*dist_sec(j1-1,upstream)),'eros'
@@ -171,7 +171,7 @@ endif
 
 else
 
-if (j1/=nbrsec(upstream)) then
+if (j1/=nbrsec(res_index(upstream))) then
 !write(*,'(I4,4F10.2,A10)')j1,minelev_sec(j1,upstream),dheight_sed(j1,upstream),minelev_sec(j1,upstream)+dheight_sed(j1,upstream),minelev_sec(j1+1,upstream)+(mean_slope*dist_sec(j1,upstream)),'depo'
 else
 !write(*,'(I4,4F10.2,A10)')j1,minelev_sec(j1,upstream),dheight_sed(j1,upstream),minelev_sec(j1,upstream)+dheight_sed(j1,upstream),minelev_sec(j1-1,upstream)-(mean_slope*dist_sec(j1-1,upstream)),'depo'

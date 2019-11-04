@@ -39,7 +39,7 @@ REAL :: dummy4
 
 ! initialization of hydraulic parameters
 resvol(res_index(upstream))=0.
-DO j=1,nbrsec(upstream)
+DO j=1,nbrsec(res_index(upstream))
   resvol_sec(j,res_index(upstream))=0.
   bedslope_sec(j,res_index(upstream))=0.
   area_sec(j,res_index(upstream))=0.
@@ -92,7 +92,7 @@ damelev_mean(step,res_index(upstream))=damelev
 !write(*,*)damelevact(upstream),damelev0(step,upstream),damelev_mean(step,upstream)
 
 ! Minimum elevation for each cross_section (m)
-DO j=1,nbrsec(upstream)
+DO j=1,nbrsec(res_index(upstream))
   minelev_sec(j,res_index(upstream))=y_sec(1,j,res_index(upstream))
   npt=npoints(j,res_index(upstream))
   DO m=2,npt
@@ -104,8 +104,8 @@ DO j=1,nbrsec(upstream)
 END DO
 
 ! Bed slope of each cross section
-DO j=1,nbrsec(upstream)
-  IF (j /= nbrsec(upstream)) THEN
+DO j=1,nbrsec(res_index(upstream))
+  IF (j /= nbrsec(res_index(upstream))) THEN
     IF (minelev_sec(j,res_index(upstream))-minelev_sec(j+1,res_index(upstream)) <= 0.) THEN
       bedslope_sec(j,res_index(upstream))=0.001
     ELSE
@@ -119,7 +119,7 @@ DO j=1,nbrsec(upstream)
 END DO
 
 ! Computation of maximum wetted surface of cross sections
-DO j=1,nbrsec(upstream)
+DO j=1,nbrsec(res_index(upstream))
   maxarea_sec(j,res_index(upstream))=0.
   npt=npoints(j,res_index(upstream))
   maxelev_sec(j,res_index(upstream))=MIN(y_sec(1,j,res_index(upstream)), y_sec(npt,j,res_index(upstream)))
@@ -147,7 +147,7 @@ DO j=1,nbrsec(upstream)
 END DO
 
 ! Check if the cross sections are completely sedimented
-DO j=1,nbrsec(upstream)
+DO j=1,nbrsec(res_index(upstream))
   if (maxarea_sec(j,res_index(upstream)) == 0.) then
     WRITE(*,*)'ERROR: cross section ',j
     WRITE(*,*)'is completely sedimented'
@@ -162,7 +162,7 @@ n=0
 
 ! Computation of the water discharge along the longitudinal profile of the reservoir
 ! from a weighted averaged value using the river inflow and the reservoir outflow discharges
-DO j=1,nbrsec(upstream)
+DO j=1,nbrsec(res_index(upstream))
   IF (damelev >= minelev_sec(j,res_index(upstream))) THEN
     IF (damelev > maxelev_sec(j,res_index(upstream))) THEN
       WRITE(*,*)'ERROR: the water discharge overflows the cross section geometry ',j
@@ -216,7 +216,7 @@ END DO
 
 ! Reservoir subreach must not include sections with minimum elevation above the reservoir level
 q=0
-DO j=1,nbrsec(upstream)
+DO j=1,nbrsec(res_index(upstream))
   if (resarea_sec(j,res_index(upstream)) == 0.) q=j
 ENDDO
 
@@ -229,18 +229,18 @@ endif
 
 ! Weighted averaged value
 weight=0.
-DO j=1,nbrsec(upstream)
+DO j=1,nbrsec(res_index(upstream))
   IF (damelev >= minelev_sec(j,res_index(upstream))) THEN
     weight=weight+resvol_sec(j,res_index(upstream))/resvol(res_index(upstream))
     weight_sec(j,res_index(upstream))=weight
-    IF (j == nbrsec(upstream)) THEN
+    IF (j == nbrsec(res_index(upstream))) THEN
       weight_sec(j,res_index(upstream))=1.
     END IF
   END IF
 END DO
 
 ! Discharge at the cross section j (m3/s)
-DO j=1,nbrsec(upstream)
+DO j=1,nbrsec(res_index(upstream))
   IF (resarea_sec(j,res_index(upstream)) /= 0.) THEN
 ! reservoir subreach
     discharge_sec(j,res_index(upstream))=qinflow(step,upstream)-  &
@@ -258,7 +258,7 @@ END DO
 ! Find the amount of cross section located in the river subreach
 k=0
 
-DO j=1,nbrsec(upstream)
+DO j=1,nbrsec(res_index(upstream))
   npt=npoints(j,res_index(upstream))
 
   if (j==1) depth_sec(j,res_index(upstream))=1.
@@ -415,8 +415,8 @@ END DO
 ! the first approximation to calculate the water depth (triangular cross section)
 !write(*,*)'Step (2)'
 
-DO j=1,nbrsec(upstream)
-  if(j==k+1 .and. k/=nbrsec(upstream))exit
+DO j=1,nbrsec(res_index(upstream))
+  if(j==k+1 .and. k/=nbrsec(res_index(upstream)))exit
 
   npt=npoints(j,res_index(upstream))
   crdepth_sec(j,res_index(upstream))=depth_sec(j,res_index(upstream))
@@ -577,7 +577,7 @@ END DO
 
 
 !write(*,*)'Step (3.1)'
-DO j=1,nbrsec(upstream)
+DO j=1,nbrsec(res_index(upstream))
 
 ! 3.1) computation of hydraulic parameters if the cross section j belongs to the reservoir subreach
   IF (resarea_sec(j,res_index(upstream)) /= 0.) THEN
@@ -658,7 +658,7 @@ IF (k /= 0) THEN
  if (flow_regime>=0.5) then
 ! for the case, which the reservoir is not completely empty (simulation affected by the reservoir subreach)
 
-  IF (k == nbrsec(upstream)) THEN
+  IF (k == nbrsec(res_index(upstream))) THEN
     depth_sec(k,res_index(upstream))=crdepth_sec(k,res_index(upstream))
 	watelev_sec(k,res_index(upstream))=crwatelev_sec(k,res_index(upstream))
 	topwidth_sec(k,res_index(upstream))=crtopwidth_sec(k,res_index(upstream))
