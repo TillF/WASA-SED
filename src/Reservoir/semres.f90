@@ -1586,7 +1586,7 @@ end if
 
 ! Daily sediment retention in the subbasin's reservoir [ton/timestep]
     DO j=1,nbrsec(upstream)
-      sed_ret(step,upstream)=sed_ret(step,upstream)+retention(j,res_index(upstream))
+      sed_ret(step,res_index(upstream))=sed_ret(step,res_index(upstream))+retention(j,res_index(upstream))
 	enddo
 
 ! Cross section geometry before bed elevtion change
@@ -1631,8 +1631,8 @@ end if
 ! Sediment outflow (ton/time step)
     j=nbrsec(upstream)
 	if (totalload(j,res_index(upstream)) /= 0.) then
-	  sed_overflow(step,upstream)=totalload(j,res_index(upstream))*factor_over2
-	  sed_intake(step,upstream)=totalload(j,res_index(upstream))*factor_intake2
+	  sed_overflow(step,res_index(upstream))=totalload(j,res_index(upstream))*factor_over2
+	  sed_intake(step,res_index(upstream))=totalload(j,res_index(upstream))*factor_intake2
 	  sed_bottom(step,res_index(upstream))=totalload(j,res_index(upstream))*factor_bottom2
 	  sed_outflow(step,res_index(upstream))=totalload(j,res_index(upstream))
 !temp	  sed_overflow(step,upstream)=max(0.,totalload(j,upstream)*overflow(step,upstream)/(res_qout(step,upstream)))
@@ -1640,8 +1640,8 @@ end if
 !temp	  sed_bottom(step,upstream)=max(0.,totalload(j,upstream)*qbottom(step,upstream)/(res_qout(step,upstream)))
 !temp	  sed_outflow(step,upstream)=sed_overflow(step,upstream)+sed_intake(step,upstream)+sed_bottom(step,upstream)
 	else
-	  sed_overflow(step,upstream)=0.
-	  sed_intake(step,upstream)=0.
+	  sed_overflow(step,res_index(upstream))=0.
+	  sed_intake(step,res_index(upstream))=0.
 	  sed_bottom(step,res_index(upstream))=0.
 	  sed_outflow(step,res_index(upstream))=0.
 	endif

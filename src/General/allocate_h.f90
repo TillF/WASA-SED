@@ -488,9 +488,10 @@ subroutine allocate_reservoir()
 	      x_sec0(npointsxsect,nxsection_res,subasin), &
 	      y_sec0(npointsxsect,nxsection_res,subasin), &
     !	  sed_susp(366*nt,subasin), &
-	      sed_ret(366*nt,subasin), &
-	      sed_overflow(366*nt,subasin), &
-	      sed_intake(366*nt,subasin), &
+            
+!A	      sed_ret(366*nt,subasin), &
+!A	      sed_overflow(366*nt,subasin), &
+!A	      sed_intake(366*nt,subasin), &
 !A	      sed_bottom(366*nt,subasin), &
 !A	      sed_qlateral(subasin,n_sed_class), &
 !A	      sed_inflow(366*nt,subasin), &
