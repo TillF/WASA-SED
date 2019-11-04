@@ -521,8 +521,8 @@ subroutine allocate_reservoir()
     !	  dheight_sed(nxsection_res,subasin), &
             
 	      frconc(n_sed_class,nxsection_res), &          
-	      volbed0(subasin), &	      
-          length_plunge(subasin), &
+!A	      volbed0(subasin), &	      
+!A        length_plunge(subasin), &
                
     !	  weightfac_actlay(npointsxsect,nxsection_res,subasin), &
     !	  weightfac_toplay(npointsxsect,nxsection_res,subasin), &

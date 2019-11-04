@@ -322,6 +322,7 @@ storcap(:)=0.
 	      !damelevact(n_reservoir), &
 	      !maxlevel(n_reservoir), &
 	      !minlevel(n_reservoir), &
+     
     damvol0(n_reservoir), &
     damelev0(366*nt,n_reservoir), &
     damelev1(366*nt,n_reservoir), &
@@ -421,8 +422,8 @@ storcap(:)=0.
     conc(nxsection_res,n_reservoir), &      
     area_sedim(nxsection_res,n_reservoir), &
     vol_sedim(nxsection_res,n_reservoir), &
-	      !volbed0(n_reservoir), &
-	      !length_plunge(n_reservoir), &
+    volbed0(n_reservoir), &
+    length_plunge(n_reservoir), &
     
     cumlength_sec(nxsection_res,n_reservoir), &
     length_sec(nxsection_res,n_reservoir), &

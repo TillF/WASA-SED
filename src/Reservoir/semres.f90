@@ -287,7 +287,7 @@ IF (STATUS == 0) THEN
 	  dummy3=0.
 	  dummy4=0.
 	  dummy1=pt_long0(res_index(i))
-	  length_plunge(i)=cumlength_sec(dummy1,res_index(i))
+	  length_plunge(res_index(i))=cumlength_sec(dummy1,res_index(i))
 	  IF (nbrsec1>1 .and. dummy1/=nbrsec1) then
 	    dummy3=y_sec0(1,dummy1,res_index(i))
 	    dummy4=y_sec0(1,dummy1+1,res_index(i))
@@ -413,12 +413,12 @@ IF (STATUS == 0) THEN
   ENDDO
 
 ! Initial sediment volume of the sub-basins' reservoir (m3)
+ volbed0=0.
   DO i=1,subasin
-    volbed0(i)=0.
     nbrsec1=nbrsec(i)
     IF (nbrsec(i) /= 0) THEN
       DO j=1,nbrsec1
-        volbed0(i)=volbed0(i)+vol_sedim(j,res_index(i))
+        volbed0(res_index(i))=volbed0(res_index(i))+vol_sedim(j,res_index(i))
 !write(*,'(2I4,5F18.3)')id_subbas_extern(i),j,vol_sedim(j,i),volbed0(i)
       ENDDO
 	ENDIF
@@ -960,7 +960,7 @@ end if
 !write(*,*)cumlength_sec(pt_long(upstream),upstream),cumlength_sec(pt_long0(upstream)+1,upstream),dummy4,dummy3 !(cumlength_sec(pt_long(upstream),upstream)-cumlength_sec(pt_long0(upstream)+1,upstream)),dist_sec(pt_long0(upstream),upstream)
       IF (dummy3 > slope_long(res_index(upstream))) THEN   !A
 	    pt_long(res_index(upstream))=max(pt_long(res_index(upstream))-1,42)		!the section 42 of the Barasona reservoir was assumed to be the upstream limit (variable pt_long_min(upstream) should be read in the file sed.dat
-        length_plunge(upstream)=cumlength_sec(max(pt_long(res_index(upstream)),1),res_index(upstream))
+        length_plunge(res_index(upstream))=cumlength_sec(max(pt_long(res_index(upstream)),1),res_index(upstream))
 	  ENDIF
 !write(*,'(2I6,F10.2,2F10.6,4F10.2)')pt_long0(upstream),pt_long(upstream),length_plunge(upstream),dummy3,slope_long(upstream),minelev_sec(pt_long0(upstream),upstream),minelev_sec(pt_long0(upstream)+1,upstream),cumlength_sec(pt_long(upstream)&
 !,upstream)-cumlength_sec(pt_long0(upstream)+1,upstream)
@@ -1666,8 +1666,8 @@ end if
 ! Conversion (m3 to ton)
 !2010    cum_sedimentation(upstream)=cum_sedimentation(upstream)*dry_dens(upstream)
 	sedimentation(step,res_index(upstream))=sedimentation(step,res_index(upstream))*dry_dens(upstream)
-	if (step==1 .and. t==tstart) cum_sedimentation(upstream)=cum_sedimentation(upstream)+volbed0(upstream) !2010
-	if (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(upstream)=cum_sedimentation(upstream)+volbed0(upstream) !2010
+	if (step==1 .and. t==tstart) cum_sedimentation(upstream)=cum_sedimentation(upstream)+volbed0(res_index(upstream)) !2010
+	if (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(upstream)=cum_sedimentation(upstream)+volbed0(res_index(upstream)) !2010
     cum_sedimentation(upstream)=cum_sedimentation(upstream)+sedimentation(step,res_index(upstream)) !2010
 !write(*,'(2F18.3)')cum_sedimentation(upstream),sedimentation(step,upstream)
 !if (step==30)stop
