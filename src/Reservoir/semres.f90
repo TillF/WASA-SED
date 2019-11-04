@@ -167,8 +167,8 @@ IF (STATUS == 0) THEN
       DO i=1,subasin
         nbrsec1=nbrsec(i)
         IF (nbrbat(i) /= 0 .AND. nbrsec(i) /= 0) THEN
-          READ(11,*) dummy1,dummy2,(manning_sec(j,i),j=1,nbrsec1)
-          READ(11,*) dummy1,dummy2,(dist_sec(j,i),j=1,nbrsec1)
+          READ(11,*) dummy1,dummy2,(manning_sec(j,res_index(i)),j=1,nbrsec1)
+          READ(11,*) dummy1,dummy2,(dist_sec(j,res_index(i)),j=1,nbrsec1)
         ELSE IF (nbrbat(i) == 0.AND.nbrsec(i) /= 0) THEN
           WRITE(*,*)'ERROR - if sections are defined, the file cav.dat must be given'
           WRITE(*,*)'subasin:',id_subbas_extern(i)
@@ -191,7 +191,7 @@ IF (STATUS == 0) THEN
       DO j=1,nbrsec1
 	    cumlength_sec(j,res_index(i))=0.
 	    DO j1=j,nbrsec1
-		  cumlength_sec(j,res_index(i))=cumlength_sec(j,res_index(i))+dist_sec(j1,i)
+		  cumlength_sec(j,res_index(i))=cumlength_sec(j,res_index(i))+dist_sec(j1,res_index(i))
 		ENDDO
 !write(*,'(2I4,2F15.3)')id_subbas_extern(i),j,dist_sec(j,i),cumlength_sec(j,i)
 	  ENDDO
@@ -204,11 +204,11 @@ IF (STATUS == 0) THEN
     IF (nbrsec(i) /= 0) THEN
       DO j=1,nbrsec1
         IF (j == 1) THEN
-          length_sec(j,res_index(i))=dist_sec(j,i)
+          length_sec(j,res_index(i))=dist_sec(j,res_index(i))
         ELSE IF (j == nbrsec(i)) THEN
-          length_sec(j,res_index(i))=dist_sec(j,i)+(dist_sec(j-1,i)/2.)
+          length_sec(j,res_index(i))=dist_sec(j,res_index(i))+(dist_sec(j-1,res_index(i))/2.)
         ELSE
-          length_sec(j,res_index(i))=(dist_sec(j,i)+dist_sec(j-1,i))/2.
+          length_sec(j,res_index(i))=(dist_sec(j,res_index(i))+dist_sec(j-1,res_index(i)))/2.
         END IF
       END DO
     endif
@@ -256,14 +256,14 @@ IF (STATUS == 0) THEN
         nbrsec1=nbrsec(i)
         DO j=1,nbrsec1
           READ(11,*, IOSTAT=istate) dummy1,dummy2,npoints(j,i),  &
-            (x_sec0(m,j,i),y_sec0(m,j,i),m=1,npoints(j,i))
+            (x_sec0(m,j,res_index(i)),y_sec0(m,j,res_index(i)),m=1,npoints(j,i))
             IF (istate/=0) THEN
                 write(*,"(A)")"ERROR: Premature end of file in cross_sec_"//trim(adjustl(subarea))//".dat. Check specs in hydraul_param.dat."
                 stop
             end if
             do m=1,npoints(j,i)-1 !check for increasing x-coordinates
-               if (x_sec0(m,j,i) >= x_sec0(m+1,j,i)) then
-                    write(*,'(A,i0,A,i0,A,f6.1,A)')"ERROR: x-coordinates in reservoir cross-section must be increasing (line ", j+2,", point ", m,", x=", x_sec0(m,j,i), ",). "
+               if (x_sec0(m,j,res_index(i)) >= x_sec0(m+1,j,res_index(i))) then
+                    write(*,'(A,i0,A,i0,A,f6.1,A)')"ERROR: x-coordinates in reservoir cross-section must be increasing (line ", j+2,", point ", m,", x=", x_sec0(m,j,res_index(i)), ",). "
                     g=1 !indicate error
                end if
             end do
@@ -290,23 +290,23 @@ IF (STATUS == 0) THEN
 	  dummy1=pt_long0(res_index(i))
 	  length_plunge(i)=cumlength_sec(dummy1,res_index(i))
 	  IF (nbrsec1>1 .and. dummy1/=nbrsec1) then
-	    dummy3=y_sec0(1,dummy1,i)
-	    dummy4=y_sec0(1,dummy1+1,i)
+	    dummy3=y_sec0(1,dummy1,res_index(i))
+	    dummy4=y_sec0(1,dummy1+1,res_index(i))
 !write(*,*)nbrsec1,dummy1,dummy3,dummy4
         DO m=2,npoints(dummy1,i)
-          IF (dummy3 > y_sec0(m,dummy1,i)) dummy3=y_sec0(m,dummy1,i)
-          IF (dummy4 > y_sec0(m,dummy1+1,i)) dummy4=y_sec0(m,dummy1+1,i)
+          IF (dummy3 > y_sec0(m,dummy1,res_index(i))) dummy3=y_sec0(m,dummy1,res_index(i))
+          IF (dummy4 > y_sec0(m,dummy1+1,res_index(i))) dummy4=y_sec0(m,dummy1+1,res_index(i))
 		ENDDO
-	    slope_long(res_index(i))=min((dummy3-dummy4)/dist_sec(dummy1,i),0.005)  !A
+	    slope_long(res_index(i))=min((dummy3-dummy4)/dist_sec(dummy1,res_index(i)),0.005)  !A
 	  ENDIF
 	  IF (nbrsec1>1 .and. dummy1==nbrsec1) then
-	    dummy3=y_sec0(1,dummy1-1,i)
-	    dummy4=y_sec0(1,dummy1,i)
+	    dummy3=y_sec0(1,dummy1-1,res_index(i))
+	    dummy4=y_sec0(1,dummy1,res_index(i))
         DO m=2,npoints(dummy1,i)
-          IF (dummy3 > y_sec0(m,dummy1-1,i)) dummy3=y_sec0(m,dummy1-1,i)
-          IF (dummy4 > y_sec0(m,dummy1,i)) dummy4=y_sec0(m,dummy1,i)
+          IF (dummy3 > y_sec0(m,dummy1-1,res_index(i))) dummy3=y_sec0(m,dummy1-1,res_index(i))
+          IF (dummy4 > y_sec0(m,dummy1,res_index(i))) dummy4=y_sec0(m,dummy1,res_index(i))
 		ENDDO
-	    slope_long(res_index(i))=min((dummy3-dummy4)/dist_sec(dummy1-1,i),0.005) !A
+	    slope_long(res_index(i))=min((dummy3-dummy4)/dist_sec(dummy1-1,res_index(i)),0.005) !A
 	  ENDIF
 !write(*,*) dummy1,dummy1,dummy3,dummy4,slope_long(i)
      ENDIF
@@ -320,8 +320,8 @@ IF (STATUS == 0) THEN
     IF (nbrsec(i) /= 0) THEN
       DO j=1,nbrsec1
         DO m=1,npoints(j,i)
-          x_sec(m,j,res_index(i))=x_sec0(m,j,i)
-          y_sec(m,j,res_index(i))=y_sec0(m,j,i)
+          x_sec(m,j,res_index(i))=x_sec0(m,j,res_index(i))
+          y_sec(m,j,res_index(i))=y_sec0(m,j,res_index(i))
         END DO
 !write(*,*)j,npoints(j,i),(x_sec0(m,j,i),y_sec0(m,j,i),m=1,npoints(j,i))
       END DO
@@ -340,7 +340,7 @@ IF (STATUS == 0) THEN
           nbrsec1=nbrsec(i)
           DO j=1,nbrsec1
             DO m=1,npoints(j,i)
-              y_original(m,j,res_index(i))=y_sec0(m,j,i)
+              y_original(m,j,res_index(i))=y_sec0(m,j,res_index(i))
 			ENDDO
 		  ENDDO
 		  dummy2=0
@@ -374,7 +374,7 @@ IF (STATUS == 0) THEN
       DO j=1,nbrsec1
         DO m=1,npoints(j,i)
 !write(*,*)j,m,y_original(m,j,i),y_sec0(m,j,i)
-	      IF (y_original(m,j,res_index(i)) > y_sec0(m,j,i)) THEN
+	      IF (y_original(m,j,res_index(i)) > y_sec0(m,j,res_index(i))) THEN
 		    write(*,*)'ERROR - original bed elevation over the initial bed elevation:'
 			write(*,*)'    subbasin=',id_subbas_extern(i),'section=',id_sec_extern(j,i)
 		    stop
@@ -431,7 +431,7 @@ IF (STATUS == 0) THEN
       DO j=1,nbrsec1
         npt=npoints(j,i)
         DO m=1,npt
-          y_actlay(m,j,res_index(i))=y_sec0(m,j,i)
+          y_actlay(m,j,res_index(i))=y_sec0(m,j,res_index(i))
         END DO
       END DO
     END IF
@@ -573,11 +573,11 @@ IF (STATUS == 0) THEN
 
        DO j=1,nbrsec(i)
         IF (j /= nbrsec(i)) THEN
-	      volhelp2(b)=volhelp2(b)+(areasec2(j)+areasec2(j+1))*dist_sec(j,i)/2.
-	      areahelp2(b)=areahelp2(b)+(widthsec2(j)+widthsec2(j+1))*dist_sec(j,i)/2.
+	      volhelp2(b)=volhelp2(b)+(areasec2(j)+areasec2(j+1))*dist_sec(j,res_index(i))/2.
+	      areahelp2(b)=areahelp2(b)+(widthsec2(j)+widthsec2(j+1))*dist_sec(j,res_index(i))/2.
         ELSE
-	      volhelp2(b)=volhelp2(b)+areasec2(j)*dist_sec(j,i)/2.
-	      areahelp2(b)=areahelp2(b)+widthsec2(j)*dist_sec(j,i)/2.
+	      volhelp2(b)=volhelp2(b)+areasec2(j)*dist_sec(j,res_index(i))/2.
+	      areahelp2(b)=areahelp2(b)+widthsec2(j)*dist_sec(j,res_index(i))/2.
         END IF
 !write(*,*)j,areasec2(j),dist_sec(j,i),areahelp2(b),volhelp2(b)
 	   END DO
@@ -953,7 +953,7 @@ end if
 !	if (qbottom(step,upstream) /= 0.) then
       dummy4=0.
 	  DO j=pt_long(res_index(upstream)),pt_long0(res_index(upstream))
-	    dummy4=dummy4+dist_sec(j,upstream)
+	    dummy4=dummy4+dist_sec(j,res_index(upstream))
 	  ENDDO
 !write(*,*)dummy4
 
@@ -1753,15 +1753,15 @@ end if
 
        DO j=1,nbrsec(upstream)
         IF (j /= nbrsec(upstream)) THEN
-	      volhelp(b)=volhelp(b)+(areasec(j)+areasec(j+1))*dist_sec(j,upstream)/2.
-	      areahelp(b)=areahelp(b)+(widthsec(j)+widthsec(j+1))*dist_sec(j,upstream)/2.
-	      IF (fcav(upstream)==0) volhelp2(b)=volhelp2(b)+(areasec2(j)+areasec2(j+1))*dist_sec(j,upstream)/2.
-	      IF (fcav(upstream)==0) areahelp2(b)=areahelp2(b)+(widthsec2(j)+widthsec2(j+1))*dist_sec(j,upstream)/2.
+	      volhelp(b)=volhelp(b)+(areasec(j)+areasec(j+1))*dist_sec(j,res_index(upstream))/2.
+	      areahelp(b)=areahelp(b)+(widthsec(j)+widthsec(j+1))*dist_sec(j,res_index(upstream))/2.
+	      IF (fcav(upstream)==0) volhelp2(b)=volhelp2(b)+(areasec2(j)+areasec2(j+1))*dist_sec(j,res_index(upstream))/2.
+	      IF (fcav(upstream)==0) areahelp2(b)=areahelp2(b)+(widthsec2(j)+widthsec2(j+1))*dist_sec(j,res_index(upstream))/2.
         ELSE
-	      volhelp(b)=volhelp(b)+areasec(j)*dist_sec(j,upstream)/2.
-	      areahelp(b)=areahelp(b)+widthsec(j)*dist_sec(j,upstream)/2.
-	      IF (fcav(upstream)==0) volhelp2(b)=volhelp2(b)+areasec2(j)*dist_sec(j,upstream)/2.
-	      IF (fcav(upstream)==0) areahelp2(b)=areahelp2(b)+widthsec2(j)*dist_sec(j,upstream)/2.
+	      volhelp(b)=volhelp(b)+areasec(j)*dist_sec(j,res_index(upstream))/2.
+	      areahelp(b)=areahelp(b)+widthsec(j)*dist_sec(j,res_index(upstream))/2.
+	      IF (fcav(upstream)==0) volhelp2(b)=volhelp2(b)+areasec2(j)*dist_sec(j,res_index(upstream))/2.
+	      IF (fcav(upstream)==0) areahelp2(b)=areahelp2(b)+widthsec2(j)*dist_sec(j,res_index(upstream))/2.
         END IF
 	   END DO
      ENDDO

@@ -332,15 +332,14 @@ storcap(:)=0.
 	      !decmaxdamarea(366*nt,n_reservoir), &
 	      !decdamdead(366*nt,n_reservoir), &
 	      !decdamalert(366*nt,n_reservoir), &
-	      !manning_sec(nxsection_res,n_reservoir), &
-	      !dist_sec(nxsection_res,n_reservoir), &
-	      !x_sec0(npointsxsect,nxsection_res,n_reservoir), &
-	      !y_sec0(npointsxsect,nxsection_res,n_reservoir), &
+    manning_sec(nxsection_res,n_reservoir), &
+    dist_sec(nxsection_res,n_reservoir), &
+    x_sec0(npointsxsect,nxsection_res,n_reservoir), &
+    y_sec0(npointsxsect,nxsection_res,n_reservoir), &
      
     sed_ret(366*nt,n_reservoir), &
     sed_overflow(366*nt,n_reservoir), &
-    sed_intake(366*nt,n_reservoir), &
-     
+    sed_intake(366*nt,n_reservoir), &  
     sed_bottom(366*nt,n_reservoir), &
     sed_qlateral(n_reservoir,n_sed_class), &
     sed_inflow(366*nt,n_reservoir), &

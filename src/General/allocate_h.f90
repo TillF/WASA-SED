@@ -483,10 +483,10 @@ subroutine allocate_reservoir()
 	      decmaxdamarea(366*nt,subasin), &
 	      decdamdead(366*nt,subasin), &
 	      decdamalert(366*nt,subasin), &
-	      manning_sec(nxsection_res,subasin), &
-	      dist_sec(nxsection_res,subasin), &
-	      x_sec0(npointsxsect,nxsection_res,subasin), &
-	      y_sec0(npointsxsect,nxsection_res,subasin), &
+!A	      manning_sec(nxsection_res,subasin), &
+!A	      dist_sec(nxsection_res,subasin), &
+!A	      x_sec0(npointsxsect,nxsection_res,subasin), &
+!A	      y_sec0(npointsxsect,nxsection_res,subasin), &
     !	  sed_susp(366*nt,subasin), &
             
 !A	      sed_ret(366*nt,subasin), &
