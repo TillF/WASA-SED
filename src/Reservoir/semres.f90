@@ -218,8 +218,8 @@ IF (STATUS == 0) THEN
   READ(11,*);READ(11,*)
   DO i=1,subasin
     IF (storcap(i) > 0.) THEN
-     IF (nbrsec(i) == 0) read(11,*) dummy1,dry_dens(i)
-     IF (nbrsec(i) /= 0) read(11,*) dummy1,dry_dens(i),factor_actlay(i)
+     IF (nbrsec(i) == 0) read(11,*) dummy1,dry_dens(res_index(i))
+     IF (nbrsec(i) /= 0) read(11,*) dummy1,dry_dens(res_index(i)),factor_actlay(res_index(i))
 !     IF (nbrsec(i) /= 0) read(11,*) dummy1,dry_dens(i),sed_flag(i)
 	ENDIF
     IF (storcap(i) == 0.) dummy1=id_subbas_extern(i)
@@ -1090,12 +1090,12 @@ end if
 !      thickness_act(j)=factor_actlay(upstream)*d90_actlay(j,upstream)*(24./nt)		!nt is the number of simulation steps per day
 !	  if (p /= 0) then
 	  if (sed_routing_flag(res_index(upstream)) == 0) then
-        thickness_act(j)=.03*factor_actlay(upstream)*(24./nt)	!0,03 value of active layer thickness along the reservoir derived from the simulation without sediment management technique for the Barasona reservoir
+        thickness_act(j)=.03*factor_actlay(res_index(upstream))*(24./nt)	!0,03 value of active layer thickness along the reservoir derived from the simulation without sediment management technique for the Barasona reservoir
 	  else if (sed_routing_flag(res_index(upstream)) == 1) then
 	    if (length_plunge(upstream) > cumlength_sec(j,res_index(upstream))) then !0,25 value of active layer thickness close to the dam derived from the simulation with sediment management technique for the Barasona reservoir
-          thickness_act(j)=max(.03*factor_actlay(upstream),(.25**factor_actlay(upstream))*(length_plunge(upstream)-cumlength_sec(j,res_index(upstream)))/length_plunge(upstream))
+          thickness_act(j)=max(.03*factor_actlay(res_index(upstream)),(.25**factor_actlay(res_index(upstream)))*(length_plunge(upstream)-cumlength_sec(j,res_index(upstream)))/length_plunge(upstream))
 		else
-          thickness_act(j)=.03*factor_actlay(upstream)
+          thickness_act(j)=.03*factor_actlay(res_index(upstream))
 		endif
 	  endif
 
@@ -1215,7 +1215,7 @@ end if
 ! Fractional sediment availability at the active layer (ton)
     DO j=1,nbrsec(upstream)
       DO g=1,n_sed_class
-        frsedavailab(g,j)=vol_actlay(j,res_index(upstream))*frac_actlay(g,j,res_index(upstream))*dry_dens(upstream)
+        frsedavailab(g,j)=vol_actlay(j,res_index(upstream))*frac_actlay(g,j,res_index(upstream))*dry_dens(res_index(upstream))
 !if(j<10)write(*,'(2I4,10F15.2)')j,g,frsedavailab(g,j),vol_actlay(j,upstream),frac_actlay(g,j,upstream),dry_dens(upstream)
       END DO
     END DO
@@ -1293,7 +1293,7 @@ end if
 ! The weighting factor to include incoming sediment into the carrying capacity has to be read in do.dat
 ! temporarily selected as 0.9 according to the literature
         weigth_factor=0.9
-		fr_capacity(g,j)=fr_capacity(g,j)*dry_dens(upstream)
+		fr_capacity(g,j)=fr_capacity(g,j)*dry_dens(res_index(upstream))
         IF (fr_capacity(g,j) > 0.) THEN
           fr_capacity(g,j)=fr_capacity(g,j)*(weigth_factor*frac_actlay(g,j,res_index(upstream))+ &
 			   (1.-weigth_factor)*frac_toplay(g,j,res_index(upstream)))
@@ -1547,7 +1547,7 @@ end if
 	  totvol_actlay(j,res_index(upstream))=0.
       DO g=1,n_sed_class
 	    frvol_actlay(g,j,res_index(upstream))=frvol_actlay(g,j,res_index(upstream))+ &
-			(frdeposition(g,j)-frerosion(g,j)+frretention(g,j))/dry_dens(upstream)
+			(frdeposition(g,j)-frerosion(g,j)+frretention(g,j))/dry_dens(res_index(upstream))
 		frvol_actlay(g,j,res_index(upstream))=MAX(frvol_actlay(g,j,res_index(upstream)),0.)
         totvol_actlay(j,res_index(upstream))=totvol_actlay(j,res_index(upstream))+frvol_actlay(g,j,res_index(upstream))
 !write(*,'(2I4,5F15.4)')id_subbas_extern(upstream),j,frvol_actlay(g,j,upstream),totvol_actlay(j,upstream)
@@ -1580,7 +1580,7 @@ end if
 
 ! Computation of sediment volume variation at the reservoir bed for each cross section
     DO j=1,nbrsec(upstream)
-	  dvol_sed(j,res_index(upstream))=(deposition(j,res_index(upstream))-erosion(j,res_index(upstream))+retention(j,res_index(upstream)))/dry_dens(upstream)
+	  dvol_sed(j,res_index(upstream))=(deposition(j,res_index(upstream))-erosion(j,res_index(upstream))+retention(j,res_index(upstream)))/dry_dens(res_index(upstream))
 !write(*,'(I4,4F15.3)')j,deposition(j,upstream),erosion(j,upstream),retention(j,upstream),dvol_sed(j,upstream)
     END DO
 !if(step==290)stop
@@ -1672,7 +1672,7 @@ end if
 
 ! Conversion (m3 to ton)
 !2010    cum_sedimentation(upstream)=cum_sedimentation(upstream)*dry_dens(upstream)
-	sedimentation(step,res_index(upstream))=sedimentation(step,res_index(upstream))*dry_dens(upstream)
+	sedimentation(step,res_index(upstream))=sedimentation(step,res_index(upstream))*dry_dens(res_index(upstream))
 	if (step==1 .and. t==tstart) cum_sedimentation(upstream)=cum_sedimentation(upstream)+volbed0(res_index(upstream)) !2010
 	if (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(upstream)=cum_sedimentation(upstream)+volbed0(res_index(upstream)) !2010
     cum_sedimentation(upstream)=cum_sedimentation(upstream)+sedimentation(step,res_index(upstream)) !2010
@@ -1853,7 +1853,7 @@ end if
 
 
 	IF (decstorcap(step,res_index(upstream)) >= daystorcap(step,upstream) .or.&
-	    cum_sedimentation(upstream)/dry_dens(upstream) >= storcap(upstream)*1.e6) then
+	    cum_sedimentation(upstream)/dry_dens(res_index(upstream)) >= storcap(upstream)*1.e6) then
 	 storcap(upstream)=0.
 	 daystorcap(step,upstream)=0.
 
