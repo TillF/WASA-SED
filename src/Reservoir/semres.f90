@@ -279,7 +279,8 @@ IF (STATUS == 0) THEN
   ENDDO
 
   DO i=1,subasin
-   IF (sed_flag(i)==1) THEN
+   if (res_index(i) /= 0.) then !Anne inserted this line   
+   IF (sed_flag(res_index(i))==1) THEN
     IF (nbrsec(i) /= 0) THEN
 	  pt_long0(res_index(i))=0			!pt_long0(i) should be read in the file sed.dat (not implemented)
 	  pt_long(res_index(i))=pt_long0(res_index(i)) !Anne changed i to res_index(i)
@@ -309,7 +310,8 @@ IF (STATUS == 0) THEN
 	  ENDIF
 !write(*,*) dummy1,dummy1,dummy3,dummy4,slope_long(i)
      ENDIF
-	ENDIF
+   ENDIF
+  endif	 !Anne 
   ENDDO
 !stop
 
@@ -460,70 +462,75 @@ IF (STATUS == 0) THEN
 	IF (istate/=0) THEN					!main_channel.dat not found
       write(*,*)'WARNING: '//pfadp(1:pfadj)// 'main_channel.dat not found, using defaults'
       DO i=1,subasin
-	    sed_flag(i)=0 !0 = changes on sideslope is not controlled
+	    sed_flag(res_index(i))=0 !0 = changes on sideslope is not controlled
 	  ENDDO
     ELSE
-      READ(11,*);READ(11,*)
-      DO i=1,subasin
- 	    sed_flag(i)=1 !changes on sideslope is controlled avoiding steeper slopes by erosion processes
-        nbrsec1=nbrsec(i)
-        IF (nbrbat(i) /= 0 .AND. nbrsec(i) /= 0) THEN
-          READ(11,*) dummy1,dummy2,(pt1(j,res_index(i)),j=1,nbrsec1)
-          READ(11,*) dummy1,dummy2,(pt2(j,res_index(i)),j=1,nbrsec1)    !A
-        ELSE IF (nbrbat(i) == 0.AND.nbrsec(i) /= 0) THEN
-          WRITE(*,*)'ERROR - if sections are defined, the file cav.dat must be given'
-          WRITE(*,*)'subasin:',id_subbas_extern(i)
-          STOP
-        ELSE IF (nbrsec(i) == 0) THEN
-          dummy1=id_subbas_extern(i)
-        END IF
-        IF (dummy1 /= id_subbas_extern(i)) THEN
-          WRITE(*,*) 'ERROR: Sub-basin-IDs in file main_channel.dat must have the same ordering scheme as in hymo.dat'
-          STOP
-        END IF
-      END DO
+    READ(11,*);READ(11,*)
+        DO i=1,subasin
+        if (res_index(i) /= 0.) then !Anne inserted this line    
+ 	        sed_flag(res_index(i))=1 !changes on sideslope is controlled avoiding steeper slopes by erosion processes
+            nbrsec1=nbrsec(i)
+            IF (nbrbat(i) /= 0 .AND. nbrsec(i) /= 0) THEN
+                READ(11,*) dummy1,dummy2,(pt1(j,res_index(i)),j=1,nbrsec1)
+                READ(11,*) dummy1,dummy2,(pt2(j,res_index(i)),j=1,nbrsec1)    !A
+            ELSE IF (nbrbat(i) == 0.AND.nbrsec(i) /= 0) THEN
+                WRITE(*,*)'ERROR - if sections are defined, the file cav.dat must be given'
+                WRITE(*,*)'subasin:',id_subbas_extern(i)
+                STOP
+            ELSE IF (nbrsec(i) == 0) THEN
+                dummy1=id_subbas_extern(i)
+            END IF
+            IF (dummy1 /= id_subbas_extern(i)) THEN
+                WRITE(*,*) 'ERROR: Sub-basin-IDs in file main_channel.dat must have the same ordering scheme as in hymo.dat'
+                STOP
+            END IF
+        endif	!Anne    
+        END DO
 	ENDIF
   CLOSE(11)
+  
 
   DO i=1,subasin
     nbrsec1=nbrsec(i)
-    IF (sed_flag(i)==1) THEN
-     IF (nbrsec(i) /= 0) THEN
-      DO j=1,nbrsec1
-	    npt=npoints(j,res_index(i))
-		p1=pt1(j,res_index(i))
-		p2=pt2(j,res_index(i))
-	    if (p1/=-999) then
-		  sideslope_pt1(j,res_index(i))=abs(y_sec(p1,j,res_index(i))-y_sec(p1+1,j,res_index(i)))/abs(x_sec(p1,j,res_index(i))-x_sec(p1+1,j,res_index(i)))   !A changed i to res_index(i)
-		  sideslope_pt1(j,res_index(i))=max(sideslope_pt1(j,res_index(i)),.05)                                  !A
-!		  elev=y_sec(p1,j,i)+2.
-		  elev=y_sec(p1,j,res_index(i))+(min(y_sec(1,j,res_index(i)),y_sec(npt,j,res_index(i)))-y_sec(p1,j,res_index(i)))/2.
-          DO m=2,npoints(j,res_index(i))-1
-            if (y_sec(m,j,res_index(i)) < elev) then
-		      pt3(j,res_index(i))=m-1
-		      exit
-		    endif
-	      ENDDO
-		else
-		  pt3(j,res_index(i))=-999
-		endif
-	    if (p2/=-999) then
-	      sideslope_pt2(j,res_index(i))=abs(y_sec(p2,j,res_index(i))-y_sec(p2-1,j,res_index(i)))/abs(x_sec(p2,j,res_index(i))-x_sec(p2-1,j,res_index(i)))   !A
-		  sideslope_pt2(j,res_index(i))=max(sideslope_pt1(j,res_index(i)),.05)                                  !A
-!		  elev=y_sec(p2,j,i)+2.
-		  elev=y_sec(p2,j,res_index(i))+(min(y_sec(1,j,res_index(i)),y_sec(npt,j,res_index(i)))-y_sec(p2,j,res_index(i)))/2.
-          DO m=1,npoints(j,res_index(i))
-            if (y_sec(m,j,res_index(i)) < elev) then
-		      pt4(j,res_index(i))=m+1
-		    endif
-	      ENDDO
-		else
-		  pt4(j,res_index(i))=-999
-		endif
-!write(*,'(6I5,8F15.4)')id_subbas_extern(i),j,pt1(j,i),pt2(j,i),pt3(j,i),pt4(j,i),sideslope_pt1(j,i),sideslope_pt2(j,i),elev
-      END DO
-     END IF
-    END IF
+    if (res_index(i) /= 0.) then !Anne inserted this line
+            IF (sed_flag(res_index(i))==1) THEN
+             IF (nbrsec(i) /= 0) THEN
+              DO j=1,nbrsec1
+	            npt=npoints(j,res_index(i))
+		        p1=pt1(j,res_index(i))
+		        p2=pt2(j,res_index(i))
+	            if (p1/=-999) then
+		          sideslope_pt1(j,res_index(i))=abs(y_sec(p1,j,res_index(i))-y_sec(p1+1,j,res_index(i)))/abs(x_sec(p1,j,res_index(i))-x_sec(p1+1,j,res_index(i)))   !A changed i to res_index(i)
+		          sideslope_pt1(j,res_index(i))=max(sideslope_pt1(j,res_index(i)),.05)                                  !A
+        !		  elev=y_sec(p1,j,i)+2.
+		          elev=y_sec(p1,j,res_index(i))+(min(y_sec(1,j,res_index(i)),y_sec(npt,j,res_index(i)))-y_sec(p1,j,res_index(i)))/2.
+                  DO m=2,npoints(j,res_index(i))-1
+                    if (y_sec(m,j,res_index(i)) < elev) then
+		              pt3(j,res_index(i))=m-1
+		              exit
+		            endif
+	              ENDDO
+		        else
+		          pt3(j,res_index(i))=-999
+		        endif
+	            if (p2/=-999) then
+	              sideslope_pt2(j,res_index(i))=abs(y_sec(p2,j,res_index(i))-y_sec(p2-1,j,res_index(i)))/abs(x_sec(p2,j,res_index(i))-x_sec(p2-1,j,res_index(i)))   !A
+		          sideslope_pt2(j,res_index(i))=max(sideslope_pt1(j,res_index(i)),.05)                                  !A
+        !		  elev=y_sec(p2,j,i)+2.
+		          elev=y_sec(p2,j,res_index(i))+(min(y_sec(1,j,res_index(i)),y_sec(npt,j,res_index(i)))-y_sec(p2,j,res_index(i)))/2.
+                  DO m=1,npoints(j,res_index(i))
+                    if (y_sec(m,j,res_index(i)) < elev) then
+		              pt4(j,res_index(i))=m+1
+		            endif
+	              ENDDO
+		        else
+		          pt4(j,res_index(i))=-999
+		        endif
+        !write(*,'(6I5,8F15.4)')id_subbas_extern(i),j,pt1(j,i),pt2(j,i),pt3(j,i),pt4(j,i),sideslope_pt1(j,i),sideslope_pt2(j,i),elev
+              END DO
+             END IF
+            END IF
+     endif	!Anne       
   END DO
 !stop
 
@@ -947,7 +954,7 @@ end if
 !	  endif
 !	ENDDO
 
-    IF (sed_routing_flag(upstream)==1) THEN
+    IF (sed_routing_flag(res_index(upstream))==1) THEN
 	 if (p == 0) then
 !	if (qbottom(step,upstream) /= 0.) then
       dummy4=0.
@@ -988,10 +995,10 @@ end if
 !if (id_sec_extern(j,upstream)==47)elev=max(elev,435.)
 !	  elev=min(watelev_sec(j,upstream)+1.5,watelev_sec(j,upstream)+((maxelev_sec(j,upstream)-watelev_sec(j,upstream))/5.))
 !	  elev=watelev_sec(j,upstream)
-	  if (sed_flag(upstream) == 0) then
+	  if (sed_flag(res_index(upstream)) == 0) then
         p1=-999
         p2=-999
-	  else if (sed_flag(upstream) == 1) then
+	  else if (sed_flag(res_index(upstream)) == 1) then
         p1=pt1(j,res_index(upstream))
         p2=pt2(j,res_index(upstream))
 	  endif
@@ -1082,9 +1089,9 @@ end if
 !factor_actlay(upstream)=5.
 !      thickness_act(j)=factor_actlay(upstream)*d90_actlay(j,upstream)*(24./nt)		!nt is the number of simulation steps per day
 !	  if (p /= 0) then
-	  if (sed_routing_flag(upstream) == 0) then
+	  if (sed_routing_flag(res_index(upstream)) == 0) then
         thickness_act(j)=.03*factor_actlay(upstream)*(24./nt)	!0,03 value of active layer thickness along the reservoir derived from the simulation without sediment management technique for the Barasona reservoir
-	  else if (sed_routing_flag(upstream) == 1) then
+	  else if (sed_routing_flag(res_index(upstream)) == 1) then
 	    if (length_plunge(upstream) > cumlength_sec(j,res_index(upstream))) then !0,25 value of active layer thickness close to the dam derived from the simulation with sediment management technique for the Barasona reservoir
           thickness_act(j)=max(.03*factor_actlay(upstream),(.25**factor_actlay(upstream))*(length_plunge(upstream)-cumlength_sec(j,res_index(upstream)))/length_plunge(upstream))
 		else

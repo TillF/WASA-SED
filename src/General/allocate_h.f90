@@ -492,8 +492,8 @@ subroutine allocate_reservoir()
                        
 	      dry_dens(subasin), &
 	      factor_actlay(subasin), &
-	      sed_flag(subasin), &
-	      sed_routing_flag(subasin), &
+!A	      sed_flag(subasin), &
+!A	      sed_routing_flag(subasin), &
     !	  numbeqs(subasin), &
     !	  Q_max(10,subasin), &
     !	  param_a(10,subasin), &

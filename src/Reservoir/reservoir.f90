@@ -359,8 +359,8 @@ storcap(:)=0.
     frsediment_out(n_reservoir,n_sed_class), &
 	      !dry_dens(n_reservoir), &
 	      !factor_actlay(n_reservoir), &
-	      !sed_flag(n_reservoir), &
-	      !sed_routing_flag(n_reservoir), &   
+    sed_flag(n_reservoir), &
+    sed_routing_flag(n_reservoir), &   
     sedinflow_g(366*nt,n_reservoir,n_sed_class), &
     sedoutflow_g(366*nt,n_reservoir,n_sed_class), &
     damelev_mean(366*nt,n_reservoir), &
