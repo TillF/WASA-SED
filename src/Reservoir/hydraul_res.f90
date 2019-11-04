@@ -71,23 +71,23 @@ END DO
 
 ! Mean reservoir level (m)
 IF (reservoir_balance == 1) THEN
-  damelev0(step,upstream)= -1. !flag as "not set"
+  damelev0(step,res_index(upstream))= -1. !flag as "not set"
   DO l=1,(nbrbat(upstream)-1)
-    IF (damvol0(upstream) >= vol_bat(l,upstream).AND.  &
-        damvol0(upstream) <= vol_bat(l+1,upstream)) THEN
-      damelev0(step,upstream)=elev_bat(l,upstream)+(damvol0(upstream)-  &
+    IF (damvol0(res_index(upstream)) >= vol_bat(l,upstream).AND.  &
+        damvol0(res_index(upstream)) <= vol_bat(l+1,upstream)) THEN
+      damelev0(step,res_index(upstream))=elev_bat(l,upstream)+(damvol0(res_index(upstream))-  &
         vol_bat(l,upstream))/(vol_bat(l+1,upstream)- vol_bat(l,upstream))*  &
         (elev_bat(l+1,upstream)-elev_bat(l,upstream))
     END IF
   END DO
-  if (damelev0(step,upstream) == -1.) then !flag as "not set"
+  if (damelev0(step,res_index(upstream)) == -1.) then !flag as "not set"
     write(*,*)"ERROR: actual volume beyond range of cav.dat"
     !damelev0(step,upstream)= 1.
     stop
   end if
 ENDIF
 
-damelev=(damelevact(upstream)+damelev0(step,upstream))/2.
+damelev=(damelevact(upstream)+damelev0(step,res_index(upstream)))/2.
 damelev_mean(step,res_index(upstream))=damelev
 !write(*,*)damelevact(upstream),damelev0(step,upstream),damelev_mean(step,upstream)
 

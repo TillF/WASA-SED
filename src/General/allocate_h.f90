@@ -472,13 +472,10 @@ subroutine allocate_reservoir()
 	      damelevact(subasin), &
 	      maxlevel(subasin), &
 	      minlevel(subasin), &
-	      damvol0(subasin), &
-	      damelev0(366*nt,subasin), &
-	      damelev1(366*nt,subasin), &
-	      resreach_vol(subasin), &
-!A	      res_precip(366*nt,subasin), &
-!A	      res_pet(366*nt,subasin), &
-!A	      res_qout(366*nt,subasin), &
+!A	      damvol0(subasin), &
+!A	      damelev0(366*nt,subasin), &
+!A	      damelev1(366*nt,subasin), &
+!A	      resreach_vol(subasin), &
             
 	      nbrsec(subasin), &
 

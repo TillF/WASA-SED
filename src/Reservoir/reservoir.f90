@@ -322,13 +322,13 @@ storcap(:)=0.
 	      !damelevact(n_reservoir), &
 	      !maxlevel(n_reservoir), &
 	      !minlevel(n_reservoir), &
-	      !damvol0(n_reservoir), &
-	      !damelev0(366*nt,n_reservoir), &
-	      !damelev1(366*nt,n_reservoir), &
-	      !resreach_vol(n_reservoir), &
-    res_precip(366*nt,n_reservoir), &
-    res_pet(366*nt,n_reservoir), &
+    damvol0(n_reservoir), &
+    damelev0(366*nt,n_reservoir), &
+    damelev1(366*nt,n_reservoir), &
+    resreach_vol(n_reservoir), &
      
+    res_precip(366*nt,n_reservoir), &
+    res_pet(366*nt,n_reservoir), &   
     res_qout(366*nt,n_reservoir), &      
     id_sec_extern(nxsection_res,n_reservoir), &
 	      !nbrsec(n_reservoir), &
@@ -1212,7 +1212,7 @@ IF (STATUS == 2) THEN
       daydamalert(step,upstream)=daydamalert(step,upstream)*1.e6
       daydamdead(step,upstream)=daydamdead(step,upstream)*1.e6
       damflow(upstream)=damflow(upstream)*(86400./nt)
-      damvol0(upstream)=volact(step,upstream)
+      damvol0(res_index(upstream))=volact(step,upstream)
 	  qoutlet(upstream)=qoutlet(upstream)*(86400./nt)
 	  withdrawal(upstream)=withdrawal(upstream)*(86400./nt)
 
@@ -1547,10 +1547,10 @@ IF (STATUS == 2) THEN
       daystorcap(step,upstream)=daystorcap(step,upstream)*1.e6
       daydamalert(step,upstream)=daydamalert(step,upstream)*1.e6
       daydamdead(step,upstream)=daydamdead(step,upstream)*1.e6
-      damvol0(upstream)=volact(step,upstream)
+      damvol0(res_index(upstream))=volact(step,upstream)
 
 	  res_qout(step,res_index(upstream))=qintake(step,upstream)+overflow(step,upstream)+qbottom(step,upstream)
-	  damelevact(upstream)=damelev1(step,upstream)
+	  damelevact(upstream)=damelev1(step,res_index(upstream))
 
       IF (nbrbat(upstream) /= 0) THEN
         DO j=1,nbrbat(upstream)-1

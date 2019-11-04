@@ -1190,14 +1190,14 @@ end if
 
 ! Determination of water volume of the reservoir reach by summing up all cross sections' volume
 ! that belong to it [m**3]
-    resreach_vol(upstream)=0.
+    resreach_vol(res_index(upstream))=0.
 	p=0
 !george    DO j=1,nbrsec(upstream)
 !george      if (watelev_sec(j,upstream) /= damelev_mean(step,upstream)) p=j
 !george	ENDDO
 !george	if (p /=0 ) then
       DO j=1,nbrsec(upstream)
-	    resreach_vol(upstream)=resreach_vol(upstream)+vol_toplay(j,res_index(upstream))
+	    resreach_vol(res_index(upstream))=resreach_vol(res_index(upstream))+vol_toplay(j,res_index(upstream))
 !george	    if (j > p) resreach_vol(upstream)=resreach_vol(upstream)+vol_toplay(j,upstream)
 !write(*,'(2I4,4F15.3)')j,p,watelev_sec(j,upstream),damelev_mean(step,upstream),vol_toplay(j,upstream),resreach_vol(upstream)
 	  enddo
@@ -1394,7 +1394,7 @@ end if
 !temp			else
 !temp              retent(g)=max(loadincoming-frtotal_discharge(g,j),0.)
 !temp			endif
-            if (resreach_vol(upstream) /= 0.) then
+            if (resreach_vol(res_index(upstream)) /= 0.) then
 			  if (frtotal_discharge(g,j) /= 0.) then
 !                call ssc_function(g,j,upstream,dummy9)
 			    call vert_dist(g,j,upstream,factor_bottom,factor_intake,factor_over)
@@ -1499,9 +1499,9 @@ end if
     weight=0.
     dummy5=0.
     DO j=1,nbrsec(upstream)
-      if (j > p .and. resreach_vol(upstream) /= 0.) then
+      if (j > p .and. resreach_vol(res_index(upstream)) /= 0.) then
 		if (j /= nbrsec(upstream)) then
-          weight=vol_toplay(j,res_index(upstream))/resreach_vol(upstream)
+          weight=vol_toplay(j,res_index(upstream))/resreach_vol(res_index(upstream))
 		else
           weight=max(0.,1.-dummy5)
 		endif
