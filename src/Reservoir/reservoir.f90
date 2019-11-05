@@ -76,14 +76,16 @@ f_intake_obs = .false.
 if (reservoir_check==0) reservoir_balance=1
 
 ! Initialize
+
+qinflow=0.
+qintake=0.
+overflow=0.
+
   DO i=1,subasin
 !Ge "volact" vector contains now only 365/366 values per annum
 !Ge others reservoir parameters have to be inserted
     DO id=1,dayyear*nt
       volact(id,i) = 0. !actual stored volume in reservoir [m**3 and 10**6 m**3]
-      qinflow(id,i) = 0.
-      qintake(id,i) = 0.
-      overflow(id,i) = 0.
     END DO
   END DO
 
@@ -291,15 +293,16 @@ storcap(:)=0.
 	      !forma_factor(n_reservoir), &
           !lakeret(366*nt,n_reservoir), &
        
-	      !qlateral(366*nt,n_reservoir), &
-	      !qinflow(366*nt,n_reservoir), &
-	      !overflow(366*nt,n_reservoir), &
-	      !qintake(366*nt,n_reservoir), &
-	      !qbottom(366*nt,n_reservoir), &
-	      !withdraw_out(366*nt,n_reservoir), &
-    daystorcap(366*nt,n_reservoir), &
-    daymaxdamarea(366*nt,n_reservoir), &
+    qlateral(366*nt,n_reservoir), &
+    qinflow(366*nt,n_reservoir), &
+    overflow(366*nt,n_reservoir), &
+    qintake(366*nt,n_reservoir), &
+    qbottom(366*nt,n_reservoir), &   
+    
+    withdraw_out(366*nt,n_reservoir), &
      
+    daystorcap(366*nt,n_reservoir), &
+    daymaxdamarea(366*nt,n_reservoir), &    
     daydamdead(366*nt,n_reservoir), &
     daydamalert(366*nt,n_reservoir), &
     dayminlevel(366*nt,n_reservoir), &
@@ -1140,7 +1143,7 @@ IF (STATUS == 1) THEN
         ! NOTE: missing observations are treated later
         do i=1,subasin
             if( f_intake_obs(i) .and. (t >= damyear(i)) ) then
-                qintake(id,i) = r_qintake(corr_column_intakes(i))*(86400./nt)
+                qintake(id,res_index(i)) = r_qintake(corr_column_intakes(i))*(86400./nt)
             endif
         enddo
     enddo
@@ -1173,12 +1176,12 @@ IF (STATUS == 2) THEN
   IF (res_flag(upstream) .and. t >= damyear(upstream)) THEN
     IF (reservoir_balance == 1) THEN
       IF (reservoir_check == 1) THEN
-	    qinflow(step,upstream)=qinflow(step,upstream)*(86400./nt) !Till: convert m3/s to m3
+	    qinflow(step,res_index(upstream))=qinflow(step,res_index(upstream))*(86400./nt) !Till: convert m3/s to m3
 	  ELSE
         if (river_transport.eq.1)then ! old routing
-	      qinflow(step,upstream)=qout(step,upstream)*(86400./nt)
+	      qinflow(step,res_index(upstream))=qout(step,upstream)*(86400./nt)
 	    else ! new routing
-          qinflow(step,upstream)=(r_qout(2,upstream)+qlateral(step,upstream))*(86400./nt)
+          qinflow(step,res_index(upstream))=(r_qout(2,upstream)+qlateral(step,res_index(upstream)))*(86400./nt)
 	    endif
 	  ENDIF
 
@@ -1202,7 +1205,7 @@ IF (STATUS == 2) THEN
 
 
 ! 1) Calculation of the actual reservoir volume after water inflow
-	  help3=volact(step,upstream)+qinflow(step,upstream) !Till: m^3
+	  help3=volact(step,upstream)+qinflow(step,res_index(upstream)) !Till: m^3
 	  help2=volact(step,upstream) !Till: m^3
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),help3,volact(step,upstream),daystorcap(step,upstream),overflow(step,upstream)
       IF (help3 > daystorcap(step,res_index(upstream))) THEN
@@ -1214,12 +1217,12 @@ IF (STATUS == 2) THEN
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),volact(step,upstream),help3,help,daystorcap(step,upstream)
 		ELSE
 		  help=daystorcap(step,res_index(upstream))
-		  overflow(step,upstream)=help3-daystorcap(step,res_index(upstream)) !Till: spillover [m^3]
+		  overflow(step,res_index(upstream))=help3-daystorcap(step,res_index(upstream)) !Till: spillover [m^3]
         END IF
 	    lakeret(step,upstream)=max(0.,help-volact(step,upstream))
         volact(step,upstream)=help
 	  ELSE
-	    lakeret(step,upstream)=qinflow(step,upstream)
+	    lakeret(step,upstream)=qinflow(step,res_index(upstream))
         volact(step,upstream)=help3
       END IF
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),help,volact(step,upstream),daystorcap(step,upstream),overflow(step,upstream)
@@ -1342,8 +1345,8 @@ IF (STATUS == 2) THEN
 !       (not yet implemented)
 
 ! use measured intake values if available
-      if(f_intake_obs(upstream) .and. qintake(step,upstream) > -0.5) then
-        helpout=qintake(step,upstream)
+      if(f_intake_obs(upstream) .and. qintake(step,res_index(upstream)) > -0.5) then
+        helpout=qintake(step,res_index(upstream))
       else
 ! Calculation of the maximum controlled outflow discharge using a factor defined in the reservoir.dat
           IF (damq_frac(upstream) >= 0.0) THEN !Andreas
@@ -1380,8 +1383,8 @@ IF (STATUS == 2) THEN
       IF (volact(step,upstream) <= daydamdead(step,res_index(upstream))) helpout=0.
       IF (elevdead(upstream) <= dayminlevel(step,res_index(upstream))) helpout=0.
  !write(*,*)step,id_subbas_extern(upstream),helpout/86400.
-      qintake(step,upstream)=helpout
-      volact(step,upstream)=MAX(0.,volact(step,upstream)-qintake(step,upstream))
+      qintake(step,res_index(upstream))=helpout
+      volact(step,upstream)=MAX(0.,volact(step,upstream)-qintake(step,res_index(upstream)))
 
 !write(*,'(2I4,3F15.4)')step,id_subbas_extern(upstream),volact(step,upstream)
 
@@ -1434,17 +1437,17 @@ IF (STATUS == 2) THEN
 !write(*,*)step,id_subbas_extern(upstream),helpout,fvol_bottom(upstream),volact(step,upstream),daystorcap(step,upstream)
 !write(*,'(2I4,6F12.2)')step,id_subbas_extern(upstream),helpout,fvol_bottom(upstream),volact(step,upstream),daystorcap(step,upstream)
 
-      qbottom(step,upstream)=helpout
-      volact(step,upstream)=MAX(0.,volact(step,upstream)-qbottom(step,upstream))
+      qbottom(step,res_index(upstream))=helpout
+      volact(step,upstream)=MAX(0.,volact(step,upstream)-qbottom(step,res_index(upstream)))
 !write(*,'(2I4,3F15.4)')step,id_subbas_extern(upstream),volact(step,upstream)
 
 
 ! 4c) Withdrawal water volume to supply the water use sectors
       IF (volact(step,upstream) > .05*daystorcap(step,res_index(upstream))) THEN
-        withdraw_out(step,upstream) = withdrawal(upstream)
+        withdraw_out(step,res_index(upstream)) = withdrawal(upstream)
         volact(step,upstream)=MAX(0.,volact(step,upstream)-withdrawal(upstream))
 	  ELSE
-        withdraw_out(step,upstream) = 0.
+        withdraw_out(step,res_index(upstream)) = 0.
       ENDIF
 
 !write(*,'(2I4,3F15.4)')step,id_subbas_extern(upstream),volact(step,upstream)
@@ -1453,7 +1456,7 @@ IF (STATUS == 2) THEN
 ! 5) Calculation of the overflow discharges from the reservoir
       IF (help3 > daystorcap(step,res_index(upstream)) .and. fvol_over(upstream) == 1) THEN
         ! volume in/decrease relative to storage capacity after all other water balance components were added
-        help=(volact(step,upstream)-daystorcap(step,res_index(upstream)))+qinflow(step,upstream)
+        help=(volact(step,upstream)-daystorcap(step,res_index(upstream)))+qinflow(step,res_index(upstream))
         ! total volume after all other water balance components were added
 		help1=help2+help
         help=max(0.,help)
@@ -1471,11 +1474,11 @@ IF (STATUS == 2) THEN
 		 volume_last(upstream)=0.
 		 outflow_last(upstream)=0.
 		 volact(step,upstream)=help1
-		 overflow(step,upstream)=0.
+		 overflow(step,res_index(upstream))=0.
         END IF
 	  ELSE IF (volact(step,upstream) > daystorcap(step,res_index(upstream))) THEN
 	    volact(step,upstream)=daystorcap(step,res_index(upstream))
-		overflow(step,upstream)=overflow(step,upstream)+volact(step,upstream)-daystorcap(step,res_index(upstream))
+		overflow(step,res_index(upstream))=overflow(step,res_index(upstream))+volact(step,upstream)-daystorcap(step,res_index(upstream))
       END IF
 
 
@@ -1486,7 +1489,7 @@ IF (STATUS == 2) THEN
 !if (step==20)stop
 !if (step==41 .and. id_subbas_extern(upstream)==29) stop
 
-      res_qout(step,res_index(upstream))=qintake(step,upstream)+overflow(step,upstream)+qbottom(step,upstream)
+      res_qout(step,res_index(upstream))=qintake(step,res_index(upstream))+overflow(step,res_index(upstream))+qbottom(step,res_index(upstream))
 
 
 
@@ -1513,11 +1516,11 @@ IF (STATUS == 2) THEN
 !write(*,'(I4,4F15.4)')d,dayminlevel(step,upstream),elevhelp,forma_factor(upstream),areahelp
 
       res_qout(step,res_index(upstream))=res_qout(step,res_index(upstream))/(86400./nt)
-      qinflow(step,upstream)=qinflow(step,upstream)/(86400./nt)
-      qintake(step,upstream)=qintake(step,upstream)/(86400./nt)
-      overflow(step,upstream)=overflow(step,upstream)/(86400./nt)
-	  qbottom(step,upstream)=qbottom(step,upstream)/(86400./nt)
-	  withdraw_out(step,upstream)=withdraw_out(step,upstream)/(86400./nt)
+      qinflow(step,res_index(upstream))=qinflow(step,res_index(upstream))/(86400./nt)
+      qintake(step,res_index(upstream))=qintake(step,res_index(upstream))/(86400./nt)
+      overflow(step,res_index(upstream))=overflow(step,res_index(upstream))/(86400./nt)
+	  qbottom(step,res_index(upstream))=qbottom(step,res_index(upstream))/(86400./nt)
+	  withdraw_out(step,res_index(upstream))=withdraw_out(step,res_index(upstream))/(86400./nt)
 
 
 ! Calculation of reservoir surface area and reservoir volume when inflow discharges, outflow discharges
@@ -1531,7 +1534,7 @@ IF (STATUS == 2) THEN
       daydamdead(step,res_index(upstream))=daydamdead(step,res_index(upstream))*1.e6
       damvol0(res_index(upstream))=volact(step,upstream)
 
-	  res_qout(step,res_index(upstream))=qintake(step,upstream)+overflow(step,upstream)+qbottom(step,upstream)
+	  res_qout(step,res_index(upstream))=qintake(step,res_index(upstream))+overflow(step,res_index(upstream))+qbottom(step,res_index(upstream))
 	  damelevact(res_index(upstream))=damelev1(step,res_index(upstream))
 
       IF (nbrbat(upstream) /= 0) THEN
@@ -1784,9 +1787,9 @@ IF (STATUS == 2) THEN
 	 IF (f_res_watbal) THEN
      OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_watbal.out',STATUS='old',  &
 		  POSITION='append')
-	 WRITE(11,'(4I6,2f10.3,2f13.1,6f10.3,3f14.1)')id_subbas_extern(upstream),t,d,hour,qlateral(step,upstream),qinflow(step,upstream),etdam(step,upstream),precdam(step,upstream),  &
-				qintake(step,upstream),overflow(step,upstream),qbottom(step,upstream),res_qout(step,res_index(upstream)), &
-				withdraw_out(step,upstream),damelevact(res_index(upstream)),damareaact(upstream),volact(step,upstream)
+	 WRITE(11,'(4I6,2f10.3,2f13.1,6f10.3,3f14.1)')id_subbas_extern(upstream),t,d,hour,qlateral(step,res_index(upstream)),qinflow(step,res_index(upstream)),etdam(step,upstream),precdam(step,upstream),  &
+				qintake(step,res_index(upstream)),overflow(step,res_index(upstream)),qbottom(step,res_index(upstream)),res_qout(step,res_index(upstream)), &
+				withdraw_out(step,res_index(upstream)),damelevact(res_index(upstream)),damareaact(upstream),volact(step,upstream)
      CLOSE(11)
 	 ENDIF
 
@@ -1851,7 +1854,7 @@ ELSE  ! reservoir does not (yet) exist
         if (river_transport.eq.1)then
           res_qout(step,res_index(upstream))=qout(step,upstream)
         else
-        res_qout(step,res_index(upstream))=r_qout(2,upstream)+qlateral(step,upstream)
+        res_qout(step,res_index(upstream))=r_qout(2,upstream)+qlateral(step,res_index(upstream))
         endif
     endif
         
@@ -1882,10 +1885,10 @@ endif
 		    hour=ih
             step=(d-1)*nt+hour
 	        WRITE(11,'(4(I6,a),2(f10.3,a),2(f13.1,a),6(f10.3,a),3(f14.1,a))')id_subbas_extern(i),char(9),&
-            t,char(9),d,char(9),hour,char(9),qlateral(step,i),char(9),qinflow(step,i),char(9),etdam(step,i),char(9),&
-            precdam(step,i),char(9),qintake(step,i),char(9),overflow(step,i),char(9),qbottom(step,i),char(9),&
+            t,char(9),d,char(9),hour,char(9),qlateral(step,res_index(i)),char(9),qinflow(step,res_index(i)),char(9),etdam(step,i),char(9),&
+            precdam(step,i),char(9),qintake(step,res_index(i)),char(9),overflow(step,res_index(i)),char(9),qbottom(step,res_index(i)),char(9),&
     !Anne changed, eg., daydamareaact(step,i) to daydamareaact(step,res_index(i))
-            res_qout(step,res_index(i)),char(9),withdraw_out(step,i),char(9),daydamelevact(step,res_index(i)),char(9),daydamareaact(step,res_index(i)),char(9),volact(step,i)*1.e6,char(9)
+            res_qout(step,res_index(i)),char(9),withdraw_out(step,res_index(i)),char(9),daydamelevact(step,res_index(i)),char(9),daydamareaact(step,res_index(i)),char(9),volact(step,i)*1.e6,char(9)
 		  ENDDO
 		ENDDO
         CLOSE(11)

@@ -465,13 +465,7 @@ subroutine allocate_reservoir()
     !	  area_bat(maxreservoir_b,subasin), &
     !	  vol_bat(maxreservoir_b,subasin), &
 	      vol0(subasin), &
-	      qlateral(366*nt,subasin), &
-	      qinflow(366*nt,subasin), &
-	      overflow(366*nt,subasin), &
-	      qintake(366*nt,subasin), &
-	      qbottom(366*nt,subasin), &
-	      withdraw_out(366*nt,subasin), &
-!A	      daystorcap(366*nt,subasin), &
+!A	      qlateral(366*nt,subasin), &
 
 	      maxlevel(subasin), &
 	      minlevel(subasin), &

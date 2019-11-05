@@ -809,10 +809,10 @@ IF (STATUS == 2) THEN
 !stop
 !****************************************************************
 
-if (qinflow(step,upstream)==0.) then
+if (qinflow(step,res_index(upstream))==0.) then
     conc_inflow = 0. 
 else
-    conc_inflow=sed_inflow(step,res_index(upstream))/(qinflow(step,upstream)*(86400./nt)*.001)
+    conc_inflow=sed_inflow(step,res_index(upstream))/(qinflow(step,res_index(upstream))*(86400./nt)*.001)
 end if
 
 
@@ -1438,7 +1438,7 @@ end if
 			    factor_over=0.
 				dummy9=0.
 			  endif
-			  if (qbottom(step,upstream)/=0.) factor_intake=max(factor_intake,.7)	!to account for resuspension of sediment by opening of the bottom outlets
+			  if (qbottom(step,res_index(upstream))/=0.) factor_intake=max(factor_intake,.7)	!to account for resuspension of sediment by opening of the bottom outlets
 !			    factor_bottom=1.
 !			    factor_intake=1.
 !			    factor_over=1.
@@ -1449,9 +1449,9 @@ end if
               frtotal_discharge(g,j)=frtotal_discharge(g,j)*dummy9
 			  if (frtotal_discharge(g,j) < dummy4) retent(g)=max(dummy4-frtotal_discharge(g,j),0.)
 			  if (res_qout(step,res_index(upstream)) /= 0.)then
- 			    dummy5=factor_bottom*(qbottom(step,upstream)/res_qout(step,res_index(upstream)))
-			    dummy6=factor_intake*(qintake(step,upstream)/res_qout(step,res_index(upstream)))
-			    dummy7=factor_over*(overflow(step,upstream)/res_qout(step,res_index(upstream)))
+ 			    dummy5=factor_bottom*(qbottom(step,res_index(upstream))/res_qout(step,res_index(upstream)))
+			    dummy6=factor_intake*(qintake(step,res_index(upstream))/res_qout(step,res_index(upstream)))
+			    dummy7=factor_over*(overflow(step,res_index(upstream))/res_qout(step,res_index(upstream)))
 			  else
  			    dummy5=0.
  			    dummy6=0.
@@ -1470,9 +1470,9 @@ end if
 			  factor_over2=factor_over2+dummy7*dummy4
 			else
 			  retent(g)=0.
-			  factor_bottom2=factor_bottom2+(qbottom(step,upstream)/res_qout(step,res_index(upstream)))*frtotal_discharge(g,j)
-			  factor_intake2=factor_intake2+(qintake(step,upstream)/res_qout(step,res_index(upstream)))*frtotal_discharge(g,j)
-			  factor_over2=factor_over2+(overflow(step,upstream)/res_qout(step,res_index(upstream)))*frtotal_discharge(g,j)
+			  factor_bottom2=factor_bottom2+(qbottom(step,res_index(upstream))/res_qout(step,res_index(upstream)))*frtotal_discharge(g,j)
+			  factor_intake2=factor_intake2+(qintake(step,res_index(upstream))/res_qout(step,res_index(upstream)))*frtotal_discharge(g,j)
+			  factor_over2=factor_over2+(overflow(step,res_index(upstream))/res_qout(step,res_index(upstream)))*frtotal_discharge(g,j)
 			endif
 
 !write(*,'(2I4,3F11.6,3F12.3)')j,g,dummy5,dummy6,dummy7,factor_bottom2,factor_intake2,factor_over2
@@ -1507,9 +1507,9 @@ end if
             factor_intake2=0.
             factor_over2  =0.
           else
-	        factor_bottom2=qbottom(step,upstream)/res_qout(step,res_index(upstream))
-	        factor_intake2=qintake(step,upstream)/res_qout(step,res_index(upstream))
-	        factor_over2=overflow(step,upstream)/res_qout(step,res_index(upstream))
+	        factor_bottom2=qbottom(step,res_index(upstream))/res_qout(step,res_index(upstream))
+	        factor_intake2=qintake(step,res_index(upstream))/res_qout(step,res_index(upstream))
+	        factor_over2=overflow(step,res_index(upstream))/res_qout(step,res_index(upstream))
 	      end if
 	    ENDIF
 !write(*,'(2I4,6F12.6)')j,g,factor_bottom2,factor_intake2,factor_over2,factor_over2+factor_intake2+factor_bottom2

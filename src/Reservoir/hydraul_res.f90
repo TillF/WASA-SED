@@ -243,11 +243,11 @@ END DO
 DO j=1,nbrsec(res_index(upstream))
   IF (resarea_sec(j,res_index(upstream)) /= 0.) THEN
 ! reservoir subreach
-    discharge_sec(j,res_index(upstream))=qinflow(step,upstream)-  &
-        (qinflow(step,upstream)-res_qout(step,res_index(upstream)))*weight_sec(j,res_index(upstream))
+    discharge_sec(j,res_index(upstream))=qinflow(step,res_index(upstream))-  &
+        (qinflow(step,res_index(upstream))-res_qout(step,res_index(upstream)))*weight_sec(j,res_index(upstream))
   ELSE
 ! river subreach
-    discharge_sec(j,res_index(upstream))=(qinflow(step,upstream)+res_qout(step,res_index(upstream)))/2.
+    discharge_sec(j,res_index(upstream))=(qinflow(step,res_index(upstream))+res_qout(step,res_index(upstream)))/2.
   END IF
 END DO
 

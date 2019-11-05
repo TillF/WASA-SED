@@ -134,7 +134,7 @@ DO i=1,ninterac
   outflow_last(upstream)=outflow
 ENDDO
 
-overflow(step,upstream)=outflow_mean
+overflow(step,res_index(upstream))=outflow_mean
 volume_last(upstream)=vol2
 volact(step,upstream)=volmax+vol2 ! current reservoir volume in m3
 
