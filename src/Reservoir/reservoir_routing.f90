@@ -33,7 +33,7 @@ REAL :: hmax0,vmax0,par_k,par_alpha
 ! Initialization
 inflow=help/(86400./nt)
 outflow=outflow_last(upstream)
-volmax=daystorcap(step,upstream) !storage capacity in the subbasin's reservoir [m**3]
+volmax=daystorcap(step,res_index(upstream)) !storage capacity in the subbasin's reservoir [m**3]
 volstep=help2
 par_c=damc(upstream)
 par_d=damd(upstream)

@@ -471,8 +471,7 @@ subroutine allocate_reservoir()
 	      qintake(366*nt,subasin), &
 	      qbottom(366*nt,subasin), &
 	      withdraw_out(366*nt,subasin), &
-	      daystorcap(366*nt,subasin), &
-	      daymaxdamarea(366*nt,subasin), &
+!A	      daystorcap(366*nt,subasin), &
 
 	      maxlevel(subasin), &
 	      minlevel(subasin), &

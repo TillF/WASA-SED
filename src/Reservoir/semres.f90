@@ -1716,7 +1716,7 @@ end if
 ! Change on stage-area-volume curve due to erosion and deposition processes
     dummy9=0.
 	nbrbat1=nbrbat(upstream)
-	if (decstorcap(step,res_index(upstream)) < daystorcap(step,upstream) .and. decstorcap(step,res_index(upstream))/=0.) then
+	if (decstorcap(step,res_index(upstream)) < daystorcap(step,res_index(upstream)) .and. decstorcap(step,res_index(upstream))/=0.) then
      DO b=1,nbrbat1
       elevhelp=elev_bat(b,upstream)
       DO j=1,nbrsec(res_index(upstream))
@@ -1879,10 +1879,10 @@ end if
 	ENDIF
 
 
-	IF (decstorcap(step,res_index(upstream)) >= daystorcap(step,upstream) .or.&
+	IF (decstorcap(step,res_index(upstream)) >= daystorcap(step,res_index(upstream)) .or.&
 	    cum_sedimentation(res_index(upstream))/dry_dens(res_index(upstream)) >= storcap(upstream)*1.e6) then
 	 storcap(upstream)=0.
-	 daystorcap(step,upstream)=0.
+	 daystorcap(step,res_index(upstream))=0.
 
      DO b=1,nbrbat(upstream)
 	  vol_bat(b,upstream)=0.

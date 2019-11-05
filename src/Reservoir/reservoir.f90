@@ -277,11 +277,8 @@ storcap(:)=0.
 	      !operat_elev(n_reservoir), &
           !hmax(n_reservoir), &
           !volume_last(n_reservoir), &
-          !outflow_last(n_reservoir), &
-       
-	      
-	      !elevdead(n_reservoir), &
-	     
+          !outflow_last(n_reservoir), &  	      
+	      !elevdead(n_reservoir), &     
 	      !elevalert(n_reservoir), &
 	      !damq_frac_season(n_reservoir,4), &
 	      !volact(366*nt,n_reservoir), &
@@ -300,13 +297,13 @@ storcap(:)=0.
 	      !qintake(366*nt,n_reservoir), &
 	      !qbottom(366*nt,n_reservoir), &
 	      !withdraw_out(366*nt,n_reservoir), &
-	      !daystorcap(366*nt,n_reservoir), &
-	      !daymaxdamarea(366*nt,n_reservoir), &
+    daystorcap(366*nt,n_reservoir), &
+    daymaxdamarea(366*nt,n_reservoir), &
+     
     daydamdead(366*nt,n_reservoir), &
     daydamalert(366*nt,n_reservoir), &
     dayminlevel(366*nt,n_reservoir), &
-    damelevact(n_reservoir), &
-     
+    damelevact(n_reservoir), &    
     damvol0(n_reservoir), &
     damelev0(366*nt,n_reservoir), &
     damelev1(366*nt,n_reservoir), &
@@ -914,10 +911,10 @@ IF (STATUS == 1) THEN
    IF (res_flag(i)) THEN
      IF (t > damyear(i) .AND. t > tstart) THEN  !continuing simulations
        volact(1,i)=volact(daylastyear*nt,i)
-       daystorcap(1,i)=daystorcap(daylastyear*nt,i)
+       daystorcap(1,res_index(i))=daystorcap(daylastyear*nt,res_index(i))
        daydamalert(1,res_index(i))=daydamalert(daylastyear*nt,res_index(i))
        daydamdead(1,res_index(i))=daydamdead(daylastyear*nt,res_index(i))
-       daymaxdamarea(1,i)=daymaxdamarea(daylastyear*nt,i)
+       daymaxdamarea(1,res_index(i))=daymaxdamarea(daylastyear*nt,res_index(i))
 	   dayminlevel(1,res_index(i))=dayminlevel(daylastyear*nt,res_index(i))
 
      ELSE IF (t == damyear(i) .OR. (t > damyear(i) .AND. t == tstart)) THEN  !Andreas
@@ -928,17 +925,17 @@ IF (STATUS == 1) THEN
              volact(1,i)=storcap(i)/5. !Till: initial volume as 20% of storage cap [1e6 m^3]
            END IF
        end if    
-       daystorcap(1,i)=storcap(i)
+       daystorcap(1,res_index(i))=storcap(i)
        daydamalert(1,res_index(i))=damalert(i)
        daydamdead(1,res_index(i))=damdead(i)
-       daymaxdamarea(1,i)=maxdamarea(i)
+       daymaxdamarea(1,res_index(i))=maxdamarea(i)
 	   dayminlevel(1,res_index(i))=minlevel(i)
      ELSE  !no reservoirs or not-yet built
        volact(1,i)=0.
-       daystorcap(1,i)=0.
+       daystorcap(1,res_index(i))=0.
        daydamalert(1,res_index(i))=0.
        daydamdead(1,res_index(i))=0.
-       daymaxdamarea(1,i)=0.
+       daymaxdamarea(1,res_index(i))=0.
        dayminlevel(1,res_index(i))=0.
 	 ENDIF
    END IF
@@ -1192,8 +1189,8 @@ IF (STATUS == 2) THEN
 !if (step == 16 .and. t==2002) read(*,*)
 
       volact(step,upstream)=volact(step,upstream)*1.e6 !convert to m^3
-      daymaxdamarea(step,upstream)=daymaxdamarea(step,upstream)*1.e4
-      daystorcap(step,upstream)=daystorcap(step,upstream)*1.e6
+      daymaxdamarea(step,res_index(upstream))=daymaxdamarea(step,res_index(upstream))*1.e4
+      daystorcap(step,res_index(upstream))=daystorcap(step,res_index(upstream))*1.e6
       daydamalert(step,res_index(upstream))=daydamalert(step,res_index(upstream))*1.e6
       daydamdead(step,res_index(upstream))=daydamdead(step,res_index(upstream))*1.e6
       damflow(upstream)=damflow(upstream)*(86400./nt)
@@ -1208,16 +1205,16 @@ IF (STATUS == 2) THEN
 	  help3=volact(step,upstream)+qinflow(step,upstream) !Till: m^3
 	  help2=volact(step,upstream) !Till: m^3
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),help3,volact(step,upstream),daystorcap(step,upstream),overflow(step,upstream)
-      IF (help3 > daystorcap(step,upstream)) THEN
+      IF (help3 > daystorcap(step,res_index(upstream))) THEN
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),volact(step,upstream),help3,help,daystorcap(step,upstream)
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),fvol_over(upstream)*daystorcap(step,upstream),help3,daystorcap(step,upstream)
 		IF (fvol_over(upstream)==1) THEN
-          help=daystorcap(step,upstream)
+          help=daystorcap(step,res_index(upstream))
 !write(*,'(2I4,3F15.4)')step,id_subbas_extern(upstream),overflow(step,upstream)/86400.
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),volact(step,upstream),help3,help,daystorcap(step,upstream)
 		ELSE
-		  help=daystorcap(step,upstream)
-		  overflow(step,upstream)=help3-daystorcap(step,upstream) !Till: spillover [m^3]
+		  help=daystorcap(step,res_index(upstream))
+		  overflow(step,upstream)=help3-daystorcap(step,res_index(upstream)) !Till: spillover [m^3]
         END IF
 	    lakeret(step,upstream)=max(0.,help-volact(step,upstream))
         volact(step,upstream)=help
@@ -1407,10 +1404,10 @@ IF (STATUS == 2) THEN
 	  IF (fvol_bottom(upstream) /= -999.) THEN
 	   helpout=qoutlet(upstream)
        IF (volact(step,upstream) > daydamdead(step,res_index(upstream))) THEN
-        IF (volact(step,upstream) < daystorcap(step,upstream)) THEN
-          IF (volact(step,upstream) > fvol_bottom(upstream)*daystorcap(step,upstream)) THEN
-            helpout=min(helpout,helpout*(volact(step,upstream)-(fvol_bottom(upstream)*daystorcap(step,upstream)))/ &
-		             ((1.-fvol_bottom(upstream))*daystorcap(step,upstream)))
+        IF (volact(step,upstream) < daystorcap(step,res_index(upstream))) THEN
+          IF (volact(step,upstream) > fvol_bottom(upstream)*daystorcap(step,res_index(upstream))) THEN
+            helpout=min(helpout,helpout*(volact(step,upstream)-(fvol_bottom(upstream)*daystorcap(step,res_index(upstream))))/ &
+		             ((1.-fvol_bottom(upstream))*daystorcap(step,res_index(upstream))))
 		  ELSE
 		    helpout=0.
 		  ENDIF
@@ -1443,7 +1440,7 @@ IF (STATUS == 2) THEN
 
 
 ! 4c) Withdrawal water volume to supply the water use sectors
-      IF (volact(step,upstream) > .05*daystorcap(step,upstream)) THEN
+      IF (volact(step,upstream) > .05*daystorcap(step,res_index(upstream))) THEN
         withdraw_out(step,upstream) = withdrawal(upstream)
         volact(step,upstream)=MAX(0.,volact(step,upstream)-withdrawal(upstream))
 	  ELSE
@@ -1454,20 +1451,20 @@ IF (STATUS == 2) THEN
 
 
 ! 5) Calculation of the overflow discharges from the reservoir
-      IF (help3 > daystorcap(step,upstream) .and. fvol_over(upstream) == 1) THEN
+      IF (help3 > daystorcap(step,res_index(upstream)) .and. fvol_over(upstream) == 1) THEN
         ! volume in/decrease relative to storage capacity after all other water balance components were added
-        help=(volact(step,upstream)-daystorcap(step,upstream))+qinflow(step,upstream)
+        help=(volact(step,upstream)-daystorcap(step,res_index(upstream)))+qinflow(step,upstream)
         ! total volume after all other water balance components were added
 		help1=help2+help
         help=max(0.,help)
 !write(*,'(2I4,6F11.1)')step,id_subbas_extern(upstream),help,help1,help2,help3,volact(step,upstream),daystorcap(step,upstream)
         ! total volume still larger than storage capacity -> calculate overspill
-        IF (help1 > daystorcap(step,upstream)) THEN
+        IF (help1 > daystorcap(step,res_index(upstream))) THEN
 !write(*,'(2I4,6F15.2)')step,id_subbas_extern(upstream),help,help2
          call reservoir_routing(upstream,help,help2)
 !         help=max(0.,help-overflow(step,upstream))
-         if(help2 > daystorcap(step,upstream)) lakeret(step,upstream)=lakeret(step,upstream)+(max(0.,volact(step,upstream)-help2))
-         if(help2 <= daystorcap(step,upstream)) lakeret(step,upstream)=lakeret(step,upstream)+(max(0.,volact(step,upstream)-daystorcap(step,upstream)))
+         if(help2 > daystorcap(step,res_index(upstream))) lakeret(step,upstream)=lakeret(step,upstream)+(max(0.,volact(step,upstream)-help2))
+         if(help2 <= daystorcap(step,res_index(upstream))) lakeret(step,upstream)=lakeret(step,upstream)+(max(0.,volact(step,upstream)-daystorcap(step,res_index(upstream))))
 
 !write(*,'(2I4,3F15.4)')step,id_subbas_extern(upstream),help,volact(step,upstream),overflow(step,upstream)/86400.
         ELSE
@@ -1476,9 +1473,9 @@ IF (STATUS == 2) THEN
 		 volact(step,upstream)=help1
 		 overflow(step,upstream)=0.
         END IF
-	  ELSE IF (volact(step,upstream) > daystorcap(step,upstream)) THEN
-	    volact(step,upstream)=daystorcap(step,upstream)
-		overflow(step,upstream)=overflow(step,upstream)+volact(step,upstream)-daystorcap(step,upstream)
+	  ELSE IF (volact(step,upstream) > daystorcap(step,res_index(upstream))) THEN
+	    volact(step,upstream)=daystorcap(step,res_index(upstream))
+		overflow(step,upstream)=overflow(step,upstream)+volact(step,upstream)-daystorcap(step,res_index(upstream))
       END IF
 
 
@@ -1528,8 +1525,8 @@ IF (STATUS == 2) THEN
     ELSE IF (reservoir_balance == 0) THEN
 
 !      write(*,*)t,d,hour,upstream,qinflow(step,upstream)
-      daymaxdamarea(step,upstream)=daymaxdamarea(step,upstream)*1.e4
-      daystorcap(step,upstream)=daystorcap(step,upstream)*1.e6
+      daymaxdamarea(step,res_index(upstream))=daymaxdamarea(step,res_index(upstream))*1.e4
+      daystorcap(step,res_index(upstream))=daystorcap(step,res_index(upstream))*1.e6
       daydamalert(step,res_index(upstream))=daydamalert(step,res_index(upstream))*1.e6
       daydamdead(step,res_index(upstream))=daydamdead(step,res_index(upstream))*1.e6
       damvol0(res_index(upstream))=volact(step,upstream)
@@ -1571,34 +1568,34 @@ IF (STATUS == 2) THEN
 
 ! CASE 1: stage-area-volume curve is not provided
        if (nbrbat(upstream) == 0) then
-	    if (decstorcap(step,res_index(upstream)) >= daystorcap(step,upstream) .or. daystorcap(step,upstream) == 0.) then
+	    if (decstorcap(step,res_index(upstream)) >= daystorcap(step,res_index(upstream)) .or. daystorcap(step,res_index(upstream)) == 0.) then
 	     write(*,*) 'the resevoir located at the outlet point of sub-basin:',id_subbas_extern(upstream)
 	     write(*,*) 'lost its total storage capacity due to sediment deposition'
 		 storcap(upstream)=0.
-	     daystorcap(step,upstream)=0.
+	     daystorcap(step,res_index(upstream))=0.
 		 do j=1,nbrbat(upstream)
           area_bat(j,upstream)=0.
           vol_bat(j,upstream)=0.
 		 enddo
         else
-         volhelp=MAX(0.,daystorcap(step,upstream)  &
+         volhelp=MAX(0.,daystorcap(step,res_index(upstream))  &
 			-decstorcap(step,res_index(upstream)))
 
 ! Calculation of minimum reservoir elevation
-         if (daystorcap(step,upstream) == 0.) then
+         if (daystorcap(step,res_index(upstream)) == 0.) then
 	      dummy4=0.
 	     else
-	      dummy4=decstorcap(step,res_index(upstream))/daystorcap(step,upstream)
+	      dummy4=decstorcap(step,res_index(upstream))/daystorcap(step,res_index(upstream))
 	     endif
 
 	     elevhelp=max(0.,(maxlevel(upstream)-dayminlevel(step,res_index(upstream)))*dummy4)
 	     dayminlevel(step,res_index(upstream))=dayminlevel(step,res_index(upstream))+elevhelp
 	     forma_factor(upstream)=volhelp/((maxlevel(upstream)-dayminlevel(step,res_index(upstream)))**3)
 
-	     daystorcap(step,upstream)=volhelp
+	     daystorcap(step,res_index(upstream))=volhelp
 
 	     elevhelp=max(0.,maxlevel(upstream)-dayminlevel(step,res_index(upstream)))
-         daymaxdamarea(step,upstream)=dama(upstream)*(volhelp**damb(upstream))
+         daymaxdamarea(step,res_index(upstream))=dama(upstream)*(volhelp**damb(upstream))
 
 ! Calculation of dead water volume after sediment deposition
 	     if (damdead(upstream) /= 0. .and. daydamdead(step,res_index(upstream)) /= 0.) then
@@ -1621,18 +1618,18 @@ IF (STATUS == 2) THEN
 	   else
 ! CASE 2a: no detailed information of the reservoir geometry is provided (no cross section)
 	    if (nbrsec(res_index(upstream)) == 0) then
-	     if (decstorcap(step,res_index(upstream)) >= daystorcap(step,upstream) .or. daystorcap(step,upstream) == 0.) then
+	     if (decstorcap(step,res_index(upstream)) >= daystorcap(step,res_index(upstream)) .or. daystorcap(step,res_index(upstream)) == 0.) then
 	      write(*,*) 'the resevoir located at the outlet point of sub-basin:',id_subbas_extern(upstream)
 	      write(*,*) 'lost its total storage capacity due to sediment deposition'
 		  storcap(upstream)=0.
-	      daystorcap(step,upstream)=0.
+	      daystorcap(step,res_index(upstream))=0.
 		  do j=1,nbrbat(upstream)
            area_bat(j,upstream)=0.
            vol_bat(j,upstream)=0.
 		  enddo
          else
 
-	     daystorcap(step,upstream)=MAX(0.,daystorcap(step,upstream)  &
+	     daystorcap(step,res_index(upstream))=MAX(0.,daystorcap(step,res_index(upstream))  &
 			-decstorcap(step,res_index(upstream)))
 
 ! Change on stage-area-volume curve due to erosion and deposition processes
@@ -1703,41 +1700,41 @@ IF (STATUS == 2) THEN
 	       daydamalert(step,res_index(upstream))=0.
 	      endif
 ! Calculation of maximum reservoir area after sediment deposition
- 	      if (daymaxdamarea(step,upstream) /= 0.) then
+ 	      if (daymaxdamarea(step,res_index(upstream)) /= 0.) then
            if (maxlevel(upstream) >= elev_bat(j,upstream).AND.  &
                maxlevel(upstream) <= elev_bat(j+1,upstream)) THEN
-            daymaxdamarea(step,upstream)=area_bat(j,upstream)+(maxlevel(upstream)-elev_bat  &
+            daymaxdamarea(step,res_index(upstream))=area_bat(j,upstream)+(maxlevel(upstream)-elev_bat  &
                 (j,upstream))/(elev_bat(j+1,upstream)-elev_bat(j,upstream))*  &
                 (area_bat(j+1,upstream)-area_bat(j,upstream))
            endif
 	      else
-	       daymaxdamarea(step,upstream)=0.
+	       daymaxdamarea(step,res_index(upstream))=0.
 	      endif
 	     enddo
 	    endif
 
 ! CASE 2b: detailed information of the reservoir geometry is provided (cross sections)
        else
-	    if (decstorcap(step,res_index(upstream)) >= daystorcap(step,upstream) .or. daystorcap(step,upstream) == 0.) then
+	    if (decstorcap(step,res_index(upstream)) >= daystorcap(step,res_index(upstream)) .or. daystorcap(step,res_index(upstream)) == 0.) then
 	     write(*,*) 'the resevoir located at the outlet point of sub-basin:',id_subbas_extern(upstream)
 	     write(*,*) 'lost its total storage capacity due to sediment deposition'
 		 storcap(upstream)=0.
-	     daystorcap(step,upstream)=0.
+	     daystorcap(step,res_index(upstream))=0.
 		 do j=1,nbrbat(upstream)
           area_bat(j,upstream)=0.
           vol_bat(j,upstream)=0.
 		 enddo
         else
          do j=1,nbrbat(upstream)-1
-	      if (storcap(upstream) /= 0. .and. daystorcap(step,upstream) /= 0.) then
+	      if (storcap(upstream) /= 0. .and. daystorcap(step,res_index(upstream)) /= 0.) then
            if (maxlevel(upstream) >= elev_bat(j,upstream).AND.  &
                maxlevel(upstream) <= elev_bat(j+1,upstream)) THEN
-            daystorcap(step,upstream)=vol_bat(j,upstream)+(maxlevel(upstream)-elev_bat  &
+            daystorcap(step,res_index(upstream))=vol_bat(j,upstream)+(maxlevel(upstream)-elev_bat  &
                 (j,upstream))/(elev_bat(j+1,upstream)-elev_bat(j,upstream))*  &
                 (vol_bat(j+1,upstream)-vol_bat(j,upstream))
            endif
 	      else
-	       daystorcap(step,upstream)=0.
+	       daystorcap(step,res_index(upstream))=0.
 	      endif
 ! Calculation of dead water volume after sediment deposition
 	      if (damdead(upstream) /= 0. .and. daydamdead(step,res_index(upstream)) /= 0.) then
@@ -1762,15 +1759,15 @@ IF (STATUS == 2) THEN
 	       daydamalert(step,res_index(upstream))=0.
 	      endif
 ! Calculation of maximum reservoir area after sediment deposition
- 	      if (daymaxdamarea(step,upstream) /= 0.) then
+ 	      if (daymaxdamarea(step,res_index(upstream)) /= 0.) then
            if (maxlevel(upstream) >= elev_bat(j,upstream).AND.  &
                maxlevel(upstream) <= elev_bat(j+1,upstream)) THEN
-            daymaxdamarea(step,upstream)=area_bat(j,upstream)+(maxlevel(upstream)-elev_bat  &
+            daymaxdamarea(step,res_index(upstream))=area_bat(j,upstream)+(maxlevel(upstream)-elev_bat  &
                 (j,upstream))/(elev_bat(j+1,upstream)-elev_bat(j,upstream))*  &
                 (area_bat(j+1,upstream)-area_bat(j,upstream))
            endif
 	      else
-	       daymaxdamarea(step,upstream)=0.
+	       daymaxdamarea(step,res_index(upstream))=0.
 	      endif
 	     enddo
 	    endif
@@ -1799,7 +1796,7 @@ IF (STATUS == 2) THEN
      OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_vollost.out',STATUS='old',  &
 		  POSITION='append')
 	 WRITE(11,'(4I6,3f15.2)')id_subbas_extern(upstream),t,d,hour,daydamdead(step,res_index(upstream)), &
-			daydamalert(step,res_index(upstream)),daystorcap(step,upstream)
+			daydamalert(step,res_index(upstream)),daystorcap(step,res_index(upstream))
      CLOSE(11)
 	 ENDIF
 
@@ -1827,8 +1824,8 @@ IF (STATUS == 2) THEN
 
 
     volact(step,upstream)=volact(step,upstream)/1.e6 !convert to 10^6 m3
-	daymaxdamarea(step,upstream)=daymaxdamarea(step,upstream)/1.e4
-	daystorcap(step,upstream)=daystorcap(step,upstream)/1.e6
+	daymaxdamarea(step,res_index(upstream))=daymaxdamarea(step,res_index(upstream))/1.e4
+	daystorcap(step,res_index(upstream))=daystorcap(step,res_index(upstream))/1.e6
 	daydamalert(step,res_index(upstream))=daydamalert(step,res_index(upstream))/1.e6
 	daydamdead(step,res_index(upstream))=daydamdead(step,res_index(upstream))/1.e6
 	damflow(upstream)=damflow(upstream)/(86400./nt)
@@ -1838,10 +1835,10 @@ IF (STATUS == 2) THEN
 
 	IF (step < dayyear*nt) THEN !Till: use current values to initialize the next timestep
 	  volact(step+1,upstream)=volact(step,upstream)
-	  daystorcap(step+1,upstream)=daystorcap(step,upstream)
+	  daystorcap(step+1,res_index(upstream))=daystorcap(step,res_index(upstream))
 	  daydamalert(step+1,res_index(upstream))=daydamalert(step,res_index(upstream))
 	  daydamdead(step+1,res_index(upstream))=daydamdead(step,res_index(upstream))
-	  daymaxdamarea(step+1,upstream)=daymaxdamarea(step,upstream)
+	  daymaxdamarea(step+1,res_index(upstream))=daymaxdamarea(step,res_index(upstream))
 	  dayminlevel(step+1,res_index(upstream))=dayminlevel(step,res_index(upstream))
 	END IF
 
@@ -1901,7 +1898,7 @@ endif
 		    hour=ih
             step=(d-1)*nt+hour
 			WRITE(11,'(4I6,3f15.2)')id_subbas_extern(i),t,d,hour,daydamdead(step,res_index(i))*1.e6, &
-				daydamalert(step,res_index(i))*1.e6,daystorcap(step,i)*1.e6
+				daydamalert(step,res_index(i))*1.e6,daystorcap(step,res_index(i))*1.e6
 		  ENDDO
 		ENDDO
         CLOSE(11)
