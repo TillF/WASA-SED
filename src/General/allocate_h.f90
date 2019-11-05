@@ -412,6 +412,7 @@ subroutine allocate_reservoir()
   !			fvol_over(i),damc(i),damd(i),elevbottom(i)
   !         forma_factor(i)
   !         damareaact(i), volact(id,i)
+  !         volume_last(i), outflow_last(i)   !for lake.f90       
                                 
 	      res_index(subasin), &
           f_intake_obs(subasin), &
@@ -423,17 +424,14 @@ subroutine allocate_reservoir()
           reservoir_down(subasin), &
  	      damyear(subasin), &
 	      nbrbat(subasin), &
-	      dayexplot(subasin,4), &
-	      operat_start(subasin), &
-	      operat_stop(subasin), &
-	      operat_elev(subasin), &
-          hmax(subasin), &
+!A	      dayexplot(subasin,4), &
+
           volume_last(subasin), &
           outflow_last(subasin), &
+
 !	      damex(366*nt,subasin), & tp not used
 	      storcap(subasin), &
 	      damdead(subasin), &
-!A	      elevdead(subasin), &
 	      damalert(subasin), &
 	      elevbottom(subasin), &
 	      damflow(subasin), &

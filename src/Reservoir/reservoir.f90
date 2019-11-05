@@ -272,21 +272,20 @@ storcap(:)=0.
    	      !fcav(n_reservoir), &
 	      !latflow_res(n_reservoir), &
           !reservoir_down(n_reservoir), &
-        !nbrbat(n_reservoir), &
-	      !dayexplot(n_reservoir,4), &
-	      !operat_start(n_reservoir), &
-	      !operat_stop(n_reservoir), &
-	      !operat_elev(n_reservoir), &
-          !hmax(n_reservoir), &
-          !volume_last(n_reservoir), &
-          !outflow_last(n_reservoir), &  
      
+        !nbrbat(n_reservoir), &
+     
+    dayexplot(n_reservoir,4), &
+    operat_start(n_reservoir), &
+    operat_stop(n_reservoir), &
+    operat_elev(n_reservoir), &
+    hmax(n_reservoir), &
+               
     elevdead(n_reservoir), &     
     elevalert(n_reservoir), &
     damq_frac_season(n_reservoir,4), &	      
     precdam(366*nt,n_reservoir), &
-    etdam(366*nt,n_reservoir), &
-       
+    etdam(366*nt,n_reservoir), &     
     alpha_over(n_reservoir), &
     k_over(n_reservoir), &
     lakeret(366*nt,n_reservoir), &      
@@ -556,7 +555,7 @@ storcap(:)=0.
     READ(11,*)
     READ(11,*)
     DO i=1,subasin
-	  IF (damq_frac(i) == -999.) READ (11,*)dummy1,(dayexplot(i,s),s=1,4),(damq_frac_season(res_index(i),s),s=1,4)
+	  IF (damq_frac(i) == -999.) READ (11,*)dummy1,(dayexplot(res_index(i),s),s=1,4),(damq_frac_season(res_index(i),s),s=1,4)
 	  IF (damq_frac(i) /= -999.) dummy1=id_subbas_extern(i)
       IF (dummy1 /= id_subbas_extern(i)) THEN
         WRITE(*,'(A)') 'ERROR: Sub-basin-IDs in file operat_rule.dat must have the same ordering scheme as in hymo.dat'
@@ -578,7 +577,7 @@ storcap(:)=0.
     READ(11,*)
     READ(11,*)
     DO i=1,subasin
-	  IF (fvol_bottom(i) == -999.) READ (11,*)dummy1,operat_start(i),operat_stop(i),operat_elev(i)
+	  IF (fvol_bottom(i) == -999.) READ (11,*)dummy1,operat_start(res_index(i)),operat_stop(res_index(i)),operat_elev(res_index(i))
 	  IF (fvol_bottom(i) /= -999.) dummy1=id_subbas_extern(i)
       IF (dummy1 /= id_subbas_extern(i)) THEN
         WRITE(*,'(A)') 'ERROR: Sub-basin-IDs in file operat_bottom.dat must have the same ordering scheme as in hymo.dat'
@@ -792,7 +791,7 @@ storcap(:)=0.
 	  alpha_over(res_index(i))=1./(1.-damb(i))
 	  k_over(res_index(i))=(dama(i)/alpha_over(res_index(i)))**alpha_over(res_index(i))
 !write(*,*)id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),storcap(i)*1.e6
-	  hmax(i)=((storcap(i)*1.e6)/k_over(res_index(i)))**(1./alpha_over(res_index(i)))
+	  hmax(res_index(i))=((storcap(i)*1.e6)/k_over(res_index(i)))**(1./alpha_over(res_index(i)))
 !write(*,'(I6,4F12.3,F10.3,F15.1)')id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),hmax(i),storcap(i)*1.e6
 	ENDIF
   ENDDO
@@ -1352,11 +1351,11 @@ IF (STATUS == 2) THEN
           ELSE
             dummy4=0.
             do s=1,3
-              IF (dayoutsim+d >= dayexplot(upstream,s) .and. &
-                  dayoutsim+d < dayexplot(upstream,s+1)) dummy4=damq_frac_season(res_index(upstream),s)
+              IF (dayoutsim+d >= dayexplot(res_index(upstream),s) .and. &
+                  dayoutsim+d < dayexplot(res_index(upstream),s+1)) dummy4=damq_frac_season(res_index(upstream),s)
             enddo
-            IF (dayoutsim+d < dayexplot(upstream,1) .or. &
-                dayoutsim+d >= dayexplot(upstream,4)) dummy4=damq_frac_season(res_index(upstream),4)
+            IF (dayoutsim+d < dayexplot(res_index(upstream),1) .or. &
+                dayoutsim+d >= dayexplot(res_index(upstream),4)) dummy4=damq_frac_season(res_index(upstream),4)
             helpout=damflow(upstream)*dummy4
           ENDIF
 !write(*,*)upstream,dayoutsim+d,(dayexplot(upstream,s),s=1,4)
@@ -1389,15 +1388,15 @@ IF (STATUS == 2) THEN
 ! 4b) Bottom outlets
       IF (nbrbat(upstream) /= 0) THEN
         DO j=1,nbrbat(upstream)-1
-          IF (operat_elev(upstream) >= elev_bat(j,upstream).AND.  &
-                operat_elev(upstream) <= elev_bat(j+1,upstream)) THEN
-            volhelp=vol_bat(j,upstream)+(operat_elev(upstream)-elev_bat  &
+          IF (operat_elev(res_index(upstream)) >= elev_bat(j,upstream).AND.  &
+                operat_elev(res_index(upstream)) <= elev_bat(j+1,upstream)) THEN
+            volhelp=vol_bat(j,upstream)+(operat_elev(res_index(upstream))-elev_bat  &
                 (j,upstream))/(elev_bat(j+1,upstream)-elev_bat(j,upstream))*  &
                 (vol_bat(j+1,upstream)-vol_bat(j,upstream))
          END IF
         END DO
       ELSE
-        elevhelp=operat_elev(upstream)-dayminlevel(step,res_index(upstream))
+        elevhelp=operat_elev(res_index(upstream))-dayminlevel(step,res_index(upstream))
         volhelp=forma_factor(upstream)*(elevhelp**3)
       END IF
 
@@ -1416,7 +1415,7 @@ IF (STATUS == 2) THEN
 		helpout=0.
        END IF
 	  ELSE
-	   IF (step >= operat_start(upstream) .and. step <= operat_stop(upstream)) THEN
+	   IF (step >= operat_start(res_index(upstream)) .and. step <= operat_stop(res_index(upstream))) THEN
 	    IF (volact(step,upstream) > volhelp) THEN
 		  helpout=min(qoutlet(upstream),(volact(step,upstream)-volhelp))
         ELSE

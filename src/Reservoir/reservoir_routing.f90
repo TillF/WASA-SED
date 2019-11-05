@@ -40,7 +40,7 @@ par_d=damd(upstream)
 par_k=k_over(res_index(upstream))
 par_alpha=alpha_over(res_index(upstream))
 vmax0=(storcap(upstream)*1.e6)
-hmax0=hmax(upstream)
+hmax0=hmax(res_index(upstream))
 
 !write(*,'(I6,4F7.3,F13.1,2F8.3,F13.1)')upstream,par_c,par_d,par_k,par_alpha,hmax0,vmax0
 
