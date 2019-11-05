@@ -37,8 +37,8 @@ volmax=daystorcap(step,res_index(upstream)) !storage capacity in the subbasin's 
 volstep=help2
 par_c=damc(upstream)
 par_d=damd(upstream)
-par_k=k_over(upstream)
-par_alpha=alpha_over(upstream)
+par_k=k_over(res_index(upstream))
+par_alpha=alpha_over(res_index(upstream))
 vmax0=(storcap(upstream)*1.e6)
 hmax0=hmax(upstream)
 

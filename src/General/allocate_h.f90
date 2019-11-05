@@ -410,8 +410,9 @@ subroutine allocate_reservoir()
   !			damflow(i),damq_frac(i),withdrawal(i),damyear(i),maxdamarea(i), &
   !			damdead(i),damalert(i),dama(i),damb(i),qoutlet(i),fvol_bottom(i), &
   !			fvol_over(i),damc(i),damd(i),elevbottom(i)
-            
-            
+  !         forma_factor
+  !         damareaact          
+                       
 	      res_index(subasin), &
           f_intake_obs(subasin), &
           corr_column_intakes(subasin), &
@@ -447,8 +448,6 @@ subroutine allocate_reservoir()
 !	      infdam(366*nt,subasin), &
 	      maxdamarea(subasin), &
 	      damareaact(subasin), &
-	      alpha_over(subasin), &
-	      k_over(subasin), &
 	      dama(subasin), &
 	      damb(subasin), &
 	      damc(subasin), &
@@ -457,7 +456,7 @@ subroutine allocate_reservoir()
 	      qoutlet(subasin), &
 	      fvol_bottom(subasin), &
 	      withdrawal(subasin), &
-	      lakeret(366*nt,subasin), &
+
     !	  elev_bat0(maxreservoir_b,subasin), &
     !	  area_bat0(maxreservoir_b,subasin), &
     !	  vol_bat0(maxreservoir_b,subasin), &
@@ -465,8 +464,6 @@ subroutine allocate_reservoir()
     !	  area_bat(maxreservoir_b,subasin), &
     !	  vol_bat(maxreservoir_b,subasin), &
 	      vol0(subasin), &
-!A	      qlateral(366*nt,subasin), &
-
 	      maxlevel(subasin), &
 	      minlevel(subasin), &
             

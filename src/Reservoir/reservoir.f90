@@ -287,11 +287,9 @@ storcap(:)=0.
 	      !precdam(366*nt,n_reservoir), &
           !etdam(366*nt,n_reservoir), &
        
-	      !damareaact(n_reservoir), &
-	      !alpha_over(n_reservoir), &
-	      !k_over(n_reservoir), &
-	      !forma_factor(n_reservoir), &
-          !lakeret(366*nt,n_reservoir), &
+    alpha_over(n_reservoir), &
+    k_over(n_reservoir), &
+    lakeret(366*nt,n_reservoir), &
        
     qlateral(366*nt,n_reservoir), &
     qinflow(366*nt,n_reservoir), &
@@ -792,10 +790,10 @@ storcap(:)=0.
 	IF (res_flag(i)) THEN
 	  outflow_last(i)=0.
 	  volume_last(i)=max(0., vol0(i) - storcap(i))
-	  alpha_over(i)=1./(1.-damb(i))
-	  k_over(i)=(dama(i)/alpha_over(i))**alpha_over(i)
+	  alpha_over(res_index(i))=1./(1.-damb(i))
+	  k_over(res_index(i))=(dama(i)/alpha_over(res_index(i)))**alpha_over(res_index(i))
 !write(*,*)id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),storcap(i)*1.e6
-	  hmax(i)=((storcap(i)*1.e6)/k_over(i))**(1./alpha_over(i))
+	  hmax(i)=((storcap(i)*1.e6)/k_over(res_index(i)))**(1./alpha_over(res_index(i)))
 !write(*,'(I6,4F12.3,F10.3,F15.1)')id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),hmax(i),storcap(i)*1.e6
 	ENDIF
   ENDDO
@@ -1219,10 +1217,10 @@ IF (STATUS == 2) THEN
 		  help=daystorcap(step,res_index(upstream))
 		  overflow(step,res_index(upstream))=help3-daystorcap(step,res_index(upstream)) !Till: spillover [m^3]
         END IF
-	    lakeret(step,upstream)=max(0.,help-volact(step,upstream))
+	    lakeret(step,res_index(upstream))=max(0.,help-volact(step,upstream))
         volact(step,upstream)=help
 	  ELSE
-	    lakeret(step,upstream)=qinflow(step,res_index(upstream))
+	    lakeret(step,res_index(upstream))=qinflow(step,res_index(upstream))
         volact(step,upstream)=help3
       END IF
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),help,volact(step,upstream),daystorcap(step,upstream),overflow(step,upstream)
@@ -1466,8 +1464,8 @@ IF (STATUS == 2) THEN
 !write(*,'(2I4,6F15.2)')step,id_subbas_extern(upstream),help,help2
          call reservoir_routing(upstream,help,help2)
 !         help=max(0.,help-overflow(step,upstream))
-         if(help2 > daystorcap(step,res_index(upstream))) lakeret(step,upstream)=lakeret(step,upstream)+(max(0.,volact(step,upstream)-help2))
-         if(help2 <= daystorcap(step,res_index(upstream))) lakeret(step,upstream)=lakeret(step,upstream)+(max(0.,volact(step,upstream)-daystorcap(step,res_index(upstream))))
+         if(help2 > daystorcap(step,res_index(upstream))) lakeret(step,res_index(upstream))=lakeret(step,res_index(upstream))+(max(0.,volact(step,upstream)-help2))
+         if(help2 <= daystorcap(step,res_index(upstream))) lakeret(step,res_index(upstream))=lakeret(step,res_index(upstream))+(max(0.,volact(step,upstream)-daystorcap(step,res_index(upstream))))
 
 !write(*,'(2I4,3F15.4)')step,id_subbas_extern(upstream),help,volact(step,upstream),overflow(step,upstream)/86400.
         ELSE
@@ -1481,7 +1479,6 @@ IF (STATUS == 2) THEN
 		overflow(step,res_index(upstream))=overflow(step,res_index(upstream))+volact(step,upstream)-daystorcap(step,res_index(upstream))
       END IF
 
-
 !write(*,'(2I4,5F15.4)')step,id_subbas_extern(upstream),qinflow(step,upstream)/86400.,overflow(step,upstream)/86400.,volact(step,upstream),lakeret(step,upstream)/86400.
 
 !write(*,'(2I4,3F15.4)')step,id_subbas_extern(upstream),volact(step,upstream)
@@ -1490,7 +1487,6 @@ IF (STATUS == 2) THEN
 !if (step==41 .and. id_subbas_extern(upstream)==29) stop
 
       res_qout(step,res_index(upstream))=qintake(step,res_index(upstream))+overflow(step,res_index(upstream))+qbottom(step,res_index(upstream))
-
 
 
       IF (nbrbat(upstream) /= 0) THEN
