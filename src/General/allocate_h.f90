@@ -421,10 +421,7 @@ subroutine allocate_reservoir()
    	      fcav(subasin), &
 	      fvol_over(subasin), &
           latflow_res(subasin), &
-          reservoir_down(subasin), &
  	      damyear(subasin), &
-!A	      nbrbat(subasin), &
-
           volume_last(subasin), &
           outflow_last(subasin), &
 !	      damex(366*nt,subasin), & tp not used

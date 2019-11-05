@@ -414,9 +414,9 @@ DO h=1,nt
 	   ENDIF
 	 ELSE IF (latflow_res(upstream) == 1) THEN
        IF (storcap(upstream) > 0. .and. t >= damyear(upstream)) THEN
-         IF (storcap(reservoir_down(upstream)) > 0. .and. t >= damyear(reservoir_down(upstream))) THEN
+         IF (storcap(reservoir_down(res_index(upstream))) > 0. .and. t >= damyear(reservoir_down(res_index(upstream)))) THEN
 !write(*,*)step,id_subbas_extern(upstream),"case 2a"
-           qlateral(step,reservoir_down(upstream))=add_ifnot_nodata(qlateral(step,reservoir_down(upstream)), res_qout(step,res_index(upstream)))
+           qlateral(step,reservoir_down(res_index(upstream)))=add_ifnot_nodata(qlateral(step,reservoir_down(res_index(upstream))), res_qout(step,res_index(upstream)))
 	       if(dosediment) then
 	         do k=1,n_sed_class
 	           sed_qlateral(reservoir_down(res_index(upstream)),k) = add_ifnot_nodata(sed_qlateral(reservoir_down(res_index(upstream)),k), res_sediment_out(res_index(upstream),k))
@@ -434,9 +434,9 @@ DO h=1,nt
            END IF !George
 		 ENDIF
 	   ELSE
-         IF (storcap(reservoir_down(upstream)) > 0. .and. t >= damyear(reservoir_down(upstream))) THEN
+         IF (storcap(reservoir_down(res_index(upstream))) > 0. .and. t >= damyear(reservoir_down(res_index(upstream)))) THEN
 !write(*,*)step,id_subbas_extern(upstream),"case 3a"
-           qlateral(step,reservoir_down(upstream)) = add_ifnot_nodata(qlateral(step,reservoir_down(upstream)), r_qout(2,upstream))
+           qlateral(step,reservoir_down(res_index(upstream))) = add_ifnot_nodata(qlateral(step,reservoir_down(res_index(upstream))), r_qout(2,upstream))
 	       if(dosediment) then
 	         do k=1,n_sed_class
 	           sed_qlateral(reservoir_down(res_index(upstream)),k) = add_ifnot_nodata(sed_qlateral(reservoir_down(res_index(upstream)),k), sediment_out(upstream,k))
