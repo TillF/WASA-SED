@@ -279,18 +279,17 @@ storcap(:)=0.
 	      !operat_elev(n_reservoir), &
           !hmax(n_reservoir), &
           !volume_last(n_reservoir), &
-          !outflow_last(n_reservoir), &  	      
-	      !elevdead(n_reservoir), &     
-	      !elevalert(n_reservoir), &
-	      !damq_frac_season(n_reservoir,4), &
-	      !volact(366*nt,n_reservoir), &
-	      !precdam(366*nt,n_reservoir), &
-          !etdam(366*nt,n_reservoir), &
+          !outflow_last(n_reservoir), &  
+     
+    elevdead(n_reservoir), &     
+    elevalert(n_reservoir), &
+    damq_frac_season(n_reservoir,4), &	      
+    precdam(366*nt,n_reservoir), &
+    etdam(366*nt,n_reservoir), &
        
     alpha_over(n_reservoir), &
     k_over(n_reservoir), &
-    lakeret(366*nt,n_reservoir), &
-       
+    lakeret(366*nt,n_reservoir), &      
     qlateral(366*nt,n_reservoir), &
     qinflow(366*nt,n_reservoir), &
     overflow(366*nt,n_reservoir), &
@@ -557,7 +556,7 @@ storcap(:)=0.
     READ(11,*)
     READ(11,*)
     DO i=1,subasin
-	  IF (damq_frac(i) == -999.) READ (11,*)dummy1,(dayexplot(i,s),s=1,4),(damq_frac_season(i,s),s=1,4)
+	  IF (damq_frac(i) == -999.) READ (11,*)dummy1,(dayexplot(i,s),s=1,4),(damq_frac_season(res_index(i),s),s=1,4)
 	  IF (damq_frac(i) /= -999.) dummy1=id_subbas_extern(i)
       IF (dummy1 /= id_subbas_extern(i)) THEN
         WRITE(*,'(A)') 'ERROR: Sub-basin-IDs in file operat_rule.dat must have the same ordering scheme as in hymo.dat'
@@ -757,13 +756,13 @@ storcap(:)=0.
       DO j=1,nbrbat(i)-1
         IF (damdead(i)*1.e6 >= vol_bat(j,i).AND.  &
             damdead(i)*1.e6 <= vol_bat(j+1,i)) THEN
-          elevdead(i)=elev_bat(j,i)+((damdead(i)*1.e6)-vol_bat  &
+          elevdead(res_index(i))=elev_bat(j,i)+((damdead(i)*1.e6)-vol_bat  &
                 (j,i))/(vol_bat(j+1,i)-vol_bat(j,i))*  &
                 (elev_bat(j+1,i)-elev_bat(j,i))
 	    ENDIF
         IF (damalert(i)*1.e6 >= vol_bat(j,i).AND.  &
             damalert(i)*1.e6 <= vol_bat(j+1,i)) THEN
-          elevalert(i)=elev_bat(j,i)+((damalert(i)*1.e6)-vol_bat  &
+          elevalert(res_index(i))=elev_bat(j,i)+((damalert(i)*1.e6)-vol_bat  &
                 (j,i))/(vol_bat(j+1,i)-vol_bat(j,i))*  &
                 (elev_bat(j+1,i)-elev_bat(j,i))
 	    ENDIF
@@ -774,13 +773,13 @@ storcap(:)=0.
 	  else
         elevhelp=0.
 	  endif
-	  elevdead(i)=elevhelp+minlevel(i)
+	  elevdead(res_index(i))=elevhelp+minlevel(i)
 	  if (damalert(i) /= 0.) then
         elevhelp=((damalert(i)*1.e6)/forma_factor(i))**(1./3.)
 	  else
         elevhelp=0.
 	  endif
-	  elevalert(i)=elevhelp+minlevel(i)
+	  elevalert(res_index(i))=elevhelp+minlevel(i)
     ENDIF
    ENDIF
   END DO
@@ -1318,8 +1317,8 @@ IF (STATUS == 2) THEN
 !write(*,'(2I4,3F15.4)')step,id_subbas_extern(upstream),volact(step,upstream)
 
 !tp store for output in reservoir balance in m**3
-       etdam(step,upstream)=evaphelp
-       precdam(step,upstream)=prechelp
+       etdam(step,res_index(upstream))=evaphelp
+       precdam(step,res_index(upstream))=prechelp
 
 ! 3) reservoir evaporation in mm, tp: TODO never used!
 !      IF (nbrbat(upstream) /= 0) THEN
@@ -1354,10 +1353,10 @@ IF (STATUS == 2) THEN
             dummy4=0.
             do s=1,3
               IF (dayoutsim+d >= dayexplot(upstream,s) .and. &
-                  dayoutsim+d < dayexplot(upstream,s+1)) dummy4=damq_frac_season(upstream,s)
+                  dayoutsim+d < dayexplot(upstream,s+1)) dummy4=damq_frac_season(res_index(upstream),s)
             enddo
             IF (dayoutsim+d < dayexplot(upstream,1) .or. &
-                dayoutsim+d >= dayexplot(upstream,4)) dummy4=damq_frac_season(upstream,4)
+                dayoutsim+d >= dayexplot(upstream,4)) dummy4=damq_frac_season(res_index(upstream),4)
             helpout=damflow(upstream)*dummy4
           ENDIF
 !write(*,*)upstream,dayoutsim+d,(dayexplot(upstream,s),s=1,4)
@@ -1379,7 +1378,7 @@ IF (STATUS == 2) THEN
       END IF
 
       IF (volact(step,upstream) <= daydamdead(step,res_index(upstream))) helpout=0.
-      IF (elevdead(upstream) <= dayminlevel(step,res_index(upstream))) helpout=0.
+      IF (elevdead(res_index(upstream)) <= dayminlevel(step,res_index(upstream))) helpout=0.
  !write(*,*)step,id_subbas_extern(upstream),helpout/86400.
       qintake(step,res_index(upstream))=helpout
       volact(step,upstream)=MAX(0.,volact(step,upstream)-qintake(step,res_index(upstream)))
@@ -1598,7 +1597,7 @@ IF (STATUS == 2) THEN
 
 ! Calculation of dead water volume after sediment deposition
 	     if (damdead(upstream) /= 0. .and. daydamdead(step,res_index(upstream)) /= 0.) then
-	      elevhelp=max(0.,elevdead(upstream)-dayminlevel(step,res_index(upstream)))
+	      elevhelp=max(0.,elevdead(res_index(upstream))-dayminlevel(step,res_index(upstream)))
           daydamdead(step,res_index(upstream))=forma_factor(upstream)*(elevhelp**3.)
 	     else
 	      daydamdead(step,res_index(upstream))=0.
@@ -1606,7 +1605,7 @@ IF (STATUS == 2) THEN
 
 ! Calculation of alert water volume after sediment deposition
  	     if (damalert(upstream) /= 0. .and. daydamalert(step,res_index(upstream)) /= 0.) then
-	      elevhelp=max(0.,elevalert(upstream)-dayminlevel(step,res_index(upstream)))
+	      elevhelp=max(0.,elevalert(res_index(upstream))-dayminlevel(step,res_index(upstream)))
           daydamalert(step,res_index(upstream))=forma_factor(upstream)*(elevhelp**3.)
 	     else
 	      daydamalert(step,res_index(upstream))=0.
@@ -1678,9 +1677,9 @@ IF (STATUS == 2) THEN
 ! Calculation of dead water volume after sediment deposition
          do j=1,nbrbat(upstream)-1
 	      if (damdead(upstream) /= 0. .and. daydamdead(step,res_index(upstream)) /= 0.) then
-           if (elevdead(upstream) >= elev_bat(j,upstream).AND.  &
-               elevdead(upstream) <= elev_bat(j+1,upstream)) THEN
-            daydamdead(step,res_index(upstream))=vol_bat(j,upstream)+(elevdead(upstream)-elev_bat  &
+           if (elevdead(res_index(upstream)) >= elev_bat(j,upstream).AND.  &
+               elevdead(res_index(upstream)) <= elev_bat(j+1,upstream)) THEN
+            daydamdead(step,res_index(upstream))=vol_bat(j,upstream)+(elevdead(res_index(upstream))-elev_bat  &
                 (j,upstream))/(elev_bat(j+1,upstream)-elev_bat(j,upstream))*  &
                 (vol_bat(j+1,upstream)-vol_bat(j,upstream))
            endif
@@ -1689,9 +1688,9 @@ IF (STATUS == 2) THEN
 	      endif
 ! Calculation of alert water volume after sediment deposition
  	      if (damalert(upstream) /= 0. .and. daydamalert(step,res_index(upstream)) /= 0.) then
-           if (elevalert(upstream) >= elev_bat(j,upstream).AND.  &
-               elevalert(upstream) <= elev_bat(j+1,upstream)) THEN
-            daydamalert(step,res_index(upstream))=vol_bat(j,upstream)+(elevalert(upstream)-elev_bat  &
+           if (elevalert(res_index(upstream)) >= elev_bat(j,upstream).AND.  &
+               elevalert(res_index(upstream)) <= elev_bat(j+1,upstream)) THEN
+            daydamalert(step,res_index(upstream))=vol_bat(j,upstream)+(elevalert(res_index(upstream))-elev_bat  &
                 (j,upstream))/(elev_bat(j+1,upstream)-elev_bat(j,upstream))*  &
                 (vol_bat(j+1,upstream)-vol_bat(j,upstream))
            endif
@@ -1737,9 +1736,9 @@ IF (STATUS == 2) THEN
 	      endif
 ! Calculation of dead water volume after sediment deposition
 	      if (damdead(upstream) /= 0. .and. daydamdead(step,res_index(upstream)) /= 0.) then
-           if (elevdead(upstream) >= elev_bat(j,upstream).AND.  &
-               elevdead(upstream) <= elev_bat(j+1,upstream)) THEN
-            daydamdead(step,res_index(upstream))=vol_bat(j,upstream)+(elevdead(upstream)-elev_bat  &
+           if (elevdead(res_index(upstream)) >= elev_bat(j,upstream).AND.  &
+               elevdead(res_index(upstream)) <= elev_bat(j+1,upstream)) THEN
+            daydamdead(step,res_index(upstream))=vol_bat(j,upstream)+(elevdead(res_index(upstream))-elev_bat  &
                 (j,upstream))/(elev_bat(j+1,upstream)-elev_bat(j,upstream))*  &
                 (vol_bat(j+1,upstream)-vol_bat(j,upstream))
            endif
@@ -1748,9 +1747,9 @@ IF (STATUS == 2) THEN
 	      endif
 ! Calculation of alert water volume after sediment deposition
  	      if (damalert(upstream) /= 0. .and. daydamalert(step,res_index(upstream)) /= 0.) then
-           if (elevalert(upstream) >= elev_bat(j,upstream).AND.  &
-               elevalert(upstream) <= elev_bat(j+1,upstream)) THEN
-            daydamalert(step,res_index(upstream))=vol_bat(j,upstream)+(elevalert(upstream)-elev_bat  &
+           if (elevalert(res_index(upstream)) >= elev_bat(j,upstream).AND.  &
+               elevalert(res_index(upstream)) <= elev_bat(j+1,upstream)) THEN
+            daydamalert(step,res_index(upstream))=vol_bat(j,upstream)+(elevalert(res_index(upstream))-elev_bat  &
                 (j,upstream))/(elev_bat(j+1,upstream)-elev_bat(j,upstream))*  &
                 (vol_bat(j+1,upstream)-vol_bat(j,upstream))
            endif
@@ -1783,7 +1782,8 @@ IF (STATUS == 2) THEN
 	 IF (f_res_watbal) THEN
      OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_watbal.out',STATUS='old',  &
 		  POSITION='append')
-	 WRITE(11,'(4I6,2f10.3,2f13.1,6f10.3,3f14.1)')id_subbas_extern(upstream),t,d,hour,qlateral(step,res_index(upstream)),qinflow(step,res_index(upstream)),etdam(step,upstream),precdam(step,upstream),  &
+	 WRITE(11,'(4I6,2f10.3,2f13.1,6f10.3,3f14.1)')id_subbas_extern(upstream),t,d,hour,qlateral(step,res_index(upstream)),qinflow(step,res_index(upstream)), & 
+                etdam(step,res_index(upstream)),precdam(step,res_index(upstream)),  &
 				qintake(step,res_index(upstream)),overflow(step,res_index(upstream)),qbottom(step,res_index(upstream)),res_qout(step,res_index(upstream)), &
 				withdraw_out(step,res_index(upstream)),damelevact(res_index(upstream)),damareaact(upstream),volact(step,upstream)
      CLOSE(11)
@@ -1881,8 +1881,8 @@ endif
 		    hour=ih
             step=(d-1)*nt+hour
 	        WRITE(11,'(4(I6,a),2(f10.3,a),2(f13.1,a),6(f10.3,a),3(f14.1,a))')id_subbas_extern(i),char(9),&
-            t,char(9),d,char(9),hour,char(9),qlateral(step,res_index(i)),char(9),qinflow(step,res_index(i)),char(9),etdam(step,i),char(9),&
-            precdam(step,i),char(9),qintake(step,res_index(i)),char(9),overflow(step,res_index(i)),char(9),qbottom(step,res_index(i)),char(9),&
+            t,char(9),d,char(9),hour,char(9),qlateral(step,res_index(i)),char(9),qinflow(step,res_index(i)),char(9),etdam(step,res_index(i)),char(9),&
+            precdam(step,res_index(i)),char(9),qintake(step,res_index(i)),char(9),overflow(step,res_index(i)),char(9),qbottom(step,res_index(i)),char(9),&
     !Anne changed, eg., daydamareaact(step,i) to daydamareaact(step,res_index(i))
             res_qout(step,res_index(i)),char(9),withdraw_out(step,res_index(i)),char(9),daydamelevact(step,res_index(i)),char(9),daydamareaact(step,res_index(i)),char(9),volact(step,i)*1.e6,char(9)
 		  ENDDO

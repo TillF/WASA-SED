@@ -32,7 +32,7 @@ tempres(d,upstream)=20.
 ! initialization
 a=2.*diam(g)
 depth_bottom=a
-depth_intake=max(0.,elevdead(upstream)-dayminlevel(step,res_index(upstream)))
+depth_intake=max(0.,elevdead(res_index(upstream))-dayminlevel(step,res_index(upstream)))
 depth_over=max(0.,(1.-a)*(maxlevel(upstream)-dayminlevel(step,res_index(upstream))))
 
 ! density of water and density of natural sediments (kg/m3)

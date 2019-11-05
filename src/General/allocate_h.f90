@@ -410,9 +410,9 @@ subroutine allocate_reservoir()
   !			damflow(i),damq_frac(i),withdrawal(i),damyear(i),maxdamarea(i), &
   !			damdead(i),damalert(i),dama(i),damb(i),qoutlet(i),fvol_bottom(i), &
   !			fvol_over(i),damc(i),damd(i),elevbottom(i)
-  !         forma_factor
-  !         damareaact          
-                       
+  !         forma_factor(i)
+  !         damareaact(i), volact(id,i)
+                                
 	      res_index(subasin), &
           f_intake_obs(subasin), &
           corr_column_intakes(subasin), &
@@ -433,16 +433,13 @@ subroutine allocate_reservoir()
 !	      damex(366*nt,subasin), & tp not used
 	      storcap(subasin), &
 	      damdead(subasin), &
-	      elevdead(subasin), &
+!A	      elevdead(subasin), &
 	      damalert(subasin), &
-	      elevalert(subasin), &
 	      elevbottom(subasin), &
 	      damflow(subasin), &
 	      damq_frac(subasin), &
-	      damq_frac_season(subasin,4), &
-	      volact(366*nt,subasin), &
-	      precdam(366*nt,subasin), &
-          etdam(366*nt,subasin), &
+          volact(366*nt,subasin), &
+            
 ! tp TODO never used
 !	      evapdam(366*nt,subasin), &
 !	      infdam(366*nt,subasin), &
