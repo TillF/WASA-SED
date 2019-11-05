@@ -194,13 +194,14 @@ storcap(:)=0.
 	  IF (i==0) THEN
 		  WRITE (*,'(A,I0,A)') 'WARNING: unknown upstream subbasin ID ', dummy1,' in reservoir.dat, ignored.'
 		  cycle
-	  END IF
-
+      END IF 
+      
 	  READ (fmtstr,*,IOSTAT=istate) dummy1, minlevel(i), maxlevel(i),vol0(i),storcap(i), &
 			damflow(i),damq_frac(i),withdrawal(i),damyear(i),maxdamarea(i), &
 			damdead(i),damalert(i),dama(i),damb(i),qoutlet(i),fvol_bottom(i), &
 			fvol_over(i),damc(i),damd(i),elevbottom(i)
 
+      
 	  IF (istate/=0) THEN
 		  WRITE (*,'(A,i0,A,A)') 'ERROR: Format error in reservoir.dat, line ',j,':', fmtstr
 		  STOP
@@ -267,11 +268,9 @@ storcap(:)=0.
           !corr_column_intakes(n_reservoir), &
           !res_flag(n_reservoir), &
    	      !fcav(n_reservoir), &
-	      !fvol_over(n_reservoir), &
-          !latflow_res(n_reservoir), &
+	      !latflow_res(n_reservoir), &
           !reservoir_down(n_reservoir), &
- 	      !damyear(n_reservoir), &
-	      !nbrbat(n_reservoir), &
+        !nbrbat(n_reservoir), &
 	      !dayexplot(n_reservoir,4), &
 	      !operat_start(n_reservoir), &
 	      !operat_stop(n_reservoir), &
@@ -280,34 +279,21 @@ storcap(:)=0.
           !volume_last(n_reservoir), &
           !outflow_last(n_reservoir), &
        
-	      !storcap(n_reservoir), &
-	      !damdead(n_reservoir), &
+	      
 	      !elevdead(n_reservoir), &
-	      !damalert(n_reservoir), &
+	     
 	      !elevalert(n_reservoir), &
-	      !elevbottom(n_reservoir), &
-	      !damflow(n_reservoir), &
-	      !damq_frac(n_reservoir), &
 	      !damq_frac_season(n_reservoir,4), &
 	      !volact(366*nt,n_reservoir), &
 	      !precdam(366*nt,n_reservoir), &
           !etdam(366*nt,n_reservoir), &
        
-	      !maxdamarea(n_reservoir), &
 	      !damareaact(n_reservoir), &
 	      !alpha_over(n_reservoir), &
 	      !k_over(n_reservoir), &
-	      !dama(n_reservoir), &
-	      !damb(n_reservoir), &
-	      !damc(n_reservoir), &
-	      !damd(n_reservoir), &
 	      !forma_factor(n_reservoir), &
-	      !qoutlet(n_reservoir), &
-	      !fvol_bottom(n_reservoir), &
-	      !withdrawal(n_reservoir), &
-	      !lakeret(366*nt,n_reservoir), &
+          !lakeret(366*nt,n_reservoir), &
        
-	      !vol0(n_reservoir), &
 	      !qlateral(366*nt,n_reservoir), &
 	      !qinflow(366*nt,n_reservoir), &
 	      !overflow(366*nt,n_reservoir), &
@@ -320,8 +306,6 @@ storcap(:)=0.
 	      !daydamalert(366*nt,n_reservoir), &
 	      !dayminlevel(366*nt,n_reservoir), &
 	      !damelevact(n_reservoir), &
-	      !maxlevel(n_reservoir), &
-	      !minlevel(n_reservoir), &
      
     damvol0(n_reservoir), &
     damelev0(366*nt,n_reservoir), &

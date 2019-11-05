@@ -404,7 +404,14 @@ subroutine allocate_reservoir()
         !to decrease array size & only do calculations for subbasins with reservoir,  
         !moved all arrays with "subbasin" to reservoir.f90 and substituted by "n_reservoir";
         !plus inserted "res_index()", e.g.: dayarea_bat(step,j,i) changed to dayarea_bat(step,j,res_index(i))   
-                  
+  
+  !The following variables could not be moved/changed, because they are allocated after READ-operation from file in reservoir.f90
+  !	        minlevel(i), maxlevel(i),vol0(i),storcap(i), &
+  !			damflow(i),damq_frac(i),withdrawal(i),damyear(i),maxdamarea(i), &
+  !			damdead(i),damalert(i),dama(i),damb(i),qoutlet(i),fvol_bottom(i), &
+  !			fvol_over(i),damc(i),damd(i),elevbottom(i)
+            
+            
 	      res_index(subasin), &
           f_intake_obs(subasin), &
           corr_column_intakes(subasin), &
