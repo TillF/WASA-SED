@@ -163,10 +163,10 @@ nbrsec=0.
       DO i=1,subasin
         if (res_index(i) /= 0.) then !Anne inserted this line
             nbrsec1=nbrsec(res_index(i))
-            IF (nbrbat(i) /= 0 .AND. nbrsec(res_index(i)) /= 0) THEN
+            IF (nbrbat(res_index(i)) /= 0 .AND. nbrsec(res_index(i)) /= 0) THEN
               READ(11,*) dummy1,dummy2,(manning_sec(j,res_index(i)),j=1,nbrsec1)
               READ(11,*) dummy1,dummy2,(dist_sec(j,res_index(i)),j=1,nbrsec1)
-            ELSE IF (nbrbat(i) == 0.AND.nbrsec(res_index(i)) /= 0) THEN
+            ELSE IF (nbrbat(res_index(i)) == 0.AND.nbrsec(res_index(i)) /= 0) THEN
               WRITE(*,*)'ERROR - if sections are defined, the file cav.dat must be given'
               WRITE(*,*)'subasin:',id_subbas_extern(i)
               STOP
@@ -491,10 +491,10 @@ nbrsec=0.
         if (res_index(i) /= 0.) then !Anne inserted this line    
  	        sed_flag(res_index(i))=1 !changes on sideslope is controlled avoiding steeper slopes by erosion processes
             nbrsec1=nbrsec(res_index(i))
-            IF (nbrbat(i) /= 0 .AND. nbrsec(res_index(i)) /= 0) THEN
+            IF (nbrbat(res_index(i)) /= 0 .AND. nbrsec(res_index(i)) /= 0) THEN
                 READ(11,*) dummy1,dummy2,(pt1(j,res_index(i)),j=1,nbrsec1)
                 READ(11,*) dummy1,dummy2,(pt2(j,res_index(i)),j=1,nbrsec1)    !A
-            ELSE IF (nbrbat(i) == 0.AND.nbrsec(res_index(i)) /= 0) THEN
+            ELSE IF (nbrbat(res_index(i)) == 0.AND.nbrsec(res_index(i)) /= 0) THEN
                 WRITE(*,*)'ERROR - if sections are defined, the file cav.dat must be given'
                 WRITE(*,*)'subasin:',id_subbas_extern(i)
                 STOP
@@ -559,7 +559,7 @@ nbrsec=0.
   DO i=1,subasin   
     if (res_index(i) /= 0.) then !Anne inserted this line  
         IF (nbrsec(res_index(i)) /= 0) THEN
-	     nbrbat1=nbrbat(i)
+	     nbrbat1=nbrbat(res_index(i))
          DO b=1,nbrbat1
           elevhelp=elev_bat(b,i)
           DO j=1,nbrsec(res_index(i))
@@ -1715,7 +1715,7 @@ end if
 
 ! Change on stage-area-volume curve due to erosion and deposition processes
     dummy9=0.
-	nbrbat1=nbrbat(upstream)
+	nbrbat1=nbrbat(res_index(upstream))
 	if (decstorcap(step,res_index(upstream)) < daystorcap(step,res_index(upstream)) .and. decstorcap(step,res_index(upstream))/=0.) then
      DO b=1,nbrbat1
       elevhelp=elev_bat(b,upstream)
@@ -1800,7 +1800,7 @@ end if
      ENDDO
 
 ! Calculation of the ratio between the reservoir volume calculated according to the cross sections and that value given in the file cav.dat
-	 nbrbat1=nbrbat(upstream)
+	 nbrbat1=nbrbat(res_index(upstream))
      DO b=1,nbrbat1
 	   if (elev_bat(b,upstream) >= maxlevel(upstream)) THEN
 !	     if (step==1 .and. t==tstart) dummy12=vol_bat(b,upstream)/volhelp2(b)
@@ -1833,7 +1833,7 @@ end if
 	   ENDIF
 	 ENDDO
 
-     DO b=1,nbrbat(upstream)
+     DO b=1,nbrbat(res_index(upstream))
 	   if (elev_bat(b,upstream) >= maxlevel(upstream)) THEN
 	     vol_bat(b,upstream)=max(vol_bat(b,upstream)-decstorcap(step,res_index(upstream)),0.)
 	   else
@@ -1866,9 +1866,9 @@ end if
 !if (step==126)stop
 
 	 if (dayminlevel(step,res_index(upstream)) < elev_bat(1,upstream)) elev_bat(1,upstream)=dayminlevel(step,res_index(upstream))
-	 if (dayminlevel(step,res_index(upstream)) > elev_bat(nbrbat(upstream),upstream)) elev_bat(nbrbat(upstream),upstream)=dayminlevel(step,res_index(upstream))
+	 if (dayminlevel(step,res_index(upstream)) > elev_bat(nbrbat(res_index(upstream)),upstream)) elev_bat(nbrbat(upstream),upstream)=dayminlevel(step,res_index(upstream))
 
-     DO b=1,nbrbat(upstream)
+     DO b=1,nbrbat(res_index(upstream))
 	   if (elev_bat(b,upstream) < dayminlevel(step,res_index(upstream))) then
 	     vol_bat(b,upstream)=0.
 		 area_bat(b,upstream)=0.
@@ -1884,7 +1884,7 @@ end if
 	 storcap(upstream)=0.
 	 daystorcap(step,res_index(upstream))=0.
 
-     DO b=1,nbrbat(upstream)
+     DO b=1,nbrbat(res_index(upstream))
 	  vol_bat(b,upstream)=0.
 	  area_bat(b,upstream)=0.
 	 ENDDO

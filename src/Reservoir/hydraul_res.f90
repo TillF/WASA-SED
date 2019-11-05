@@ -72,7 +72,7 @@ END DO
 ! Mean reservoir level (m)
 IF (reservoir_balance == 1) THEN
   damelev0(step,res_index(upstream))= -1. !flag as "not set"
-  DO l=1,(nbrbat(upstream)-1)
+  DO l=1,(nbrbat(res_index(upstream))-1)
     IF (damvol0(res_index(upstream)) >= vol_bat(l,upstream).AND.  &
         damvol0(res_index(upstream)) <= vol_bat(l+1,upstream)) THEN
       damelev0(step,res_index(upstream))=elev_bat(l,upstream)+(damvol0(res_index(upstream))-  &

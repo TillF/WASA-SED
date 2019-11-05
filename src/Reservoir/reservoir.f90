@@ -271,9 +271,8 @@ storcap(:)=0.
           !res_flag(n_reservoir), &
    	      !fcav(n_reservoir), &
 	      !latflow_res(n_reservoir), &
-          !reservoir_down(n_reservoir), &
-     
-        !nbrbat(n_reservoir), &
+          !reservoir_down(n_reservoir), &    
+    nbrbat(n_reservoir), &
      
     dayexplot(n_reservoir,4), &
     operat_start(n_reservoir), &
@@ -621,7 +620,7 @@ storcap(:)=0.
   endif
 
 !Ge stage-volume curves for each sub-basin
-  nbrbat(1:subasin)=0
+  nbrbat(1:n_reservoir)=0
 
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/cav.dat', IOSTAT=istate,STATUS='old')
   IF (istate/=0) THEN					!cav.dat not found
@@ -634,7 +633,7 @@ storcap(:)=0.
     READ(11,*,IOSTAT=ka) dummy1,dummy2
     DO i=1,subasin
       IF (dummy1==id_subbas_extern(i)) THEN
-         nbrbat(i)=dummy2
+         nbrbat(res_index(i))=dummy2
 	  ENDIF
 	ENDDO
     DO WHILE (ka==0)
@@ -642,7 +641,7 @@ storcap(:)=0.
 	  READ(11,*, IOSTAT=ka) dummy1,dummy2					!read next line in file
       DO i=1,subasin
         IF (dummy1==id_subbas_extern(i)) THEN
-          nbrbat(i)=dummy2
+          nbrbat(res_index(i))=dummy2
 		ENDIF
 	  ENDDO
     END DO
@@ -726,33 +725,37 @@ storcap(:)=0.
   ENDIF
 
   DO i=1,subasin
-    nbrbat1=nbrbat(i)
-    IF (nbrbat(i) /= 0) THEN
-      DO j=1,nbrbat1
-        area_bat0(j,i)=area_bat0(j,i)*1000.
-        vol_bat0(j,i)=vol_bat0(j,i)*1000.
-      END DO
-    END IF
+    if (res_index(i) /= 0.) then !Anne inserted this line  
+        nbrbat1=nbrbat(res_index(i))
+        IF (nbrbat(res_index(i)) /= 0) THEN
+          DO j=1,nbrbat1
+            area_bat0(j,i)=area_bat0(j,i)*1000.
+            vol_bat0(j,i)=vol_bat0(j,i)*1000.
+          END DO
+        END IF
+     endif  !Anne 
   END DO
 
 !Ge initialization of the stage-volume curves for each sub-basin (erosion/deposition process)
   DO i=1,subasin
-    nbrbat1=nbrbat(i)
-    IF (nbrbat(i) /= 0) THEN
-      DO j=1,nbrbat1
-        elev_bat(j,i)=elev_bat0(j,i)
-        area_bat(j,i)=area_bat0(j,i)
-        vol_bat(j,i)=vol_bat0(j,i)
-      END DO
-    END IF
+    if (res_index(i) /= 0.) then !Anne inserted this line  
+        nbrbat1=nbrbat(res_index(i))
+        IF (nbrbat(res_index(i)) /= 0) THEN
+          DO j=1,nbrbat1
+            elev_bat(j,i)=elev_bat0(j,i)
+            area_bat(j,i)=area_bat0(j,i)
+            vol_bat(j,i)=vol_bat0(j,i)
+          END DO
+        END IF
+     endif  !Anne   
   END DO
 
 
   DO i=1,subasin
    IF (res_flag(i)) THEN
-    nbrbat1=nbrbat(i)
-    IF (nbrbat(i) /= 0) THEN
-      DO j=1,nbrbat(i)-1
+    nbrbat1=nbrbat(res_index(i))
+    IF (nbrbat(res_index(i)) /= 0) THEN
+      DO j=1,nbrbat(res_index(i))-1
         IF (damdead(i)*1.e6 >= vol_bat(j,i).AND.  &
             damdead(i)*1.e6 <= vol_bat(j+1,i)) THEN
           elevdead(res_index(i))=elev_bat(j,i)+((damdead(i)*1.e6)-vol_bat  &
@@ -839,12 +842,14 @@ storcap(:)=0.
 !Ge initialization of output files
   IF (f_res_cav) then
       DO i=1,subasin
-       IF (nbrbat(i) /= 0) THEN
-        IF (res_flag(i)) THEN
-          WRITE(subarea,*)id_subbas_extern(i)
-          OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_cav.out',STATUS='replace')
-        ENDIF
-       ENDIF
+        if (res_index(i) /= 0.) then !Anne inserted this line  
+           IF (nbrbat(res_index(i)) /= 0) THEN
+            IF (res_flag(i)) THEN
+              WRITE(subarea,*)id_subbas_extern(i)
+              OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_cav.out',STATUS='replace')
+            ENDIF
+           ENDIF
+         endif	 !Anne  
       ENDDO
   ENDIF
 
@@ -960,9 +965,9 @@ IF (STATUS == 1) THEN
 !George reservoir water surface (m**2)
   DO i=1,subasin
     IF (res_flag(i) .and. t >= damyear(i)) THEN
-     nbrbat1=nbrbat(i)
-     IF (nbrbat(i) /= 0) THEN
-      DO j=1,nbrbat(i)-1
+     nbrbat1=nbrbat(res_index(i))
+     IF (nbrbat(res_index(i)) /= 0) THEN
+      DO j=1,nbrbat(res_index(i))-1
         IF (volact(1,i)*1.e6 >= vol_bat(j,i).AND.  &
             volact(1,i)*1.e6 <= vol_bat(j+1,i)) THEN
           damareaact(i)=area_bat(j,i)+((volact(1,i)*1.e6)-vol_bat  &
@@ -1230,8 +1235,8 @@ IF (STATUS == 2) THEN
 
 ! 2) Substract evaporation out the reservoir
 ! Calculation of the actual reservoir area by interpolation (using the stage-area-volume curve)
-      IF (nbrbat(upstream) /= 0) THEN
-        DO j=1,nbrbat(upstream)-1
+      IF (nbrbat(res_index(upstream)) /= 0) THEN
+        DO j=1,nbrbat(res_index(upstream))-1
           IF (volact(step,upstream) >= vol_bat(j,upstream).AND.  &
                 volact(step,upstream) <= vol_bat(j+1,upstream)) THEN
             areahelp=area_bat(j,upstream)+(volact(step,upstream)-vol_bat  &
@@ -1256,7 +1261,7 @@ IF (STATUS == 2) THEN
 ! Calculation of increase or decrease of the reservoir level due to precip and evap.
 ! (using the stage-area-volume curve)
       evaphelp2=0.
-      IF (nbrbat(upstream) /= 0) THEN
+      IF (nbrbat(res_index(upstream)) /= 0) THEN
         damelevact(res_index(upstream))=damelevact(res_index(upstream))+  &
             (res_precip(step,res_index(upstream))-res_pet(step,res_index(upstream)))/1000.
         IF (damelevact(res_index(upstream)) < dayminlevel(step,res_index(upstream))) THEN
@@ -1271,10 +1276,10 @@ IF (STATUS == 2) THEN
 !George          damelevact(upstream)=maxlevel(upstream)
 !George        END IF
         volhelp = -1. !flag as "not computed"
-        DO j=1,nbrbat(upstream)-1 !iterate through points of CAV
+        DO j=1,nbrbat(res_index(upstream))-1 !iterate through points of CAV
           IF ((damelevact(res_index(upstream)) >= elev_bat(j,upstream).AND.  &
                 damelevact(res_index(upstream)) <= elev_bat(j+1,upstream)) .OR. &
-            (j == nbrbat(upstream)-1) & ! (when water stage is higher than max stage in CAV extrapolate CAV-curve
+            (j == nbrbat(res_index(upstream))-1) & ! (when water stage is higher than max stage in CAV extrapolate CAV-curve
           ) THEN
             volhelp=vol_bat(j,upstream)+(damelevact(res_index(upstream))-elev_bat  &
                 (j,upstream))/(elev_bat(j+1,upstream)-elev_bat(j,upstream))*  &
@@ -1286,7 +1291,7 @@ IF (STATUS == 2) THEN
           END IF
       END DO
 
-      if (damelevact(res_index(upstream)) > elev_bat(nbrbat(upstream),upstream)) then
+      if (damelevact(res_index(upstream)) > elev_bat(nbrbat(res_index(upstream)),upstream)) then
           write(*,"(A,i0,a)")"WARNING: Water stage of reservoir ",id_subbas_extern(upstream)," exceeds CAV-curve. Curve extrapolated."
       end if
 
@@ -1386,8 +1391,8 @@ IF (STATUS == 2) THEN
 
 
 ! 4b) Bottom outlets
-      IF (nbrbat(upstream) /= 0) THEN
-        DO j=1,nbrbat(upstream)-1
+      IF (nbrbat(res_index(upstream)) /= 0) THEN
+        DO j=1,nbrbat(res_index(upstream))-1
           IF (operat_elev(res_index(upstream)) >= elev_bat(j,upstream).AND.  &
                 operat_elev(res_index(upstream)) <= elev_bat(j+1,upstream)) THEN
             volhelp=vol_bat(j,upstream)+(operat_elev(res_index(upstream))-elev_bat  &
@@ -1487,8 +1492,8 @@ IF (STATUS == 2) THEN
       res_qout(step,res_index(upstream))=qintake(step,res_index(upstream))+overflow(step,res_index(upstream))+qbottom(step,res_index(upstream))
 
 
-      IF (nbrbat(upstream) /= 0) THEN
-        DO j=1,nbrbat(upstream)-1
+      IF (nbrbat(res_index(upstream)) /= 0) THEN
+        DO j=1,nbrbat(res_index(upstream))-1
           IF (volact(step,upstream) >= vol_bat(j,upstream).AND.  &
                 volact(step,upstream) <= vol_bat(j+1,upstream)) THEN
             areahelp=area_bat(j,upstream)+(volact(step,upstream)-vol_bat  &
@@ -1531,8 +1536,8 @@ IF (STATUS == 2) THEN
 	  res_qout(step,res_index(upstream))=qintake(step,res_index(upstream))+overflow(step,res_index(upstream))+qbottom(step,res_index(upstream))
 	  damelevact(res_index(upstream))=damelev1(step,res_index(upstream))
 
-      IF (nbrbat(upstream) /= 0) THEN
-        DO j=1,nbrbat(upstream)-1
+      IF (nbrbat(res_index(upstream)) /= 0) THEN
+        DO j=1,nbrbat(res_index(upstream))-1
           IF (damelevact(res_index(upstream)) >= elev_bat(j,upstream).AND.  &
                 damelevact(res_index(upstream)) <= elev_bat(j+1,upstream)) THEN
             volhelp=vol_bat(j,upstream)+(damelevact(res_index(upstream))-elev_bat  &
@@ -1564,13 +1569,13 @@ IF (STATUS == 2) THEN
       if (decstorcap(step,res_index(upstream))/=0.) then
 
 ! CASE 1: stage-area-volume curve is not provided
-       if (nbrbat(upstream) == 0) then
+       if (nbrbat(res_index(upstream)) == 0) then
 	    if (decstorcap(step,res_index(upstream)) >= daystorcap(step,res_index(upstream)) .or. daystorcap(step,res_index(upstream)) == 0.) then
 	     write(*,*) 'the resevoir located at the outlet point of sub-basin:',id_subbas_extern(upstream)
 	     write(*,*) 'lost its total storage capacity due to sediment deposition'
 		 storcap(upstream)=0.
 	     daystorcap(step,res_index(upstream))=0.
-		 do j=1,nbrbat(upstream)
+		 do j=1,nbrbat(res_index(upstream))
           area_bat(j,upstream)=0.
           vol_bat(j,upstream)=0.
 		 enddo
@@ -1620,7 +1625,7 @@ IF (STATUS == 2) THEN
 	      write(*,*) 'lost its total storage capacity due to sediment deposition'
 		  storcap(upstream)=0.
 	      daystorcap(step,res_index(upstream))=0.
-		  do j=1,nbrbat(upstream)
+		  do j=1,nbrbat(res_index(upstream))
            area_bat(j,upstream)=0.
            vol_bat(j,upstream)=0.
 		  enddo
@@ -1633,13 +1638,13 @@ IF (STATUS == 2) THEN
 ! Calculation of minimum reservoir elevation
 	     elevhelp=dayminlevel(step,res_index(upstream))
 		 p=0
-         do j=1,nbrbat(upstream)
+         do j=1,nbrbat(res_index(upstream))
 		  if (elev_bat(j,upstream) >= maxlevel(upstream)) then
 		   dummy1=j
 		    exit
 		  endif
 		 enddo
-         do j=1,nbrbat(upstream)
+         do j=1,nbrbat(res_index(upstream))
 	      if (elev_bat(j,upstream) < maxlevel(upstream)) then
 		   dummy5=real(j)/real(dummy1)
 		  else if (elev_bat(j,upstream) >= maxlevel(upstream)) then
@@ -1650,7 +1655,7 @@ IF (STATUS == 2) THEN
 		  dummy5=max(0.,vol_bat(j,upstream)-(decstorcap(step,res_index(upstream))*dummy5))
 		  if (dummy5 == 0.)p=j
 		  if (j == p+1) then
-           DO q=1,nbrbat(upstream)-1
+           DO q=1,nbrbat(res_index(upstream))-1
             IF (vol_bat(j,upstream)-dummy5 >= vol_bat(q,upstream).AND.  &
                 vol_bat(j,upstream)-dummy5 <= vol_bat(q+1,upstream)) THEN
              elevhelp=elev_bat(q,upstream)+((vol_bat(j,upstream)-dummy5)-vol_bat  &
@@ -1666,7 +1671,7 @@ IF (STATUS == 2) THEN
 	     enddo
 		 dayminlevel(step,res_index(upstream))=elevhelp
 
-         do j=1,nbrbat(upstream)
+         do j=1,nbrbat(res_index(upstream))
 		  if (elev_bat(j,upstream) <= elevhelp) then
 		   vol_bat(j,upstream)=0.
 		   area_bat(j,upstream)=0.
@@ -1674,7 +1679,7 @@ IF (STATUS == 2) THEN
 	     enddo
 
 ! Calculation of dead water volume after sediment deposition
-         do j=1,nbrbat(upstream)-1
+         do j=1,nbrbat(res_index(upstream))-1
 	      if (damdead(upstream) /= 0. .and. daydamdead(step,res_index(upstream)) /= 0.) then
            if (elevdead(res_index(upstream)) >= elev_bat(j,upstream).AND.  &
                elevdead(res_index(upstream)) <= elev_bat(j+1,upstream)) THEN
@@ -1717,12 +1722,12 @@ IF (STATUS == 2) THEN
 	     write(*,*) 'lost its total storage capacity due to sediment deposition'
 		 storcap(upstream)=0.
 	     daystorcap(step,res_index(upstream))=0.
-		 do j=1,nbrbat(upstream)
+		 do j=1,nbrbat(res_index(upstream))
           area_bat(j,upstream)=0.
           vol_bat(j,upstream)=0.
 		 enddo
         else
-         do j=1,nbrbat(upstream)-1
+         do j=1,nbrbat(res_index(upstream))-1
 	      if (storcap(upstream) /= 0. .and. daystorcap(step,res_index(upstream)) /= 0.) then
            if (maxlevel(upstream) >= elev_bat(j,upstream).AND.  &
                maxlevel(upstream) <= elev_bat(j+1,upstream)) THEN
@@ -1799,21 +1804,21 @@ IF (STATUS == 2) THEN
 	 ENDIF
 
 ! print temporal evolution of the stage-area-volume curve, when the initial curve is given by the user
-     write(fmtstr,'(a,i0,a)')'(4I6,',nbrbat(upstream),'F15.2)'		!generate format string
-     IF (nbrbat(upstream) /= 0) THEN
+     write(fmtstr,'(a,i0,a)')'(4I6,',nbrbat(res_index(upstream)),'F15.2)'		!generate format string
+     IF (nbrbat(res_index(upstream)) /= 0) THEN
 	  IF (f_res_cav) THEN
       OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_cav.out',STATUS='old',  &
 		    POSITION='append')
-		WRITE(11,fmtstr)id_subbas_extern(upstream),t,d,hour,(elev_bat(j,upstream),j=1,nbrbat(upstream))
-		WRITE(11,fmtstr)id_subbas_extern(upstream),t,d,hour,(area_bat(j,upstream),j=1,nbrbat(upstream))
-		WRITE(11,fmtstr)id_subbas_extern(upstream),t,d,hour,(vol_bat(j,upstream),j=1,nbrbat(upstream))
+		WRITE(11,fmtstr)id_subbas_extern(upstream),t,d,hour,(elev_bat(j,upstream),j=1,nbrbat(res_index(upstream)))
+		WRITE(11,fmtstr)id_subbas_extern(upstream),t,d,hour,(area_bat(j,upstream),j=1,nbrbat(res_index(upstream)))
+		WRITE(11,fmtstr)id_subbas_extern(upstream),t,d,hour,(vol_bat(j,upstream),j=1,nbrbat(res_index(upstream)))
       CLOSE(11)
 	  ENDIF
 	 ENDIF
     ELSE
 	 daydamelevact(step,res_index(upstream))=damelevact(res_index(upstream)) !A
 	 daydamareaact(step,res_index(upstream))=damareaact(upstream) !A
-	 DO j=1,nbrbat(upstream)
+	 DO j=1,nbrbat(res_index(upstream))
 	   dayelev_bat(step,j,res_index(upstream))=elev_bat(j,upstream) !A
 	   dayarea_bat(step,j,res_index(upstream))=area_bat(j,upstream) !A
 	   dayvol_bat(step,j,res_index(upstream))=vol_bat(j,upstream) !Anne: changed "upstream" to "res_index(upstream)" to save memory
@@ -1901,25 +1906,27 @@ endif
 		ENDDO
         CLOSE(11)
 		ENDIF
-	  ENDIF
-      IF (res_flag(i) .and. t >= damyear(i) .and. nbrbat(i) /= 0) THEN
-        WRITE(subarea,*)id_subbas_extern(i)
-		IF (f_res_cav) THEN
-        OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_cav.out',STATUS='old',  &
-		    POSITION='append')
-	    write(fmtstr,'(a,i0,a)')'(4I6,',nbrbat(i),'F15.2)'		!generate format string
-		DO d=1,dayyear
-	      DO ih=1,nt
-		    hour=ih
-            step=(d-1)*nt+hour
-			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayelev_bat(step,j,res_index(i)),j=1,nbrbat(i))
-			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayarea_bat(step,j,res_index(i)),j=1,nbrbat(i))
-			WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayvol_bat(step,j,res_index(i)),j=1,nbrbat(i)) !Anne: changed i to res_index(i) to save memory
-		  ENDDO
-		ENDDO
-        CLOSE(11)
-		ENDIF
-	  ENDIF
+      ENDIF
+      if (res_index(i) /= 0.) then !Anne inserted this line
+          IF (res_flag(i) .and. t >= damyear(i) .and. nbrbat(res_index(i)) /= 0) THEN
+            WRITE(subarea,*)id_subbas_extern(i)
+		    IF (f_res_cav) THEN
+                OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_cav.out',STATUS='old',  &
+		            POSITION='append')
+	            write(fmtstr,'(a,i0,a)')'(4I6,',nbrbat(res_index(i)),'F15.2)'		!generate format string
+		        DO d=1,dayyear
+	              DO ih=1,nt
+		            hour=ih
+                    step=(d-1)*nt+hour
+			        WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayelev_bat(step,j,res_index(i)),j=1,nbrbat(res_index(i)))
+			        WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayarea_bat(step,j,res_index(i)),j=1,nbrbat(res_index(i)))
+			        WRITE(11,fmtstr)id_subbas_extern(i),t,d,hour,(dayvol_bat(step,j,res_index(i)),j=1,nbrbat(res_index(i))) !Anne: changed i to res_index(i) to save memory
+		          ENDDO
+		        ENDDO
+                CLOSE(11)
+		    ENDIF
+          ENDIF
+       endif	 !Anne   
     ENDDO
   ENDIF
 
