@@ -473,10 +473,7 @@ subroutine allocate_reservoir()
 	      withdraw_out(366*nt,subasin), &
 	      daystorcap(366*nt,subasin), &
 	      daymaxdamarea(366*nt,subasin), &
-	      daydamdead(366*nt,subasin), &
-	      daydamalert(366*nt,subasin), &
-	      dayminlevel(366*nt,subasin), &
-	      damelevact(subasin), &
+
 	      maxlevel(subasin), &
 	      minlevel(subasin), &
             

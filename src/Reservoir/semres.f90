@@ -1860,16 +1860,16 @@ end if
 	   END IF
 	 END DO
 	 dummy4=minelev_sec(j,res_index(upstream))-dummy5
-	 dayminlevel(step,upstream)=min(dayminlevel(step,upstream)+dummy4,maxlevel(upstream))
+	 dayminlevel(step,res_index(upstream))=min(dayminlevel(step,res_index(upstream))+dummy4,maxlevel(upstream))
 
 !write(*,'(2I4,3F15.3)')d,p,dummy4,dummy12,dayminlevel(step,upstream)
 !if (step==126)stop
 
-	 if (dayminlevel(step,upstream) < elev_bat(1,upstream)) elev_bat(1,upstream)=dayminlevel(step,upstream)
-	 if (dayminlevel(step,upstream) > elev_bat(nbrbat(upstream),upstream)) elev_bat(nbrbat(upstream),upstream)=dayminlevel(step,upstream)
+	 if (dayminlevel(step,res_index(upstream)) < elev_bat(1,upstream)) elev_bat(1,upstream)=dayminlevel(step,res_index(upstream))
+	 if (dayminlevel(step,res_index(upstream)) > elev_bat(nbrbat(upstream),upstream)) elev_bat(nbrbat(upstream),upstream)=dayminlevel(step,res_index(upstream))
 
      DO b=1,nbrbat(upstream)
-	   if (elev_bat(b,upstream) < dayminlevel(step,upstream)) then
+	   if (elev_bat(b,upstream) < dayminlevel(step,res_index(upstream))) then
 	     vol_bat(b,upstream)=0.
 		 area_bat(b,upstream)=0.
 	   endif

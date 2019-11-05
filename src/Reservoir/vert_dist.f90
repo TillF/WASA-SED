@@ -32,8 +32,8 @@ tempres(d,upstream)=20.
 ! initialization
 a=2.*diam(g)
 depth_bottom=a
-depth_intake=max(0.,elevdead(upstream)-dayminlevel(step,upstream))
-depth_over=max(0.,(1.-a)*(maxlevel(upstream)-dayminlevel(step,upstream)))
+depth_intake=max(0.,elevdead(upstream)-dayminlevel(step,res_index(upstream)))
+depth_over=max(0.,(1.-a)*(maxlevel(upstream)-dayminlevel(step,res_index(upstream))))
 
 ! density of water and density of natural sediments (kg/m3)
 wat_dens=1.*1000.
@@ -60,7 +60,7 @@ if (discharge_sec(j,res_index(upstream)) /= 0.) then
 ! Von Kàrmàn constant (-)
   karman=0.412
 
-  dep=max(0.,maxlevel(upstream)-dayminlevel(step,upstream))
+  dep=max(0.,maxlevel(upstream)-dayminlevel(step,res_index(upstream)))
   z=setvel(g)/(karman*shear_vel)
 
 

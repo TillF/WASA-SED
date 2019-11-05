@@ -87,7 +87,7 @@ IF (reservoir_balance == 1) THEN
   end if
 ENDIF
 
-damelev=(damelevact(upstream)+damelev0(step,res_index(upstream)))/2.
+damelev=(damelevact(res_index(upstream))+damelev0(step,res_index(upstream)))/2.
 damelev_mean(step,res_index(upstream))=damelev
 !write(*,*)damelevact(upstream),damelev0(step,upstream),damelev_mean(step,upstream)
 
