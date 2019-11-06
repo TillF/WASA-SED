@@ -265,13 +265,7 @@ storcap(:)=0.
 ! allocate reservoir arrays, now that their required dimension is known 
  allocate( &
     
-          !res_index(n_reservoir), &
-          !f_intake_obs(n_reservoir), &
-          !corr_column_intakes(n_reservoir), &
-          !res_flag(n_reservoir), &
-   	      !fcav(n_reservoir), &
-	      !latflow_res(n_reservoir), &
-    
+    corr_column_intakes(n_reservoir), &   
     reservoir_down(n_reservoir), &    
     nbrbat(n_reservoir), &     
     dayexplot(n_reservoir,4), &
@@ -604,7 +598,7 @@ storcap(:)=0.
     DO i=1,subasin
         DO j=1,size(columnheader)
             IF(columnheader(j) == id_subbas_extern(i)) THEN
-                corr_column_intakes(i)= j    !for each subbasin, find position of corresponding column in input file
+                corr_column_intakes(res_index(i))= j    !for each subbasin, find position of corresponding column in input file
                 f_intake_obs(i)=.true.
                 exit
             END IF
@@ -1146,7 +1140,7 @@ IF (STATUS == 1) THEN
         ! NOTE: missing observations are treated later
         do i=1,subasin
             if( f_intake_obs(i) .and. (t >= damyear(i)) ) then
-                qintake(id,res_index(i)) = r_qintake(corr_column_intakes(i))*(86400./nt)
+                qintake(id,res_index(i)) = r_qintake(corr_column_intakes(res_index(i)))*(86400./nt)
             endif
         enddo
     enddo

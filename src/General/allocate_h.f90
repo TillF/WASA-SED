@@ -415,12 +415,11 @@ subroutine allocate_reservoir()
   !         volume_last(i), outflow_last(i)   !for lake.f90       
                                 
 	      res_index(subasin), &
-          f_intake_obs(subasin), &
-          corr_column_intakes(subasin), &
-          res_flag(subasin), &
-   	      fcav(subasin), &
-	      fvol_over(subasin), &
-          latflow_res(subasin), &
+          f_intake_obs(subasin), &      !flag
+          res_flag(subasin), &          !flag
+   	      fcav(subasin), &              !flag
+	      fvol_over(subasin), &         !flag
+          latflow_res(subasin), &       !flag
  	      damyear(subasin), &
           volume_last(subasin), &
           outflow_last(subasin), &
