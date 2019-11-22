@@ -843,6 +843,7 @@ storcap(:)=0.
             IF (res_flag(i)) THEN
               WRITE(subarea,*)id_subbas_extern(i)
               OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_cav.out',STATUS='replace')
+              WRITE(11,'(A)')'Subasin-ID, year, day, hour, 1st row: elev_bat(m), 2nd row: area_bat(m**2), 3rd row: vol_bat(m**3)'
             ENDIF
            ENDIF
          endif	 !Anne  
