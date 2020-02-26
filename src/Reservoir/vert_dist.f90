@@ -32,8 +32,8 @@ tempres(d,upstream)=20.
 ! initialization
 a=2.*diam(g)
 depth_bottom=a
-depth_intake=max(0.,elevdead(upstream)-dayminlevel(step,upstream))
-depth_over=max(0.,(1.-a)*(maxlevel(upstream)-dayminlevel(step,upstream)))
+depth_intake=max(0.,elevdead(res_index(upstream))-dayminlevel(step,res_index(upstream)))
+depth_over=max(0.,(1.-a)*(maxlevel(upstream)-dayminlevel(step,res_index(upstream))))
 
 ! density of water and density of natural sediments (kg/m3)
 wat_dens=1.*1000.
@@ -50,17 +50,17 @@ setvel(g)=SQRT((13.95*visc/diam(g))**2.+1.09*  &
 !if (upper_limit(g) <= .0025) setvel(g)=0.00000456
 if (upper_limit(g) <= .0040) setvel(g)=0.0000117
 
-if (discharge_sec(j,upstream) /= 0.) then
+if (discharge_sec(j,res_index(upstream)) /= 0.) then
 
 ! shear velocity (m/s)
-  shear_vel=sqrt(9.807*hydrad_sec(j,upstream)*energslope_sec(j,upstream))
+  shear_vel=sqrt(9.807*hydrad_sec(j,res_index(upstream))*energslope_sec(j,res_index(upstream)))
 !  shear_vel=sqrt(9.807*hydrad_sec(j,upstream)*max(energslope_sec(j,upstream),.0001))
 !write(*,'(2I4,8E10.2)')j,g,a,hydrad_sec(j,upstream),energslope_sec(j,upstream),shear_vel
 
 ! Von Kàrmàn constant (-)
   karman=0.412
 
-  dep=max(0.,maxlevel(upstream)-dayminlevel(step,upstream))
+  dep=max(0.,maxlevel(upstream)-dayminlevel(step,res_index(upstream)))
   z=setvel(g)/(karman*shear_vel)
 
 

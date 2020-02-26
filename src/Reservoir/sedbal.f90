@@ -36,7 +36,7 @@ REAL :: tempres(step,upstream)
 
 ! -----------------------------------------------------------------------
 
-if (res_qout(step,upstream)/=0.) then
+if (res_qout(step,res_index(upstream))/=0.) then
 !Ge to include the DAILY mean temperature of the reservoir (celsius degree)
 !Ge tempres=20 C (temporarily)
   tempres(step,upstream)=20.
@@ -56,7 +56,7 @@ if (res_qout(step,upstream)/=0.) then
       0.00068*((tempres(step,upstream)-15.)**2.))*1.e-6
 
 ! Overflow rate  Vc (m/s)
-  overflow_rate=res_qout(step,upstream)/damareaact(upstream)
+  overflow_rate=res_qout(step,res_index(upstream))/damareaact(upstream)
 !  overflow_rate=0.00032
 
 ! calculation of the corresponding equivalent diameter (mm)
@@ -71,7 +71,7 @@ if (res_qout(step,upstream)/=0.) then
 ! affluent grain size distribution (-)
   dummy=0.
   DO g=1,n_sed_class
-    dummy=dummy+frsediment_in(upstream,g)
+    dummy=dummy+frsediment_in(res_index(upstream),g)
     cumfrsed_in(g)=dummy
 !write(*,*)g,cumfrsed_in(g)
   enddo
@@ -111,11 +111,11 @@ if (res_qout(step,upstream)/=0.) then
     trap_eff=1.-frac_finer
 	if (frac_finer == 1.) then
       DO g=1,n_sed_class
-	    frsediment_out(upstream,g)=frsediment_in(upstream,g)
+	    frsediment_out(res_index(upstream),g)=frsediment_in(res_index(upstream),g)
 	  enddo
 	else
       DO g=1,n_sed_class
-	    frsediment_out(upstream,g)=0.
+	    frsediment_out(res_index(upstream),g)=0.
 	  enddo
     endif
   else
@@ -219,27 +219,27 @@ if (res_qout(step,upstream)/=0.) then
 		  endif
 		enddo
 	  endif
-	  if (g==1) frsediment_out(upstream,g)=cumfrsed_out(g)
-	  if (g>1) frsediment_out(upstream,g)=cumfrsed_out(g)-cumfrsed_out(g-1)
+	  if (g==1) frsediment_out(res_index(upstream),g)=cumfrsed_out(g)
+	  if (g>1) frsediment_out(res_index(upstream),g)=cumfrsed_out(g)-cumfrsed_out(g-1)
 
 !write(*,'(I3,2F12.8)')g,frsediment_out(upstream,g),cumfrsed_out(g)
 	enddo
   endif
-  sed_outflow(step,upstream)=sed_inflow(step,upstream)*(1.-trap_eff)
+  sed_outflow(step,res_index(upstream))=sed_inflow(step,res_index(upstream))*(1.-trap_eff)
 else
-  sed_outflow(step,upstream)=0.
+  sed_outflow(step,res_index(upstream))=0.
 endif
 
 
-if (t==tstart .and. step==1) cum_sedimentation(upstream)=0.
-IF (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(upstream)=0.
-sedimentation(step,upstream)=max(sed_inflow(step,upstream)-sed_outflow(step,upstream),0.)
-cum_sedimentation(upstream)=cum_sedimentation(upstream)+sedimentation(step,upstream)
+if (t==tstart .and. step==1) cum_sedimentation(res_index(upstream))=0.
+IF (t>tstart .and. t== damyear(upstream) .and. step==1) cum_sedimentation(res_index(upstream))=0.
+sedimentation(step,res_index(upstream))=max(sed_inflow(step,res_index(upstream))-sed_outflow(step,res_index(upstream)),0.)
+cum_sedimentation(res_index(upstream))=cum_sedimentation(res_index(upstream))+sedimentation(step,res_index(upstream))
 !sed_susp(step,upstream)=0.
 
 
 ! storage capacity reduction (m3)
-decstorcap(step,upstream)=sedimentation(step,upstream)/dry_dens(upstream)
+decstorcap(step,res_index(upstream))=sedimentation(step,res_index(upstream))/dry_dens(res_index(upstream))
 
 
 !write(*,'(3I4,2F15.1)')t,d,upstream,sedimentation(step,upstream),cum_sedimentation(upstream)

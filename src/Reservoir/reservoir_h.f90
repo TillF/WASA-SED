@@ -309,7 +309,7 @@ real, allocatable :: energslope_sec(:,:)
 real, allocatable :: dynhead_sec(:,:)
 !total head of each cross section in the sub-basin's reservoir [m]
 real, allocatable :: tothead_sec(:,:)
-!head loss between two adjacent cross sections in the sub-basin's reservoir due friction[m]
+!head loss between two adjacent cross sections in the sub-basin's reservoir due to friction[m]
 real, allocatable :: headloss_sec(:,:)
 !local head loss between two adjacent cross sections in the sub-basin's reservoir [m]
 real, allocatable :: locloss_sec(:,:)
@@ -468,7 +468,7 @@ integer, allocatable :: pt2(:,:)
 integer, allocatable :: pt3(:,:)
 !Point located after pt2 that defines the minimum reach available to be eroded  (from left to right, view from upstream side) [-] (used to minimize sediment erosion concentrated on the main channel)
 integer, allocatable :: pt4(:,:)
-!Initial location of the delta plunge point along the reservoir cross sections [-] (location varies acording to sedimento erosion/deposition in the reservoi)
+!Initial location of the delta plunge point along the reservoir cross sections [-] (location varies acording to sediment erosion/deposition in the reservoir)
 integer, allocatable :: pt_long0(:)
 !Location of the delta plunge point along the reservoir cross sections [-]
 integer, allocatable :: pt_long(:)

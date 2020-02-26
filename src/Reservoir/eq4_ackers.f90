@@ -36,33 +36,33 @@ real :: manning(200),topwidth(200),meanvel(200)
 
 ! -----------------------------------------------------------------------
 
-do j=1,nbrsec(upstream)
-  if (j /= nbrsec(upstream)) then
-    discharge(j)=(discharge_sec(j,upstream)+discharge_sec(j+1,upstream))/2.
-    depth(j)=(depth_sec(j,upstream)+depth_sec(j+1,upstream))/2.
-    hydrad(j)=(hydrad_sec(j,upstream)+hydrad_sec(j+1,upstream))/2.
-    energslope(j)=(energslope_sec(j,upstream)+energslope_sec(j+1,upstream))/2.
-    manning(j)=(manning_sec(j,upstream)+manning_sec(j+1,upstream))/2.
-    topwidth(j)=(topwidth_sec(j,upstream)+topwidth_sec(j+1,upstream))/2.
-    meanvel(j)=(meanvel_sec(j,upstream)+meanvel_sec(j+1,upstream))/2.
+do j=1,nbrsec(res_index(upstream))
+  if (j /= nbrsec(res_index(upstream))) then
+    discharge(j)=(discharge_sec(j,res_index(upstream))+discharge_sec(j+1,res_index(upstream)))/2.
+    depth(j)=(depth_sec(j,res_index(upstream))+depth_sec(j+1,res_index(upstream)))/2.
+    hydrad(j)=(hydrad_sec(j,res_index(upstream))+hydrad_sec(j+1,res_index(upstream)))/2.
+    energslope(j)=(energslope_sec(j,res_index(upstream))+energslope_sec(j+1,res_index(upstream)))/2.
+    manning(j)=(manning_sec(j,res_index(upstream))+manning_sec(j+1,res_index(upstream)))/2.
+    topwidth(j)=(topwidth_sec(j,res_index(upstream))+topwidth_sec(j+1,res_index(upstream)))/2.
+    meanvel(j)=(meanvel_sec(j,res_index(upstream))+meanvel_sec(j+1,res_index(upstream)))/2.
   else
-    discharge(j)=discharge_sec(j,upstream)
-    depth(j)=depth_sec(j,upstream)
-    hydrad(j)=hydrad_sec(j,upstream)
-    energslope(j)=energslope_sec(j,upstream)
-    manning(j)=manning_sec(j,upstream)
-    topwidth(j)=topwidth_sec(j,upstream)
-    meanvel(j)=meanvel_sec(j,upstream)
+    discharge(j)=discharge_sec(j,res_index(upstream))
+    depth(j)=depth_sec(j,res_index(upstream))
+    hydrad(j)=hydrad_sec(j,res_index(upstream))
+    energslope(j)=energslope_sec(j,res_index(upstream))
+    manning(j)=manning_sec(j,res_index(upstream))
+    topwidth(j)=topwidth_sec(j,res_index(upstream))
+    meanvel(j)=meanvel_sec(j,res_index(upstream))
   endif
 enddo
 
 ! loop to calculate the sediment carrying capacity
-DO j=1,nbrsec(upstream)
+DO j=1,nbrsec(res_index(upstream))
 
   if (discharge(j) /= 0.) then
   
 !Ge mean diameter has to be calculated from the grain size distribution
-  dummy2=d50_actlay(j,upstream)
+  dummy2=d50_actlay(j,res_index(upstream))
 
 
 
