@@ -46,7 +46,7 @@ integer, allocatable :: fcav(:)
 integer, allocatable :: fvol_over(:)
 !flag to identify the ocurrence of lateral inflow into the dowstream reservoir (0 = no and 1 = yes)
 integer, allocatable :: latflow_res(:)
-!arrays used for the routing of lateral inflow into the dowstream reservoir
+!arrays used for the routing of lateral inflow into the downstream reservoir
 integer, allocatable :: reservoir_down(:)
 !year of construction of the dam in the sub-basin
 integer, allocatable :: damyear(:)

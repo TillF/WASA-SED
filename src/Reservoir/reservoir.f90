@@ -260,7 +260,7 @@ storcap(:)=0.
  allocate( &
     
     corr_column_intakes(n_reservoir), &   
-    reservoir_down(n_reservoir), &    
+    reservoir_down(subasin), &    
     nbrbat(n_reservoir), &     
     dayexplot(n_reservoir,4), &
     operat_start(n_reservoir), &
@@ -474,7 +474,7 @@ storcap(:)=0.
   latflow_res(1:subasin)=0
 
   ! Till: flag subbasins draining into reservoirs of other subbasins
-  !ii: move this into a single loop, use "id2intern"
+  !ii: move this into a single loop, use "id2intern", check for 3 columns (legacy files)
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!lateral_inflow.dat not found
 	  write(*,'(A)')'WARNING: '//pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat not found, using defaults'
@@ -499,23 +499,23 @@ storcap(:)=0.
 	  READ(11,*)
       DO i=1,subasin
 		IF (latflow_res(i)==1) THEN
-		  READ (11,*)dummy1,reservoir_down(res_index(i))
+		  READ (11,*)dummy1,reservoir_down(i)
 
 		  IF (dummy1 /= id_subbas_extern(i)) THEN
 			WRITE(*,'(A)') 'ERROR: Sub-basin-IDs in file lateral_inflow.dat must have the same ordering scheme as in hymo.dat'
 			STOP
 		  END IF
 
-		  IF (reservoir_down(res_index(i)) /= 999 .AND. reservoir_down(i) /= 9999) THEN
+		  IF (reservoir_down(i) /= 999 .AND. reservoir_down(i) /= 9999) THEN
 			j=1
-			DO WHILE (id_subbas_extern(j) /= reservoir_down(res_index(i)))
+			DO WHILE (id_subbas_extern(j) /= reservoir_down(i))
 			  j=j+1
 			  IF (j > 1000) THEN
 				WRITE (*,'(A)') 'ERROR: in lateral_inflow.dat: specified reservoir not found'
 				STOP
 			  END IF
 			END DO
-			reservoir_down(res_index(i))=j !internal ID of destination subbasin/reservoir
+			reservoir_down(i)=j !internal ID of destination subbasin/reservoir
 		  END IF
 		ELSE
 		  dummy1=id_subbas_extern(i)

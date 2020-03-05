@@ -389,8 +389,8 @@ DO h=1,nt
    ENDIF
 
    IF (doreservoir) THEN
-     IF (latflow_res(upstream) == 0) THEN
-       IF (storcap(upstream) > 0. .and. t >= damyear(upstream)) THEN
+     IF (latflow_res(upstream) == 0) THEN      !Till: no lateral inflow
+       IF (storcap(upstream) > 0. .and. t >= damyear(upstream)) THEN !Till: reservoir exists?
          IF (downstream /= 9999 .AND. downstream /= 999) THEN
 !George res_qout(step,upstream) instead qout(d,upstream)
 !write(*,*)step,id_subbas_extern(upstream),"case 1a"
@@ -412,14 +412,14 @@ DO h=1,nt
 	       endif !George
          END IF !George
 	   ENDIF
-	 ELSE IF (latflow_res(upstream) == 1) THEN
-       IF (storcap(upstream) > 0. .and. t >= damyear(upstream)) THEN
-         IF (storcap(reservoir_down(res_index(upstream))) > 0. .and. t >= damyear(reservoir_down(res_index(upstream)))) THEN
+	 ELSE IF (latflow_res(upstream) == 1) THEN !Till: lateral inflow
+       IF (storcap(upstream) > 0. .and. t >= damyear(upstream)) THEN !Till: reservoir exists AND flagged as "lateral inflow". Does this make sense?
+         IF (storcap(reservoir_down(upstream)) > 0. .and. t >= damyear(reservoir_down(upstream))) THEN
 !write(*,*)step,id_subbas_extern(upstream),"case 2a"
-           qlateral(step,reservoir_down(res_index(upstream)))=add_ifnot_nodata(qlateral(step,reservoir_down(res_index(upstream))), res_qout(step,res_index(upstream)))
+           qlateral(step, res_index(reservoir_down(upstream)))=add_ifnot_nodata(qlateral(step, res_index(reservoir_down(upstream))), res_qout(step,res_index(upstream)))
 	       if(dosediment) then
 	         do k=1,n_sed_class
-	           sed_qlateral(reservoir_down(res_index(upstream)),k) = add_ifnot_nodata(sed_qlateral(reservoir_down(res_index(upstream)),k), res_sediment_out(res_index(upstream),k))
+	           sed_qlateral(reservoir_down(upstream),k) = add_ifnot_nodata(sed_qlateral(reservoir_down(upstream),k), res_sediment_out(res_index(upstream),k))
 	         enddo
 	       endif
 		 ELSE
@@ -433,16 +433,24 @@ DO h=1,nt
 	         endif !George
            END IF !George
 		 ENDIF
-	   ELSE
-         IF (storcap(reservoir_down(res_index(upstream))) > 0. .and. t >= damyear(reservoir_down(res_index(upstream)))) THEN
+	   ELSE                                                          !Till: reservoir not (yet) exists
+		 !Till: successive evaluation is necessary to adhere to Fortran standard (no short-circuit-evaluation guaranteed)
+		 log_temp = res_index(reservoir_down(upstream)) > 0 !Till: is there a receiver reservoir?
+		 !Till: does the receiver reservoir (already) exist?
+		 if (log_temp) log_temp = storcap(reservoir_down(upstream)) > 0. .and. t >= damyear(reservoir_down(upstream))
+		 
+		 IF (log_temp) THEN
+         !the receiver reservoir exists
 !write(*,*)step,id_subbas_extern(upstream),"case 3a"
-           qlateral(step,reservoir_down(res_index(upstream))) = add_ifnot_nodata(qlateral(step,reservoir_down(res_index(upstream))), r_qout(2,upstream))
+           qlateral(step, res_index(reservoir_down(upstream))) = add_ifnot_nodata(qlateral(step, res_index(reservoir_down(upstream))), r_qout(2,upstream))
 	       if(dosediment) then
 	         do k=1,n_sed_class
-	           sed_qlateral(reservoir_down(res_index(upstream)),k) = add_ifnot_nodata(sed_qlateral(reservoir_down(res_index(upstream)),k), sediment_out(upstream,k))
+	           sed_qlateral(reservoir_down(upstream),k) = add_ifnot_nodata(sed_qlateral(reservoir_down(upstream),k), sediment_out(upstream,k))
 	         enddo
 	       endif
 		 ELSE
+         
+           !the receiver reservoir not (yet) exists
            IF (downstream /= 9999 .AND. downstream /= 999) THEN !George
 !write(*,*)step,id_subbas_extern(upstream),"case 3b"
              r_qin(2,downstream) = add_ifnot_nodata(r_qin(2,downstream), r_qout(2,upstream)) !George
@@ -452,11 +460,13 @@ DO h=1,nt
 	           enddo !George
 	         endif !George
            END IF !George
+		   
+		   
 		 ENDIF
 	   ENDIF
 	 ENDIF
-   ELSE
-     IF (downstream /= 9999 .AND. downstream /= 999) THEN !if this is not the outle basin
+   ELSE !Till: reservoirs disabled ("IF (doreservoir)")
+     IF (downstream /= 9999 .AND. downstream /= 999) THEN !if this is not the outlet basin
 !write(*,*)step,id_subbas_extern(upstream),"case 4"
         r_qin(2,downstream) = add_ifnot_nodata(r_qin(2,downstream), r_qout(2,upstream) )
        
