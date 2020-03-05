@@ -473,22 +473,16 @@ storcap(:)=0.
 ! Check lateral inflow directly into the subbasins' reservoir
   latflow_res(1:subasin)=0
 
+  ! Till: flag subbasins draining into reservoirs of other subbasins
+  !ii: move this into a single loop, use "id2intern"
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!lateral_inflow.dat not found
 	  write(*,'(A)')'WARNING: '//pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat not found, using defaults'
-      DO i=1,subasin
-        latflow_res(i)=0
-      ENDDO
     ELSE
 	  READ(11,*)
 	  READ(11,*)
-      READ(11,*,IOSTAT=ka) dummy1
-      DO i=1,subasin
-        IF (dummy1==id_subbas_extern(i)) THEN
-          latflow_res(i)=1
-	    ENDIF
-	  ENDDO
-      DO WHILE (ka==0)
+      ka = 0
+	  DO WHILE (ka==0)
 	    READ(11,*, IOSTAT=ka) dummy1					!read next line in file
         DO i=1,subasin
           IF (dummy1==id_subbas_extern(i)) THEN
@@ -504,34 +498,32 @@ storcap(:)=0.
       READ(11,*)
 	  READ(11,*)
       DO i=1,subasin
-         if (res_index(i) /= 0.) then !Anne inserted this line 
-            IF (latflow_res(i)==1) THEN
-              READ (11,*)dummy1,reservoir_down(res_index(i))
+		IF (latflow_res(i)==1) THEN
+		  READ (11,*)dummy1,reservoir_down(res_index(i))
 
-              IF (dummy1 /= id_subbas_extern(i)) THEN
-                WRITE(*,'(A)') 'ERROR: Sub-basin-IDs in file lateral_inflow.dat must have the same ordering scheme as in hymo.dat'
-                STOP
-              END IF
+		  IF (dummy1 /= id_subbas_extern(i)) THEN
+			WRITE(*,'(A)') 'ERROR: Sub-basin-IDs in file lateral_inflow.dat must have the same ordering scheme as in hymo.dat'
+			STOP
+		  END IF
 
-              IF (reservoir_down(res_index(i)) /= 999.AND.reservoir_down(i) /= 9999) THEN
-                j=1
-                DO WHILE (id_subbas_extern(j) /= reservoir_down(res_index(i)))
-                  j=j+1
-                  IF (j > 500) THEN
-                    WRITE (*,'(A)') 'ERROR: downsbasin(i) loop in readhymo.f'
-                    STOP
-                  END IF
-                END DO
-                reservoir_down(res_index(i))=j
-              END IF
-	        ELSE
-		      dummy1=id_subbas_extern(i)
-		    ENDIF
-            IF (dummy1 /= id_subbas_extern(i)) THEN
-             WRITE(*,'(A)') 'ERROR: Sub-basin-IDs in file operat_rule.dat must have the same ordering scheme as in hymo.dat'
-             STOP
-            END IF
-        endif	 !Anne  
+		  IF (reservoir_down(res_index(i)) /= 999 .AND. reservoir_down(i) /= 9999) THEN
+			j=1
+			DO WHILE (id_subbas_extern(j) /= reservoir_down(res_index(i)))
+			  j=j+1
+			  IF (j > 1000) THEN
+				WRITE (*,'(A)') 'ERROR: in lateral_inflow.dat: specified reservoir not found'
+				STOP
+			  END IF
+			END DO
+			reservoir_down(res_index(i))=j !internal ID of destination subbasin/reservoir
+		  END IF
+		ELSE
+		  dummy1=id_subbas_extern(i)
+		ENDIF
+		IF (dummy1 /= id_subbas_extern(i)) THEN
+		 WRITE(*,'(A)') 'ERROR: Sub-basin-IDs in file lateral_inflow.dat must have the same ordering scheme as in hymo.dat'
+		 STOP
+		END IF
      ENDDO
 	ENDIF
   CLOSE (11)
