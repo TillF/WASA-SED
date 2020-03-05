@@ -70,16 +70,10 @@ IF (STATUS == 0) THEN
 reservoir_check=0 !(0=simulation will all components; 1=simulation without hillslope and river modules)
 reservoir_balance=1 !(0=inflow and outflow discharges must be provided as input file; 1=only inflow discharges must be provided as input file)
 reservoir_print=1 !(0=results printed at the end of the timestep; 1=results printed at the end of the simulated year)
-corr_column_intakes = 0
 f_intake_obs = .false.
 
 if (reservoir_check==0) reservoir_balance=1
 
-! Initialize
-
-qinflow=0.
-qintake=0.
-overflow=0.
 
   DO i=1,subasin
 !Ge "volact" vector contains now only 365/366 values per annum
@@ -442,6 +436,11 @@ storcap(:)=0.
         stop
     end if
 
+    !initialisation
+    corr_column_intakes = 0
+    qinflow=0.
+    qintake=0.
+    overflow=0.
     
 !Anne moved reservoir sediment variables from allocate_h to reservoir.f90
     
