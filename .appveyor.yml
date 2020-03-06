@@ -90,7 +90,7 @@ deploy:
   description: 'Windows binaries built by Appveyor ($(APPVEYOR_REPO_COMMIT_TIMESTAMP))'
   provider: GitHub
   auth_token:
-    secure: meYLNf3tmP33dPMobNw70vtLNzgx5HiBEzPGSxl4575gHYEI2OtGgthLNxuz62xg
+    secure: dWCU3UbodKZFB+rUKCWCxpAYxn0q+JIXbEoQqsdYYiVqQHgsFDrNLG/2WLxLwzen
   artifacts: WASA-SEDexec_windows_msys2,WASA-SEDexec_mingw64
   draft: true
   prerelease: true
