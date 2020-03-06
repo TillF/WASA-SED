@@ -11,10 +11,16 @@ environment:
   MINGW64_DIR: C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin 
   MSYS_DIR: C:\MinGW\msys\1.0\bin 
   MSYS2_DIR: C:\msys64\mingw32\bin 
-  APPVEYOR_RDP_PASSWORD: aA45-#nuto
+  #APPVEYOR_RDP_PASSWORD: aA45-#nuto
   
 build: off
  #disables MSBuild functionality
+
+branches:
+  only:
+    - xmaster
+    - autobuild
+    - /rev_\d*.*/
 
 init:
   # - ps: |
@@ -48,9 +54,8 @@ install:
   - cmd: mingw32-make.exe --version
   - cmd: mingw32-make.exe all DEBUG=0 OUTDIR=build_win_mingw64
   - cmd: build_win_mingw64\bin\wasa.exe
-
   #collect DLL dependencies
-  - cmd: bash .copy_dlls.sh build_win_mingw64/bin
+#  - cmd: bash .copy_dlls.sh build_win_mingw64/bin #enable!
    #copies libgcc_s_seh-1.dll, libgfortran-4.dll, libquadmath-0.dll, libwinpthread-1.dll
   
  # #try msys - fails in update_revision.bat - needs sh commands?
@@ -64,9 +69,9 @@ install:
   - cmd: mingw32-make.exe all DEBUG=0 OUTDIR=build_win_msys2
   - cmd: build_win_msys2\bin\wasa.exe
   #collect DLL dependencies
-  - cmd: bash .copy_dlls.sh build_win_msys2/bin
+  #- cmd: bash .copy_dlls.sh build_win_msys2/bin #enable!
    #copies libgcc_s_dw2-1.dll, libgfortran-4.dll, libquadmath-0.dll, libwinpthread-1.dll
-
+   
 artifacts:
 
   
@@ -96,11 +101,12 @@ deploy:
   prerelease: true
   force_update: true
   on:
-    branch: master                 # release from master branch only
+ #   branch: master                 # release from master branch only (in fact, this looks for "master" in the tag, so I disabled it 
     APPVEYOR_REPO_TAG: true        # deploy on tag push only
 
 on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 #allow login to remote machine after build
 
-  
+# configuration for "master" branch
+# build in Release mode and deploy to Azure
