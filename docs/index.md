@@ -5,13 +5,13 @@
 Eva Nora 
 Müller, Till Francke, George Mamede and Andreas Güntner
 
-**26.3.2019<br>
+**6.3.2020<br>
 WASA-SED rev_261**
 
 Developed within the SESAM-Project:<br>
 Sediment Export of Semi-Arid Catchment: Monitoring and Modelling 2005-2008<br>
 SESAM II 2010-2014,<br>
-2015-2019
+2015-2020
 
 Institute of Environmental Sciences and Geography, University of Potsdam, Potsdam,<br>
 Deutsches Geoforschungszentrum Potsdam,<br>
@@ -923,7 +923,7 @@ This file and any of its entries are optional. If not present, default values ar
 0.7
 ```
 
-This file contains a single value x that specifies the fraction of the groundwater (formed in the LUs) that is routed directly into the river. The remaining fraction 1-x enters the lowermost TC as subsurface flow. Low values of x tend to reduce periods of very low flow in ephemeral rivers. Default x is 1.
+This file contains a single value x that specifies the fraction of the groundwater (formed in the LUs) that is routed directly into the river (as is the default). The remaining fraction 1-x enters the lowermost TC as subsurface flow. Low values of x tend to reduce periods of very low flow in ephemeral rivers. Default x is 1.
 
 ```frac_direct_gw.dat``` resides in the root of the WASA-SED input-directory as specified in ```do.dat```.
 
@@ -1209,7 +1209,7 @@ The input files for the reservoir module are located in the folder ```Input\\[ca
 Nr. |Parameter File	| Content
 ---|---|---
 1 | ```reservoir.dat``` | Specification of reservoir parameters
-2 | ```lateral_inflow.dat``` (optional) | Specification of lateral inflow into the sub-basin’s reservoir
+2 | ```lateral_inflow.dat``` (optional) | Specification of lateral inflow into the sub-basin’s reservoir (multiple subbasins draining into one reservoir)
 3 | ```operat_rule.dat``` (optional) | Specification of reservoir operation rule
 4 | ```operat_bottom.dat``` (optional) | Specification of operation rule of reservoir bottom outlets
 5 | ```cav.dat``` (optional) | Specification of stage-area and stage-volume curves of the sub-basin’s reservoir
@@ -1271,7 +1271,8 @@ Subbasin-ID, reservoir_down[-]
 *Subbasin-ID*:		ID of sub-basin with generated runoff flowing directly into the reservoir of another sub-basin <br>
 *Reservoir_down*:	ID of sub-basin with an outlet reservoir that receives lateral inflow coming from another sub-basin.
 
-Example: This optional file allows specifying lateral inflow into the sub-basin’s reservoir. If this file is not found in the folder reservoir, lateral inflow into the sub-basin’s reservoir is disregarded. The reservoir located at the outlet point of the sub-basin with the ID 60 receives lateral inflow coming from the sub-basin with the ID 15. The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs as was used in ```hymo.dat``` (due to computational reasons); otherwise, an error message occurs. Sub-basins without generated runoff flowing directly into the reservoir of another sub-basin must not be entered in the file.
+Example: This optional file allows specifying lateral inflow into the sub-basin’s reservoir (multiple subbasins draining into one reservoir). The reservoir located at the outlet point of the sub-basin 60 receives lateral inflow coming from the sub-basin 15. 
+Sub-basins draining regularly into their respective "own" reservoir or downstream basin must not be entered in the file.
 
 **3)** ```operat_rule.dat``` <br>
 (optional)
