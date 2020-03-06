@@ -38,7 +38,7 @@ INTEGER, INTENT(IN)                  :: res_h
 ! STATUS of CALL (0=initialization run, 1=initialization year,
 !                 2=calculation day,    3=finalization year)
 
-INTEGER :: i,id,dummy1,dummy2,s,p,q,h,istate,ka,ih !,irout,imun,dummy1a,dummy2a,f
+INTEGER :: i,id,dummy1,dummy2,dummy3,d4,s,p,q,h,istate,ka,ih,n
 character(100) :: dummy_char
 !Ge include j,nbrbat1,cont,upstream,downstream
 INTEGER :: j,nbrbat1,flag_cav
@@ -52,8 +52,6 @@ CHARACTER(12) :: subarea
 !REAL :: r_level0,r_level1,r_overflow,r_qbottom
 !REAL :: r_precip,r_etp,r_qinflow
 
-INTEGER :: idummy,n !,npt, nbrsec1
-!INTEGER :: dummy3
 REAL :: dummy4,dummy5,dummy6
 character(len=1000) :: fmtstr	!string for formatting file output
 
@@ -106,7 +104,7 @@ if (reservoir_check==0) reservoir_balance=1
 	OPEN(11,FILE=pfadp(1:pfadj)// 'River/routing.dat',STATUS='old')! upbasin: MAP ID of upstream sub-basin (MAP IDs);! downbasin: MAP ID of downstream sub-basin (MAP IDs)
 	READ (11,*); READ(11,*)
 	DO i=1,subasin
-	  READ (11,*)  idummy, upbasin(i),downbasin(i)
+	  READ (11,*)  dummy3, upbasin(i),downbasin(i)
 	END DO
 	CLOSE (11)
 
@@ -473,62 +471,63 @@ storcap(:)=0.
 ! Check lateral inflow directly into the subbasins' reservoir
   latflow_res(1:subasin)=0
 
-  ! Till: flag subbasins draining into reservoirs of other subbasins
-  !ii: move this into a single loop, use "id2intern", check for 3 columns (legacy files)
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!lateral_inflow.dat not found
 	  write(*,'(A)')'WARNING: '//pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat not found, using defaults'
     ELSE
-	  READ(11,*)
-	  READ(11,*)
-      ka = 0
-	  DO WHILE (ka==0)
-	    READ(11,*, IOSTAT=ka) dummy1					!read next line in file
-        DO i=1,subasin
-          IF (dummy1==id_subbas_extern(i)) THEN
-            latflow_res(i)=1
-		  ENDIF
-	    ENDDO
+	  READ(11,*, IOSTAT=istate)
+	  READ(11,*, IOSTAT=istate)
+	  h=2 !count lines
+	  DO WHILE (.TRUE.)
+	    READ(11,'(a)',IOSTAT=istate) fmtstr
+	    if (istate /=0) exit
+        h=h+1
+        dummy1=GetNumberOfSubstrings(fmtstr) !Till: count number of fields/columns
+        if (dummy1 /= 2) then    !incorrect number of fields in line
+            write(*,'(a,i0,a)')'ERROR (lateral_inflow.dat): line ', h, ' contains more than 2 fields.'
+            stop
+        end if
+
+        READ(fmtstr,*,IOSTAT=istate) dummy1, dummy2
+	    if (istate/=0) then
+            write(*,'(a,i0)')'ERROR (lateral_inflow.dat): Format error in line ', h
+            stop
+        end if
+
+	    dummy3 = id_ext2int(dummy1, id_subbas_extern) !convert to internal ID
+	    if (dummy3 == -1) then
+            write(*,'(a,i0,a)')'WARNING (lateral_inflow.dat): unknown subbasin ID ', dummy1, ', skipped.'
+            cycle
+        end if
+        latflow_res(dummy3)=1 !enable for this basin
+
+        IF (dummy2 /= 999 .AND. dummy2 /= 9999) THEN !special marker, do not change
+            d4 = id_ext2int(dummy2, id_subbas_extern) !convert to internal ID
+        else
+            d4 = dummy2
+        end if
+
+        if (d4 == -1) then
+            write(*,'(a,i0,a)')'WARNING (lateral_inflow.dat): unknown subbasin ID ', dummy2, ', skipped.'
+            latflow_res(dummy3)=0 !disable for this basin
+            cycle
+        end if
+        reservoir_down(dummy3)=d4
+
+!	    READ(11,*, IOSTAT=istate) dummy1					!read next line in file
+!        DO i=1,subasin
+!          IF (dummy1==id_subbas_extern(i)) THEN
+!            latflow_res(i)=1
+!		  ENDIF
+!	    ENDDO
+
       END DO
 	ENDIF
   CLOSE (11)
 
-  OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/lateral_inflow.dat', IOSTAT=istate,STATUS='old')
-	IF (istate==0) THEN
-      READ(11,*)
-	  READ(11,*)
-      DO i=1,subasin
-		IF (latflow_res(i)==1) THEN
-		  READ (11,*)dummy1,reservoir_down(i)
 
-		  IF (dummy1 /= id_subbas_extern(i)) THEN
-			WRITE(*,'(A)') 'ERROR: Sub-basin-IDs in file lateral_inflow.dat must have the same ordering scheme as in hymo.dat'
-			STOP
-		  END IF
 
-		  IF (reservoir_down(i) /= 999 .AND. reservoir_down(i) /= 9999) THEN
-			j=1
-			DO WHILE (id_subbas_extern(j) /= reservoir_down(i))
-			  j=j+1
-			  IF (j > 1000) THEN
-				WRITE (*,'(A)') 'ERROR: in lateral_inflow.dat: specified reservoir not found'
-				STOP
-			  END IF
-			END DO
-			reservoir_down(i)=j !internal ID of destination subbasin/reservoir
-		  END IF
-		ELSE
-		  dummy1=id_subbas_extern(i)
-		ENDIF
-		IF (dummy1 /= id_subbas_extern(i)) THEN
-		 WRITE(*,'(A)') 'ERROR: Sub-basin-IDs in file lateral_inflow.dat must have the same ordering scheme as in hymo.dat'
-		 STOP
-		END IF
-     ENDDO
-	ENDIF
-  CLOSE (11)
-
-  OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/operat_rule.dat', IOSTAT=istate,STATUS='old')
+  OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/operat_rule.dat', IOSTAT=istate, STATUS='old')
   IF (istate/=0) THEN					!operat_rule.dat not found
 	write(*,'(A)')'WARNING: '//pfadp(1:pfadj)// 'Reservoir/operat_rule.dat not found, using defaults'
     DO i=1,subasin
