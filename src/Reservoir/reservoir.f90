@@ -302,11 +302,11 @@ storcap(:)=0.
     nbrsec(n_reservoir), &
     npoints(nxsection_res,n_reservoir), &
 	      
-    decvolact(366*nt,n_reservoir), &       !Anne variable seems to be unused
+!    decvolact(366*nt,n_reservoir), &       !Anne variable seems to be unused
     decstorcap(366*nt,n_reservoir), &
-    decmaxdamarea(366*nt,n_reservoir), &   !Anne variable seems to be unused & is set to 0 in semres.f90
-    decdamdead(366*nt,n_reservoir), &      !Anne variable seems to be unused
-    decdamalert(366*nt,n_reservoir), &     !Anne variable seems to be unused   
+!    decmaxdamarea(366*nt,n_reservoir), &   !Anne variable seems to be unused & is set to 0 in semres.f90
+!    decdamdead(366*nt,n_reservoir), &      !Anne variable seems to be unused
+!    decdamalert(366*nt,n_reservoir), &     !Anne variable seems to be unused
     manning_sec(nxsection_res,n_reservoir), &
     dist_sec(nxsection_res,n_reservoir), &
     x_sec0(npointsxsect,nxsection_res,n_reservoir), &

@@ -74,11 +74,11 @@ character(len=1000) :: fmtstr	!string for formatting file output
 IF (STATUS == 0) THEN
 
   sed_qlateral=0.
-  decdamalert=0.    !Anne moved from DO-loop below; variable seems to be unused
-  decdamdead=0.     !A
-  decmaxdamarea=0.  !A
+!  decdamalert=0.    !Anne moved from DO-loop below; variable seems to be unused
+!  decdamdead=0.     !A
+!  decmaxdamarea=0.  !A
   decstorcap=0.     !A
-  decvolact=0.      !A  
+!  decvolact=0.      !A
   cum_sedimentation=0. 
  
   DO i=1,subasin

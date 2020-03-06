@@ -190,15 +190,15 @@ integer, allocatable :: npoints(:,:)
 !at the cross section of the reservoir in the sub-basin
 integer, allocatable :: geom(:,:)
 !decrease of stored volume in the subbasin's reservoir [m**3]
-real, allocatable :: decvolact(:,:)
+!real, allocatable :: decvolact(:,:)
 !decrease of storage capacity in the subbasin's reservoir [m**3]
 real, allocatable :: decstorcap(:,:)
 !decrease of maximum reservoir area in subbasins [m**2]
-real, allocatable :: decmaxdamarea(:,:)
+!real, allocatable :: decmaxdamarea(:,:)
 !decrease of dead volume in the subbasin's reservoir [m**3]
-real, allocatable :: decdamdead(:,:)
+!real, allocatable :: decdamdead(:,:)
 !decrease of alert volume in the subbasin's reservoir [m**3]
-real, allocatable :: decdamalert(:,:)
+!real, allocatable :: decdamalert(:,:)
 !Manning's roughness for each cross section [m**(-1/3).s]
 real, allocatable :: manning_sec(:,:)
 !distance to the downstream cross section [m]
