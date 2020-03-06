@@ -1,6 +1,6 @@
 image: 
 #- Ubuntu #no use distributing Ubuntu binaries, may be used later for testing
-- Visual Studio 2015 
+- Visual Studio 2015 #do we actually use this? I dunno
 #Visual Studio 2017 does not contain some mingw installations
 
 platform:
