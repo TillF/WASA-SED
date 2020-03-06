@@ -11,7 +11,7 @@ environment:
   MINGW64_DIR: C:\mingw-w64\x86_64-7.3.0-posix-seh-rt_v5-rev0\mingw64\bin 
   MSYS_DIR: C:\MinGW\msys\1.0\bin 
   MSYS2_DIR: C:\msys64\mingw32\bin 
-  #APPVEYOR_RDP_PASSWORD: aA45-#nuto
+  APPVEYOR_RDP_PASSWORD: aA45-#nuto
   
 build: off
  #disables MSBuild functionality
@@ -46,7 +46,7 @@ install:
  #try mingw64 - works! GNU Make 4.2.1
   - cmd: set PATH=%MINGW64_DIR%;%ORG_PATH%
   - cmd: mingw32-make.exe --version
-  - cmd: mingw32-make.exe all OUTDIR=build_win_mingw64
+  - cmd: mingw32-make.exe all DEBUG=0 OUTDIR=build_win_mingw64
   - cmd: build_win_mingw64\bin\wasa.exe
 
   #collect DLL dependencies
@@ -61,7 +61,7 @@ install:
 #try msys2 - works! GNU Make 4.2.1
   - cmd: set PATH=%MSYS2_DIR%;%ORG_PATH%
   - cmd: mingw32-make.exe --version
-  - cmd: mingw32-make.exe all OUTDIR=build_win_msys2
+  - cmd: mingw32-make.exe all DEBUG=0 OUTDIR=build_win_msys2
   - cmd: build_win_msys2\bin\wasa.exe
   #collect DLL dependencies
   - cmd: bash .copy_dlls.sh build_win_msys2/bin
@@ -101,7 +101,8 @@ deploy:
     branch: master                 # release from master branch only
     appveyor_repo_tag: true        # deploy on tag push only
 
-# on_finish:
-  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#allow login to remote machine after build
 
   
