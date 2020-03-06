@@ -67,7 +67,6 @@ install:
   - cmd: bash .copy_dlls.sh build_win_msys2/bin
    #copies libgcc_s_dw2-1.dll, libgfortran-4.dll, libquadmath-0.dll, libwinpthread-1.dll
 
-
 artifacts:
 
   
@@ -83,7 +82,6 @@ artifacts:
 # - ps: foreach ($artifactName in $artifacts.keys) {
       # Write-Host $artifacts[$artifactName]
       # }
-
 
 deploy:
   environment: Windows_binary  
