@@ -64,10 +64,10 @@ install:
   # - cmd: make.exe all OUTDIR=build_win
 
 #try msys2 - works! GNU Make 4.2.1
-  - cmd: set PATH=%MSYS2_DIR%;%ORG_PATH%
-  - cmd: mingw32-make.exe --version
-  - cmd: mingw32-make.exe all DEBUG=0 OUTDIR=build_win_msys2
-  - cmd: build_win_msys2\bin\wasa.exe
+#  - cmd: set PATH=%MSYS2_DIR%;%ORG_PATH%
+#  - cmd: mingw32-make.exe --version
+#  - cmd: mingw32-make.exe all DEBUG=0 OUTDIR=build_win_msys2
+#  - cmd: build_win_msys2\bin\wasa.exe
   #collect DLL dependencies
   #- cmd: bash .copy_dlls.sh build_win_msys2/bin #enable!
    #copies libgcc_s_dw2-1.dll, libgfortran-4.dll, libquadmath-0.dll, libwinpthread-1.dll
