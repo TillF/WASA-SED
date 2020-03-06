@@ -4,20 +4,20 @@
 
 WASA-SED Model
 --------------
-WASA-SED is a numerical model for simulation hydrological and sediment fluxes from meso-scale catchments (Mueller et al., 2010).
-This repository contains documentation, sample data set and source code.
+WASA-SED is a numerical model for simulation hydrological and sediment fluxes from meso-scale catchments [(Mueller et al., 2010)](https://www.geosci-model-dev.net/3/275/2010/gmd-3-275-2010.pdf).
+This repository contains source code and documentation.
 
-All rights under the stated license (see ```license.txt```) of the WASA-SED code are with the SESAM-Project and successors, c/o Till Francke, Universität Potsdam, Karl-Liebknecht-Str. 24-25, 14473 Potsdam, Germany, please contact the maintainer of this repository, e.g. via the 'Issues' function.
+All rights under the stated license (see [```license.txt```](https://github.com/TillF/WASA-SED/blob/master/license.txt)) of the WASA-SED code are with the SESAM-Project and its successors, c/o Till Francke, Universität Potsdam, Karl-Liebknecht-Str. 24-25, 14473 Potsdam, Germany, please contact the maintainer of this repository, e.g. via the 'Issues' function.
 
 ******************************
-WASA-SED is a large and complex hydrological and sediment transport model. It is not a polished point-and-click GUI tool. Extensive knowledge of its design, purpose, and limitations is required in order to apply it properly. See license.txt for terms of use.
+WASA-SED is a large and complex hydrological and sediment transport model. It is not a polished point-and-click GUI tool. Extensive knowledge of its design, purpose, and limitations is required in order to apply it properly. See [```license.txt```](https://github.com/TillF/WASA-SED/blob/master/license.txt) for terms of use.
 ******************************
 
 Contents
 --------
 * docs/: Directory containg the documentation
   * CONTRIBUTING.md: Guidelines for modifying the code
-  * index.md: technical documentation (also available via https://tillf.github.io/WASA-SED/, replaces Wasa_Documentation.doc)
+  * index.md: technical documentation (also available via https://tillf.github.io/WASA-SED/)
   * variables.ods: List of variables used in the source code (incomplete)
   * tutorial_wasa_input.zip: Example input to run the model
 
@@ -30,7 +30,7 @@ Contents
 
 * README.md: THIS readme in markdown language
 
-* .gitignore: List of files / directories git shall ignore (only needed for model development)
+* .gitignore: List of files / directories git shall ignore (only needed for git usage)
 
 
 Installation
@@ -47,5 +47,6 @@ E.N. Mueller, A. Güntner, T. Francke, G. Mamede (2010): Modelling sediment expo
 
 Auxiliary Tools
 ---------
-[SoilDataPrep](https://github.com/tillf/SoilDataPrep/SoilDataPrep)) : soildata-preprocessing for WASA-SED
-[lumpR](https://github.com/tpilz/lumpR)) : Geodata-preprocessing for WASA-SED
+[SoilDataPrep](https://github.com/tillf/SoilDataPrep/SoilDataPrep) : soildata-preprocessing for WASA-SED
+
+[lumpR](https://github.com/tpilz/lumpR) : Geodata-preprocessing for WASA-SED
