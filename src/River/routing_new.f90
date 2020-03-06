@@ -1,18 +1,4 @@
 SUBROUTINE routing_new(STATUS)
-!Till: computationally irrelevant: removed unused parameters flow, rarea
-!2011-05-05
-
-!Till: computationally irrelevant: quick-fix of severe performance loss when using output of river_flow.dat in hourly version
-!2009-04-02
-
-!Till: added output for River_Sediment_Storage.out
-!2008-11-13
-
-!(George:) various changes concerning routing of reservoir fluxes
-!2008-10-07
-
-!Till: file and header of river_sediment_total was not created when river_transport=3
-!2008-07-11
 
 !! Routing of water and sediment fluxes through the river system
 !!

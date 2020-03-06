@@ -1,25 +1,4 @@
 SUBROUTINE sedi_yield_subbas(precip_dt, subbas_id, q_out, sed_yield_subbas)
-! Till: runoff during no-rain days caused math error (log(0)) - fixed
-! 2012-05-15
-
-! Till: computationally irrelevant: minor changes to improve compiler compatibility
-! 2011-04-29
-
-! Pedro: computationally relevant correction on q_ov by kfkorrday (overland flow with duration according to rainfall, and not during 24 h)
-! 2009-06-03
-
-! Till: cleanup of storage structure for SVCs
-! 2008-09-11
-
-! 2008-07-10
-! Till: outsourced coefficients for estimation of maximum half-hour rainfall intensity 
-
-! 2008-01-23
-! Version with the modifications proposed by Pedro
-
-! 2007-11-13:
-! Till: calculate sediment yield of a subbasin based on MUSLE
-
 
 use hymo_h
 use erosion_h

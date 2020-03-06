@@ -1,10 +1,5 @@
 SUBROUTINE route_sediments(i)
 
-! Till: computationally irrelevant: removed unused parameters flow, rarea
-! 2011-05-05
-
-! Till: computationally irrelevant: minor changes to improve compiler compatibility
-! 2011-04-29
 
 !!    ~ ~ ~ PURPOSE ~ ~ ~
 !!    this subroutine routes sediment through the river system;

@@ -1,16 +1,4 @@
 SUBROUTINE routing_coefficients(i, STATUS, flow, r_area, p)
-! Till: computationally irrelevant: minor changes to improve compiler compatibility
-! 2011-04-29
-
-!Till: computationally relevant for very initial phase of simulation: fixed bug in iterative estimation of depth from discharge
-!2009-12-18
-
-!Till: computationally relevant: major changes, bugfixes and optimization
-!2009-12-17
-
-!Till: computationally irrelevant: increased iteration counter for determination of river cross section
-!2009-12-11
-
 
 !!    this subroutine computes travel time coefficients for the Muskingum Routing
 !!    along the main channel
@@ -286,7 +274,7 @@ REAL FUNCTION calc_d(q)
 implicit none
 real, intent(in) :: q	!discharge, for which the water depth is to be calculated
 real :: dd, df	!differentials
-real :: d_est0, d_est1, q_est0, q_est1, f0, f1, error_tolerance=0.01, dum	!Till: max. relative error indicating convergence
+real :: d_est0, d_est1, q_est0, q_est1, f0, f1, error_tolerance=0.01, dum, dum2	!Till: max. relative error indicating convergence
 integer :: j, max_iter=50			!Till: max number of iterations
 
     calc_d = 0.	
@@ -303,7 +291,7 @@ integer :: j, max_iter=50			!Till: max number of iterations
     end if
 	
     q_est1 = -1. !request q-calculation
-    call calc_q_a_p(d_est1, q_est1, dum, dum)
+    call calc_q_a_p(d_est1, q_est1, dum, dum2)
     
 	do j=1,max_iter
 		f1 = q_est1-q         !error between current estimate and prescribed q
@@ -319,7 +307,7 @@ integer :: j, max_iter=50			!Till: max number of iterations
         if (isNaN(d_est1)) d_est1 = 0.  !Till: prevent NaNs when convergence stalls
 
         q_est1 = -1. !request q-calculation
-        call calc_q_a_p(d_est1, q_est1, dum, dum)
+        call calc_q_a_p(d_est1, q_est1, dum, dum2)
 
 		if (abs(q-q_est1)/q <= error_tolerance) exit	!Till: converged
 	end do

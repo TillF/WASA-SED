@@ -1,12 +1,5 @@
 module utils_h
 
-!Till: included whichn function
-!2008-08-12
-
-!Till: inluded wrapper for pause command
-!2008-08-08
-
-
 
 contains
 INTEGER FUNCTION GetNumberOfSubstrings(string)

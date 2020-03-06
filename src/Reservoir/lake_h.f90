@@ -1,8 +1,3 @@
-! Till: computationally irrelevant: outcommented unused variables
-! 2012-09-14
-!
-! Till: computationally irrelevant: minor changes to improve compiler compatibility
-! 2011-04-29
 !
 !The module file contains two modules: reservoir_h and lake_h
 !

@@ -38,10 +38,10 @@ subroutine allocate_general()
         a = subasin
         ab = a * 366
         abc = ab * 24
-        total_required = nint(  (1.0 * a + 6 * ab + 1 * abc) * SIZEOF(1.1) / 1024) !size in kBytes
+        total_required = nint(  (1.0 * a + 6 * ab + 1 * abc) * real(SIZEOF(1.1)) / 1024) !size in kBytes
         write(*,*) 'Memory requirements general [kB]: ', total_required
         write(*,*) ' influence rates:'
-        write(*,*) '   number of subbasins : ', nint ((1.0 + 6*ab/a + 1*abc/a)* SIZEOF(1.1) /a )
+        write(*,*) '   number of subbasins : ', nint ((1.0 + 6*ab/a + 1*abc/a)* real(SIZEOF(1.1)) /a )
 
     end subroutine mem_usage
 
@@ -402,7 +402,7 @@ subroutine allocate_reservoir()
             
  !Anne & Till 2019 fix reservoir memory issue:
         !to decrease array size & only do calculations for subbasins with reservoir,  
-        !moved all arrays with "subbasin" to reservoir.f90 and substituted by "n_reservoir";
+        !moved all multidimensional arrays with "subbasin" to reservoir.f90 and substituted by "n_reservoir";
         !plus inserted "res_index()", e.g.: dayarea_bat(step,j,i) changed to dayarea_bat(step,j,res_index(i))   
   
   !The following variables could not be moved/changed, because they are allocated after READ-operation from file in reservoir.f90

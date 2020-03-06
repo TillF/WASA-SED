@@ -1,11 +1,5 @@
 SUBROUTINE semres (STATUS,upstream)
 
-! Till: computationally irrelevant: outcommented unused vars
-! 2012-09-14
-
-! Till: computationally irrelevant: minor changes to improve compiler compatibility
-! 2011-04-29
-
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:56:59
 
@@ -133,7 +127,7 @@ IF (STATUS == 0) THEN
   ENDIF
 
 ! Read geometric parameters of the reservoir
-nbrsec=0. 
+nbrsec=0
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/hydraul_param.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!hydraul_param.dat not found
 	  write(*,*)'WARNING: '//pfadp(1:pfadj)// 'hydraul_param.dat not found, using defaults'

@@ -1,6 +1,4 @@
 SUBROUTINE lake_routing(muni,k,help,help2,help3)
-!Till: computationally irrelevant: outcommented unused vars
-!2012-09-14
 
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:31

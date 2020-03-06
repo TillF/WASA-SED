@@ -1,63 +1,7 @@
 SUBROUTINE sedi_yield(precip_dt, subbas_id, lu_id, tc_type_id, tcid_instance2, q_in, q_out, q_peak_in, v_ov_in, sed_in, timestep, tc_area, sed_yield)
 
     ! hillslope erosion module for WASA
-    ! to be called by soilwat.f90, Till Francke (till@comets.de)
-
-    ! Till: runoff during no-rain days caused math error (log(0)) - fixed
-    ! 2012-05-30
-
-    ! Till: computationally irrelevant: removed unused parameter h
-    ! 2011-05-05
-
-    ! Till: computationally relevant: fixed overestimation of transport capacity according to Everaert due to integer division
-    ! minor changes to improve compiler compatibility
-    ! 2011-04-29
-
-    ! Pedro: added variables for TC_wise output
-    ! 2009-06-03
-
-    ! Pedro: fixed stream power calculation - computationally relevant for sediment estimations
-    ! 2009-06-03
-
-    ! Till: include optional specification for LU-based correction of beta/m (exponent for L-factor calculation)
-    ! 2008-10-22
-
-    ! Till: switched back from cumulative to ordinary L-factor
-    ! 2008-10-15
-
-    ! Till: cleanup of storage structure for SVCs
-    ! 2008-09-11
-
-    ! 2008-07-15
-    ! Till: clarified code
-
-    ! 2008-07-10
-    ! Till: outsourced coefficients for estimation of maximum half-hour rainfall intensity
-    ! minor correction for transport capacity limit=off
-
-    ! 2008-01-23
-    ! Version with the modifications proposed by Pedro
-
-    ! 2007-11-07
-    ! Till: corrected MUSLE (SWAT-version had wrong units) to version by Krysanova et al. in Summer&Walling (2002) which is equivalent to Williams, 1995
-
-    ! 2005-10-10
-    ! Till: d50 no more calculated internally but used from global array
-
-    ! 2005-09-29
-    ! Till: structure changed from FUNCTION to SUBROUTINE: variables are passed by reference anyway and SUBROUTINE allows easier handling of array return values
-    ! sediment yield is returned in fractions (MUSLE-result distributed according to mean particle size fractions in TC)
-
-    ! 2005-08-10
-    ! Till: fixed minor bugs with unit conversions
-
-    ! 2005-07-08
-    ! Till: adapt to new WASA-structure and headers
-
-    ! 2005-06-23:
-    ! Till: calculate sediment yield of a TC based on MUSLE:
-    ! use the mean of flow coming into the TC and flow going out of TC as average flow
-
+    ! to be called by soilwat.f90
 
     use hymo_h
     use erosion_h

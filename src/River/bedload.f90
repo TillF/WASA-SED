@@ -1,8 +1,5 @@
 SUBROUTINE bedload_formulae(i)
  
-! Till: computationally irrelevant: minor changes to improve compiler compatibility
-! 2011-04-29
-
 !! Subroutine calculates the bedload using 5 different formulae for individual river stretches
 !! Formula after: Meyer_Peter, Schoklitsch, Smart&Jaeggi, Bagnold, Rickenmann
 !! For list of reference, see publication on bedload modelling Müller et al. 2006

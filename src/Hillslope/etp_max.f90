@@ -1,18 +1,6 @@
 SUBROUTINE etp_max(isubbas,vegi,etpmax,  &
         height_act,lai_act,alb_act,day,hh)
 
-!Till: computationally irrelevant: minor changes to improve compiler compatibility
-!2011-04-29
-
-!Till: optimized speed by re-using already calculated values
-!2008-08-14
-
-!Till: excluded domean, donight as logicals to module common_h
-! excluded daily_delta_temp (daily temperature variation),hours_of_daylight
-! added initialisation of rsp=0. (missing)
-! prevented negative night time evaporation
-! 2008-02-05
-
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-06-30  Time: 13:45:55
 

@@ -2,24 +2,6 @@ module hymo_h
     use common_h
     save
 
-    !Till: computationally irrelevant: added options for LU-wise sediment output
-    !2014-05-15
-
-    ! Till: optional subdaily output of actetranspiration.out,qhorton.out,subsurface_runoff.out,total_overlandflow.out,gw_discharge.out,potetranspiration.out,gw_loss.out,gw_recharge.out
-    ! 2009-04-16
-
-    ! Till: outcommented unnecessary variable
-    ! 2008-06-24
-
-    ! 2007-10-29 Till:
-    ! added variables for time-variant kfkorr and debug-output
-
-    ! 2007-08-20 Till:
-    ! added variable frac_direct_gw
-
-    ! 2005-07-11 Till:
-    ! replaced misleading variable names
-
     ! Code converted using TO_F90 by Alan Miller
     ! Date: 2005-06-30  Time: 13:59:19
 

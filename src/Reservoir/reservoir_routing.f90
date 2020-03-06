@@ -1,9 +1,5 @@
 SUBROUTINE reservoir_routing(upstream,help,help2)
 
-!Till: computationally irrelevant: outcommented unused vars
-!2012-09-14
-
-
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:31
 
@@ -23,7 +19,7 @@ INTEGER :: ninterac !,nbrbat1
 
 REAL :: par_c,par_d
 REAL :: y1,y2,vol1,vol2,dvol !out1,out2,elev
-REAL :: frtime,inflow_t,inflow_mean,outflow_mean
+REAL :: frtime,inflow_t,outflow_mean
 REAL :: inflow,outflow
 REAL :: dummy1,dummy2,error !,dummy3,dummy4,dummy5
 REAL :: volmax,volstep,time !,areamax
@@ -80,7 +76,6 @@ frtime=0.
 error=1.
 dummy1=outflow
 dummy2=y2
-!inflow_mean=0. TODO: unnecessary?
 outflow_mean=0.
 
 ! loop over sub-steps
@@ -128,7 +123,6 @@ DO i=1,ninterac
 !write(*,*)frtime,inflow,dummy1
   outflow=dummy1
   outflow_mean=outflow_mean+outflow*(time/ninterac) ! cumulated outflow over sub-steps in m3
-  !inflow_mean=inflow_mean+inflow*(time/ninterac) TODO: unnecessary?
   error=1.
 
   outflow_last(upstream)=outflow

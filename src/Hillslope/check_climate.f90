@@ -1,24 +1,4 @@
 SUBROUTINE check_climate
-!Till: computationally irrelevant: minor changes to improve compiler compatibility
-!2011-04-29
-
-!check read climate data for implausible data
-
-!Till: computationally irrelevant: improved error reporting in faulty climate data
-!2009-06-22
-
-!Till: fixed faulty check of hourly rainfall
-!2009-04-06
- 
-!Till: added check of hourly rainfall
-!2009-03-11
- 
-!Till: removed erroneous error messages that could occur when starting midyear
-!2008-04-11
-
-!Till: modified error messages
-!2008-01-21
-
 
 use climo_h
 use common_h

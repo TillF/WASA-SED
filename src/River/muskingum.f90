@@ -1,14 +1,5 @@
 SUBROUTINE muskingum (i, h)
 
-! Till: computationally irrelevant: minor changes to improve compiler compatibility
-! 2011-04-29
-
-!Till: re-modified transmission losses, various optimizations 
-!2009-12-17
- 
-!Till: modified transmission losses (affect rout instead of storage in reach); infiltration is restricted to bottom width, not full wetted perimeter
-!2008-10-30
-
 !! subroutine routes a daily or hourly water flow through a reach using the Muskingum method
 
 !!    ~ ~ ~ INCOMING VARIABLES ~ ~ ~

@@ -1,29 +1,3 @@
-! Till: added specifiyable SDR for TCs
-! 2013-10-02
-
-! Pedro: added variables for TC_wise output
-! 2009-06-03
-
-! Till: include optional specification for LU-based correction of beta/m (exponent for L-factor calculation)
-! 2008-10-22
-
-! Till: added specifyable SDR for LUs
-! 2008-09-09
-
-! Till: implemented variables for optional pre-specified sediment outflow of selected subbasins
-! 2008-07-11
-
-! Till: included coefficients for estimation of maximum half-hour rainfall intensity 
-! 2008-07-10
-
-! Pedro
-! added variables
-! 2008-02-07
-
-! Till: changed addressing scheme of sediment_subbasin_t from (366*nt,subasin,n_sed_class) to (366,nt,subasin,n_sed_class)
-! 2005-12-20
-
-
 module erosion_h
 
 

@@ -2,15 +2,6 @@ SUBROUTINE petcalc
 !read input file containing extra terrestrial radiation
 !compute potential evaporation from water surface (applied for each subbasin and day)
 
-! Till: computationally irrelevant: minor changes to improve compiler compatibility
-! 2011-04-29
-
-! Till: adapted day-night-calculation scheme that is also used in etp_max to have consistent results
-! 2008-02-07
-
-! Till: prevent PET from getting negative
-! 2006-02-20
-
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-06-30  Time: 13:47:16
  

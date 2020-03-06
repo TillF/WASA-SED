@@ -1,21 +1,6 @@
 SUBROUTINE etp_soil(i_subbas3,vegi,defi,facwi,act,actveg,acts,  &
         height_act,lai_act,alb_act,rsfinal)
 
-!Jose: an upper theshold for soil surface resistance "rss" was introduced. For very high values of "rss" a divi! jose miguel: for very low soil water content, the rss tends to infinity. This is not accepted by the computations, so the maximum of surface resistance of bare soil is limited to 1.0e6 (arbitrary huge number beyond maximum value obtained by Domingo et al. 1999) in order to prevent errors. See Domingo et al./Agricultural and Forest Meteorology 95 (1999) 76-77
-!2012-12-05
-
-!Till: computationally irrelevant: minor changes to improve compiler compatibility
-!2011-04-29
-
-!Till: excluded domean, donight as logicals to module common_h
-! excluded daily_delta_temp (daily temperature variation),hours_of_daylight
-! 2008-02-05
-
-!Till: added safety checks to prevent NaN values when LAI or plant height=0
-! renamed muni to i_subbas3
-!2006-08-16
-!
-
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-06-30  Time: 13:46:00
 

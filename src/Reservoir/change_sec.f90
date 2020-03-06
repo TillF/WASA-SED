@@ -1,10 +1,4 @@
 SUBROUTINE change_sec (j1,upstream)
-!Till: computationally irrelevant: outcommented unused vars
-!2012-09-14 
-
-!Till: computationally irrelevant: minor changes to improve compiler compatibility
-!2011-04-29
-
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2005-08-23  Time: 12:57:15
  
