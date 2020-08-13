@@ -1934,17 +1934,6 @@ end if ! do_snow
 
 
 
-
-
-
-
-
-
-
-
-
-
-
     SUBROUTINE read_pre_subbas_outflow    !Till: reads predefined subbasin outflow (water and sediment)
     ! status of call (0=initialization, 1=start of year)
     use common_h
@@ -1974,6 +1963,9 @@ end if ! do_snow
             READ(91,'(a)') linedummy
             columnheader=0
             no_columns(1)=GetNumberOfSubstrings(linedummy)-2    !Till: count number of columns
+            IF (no_columns(1) < 1) then        !nothing found, issue warning
+                WRITE(*,'(A)') 'WARNING: subbasin_out.dat contains no valid header columns, check format'
+            END IF
             allocate (pre_subbas_outflow(366,nt,no_columns(1)))
             pre_subbas_outflow(:,:,:)=-2.
 
