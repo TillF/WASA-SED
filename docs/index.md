@@ -1144,7 +1144,7 @@ Date	Timestep	Sub-basin-ID.
 …
 ```
 
-*Date*: Date in the format ddmmyyyy <br>
+*Date*: Date in the format ddmmyyyy (leading zeroes are optional) <br>
 *Timestep*: timestep (not interpreted in daily resolution, 1..24 for hourly resolution)<br>
 *Subbasin-ID*: ID of sub-basin
 
@@ -1166,7 +1166,7 @@ Date	Timestep	Sub-basin-ID.
 ```
 
 *mean PSD*:	mean particle size distribution to be used for all records, consists of n_sed_classes fraction values that sum to 1 <br>
-*Date*: Date in the format ddmmyyyy <br>
+*Date*: Date in the format ddmmyyyy (leading zeroes are optional)<br>
 *Timestep*:	timestep (not interpreted in daily resolution, 1..24 for hourly resolution) <br>
 *Subbasin-ID*: ID of sub-basin
 
@@ -1335,7 +1335,7 @@ Date,	doy,	10,	16
 …
 ```
 
-*Date*: Date \[ddmmyyyy] <br>
+*Date*: Date \[ddmmyyyy] (leading zeroes are optional)<br>
 *Doy*:	day of year. Not used but kept for historical reasons, fill in dummy values. <br>
 *Sub-basin ID*: Measured data on regulated outflow discharge through intake devices of the reservoir’s barrage in a specific sub-basin \[m³/s]
 
