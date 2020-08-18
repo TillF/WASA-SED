@@ -1759,7 +1759,7 @@
                                 IF (dolatsc) THEN
                                     q_surf_out=q_surf_out+inputrem(i)-qmerk2(i)
                                     if (q_surf_out<0.) then
-                                        write(*,*) 'das ist mist'
+                                        write(*,*) 'Warning: unexpected redistribution of lateral inflow.'
                                     end if
                                     !only for output
                                     !hort2sc(day,i)=hort2sc(day,i)+(inputrem(i)-qmerk2(i))/(tcarea2*1.e3*frac_svc(i,tcid_instance2))

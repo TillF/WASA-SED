@@ -38,19 +38,25 @@ IF (istate/=0) THEN
 		stop
  END IF
 
-prout=0.
+prout=-1. !indicator for "not read"
 READ (11,*, IOSTAT=istate); READ(11,*, IOSTAT=istate)
 h=2
 i=0 !count treated subbasins
 
-DO WHILE (i<subasin)
+DO WHILE (istate == 0)
   h=h+1
-  READ (11,*, IOSTAT=istate)  idummy,temp2,  temp3
-  IF (istate/=0) THEN
+!  READ (11, '(A)', IOSTAT=istate) fmtstr
+!
+!  IF (istate < 0 .and. fmtstr == "") THEN !end of file
+!        exit
+!  END IF
+!  if (fmtstr == "") cycle
+
+  READ (11,*, IOSTAT=istate)  idummy, temp2, temp3
+  IF (istate > 0) THEN !format error
 		write(*,'(a, i0)')'Error (response.dat): Format error or unexpected end in line ',h
 		stop
   END IF
-
   j=which1(idummy == id_subbas_extern) !relate to external IDs from routing.dat
 
   if (j==0) then
@@ -69,12 +75,31 @@ DO WHILE (i<subasin)
 END DO
 CLOSE (11)
 
+!check completeness
+do i=1, subasin
+   j=1 !indicator for completeness
+   IF (prout(i,1)==-1) THEN !no data read
+        j = 0 !flag as "missing"
+        if (associated(corr_column_pre_subbas_outflow)) then
+            if (corr_column_pre_subbas_outflow(i) /= 0) then ! check if contained in prespecified outflows, as these don't need routing data
+                j=1 !don't raise alert
+                prout(i,:) = 0 !avoid crashes in later computations
+            end if
+        end if
+  END IF
+
+  if (j == 0) then
+    write(*,'(a, i0)')'Error (response.dat): Missing entry for subbasin ', id_subbas_extern(i)
+    stop
+  end if
+end do
+
 !this relates the external IDs (id_subbas_extern(subasin)) to the sorted CODE IDs (id_subbas_intern(subasin)),
 ! i.e. upbasin and downbasin are now numbered according to internal ids
 !     so that in routing.dat only the MAP IDs have to be read in,
 
 !replace external with internal IDs
-DO i=1,subasin
+DO i=1, subasin
   !upstream basin referencing
   ih=which1(id_subbas_extern == upbasin(i))
 
