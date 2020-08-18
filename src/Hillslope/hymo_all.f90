@@ -1194,7 +1194,7 @@ SUBROUTINE hymo_all(STATUS)
         END DO
 
         if (do_pre_outsed) then        !if water outsed from upstream subbasins is given
-            dosediment=.TRUE.        !this may have been switched off temproarily if the last subbas was a prespecified one - switch it on again
+            dosediment=.TRUE.        !this may have been switched off temporarily if the last subbas was a prespecified one - switch it on again
         end if
 
     END IF
