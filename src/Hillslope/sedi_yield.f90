@@ -47,14 +47,16 @@ SUBROUTINE sedi_yield(precip_dt, subbas_id, lu_id, tc_type_id, tcid_instance2, q
 
 
 
-    IF (q_out==0.) then        !no surface flow leaving this TC...
-        sed_yield=0.            !...no sediment export
-        return
-    END IF
 
     q  =q_in                    !q_in is not used (yet), this dummy assigment prevents compiler warnings
     !q = (q_in+q_out)/2/(tc_area*1e6)    !mean overland flow during timestep [m H2O]
     q = q_out/(tc_area*1e6)        !overland flow during timestep [m H2O]
+
+    IF (q_out==0. .or. q == 0) then        !no surface flow leaving this TC or no effective runoff...
+        sed_yield=0.            !...no sediment export
+        return
+    END IF
+
 
     !ii: ganze Schleife einmal berechnen für jede TC am Anfang des Programms
     K_fac        =0.
@@ -122,9 +124,9 @@ SUBROUTINE sedi_yield(precip_dt, subbas_id, lu_id, tc_type_id, tcid_instance2, q
 
     earea=tc_area*1e6    !area of erosive unit [m2]
     q_peak=q_peak_in
-    v_ov=v_ov_in
-    q_ov=(q_out)/(dt*3600./kfkorr_day)/(earea/L_slp)        !compute average overland flow rate [m**3/s] on a  1-m-strip
-
+    v_ov = v_ov_in
+    q_ov = (q_out)/(dt*3600./kfkorr_day)/(earea/L_slp)        !compute average overland flow rate [m**3/s] on a  1-m-strip
+    q_ov = max(q_ov, tiny(q_ov)) !avoid underflow and later division by zero
 
     !compute maximum half-hour rain: fraction of daily precipitation that falls within 30 min (needed for estimation of peak flow and rainfall erosivity)
     !IF (dt<=1) THEN        !if high resolution precipitation is available

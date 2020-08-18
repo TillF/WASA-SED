@@ -2869,7 +2869,7 @@
 
 
         v_ov=(q_ov**0.4)*((slope(id_tc_type2)/100.)**0.3)/manning_n**0.6				!overland flow velocity [m/s] (6.3.4)
-
+        v_ov = max(v_ov, tiny(v_ov)) !avoid underflow and later division by zero
 
 
         !ii: L_slp pass this to sedi_yield

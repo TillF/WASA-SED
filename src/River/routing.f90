@@ -78,7 +78,7 @@ CLOSE (11)
 !check completeness
 do i=1, subasin
    j=1 !indicator for completeness
-   IF (prout(i,1)==-1) THEN !no data read
+   IF (prout(i,1) == -1) THEN !no data read
         j = 0 !flag as "missing"
         if (associated(corr_column_pre_subbas_outflow)) then
             if (corr_column_pre_subbas_outflow(i) /= 0) then ! check if contained in prespecified outflows, as these don't need routing data
