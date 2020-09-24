@@ -5,7 +5,7 @@
 Eva Nora 
 Müller, Till Francke, George Mamede and Andreas Güntner
 
-**6.3.2020<br>
+**24.9.2020<br>
 WASA-SED rev_261**
 
 Developed within the SESAM-Project:<br>
@@ -1727,7 +1727,7 @@ Output file | Content
 ```daily_actetranspiration.out``` | daily actual evapotranspiration \[mm/d] for all sub-basins (MAP-IDs) incl. river
 ```daily_potetranspiration.out```	| daily potential evapotranspiration \[mm/d] for all sub-basins 
 ```daily_qhorton.out``` | daily horton overland flow \[m<sup>3</sup>] for all sub-basins 
-```daily_sediment_production.out``` | daily sediment production \[t] for all sub-basins  and particle classes
+```daily_sediment_production.out``` | daily sediment production \[t] for all sub-basins and particle classes (i.e. sediment input of hillslopes into the river)
 ```daily_subsurface_runoff.out```	| daily total subsurface runoff \[m<sup>3</sup>/d] for all sub-basins 
 ```daily_theta.out```	| mean soil moisture in profile \[mm] for all sub-basins 
 ```daily_total_overlandflow.out``` | total overland flow \[m<sup>3</sup>] for all sub-basins 
