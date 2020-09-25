@@ -19,7 +19,7 @@
 
     IMPLICIT NONE
 
-    INTEGER :: idummy,i,j,c,k,i_min,n,h,ii
+    INTEGER :: idummy,i,j,c,k,i_min,n,h,ii, PAUL ! for testing GetNumberOfSubstrings(cdummy)
     INTEGER :: dummy1, loop
     INTEGER ::id_sub_int,id_lu_int,id_lu_ext,id_tc_int,id_soil_int,test
     INTEGER :: idummy2(20),tausch,istate
@@ -49,6 +49,7 @@
     INTEGER :: i_soil,i_veg        ! ids of components in work
 
     REAL    :: wind_t
+
 
     !Till: Read routing.dat, which determines which of the given subbasins are to be modelled
     OPEN(11,FILE=pfadp(1:pfadj)// 'River/routing.dat',STATUS='old',IOSTAT=istate)    ! upbasin: MAP ID of upstream sub-basin (MAP IDs);! downbasin: MAP ID of downstream sub-basin (MAP IDs)
@@ -637,7 +638,8 @@
             write(*,'(a)') "ERROR: "//pfadp(1:pfadj)// 'Hillslope/svc.dat could not be opened. Supply this file or disable sediment modelling or loading/saving states. Aborting.'
             stop
         END IF
-        READ(11,*)
+
+        READ(11,*)  !----2 Zeilen überspringen, dann wird die Anzahl der SVC ermittelt, also Im Prinzip die Anzahl der Zeilen
         READ(11,*)
 
         i=0            !for counting SVC records
@@ -651,6 +653,16 @@
         END DO
 
         k=0    !count number of columns to be expected in file
+
+         !------------------------------------------------
+
+        READ(11,'(a)', IOSTAT=istate) cdummy
+
+        PAUL = GetNumberOfSubstrings(cdummy)  ! Feststellen der Spalten von Svc.dat
+
+        allocate (svc_irr(nsvc))  !svc_irr vektor anlegen. Wird in erosion.dat initialisiert
+
+        !--------------------------------------------------------------------------------------------
 
         allocate(id_svc_extern(nsvc))    !allocate memory for SVC-IDs to be read
 
@@ -731,8 +743,15 @@
                 exit        !exit loop
             END IF
             if (trim(cdummy)=='') cycle    !skip blank lines
-            READ(cdummy,*, IOSTAT=istate) id_svc_extern(i), j, n, svc_k_fac(i,:), svc_c_fac(i,:), svc_p_fac(i,:), svc_coarse_fac(i,:), svc_n(i,:)
-            IF (istate /= 0 .OR. GetNumberOfSubstrings(cdummy)/=k) THEN    !format error
+
+            !------------------------------------ Falls es mehr als 8 Spalten gibt, lies svc_irr ein
+            IF ( PAUL == k) THEN
+                READ(cdummy,*, IOSTAT=istate) id_svc_extern(i), j, n, svc_k_fac(i,:), svc_c_fac(i,:), svc_p_fac(i,:), svc_coarse_fac(i,:), svc_n(i,:)
+            ELSE
+                READ(cdummy,*, IOSTAT=istate) id_svc_extern(i), j, n, svc_k_fac(i,:), svc_c_fac(i,:), svc_p_fac(i,:), svc_coarse_fac(i,:), svc_n(i,:), svc_irr(i)
+            END IF
+
+            IF (istate /= 0 .OR. (PAUL /=k .AND. PAUL /= k + 1)) THEN    !format error
                 write(*,'(a,i0,a)')'ERROR: svc.dat, line ',h,': unexpected number of fields. Check *_seasons.dat'
                 stop
             END IF
