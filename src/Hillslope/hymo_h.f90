@@ -401,6 +401,11 @@ module hymo_h
     real, allocatable :: sedout_lu(:,:,:)       !sediment output of TCs [t/km2] (day,timestep,ntcinst)
 
 
+    !-----------------------------------------------------
+    ! IRRIGATION
+    real, allocatable :: frac_irr_sub(:)  ! Anteil der bewässerten Flächen innerhalb der Subbasins
+
+
     !Till: these are all output variables that are currently not used
     !! horton overland flow of each SVC
     !REAL , allocatable :: hortsc(:,:)

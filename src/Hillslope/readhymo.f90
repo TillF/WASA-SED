@@ -19,7 +19,7 @@
 
     IMPLICIT NONE
 
-    INTEGER :: idummy,i,j,c,k,i_min,n,h,ii, PAUL ! for testing GetNumberOfSubstrings(cdummy)
+    INTEGER :: idummy,i,j,c,k,i_min,n,h,ii
     INTEGER :: dummy1, loop
     INTEGER ::id_sub_int,id_lu_int,id_lu_ext,id_tc_int,id_soil_int,test
     INTEGER :: idummy2(20),tausch,istate
@@ -27,6 +27,14 @@
     REAL :: temp1,temp2, maxthickness
     REAL :: sortier(maxterrain),tauschr
     CHARACTER (LEN=8000) :: cdummy
+
+    !----------------------------------------------
+    INTEGER :: PAUL ! for testing GetNumberOfSubstrings(cdummy)
+    REAL :: frac_irr_tc
+    REAL :: frac_irr_lu
+
+
+    INTEGER :: sub_area_irr(subasin)     ! Für AREA
 
     INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
     INTEGER :: soilid            !internal id of current soil
@@ -660,7 +668,6 @@
 
         PAUL = GetNumberOfSubstrings(cdummy)  ! Feststellen der Spalten von Svc.dat
 
-        allocate (svc_irr(nsvc))  !svc_irr vektor anlegen. Wird in erosion.dat initialisiert
 
         !--------------------------------------------------------------------------------------------
 
@@ -734,6 +741,17 @@
         h=2 !for counting lines
         i=1
         write(fmtstr,*)'(3i, ', SIZE(seasonality_k,dim=2),'F, ',SIZE(seasonality_c,dim=2),'F, ',SIZE(seasonality_p,dim=2),'F, ',SIZE(seasonality_coarse,dim=2),'F, ',SIZE(seasonality_n,dim=2),'F)'    !generate format string according to number of columns to be expected
+
+        !-------------------------------------------------
+        IF (PAUL /= k) THEN
+        allocate (svc_irr(nsvc))  !svc_irr vektor anlegen. Wird in erosion.dat deklariert -> ändern in hymo_h
+        svc_irr = 0
+        allocate (frac_irr_sub(subasin))
+        frac_irr_sub = 0.
+
+        END IF
+        !-------------------------------------------------------
+
         DO WHILE (.TRUE.)
             READ(11,'(a)', IOSTAT=istate) cdummy
             h=h+1
@@ -745,7 +763,7 @@
             if (trim(cdummy)=='') cycle    !skip blank lines
 
             !------------------------------------ Falls es mehr als 8 Spalten gibt, lies svc_irr ein
-            IF ( PAUL == k) THEN
+            IF (PAUL == k) THEN
                 READ(cdummy,*, IOSTAT=istate) id_svc_extern(i), j, n, svc_k_fac(i,:), svc_c_fac(i,:), svc_p_fac(i,:), svc_coarse_fac(i,:), svc_n(i,:)
             ELSE
                 READ(cdummy,*, IOSTAT=istate) id_svc_extern(i), j, n, svc_k_fac(i,:), svc_c_fac(i,:), svc_p_fac(i,:), svc_coarse_fac(i,:), svc_n(i,:), svc_irr(i)
@@ -773,6 +791,9 @@
         END DO
         CLOSE(11)
     end if
+
+!----------------Hier war Berechnung der bewässerten Fläche
+
 
     CALL check_seasonality_superfluous(seasonality_k,      "k_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
     CALL check_seasonality_superfluous(seasonality_c,      "c_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
@@ -1197,7 +1218,44 @@
     END DO
 
 
+    !----------------------------------------------------------------------------------
+    ! Hier bewässerte Flächenanteile für jedes Subbasin berechnen
+    ! Ein Array mit Subbas-ID und jeweiliger bewässerter Fläche muss noch angelegt werden. Wieder in erosion? area_irr_svc/tc/lu/sub
 
+    IF (allocated(svc_irr)) THEN
+
+        DO sb_counter=1,subasin
+            DO lu_counter=1,nbr_lu(sb_counter)
+                i_lu=id_lu_intern(lu_counter,sb_counter)
+
+               frac_irr_lu = 0.
+
+                DO tc_counter=1,nbrterrain(i_lu)
+                    tcid_instance=tcallid(sb_counter,lu_counter,tc_counter)    !id of TC instance
+                    if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
+                    id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
+
+                    frac_irr_tc = 0.
+
+                    do svc_counter=1,nbr_svc(tcid_instance)    !check all SVCs of the current TC
+                       IF (svc_irr(tc_contains_svc2(id_tc_type)%p(svc_counter)%svc_id) == 1 ) THEN  ! Wie indizieren?
+
+                            frac_irr_tc = frac_irr_tc + frac_svc(svc_counter,tcid_instance) !* frac_tc(tc_counter) * frac_lu(lu_counter) * area(sb_counter)
+                       END IF
+                    end do
+
+                    frac_irr_lu = frac_irr_lu + fracterrain(tcid_instance) * frac_irr_tc
+                END DO
+                frac_irr_sub(sb_counter) = frac_irr_sub(sb_counter) + fracterrain(tcid_instance) * frac_irr_tc
+
+            END DO !LU-Loop
+
+        END DO
+
+    END IF ! if irrigation is on
+
+
+    !-------------------------------------------
 
 
     !** define van-genuchten parameter from pore-size index for
@@ -1547,6 +1605,7 @@
     !** for soil properties for soil components
     !   Saturated water content (corrected for coarse fragments)
     tctheta_s => soildistr()
+
 
 
     !George read of small_reservoirs.dat was removed
