@@ -36,10 +36,6 @@ module erosion_h
     real, pointer :: svc_coarse_fac(:,:)    !contains MUSLE-factor CFRG  for each SVC and seasonal node
     real, pointer :: svc_n(:,:)    !contains ManningsN for each SVC and seasonal node
 
-    ! ------------For Irrigation
-    integer, allocatable :: svc_irr(:)  ! irrigation variable svc_dat
-    INTEGER, allocatable :: test_area(:)
-
 
     integer, allocatable :: id_svc_extern(:)    !external ids of soil vegetation components
     integer, allocatable :: svc_soil_veg(:,:)    !contains internal IDs of soils and vegetation units belonging to each SVC

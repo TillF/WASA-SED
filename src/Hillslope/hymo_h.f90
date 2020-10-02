@@ -265,6 +265,9 @@ module hymo_h
     real, pointer ::  river_infiltration_t(:,:,:)	!infiltration into riverbed, loss from model domain
     real, pointer ::  riverflow_t(:,:,:)	!Till: flow in the river in m3/s for each day and timestep(366,nt,subasin)
 
+    ! ------------For Irrigation
+    integer, allocatable :: svc_irr(:)  ! irrigation variable svc_dat
+
 
     ! daily soil evaporation (mm/day)
     !Allocatable       real soilet(366,subasin)

@@ -158,6 +158,10 @@ SUBROUTINE readgen(path2do_dat)
     READ(11,*, IOSTAT=i) reservoir_transport
     call checkio(line,i) !check validity of line
     
+    !------------------Irrigation, Fallunterscheidung falls nicht existent? Anpassung der Fehlermeldung? Falls nicht existent, dann doirrigation == .false.
+    READ(11,*, IOSTAT=i) doirrigation
+    call checkio(line,i) !check validity of line
+
     READ(11,'(A)', IOSTAT=i) dummy !READ doloadstate
     IF (i==0) then  
         READ(dummy,*,IOSTAT=i) doloadstate, append_output !try to read doloadstate AND append_output
