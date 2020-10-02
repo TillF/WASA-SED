@@ -19,7 +19,7 @@ module common_h
     LOGICAL, allocatable :: do_pre_outflow(:)   !Till: consider pre-specified outflow time series from subbasins
     LOGICAL :: do_pre_outsed=.TRUE.   !Till: consider pre-specified sediment outflow time series from subbasins
     LOGICAL :: do_mem_diagnostics !memory diagnostics for assessing memory use
-    LOGICAL :: doirrigation ! irrigation
+    LOGICAL :: doirrigation=.FALSE. ! irrigation
 
     INTEGER :: ezgt
     INTEGER :: zahlt
