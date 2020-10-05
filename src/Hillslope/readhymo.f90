@@ -663,7 +663,6 @@
             svc_k_fac_day=>svc_k_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_k_fac(nsvc, 4))
-            CALL check_seasonality(seasonality_k, "k_seasons.dat", id_svc_extern)  !check completeness of seasonality file
             allocate(svc_k_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_k_fac,dim=2)
@@ -674,7 +673,6 @@
             svc_c_fac_day=>svc_c_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_c_fac(nsvc, 4))
-            CALL check_seasonality(seasonality_c, "c_seasons.dat", id_svc_extern)  !check completeness of seasonality file
             allocate(svc_c_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_c_fac,dim=2)
@@ -685,7 +683,6 @@
             svc_p_fac_day=>svc_p_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_p_fac(nsvc, 4))
-            CALL check_seasonality(seasonality_p, "p_seasons.dat", id_svc_extern)  !check completeness of seasonality file
             allocate(svc_p_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_p_fac,dim=2)
@@ -696,7 +693,6 @@
             svc_coarse_fac_day=>svc_coarse_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_coarse_fac(nsvc, 4))
-            CALL check_seasonality(seasonality_coarse, "coarse_seasons.dat", id_svc_extern)  !check completeness of seasonality file
             allocate(svc_coarse_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_coarse_fac,dim=2)
@@ -707,7 +703,6 @@
             svc_n_day=>svc_n(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_n(nsvc, 4))
-            CALL check_seasonality(seasonality_n, "n_seasons.dat", id_svc_extern)  !check completeness of seasonality file
             allocate(svc_n_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_n,dim=2)
@@ -754,6 +749,22 @@
             i=i+1
         END DO
         CLOSE(11)
+        
+		if (SIZE(seasonality_k,dim=2) /= 1) then
+            CALL check_seasonality(seasonality_k, "k_seasons.dat", id_svc_extern)  !check completeness of seasonality file
+        end if
+        if (SIZE(seasonality_c,dim=2) /= 1) then
+            CALL check_seasonality(seasonality_c, "c_seasons.dat", id_svc_extern)  !check completeness of seasonality file
+        end if
+        if (SIZE(seasonality_p,dim=2) /= 1) then
+            CALL check_seasonality(seasonality_p, "p_seasons.dat", id_svc_extern)  !check completeness of seasonality file
+        end if
+        if (SIZE(seasonality_coarse,dim=2) /= 1) then
+            CALL check_seasonality(seasonality_coarse, "coarse_seasons.dat", id_svc_extern)  !check completeness of seasonality file
+        end if
+        if (SIZE(seasonality_n,dim=2) /= 1) then
+            CALL check_seasonality(seasonality_n, "n_seasons.dat", id_svc_extern)  !check completeness of seasonality file
+        end if
     end if
 
     CALL check_seasonality_superfluous(seasonality_k,      "k_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
