@@ -957,7 +957,7 @@
 
         END DO
         CLOSE(11)
-    END IF
+    END IF ! (dosediment .OR. doirrigation)
 
 
 
@@ -1227,9 +1227,9 @@
 
     IF (allocated(svc_irr)) THEN
 
-        DO sb_counter=12, subasin !Loop over all Subbasins
+        DO sb_counter=1, subasin !Loop over all Subbasins
 
-            frac_irr_sub(sb_counter) = 0
+            frac_irr_sub(sb_counter) = 0.
 
             DO lu_counter=1,nbr_lu(sb_counter)  !Loop over all LU's
                 i_lu=id_lu_intern(lu_counter,sb_counter)
@@ -1247,7 +1247,11 @@
                        IF (svc_irr(tc_contains_svc2(id_tc_type)%p(svc_counter)%svc_id) == 1 ) THEN
 
                            frac_svc_x=    tc_contains_svc2(id_tc_type)%p(svc_counter)%fraction
+
                            frac_irr_tc = frac_irr_tc + frac_svc_x
+                           !if (frac_svc_x /= frac_svc(svc_counter,tcid_instance)) then
+                           ! i =3
+                           !end if
                            ! frac_irr_tc = frac_irr_tc + frac_svc(svc_counter,tcid_instance) !* frac_tc(tc_counter) * frac_lu(lu_counter) * area(sb_counter)
                        END IF
                     END DO
@@ -1255,12 +1259,12 @@
                     frac_irr_lu = frac_irr_lu + fracterrain(id_tc_type) * frac_irr_tc  ! alte Version fracterrain(id_tc_type)  / tcid_instance
                 END DO
 
-                frac_irr_sub(sb_counter) = frac_irr_sub(sb_counter) + frac_irr_lu * frac_lu(sb_counter,subasin)
+                frac_irr_sub(sb_counter) = frac_irr_sub(sb_counter) + frac_irr_lu * frac_lu(lu_counter, sb_counter)
 
             END DO !LU-Loop
 
         END DO     ! Subbasin Loop
-
+frac_irr_tc = 0.
     END IF ! if irrigation is on
 
 
