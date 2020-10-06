@@ -29,6 +29,13 @@
     CHARACTER (LEN=8000) :: cdummy
 
     REAL :: frac_svc_x
+    !----------------------------------------------
+    INTEGER :: PAUL ! for testing GetNumberOfSubstrings(cdummy)
+    REAL :: frac_irr_tc
+    REAL :: frac_irr_lu
+    REAL :: frac_svc_x
+    INTEGER :: sub_area_irr(subasin)     ! Für AREA
+
     INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
     INTEGER :: soilid            !internal id of current soil
     INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter    ! counters
@@ -50,6 +57,7 @@
     INTEGER :: i_soil,i_veg        ! ids of components in work
 
     REAL    :: wind_t
+
 
     !Till: Read routing.dat, which determines which of the given subbasins are to be modelled
     OPEN(11,FILE=pfadp(1:pfadj)// 'River/routing.dat',STATUS='old',IOSTAT=istate)    ! upbasin: MAP ID of upstream sub-basin (MAP IDs);! downbasin: MAP ID of downstream sub-basin (MAP IDs)
@@ -423,7 +431,7 @@
             h=h+2 !count lines
         else
             READ(cdummy,*,IOSTAT=istate) luse_subbas(i),luse_lu(i),luse_tc(i),  &
-                rocky(i),nbr_svc(i),(id_soil_intern(c,i),c=1,dummy1)    !!ii: nbr_svc, rocky, id_soil_intern sind feststehende Parameter f�r einen TC-Typ und sollten nur einmal pro TC-typ gespeichert werden
+                rocky(i),nbr_svc(i),(id_soil_intern(c,i),c=1,dummy1)    !!ii: nbr_svc, rocky, id_soil_intern sind feststehende Parameter für einen TC-Typ und sollten nur einmal pro TC-typ gespeichert werden
             k=k+istate
             READ(11,*,IOSTAT=istate) check1, check2, check3,  &
                 rocky(i),nbr_svc(i),(id_veg_intern(c,i),c=1,dummy1)
@@ -638,7 +646,8 @@
             write(*,'(a)') "ERROR: "//pfadp(1:pfadj)// 'Hillslope/svc.dat could not be opened. Supply this file or disable sediment modelling or loading/saving states. Aborting.'
             stop
         END IF
-        READ(11,*)
+
+        READ(11,*)  !----2 Zeilen überspringen, dann wird die Anzahl der SVC ermittelt, also Im Prinzip die Anzahl der Zeilen
         READ(11,*)
 
         i=0            !for counting SVC records
@@ -652,6 +661,15 @@
         END DO
 
         k=0    !count number of columns to be expected in file
+
+         !------------------------------------------------
+
+        READ(11,'(a)', IOSTAT=istate) cdummy
+
+        PAUL = GetNumberOfSubstrings(cdummy)  ! Feststellen der Spalten von Svc.dat
+
+
+        !--------------------------------------------------------------------------------------------
 
         allocate(id_svc_extern(nsvc))    !allocate memory for SVC-IDs to be read
 
@@ -718,6 +736,17 @@
         h=2 !for counting lines
         i=1
         write(fmtstr,*)'(3i, ', SIZE(seasonality_k,dim=2),'F, ',SIZE(seasonality_c,dim=2),'F, ',SIZE(seasonality_p,dim=2),'F, ',SIZE(seasonality_coarse,dim=2),'F, ',SIZE(seasonality_n,dim=2),'F)'    !generate format string according to number of columns to be expected
+
+        !-------------------------------------------------
+        IF (PAUL /= k) THEN
+        allocate (svc_irr(nsvc))  !svc_irr vektor anlegen. Wird in erosion.dat deklariert -> ändern in hymo_h
+        svc_irr = 0
+        allocate (frac_irr_sub(subasin))
+        frac_irr_sub = 0.
+
+        END IF
+        !-------------------------------------------------------
+
         DO WHILE (.TRUE.)
             READ(11,'(a)', IOSTAT=istate) cdummy
             h=h+1
@@ -727,8 +756,15 @@
                 exit        !exit loop
             END IF
             if (trim(cdummy)=='') cycle    !skip blank lines
-            READ(cdummy,*, IOSTAT=istate) id_svc_extern(i), j, n, svc_k_fac(i,:), svc_c_fac(i,:), svc_p_fac(i,:), svc_coarse_fac(i,:), svc_n(i,:)
-            IF (istate /= 0 .OR. GetNumberOfSubstrings(cdummy)/=k) THEN    !format error
+
+            !------------------------------------ Falls es mehr als 8 Spalten gibt, lies svc_irr ein
+            IF (PAUL == k) THEN
+                READ(cdummy,*, IOSTAT=istate) id_svc_extern(i), j, n, svc_k_fac(i,:), svc_c_fac(i,:), svc_p_fac(i,:), svc_coarse_fac(i,:), svc_n(i,:)
+            ELSE
+                READ(cdummy,*, IOSTAT=istate) id_svc_extern(i), j, n, svc_k_fac(i,:), svc_c_fac(i,:), svc_p_fac(i,:), svc_coarse_fac(i,:), svc_n(i,:), svc_irr(i)
+            END IF
+
+            IF (istate /= 0 .OR. (PAUL /=k .AND. PAUL /= k + 1)) THEN    !format error
                 write(*,'(a,i0,a)')'ERROR: svc.dat, line ',h,': unexpected number of fields. Check *_seasons.dat'
                 stop
             END IF
@@ -766,6 +802,7 @@
             CALL check_seasonality(seasonality_n, "n_seasons.dat", id_svc_extern)  !check completeness of seasonality file
         end if
     end if
+
 
     CALL check_seasonality_superfluous(seasonality_k,      "k_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
     CALL check_seasonality_superfluous(seasonality_c,      "c_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
@@ -871,7 +908,13 @@
 
 
 
-        !** read SVC relations towards TCs
+
+
+
+    END IF
+
+    IF (dosediment .OR. doirrigation) THEN
+        !** read SVC relations towards TCs  if do sediment or do irrigation
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/svc_in_tc.dat', IOSTAT=istate,STATUS='old')
         IF (istate/=0) THEN
             write(*,'(a)') "ERROR: ", pfadp(1:pfadj)// 'Hillslope/svc_in_tc.dat could not be opened. Aborting.'
@@ -922,11 +965,7 @@
 
         END DO
         CLOSE(11)
-
-
-
-    END IF
-
+    END IF ! (dosediment .OR. doirrigation)
 
 
 
@@ -1190,7 +1229,46 @@
     END DO
 
 
+    !----------------------------------------------------------------------------------
+    ! calculation of the fractions within each subbasin that have the irrigation flags. -> irrigated fraction of each subbasin
 
+    IF (allocated(svc_irr)) THEN
+
+        DO sb_counter=1, subasin !Loop over all Subbasins
+
+            frac_irr_sub(sb_counter) = 0.
+
+            DO lu_counter=1,nbr_lu(sb_counter)  !Loop over all LU's
+                i_lu=id_lu_intern(lu_counter,sb_counter)
+
+               frac_irr_lu = 0.
+
+                DO tc_counter=1,nbrterrain(i_lu)  ! Loop over all TC's
+                    tcid_instance=tcallid(sb_counter,lu_counter,tc_counter)    !id of TC instance
+                    if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
+                    id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
+
+                    frac_irr_tc = 0.
+
+                    DO svc_counter=1,nbr_svc(tcid_instance)    !check all SVCs of the current TC, Loop over all SVC's
+                       IF (svc_irr(tc_contains_svc2(id_tc_type)%p(svc_counter)%svc_id) == 1 ) THEN
+                           frac_svc_x=    tc_contains_svc2(id_tc_type)%p(svc_counter)%fraction
+                           frac_irr_tc = frac_irr_tc + frac_svc_x
+                       END IF
+                    END DO
+
+                    frac_irr_lu = frac_irr_lu + fracterrain(id_tc_type) * frac_irr_tc
+                END DO
+
+                frac_irr_sub(sb_counter) = frac_irr_sub(sb_counter) + frac_irr_lu * frac_lu(lu_counter, sb_counter)
+
+            END DO !LU-Loop
+
+        END DO     ! Subbasin Loop
+    END IF ! if irrigation is on
+
+
+    !-------------------------------------------
 
 
     !** define van-genuchten parameter from pore-size index for
@@ -1560,6 +1638,7 @@
     !** for soil properties for soil components
     !   Saturated water content (corrected for coarse fragments)
     tctheta_s => soildistr()
+
 
 
     !George read of small_reservoirs.dat was removed

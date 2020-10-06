@@ -12,6 +12,7 @@
     ! (1.1) Update of soil moisture due to lateral inflow of subsurface flow from other SVCs of this TC
     ! (1.2) Update of soil moisture due to lateral inflow of subsurface flow from higher TC
     ! (11) INTERCEPTION
+    ! (1.3) distribution of irrigation input
     ! (2)   SURFACE RUNOFF
     !     (2.0) on rock outcrops: overland flow
     !     (2.1) on saturated part of TC: saturation excess overland flow occurs
@@ -128,6 +129,8 @@
     REAL :: resf3(maxhori),etpvert(maxhori)
     REAL :: frac_old,tempth,percolmac(maxhori)
     REAL :: intc_evap(maxsoil),intcred(maxsoil),maxintc,aetred(maxsoil)
+    REAL :: irri_input(maxsoil) !water input by irrigtion for each SVC in current TC
+    INTEGER :: irri_supply
     REAL :: hfrac(maxsoil),merkalluv(maxsoil)
 
     REAL :: allalluv
@@ -1033,6 +1036,19 @@
     watbal=watbal-(temp3-tempx)							!Till: modify the water balance by the difference between storage before and after calculation [mm]
 
 
+!** -------------------------------------------------------------------------
+    !** (1.3)   Irrigation input
+    irri_supply = 1000
+    irri_input = 0.
+! Berechnung der Bewässerungsmenge für jede SVC
+
+ ! if (irr_area(i_subbas_2) /= 0) !Was passiert, wenn wir ausleitungen machen, aber nicht bewässern?
+    !in [mm]
+    DO i=1,nbr_svc(tcid_instance2)  ! oder tcid_instance 2?
+        irri_input(i) = irri_supply * (frac_lu(lu_counter2,i_subbas2) * fracterrain(id_tc_type2) * frac_svc(i,tcid_instance2)) / frac_irr_sub(i_subbas2) ! Verteilung des Irri_inputs Anteilig an gesamtbewässerter Fläche des Subbasin
+    END DO
+    !irri_supply = sum(irri_input)  Checken ob == 1, aber wo? WO wird durch die Subbasins & LU's geloopt?
+
 
     !** -------------------------------------------------------------------------
     !** (2)   SURFACE RUNOFF
@@ -1099,7 +1115,7 @@
     inputrem(:)=0.
     DO i=1,nbr_svc(tcid_instance2) !Till: for all SVC in the current TC, compute saturation excess runoff
 
-        INPUT=prec-intcred(i)+ q_surf_in/(tcarea2*1.e3)+qsurf(i)/(tcarea2*1.e3*frac_svc(i,tcid_instance2))
+        INPUT=prec-intcred(i) + q_surf_in/(tcarea2*1.e3)+qsurf(i)/(tcarea2*1.e3*frac_svc(i,tcid_instance2)) + irri_input(i)  !Irrigation input
         !Till: precipitation-intercepted+surface flow from above+surface(return) flow from within (mm)
         IF (INPUT > 0.) THEN
 

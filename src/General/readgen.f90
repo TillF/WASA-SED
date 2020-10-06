@@ -173,6 +173,10 @@ SUBROUTINE readgen(path2do_dat)
     
     READ(11,*, IOSTAT=i) dosnow !ii: rather use existence of snow input files as indicator
 
+    !------------------Irrigation, Fallunterscheidung falls nicht existent? Anpassung der Fehlermeldung? Falls nicht existent, dann doirrigation == .false.
+    READ(11,*, IOSTAT=i) doirrigation
+
+
     CLOSE(11)
 
     if (dt/=1 .AND. dt /=24) then

@@ -265,6 +265,9 @@ module hymo_h
     real, pointer ::  river_infiltration_t(:,:,:)	!infiltration into riverbed, loss from model domain
     real, pointer ::  riverflow_t(:,:,:)	!Till: flow in the river in m3/s for each day and timestep(366,nt,subasin)
 
+    ! ------------For Irrigation
+    integer, allocatable :: svc_irr(:)  ! irrigation variable svc_dat
+
 
     ! daily soil evaporation (mm/day)
     !Allocatable       real soilet(366,subasin)
@@ -399,6 +402,11 @@ module hymo_h
     real, allocatable :: sedout_tc(:,:,:)		!sediment output of TCs [t/km2] (day,timestep,ntcinst)
 
     real, allocatable :: sedout_lu(:,:,:)       !sediment output of TCs [t/km2] (day,timestep,ntcinst)
+
+
+    !-----------------------------------------------------
+    ! IRRIGATION
+    real, allocatable :: frac_irr_sub(:)  ! Anteil der bewässerten Flächen innerhalb der Subbasins
 
 
     !Till: these are all output variables that are currently not used
