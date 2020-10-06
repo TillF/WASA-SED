@@ -28,6 +28,7 @@
     REAL :: sortier(maxterrain),tauschr
     CHARACTER (LEN=8000) :: cdummy
 
+    REAL :: frac_svc_x
     INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
     INTEGER :: soilid            !internal id of current soil
     INTEGER :: sb_counter,lu_counter,tc_counter,svc_counter    ! counters
@@ -662,7 +663,6 @@
             svc_k_fac_day=>svc_k_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_k_fac(nsvc, 4))
-            CALL check_seasonality(seasonality_k, "k_seasons.dat", id_svc_extern)  !check completeness of seasonality file
             allocate(svc_k_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_k_fac,dim=2)
@@ -673,7 +673,6 @@
             svc_c_fac_day=>svc_c_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_c_fac(nsvc, 4))
-            CALL check_seasonality(seasonality_c, "c_seasons.dat", id_svc_extern)  !check completeness of seasonality file
             allocate(svc_c_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_c_fac,dim=2)
@@ -684,7 +683,6 @@
             svc_p_fac_day=>svc_p_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_p_fac(nsvc, 4))
-            CALL check_seasonality(seasonality_p, "p_seasons.dat", id_svc_extern)  !check completeness of seasonality file
             allocate(svc_p_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_p_fac,dim=2)
@@ -695,7 +693,6 @@
             svc_coarse_fac_day=>svc_coarse_fac(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_coarse_fac(nsvc, 4))
-            CALL check_seasonality(seasonality_coarse, "coarse_seasons.dat", id_svc_extern)  !check completeness of seasonality file
             allocate(svc_coarse_fac_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_coarse_fac,dim=2)
@@ -706,7 +703,6 @@
             svc_n_day=>svc_n(:,1)        !no dynamics, daily values remain static as read from file
         else
             allocate (svc_n(nsvc, 4))
-            CALL check_seasonality(seasonality_n, "n_seasons.dat", id_svc_extern)  !check completeness of seasonality file
             allocate(svc_n_day(nsvc))    !allocate memory for temporal dynamics (current day and subbasin)
         end if
         k=k+SIZE(svc_n,dim=2)
@@ -753,6 +749,22 @@
             i=i+1
         END DO
         CLOSE(11)
+        
+		if (SIZE(seasonality_k,dim=2) /= 1) then
+            CALL check_seasonality(seasonality_k, "k_seasons.dat", id_svc_extern)  !check completeness of seasonality file
+        end if
+        if (SIZE(seasonality_c,dim=2) /= 1) then
+            CALL check_seasonality(seasonality_c, "c_seasons.dat", id_svc_extern)  !check completeness of seasonality file
+        end if
+        if (SIZE(seasonality_p,dim=2) /= 1) then
+            CALL check_seasonality(seasonality_p, "p_seasons.dat", id_svc_extern)  !check completeness of seasonality file
+        end if
+        if (SIZE(seasonality_coarse,dim=2) /= 1) then
+            CALL check_seasonality(seasonality_coarse, "coarse_seasons.dat", id_svc_extern)  !check completeness of seasonality file
+        end if
+        if (SIZE(seasonality_n,dim=2) /= 1) then
+            CALL check_seasonality(seasonality_n, "n_seasons.dat", id_svc_extern)  !check completeness of seasonality file
+        end if
     end if
 
     CALL check_seasonality_superfluous(seasonality_k,      "k_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
@@ -1189,6 +1201,28 @@
         END DO
     END DO
 
+   !Till: check consistency between SVC-fractions in soil_vegetation.dat and svc_in_tc.dat
+    if (allocated(tc_contains_svc2)) then !check consistency between SVC-fractions in soil_vegetation.dat and svc_in_tc.dat
+        DO sb_counter=1,subasin
+            DO lu_counter=1,nbr_lu(sb_counter)
+                i_lu=id_lu_intern(lu_counter,sb_counter)
+                DO tc_counter=1,nbrterrain(i_lu)
+                    tcid_instance=tcallid(sb_counter,lu_counter,tc_counter)    !id of TC instance
+                    if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
+                    id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
+
+                    do svc_counter=1,nbr_svc(tcid_instance)    !check all SVCs of the current TC
+                        frac_svc_x=    tc_contains_svc2(id_tc_type)%p(svc_counter)%fraction
+                        if (abs(frac_svc_x - frac_svc(svc_counter,tcid_instance)) > 0.01) then
+                                write(*,'(A,i0,a,i0,a)')'WARNING: Inconsistent SVC-fractions in soil_vegetation.dat and svc_in_tc.dat for TC ', id_terrain_extern(id_tc_type),', SVC at position ', svc_counter,'. Using the latter. '
+                                frac_svc(svc_counter,tcid_instance) = tc_contains_svc2(id_tc_type)%p(svc_counter)%fraction  !we correct this way, as svc_in_tc.dat (if present) has a structure similar to db, which is more consistent
+                        end if
+                    end do
+
+                END DO
+            END DO
+        END DO
+    end if
 
 
     !Till: determine rocky_fraction from areal coverage of SVCs with a soil that has 100% coarse fragments in the top layer
@@ -1299,17 +1333,15 @@
             DO tc_counter=1,nbrterrain(i_lu)
                 tcid_instance=tcallid(sb_counter,lu_counter,tc_counter)    !id of TC instance
                 if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
-                id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
-
-                do svc_counter=1,nbr_svc(tcid_instance)    !check all SVCs of the current TC
-                    temp1= sum(frac_svc(:,tcid_instance)) + rocky(tcid_instance) !current sum of fractions
-                    if (temp1>1.05 .OR. temp1<0.95) then
-                        write(*,'(A,f5.2,a,i0)')'WARNING: Sum of SVC- and rocky fraction was ',temp1,', now normalized to 1. (TC ',&
-                            id_terrain_extern(id_tc_type),')'
-                    end if
-                    rocky(tcid_instance)     = rocky(tcid_instance)     / temp1    !correct fractions
-                    frac_svc(:,tcid_instance)= frac_svc(:,tcid_instance)/ temp1
-                end do
+                !normalize
+                temp1= sum(frac_svc(:,tcid_instance)) + rocky(tcid_instance) !current sum of fractions
+                if (temp1>1.05 .OR. temp1<0.95) then
+                    id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
+                    write(*,'(A,f5.2,a,i0)')'WARNING: Sum of SVC- and rocky fraction was ',temp1,', now normalized to 1. (TC ',&
+                        id_terrain_extern(id_tc_type),')'
+                end if
+                rocky(tcid_instance)     = rocky(tcid_instance)     / temp1    !correct fractions
+                frac_svc(:,tcid_instance)= frac_svc(:,tcid_instance)/ temp1
             END DO
         END DO
     END DO
