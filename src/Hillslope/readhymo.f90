@@ -33,7 +33,7 @@
     REAL :: frac_irr_tc
     REAL :: frac_irr_lu
     REAL :: frac_svc_x
-    INTEGER :: sub_area_irr(subasin)     ! FÃ¼r AREA
+    INTEGER :: sub_area_irr(subasin)     ! Für AREA
 
     INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
     INTEGER :: soilid            !internal id of current soil
@@ -665,7 +665,7 @@
 
         READ(11,'(a)', IOSTAT=istate) cdummy
 
-        PAUL = GetNumberOfSubstrings(cdummy)  ! Feststellen der Spalten von Svc.dat
+        PAUL = GetNumberOfSubstrings(cdummy)  ! Feststellen der Spalten von Svc.dat für irrigation
 
 
         !--------------------------------------------------------------------------------------------
@@ -736,15 +736,15 @@
         i=1
         write(fmtstr,*)'(3i, ', SIZE(seasonality_k,dim=2),'F, ',SIZE(seasonality_c,dim=2),'F, ',SIZE(seasonality_p,dim=2),'F, ',SIZE(seasonality_coarse,dim=2),'F, ',SIZE(seasonality_n,dim=2),'F)'    !generate format string according to number of columns to be expected
 
-        !-------------------------------------------------
-        IF (PAUL /= k) THEN
-        allocate (svc_irr(nsvc))  !svc_irr vektor anlegen. Wird in erosion.dat deklariert -> Ã¤ndern in hymo_h
-        svc_irr = 0
-        allocate (frac_irr_sub(subasin))
-        frac_irr_sub = 0.
 
-        END IF
-        !-------------------------------------------------------
+    !-------------------------------------------------
+    IF (PAUL /= k) THEN
+    allocate (svc_irr(nsvc))  !svc_irr vektor anlegen. Wird in hymo_h deklariert. Irrigation
+    svc_irr = 0
+    allocate (frac_irr_sub(subasin)) !Für die spätere Flächenberechnung
+    frac_irr_sub = 0.
+    END IF
+    !-------------------------------------------------------
 
         DO WHILE (.TRUE.)
             READ(11,'(a)', IOSTAT=istate) cdummy
@@ -1228,46 +1228,6 @@
     END DO
 
 
-    !----------------------------------------------------------------------------------
-    ! calculation of the fractions within each subbasin that have the irrigation flags. -> irrigated fraction of each subbasin
-
-    IF (allocated(svc_irr)) THEN
-
-        DO sb_counter=1, subasin !Loop over all Subbasins
-
-            frac_irr_sub(sb_counter) = 0.
-
-            DO lu_counter=1,nbr_lu(sb_counter)  !Loop over all LU's
-                i_lu=id_lu_intern(lu_counter,sb_counter)
-
-               frac_irr_lu = 0.
-
-                DO tc_counter=1,nbrterrain(i_lu)  ! Loop over all TC's
-                    tcid_instance=tcallid(sb_counter,lu_counter,tc_counter)    !id of TC instance
-                    if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
-                    id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
-
-                    frac_irr_tc = 0.
-
-                    DO svc_counter=1,nbr_svc(tcid_instance)    !check all SVCs of the current TC, Loop over all SVC's
-                       IF (svc_irr(tc_contains_svc2(id_tc_type)%p(svc_counter)%svc_id) == 1 ) THEN
-                           frac_svc_x=    tc_contains_svc2(id_tc_type)%p(svc_counter)%fraction
-                           frac_irr_tc = frac_irr_tc + frac_svc_x
-                       END IF
-                    END DO
-
-                    frac_irr_lu = frac_irr_lu + fracterrain(id_tc_type) * frac_irr_tc
-                END DO
-
-                frac_irr_sub(sb_counter) = frac_irr_sub(sb_counter) + frac_irr_lu * frac_lu(lu_counter, sb_counter)
-
-            END DO !LU-Loop
-
-        END DO     ! Subbasin Loop
-    END IF ! if irrigation is on
-
-
-    !-------------------------------------------
 
 
     !** define van-genuchten parameter from pore-size index for
@@ -1422,6 +1382,50 @@
             END DO
         END DO
     END DO
+
+
+
+
+    !----------------------------------------------------------------------------------
+    ! calculation of the fractions within each subbasin that have the irrigation flags. -> irrigated fraction of each subbasin
+
+    IF (allocated(svc_irr)) THEN
+
+        DO sb_counter=1, subasin !Loop over all Subbasins
+
+            frac_irr_sub(sb_counter) = 0.
+
+            DO lu_counter=1,nbr_lu(sb_counter)  !Loop over all LU's
+                i_lu=id_lu_intern(lu_counter,sb_counter)
+
+               frac_irr_lu = 0.
+
+                DO tc_counter=1,nbrterrain(i_lu)  ! Loop over all TC's
+                    tcid_instance=tcallid(sb_counter,lu_counter,tc_counter)    !id of TC instance
+                    if (tcid_instance==-1) cycle                            !this may happen if this is merely a dummy basin with prespecified outflow
+                    id_tc_type=id_terrain_intern(tc_counter,i_lu)            !id of TC type
+
+                    frac_irr_tc = 0.
+
+                    DO svc_counter=1,nbr_svc(tcid_instance)    !check all SVCs of the current TC, Loop over all SVC's
+                       IF (svc_irr(tc_contains_svc2(id_tc_type)%p(svc_counter)%svc_id) == 1 ) THEN
+                           frac_svc_x=    tc_contains_svc2(id_tc_type)%p(svc_counter)%fraction
+                           frac_irr_tc = frac_irr_tc + frac_svc_x
+                       END IF
+                    END DO
+
+                    frac_irr_lu = frac_irr_lu + fracterrain(id_tc_type) * frac_irr_tc
+                END DO
+
+                frac_irr_sub(sb_counter) = frac_irr_sub(sb_counter) + frac_irr_lu * frac_lu(lu_counter, sb_counter)
+
+            END DO !LU-Loop
+
+        END DO     ! Subbasin Loop
+    END IF ! if irrigation is on
+
+
+    !-------------------------------------------
 
 
 
