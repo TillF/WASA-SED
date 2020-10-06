@@ -1,12 +1,11 @@
 # WASA-SED
 
 # User Manual
+main contributors:
+Andreas Güntner (2000-2002), Eva Nora Müller (2006-2009), George Mamede(2006-2009), Till Francke (2006-...), Pedro Medeiros (2007-2008), Tobias Pilz (2016), Erwin Rottler (2017)
 
-Eva Nora 
-Müller, Till Francke, George Mamede and Andreas Güntner
-
-**24.9.2020<br>
-WASA-SED rev_261**
+**6.10.2020<br>
+WASA-SED rev_268**
 
 Developed within the SESAM-Project:<br>
 Sediment Export of Semi-Arid Catchment: Monitoring and Modelling 2005-2008<br>
@@ -1174,9 +1173,8 @@ This optional file allows specifying the sediment output of selected sub-basins.
 
 Example: Sub-basin 4 has pre-specified sediment output of 0.5 t/d for 1 Sep 2005, distributed among 3 particle size classes with the fractions 0.3, 0.2 and 0.5.
 
-***7) ```transposition.dat``` ***<br>
-(optional) Currently only works for daily resolution. For sediments, abstraction from reservoirs assumes zero concentration, whereas abstraction from river uses river concentration.
-Abstractions are taken from the outlet of river reaches, and added to the inlet points of reaches.
+**7)** ```transposition.dat``` <br>
+(optional)
 
 ```
 # Water transpositions via canals or pipes between sub-basins, in order of routing scheme
@@ -1185,18 +1183,20 @@ Start-Subbasin-ID, Flag(reservoir/river), Flow(m3/s,) Loss(%), Destination-Subba
         67         2       2.4       0.1        31         1      1997
         31         1         2      0.06        30         1      1993
         30         1         2      0.02        29         2      1993
+…
 ```
 
 *Start-Subbasin-ID*:		ID of sub-basin (source of water abstraction)<br>
 *Flag(reservoir/river)*:		water abstraction from: 1 (river) or 2 (reservoir)<br>
 *Flow(m<sup>3</sup>/s)*:			amount of re-routed water<br>
 *Loss(%)*:			transmission loss<br>
-*Destination-Subbasin-ID*:		ID of sub-basin (destination of water abstraction)
+*Destination-Subbasin-ID*:		ID of sub-basin (destination of water abstraction)<br>
 *Flag (reservoir/river)*:		water diversion to: 1 (river) or 2 (reservoir)<br>
 *begin\_year*:			start time of water abstraction
 
+Currently only works for daily resolution. For suspended sediments, abstraction from reservoirs assumes zero concentration, whereas abstraction from river uses river concentration.
+Abstractions are taken from the outlet of river reaches, and added to the inlet points of reaches.
 This file is optional. It is only read if ```dotrans``` (in ```do.dat```) is set to ```.true.```. In this case, ```transposition.dat``` is expected in the subdirectory ```Others/```. <br>
-WARNING: The transposition of sediment has not yet been implemented.
 
 <a name="3-4-input-files-for-the-reservoir-module"></a>
 ### 3.4 Input files for the reservoir module
