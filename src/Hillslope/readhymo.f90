@@ -28,7 +28,6 @@
     REAL :: sortier(maxterrain),tauschr
     CHARACTER (LEN=8000) :: cdummy
 
-    REAL :: frac_svc_x
     !----------------------------------------------
     INTEGER :: PAUL ! for testing GetNumberOfSubstrings(cdummy)
     REAL :: frac_irr_tc
