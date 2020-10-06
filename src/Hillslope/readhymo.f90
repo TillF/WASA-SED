@@ -793,8 +793,6 @@
         CLOSE(11)
     end if
 
-!----------------Hier war Berechnung der bewässerten Fläche
-
 
     CALL check_seasonality_superfluous(seasonality_k,      "k_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
     CALL check_seasonality_superfluous(seasonality_c,      "c_seasons.dat",      id_svc_extern)  !check for obsolete entries in seasonality file
@@ -1222,8 +1220,7 @@
 
 
     !----------------------------------------------------------------------------------
-    ! Hier bewässerte Flächenanteile für jedes Subbasin berechnen
-    ! Ein Array mit Subbas-ID und jeweiliger bewässerter Fläche muss noch angelegt werden. Wieder in erosion? area_irr_svc/tc/lu/sub
+    ! calculation of the fractions within each subbasin that have the irrigation flags. -> irrigated fraction of each subbasin
 
     IF (allocated(svc_irr)) THEN
 
@@ -1245,18 +1242,12 @@
 
                     DO svc_counter=1,nbr_svc(tcid_instance)    !check all SVCs of the current TC, Loop over all SVC's
                        IF (svc_irr(tc_contains_svc2(id_tc_type)%p(svc_counter)%svc_id) == 1 ) THEN
-
                            frac_svc_x=    tc_contains_svc2(id_tc_type)%p(svc_counter)%fraction
-
                            frac_irr_tc = frac_irr_tc + frac_svc_x
-                           !if (frac_svc_x /= frac_svc(svc_counter,tcid_instance)) then
-                           ! i =3
-                           !end if
-                           ! frac_irr_tc = frac_irr_tc + frac_svc(svc_counter,tcid_instance) !* frac_tc(tc_counter) * frac_lu(lu_counter) * area(sb_counter)
                        END IF
                     END DO
 
-                    frac_irr_lu = frac_irr_lu + fracterrain(id_tc_type) * frac_irr_tc  ! alte Version fracterrain(id_tc_type)  / tcid_instance
+                    frac_irr_lu = frac_irr_lu + fracterrain(id_tc_type) * frac_irr_tc
                 END DO
 
                 frac_irr_sub(sb_counter) = frac_irr_sub(sb_counter) + frac_irr_lu * frac_lu(lu_counter, sb_counter)
@@ -1264,7 +1255,6 @@
             END DO !LU-Loop
 
         END DO     ! Subbasin Loop
-frac_irr_tc = 0.
     END IF ! if irrigation is on
 
 
