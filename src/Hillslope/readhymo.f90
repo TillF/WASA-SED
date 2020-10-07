@@ -29,11 +29,11 @@
     CHARACTER (LEN=8000) :: cdummy
 
     !----------------------------------------------
-    INTEGER :: PAUL ! for testing GetNumberOfSubstrings(cdummy)
+    INTEGER :: PAUL ! for testing GetNumberOfSubstrings(cdummy) IRRIGATION
     REAL :: frac_irr_tc
     REAL :: frac_irr_lu
     REAL :: frac_svc_x
-    INTEGER :: sub_area_irr(subasin)     ! Für AREA
+
 
     INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
     INTEGER :: soilid            !internal id of current soil
@@ -661,7 +661,7 @@
 
         k=0    !count number of columns to be expected in file
 
-         !------------------------------------------------
+        !------------------------------------------------
 
         READ(11,'(a)', IOSTAT=istate) cdummy
 
@@ -785,6 +785,84 @@
         END DO
         CLOSE(11)
         
+        !------------------------------------------------------------------------------
+        ! read irri.dat Irrigation   ! This structure is taking von read hymo.dat
+        !** read subbasin parameters
+    IF (doirrigation) THEN
+
+        OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/irri.dat',STATUS='old',IOSTAT=istate)
+        IF (istate/=0) THEN
+            write(*,'(a)')'Error: Input file '//pfadp(1:pfadj)// 'Hillslope/irri.dat'//' not found, aborting.'
+            stop
+        END IF
+
+        READ(11,*)
+        READ(11,*)
+        i=1
+        h=3 !count lines
+        allocate(sub_source(subasin))  !Sinnvolle Dimensionierung?
+        sub_source = 0
+        allocate(irri_source(subasin))
+        irri_source = ''
+        allocate(sub_reciever(subasin))
+        sub_reciever  = 0
+        allocate(irri_rule(subasin))
+        irri_rule = ''
+        allocate(irri_rate(subasin))
+        irri_rate = 0.
+
+        j=1
+        DO WHILE(.TRUE.) !(istate==0)
+        cdummy=''
+        READ(11,'(a)',IOSTAT=istate) cdummy
+       ! if (istate/=0) then    !(premature) end of file
+       !     write(*,'(a,i0,a)')'ERROR (irri.dat): At least ',subasin,' lines (#subbasins) expected'
+       !     stop
+       ! end if
+
+        dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
+        if (dummy1 > 5) then    !too many fields in line
+            write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): line ',h,' contains more (',dummy1,') than the expected 4 fields.'
+            stop
+        end if
+
+        READ(cdummy,*,IOSTAT=istate) sub_source(j),irri_source(j),sub_reciever(j),irri_rule(j), irri_rate(j)
+           ! if (istate/=0) then    !format error
+            !    write(*,'(a,i0)')'ERROR (irri.dat): Format error in line ',h
+             !   stop
+            !end if
+
+         i=which1(upbasin==sub_source(j))
+         if (i==0) then    !Paul: the current sub_source was not contained in routing.dat, skip it and remove entries
+            WRITE(*,'(a, I0, a, I0, a)') 'Subbasin ',sub_source(j),' not listed in routing.dat, ignored.'
+            sub_source(j) = 0
+            irri_source(j) = ''
+            sub_reciever(j) = 0
+            irri_rule(j) = ''
+            irri_rate(j) = 0.
+         end if
+
+         i=which1(upbasin==sub_reciever(j))
+         if (i==0) then    !Paul: the current sub_reciever was not contained in routing.dat, skip it and remove entries
+            WRITE(*,'(a, I0, a, I0, a)') 'Subbasin ',sub_reciever(j),' not listed in routing.dat, ignored.'
+            sub_source(j) = 0
+            irri_source(j) = ''
+            sub_reciever(j) = 0
+            irri_rule(j) = ''
+            irri_rate(j) = 0.
+         end if
+        !Wie source, rate und rule checken? Anlegen eines Arrays mit allen möglichen Optionen und dann wie oben?
+         IF (istate/=0) THEN     !no further line
+            exit                !exit loop
+         END IF
+
+         h=h+1 !count lines
+         j=j+1
+        END DO
+        CLOSE(11)
+    END IF ! if doirrigation
+        !----------------------------------------------------------------------------------
+
 		if (SIZE(seasonality_k,dim=2) /= 1) then
             CALL check_seasonality(seasonality_k, "k_seasons.dat", id_svc_extern)  !check completeness of seasonality file
         end if
@@ -1387,7 +1465,7 @@
 
 
     !----------------------------------------------------------------------------------
-    ! calculation of the fractions within each subbasin that have the irrigation flags. -> irrigated fraction of each subbasin
+    ! calculation of the fractions within each subbasin that have the irrigation flags. -> irrigated fraction of each subbasin IRRIGATION
 
     IF (allocated(svc_irr)) THEN
 

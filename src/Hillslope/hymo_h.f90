@@ -265,10 +265,6 @@ module hymo_h
     real, pointer ::  river_infiltration_t(:,:,:)	!infiltration into riverbed, loss from model domain
     real, pointer ::  riverflow_t(:,:,:)	!Till: flow in the river in m3/s for each day and timestep(366,nt,subasin)
 
-    ! ------------For Irrigation
-    integer, allocatable :: svc_irr(:)  ! irrigation variable svc_dat
-
-
     ! daily soil evaporation (mm/day)
     !Allocatable       real soilet(366,subasin)
     real, allocatable :: soilet(:,:)
@@ -407,7 +403,12 @@ module hymo_h
     !-----------------------------------------------------
     ! IRRIGATION
     real, allocatable :: frac_irr_sub(:)  ! Anteil der bewässerten Flächen innerhalb der Subbasins
-
+    integer, allocatable :: svc_irr(:)  ! irrigation variable svc_dat
+    INTEGER, allocatable :: sub_source(:)
+    INTEGER, allocatable :: sub_reciever(:)
+    CHARACTER(len=20), allocatable :: irri_rule(:)  !oder lieber als Nummer?
+    REAL, allocatable :: irri_rate(:)
+    CHARACTER(len=20), allocatable :: irri_source(:)
 
     !Till: these are all output variables that are currently not used
     !! horton overland flow of each SVC

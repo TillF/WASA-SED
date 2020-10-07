@@ -1038,7 +1038,7 @@
 
 !** -------------------------------------------------------------------------
     !** (1.3)   Irrigation input
-    irri_supply = 1000
+    irri_supply = 500
     irri_input = 0.
 ! Berechnung der Bewässerungsmenge für jede SVC
 
