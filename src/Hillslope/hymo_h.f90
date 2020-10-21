@@ -406,9 +406,9 @@ module hymo_h
     integer, allocatable :: svc_irr(:)  ! irrigation variable svc_dat
     INTEGER, allocatable :: sub_source(:)
     INTEGER, allocatable :: sub_reciever(:)
-    CHARACTER(len=20), allocatable :: irri_rule(:)  !oder lieber als Nummer?
+    CHARACTER(len=12), allocatable :: irri_rule(:)  !oder lieber als Nummer?
     REAL, allocatable :: irri_rate(:)
-    CHARACTER(len=20), allocatable :: irri_source(:)
+    CHARACTER(len=11), allocatable :: irri_source(:)
 
     !Till: these are all output variables that are currently not used
     !! horton overland flow of each SVC
