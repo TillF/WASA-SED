@@ -57,6 +57,8 @@ DO t=tstart, tstop
  !Call routing routine
 	if (river_transport.eq.1) CALL routing(2)
     if (river_transport.ne.1) CALL routing_new(2)
+    !if irrigation CALL  irrigation_abstraction.f90
+    ! Iterieren durch Spenderbasins
     dprev = d
     dtot = dtot + 1 ! count days of simulation
   END DO

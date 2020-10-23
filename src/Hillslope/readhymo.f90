@@ -35,6 +35,8 @@
     REAL :: frac_svc_x
     CHARACTER(len=11) :: source_options(4)
     CHARACTER(len=12) :: rule_options(4)
+    LOGICAL :: file_exists !for checking if irri.dat exists
+    INTEGER ::  nbr_irri_records
 
 
     INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
@@ -786,135 +788,7 @@
             i=i+1
         END DO
         CLOSE(11)
-        
-        !------------------------------------------------------------------------------
-        ! read irri.dat Irrigation   ! This structure is taking von read hymo.dat
-        !** read subbasin parameters
-    IF (doirrigation) THEN
-
-        source_options(1) = "river" !create array to check validity of irri.dat column for sources
-        source_options(2) = "reservoir" !can this be done with less space or at initialization at beginning of script?
-        source_options(3) = "groundwater"
-        source_options(4) = "external"
-
-        rule_options(1) = "fixed"
-        rule_options(2) = "seasonal"
-        rule_options(3) = "percentage"
-        rule_options(4) = "sm_thresh"
-
-
-        OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/irri.dat',STATUS='old',IOSTAT=istate)
-        IF (istate/=0) THEN
-            write(*,'(a)')'Error: Input file '//pfadp(1:pfadj)// 'Hillslope/irri.dat'//' not found, aborting.'
-            stop
-        END IF
-
-        READ(11,*)
-        READ(11,*)
-
-        !Neu 11.10. Zählen der Zeilen um arrays richtig zu dimensionieren
-        l = 0
-        DO WHILE(.TRUE.)
-            READ(11,'(a)',IOSTAT=istate)
-            IF (istate /= 0) THEN
-                l = l+1
-                exit
-            END IF
-            l = l+1
-        END DO
-
-       IF (l==0) THEN    ! no lines in irri.dat
-        write(*,'(a,i0,a)')'ERROR (irri.dat): At least 1 line in irri.dat expected'
-        stop
-       END IF
-
-        allocate(sub_source(l))
-        sub_source = 0
-        allocate(irri_source(l))
-        irri_source = ''
-        allocate(sub_reciever(l))
-        sub_reciever  = 0
-        allocate(irri_rule(l))
-        irri_rule = ''
-        allocate(irri_rate(l))
-        irri_rate = 0.
-
-        REWIND(11)
-        READ(11,*)
-        READ(11,*)
-
-        h=3 !count lines  !Zurücksetzen des Zählers, Überspringen des Headers
-        i=1
-        j=1  !Array index
-
-        DO x = 1, l
-            cdummy=''
-            READ(11,'(a)',IOSTAT=istate) cdummy
-            dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
-
-            if (dummy1 > 5) then    !too many fields in line
-                write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): line ',h,' contains more (',dummy1,') than the expected 5 fields.'
-                stop
-            end if
-
-            READ(cdummy,*,IOSTAT=istate) sub_source(j),irri_source(j),sub_reciever(j),irri_rule(j), irri_rate(j)
-
-
-    !-------------Fehlerchecks-----------
-             i=which1(upbasin==sub_source(j))
-             if (i==0 .or. sub_source(j) == 0) then    !Paul: the current sub_source was not contained in routing.dat and is not type external (Code 9999)
-                if (sub_source(j)/=9999) then
-                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Source subbasin ',sub_source(j),' not listed in routing.dat, ignored.'
-                    irri_rate(j) = 0.
-                    irri_rule(j) = "fixed"
-                    sub_reciever(j) = -999
-                    sub_source(j) = -999
-                endif
-             end if
-
-             i=which1(upbasin==sub_reciever(j))
-             if (i==0 .or. sub_reciever(j) == 0) then    !Paul: the current sub_reciever was not contained in routing.dat and is not type external (Code 9999)
-                 if (sub_reciever(j)/=9999) then
-                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Reciever subbasin ',sub_reciever(j),' not listed in routing.dat, ignored.'
-                    irri_rate(j) = 0.
-                    irri_rule(j) = "fixed"
-                    sub_source(j) = -999
-                    sub_reciever(j) = -999
-                endif
-             end if
-
-            i=which1(source_options==irri_source(j))
-            if (i==0) then    !Paul: the current sub_source option is invalid. skip line
-                write(*,'(a,i0,a,a,a)')'WARNING (irri.dat): Source in line ',h, ': "',irri_source(j), '" is invalid. Line ignored.'
-                sub_source(j) = -999
-                sub_reciever(j) = -999
-                irri_rate(j) = 0.
-             end if
-
-            i=which1(rule_options==irri_rule(j))
-            if (i==0) then    !Paul: the current irrigation rule option is invalid. skip line
-                write(*,'(a,i0,a,a,a)')'WARNING (irri.dat): Irrigation rule in line ',h, ': "',irri_rule(j), '" is invalid. Line ignored.'
-                sub_source(j) = -999
-                sub_reciever(j) = -999
-                irri_rate(j) = 0.
-             end if
-
-             if (irri_rate(j) < 0.) then
-                write(*,'(a,I0,a)')'WARNING (irri.dat): Irrigation rate in line ' ,h, ' is negative. Line ignored.'
-                sub_source(j) = -999
-                sub_reciever(j) = -999
-                irri_rate(j) = 0
-             endif
-
-             IF (istate/=0) THEN     !no further line
-                exit                !exit loop
-             END IF
-
-             h=h+1 !count lines
-             j=j+1
-        END DO
-        CLOSE(11)
-    END IF ! if doirrigation
+        !!HIer War Irrigation
 
         !----------------------------------------------------------------------------------
 
@@ -1980,6 +1854,122 @@ if (dosnow) then
 end if ! do_snow
 
 
+       !------------------------------------------------------------------------------
+        ! read irri.dat Irrigation   ! This structure is taking von read hymo.dat
+        !** read subbasin parameters
+    INQUIRE(FILE=pfadp(1:pfadj)// 'Hillslope/irri.dat', EXIST=file_exists) !if irri.dat exists, read it
+    IF (file_exists) THEN
+
+        source_options(1) = "river" !create array to check validity of irri.dat column for sources
+        source_options(2) = "reservoir"
+        source_options(3) = "groundwater"
+        source_options(4) = "external"
+
+        rule_options(1) = "fixed"  !create array to check validity of column "rule" in irri.dat
+        rule_options(2) = "seasonal"
+        rule_options(3) = "percentage"
+        rule_options(4) = "sm_thresh"
+
+        OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/irri.dat',STATUS='old',IOSTAT=istate)
+        READ(11,*)
+        READ(11,*)
+
+        l = 0           !Count lines to properly dimension following arrays
+        DO WHILE(.TRUE.)
+            READ(11,'(a)',IOSTAT=istate)
+            IF (istate /= 0) THEN
+                l = l+1
+                exit
+            END IF
+            l = l+1
+        END DO
+
+       IF (l==0) THEN    ! no lines in irri.dat
+        write(*,'(a,i0,a)')'ERROR (irri.dat): At least 1 line in irri.dat expected'
+        stop
+       END IF
+
+        allocate(sub_source(l), irri_source(l), sub_reciever(l), irri_rule(l), irri_rate(l), STAT = istate )
+        if (istate/=0) then
+            write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in general-module: ' !Ändern? Was heißt  diese Fehlermeldung?
+            stop
+        end if
+        sub_source = 0
+        irri_source = ''
+        sub_reciever  = 0
+        irri_rule = ''
+        irri_rate = 0.
+        nbr_irri_records = 0
+
+        REWIND(11)
+        READ(11,*)
+        READ(11,*)
+
+        h=2 !count lines  !Zurücksetzen des Zählers, Überspringen des Headers
+        i=1
+        j=1  !Array index
+
+        DO x = 1, l
+            h = h+1 !count lines
+            cdummy=''
+            READ(11,'(a)',IOSTAT=istate) cdummy
+            dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
+
+            if (dummy1 > 5) then    !too many fields in line
+                write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): line ',h,' contains more (',dummy1,') than the expected 5 fields.'
+                stop
+            end if
+            READ(cdummy,*,IOSTAT=istate) sub_source(j),irri_source(j),sub_reciever(j),irri_rule(j), irri_rate(j)
+
+            if (sub_source(j) /= 9999 ) then
+            sub_source(j) = id_ext2int(sub_source(j),id_subbas_extern)
+            endif
+
+            if (sub_reciever(j) /= 9999 ) then
+            sub_reciever(j) = id_ext2int(sub_reciever(j),id_subbas_extern)
+            endif
+
+    !-------------Error checks----------- !!!! HIER weiter machen id_ext2int gibt -1 auch für 9999 aus.
+             if (sub_source(j)==-1) then    !Paul: the current sub_source was not contained in routing.dat, skip line
+                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Source subbasin ',sub_source(j),' not listed in routing.dat, ignored.' ! Hier ändern da jetzt -1 als SubIDa
+                    cycle
+             end if
+
+             if (sub_reciever(j)==-1) then    !Paul: the current sub_reciever was not contained in routing.dat and is not type external (Code 9999)
+                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Reciever subbasin ',sub_reciever(j),' not listed in routing.dat, ignored.'
+                    cycle
+             end if
+
+            i=which1(source_options==irri_source(j))
+            if (i==0) then    !Paul: the current sub_source option is invalid. skip line
+                write(*,'(a,i0,a,a,a)')'WARNING (irri.dat): Source in line ',h, ': "',irri_source(j), '" is invalid. Line ignored.'
+                cycle
+             end if
+
+            i=which1(rule_options==irri_rule(j))
+            if (i==0) then    !Paul: the current irrigation rule option is invalid. skip line
+                write(*,'(a,i0,a,a,a)')'WARNING (irri.dat): Irrigation rule in line ',h, ': "',irri_rule(j), '" is invalid. Line ignored.'
+                cycle
+             end if
+
+             if (irri_rate(j) < 0.) then
+                write(*,'(a,I0,a)')'WARNING (irri.dat): Irrigation rate in line ' ,h, ' is negative. Line ignored.'
+                cycle
+             endif
+
+             IF (istate/=0) THEN     !no further line
+                exit                !exit loop
+             END IF
+
+             j=j+1
+        END DO
+        CLOSE(11)
+        nbr_irri_records = j-1 ! Number of valid irrigation records
+
+    END IF
+
+
+
     !Till: allocation part - these variables are allocated here, because their dimension is not known before
     !!Print hydrologic variable on TC scale. If not used, DISABLE
     !!************************************************************************
@@ -2294,7 +2284,6 @@ end if ! do_snow
         END IF !do_pre_outsed
     END IF !dosediment
 
-
     !subsequent calls of function: actual reading of data
     IF (any(do_pre_outflow)) then
         if (t/=tstart .OR. pre_subbas_outflow(1,1,1)==-2.) THEN    !this clumsy check ensures that we do not read further when this function is called twice before the actual simulation starts
@@ -2362,6 +2351,9 @@ end if ! do_snow
 
     END DO
     END FUNCTION set_corr_column
+
+!
+
 
 
 
