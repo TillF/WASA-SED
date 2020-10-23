@@ -129,11 +129,13 @@
     REAL :: resf3(maxhori),etpvert(maxhori)
     REAL :: frac_old,tempth,percolmac(maxhori)
     REAL :: intc_evap(maxsoil),intcred(maxsoil),maxintc,aetred(maxsoil)
-    REAL :: irri_input(maxsoil) !water input by irrigtion for each SVC in current TC
-    INTEGER :: irri_supply
     REAL :: hfrac(maxsoil),merkalluv(maxsoil)
 
     REAL :: allalluv
+
+    !---------IRRIGATION
+    REAL :: irri_input(maxsoil) !water input by irrigtion for each SVC in current TC
+    INTEGER :: irri_supply
 
 
     INTEGER :: nbrrooth(maxsoil)

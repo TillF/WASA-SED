@@ -404,11 +404,13 @@ module hymo_h
     ! IRRIGATION
     real, allocatable :: frac_irr_sub(:)  ! Anteil der bewässerten Flächen innerhalb der Subbasins
     integer, allocatable :: svc_irr(:)  ! irrigation variable svc_dat
-    INTEGER, allocatable :: sub_source(:)
-    INTEGER, allocatable :: sub_reciever(:)
-    CHARACTER(len=12), allocatable :: irri_rule(:)  !oder lieber als Nummer?
-    REAL, allocatable :: irri_rate(:)
-    CHARACTER(len=11), allocatable :: irri_source(:)
+    INTEGER, allocatable :: sub_source(:)           !for reading irri.dat
+    INTEGER, allocatable :: sub_reciever(:)         !for reading irri.dat
+    CHARACTER(len=12), allocatable :: irri_rule(:)  !for reading irri.dat
+    REAL, allocatable :: irri_rate(:)               !for reading irri.dat
+    CHARACTER(len=11), allocatable :: irri_source(:)    !for reading irri.dat
+    INTEGER ::  nbr_irri_records !total number of vavlid irrigation records in irri.dat
+
 
     !Till: these are all output variables that are currently not used
     !! horton overland flow of each SVC

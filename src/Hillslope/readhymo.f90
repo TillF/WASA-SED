@@ -34,9 +34,8 @@
     REAL :: frac_irr_lu
     REAL :: frac_svc_x
     CHARACTER(len=11) :: source_options(4)
-    CHARACTER(len=12) :: rule_options(4)
+    CHARACTER(len=11) :: rule_options(4)
     LOGICAL :: file_exists !for checking if irri.dat exists
-    INTEGER ::  nbr_irri_records
 
 
     INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
@@ -1854,8 +1853,8 @@ if (dosnow) then
 end if ! do_snow
 
 
-       !------------------------------------------------------------------------------
-       ! read irri.dat Irrigation
+       !-----------------------------Irrigation-------------------------------------------------
+       ! read irri.dat
     INQUIRE(FILE=pfadp(1:pfadj)// 'Hillslope/irri.dat', EXIST=file_exists) !if irri.dat exists, read it
 
     IF (file_exists) THEN

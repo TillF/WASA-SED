@@ -66,6 +66,7 @@ Hillslope/sedi_yield.f90 \
 Hillslope/sedi_yield_subbas.f90 \
 Hillslope/soilwat.f90 \
 Hillslope/snow_compute.f90 \
+Hillslope/irrigation_abstraction.f90 \
 Reservoir/change_sec.f90 \
 Reservoir/eq1_wu.f90 \
 Reservoir/eq2_ashida.f90 \
