@@ -1384,7 +1384,7 @@ Subbasin-ID, section-ID, nbpoints, x-axis [m], y-axis[m]
 ```
 
 *Subbasin-ID*: ID of sub-basin <br>
-*Section-ID*: ID of cross-section <br>
+*Section-ID*:	ID of cross-section (continuously increasing, no gaps)<br>
 *nbrpoints*: Number of points at the cross section of the sub-basin’s reservoir <br>
 *x-axis*: Values at the x-axis for each point of the cross section in the sub-basin’s reservoir (from left to right, view from upstream side) \[m] <br>
 *y-axis*: Values at the y-axis for each point of the cross section in the sub-basin’s reservoir (from left to right, view from upstream side) \[m]
@@ -1403,7 +1403,7 @@ Subbasin-ID, section-ID, nbpoints, y_original[m]
 ```
 
 *Subbasin-ID*:	ID of sub-basin <br>
-*Section-ID*:	ID of cross-section <br>
+*Section-ID*:	ID of cross-section (continuously increasing, no gaps)<br>
 *nbrpoints*: Number of points at the cross section of the sub-basin’s reservoir <br>
 *y\_original*: Values of original bed elevation for each point of the cross section in the sub-basin’s reservoir (from left to right, view from upstream side) \[m]
 

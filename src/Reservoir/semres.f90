@@ -339,7 +339,7 @@ nbrsec=0
           WRITE(subarea,*)id_subbas_extern(i)
           OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/original_sec_'//trim(adjustl(subarea))//'.dat', IOSTAT=istate,STATUS='old')
             IF (istate/=0) THEN					!original_sec_"subbasin".dat not found
-              write(*,*)'WARNING: '//pfadp(1:pfadj)// 'original_sec.dat not found, using defaults'
+              write(*,*)'WARNING: '//pfadp(1:pfadj)// 'Reservoir/original_sec_'//trim(adjustl(subarea))//'.dat not found, using defaults'
               nbrsec1=nbrsec(res_index(i))
               DO j=1,nbrsec1
                 DO m=1,npoints(j,res_index(i))
@@ -348,9 +348,36 @@ nbrsec=0
 		      ENDDO
 		      dummy2=0
 	        ELSE
-	          READ(11,*);READ(11,*)
+	          READ(11,*);READ(11,*) !skip headerlines
+	          y_original(:, :, res_index(i)) = -1. !flag for "not read"
               DO j=1,nbrsec1
-		        READ(11,*)dummy1,dummy2,(y_original(m,j,res_index(i)),m=1,npoints(j,res_index(i)))
+
+		        !this would be nicer, but the gfortran compiler complains "positive width required"
+		        !write(fmtstr,'(A, I0, A)') '(',npoints(j, res_index(i)),'F)' !generate format string
+
+                READ(11, *, IOSTAT=istate, iomsg=fmtstr) dummy1, dummy2, dummy1a, (y_original(m, j, res_index(i)), m=1, npoints(j, res_index(i)))
+                IF (istate/=0) then
+                    write(*,'(a, i0,a)')'ERROR: Format error in '//pfadp(1:pfadj)// 'Reservoir/original_sec_'//trim(adjustl(subarea))//'.dat, line ', j+2, ' ('//fmtstr//').'
+                    stop
+                END IF
+
+                !if the READ statement in the previous loop found too few fields and read past the line break, we will now discover that the section IDs no longer match
+                !clumsy, but I couldn't find a better way
+                IF (j /= dummy2) then
+                    write(*,'(a, i0,a)')'ERROR: Too few columns in '//pfadp(1:pfadj)// 'Reservoir/original_sec_'//trim(adjustl(subarea))//'.dat, line ', j+1, '.'
+                    stop
+                END IF
+
+                IF (npoints(j, res_index(i)) /= dummy1a) then
+                    write(*,'(a, i0,a)')'ERROR: Inconsistency between original_sec_'//trim(adjustl(subarea))//'.dat and cross_sec_'//trim(adjustl(subarea))//'.dat, line ', j+2, '.'
+                    stop
+                END IF
+
+                if (minval(y_original(1:dummy1a, j, res_index(i))) == -1.) then
+                    write(*,'(a, i0,a)')'ERROR: Too few columns in '//pfadp(1:pfadj)// 'Reservoir/original_sec_'//trim(adjustl(subarea))//'.dat, line ', j+2, '.'
+                    stop
+                END IF
+
 		      ENDDO
 		      dummy2=1
 	        ENDIF
