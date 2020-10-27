@@ -108,9 +108,9 @@ Folder Name | Content
 ```/Input``` | Input data, contains parameter file: ```do.dat, /Input/Hillslope, /Input/River, /Input/Reservoir, /Input/Time_series```
 ```/Output``` | Output files of model scenarios 
 
-A complete example input-data set is part of the github repository (see top of document). Model parameterisations are available e.g. for meso-scale catchments in dryland areas of Spain and Brazil (Bengue Catchment in Spain: [Mamede 2008](#mamede-2008), Ribera Salada Catchment in Spain: [Mueller et al. 2008](#mueller-et-al-2008), [Mueller et al. 2009](#mueller-et-al-2009), Isábena Catchment in Spain: [Francke 2009](#francke-2009)).
+A complete example input-data set is part of the github repository (see top of document). Model parameterisations are available e.g. for meso-scale catchments in dryland areas of Spain and Brazil (Bengue Catchment in Spain: [Mamede 2008](#mamede-2008), Ribera Salada Catchment in Spain: [Mueller et al. 2008](#mueller-et-al-2008), [Mueller et al. 2009](#mueller-et-al-2009), Isábena Catchment in Spain: [Francke 2009](#francke-2009)) and others.
 
-The original WASA code version ([Güntner 2002](#guentner-2002), [Güntner and Bronstert 2004](#guentner-bronstert-2004)) was extended within the SESAM-Project to include sediment-transport processes at the hillslope scale using various USLE-derivative approaches, a spatially distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network and a reservoir module that computes the transport of water and sediment as well as sedimentation processes in reservoirs.
+The original WASA code version ([Güntner 2002](#guentner-2002), [Güntner and Bronstert 2004](#guentner-bronstert-2004)) was extended within the SESAM-Project to include sediment-transport processes at the hillslope scale using various USLE-derivative approaches, a spatially distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network and a reservoir module that computes the transport of water and sediment as well as sedimentation processes in reservoirs. Other extensions (e.g. snow) were added later.
 
 <a name="table-2"></a>
 **Table 2:** Main subroutines of the main program (```wasa.f90```).
@@ -1749,7 +1749,7 @@ Output file | Content
 ```snow*``` | optional output files from the snow routine, see [Table 5](#table-5)
 ```gw_storage.stat, intercept_storage.stat, soil_moisture.stat, snow_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
 
-The output files ```daily_water_sub-basin.out```, ```sediment_production.out``` and ```water_sub-basin.out``` include the effect of the distributed reservoirs. All other remaining basic hydrological output files contain the raw output of the hillslope module (no reservoir effects). All above-mentioned files have the same structure, as shown by the example ```daily_actetranspiration.out``` below (the subdaily output files additionally contain the timestep number in the third column):
+The output files ```daily_water_sub-basin.out```, ```sediment_production.out``` and ```water_sub-basin.out``` include the effect of the *distributed* reservoirs. All other remaining output files above contain the raw output of the hillslope module (no reservoir effects). All above-mentioned files have the same structure, as shown by the example ```daily_actetranspiration.out``` below (the subdaily output files additionally contain the timestep number in the third column):
 
 ```
 # Daily actual evapotranspiration [mm/d]  for all sub-basins (MAP-IDs)
