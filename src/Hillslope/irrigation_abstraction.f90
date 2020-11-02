@@ -12,51 +12,56 @@ use utils_h
 
     IMPLICIT NONE
     !counters
-    INTEGER :: sb_counter, i, sufficient_LUs
-    REAL :: gw_abstraction
+    INTEGER :: sb_counter, i
+    REAL :: abstraction_requested, abstraction_available
+    INTEGER, allocatable :: receiver_basins(:)
+    REAL :: irri_supply(subasin)  !Besser in hymo_h?
+
+
+    irri_supply = 0.0
 
     !-- Abstraction from groundwater, Loop through all subbasins and check if they're included in irri.dat
     DO sb_counter = 1, subasin ! Subbasin Loop
-        gw_abstraction = 0 !Till: besser mit "0.0" (Real-Zahl) initialisieren, sonst Fehlermeldung bei manchen Compilern
-        sufficient_LUs = 0
+        abstraction_requested = 0.0
+        abstraction_available = 0.0
 
-        DO i=1, nbr_irri_records !Find all groundwater extractions FROM current subbasin and sum them up
-		!vielleicht besser mit PACK alle Array-Indizes holen, die wir brauchen -> "current_receivers"
-		!gw_abstraction_requested = sum(irri_rate(current_receivers))
-            IF (sub_source(i) == sb_counter .AND. irri_source(i) == "groundwater") THEN
-                gw_abstraction = gw_abstraction + irri_rate(i)
-            END IF
-        END DO
+        abstraction_requested = sum(pack(irri_rate, MASK= sub_source==sb_counter .AND. irri_source == "groundwater"))
 
-        IF (gw_abstraction > 0. ) THEN
-			!gw_abstraction_available = sum(deepgw(1:nbr_lu(sb_counter),sb_counter)
-            DO i=1, nbr_lu(sb_counter)
-            ! count all available LUs in current subbasin that have enough groundwater equaling the total abstraction demand
-                IF (deepgw(i,sb_counter) > gw_abstraction) THEN !Till: Warum muss JEDE EINZELNE LU soviel GW bieten, wie gefordert ist? Besser: insgesamt (Summe) muss genügend GW da sein.
-				! wenn nicht genügend vorhanden, dann gw_abstraction auf verfügbare Menge reduzieren:
-				! gw_abstraction_requested = gw_abstraction_available
-                    sufficient_LUs = sufficient_LUs + 1
-                END IF
-            END DO
+       ! get the indices of irri.dat for all subbasins that receive irrigation water from current subbasin
+        receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK=sub_source == sb_counter .AND. irri_source=="groundwater")
 
-            IF ( sufficient_LUs == 0 ) THEN   !Warning if abstraction demand can't be met by any LU within current subbasin
-                WRITE(*,'(a,I0,a)') 'WARNING: Not enough groundwater in Subbasin ',id_subbas_extern(sb_counter), ' to meet abstraction rate. No extraction for this timestep.'
-            END IF
-
-            !Till: ich würde die Entnahme nicht glaichmäßih über alle LUs verteilen, sondern hinsichtlich der verfügbaren Speicher aufteilen (i.e. aus großen Speichern wird auch viel entnommen, das dürfte in der Praxis auch oft so sein:
-			!deepgw(1:nbr_lu(sb_counter),sb_counter) = deepgw(1:nbr_lu(sb_counter),sb_counter) - &
-			!deepgw(1:nbr_lu(sb_counter),sb_counter)/gw_abstraction_available * gw_abstraction_requested
-			
-			DO i=1, nbr_lu(sb_counter)            ! take abstraction equally divided out of all LUs that have enough storage
-                IF (deepgw(i,sb_counter) > gw_abstraction) THEN
-                    deepgw(i,sb_counter) = deepgw(i,sb_counter) - (gw_abstraction / sufficient_LUs) ! Numerischer Fehler? Statt 900 werden nur 896 abgezogen
-                END IF
-            END DO
-			
-			
+        IF (sum(irri_rate(receiver_basins))== 0.0) THEN
+            cycle
         END IF
 
+        IF (abstraction_requested > 0. ) THEN
+			abstraction_available = sum(deepgw(1:nbr_lu(sb_counter),sb_counter)) !total available deep groundwater
+
+                IF (abstraction_available < abstraction_requested) THEN
+				    abstraction_requested = abstraction_available  !If theres not enough water to fulfill demand, use all available water
+				    WRITE(*,'(a,I0,a)') 'WARNING: Not enough deep groundwater in Subbasin ',id_subbas_extern(sb_counter), ' to meet abstraction rate. All available (deep) groundwater will be used.'
+                END IF
+        END IF
+
+        !  Extraction of groundwater from all the LU's in Subbasin proportionally to the amount of groundwater stored in each LU. (Full LU's give a lot of water, empty ones just a bit)
+	    deepgw(1:nbr_lu(sb_counter),sb_counter) = deepgw(1:nbr_lu(sb_counter),sb_counter) - deepgw(1:nbr_lu(sb_counter),sb_counter)/abstraction_available * abstraction_requested
+        !Write extracted water for each reciever basin
+		irri_supply(sub_receiver(receiver_basins)) = irri_supply(sub_receiver(receiver_basins)) + abstraction_requested * irri_rate(receiver_basins)/sum(irri_rate(receiver_basins)) !This vector contains the total irrigation ammount for every subbasin
     END DO ! Subbasin Loop
+
+    !Add water from external sources to irri_supply
+
+    abstraction_requested = sum(pack(irri_rate, MASK= sub_source == 9999))
+    receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK=sub_source == 9999)
+
+    IF (sum(irri_rate(receiver_basins)) > 0.0) THEN
+        irri_supply(sub_receiver(receiver_basins)) = irri_supply(sub_receiver(receiver_basins)) + abstraction_requested * irri_rate(receiver_basins)/sum(irri_rate(receiver_basins))
+    END IF
+
+
+
+
+
 
 
 

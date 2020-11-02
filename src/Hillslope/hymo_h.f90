@@ -405,11 +405,12 @@ module hymo_h
     real, allocatable :: frac_irr_sub(:)  ! Anteil der bewässerten Flächen innerhalb der Subbasins
     integer, allocatable :: svc_irr(:)  ! irrigation variable svc_dat
     INTEGER, allocatable :: sub_source(:)           !for reading irri.dat
-    INTEGER, allocatable :: sub_reciever(:)         !for reading irri.dat
+    INTEGER, allocatable :: sub_receiver(:)         !for reading irri.dat
     CHARACTER(len=12), allocatable :: irri_rule(:)  !for reading irri.dat
     REAL, allocatable :: irri_rate(:)               !for reading irri.dat
     CHARACTER(len=11), allocatable :: irri_source(:)    !for reading irri.dat
     INTEGER ::  nbr_irri_records !total number of vavlid irrigation records in irri.dat
+
 
 
     !Till: these are all output variables that are currently not used

@@ -1893,14 +1893,14 @@ end if ! do_snow
         END DO
 
 
-        allocate(sub_source(l), irri_source(l), sub_reciever(l), irri_rule(l), irri_rate(l), STAT = istate )  !arrays that will contain data from irri.dat
+        allocate(sub_source(l), irri_source(l), sub_receiver(l), irri_rule(l), irri_rate(l), STAT = istate )  !arrays that will contain data from irri.dat
         if (istate/=0) then
             write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in general-module: ' !Ändern? Was heißt  diese Fehlermeldung?
             stop
         end if
         sub_source = 0
         irri_source = ''
-        sub_reciever  = 0
+        sub_receiver  = 0
         irri_rule = ''
         irri_rate = 0.
         nbr_irri_records = 0
@@ -1923,14 +1923,14 @@ end if ! do_snow
                 write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): line ',h,' contains more (',dummy1,') than the expected 5 fields.'
                 stop
             end if
-            READ(cdummy,*,IOSTAT=istate) sub_source(j),irri_source(j),sub_reciever(j),irri_rule(j), irri_rate(j) !read data from irri.dat
+            READ(cdummy,*,IOSTAT=istate) sub_source(j),irri_source(j),sub_receiver(j),irri_rule(j), irri_rate(j) !read data from irri.dat
 
             if (sub_source(j) /= 9999 ) then            ! transform external ID's to internal ID's with the exception of 9999, representing an external basin. If the Basin doesn't exist it gets the value -1
             sub_source(j) = id_ext2int(sub_source(j),id_subbas_extern)
             endif
 
-            if (sub_reciever(j) /= 9999 ) then
-            sub_reciever(j) = id_ext2int(sub_reciever(j),id_subbas_extern)
+            if (sub_receiver(j) /= 9999 ) then
+            sub_receiver(j) = id_ext2int(sub_receiver(j),id_subbas_extern)
             endif
 
     !-------------Error checks-----------
@@ -1939,8 +1939,8 @@ end if ! do_snow
                     cycle
              end if
 
-             if (sub_reciever(j)==-1) then    !Paul: the current sub_reciever was not contained in routing.dat and is not type external (Code 9999)
-                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Reciever subbasin in line ',h,' not listed in routing.dat, ignored.'
+             if (sub_receiver(j)==-1) then    !Paul: the current sub_receiver was not contained in routing.dat and is not type external (Code 9999)
+                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): receiver subbasin in line ',h,' not listed in routing.dat, ignored.'
                     cycle
              end if
 

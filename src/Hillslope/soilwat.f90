@@ -135,7 +135,7 @@
 
     !---------IRRIGATION
     REAL :: irri_input(maxsoil) !water input by irrigtion for each SVC in current TC
-    INTEGER :: irri_supply
+
 
 
     INTEGER :: nbrrooth(maxsoil)
@@ -1040,15 +1040,14 @@
 
 !** -------------------------------------------------------------------------
     !** (1.3)   Irrigation input
-    irri_supply = 500
+    !irri_supply = 500
     irri_input = 0.
 ! Berechnung der Bewässerungsmenge für jede SVC
 
- ! if (irr_area(i_subbas_2) /= 0) !Was passiert, wenn wir ausleitungen machen, aber nicht bewässern?
     !in [mm]
-    DO i=1,nbr_svc(tcid_instance2)  ! oder tcid_instance 2?
-        irri_input(i) = irri_supply * (frac_lu(lu_counter2,i_subbas2) * fracterrain(id_tc_type2) * frac_svc(i,tcid_instance2)) / frac_irr_sub(i_subbas2) ! Verteilung des Irri_inputs Anteilig an gesamtbewässerter Fläche des Subbasin
-    END DO
+   ! DO i=1,nbr_svc(tcid_instance2)  ! oder tcid_instance 2?
+    !    irri_input(i) = irri_supply * (frac_lu(lu_counter2,i_subbas2) * fracterrain(id_tc_type2) * frac_svc(i,tcid_instance2)) / frac_irr_sub(i_subbas2) ! Verteilung des Irri_inputs Anteilig an gesamtbewässerter Fläche des Subbasin
+   ! END DO
     !irri_supply = sum(irri_input)  Checken ob == 1, aber wo? WO wird durch die Subbasins & LU's geloopt?
 
 
