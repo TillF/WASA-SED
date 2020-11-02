@@ -410,6 +410,7 @@ module hymo_h
     REAL, allocatable :: irri_rate(:)               !for reading irri.dat
     CHARACTER(len=11), allocatable :: irri_source(:)    !for reading irri.dat
     INTEGER ::  nbr_irri_records !total number of vavlid irrigation records in irri.dat
+    REAL, allocatable :: irri_supply(:) !stores the amout of irrigation water each subbasin recieves for each timestep  !allocatable und dann festlegen wenn in readhymo deklarieren mit subasin
 
 
 
