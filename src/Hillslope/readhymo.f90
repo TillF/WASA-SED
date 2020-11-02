@@ -675,6 +675,8 @@
 
         allocate(id_svc_extern(nsvc))    !allocate memory for SVC-IDs to be read
         allocate(irri_supply(subasin))   ! needed in subroutine irrigation_abstraction
+        allocate(gw_abstraction(subasin))
+        allocate(rf_abstraction(subasin))
 
 
         j=(tstop-tstart)+1        !number of years to simulate
