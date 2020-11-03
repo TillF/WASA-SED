@@ -471,6 +471,9 @@ SUBROUTINE readgen(path2do_dat)
     f_lake_sedoutflow=.FALSE.
     f_lake_sizedistoutflow=.FALSE.
 
+    f_irri_abstraction=.FALSE. !Irrigation
+    f_irri_supply=.FALSE.
+
     OPEN(11,FILE=pfadp(1:pfadj)// 'outfiles.dat',IOSTAT=istate,STATUS='old')
     IF (istate==0) THEN
         READ(11,*,IOSTAT=istate)dummy

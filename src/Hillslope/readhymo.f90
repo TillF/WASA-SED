@@ -675,8 +675,8 @@
 
         allocate(id_svc_extern(nsvc))    !allocate memory for SVC-IDs to be read
         allocate(irri_supply(subasin))   ! needed in subroutine irrigation_abstraction
-        allocate(gw_abstraction(subasin))
-        allocate(rf_abstraction(subasin))
+        allocate(irri_abstraction(subasin))
+
 
 
         j=(tstop-tstart)+1        !number of years to simulate
@@ -790,9 +790,8 @@
             i=i+1
         END DO
         CLOSE(11)
-        !!HIer War Irrigation
 
-        !----------------------------------------------------------------------------------
+
 
 		if (SIZE(seasonality_k,dim=2) /= 1) then
             CALL check_seasonality(seasonality_k, "k_seasons.dat", id_svc_extern)  !check completeness of seasonality file
@@ -1864,7 +1863,7 @@ end if ! do_snow
         source_options(1) = "river" !create array to check validity of irri.dat column for sources
         source_options(2) = "reservoir"
         source_options(3) = "groundwater"
-        source_options(4) = "external"
+        source_options(4) = "9999"  ! Code for external, also external Subbasins are represented by the code "9999"
 
         rule_options(1) = "fixed"  !create array to check validity of column "rule" in irri.dat
         rule_options(2) = "seasonal"

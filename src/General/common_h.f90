@@ -63,6 +63,7 @@ module common_h
     LOGICAL :: f_snowEnergyCont, f_snowWaterEquiv, f_snowAlbedo, f_snowCover, f_snowTemp, f_surfTemp, f_liquFrac, f_fluxPrec, f_fluxSubl, f_fluxFlow, f_fluxNetS, f_fluxNetL, f_fluxSoil, f_fluxSens, f_stoiPrec, f_stoiSubl, f_stoiFlow, f_rateAlbe, f_precipMod, f_cloudFrac,f_radiMod,f_temperaMod,f_rel_elevation
     LOGICAL :: do_rad_corr=.FALSE.   ! modification of radiation with aspect and slope
     LOGICAL :: do_alt_corr=.FALSE.   ! modification of temperature with altitude of LU
+    LOGICAL :: f_irri_abstraction, f_irri_supply ! Irrigation
 
 
     LOGICAL :: doloadstate=.FALSE.         !load initial values before model run

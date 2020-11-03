@@ -235,6 +235,10 @@ SUBROUTINE hymo_all(STATUS)
         ! Output sub-daily water flux
         CALL open_subdaily_output(f_water_subbasin, 'water_subbasin.out', 'sub-daily contribution to river [m3/s] for all sub-basins (MAP-IDs)')
 
+        ! Output irrigation abstraction
+        CALL open_subdaily_output(f_irri_abstraction, 'irrigation_abstraction.out', 'Abstracted water for irrigation [m3/s] for all sub-basins (MAP-IDs)')
+        CALL open_subdaily_output(f_irri_supply, 'irrigation_supply.out', 'Received water for irrigation [m3/s] for all sub-basins (MAP-IDs)')
+
         !     Output sediment production (t)
         OPEN(11,FILE=pfadn(1:pfadi)//'daily_sediment_production.out', STATUS='replace')
         IF (f_daily_sediment_production .AND. dosediment) THEN
@@ -1214,6 +1218,8 @@ SUBROUTINE hymo_all(STATUS)
         CALL write_output(f_deep_gw_discharge,'deep_gw_discharge.out',deep_gw_discharge)  !   deep groundwater discharge (component of water_subbasin)
         CALL write_output(f_daily_gw_loss,'daily_gw_loss.out',gw_loss)            !   groundwater losses (leaving model domain)
         CALL write_output(f_daily_subsurface_runoff,'daily_subsurface_runoff.out',subflow)        !     Output total subsurface runoff (m³/d)
+        CALL write_output(f_irri_abstraction, 'daily_irrigation_abstraction.out', irri_abstraction_record) !   Output irrigation abstraction
+        CALL write_output(f_irri_supply, 'daily_irrigation_supply.out', irri_receiver_record)                !   Output irrigation abstraction
 
         CALL write_subdaily_output(f_actetranspiration, 'actetranspiration.out',  aet_t)        !     subdaily evapotranspiration [mm]
         CALL write_subdaily_output(f_qhorton,           'qhorton.out'          ,  hortflow_t)

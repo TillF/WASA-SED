@@ -88,6 +88,9 @@ INTEGER :: istate
 	 avail_all(366,subasin), &
 	 avail_ac(366,subasin), &
 
+	 irri_abstraction_record(366,subasin), &  !Irrigation
+	 irri_receiver_record(366,subasin), &       ! Irrigation
+
 	 nbr_svc(ntcinst), &
 
 	 rocky(ntcinst), &
@@ -220,6 +223,9 @@ INTEGER :: istate
 
     subflow_t          => allocate_hourly_array(f_subsurface_runoff .OR. .TRUE.)	!Till: currently, these are needed in any case
 	ovflow_t           => allocate_hourly_array(f_total_overlandflow .OR. .TRUE.)
+
+	irri_abstraction_t       => allocate_hourly_array(f_irri_abstraction)
+	irri_supply_t            => allocate_hourly_array(f_irri_supply)
 
 END subroutine allocate_hymo
 

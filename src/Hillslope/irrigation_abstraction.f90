@@ -16,7 +16,7 @@ use utils_h
     INTEGER, allocatable :: receiver_basins(:)
 
     irri_supply = 0.0
-    gw_abstraction = 0.0
+    irri_abstraction = 0.0
 
     !-- Abstraction from groundwater, Loop through all subbasins and check if they're included in irri.dat-----------------------
     DO sb_counter = 1, subasin ! Subbasin Loop for groundwater abstraction
@@ -41,7 +41,7 @@ use utils_h
                 END IF
         END IF
 
-        gw_abstraction(sb_counter) = abstraction_requested  !Write extracted water from current subbasin
+        irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin !
 
         !  Extraction of groundwater from all the LU's in Subbasin proportionally to the amount of groundwater stored in each LU. (Full LU's give a lot of water, empty ones just a bit)
 	    deepgw(1:nbr_lu(sb_counter),sb_counter) = deepgw(1:nbr_lu(sb_counter),sb_counter) - deepgw(1:nbr_lu(sb_counter),sb_counter)/abstraction_available * abstraction_requested
@@ -63,8 +63,8 @@ use utils_h
     END IF
 
     !-- Abstraction from river, Loop through all subbasins and check if they're included in irri.dat-----------------------
-    dim_qout = SIZE(qout, DIM = 1 )
-    rf_abstraction = 0.0
+    dim_qout = SIZE(qout, DIM = 1 ) !Kann weg, nur aus erstem Zeitschritt nehmen
+
 
     DO sb_counter = 1, subasin ! Subbasin Loop for river
         abstraction_requested = 0.0
@@ -87,7 +87,7 @@ use utils_h
                 END IF
         END IF
 
-        rf_abstraction(sb_counter) = abstraction_requested  !Write extracted water from current subbasin
+        irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin !
 
         !  Extraction of river water from all the slots in Subbasin proportionally to the amount of river water stored in each slot. (Full slots give a lot of water, empty ones just a bit)
         qout(1:dim_qout,sb_counter) = qout(1:dim_qout,sb_counter) - qout(1:dim_qout,sb_counter)/abstraction_available * abstraction_requested
@@ -102,6 +102,10 @@ use utils_h
 
      !TO DO Vektor mit allen Entnahmen (sub_source) analog zu irri_supply für spätere log.file. evt. eine für jede Art (groundwater/river/reservoir)
      !angelegt als gw_abstraction
+
+     !irri_supply und irri_abstraction in irri_abstraction_record und irri_receiver_record schreiben -> Ausgabedatei um Zwischenstände abzuspeichern
+     ! doacudes weitere Option
+     !readgen Z.470
 
 
 

@@ -264,6 +264,8 @@ module hymo_h
     real, pointer ::  gw_loss_t(:,:,:)				!ground water loss (deep percolation in LUs with no ground water flag) for each day and timestep(366,nt,subasin)
     real, pointer ::  river_infiltration_t(:,:,:)	!infiltration into riverbed, loss from model domain
     real, pointer ::  riverflow_t(:,:,:)	!Till: flow in the river in m3/s for each day and timestep(366,nt,subasin)
+    real, pointer :: irri_supply_t(:,:,:)   !Paul irrigation water that each subbasin receives for each day and timestep(366,nt,subasin)
+    real, pointer :: irri_abstraction_t(:,:,:)  !Paul irrigation water that is abstracted from each subbasin for each day and timestep(366,nt,subasin)
 
     ! daily soil evaporation (mm/day)
     !Allocatable       real soilet(366,subasin)
@@ -280,6 +282,10 @@ module hymo_h
     ! total subsurface runoff (m³/d)
     !Allocatable       real subflow(366,subasin)
     real, allocatable ::  subflow(:,:)
+
+    real, allocatable :: irri_abstraction_record(:,:)  ! Array that stores irrigation abtraction for each timestep
+    real, allocatable :: irri_receiver_record(:,:)     ! Array that stores irrigation abtraction for each timestep
+
 
     real, allocatable ::   deep_gw_discharge(:,:)	!groundwater discharge into river (366,subasin)
     real, allocatable ::   gw_loss(:,:)				!ground water loss (deep percolation in LUs with no ground water flag)(366,subasin)
@@ -411,8 +417,8 @@ module hymo_h
     CHARACTER(len=11), allocatable :: irri_source(:)    !for reading irri.dat
     INTEGER ::  nbr_irri_records !total number of vavlid irrigation records in irri.dat
     REAL, allocatable :: irri_supply(:) !stores the amout of irrigation water each subbasin recieves for each timestep  !allocated with dimension subasin in readhymo
-    REAL, allocatable :: gw_abstraction(:) !stores the amout of irrigation water that is taken from each subbasins deep groundwater  for each timestep  !allocated with dimension subasin in readhymo
-    REAL, allocatable :: rf_abstraction(:) !stores the amout of irrigation water that is taken from each subbasins river flow  for each timestep  !allocated with dimension subasin in readhymo
+    REAL, allocatable :: irri_abstraction(:) !stores the amout of irrigation water that is taken from each subbasin  for each timestep  !allocated with dimension subasin in readhymo
+
 
     !Till: these are all output variables that are currently not used
     !! horton overland flow of each SVC
