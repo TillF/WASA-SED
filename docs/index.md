@@ -1,12 +1,11 @@
 # WASA-SED
 
 # User Manual
+main contributors:
+Andreas Güntner (2000-2002), Eva Nora Müller (2006-2009), George Mamede(2006-2009), Till Francke (2006-...), Pedro Medeiros (2007-2008), Tobias Pilz (2016), Erwin Rottler (2017)
 
-Eva Nora 
-Müller, Till Francke, George Mamede and Andreas Güntner
-
-**24.9.2020<br>
-WASA-SED rev_261**
+**6.10.2020<br>
+WASA-SED rev_268**
 
 Developed within the SESAM-Project:<br>
 Sediment Export of Semi-Arid Catchment: Monitoring and Modelling 2005-2008<br>
@@ -109,9 +108,9 @@ Folder Name | Content
 ```/Input``` | Input data, contains parameter file: ```do.dat, /Input/Hillslope, /Input/River, /Input/Reservoir, /Input/Time_series```
 ```/Output``` | Output files of model scenarios 
 
-A complete example input-data set is part of the github repository (see top of document). Model parameterisations are available e.g. for meso-scale catchments in dryland areas of Spain and Brazil (Bengue Catchment in Spain: [Mamede 2008](#mamede-2008), Ribera Salada Catchment in Spain: [Mueller et al. 2008](#mueller-et-al-2008), [Mueller et al. 2009](#mueller-et-al-2009), Isábena Catchment in Spain: [Francke 2009](#francke-2009)).
+A complete example input-data set is part of the github repository (see top of document). Model parameterisations are available e.g. for meso-scale catchments in dryland areas of Spain and Brazil (Bengue Catchment in Spain: [Mamede 2008](#mamede-2008), Ribera Salada Catchment in Spain: [Mueller et al. 2008](#mueller-et-al-2008), [Mueller et al. 2009](#mueller-et-al-2009), Isábena Catchment in Spain: [Francke 2009](#francke-2009)) and others.
 
-The original WASA code version ([Güntner 2002](#guentner-2002), [Güntner and Bronstert 2004](#guentner-bronstert-2004)) was extended within the SESAM-Project to include sediment-transport processes at the hillslope scale using various USLE-derivative approaches, a spatially distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network and a reservoir module that computes the transport of water and sediment as well as sedimentation processes in reservoirs.
+The original WASA code version ([Güntner 2002](#guentner-2002), [Güntner and Bronstert 2004](#guentner-bronstert-2004)) was extended within the SESAM-Project to include sediment-transport processes at the hillslope scale using various USLE-derivative approaches, a spatially distributed, semi-process-based modelling approach for the modelling of water and sediment transport through the river network and a reservoir module that computes the transport of water and sediment as well as sedimentation processes in reservoirs. Other extensions (e.g. snow) were added later.
 
 <a name="table-2"></a>
 **Table 2:** Main subroutines of the main program (```wasa.f90```).
@@ -1174,9 +1173,8 @@ This optional file allows specifying the sediment output of selected sub-basins.
 
 Example: Sub-basin 4 has pre-specified sediment output of 0.5 t/d for 1 Sep 2005, distributed among 3 particle size classes with the fractions 0.3, 0.2 and 0.5.
 
-***7) ```transposition.dat``` ***<br>
-(optional) Currently only works for daily resolution. For sediments, abstraction from reservoirs assumes zero concentration, whereas abstraction from river uses river concentration.
-Abstractions are taken from the outlet of river reaches, and added to the inlet points of reaches.
+**7)** ```transposition.dat``` <br>
+(optional)
 
 ```
 # Water transpositions via canals or pipes between sub-basins, in order of routing scheme
@@ -1185,18 +1183,20 @@ Start-Subbasin-ID, Flag(reservoir/river), Flow(m3/s,) Loss(%), Destination-Subba
         67         2       2.4       0.1        31         1      1997
         31         1         2      0.06        30         1      1993
         30         1         2      0.02        29         2      1993
+…
 ```
 
 *Start-Subbasin-ID*:		ID of sub-basin (source of water abstraction)<br>
 *Flag(reservoir/river)*:		water abstraction from: 1 (river) or 2 (reservoir)<br>
 *Flow(m<sup>3</sup>/s)*:			amount of re-routed water<br>
 *Loss(%)*:			transmission loss<br>
-*Destination-Subbasin-ID*:		ID of sub-basin (destination of water abstraction)
+*Destination-Subbasin-ID*:		ID of sub-basin (destination of water abstraction)<br>
 *Flag (reservoir/river)*:		water diversion to: 1 (river) or 2 (reservoir)<br>
 *begin\_year*:			start time of water abstraction
 
+Currently only works for daily resolution. For suspended sediments, abstraction from reservoirs assumes zero concentration, whereas abstraction from river uses river concentration.
+Abstractions are taken from the outlet of river reaches, and added to the inlet points of reaches.
 This file is optional. It is only read if ```dotrans``` (in ```do.dat```) is set to ```.true.```. In this case, ```transposition.dat``` is expected in the subdirectory ```Others/```. <br>
-WARNING: The transposition of sediment has not yet been implemented.
 
 <a name="3-4-input-files-for-the-reservoir-module"></a>
 ### 3.4 Input files for the reservoir module
@@ -1384,7 +1384,7 @@ Subbasin-ID, section-ID, nbpoints, x-axis [m], y-axis[m]
 ```
 
 *Subbasin-ID*: ID of sub-basin <br>
-*Section-ID*: ID of cross-section <br>
+*Section-ID*:	ID of cross-section (continuously increasing, no gaps)<br>
 *nbrpoints*: Number of points at the cross section of the sub-basin’s reservoir <br>
 *x-axis*: Values at the x-axis for each point of the cross section in the sub-basin’s reservoir (from left to right, view from upstream side) \[m] <br>
 *y-axis*: Values at the y-axis for each point of the cross section in the sub-basin’s reservoir (from left to right, view from upstream side) \[m]
@@ -1403,7 +1403,7 @@ Subbasin-ID, section-ID, nbpoints, y_original[m]
 ```
 
 *Subbasin-ID*:	ID of sub-basin <br>
-*Section-ID*:	ID of cross-section <br>
+*Section-ID*:	ID of cross-section (continuously increasing, no gaps)<br>
 *nbrpoints*: Number of points at the cross section of the sub-basin’s reservoir <br>
 *y\_original*: Values of original bed elevation for each point of the cross section in the sub-basin’s reservoir (from left to right, view from upstream side) \[m]
 
@@ -1749,7 +1749,7 @@ Output file | Content
 ```snow*``` | optional output files from the snow routine, see [Table 5](#table-5)
 ```gw_storage.stat, intercept_storage.stat, soil_moisture.stat, snow_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
 
-The output files ```daily_water_sub-basin.out```, ```sediment_production.out``` and ```water_sub-basin.out``` include the effect of the distributed reservoirs. All other remaining basic hydrological output files contain the raw output of the hillslope module (no reservoir effects). All above-mentioned files have the same structure, as shown by the example ```daily_actetranspiration.out``` below (the subdaily output files additionally contain the timestep number in the third column):
+The output files ```daily_water_sub-basin.out```, ```sediment_production.out``` and ```water_sub-basin.out``` include the effect of the *distributed* reservoirs. All other remaining output files above contain the raw output of the hillslope module (no reservoir effects). All above-mentioned files have the same structure, as shown by the example ```daily_actetranspiration.out``` below (the subdaily output files additionally contain the timestep number in the third column):
 
 ```
 # Daily actual evapotranspiration [mm/d]  for all sub-basins (MAP-IDs)
