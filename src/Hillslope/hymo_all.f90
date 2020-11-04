@@ -541,6 +541,8 @@ SUBROUTINE hymo_all(STATUS)
         soilm=0.0                !soil moisture [mm]
         sofarea=0.0                !fraction of saturated area
         sediment_subbasin=0.
+        irri_abstraction_record = 0.0 ! Irrigation
+        irri_receiver_record = 0.0
 
         soilmroot=0.0        !soil moisture first meter
 
@@ -556,6 +558,10 @@ SUBROUTINE hymo_all(STATUS)
         if (associated(deep_gw_recharge_t))    deep_gw_recharge_t  =0.0 !groundwater rescharge
         if (associated(gw_loss_t))           gw_loss_t           =0.0 !deep seepage, loss from model domain
         if (associated(river_infiltration_t))           river_infiltration_t           =0.0 !infiltration into riverbed, loss from model domain
+
+        if (associated(irri_supply_t))      irri_supply_t = 0.0
+        if (associated(irri_abstraction_t))      irri_abstraction_t = 0.0
+
 
 
         if (any(do_pre_outflow)) then        !if water outflow from upstream subbasins is given
