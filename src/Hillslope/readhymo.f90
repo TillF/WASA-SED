@@ -633,13 +633,14 @@
     CALL check_seasonality(period, "rainy_season.dat", id_veg_extern)  !check completeness of seasonality file
 
 
-    if (doloadstate .OR. dosavestate .OR. dosediment) then
+    if (doloadstate .OR. dosavestate .OR. dosediment .OR. doirrigation) then
         seasonality_k     => seasonality_array2('k_seasons.dat')    !read seasonality of K-factor
         seasonality_c     => seasonality_array2('c_seasons.dat')    !read seasonality of C-factor
 
         seasonality_p     => seasonality_array2('p_seasons.dat'     )    !read seasonality of P-factor
         seasonality_coarse=> seasonality_array2('coarse_seasons.dat')    !read seasonality of coarse fraction factor
         seasonality_n     => seasonality_array2('n_seasons.dat'     )    !read seasonality of Manning's n
+        !Hier irrigation_season einfügen
 
 
         !** read SVC information (numbering scheme, erosion properties)

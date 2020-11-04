@@ -103,8 +103,8 @@ use utils_h
 
      !irri_supply und irri_abstraction in irri_abstraction_record und irri_receiver_record schreiben -> Ausgabedatei um Zwischenstände abzuspeichern
 
-     irri_abstraction_record(d,1:subasin) = irri_abstraction
-     irri_receiver_record(d,1:subasin) = irri_supply
+     irri_abstraction_record(d,nt,1:subasin) = irri_abstraction
+     irri_supply_record(d,nt,1:subasin) = irri_supply
 
 
 

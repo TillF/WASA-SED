@@ -264,8 +264,8 @@ module hymo_h
     real, pointer ::  gw_loss_t(:,:,:)				!ground water loss (deep percolation in LUs with no ground water flag) for each day and timestep(366,nt,subasin)
     real, pointer ::  river_infiltration_t(:,:,:)	!infiltration into riverbed, loss from model domain
     real, pointer ::  riverflow_t(:,:,:)	!Till: flow in the river in m3/s for each day and timestep(366,nt,subasin)
-    real, pointer :: irri_supply_t(:,:,:)   !Paul irrigation water that each subbasin receives for each day and timestep(366,nt,subasin)
-    real, pointer :: irri_abstraction_t(:,:,:)  !Paul irrigation water that is abstracted from each subbasin for each day and timestep(366,nt,subasin)
+    real, pointer :: irri_supply_record(:,:,:)   !Paul irrigation water that each subbasin receives for each day and timestep(366,nt,subasin)
+    real, pointer :: irri_abstraction_record(:,:,:)  !Paul irrigation water that is abstracted from each subbasin for each day and timestep(366,nt,subasin)
 
     ! daily soil evaporation (mm/day)
     !Allocatable       real soilet(366,subasin)
@@ -282,10 +282,6 @@ module hymo_h
     ! total subsurface runoff (m³/d)
     !Allocatable       real subflow(366,subasin)
     real, allocatable ::  subflow(:,:)
-
-    real, allocatable :: irri_abstraction_record(:,:)  ! Array that stores irrigation abtraction for each timestep
-    real, allocatable :: irri_receiver_record(:,:)     ! Array that stores irrigation abtraction for each timestep
-
 
     real, allocatable ::   deep_gw_discharge(:,:)	!groundwater discharge into river (366,subasin)
     real, allocatable ::   gw_loss(:,:)				!ground water loss (deep percolation in LUs with no ground water flag)(366,subasin)

@@ -567,6 +567,13 @@ SUBROUTINE readgen(path2do_dat)
                 CASE ('rel_elevation')
                     f_rel_elevation=.TRUE. .AND. (dosnow)
 
+                CASE ('irrigation_supply')                  !Irrigation
+                    f_irri_supply = doirrigation
+                CASE ('irrigation_abstraction')
+                    f_irri_abstraction = doirrigation
+
+
+
                 CASE ('river_degradation')
                     f_river_degradation=dosediment
                 CASE ('river_deposition')
