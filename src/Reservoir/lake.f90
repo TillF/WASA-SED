@@ -265,7 +265,6 @@ IF (STATUS == 0) THEN
 
   if (.NOT. doloadstate .OR. lakewater_hrr(1,1,1) == -1.) then !check, if not initialized before from files
       DO imun=1,subasin !Till: initialize fraction of total volume according to lake.dat
-        !lakewater0(imun,:)=lake_vol0_factor(:)*maxlake(imun,:)
         lakewater_hrr(1,imun,:)=lake_vol0_factor(:)*maxlake(imun,:)
         where (acud(imun,:) == 0.)
             lakewater_hrr(1,imun,:) = 0. !no water when there are no reservoirs

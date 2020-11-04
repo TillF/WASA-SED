@@ -1424,7 +1424,6 @@ end subroutine init_interflow_conds
 
 
     subroutine init_lake_conds(lake_conds_file)
-        !the variable that should be initialized here is the lakewater0 which is used in lake.f90 and declared in reservoir_lake_h.f90
         use lake_h
         use time_h
         use params_h
