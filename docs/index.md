@@ -1860,9 +1860,9 @@ Nr. |Output file | Content
 **1)** ```res_”ID”_watbal.out```
 
 ```
-Subbasin-ID, year, day, hour, inflow(m**3/s), intake(m**3/s), overflow(m**3/s), qbottom(m**3/s), qout(m**3/s), elevation(m), area(m**2), volume(m**3)
-60  1980   1   1     55.04      6.12      0.00      0.00      6.12    440.86     5255332.50    49625572.00
-60  1980   1   2     42.01      6.12      0.00      0.00      6.12    441.48     4580464.00    52922032.00
+Subasin-ID	year	day	hour	qlateral(m**3/s)	inflow(m**3/s)	evap(m**3)	prec(m**3)	intake(m**3/s)	overflow(m**3/s)	qbottom(m**3/s)	qout(m**3/s)	withdrawal(m**3/s)	    elevation(m)	area(m**2)	volume(m**3
+60	1980	1	1	55.04	6.12	25478	0	0		0.00	0.00	6.12	440.86	5255332.50	49625572.00
+60	1980	1	2	42.01	6.12	24579	0	0		0.00	0.00	6.12	441.48	4580464.00	52922032.00
 …
 ```
 
@@ -1870,11 +1870,15 @@ Subbasin-ID, year, day, hour, inflow(m**3/s), intake(m**3/s), overflow(m**3/s), 
 *year*: Year of simulation <br>
 *day*: Day of simulation <br>
 *hour*: Hour of simulation <br>
+*qlateral*: lateral inflow discharge into the subbasin's reservoir \[m<sup>3</sup>/s] <br>
 *inflow*: Water inflow discharges into the sub-basin's reservoir \[m<sup>3</sup>/s] <br>
-*intake*: Water outflow discharges through water intake devices in the sub-basin's reservoir \[m<sup>3</sup>/s] <br>
-*qbottom*: Water outflow discharges through bottom outlets in the sub-basin's reservoir \[m<sup>3</sup>/s] <br>
+*evap*: evaporation from the subbasin's reservoir \[m<sup>3</sup>] <br>
+*prec*: precipitation into the subbasin's reservoir \[m<sup>3</sup>] <br>
+*intake*: Water outflow discharges through water intake devices in the sub-basin's reservoir \[m<sup>3</sup>/s]. Should correspond to values in  ```intake.dat```.<br>
 *overflow*: Water overflow discharges in the sub-basin's reservoir \[m<sup>3</sup>/s] <br>
+*qbottom*: Water outflow discharges through bottom outlets in the sub-basin's reservoir \[m<sup>3</sup>/s] <br>
 *qout*: Total outflow discharges in the sub-basin's reservoir \[m<sup>3</sup>/s] <br>
+*withdrawal*: withdrawal water volume to supply the water use sectors Should correspond to values in  ```reservoir.dat```.) \[m<sup>3</sup>/s] <br>
 *elevation*: Reservoir level in the sub-basin's reservoir \[m] <br>
 *area*: Reservoir area in the sub-basin's reservoir \[m<sup>2</sup>] <br>
 *volume*: Reservoir volume in the sub-basin's reservoir \[m<sup>3</sup>]

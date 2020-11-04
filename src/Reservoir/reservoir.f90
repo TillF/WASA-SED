@@ -1418,7 +1418,7 @@ IF (STATUS == 2) THEN
 
 ! 4c) Withdrawal water volume to supply the water use sectors
       IF (volact(step,upstream) > .05*daystorcap(step,res_index(upstream))) THEN
-        withdraw_out(step,res_index(upstream)) = withdrawal(upstream)
+        withdraw_out(step,res_index(upstream)) = withdrawal(upstream) !ii: first, we should check that enough water is really available in teh reservoir
         volact(step,upstream)=MAX(0.,volact(step,upstream)-withdrawal(upstream))
 	  ELSE
         withdraw_out(step,res_index(upstream)) = 0.
