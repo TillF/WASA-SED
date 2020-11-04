@@ -331,7 +331,6 @@ subroutine allocate_reservoir()
 	    acudfloat(subasin,5), &
 	    acudfloatyear(subasin,5,tstop-tstart+1), &
 	      maxlakesub0(subasin,5), &
-	    !  lakewater0(subasin,5), &
 	      laketrend(subasin,5), &
 	      maxlakewater(subasin,5), &
 	      lakewater(366*nt,subasin,5), &
