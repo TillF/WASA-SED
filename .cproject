@@ -3,13 +3,15 @@
     	
     <storageModule moduleId="org.eclipse.cdt.core.settings">
         		
-        <cconfiguration id="photran.managedbuild.toolchain.xlf.fortran.macosx.exe.debug.831712647">
+        <cconfiguration id="photran.managedbuild.toolchain.gnu.fortran.exe.debug.950538685">
             			
-            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="photran.managedbuild.toolchain.xlf.fortran.macosx.exe.debug.831712647" moduleId="org.eclipse.cdt.core.settings" name="Debug">
+            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="photran.managedbuild.toolchain.gnu.fortran.exe.debug.950538685" moduleId="org.eclipse.cdt.core.settings" name="Debug">
                 				
                 <externalSettings/>
                 				
                 <extensions>
+                    					
+                    <extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
                     					
                     <extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
                     					
@@ -25,23 +27,45 @@
             			
             <storageModule moduleId="cdtBuildSystem" version="4.0.0">
                 				
-                <configuration artifactName="${ProjName}" buildProperties="" id="photran.managedbuild.toolchain.xlf.fortran.macosx.exe.debug.831712647" name="Debug" parent="org.eclipse.cdt.build.core.emptycfg">
+                <configuration artifactName="${ProjName}" buildProperties="" description="" id="photran.managedbuild.toolchain.gnu.fortran.exe.debug.950538685" name="Debug" parent="org.eclipse.cdt.build.core.emptycfg">
                     					
-                    <folderInfo id="photran.managedbuild.toolchain.xlf.fortran.macosx.exe.debug.831712647.1587933735" name="/" resourcePath="">
+                    <folderInfo id="photran.managedbuild.toolchain.gnu.fortran.exe.debug.950538685.1146118875" name="/" resourcePath="">
                         						
-                        <toolChain id="photran.managedbuild.toolchain.xlf.fortran.macosx.exe.debug.1235639497" name="IBM XL Fortran Tool Chain" superClass="photran.managedbuild.toolchain.xlf.fortran.macosx.exe.debug">
+                        <toolChain id="photran.managedbuild.toolchain.gnu.fortran.exe.debug.1865921203" name="GCC Fortran" superClass="photran.managedbuild.toolchain.gnu.fortran.exe.debug">
                             							
-                            <targetPlatform id="photran.managedbuild.toolchain.xlf.fortran.macosx.exe.debug.831712647.1332850761" name=""/>
+                            <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="photran.managedbuild.target.gnu.platform.exe.debug.1867230065" name="Debug Platform" osList="solaris,linux,hpux,aix,qnx" superClass="photran.managedbuild.target.gnu.platform.exe.debug"/>
                             							
-                            <builder id="photran.managedbuild.target.xlf.builder.macosx.exe.debug.1556039156" managedBuildOn="false" name="Gnu Make Builder.Debug" superClass="photran.managedbuild.target.xlf.builder.macosx.exe.debug"/>
+                            <builder id="photran.managedbuild.target.gnu.builder.exe.debug.1214334762" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="photran.managedbuild.target.gnu.builder.exe.debug"/>
                             							
-                            <tool id="photran.managedbuild.tool.xlf.c.compiler.macosx.exe.debug.1201305436" name="GCC C Compiler" superClass="photran.managedbuild.tool.xlf.c.compiler.macosx.exe.debug"/>
+                            <tool id="photran.managedbuild.tool.gnu.c.compiler.exe.debug.2052647319" name="GCC C Compiler" superClass="photran.managedbuild.tool.gnu.c.compiler.exe.debug">
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1105703241" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+                                							
+                            </tool>
                             							
-                            <tool id="photran.managedbuild.tool.xlf.fortran.compiler.macosx.exe.debug.1904042925" name="IBM XL Fortran Compiler" superClass="photran.managedbuild.tool.xlf.fortran.compiler.macosx.exe.debug"/>
+                            <tool id="photran.managedbuild.tool.gnu.fortran.compiler.exe.debug.794798192" name="GNU Fortran Compiler" superClass="photran.managedbuild.tool.gnu.fortran.compiler.exe.debug">
+                                								
+                                <inputType id="photran.managedbuild.tool.gnu.fortran.compiler.input.76967219" superClass="photran.managedbuild.tool.gnu.fortran.compiler.input"/>
+                                							
+                            </tool>
                             							
-                            <tool id="photran.managedbuild.tool.macosx.fortran.xlf.linker.macosx.exe.debug.1325113106" name="IBM XL Fortran Linker" superClass="photran.managedbuild.tool.macosx.fortran.xlf.linker.macosx.exe.debug"/>
+                            <tool id="photran.managedbuild.tool.gnu.fortran.linker.exe.debug.1458789628" name="GNU Fortran Linker" superClass="photran.managedbuild.tool.gnu.fortran.linker.exe.debug">
+                                								
+                                <inputType id="photran.managedbuild.tool.gnu.fortran.linker.input.1247333925" superClass="photran.managedbuild.tool.gnu.fortran.linker.input">
+                                    									
+                                    <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+                                    									
+                                    <additionalInput kind="additionalinput" paths="$(LIBS)"/>
+                                    								
+                                </inputType>
+                                							
+                            </tool>
                             							
-                            <tool id="photran.managedbuild.tool.xlf.assembler.macosx.exe.debug.1658402645" name="GCC Assembler" superClass="photran.managedbuild.tool.xlf.assembler.macosx.exe.debug"/>
+                            <tool id="photran.managedbuild.tool.gnu.assembler.exe.debug.1549040666" name="GCC Assembler" superClass="photran.managedbuild.tool.gnu.assembler.exe.debug">
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1373830690" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+                                							
+                            </tool>
                             						
                         </toolChain>
                         					
@@ -65,10 +89,22 @@
     	
     <storageModule moduleId="cdtBuildSystem" version="4.0.0">
         		
-        <project id="WASA Master.null.63345138" name="WASA Master"/>
+        <project id="Irrigation.null.1052631226" name="Irrigation"/>
         	
     </storageModule>
     	
     <storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+    	
+    <storageModule moduleId="refreshScope" versionNumber="2">
+        		
+        <configuration configurationName="Debug">
+            			
+            <resource resourceType="PROJECT" workspacePath="/Irrigation"/>
+            		
+        </configuration>
+        	
+    </storageModule>
+    	
+    <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
     
 </cproject>

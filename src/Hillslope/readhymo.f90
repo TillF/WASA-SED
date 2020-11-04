@@ -1895,7 +1895,7 @@ end if ! do_snow
         END DO
 
 
-        allocate(sub_source(l), irri_source(l), sub_receiver(l), irri_rule(l), irri_rate(l), STAT = istate )  !arrays that will contain data from irri.dat
+        allocate(sub_source(l), irri_source(l), sub_receiver(l), irri_rule(l), irri_rate(l), irri_rate2(l), irri_rate3(l), irri_rate4(l), STAT = istate )  !arrays that will contain data from irri.dat
         if (istate/=0) then
             write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in general-module: ' !Ändern? Was heißt  diese Fehlermeldung?
             stop
@@ -1905,6 +1905,9 @@ end if ! do_snow
         sub_receiver  = 0
         irri_rule = ''
         irri_rate = 0.
+        irri_rate2 = 0.
+        irri_rate3 = 0.
+        irri_rate4 = 0.
         nbr_irri_records = 0
 
         REWIND(11)
@@ -1921,11 +1924,18 @@ end if ! do_snow
             READ(11,'(a)',IOSTAT=istate) cdummy
             dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
 
-            if (dummy1 > 5) then    !too many fields in line
-                write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): line ',h,' contains more (',dummy1,') than the expected 5 fields.'
+            if (dummy1 > 8) then    !too many fields in line
+                write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): line ',h,' contains more (',dummy1,') than the expected 8 fields.'
                 stop
             end if
-            READ(cdummy,*,IOSTAT=istate) sub_source(j),irri_source(j),sub_receiver(j),irri_rule(j), irri_rate(j) !read data from irri.dat
+
+            if (dummy1 < 8) then    !not enough fields in line
+                write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): line ',h,' contains less (',dummy1,') than the expected 8 fields.'
+                stop
+            end if
+
+
+            READ(cdummy,*,IOSTAT=istate) sub_source(j),irri_source(j),sub_receiver(j),irri_rule(j), irri_rate(j), irri_rate2(j), irri_rate3(j), irri_rate4(j)  !read data from irri.dat
 
             if (sub_source(j) /= 9999 ) then            ! transform external ID's to internal ID's with the exception of 9999, representing an external basin. If the Basin doesn't exist it gets the value -1
             sub_source(j) = id_ext2int(sub_source(j),id_subbas_extern)
