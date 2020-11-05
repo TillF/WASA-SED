@@ -1233,8 +1233,8 @@ SUBROUTINE hymo_all(STATUS)
         CALL write_subdaily_output(f_potetranspiration, 'potetranspiration.out',  pet_t)
         CALL write_subdaily_output(f_gw_loss,           'gw_loss.out',            gw_loss_t)
         CALL write_subdaily_output(f_river_infiltration,'River_Infiltration.out', river_infiltration_t)
-        CALL write_subdaily_output(f_irri_abstraction, 'daily_irrigation_abstraction.out', irri_abstraction_record) !   Output irrigation abstraction
-        CALL write_subdaily_output(f_irri_supply, 'daily_irrigation_supply.out', irri_supply_record)                !   Output irrigation supply
+        CALL write_subdaily_output(f_irri_abstraction, 'irrigation_abstraction.out', irri_abstraction_record) !   Output irrigation abstraction
+        CALL write_subdaily_output(f_irri_supply, 'irrigation_supply.out', irri_supply_record)                !   Output irrigation supply
 
         if (river_transport /= 1) CALL write_subdaily_output(f_river_flow,'River_Flow.out', riverflow_t)
 

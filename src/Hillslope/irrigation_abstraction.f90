@@ -12,7 +12,7 @@ use utils_h
 
     IMPLICIT NONE
     INTEGER :: sb_counter, i     !counters
-    REAL :: abstraction_requested, abstraction_available
+    REAL :: abstraction_requested, abstraction_available, all_request
     INTEGER, allocatable :: receiver_basins(:)
 
     irri_supply = 0.0
@@ -27,6 +27,7 @@ use utils_h
        ! get the indices of irri.dat for all subbasins that receive irrigation water from current subbasin
         receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK =sub_source == sb_counter .AND. irri_source == "groundwater")
         abstraction_requested = sum(irri_rate(receiver_basins)) ! get total amount of abstracted water in current subbasin
+        all_request = abstraction_requested !needed if demand is higher than availibilty to calculate the right fractions
 
         IF (abstraction_requested== 0.0) THEN
             cycle
@@ -35,10 +36,14 @@ use utils_h
         IF (abstraction_requested > 0. ) THEN
 			abstraction_available = sum(deepgw(1:nbr_lu(sb_counter),sb_counter)) !total available deep groundwater in current subbasin
 
-                IF (abstraction_available < abstraction_requested) THEN
-				    abstraction_requested = abstraction_available  !If theres not enough water to fulfill demand, use all available water
-				    WRITE(*,'(a,I0,a)') 'WARNING: Not enough deep groundwater in Subbasin ',id_subbas_extern(sb_counter), ' to meet abstraction rate. All available (deep) groundwater will be used.'
-                END IF
+		    IF (abstraction_available == 0.0) THEN !On first day the storage might be empty. Skip this day
+		        cycle
+		    END IF
+
+            IF (abstraction_available < abstraction_requested) THEN
+			    abstraction_requested = abstraction_available  !If theres not enough water to fulfill demand, use all available water
+			WRITE(*,'(a,I0,a)') 'WARNING: Not enough deep groundwater in Subbasin ',id_subbas_extern(sb_counter), ' to meet abstraction rate. All available (deep) groundwater will be used.'
+            END IF
         END IF
 
         irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin !
@@ -48,9 +53,7 @@ use utils_h
 
         !Write extracted water for each receiver basin but skip external receiver basins (code 9999) since this water just disappears outside the model
         receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK=sub_source == sb_counter .AND. irri_source=="groundwater" .AND. sub_receiver /= 9999)
-        abstraction_requested = sum(irri_rate(receiver_basins)) ! get total amount of abstracted water in current subbasin minus the amount that will go to external
-
-		irri_supply(sub_receiver(receiver_basins)) = irri_supply(sub_receiver(receiver_basins)) + abstraction_requested * irri_rate(receiver_basins)/sum(irri_rate(receiver_basins)) !This vector contains the total irrigation amount for every subbasin
+        irri_supply(sub_receiver(receiver_basins)) = irri_supply(sub_receiver(receiver_basins)) + irri_rate(receiver_basins)/all_request * abstraction_requested  !This vector contains the total irrigation ammount for every subbasin
 
     END DO ! Subbasin Loop for groundwater abstraction
 
@@ -71,6 +74,7 @@ use utils_h
        ! get the indices of irri.dat for all subbasins that receive irrigation water from current subbasin
         receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK= sub_source == sb_counter .AND. irri_source=="river")
         abstraction_requested = sum(irri_rate(receiver_basins)) ! get total amount of abstracted water in current subbasin
+        all_request = abstraction_requested !needed if demand is higher than availibilty to calculate the right fractions
 
         IF (abstraction_requested== 0.0) THEN
             cycle
@@ -79,10 +83,14 @@ use utils_h
         IF (abstraction_requested > 0. ) THEN
             abstraction_available = qout(1,sb_counter) !river water in first timestep
 
-                IF (abstraction_available < abstraction_requested) THEN
-                    abstraction_requested = abstraction_available  !If theres not enough water to fulfill demand, use all available water from river flow
-                    WRITE(*,'(a,I0,a)') 'WARNING: Not enough river flow in Subbasin ',id_subbas_extern(sb_counter), ' to meet abstraction rate. All available river flow will be used.'
-                END IF
+            IF (abstraction_available == 0.0) THEN !On first day the storage might be empty. Skip this day
+                cycle
+            END IF
+
+            IF (abstraction_available < abstraction_requested) THEN
+                abstraction_requested = abstraction_available  !If theres not enough water to fulfill demand, use all available water from river flow
+                WRITE(*,'(a,I0,a)') 'WARNING: Not enough river flow in Subbasin ',id_subbas_extern(sb_counter), ' to meet abstraction rate. All available river flow will be used.'
+            END IF
         END IF
 
         irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin !
@@ -92,8 +100,7 @@ use utils_h
 
         !Write abstracted water for each receiver basin but skip external receiver basins (code 9999) since this water just disappears outside the model. Indexing irri_supply with 9999  would crash the program
         receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK=sub_source == sb_counter .AND. irri_source=="river" .AND. sub_receiver /= 9999)
-        abstraction_requested = sum(irri_rate(receiver_basins)) ! get total amount of abstracted water in current subbasin minus the amount that will go to external
-        irri_supply(sub_receiver(receiver_basins)) = irri_supply(sub_receiver(receiver_basins)) + abstraction_requested * irri_rate(receiver_basins)/sum(irri_rate(receiver_basins)) !This vector contains the total irrigation ammount for every subbasin
+        irri_supply(sub_receiver(receiver_basins)) = irri_supply(sub_receiver(receiver_basins)) + irri_rate(receiver_basins)/all_request * abstraction_requested  !This vector contains the total irrigation ammount for every subbasin
 
     END DO ! Subbasin Loop for river abstraction
 
