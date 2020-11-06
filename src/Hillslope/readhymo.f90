@@ -33,7 +33,7 @@
     REAL :: frac_irr_tc
     REAL :: frac_irr_lu
     REAL :: frac_svc_x
-    CHARACTER(len=11) :: source_options(4)
+    CHARACTER(len=11) :: source_options(5)
     CHARACTER(len=11) :: rule_options(4)
     LOGICAL :: file_exists !for checking if irri.dat exists
     REAL :: irri_rate(4) !termporary array for reading rates from file
@@ -1870,6 +1870,7 @@ end if ! do_snow
         source_options(2) = "reservoir"
         source_options(3) = "groundwater"
         source_options(4) = "9999"  ! Code for external, also external Subbasins are represented by the code "9999"
+        source_options(5) = "lake"
 
         rule_options(1) = "fixed"  !create array to check validity of column "rule" in irri.dat
         rule_options(2) = "seasonal"
@@ -1901,7 +1902,8 @@ end if ! do_snow
         END DO
 
 
-        allocate(sub_source(l), irri_source(l), sub_receiver(l), irri_rule(l), irri_rate_gw(subasin, 4), STAT = istate )  !PAultill: ander arrays allozieren
+        allocate(sub_source(l), irri_source(l), sub_receiver(l), irri_rule(l), irri_rate_gw(subasin+1, 4), irri_rate_riv(subasin+1, 4), &  ! subasin + 1 because of option external
+                                 irri_rate_res(subasin+1, 4), irri_rate_lake(subasin+1, 4),  irri_rate_ext(subasin+1, 4), STAT = istate )
          !arrays that will contain data from irri.dat
         if (istate/=0) then
             write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in general-module: ' !Ändern? Was heißt  diese Fehlermeldung?
@@ -1913,6 +1915,11 @@ end if ! do_snow
         irri_rule = ''
         irri_rate = 0.
         nbr_irri_records = 0
+        irri_rate_gw = 0.
+        irri_rate_riv = 0.
+        irri_rate_res = 0.
+        irri_rate_lake = 0.
+        irri_rate_ext = 0.
 
         REWIND(11)
         READ(11,*)
@@ -1966,20 +1973,61 @@ end if ! do_snow
                 cycle
              end if
 
+            if (irri_source(j) == "reservoir") then
+                if (doreservoir .eqv. .FALSE.) then
+                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Irrigation source "reservoir" in line ',h,' cannot be used because reservoir module is switched off in do.dat. Line skipped. '
+                    cycle
+                endif
+            endif
+
+            if (irri_source(j) == "lake") then
+                if (doacud .eqv. .FALSE.) then
+                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Irrigation source "lake" in line ',h,' cannot be used because lake module is switched off in do.dat. Line skipped. '
+                    cycle
+                endif
+            endif
+
             i=which1(rule_options==irri_rule(j))
             if (i==0) then    !Paul: the current irrigation rule option is invalid. skip line
                 write(*,'(a,i0,a,a,a)')'WARNING (irri.dat): Irrigation rule in line ',h, ': "',irri_rule(j), '" is invalid. Line ignored.'
                 cycle
              end if
 
-             if (irri_rate(j) < 0.) then !irrigation rate is invalid
+             IF (ANY(irri_rate(1:4) < 0.)) then !irrigation rate is invalid
                 write(*,'(a,I0,a)')'WARNING (irri.dat): Irrigation rate in line ' ,h, ' is negative. Line ignored.'
                 cycle
              endif
 
-             if (irri_source(j) == "groundwater") then
+             if (irri_source(j) == "groundwater" .AND. sub_receiver(j) == 9999) then
+                irri_rate_gw(subasin+1, 1:4) =irri_rate(1:4)
+             else if (irri_source(j) == "groundwater" .AND. sub_receiver(j) /= 9999) then
                 irri_rate_gw(sub_receiver(j), 1:4) =irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
+             endif
+
+             if (irri_source(j) == "reservoir" .AND. sub_receiver(j) == 9999) then
+                irri_rate_res(subasin+1, 1:4) =irri_rate(1:4)
+             else if (irri_source(j) == "reservoir" .AND. sub_receiver(j) /= 9999) then
+                irri_rate_res(sub_receiver(j), 1:4) =irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
+             endif
+
+             if (irri_source(j) == "lake" .AND. sub_receiver(j) /= 9999) then
+                irri_rate_lake(sub_receiver(j), 1:4) =irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
+             else if (irri_source(j) == "lake" .AND. sub_receiver(j) == 9999) then
+                irri_rate_lake(subasin+1, 1:4) =irri_rate(1:4)
              end if
+
+             if (irri_source(j) == "river" .AND. sub_receiver(j) /= 9999) then
+                irri_rate_riv(sub_receiver(j), 1:4) =irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
+             else if (irri_source(j) == "river" .AND. sub_receiver(j) == 9999) then
+                irri_rate_riv(subasin+1, 1:4) =irri_rate(1:4)
+             end if
+
+             if (irri_source(j) == "external" .AND. sub_receiver(j) /= 9999) then
+                irri_rate_ext(sub_receiver(j), 1:4) =irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
+             else if (irri_source(j) == "external" .AND. sub_receiver(j) == 9999) then
+                irri_rate_ext(subasin+1, 1:4) =irri_rate(1:4)
+             end if
+
              IF (istate/=0) THEN     !no further line
                 exit                !exit loop
              END IF

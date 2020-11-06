@@ -13,34 +13,33 @@ use utils_h
     IMPLICIT NONE
     INTEGER :: sb_counter, i     !counters
     REAL :: abstraction_requested, abstraction_available, all_request
-	REAL :: season_test(subasin)
-    INTEGER, allocatable :: receiver_basins(:)
-    !REAL, dimension(2,4) :: test
+	REAL :: rate(subasin)
+    INTEGER, allocatable :: receiver_basins(:), sub_exists(:)
+
 
     irri_supply = 0.0
     irri_abstraction = 0.0
+    rate = 0.0
 
     !-- Abstraction from groundwater, Loop through all subbasins and check if they're included in irri.dat-----------------------
-    
-	
-	 ! Subbasin Loop compute current rate for all receiver basins from gw according to seasonality
-	season_test = calc_seasonality2(sb_counter, t, d, seasonality_irri_gw, irri_rate_gw)
-	
-    
-	DO sb_counter = 2, subasin ! Subbasin Loop for groundwater abstraction
+	DO  sb_counter = 2, subasin ! Subbasin Loop for groundwater abstraction
         abstraction_requested = 0.0
         abstraction_available = 0.0
 
-
+        sub_exists = pack(sub_receiver, MASK=sub_source == sb_counter) !If
+        IF (SIZE(sub_exists) == 0) THEN
+            cycle
+        END IF
+        rate = calc_seasonality2(sb_counter, t, d, seasonality_irri_gw, irri_rate_gw) ! Subbasin Loop compute current rate for all receiver basins from gw according to seasonality
 
        ! get the indices of irri.dat for all subbasins that receive irrigation water from current subbasin
         receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK =sub_source == sb_counter .AND. irri_source == "groundwater")
-        abstraction_requested = sum(season_test(receiver_basins)) ! get total amount of abstracted water in current subbasin
+        abstraction_requested = sum(rate(receiver_basins)) ! get total amount of abstracted water in current subbasin
         all_request = abstraction_requested !needed if demand is higher than availibilty to calculate the right fractions
 
-        IF (abstraction_requested== 0.0) THEN
-            cycle
-        END IF
+        !IF (abstraction_requested== 0.0) THEN    NICHT MEHR BENÖTIGT WEGEN OBIGEM CHECK
+        !    cycle
+        !END IF
 
         IF (abstraction_requested > 0. ) THEN
 			abstraction_available = sum(deepgw(1:nbr_lu(sb_counter),sb_counter)) !total available deep groundwater in current subbasin
@@ -62,7 +61,7 @@ use utils_h
 
         !Write extracted water for each receiver basin but skip external receiver basins (code 9999) since this water just disappears outside the model
         receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK=sub_source == sb_counter .AND. irri_source=="groundwater" .AND. sub_receiver /= 9999)
-        irri_supply(sub_receiver(receiver_basins)) = irri_supply(sub_receiver(receiver_basins)) + season_test(receiver_basins)/all_request * abstraction_requested  !This vector contains the total irrigation ammount for every subbasin
+        irri_supply(sub_receiver(receiver_basins)) = irri_supply(sub_receiver(receiver_basins)) + rate(receiver_basins)/all_request * abstraction_requested  !This vector contains the total irrigation ammount for every subbasin
 
     END DO ! Subbasin Loop for groundwater abstraction
 
@@ -70,8 +69,8 @@ use utils_h
 
     receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK=sub_source == 9999) !get indices of all external sources
 
-    IF (sum(season_test(receiver_basins)) > 0.0) THEN
-        irri_supply(sub_receiver(receiver_basins)) = irri_supply(sub_receiver(receiver_basins)) + season_test(receiver_basins)
+    IF (sum(rate(receiver_basins)) > 0.0) THEN
+        irri_supply(sub_receiver(receiver_basins)) = irri_supply(sub_receiver(receiver_basins)) + rate(receiver_basins)
     END IF
 
     !-- Abstraction from river, Loop through all subbasins and check if they're included in irri.dat-----------------------
@@ -82,7 +81,7 @@ use utils_h
 
        ! get the indices of irri.dat for all subbasins that receive irrigation water from current subbasin
         receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK= sub_source == sb_counter .AND. irri_source=="river")
-        abstraction_requested = sum(season_test(receiver_basins)) ! get total amount of abstracted water in current subbasin
+        abstraction_requested = sum(rate(receiver_basins)) ! get total amount of abstracted water in current subbasin
         all_request = abstraction_requested !needed if demand is higher than availibilty to calculate the right fractions
 
         IF (abstraction_requested== 0.0) THEN
@@ -109,7 +108,7 @@ use utils_h
 
         !Write abstracted water for each receiver basin but skip external receiver basins (code 9999) since this water just disappears outside the model. Indexing irri_supply with 9999  would crash the program
         receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK=sub_source == sb_counter .AND. irri_source=="river" .AND. sub_receiver /= 9999)
-        irri_supply(sub_receiver(receiver_basins)) = irri_supply(sub_receiver(receiver_basins)) + season_test(receiver_basins)/all_request * abstraction_requested  !This vector contains the total irrigation ammount for every subbasin
+        irri_supply(sub_receiver(receiver_basins)) = irri_supply(sub_receiver(receiver_basins)) + rate(receiver_basins)/all_request * abstraction_requested  !This vector contains the total irrigation ammount for every subbasin
 
     END DO ! Subbasin Loop for river abstraction
 
