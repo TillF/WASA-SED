@@ -640,7 +640,7 @@
         seasonality_p     => seasonality_array2('p_seasons.dat'     )    !read seasonality of P-factor
         seasonality_coarse=> seasonality_array2('coarse_seasons.dat')    !read seasonality of coarse fraction factor
         seasonality_n     => seasonality_array2('n_seasons.dat'     )    !read seasonality of Manning's n
-        !Hier irrigation_season einfügen
+        seasonality_irri  => seasonality_array2('irri_seasons.dat'  )    !read seasonality of irrigation
 
 
         !** read SVC information (numbering scheme, erosion properties)

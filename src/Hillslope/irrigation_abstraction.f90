@@ -12,16 +12,19 @@ use utils_h
 
     IMPLICIT NONE
     INTEGER :: sb_counter, i     !counters
-    REAL :: abstraction_requested, abstraction_available, all_request
+    REAL :: abstraction_requested, abstraction_available, all_request, season_test
     INTEGER, allocatable :: receiver_basins(:)
+    !REAL, dimension(2,4) :: test
 
     irri_supply = 0.0
     irri_abstraction = 0.0
 
     !-- Abstraction from groundwater, Loop through all subbasins and check if they're included in irri.dat-----------------------
-    DO sb_counter = 1, subasin ! Subbasin Loop for groundwater abstraction
+    DO sb_counter = 2, subasin ! Subbasin Loop for groundwater abstraction
         abstraction_requested = 0.0
         abstraction_available = 0.0
+
+       ! season_test =     calc_seasonality2(sb_counter, t, d, seasonality_irri, test )
 
 
        ! get the indices of irri.dat for all subbasins that receive irrigation water from current subbasin
