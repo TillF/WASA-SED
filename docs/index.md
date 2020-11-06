@@ -852,7 +852,7 @@ Eg. ```rainy_season.dat``` contains the points in time that serve as temporal no
 “-1” can be used as a wildcard for sub-basins, vegetation classes and years. The file is interpreted top to bottom, i.e. if multiple matches are found, the uppermost is used. Thus, a fallback specification (“all other cases”) should go into the last line (see example).
 A standard (legacy) rainy_season.dat can be generated from rainfall data using the function rainy_season of the lumpR-package. If rainy_season.dat is missing or contains only the headerlines, only the first value in vegetation.dat is used (i.e. no seasonality).
 
-The optional files ```k_seasons.dat```, ```c_seasons.dat```, ```p_seasons.dat```, ```coarse_seasons.dat```, ```n_seasons.dat``` work analogously for the USLE factors K, C, P, the coarse fraction and Manning’s n. If any of these files is found, four respective columns (instead of the default one) must be given in ```svc.dat```.
+The optional files ```k_seasons.dat```, ```c_seasons.dat```, ```p_seasons.dat```, ```coarse_seasons.dat```, ```n_seasons.dat``` work analogously for the USLE factors K, C, P, the coarse fraction and Manning’s n. If any of these files is found, four respective columns (instead of the default one) must be given in ```svc.dat```. Any seasonality file must reside in the input-subfolder ```hillslope```.
 
 Example: The example file above is for two specific simulation years: 1980 and 1981. For vegetation class 2 in sub-basin 49, the rainy season in 1980 started on the 40th day (09.02.1980), and stopped on the 175th day (28.06.1980) (line 4). For all other vegetation classes, it started ten days later (DOY 20) (line 5). For sub-basin 50, the dynamics are identical for all vegetation classes (line 6).
 
@@ -873,7 +873,7 @@ Subbasin-ID	mean_kf-calib-factor
 
 This file is optional and is only read if doscale (in ```do.dat```) is set to “.T.”. In this case, ```scaling_factor.dat``` is expected in the subdirectory ```Others/```.
 
-Example: All values for saturated hydraulic conductivity during infiltration in sub-basin 1 are modified by dividing them by 10. Maximum interception is adjusted by setting it to (0.340+0.647*10).
+Example: All values for saturated hydraulic conductivity during infiltration in sub-basin 1 are modified by dividing them by 10. Maximum interception is adjusted by multiplication with 1/(0.340+0.647*10).
 
 **12)** ```calibration.dat```<br>
 (optional)
