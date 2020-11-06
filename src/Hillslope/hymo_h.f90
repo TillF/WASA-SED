@@ -409,15 +409,20 @@ module hymo_h
     INTEGER, allocatable :: sub_source(:)           !for reading irri.dat
     INTEGER, allocatable :: sub_receiver(:)         !for reading irri.dat
     CHARACTER(len=12), allocatable :: irri_rule(:)  !for reading irri.dat
-    REAL, allocatable :: irri_rate(:)               !for reading irri.dat
-    REAL, allocatable :: irri_rate2(:)              !for seasonality
-    REAL, allocatable :: irri_rate3(:)              !for seasonality
-    REAL, allocatable :: irri_rate4(:)              !for seasonality
+    REAL, allocatable :: irri_rate_res(:,:)               !for reading irri.dat, rates for reservoir abstraction
+    REAL, allocatable :: irri_rate_lake(:,:)               !for reading irri.dat, rates for reservoir abstraction
+    REAL, allocatable :: irri_rate_riv(:,:)               !for reading irri.dat, rates for reservoir abstraction
+    REAL, allocatable :: irri_rate_gw(:,:)               !for reading irri.dat, rates for reservoir abstraction
+    REAL, allocatable :: irri_rate_ext(:,:)               !for reading irri.dat, rates for reservoir abstraction
     CHARACTER(len=11), allocatable :: irri_source(:)    !for reading irri.dat
     INTEGER ::  nbr_irri_records !total number of vavlid irrigation records in irri.dat
     REAL, allocatable :: irri_supply(:) !stores the amout of irrigation water each subbasin recieves for each timestep  !allocated with dimension subasin in readhymo
     REAL, allocatable :: irri_abstraction(:) !stores the amout of irrigation water that is taken from each subbasin  for each timestep  !allocated with dimension subasin in readhymo
-    INTEGER, pointer :: seasonality_irri(:,:)
+    INTEGER, pointer :: seasonality_irri_res(:,:)
+    INTEGER, pointer :: seasonality_irri_lake(:,:)
+    INTEGER, pointer :: seasonality_irri_riv(:,:)
+    INTEGER, pointer :: seasonality_irri_gw(:,:)
+    INTEGER, pointer :: seasonality_irri_ext(:,:)
 
 
     !Till: these are all output variables that are currently not used

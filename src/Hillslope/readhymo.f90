@@ -36,6 +36,7 @@
     CHARACTER(len=11) :: source_options(4)
     CHARACTER(len=11) :: rule_options(4)
     LOGICAL :: file_exists !for checking if irri.dat exists
+    REAL :: irri_rate(4) !termporary array for reading rates from file
 
 
     INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
@@ -640,7 +641,11 @@
         seasonality_p     => seasonality_array2('p_seasons.dat'     )    !read seasonality of P-factor
         seasonality_coarse=> seasonality_array2('coarse_seasons.dat')    !read seasonality of coarse fraction factor
         seasonality_n     => seasonality_array2('n_seasons.dat'     )    !read seasonality of Manning's n
-        seasonality_irri  => seasonality_array2('irri_seasons.dat'  )    !read seasonality of irrigation
+        seasonality_irri_gw      => seasonality_array2('irri_gw_seasons.dat'   )    !read seasonality of irrigation from groundwater
+        seasonality_irri_res     => seasonality_array2('irri_res_seasons.dat'  )    !read seasonality of irrigation from groundwater
+        seasonality_irri_lake    => seasonality_array2('irri_lake_seasons.dat'  )    !read seasonality of irrigation from groundwater
+        seasonality_irri_riv     => seasonality_array2('irri_riv_seasons.dat'  )    !read seasonality of irrigation from groundwater
+        seasonality_irri_ext     => seasonality_array2('irri_ext_seasons.dat'  )    !read seasonality of irrigation from groundwater
 
 
         !** read SVC information (numbering scheme, erosion properties)
@@ -1896,7 +1901,8 @@ end if ! do_snow
         END DO
 
 
-        allocate(sub_source(l), irri_source(l), sub_receiver(l), irri_rule(l), irri_rate(l), irri_rate2(l), irri_rate3(l), irri_rate4(l), STAT = istate )  !arrays that will contain data from irri.dat
+        allocate(sub_source(l), irri_source(l), sub_receiver(l), irri_rule(l), irri_rate_gw(subasin, 4), STAT = istate )  !PAultill: ander arrays allozieren
+         !arrays that will contain data from irri.dat
         if (istate/=0) then
             write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in general-module: ' !Ändern? Was heißt  diese Fehlermeldung?
             stop
@@ -1906,9 +1912,6 @@ end if ! do_snow
         sub_receiver  = 0
         irri_rule = ''
         irri_rate = 0.
-        irri_rate2 = 0.
-        irri_rate3 = 0.
-        irri_rate4 = 0.
         nbr_irri_records = 0
 
         REWIND(11)
@@ -1936,7 +1939,7 @@ end if ! do_snow
             end if
 
 
-            READ(cdummy,*,IOSTAT=istate) sub_source(j),irri_source(j),sub_receiver(j),irri_rule(j), irri_rate(j), irri_rate2(j), irri_rate3(j), irri_rate4(j)  !read data from irri.dat
+            READ(cdummy,*,IOSTAT=istate) sub_source(j),irri_source(j),sub_receiver(j),irri_rule(j), irri_rate(1:4)  !read data from irri.dat
 
             if (sub_source(j) /= 9999 ) then            ! transform external ID's to internal ID's with the exception of 9999, representing an external basin. If the Basin doesn't exist it gets the value -1
             sub_source(j) = id_ext2int(sub_source(j),id_subbas_extern)
@@ -1974,6 +1977,9 @@ end if ! do_snow
                 cycle
              endif
 
+             if (irri_source(j) == "groundwater") then
+                irri_rate_gw(sub_receiver(j), 1:4) =irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
+             end if
              IF (istate/=0) THEN     !no further line
                 exit                !exit loop
              END IF
