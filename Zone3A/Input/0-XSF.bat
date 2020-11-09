@@ -1,0 +1,1 @@
+.\..\..\wasa_release .\do.dat > .\..\Output\0_protokoll.txt

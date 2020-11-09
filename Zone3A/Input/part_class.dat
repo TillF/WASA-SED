@@ -1,0 +1,5 @@
+Particle size classes to be used in sediment modelling
+class_number	upper_limit[mm]
+1	0.002
+2	0.05
+3	2

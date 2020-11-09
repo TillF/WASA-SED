@@ -37,7 +37,8 @@
     CHARACTER(len=11) :: rule_options(4)
     LOGICAL :: file_exists !for checking if irri.dat exists
     REAL :: irri_rate(4) !termporary array for reading rates from file
-
+    INTEGER, allocatable :: season_filecheck(:)
+    REAL :: loss
 
     INTEGER :: tcid_instance    !(internal) id of TC-instance (unique subbas-LU-TC-combination)
     INTEGER :: soilid            !internal id of current soil
@@ -1903,7 +1904,8 @@ end if ! do_snow
 
 
         allocate(sub_source(l), irri_source(l), sub_receiver(l), irri_rule(l), irri_rate_gw(subasin+1, 4), irri_rate_riv(subasin+1, 4), &  ! subasin + 1 because of option external
-                                 irri_rate_res(subasin+1, 4), irri_rate_lake(subasin+1, 4),  irri_rate_ext(subasin+1, 4), STAT = istate )
+                                 irri_rate_res(subasin+1, 4), irri_rate_lake(subasin+1, 4),  irri_rate_ext(subasin+1, 4), &
+                                 loss_gw(subasin),loss_riv(subasin),loss_res(subasin),loss_lake(subasin),loss_ext(subasin), STAT = istate )
          !arrays that will contain data from irri.dat
         if (istate/=0) then
             write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in general-module: ' !Ändern? Was heißt  diese Fehlermeldung?
@@ -1920,6 +1922,12 @@ end if ! do_snow
         irri_rate_res = 0.
         irri_rate_lake = 0.
         irri_rate_ext = 0.
+        loss_gw = 0.
+        loss_riv = 0.
+        loss_res = 0.
+        loss_lake = 0.
+        loss_ext = 0.
+        loss = 0.
 
         REWIND(11)
         READ(11,*)
@@ -1935,18 +1943,18 @@ end if ! do_snow
             READ(11,'(a)',IOSTAT=istate) cdummy
             dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
 
-            if (dummy1 > 8) then    !too many fields in line
-                write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): line ',h,' contains more (',dummy1,') than the expected 8 fields.'
+            if (dummy1 > 9) then    !too many fields in line
+                write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): line ',h,' contains more (',dummy1,') than the expected 9 fields.'
                 stop
             end if
 
-            if (dummy1 < 8) then    !not enough fields in line
-                write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): line ',h,' contains less (',dummy1,') than the expected 8 fields.'
+            if (dummy1 < 9) then    !not enough fields in line
+                write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): line ',h,' contains less (',dummy1,') than the expected 9 fields.'
                 stop
             end if
 
 
-            READ(cdummy,*,IOSTAT=istate) sub_source(j),irri_source(j),sub_receiver(j),irri_rule(j), irri_rate(1:4)  !read data from irri.dat
+            READ(cdummy,*,IOSTAT=istate) sub_source(j),irri_source(j),sub_receiver(j),irri_rule(j), irri_rate(1:4), loss  !read data from irri.dat
 
             if (sub_source(j) /= 9999 ) then            ! transform external ID's to internal ID's with the exception of 9999, representing an external basin. If the Basin doesn't exist it gets the value -1
             sub_source(j) = id_ext2int(sub_source(j),id_subbas_extern)
@@ -1955,6 +1963,18 @@ end if ! do_snow
             if (sub_receiver(j) /= 9999 ) then
             sub_receiver(j) = id_ext2int(sub_receiver(j),id_subbas_extern)
             endif
+
+            IF (irri_source(j) == "groundwater" .AND. sub_receiver(j) /= 9999) THEN  !Sort the loss factors
+                loss_gw(sub_receiver(j)) = loss
+            ELSE IF (irri_source(j) == "river" .AND. sub_receiver(j) /= 9999) THEN
+                loss_riv(sub_receiver(j)) = loss
+            ELSE IF (irri_source(j) == "reservoir" .AND. sub_receiver(j) /= 9999) THEN
+                loss_res(sub_receiver(j)) = loss
+            ELSE IF (irri_source(j) == "lake" .AND. sub_receiver(j) /= 9999) THEN
+                loss_lake(sub_receiver(j)) = loss
+            ELSE IF (irri_source(j) == "9999" .AND. sub_receiver(j) /= 9999) THEN
+                loss_ext(sub_receiver(j)) = loss
+            END IF
 
     !-------------Error checks-----------
              if (sub_source(j)==-1) then    !Paul: the current sub_source was not contained in routing.dat, skip line
@@ -1991,41 +2011,60 @@ end if ! do_snow
             if (i==0) then    !Paul: the current irrigation rule option is invalid. skip line
                 write(*,'(a,i0,a,a,a)')'WARNING (irri.dat): Irrigation rule in line ',h, ': "',irri_rule(j), '" is invalid. Line ignored.'
                 cycle
-             end if
+            end if
+
+            if ((irri_source(j) == "groundwater" .OR. irri_source(j) == "river" .OR. irri_source(j) == "9999") .AND. irri_rule(j) == "percentage") then
+                WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Irrigation rule "lake" in line ',h,' cannot be used with irrigation source ',irri_source(j),'. Line skipped. '
+                cycle
+            end if
+
+            if (irri_rule(j) == "seasonal" .AND. irri_source(j) == "groundwater") THEN  ! Auch für die anderen sources anlegen
+                 season_filecheck = PACK(seasonality_irri_gw(1,:), MASK= seasonality_irri_gw(1,:) == sub_receiver(j))
+                 IF (SIZE(season_filecheck) == 0) THEN
+                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): sub_receiver in line ',h,' not contained in resepctive irri_"source_name"_seasons.dat Changed irrigation rule to "fixed".'
+                    irri_rule(j) = "fixed"
+                 END IF
+            end if
+
 
              IF (ANY(irri_rate(1:4) < 0.)) then !irrigation rate is invalid
                 write(*,'(a,I0,a)')'WARNING (irri.dat): Irrigation rate in line ' ,h, ' is negative. Line ignored.'
                 cycle
              endif
 
-             if (irri_source(j) == "groundwater" .AND. sub_receiver(j) == 9999) then
-                irri_rate_gw(subasin+1, 1:4) =irri_rate(1:4)
-             else if (irri_source(j) == "groundwater" .AND. sub_receiver(j) /= 9999) then
-                irri_rate_gw(sub_receiver(j), 1:4) =irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
+
+             !----------End Error checks
+
+
+
+             if (irri_source(j) == "groundwater" .AND. sub_receiver(j)== 9999) then
+                irri_rate_gw(subasin+1,1:4) = irri_rate_gw(subasin+1,1:4) + irri_rate(1:4)
+             elseif (irri_source(j) == "groundwater" .AND. sub_receiver(j) /= 9999) then
+                irri_rate_gw(sub_receiver(j), 1:4) = irri_rate_gw(sub_receiver(j), 1:4) + irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
              endif
 
              if (irri_source(j) == "reservoir" .AND. sub_receiver(j) == 9999) then
-                irri_rate_res(subasin+1, 1:4) =irri_rate(1:4)
+                irri_rate_res(subasin+1, 1:4) =irri_rate_res(subasin+1, 1:4) + irri_rate(1:4)
              else if (irri_source(j) == "reservoir" .AND. sub_receiver(j) /= 9999) then
-                irri_rate_res(sub_receiver(j), 1:4) =irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
+                irri_rate_res(sub_receiver(j), 1:4) =irri_rate_res(sub_receiver(j), 1:4) + irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
              endif
 
              if (irri_source(j) == "lake" .AND. sub_receiver(j) /= 9999) then
-                irri_rate_lake(sub_receiver(j), 1:4) =irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
+                irri_rate_lake(sub_receiver(j), 1:4) = irri_rate_lake(sub_receiver(j), 1:4) + irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
              else if (irri_source(j) == "lake" .AND. sub_receiver(j) == 9999) then
-                irri_rate_lake(subasin+1, 1:4) =irri_rate(1:4)
+                irri_rate_lake(subasin+1, 1:4) =irri_rate_lake(subasin+1, 1:4) + irri_rate(1:4)
              end if
 
              if (irri_source(j) == "river" .AND. sub_receiver(j) /= 9999) then
-                irri_rate_riv(sub_receiver(j), 1:4) =irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
+                irri_rate_riv(sub_receiver(j), 1:4) = irri_rate_riv(sub_receiver(j), 1:4) + irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
              else if (irri_source(j) == "river" .AND. sub_receiver(j) == 9999) then
-                irri_rate_riv(subasin+1, 1:4) =irri_rate(1:4)
+                irri_rate_riv(subasin+1, 1:4) = irri_rate_riv(subasin+1, 1:4) + irri_rate(1:4)
              end if
 
-             if (irri_source(j) == "external" .AND. sub_receiver(j) /= 9999) then
-                irri_rate_ext(sub_receiver(j), 1:4) =irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
-             else if (irri_source(j) == "external" .AND. sub_receiver(j) == 9999) then
-                irri_rate_ext(subasin+1, 1:4) =irri_rate(1:4)
+             if (irri_source(j) == "9999" .AND. sub_receiver(j) /= 9999) then
+                irri_rate_ext(sub_receiver(j), 1:4) = irri_rate_ext(sub_receiver(j), 1:4) + irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
+             else if (irri_source(j) == "9999" .AND. sub_receiver(j) == 9999) then
+                irri_rate_ext(subasin+1, 1:4) = irri_rate_ext(subasin+1, 1:4) + irri_rate(1:4)
              end if
 
              IF (istate/=0) THEN     !no further line
@@ -2115,7 +2154,7 @@ end if ! do_snow
 
             IF (dummy3 /= -1 .AND. ((dummy3 > tstop) .OR. (dummy3 < tstart))) cycle        !found specification for a year that is out of the simulation range
 
-            if (dummy1 /=-1) then !wildcard for "all subbasins"
+            if (dummy1 /=-1 .AND. dummy1 /= 9999) then !wildcard for "all subbasins" !Paul 09.11.20 option 9999 for irrigation
                 j = id_ext2int(dummy1, id_subbas_extern)            !convert external to internal ID
                 IF (j == -1) THEN                                        !found unknown subbasin id
                     WRITE(*,'(a, I0, a, I0, a)') inputfile_name//', line ', loop, ': Sub-basin-ID ', dummy1, ' not found in hymo.dat, ignored.'

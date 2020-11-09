@@ -1,0 +1,35 @@
+
+C:\Users\Admin\Documents\Workspace\WASA-SED\Zone3A\./Input/                                                                                                     
+C:\Users\Admin\Documents\Workspace\WASA-SED\Zone3A\./Output/                                                                                                    
+ start year of simulation:         2000
+ end year of simulation:         2002
+ start of simulation (month, day):            1           1
+ end of simulation (month, day):           12          31
+ no. of sub-basin:           75
+ no. of combinations:         5061
+ total no. of SOTER units:           63
+ total no. of terrain components:          189
+ total no. of soil components:            9
+ total no. of vegetation units:            7
+ do reservoir calculations:  F
+ T
+ F
+ T
+ T
+ F
+ F
+           0
+           0
+   15.0000000       0.00000000       1.00000000    
+  0.300000012    
+           0
+ F
+ F
+   1.00000000    
+ F
+           3
+ [not used]
+           1
+           1
+ WASA model, rev_268-40-g7346599  (local modifications); repository date 2020-11-06 18:54:36 +0100, built 09.11.2020 12:58
+ using prespecified outflow: T

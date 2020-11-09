@@ -423,7 +423,11 @@ module hymo_h
     INTEGER, pointer :: seasonality_irri_riv(:,:)
     INTEGER, pointer :: seasonality_irri_gw(:,:)
     INTEGER, pointer :: seasonality_irri_ext(:,:)
-
+    REAL, allocatable :: loss_gw(:)
+    REAL, allocatable :: loss_riv(:)
+    REAL, allocatable :: loss_res(:)
+    REAL, allocatable :: loss_lake(:)
+    REAL, allocatable :: loss_ext(:)
 
     !Till: these are all output variables that are currently not used
     !! horton overland flow of each SVC
