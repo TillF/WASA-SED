@@ -1,6 +1,0 @@
-Specification of seasonality of irrigation (per year)					
-for the interpolation of temporal distribution between 4 nodes within the year using values in irri.dat					
-subbasin_id	year	DOY1	DOY2	DOY3	DOY4
-33	2000	1	3	5	7
-1	2000	1	3	5	7
-

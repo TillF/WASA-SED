@@ -418,11 +418,12 @@ module hymo_h
     INTEGER ::  nbr_irri_records !total number of vavlid irrigation records in irri.dat
     REAL, allocatable :: irri_supply(:) !stores the amout of irrigation water each subbasin recieves for each timestep  !allocated with dimension subasin in readhymo
     REAL, allocatable :: irri_abstraction(:) !stores the amout of irrigation water that is taken from each subbasin  for each timestep  !allocated with dimension subasin in readhymo
-    INTEGER, pointer :: seasonality_irri_res(:,:)
-    INTEGER, pointer :: seasonality_irri_lake(:,:)
-    INTEGER, pointer :: seasonality_irri_riv(:,:)
-    INTEGER, pointer :: seasonality_irri_gw(:,:)
-    INTEGER, pointer :: seasonality_irri_ext(:,:)
+    INTEGER, pointer :: seasonality_irri(:,:)
+    !INTEGER, pointer :: seasonality_irri_res(:,:)   !Paul 09.11.2020 First version with different seasonality depending on irri_source. For this option were 5 seasons.dat files necesssary. Simplified to one seasonality per sreceiver basin
+    !INTEGER, pointer :: seasonality_irri_lake(:,:)
+    !INTEGER, pointer :: seasonality_irri_riv(:,:)
+    !INTEGER, pointer :: seasonality_irri_gw(:,:)
+    !INTEGER, pointer :: seasonality_irri_ext(:,:)
     REAL, allocatable :: loss_gw(:)
     REAL, allocatable :: loss_riv(:)
     REAL, allocatable :: loss_res(:)

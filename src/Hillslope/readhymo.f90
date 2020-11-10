@@ -642,11 +642,13 @@
         seasonality_p     => seasonality_array2('p_seasons.dat'     )    !read seasonality of P-factor
         seasonality_coarse=> seasonality_array2('coarse_seasons.dat')    !read seasonality of coarse fraction factor
         seasonality_n     => seasonality_array2('n_seasons.dat'     )    !read seasonality of Manning's n
-        seasonality_irri_gw      => seasonality_array2('irri_gw_seasons.dat'   )    !read seasonality of irrigation from groundwater
-        seasonality_irri_res     => seasonality_array2('irri_res_seasons.dat'  )    !read seasonality of irrigation from groundwater
-        seasonality_irri_lake    => seasonality_array2('irri_lake_seasons.dat'  )    !read seasonality of irrigation from groundwater
-        seasonality_irri_riv     => seasonality_array2('irri_riv_seasons.dat'  )    !read seasonality of irrigation from groundwater
-        seasonality_irri_ext     => seasonality_array2('irri_ext_seasons.dat'  )    !read seasonality of irrigation from groundwater
+
+        seasonality_irri     => seasonality_array2('irri_seasons.dat'   )
+       ! seasonality_irri_gw      => seasonality_array2('irri_gw_seasons.dat'   )    !read seasonality of irrigation from groundwater !Paul 09.11.2020 First version with different seasonality depending on irri_source. For this option were 5 seasons.dat files necesssary. Simplified to one seasonality per sreceiver basin
+       ! seasonality_irri_res     => seasonality_array2('irri_res_seasons.dat'  )    !read seasonality of irrigation from groundwater
+       ! seasonality_irri_lake    => seasonality_array2('irri_lake_seasons.dat'  )    !read seasonality of irrigation from groundwater
+       ! seasonality_irri_riv     => seasonality_array2('irri_riv_seasons.dat'  )    !read seasonality of irrigation from groundwater
+       ! seasonality_irri_ext     => seasonality_array2('irri_ext_seasons.dat'  )    !read seasonality of irrigation from groundwater
 
 
         !** read SVC information (numbering scheme, erosion properties)
@@ -1944,12 +1946,12 @@ end if ! do_snow
             dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
 
             if (dummy1 > 9) then    !too many fields in line
-                write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): line ',h,' contains more (',dummy1,') than the expected 9 fields.'
+                write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): Line ',h,' contains more (',dummy1,') than the expected 9 fields.'
                 stop
             end if
 
             if (dummy1 < 9) then    !not enough fields in line
-                write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): line ',h,' contains less (',dummy1,') than the expected 9 fields.'
+                write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): Line ',h,' contains less (',dummy1,') than the expected 9 fields.'
                 stop
             end if
 
@@ -1976,19 +1978,19 @@ end if ! do_snow
                 loss_ext(sub_receiver(j)) = loss
             END IF
 
-    !-------------Error checks-----------
-             if (sub_source(j)==-1) then    !Paul: the current sub_source was not contained in routing.dat, skip line
+    !-------------Error checks and Warnings-----------
+             if (sub_source(j)==-1) then    ! the current sub_source was not contained in routing.dat, skip line
                     WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Source subbasin in line ',h,' not listed in routing.dat, ignored.'
                     cycle
              end if
 
-             if (sub_receiver(j)==-1) then    !Paul: the current sub_receiver was not contained in routing.dat and is not type external (Code 9999)
+             if (sub_receiver(j)==-1) then    !the current sub_receiver was not contained in routing.dat and is not type external (Code 9999)
                     WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): receiver subbasin in line ',h,' not listed in routing.dat, ignored.'
                     cycle
              end if
 
             i=which1(source_options==irri_source(j))
-            if (i==0) then    !Paul: the current irrigation source option is invalid. skip line
+            if (i==0) then    !the current irrigation source option is invalid. skip line
                 write(*,'(a,i0,a,a,a)')'WARNING (irri.dat): Source in line ',h, ': "',irri_source(j), '" is invalid. Line ignored.'
                 cycle
              end if
@@ -2008,33 +2010,31 @@ end if ! do_snow
             endif
 
             i=which1(rule_options==irri_rule(j))
-            if (i==0) then    !Paul: the current irrigation rule option is invalid. skip line
+            if (i==0) then    !the current irrigation rule option is invalid. skip line
                 write(*,'(a,i0,a,a,a)')'WARNING (irri.dat): Irrigation rule in line ',h, ': "',irri_rule(j), '" is invalid. Line ignored.'
                 cycle
             end if
 
-            if ((irri_source(j) == "groundwater" .OR. irri_source(j) == "river" .OR. irri_source(j) == "9999") .AND. irri_rule(j) == "percentage") then
-                WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Irrigation rule "lake" in line ',h,' cannot be used with irrigation source ',irri_source(j),'. Line skipped. '
-                cycle
-            end if
-
-            if (irri_rule(j) == "seasonal" .AND. irri_source(j) == "groundwater") THEN  ! Auch für die anderen sources anlegen
-                 season_filecheck = PACK(seasonality_irri_gw(1,:), MASK= seasonality_irri_gw(1,:) == sub_receiver(j))
+            if (irri_rule(j) == "seasonal" ) THEN
+                 season_filecheck = PACK(seasonality_irri(:,1), MASK= seasonality_irri(:,1) == sub_receiver(j))
                  IF (SIZE(season_filecheck) == 0) THEN
-                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): sub_receiver in line ',h,' not contained in resepctive irri_"source_name"_seasons.dat Changed irrigation rule to "fixed".'
+                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): sub_receiver in line ',h,' not contained in irri_seasons.dat. Changed irrigation rule to "fixed". Just the first rate value (column 5) will be used'
                     irri_rule(j) = "fixed"
+                    irri_rate(2:4) = irri_rate(1)
                  END IF
             end if
 
+            if (irri_rule(j) == "fixed" .AND. MINVAL(irri_rate(1:4)) /= MAXVAL(irri_rate(1:4))) THEN
+                WRITE(*,'(a, I0, a)') 'WARNING (irri.dat): Line ',h,': When using rule "fixed", all four rate values must be identical. Just using the first rate value (column 5) now.'
+                irri_rate(2:4) = irri_rate(1)
+            end if
 
              IF (ANY(irri_rate(1:4) < 0.)) then !irrigation rate is invalid
                 write(*,'(a,I0,a)')'WARNING (irri.dat): Irrigation rate in line ' ,h, ' is negative. Line ignored.'
                 cycle
-             endif
-
+             end if
 
              !----------End Error checks
-
 
 
              if (irri_source(j) == "groundwater" .AND. sub_receiver(j)== 9999) then
