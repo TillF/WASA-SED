@@ -1904,8 +1904,8 @@ end if ! do_snow
         END DO
 
 
-        allocate(sub_source(l), irri_source(l), sub_receiver(l), irri_rule(l), irri_rate_gw(subasin+1,subasin, 4), irri_rate_riv(subasin+1, 4), &  ! subasin + 1 because of option external
-                                 irri_rate_res(subasin+1,subasin, 4), irri_rate_lake(subasin+1, 4),  irri_rate_ext(subasin+1, 4), &
+        allocate(sub_source(l), irri_source(l), sub_receiver(l), irri_rule(l), irri_rate_gw(subasin+1,subasin, 4), irri_rate_riv(subasin+1,subasin, 4), &  ! subasin + 1 because of option external
+                                 irri_rate_res(subasin+1,subasin, 4), irri_rate_lake(subasin+1,subasin, 4),  irri_rate_ext(subasin+1, 4), &
                                  loss_gw(subasin),loss_riv(subasin),loss_res(subasin),loss_lake(subasin),loss_ext(subasin), STAT = istate )
          !arrays that will contain data from irri.dat
         if (istate/=0) then
@@ -2054,15 +2054,15 @@ end if ! do_snow
              endif
 
              if (irri_source(j) == "lake" .AND. sub_receiver(j) /= 9999) then
-                irri_rate_lake(sub_receiver(j), 1:4) = irri_rate_lake(sub_receiver(j), 1:4) + irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
+                irri_rate_lake(sub_receiver(j),sub_source(j), 1:4) = irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
              else if (irri_source(j) == "lake" .AND. sub_receiver(j) == 9999) then
-                irri_rate_lake(subasin+1, 1:4) =irri_rate_lake(subasin+1, 1:4) + irri_rate(1:4)
+                irri_rate_lake(subasin+1,sub_source(j), 1:4) = irri_rate(1:4)
              end if
 
              if (irri_source(j) == "river" .AND. sub_receiver(j) /= 9999) then
-                irri_rate_riv(sub_receiver(j), 1:4) = irri_rate_riv(sub_receiver(j), 1:4) + irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
+                irri_rate_riv(sub_receiver(j),sub_source(j), 1:4) =  irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
              else if (irri_source(j) == "river" .AND. sub_receiver(j) == 9999) then
-                irri_rate_riv(subasin+1, 1:4) = irri_rate_riv(subasin+1, 1:4) + irri_rate(1:4)
+                irri_rate_riv(subasin+1,sub_source(j), 1:4) = irri_rate(1:4)
              end if
 
              if (irri_source(j) == "9999" .AND. sub_receiver(j) /= 9999) then

@@ -410,10 +410,10 @@ module hymo_h
     INTEGER, allocatable :: sub_receiver(:)         !for reading irri.dat
     CHARACTER(len=12), allocatable :: irri_rule(:)  !for reading irri.dat
     REAL, allocatable :: irri_rate_res(:,:,:)               !for reading irri.dat, rates for reservoir abstraction
-    REAL, allocatable :: irri_rate_lake(:,:)               !for reading irri.dat, rates for reservoir abstraction
-    REAL, allocatable :: irri_rate_riv(:,:)               !for reading irri.dat, rates for reservoir abstraction
-    REAL, allocatable :: irri_rate_gw(:,:,:)               !for reading irri.dat, rates for reservoir abstraction
-    REAL, allocatable :: irri_rate_ext(:,:)               !for reading irri.dat, rates for reservoir abstraction
+    REAL, allocatable :: irri_rate_lake(:,:,:)               !for reading irri.dat, rates for lake abstraction
+    REAL, allocatable :: irri_rate_riv(:,:,:)               !for reading irri.dat, rates for river abstraction
+    REAL, allocatable :: irri_rate_gw(:,:,:)               !for reading irri.dat, rates for groundwater abstraction
+    REAL, allocatable :: irri_rate_ext(:,:)               !for reading irri.dat, rates for external abstraction
     CHARACTER(len=11), allocatable :: irri_source(:)    !for reading irri.dat
     INTEGER ::  nbr_irri_records !total number of vavlid irrigation records in irri.dat
     REAL, allocatable :: irri_supply(:) !stores the amout of irrigation water each subbasin recieves for each timestep  !allocated with dimension subasin in readhymo

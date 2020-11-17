@@ -38,9 +38,9 @@ use utils_h
         IF (SIZE(receiver_basins) /= 0) THEN
             rate = calc_seasonality2(sub_receiver(receiver_basins(1)), t, d, seasonality_irri, irri_rate_gw(:,sb_counter,:)) !this function needs one seasonally irrigated subbasinId as first argument and then strangely computes the values for all the seasonal and fixed receivers
             abstraction_requested = sum(rate)
-        ELSE IF (SIZE(receiver_basins) == 0) THEN ! if there's no seasonal irrigation just use the rates from the irri_rate_gw array
+        ELSE IF (SIZE(receiver_basins) == 0) THEN ! if there's no seasonal irrigation just use the first rate from the irri_rate_gw array
             rate = irri_rate_gw(:,sb_counter,1)
-            abstraction_requested = sum(rate) ! + irri_rate_gw(subasin + 1,sb_counter,1) ! <- can't index with external. External is always the last row in irri_rate arrays
+            abstraction_requested = sum(rate)
         END IF
 
         !Einfügen abstraction requested von soil moisture thresh
@@ -85,8 +85,7 @@ use utils_h
             rate = calc_seasonality2(sub_receiver(receiver_basins(1)), t, d, seasonality_irri, irri_rate_ext) !this function needs one seasonally irrigated subbasinId as first argument and then strangely computes the values for all the seasonal and fixed receivers
             irri_supply = irri_supply + rate(1:subasin) * loss_ext
         ELSE IF (SIZE(receiver_basins) == 0) THEN
-            receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK =sub_source == 9999 .AND. irri_rule == "fixed" .AND. sub_receiver /= 9999)
-            rate(sub_receiver(receiver_basins)) = irri_rate_ext(sub_receiver(receiver_basins),1)
+            rate = irri_rate_ext(:,1)
             irri_supply = irri_supply + rate(1:subasin) * loss_ext
         END IF
     END IF
@@ -109,12 +108,11 @@ use utils_h
 
         ! get total amount of seasonal and fixed abstracted water in current subbasin
         IF (SIZE(receiver_basins) /= 0) THEN
-            rate = calc_seasonality2(sub_receiver(receiver_basins(1)), t, d, seasonality_irri, irri_rate_riv) !this function needs one seasonally irrigated subbasinId as first argument and then strangely computes the values for all the seasonal and fixed receivers
+            rate = calc_seasonality2(sub_receiver(receiver_basins(1)), t, d, seasonality_irri, irri_rate_riv(:,sb_counter,:)) !this function needs one seasonally irrigated subbasinId as first argument and then strangely computes the values for all the seasonal and fixed receivers
             abstraction_requested = sum(rate)
-        ELSE IF (SIZE(receiver_basins) == 0) THEN
-            receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK =sub_source == sb_counter .AND. irri_source == "river" .AND. irri_rule == "fixed" .AND. sub_receiver /= 9999)
-            rate(sub_receiver(receiver_basins)) = irri_rate_riv(sub_receiver(receiver_basins),1)
-            abstraction_requested = sum(irri_rate_riv(sub_receiver(receiver_basins),1)) + irri_rate_riv(subasin + 1,1) ! <- can't index with external. External is always the last row in irri_rate arrays
+        ELSE IF (SIZE(receiver_basins) == 0) THEN  !if there's no seasonal irrigation just use the first rate from the irri_rate_riv array
+            rate = irri_rate_riv(:,sb_counter,1)
+            abstraction_requested = sum(rate)
         END IF
 
         !Einfügen abstraction requested von soil moisture thresh
@@ -166,7 +164,7 @@ use utils_h
             IF (SIZE(receiver_basins) /= 0) THEN
                 rate = calc_seasonality2(sub_receiver(receiver_basins(1)), t, d, seasonality_irri, irri_rate_res(:,sb_counter,:)) !this function needs one seasonally irrigated subbasinId as first argument and then strangely computes the values for all the seasonal and fixed receivers
                 abstraction_requested = sum(rate)
-            ELSE IF (SIZE(receiver_basins) == 0) THEN ! if there's no seasonal irrigation just use the rates from the irri_rate_gw array
+            ELSE IF (SIZE(receiver_basins) == 0) THEN ! if there's no seasonal irrigation just use the first rate from the irri_rate_res array
                 rate = irri_rate_res(:,sb_counter,1)
                 abstraction_requested = sum(rate)
             END IF
