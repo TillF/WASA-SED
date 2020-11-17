@@ -19,14 +19,14 @@ use utils_h
 
     irri_supply = 0.0
     irri_abstraction = 0.0
-    rate = 0.0
 
     !-- Abstraction from groundwater, Loop through all subbasins and check if they're included in irri.dat-----------------------
 	DO  sb_counter = 1, subasin ! Subbasin Loop for groundwater abstraction
         abstraction_requested = 0.0
         abstraction_available = 0.0
+        rate = 0.0
 
-        sub_exists = pack(sub_receiver, MASK=sub_source == sb_counter .AND. irri_source == "groundwater") !If
+        sub_exists = pack(sub_receiver, MASK=sub_source == sb_counter .AND. irri_source == "groundwater") !check if current subbasin gives water
         IF (SIZE(sub_exists) == 0) THEN
             cycle
         END IF
@@ -36,12 +36,11 @@ use utils_h
 
         ! get total amount of seasonal and fixed abstracted water in current subbasin
         IF (SIZE(receiver_basins) /= 0) THEN
-            rate = calc_seasonality2(sub_receiver(receiver_basins(1)), t, d, seasonality_irri, irri_rate_gw) !this function needs one seasonally irrigated subbasinId as first argument and then strangely computes the values for all the seasonal and fixed receivers
+            rate = calc_seasonality2(sub_receiver(receiver_basins(1)), t, d, seasonality_irri, irri_rate_gw(:,sb_counter,:)) !this function needs one seasonally irrigated subbasinId as first argument and then strangely computes the values for all the seasonal and fixed receivers
             abstraction_requested = sum(rate)
-        ELSE IF (SIZE(receiver_basins) == 0) THEN
-            receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK =sub_source == sb_counter .AND. irri_source == "groundwater" .AND. irri_rule == "fixed" .AND. sub_receiver /= 9999)
-            rate(sub_receiver(receiver_basins)) = irri_rate_gw(sub_receiver(receiver_basins),1)
-            abstraction_requested = sum(irri_rate_gw(sub_receiver(receiver_basins),1)) + irri_rate_gw(subasin + 1,1) ! <- can't index with external. External is always the last row in irri_rate arrays
+        ELSE IF (SIZE(receiver_basins) == 0) THEN ! if there's no seasonal irrigation just use the rates from the irri_rate_gw array
+            rate = irri_rate_gw(:,sb_counter,1)
+            abstraction_requested = sum(rate) ! + irri_rate_gw(subasin + 1,sb_counter,1) ! <- can't index with external. External is always the last row in irri_rate arrays
         END IF
 
         !Einfügen abstraction requested von soil moisture thresh
@@ -93,11 +92,12 @@ use utils_h
     END IF
 
     !-- Abstraction from river, Loop through all subbasins and check if they're included in irri.dat-----------------------
-    rate = 0.0
+
 
     DO sb_counter = 1, subasin ! Subbasin Loop for river
         abstraction_requested = 0.0
         abstraction_available = 0.0
+        rate = 0.0
 
         sub_exists = pack(sub_receiver, MASK=sub_source == sb_counter .AND. irri_source == "river")
         IF (SIZE(sub_exists) == 0) THEN
@@ -149,8 +149,9 @@ use utils_h
     END DO ! Subbasin Loop for river abstraction
 
     IF (doreservoir) THEN
-        rate = 0.0
+
      DO sb_counter = 1, subasin ! Subbasin Loop for reservoir
+            rate = 0.0
             abstraction_requested = 0.0
             abstraction_available = 0.0
 
@@ -163,12 +164,11 @@ use utils_h
             receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK =sub_source == sb_counter .AND. irri_source == "reservoir" .AND. irri_rule == "seasonal")
             ! get total amount of seasonal and fixed abstracted water in current subbasin
             IF (SIZE(receiver_basins) /= 0) THEN
-                rate = calc_seasonality2(sub_receiver(receiver_basins(1)), t, d, seasonality_irri, irri_rate_res) !this function needs one seasonally irrigated subbasinId as first argument and then strangely computes the values for all the seasonal and fixed receivers
+                rate = calc_seasonality2(sub_receiver(receiver_basins(1)), t, d, seasonality_irri, irri_rate_res(:,sb_counter,:)) !this function needs one seasonally irrigated subbasinId as first argument and then strangely computes the values for all the seasonal and fixed receivers
                 abstraction_requested = sum(rate)
-            ELSE IF (SIZE(receiver_basins) == 0) THEN
-                receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK =sub_source == sb_counter .AND. irri_source == "reservoir" .AND. irri_rule == "fixed" .AND. sub_receiver /= 9999)
-                rate(sub_receiver(receiver_basins)) = irri_rate_res(sub_receiver(receiver_basins),1)
-                abstraction_requested = sum(irri_rate_riv(sub_receiver(receiver_basins),1)) + irri_rate_riv(subasin + 1,1) ! <- can't index with external. External is always the last row in irri_rate arrays
+            ELSE IF (SIZE(receiver_basins) == 0) THEN ! if there's no seasonal irrigation just use the rates from the irri_rate_gw array
+                rate = irri_rate_res(:,sb_counter,1)
+                abstraction_requested = sum(rate)
             END IF
 
             !Einfügen abstraction requested von soil moisture thresh abstraction_requested = abstraction_requested + request from soil moisture
@@ -188,7 +188,7 @@ use utils_h
 
                 IF (abstraction_available < abstraction_requested) THEN
                     abstraction_requested = abstraction_available  !If theres not enough water to fulfill demand, use all available water from river flow
-                    WRITE(*,'(a,I0,a)') 'WARNING: Not enough water in reservoir in Subbasin ',id_subbas_extern(sb_counter), ' to meet abstraction rate. All available water from reservoir will be used.'
+                    WRITE(*,'(a,I0,a)') 'WARNING: Not enough reservoir water in Subbasin ',id_subbas_extern(sb_counter), ' to meet abstraction rate. All available water from reservoir will be used.'
                 END IF
             END IF
 
@@ -220,12 +220,12 @@ use utils_h
             receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK =sub_source == sb_counter .AND. irri_source == "reservoir" .AND. irri_rule == "seasonal")
             ! get total amount of seasonal and fixed abstracted water in current subbasin
             IF (SIZE(receiver_basins) /= 0) THEN
-                rate = calc_seasonality2(sub_receiver(receiver_basins(1)), t, d, seasonality_irri, irri_rate_res) !this function needs one seasonally irrigated subbasinId as first argument and then strangely computes the values for all the seasonal and fixed receivers
+              !  rate = calc_seasonality2(sub_receiver(receiver_basins(1)), t, d, seasonality_irri, irri_rate_res) !this function needs one seasonally irrigated subbasinId as first argument and then strangely computes the values for all the seasonal and fixed receivers
                ! abstraction_requested = sum(rate * withdraw_out(d * JAHR, n_reservoir) !FIX THIS
             ELSE IF (SIZE(receiver_basins) == 0) THEN
                 receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK =sub_source == sb_counter .AND. irri_source == "res" .AND. irri_rule == "fixed" .AND. sub_receiver /= 9999)
-                rate(sub_receiver(receiver_basins)) = irri_rate_res(sub_receiver(receiver_basins),1)
-                abstraction_requested = sum(irri_rate_riv(sub_receiver(receiver_basins),1)) + irri_rate_riv(subasin + 1,1) ! <- can't index with external. External is always the last row in irri_rate arrays
+                rate(sub_receiver(receiver_basins)) = irri_rate_res(sub_receiver(receiver_basins),sb_counter,1)
+                abstraction_requested = sum(rate) + irri_rate_res(subasin + 1,sb_counter,1) ! <- can't index with external. External is always the last row in irri_rate arrays
             END IF
 
             !Einfügen abstraction requested von soil moisture thresh
