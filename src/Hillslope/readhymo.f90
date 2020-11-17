@@ -34,7 +34,7 @@
     REAL :: frac_irr_lu
     REAL :: frac_svc_x
     CHARACTER(len=11) :: source_options(5)
-    CHARACTER(len=11) :: rule_options(4)
+    CHARACTER(len=11) :: rule_options(3)
     LOGICAL :: file_exists !for checking if irri.dat exists
     REAL :: irri_rate(4) !termporary array for reading rates from file
     INTEGER, allocatable :: season_filecheck(:)
@@ -1877,8 +1877,7 @@ end if ! do_snow
 
         rule_options(1) = "fixed"  !create array to check validity of column "rule" in irri.dat
         rule_options(2) = "seasonal"
-        rule_options(3) = "percentage"
-        rule_options(4) = "sm_thresh"
+        rule_options(3) = "sm_thresh"
 
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/irri.dat',STATUS='old',IOSTAT=istate)  ! check if irri.dat contains data
         READ(11,*)  !skip Header
@@ -1983,6 +1982,11 @@ end if ! do_snow
                     WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Source subbasin in line ',h,' not listed in routing.dat, ignored.'
                     cycle
              end if
+
+             if (sub_source(j) /= 9999 .AND. irri_source(j) == "9999") then
+                WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Source option "9999" in line ',h,' only possible when sub_source = 9999 (external). Line ignored.'
+                cycle
+             endif
 
              if (sub_receiver(j)==-1) then    !the current sub_receiver was not contained in routing.dat and is not type external (Code 9999)
                     WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): receiver subbasin in line ',h,' not listed in routing.dat, ignored.'
