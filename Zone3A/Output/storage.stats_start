@@ -1,13 +1,13 @@
 total water storage in catchment after model run [m3]
-soil_storage	   61953458176.0
-gw_storage	     460932064.0
+soil_storage	   46143078400.0
+gw_storage	             0.0
 interception_storage	             0.0
-interflow_storage	        112216.2
+interflow_storage	             0.0
 snow_storage	             0.0
-lake_storage1	        299985.0
-lake_storage2	         79992.0
-lake_storage3	         17997.0
-lake_storage4	          5997.0
-lake_storage5	          3150.0
-river_storage	    1093513216.0
+lake_storage1	        165514.2
+lake_storage2	        557475.1
+lake_storage3	         12600.0
+lake_storage4	          6300.0
+lake_storage5	          1260.0
+river_storage	             0.0
 reservoir_storage	     -75000000.0

@@ -216,7 +216,7 @@ use utils_h
             abstraction_available = 0.0
 
 
-            sub_exists = pack(sub_receiver, MASK=sub_source == sb_counter .AND. irri_source == "reservoir")
+            sub_exists = pack(sub_receiver, MASK=sub_source == sb_counter .AND. irri_source == "lake")
             IF (SIZE(sub_exists) == 0) THEN
                 cycle
             END IF
@@ -246,6 +246,7 @@ use utils_h
             END IF
             ! res_index contains subbasins and the corresponding reservoir Ids
             IF (abstraction_requested > 0. ) THEN
+                !abstraction_available = acud(sb_counter,)
                 abstraction_available = sum(lakewater_hrr(d,sb_counter,:) * acud(sb_counter,:)) !Check this once lake module is working
 
                 IF (abstraction_available == 0.0) THEN !On first day the storage might be empty. Skip this day
@@ -261,18 +262,17 @@ use utils_h
 
             irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin !
 
-            !  Abstraction of water from reservoir outflow
-           !  lakewater_hrr(d,sb_counter,:) = withdraw_out(d,res_index(sb_counter)) - abstraction_requested/(3600 * dt * nt)
+            !  Abstraction of lake water respective to lake size
+            lakewater_hrr(d,sb_counter,:) = lakewater_hrr(d,sb_counter,:) - lakewater_hrr(d,sb_counter,:) /abstraction_available * abstraction_requested
 
             !Write abstracted water for each receiver basin but skip external receiver basins (code 9999) since this water just disappears outside the model. Indexing irri_supply with 9999  would crash the program
             irri_supply = irri_supply + rate(1:subasin)/all_request * abstraction_requested * loss_res !This vector contains the total irrigation ammount for every subbasin
 
-        END DO ! Subbasin Loop for reservoir abstraction
+        END DO ! Subbasin Loop for lake abstraction
     END IF
 
 
-
-     !irri_supply und irri_abstraction in irri_abstraction_record und irri_receiver_record schreiben -> Ausgabedatei um Zwischenstände abzuspeichern
+     !these arrays are for creating the outfiles
      irri_abstraction_record(d,nt,1:subasin) = irri_abstraction
      irri_supply_record(d,nt,1:subasin) = irri_supply
 
