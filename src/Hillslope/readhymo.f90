@@ -2001,14 +2001,18 @@ end if ! do_snow
 
             if (irri_source(j) == "reservoir") then
                 if (doreservoir .eqv. .FALSE.) then
-                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Irrigation source "reservoir" in line ',h,' cannot be used because reservoir module is switched off in do.dat. Line skipped. '
+                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Irrigation source "reservoir" in line ',h,' cannot be used because reservoir module is switched off in do.dat. Line ignored. '
                     cycle
                 endif
             endif
+            ! Unfortunately this doesn't work because the reservoir index doesn't exist yet
+            !if (irri_source(j) == "reservoir" .AND. res_index(sub_source(j)) == 0) then
+             !   WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Irrigation source "reservoir" in line ',h,' not possible because Subbasin ',sub_source(j), ' does not contain a reservoir (check reservoir.dat). Line ignored.'
+            !end if
 
             if (irri_source(j) == "lake") then
                 if (doacud .eqv. .FALSE.) then
-                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Irrigation source "lake" in line ',h,' cannot be used because lake module is switched off in do.dat. Line skipped. '
+                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Irrigation source "lake" in line ',h,' cannot be used because lake module is switched off in do.dat. Line ignored. '
                     cycle
                 endif
             endif

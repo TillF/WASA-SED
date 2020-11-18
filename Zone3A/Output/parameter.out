@@ -11,7 +11,7 @@ C:\Users\Admin\Documents\Workspace\WASA-SED\Zone3A\./Output/
  total no. of terrain components:          189
  total no. of soil components:            9
  total no. of vegetation units:            7
- do reservoir calculations:  F
+ do reservoir calculations:  T
  T
  F
  T
@@ -31,5 +31,5 @@ C:\Users\Admin\Documents\Workspace\WASA-SED\Zone3A\./Output/
  [not used]
            1
            1
- WASA model, rev_268-43-g473326b  (local modifications); repository date 2020-11-17 15:41:33 +0100, built 17.11.2020 16:25
+ WASA model, rev_268-45-g0f7f9f7  (local modifications); repository date 2020-11-17 17:35:28 +0100, built 18.11.2020 10:36
  using prespecified outflow: T

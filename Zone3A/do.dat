@@ -12,7 +12,7 @@ Parameter specification for the WASA Model (SESAM-Project), generated with R-Pac
 9	//total no. of soil components in study area
 7	//total no. of vegetation units in study area
 .t.	//doreservoir: do reservoir calculations
-.f.	//doacudes: include calculations for small reservoirs
+.t.	//doacudes: include calculations for small reservoirs
 .t.	//dolattc: do latflow between TCs
 .f.	//doalllattc: route latflow compeletely to next downslope TC
 .t.	//dolatsc: do latflow within TCs (surface runoff)
