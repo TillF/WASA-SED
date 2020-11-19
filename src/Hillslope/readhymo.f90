@@ -1994,6 +1994,12 @@ end if ! do_snow
                 cycle
              endif
 
+             if (sub_source(j) == 9999 .AND. irri_source(j) /= "9999") then
+                 WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Line ',h,': when sub_source = 9999 (external) source has to be "9999". Changed source to "9999".'
+                 irri_source(j) = "9999"
+             end if
+
+
              if (sub_receiver(j)==-1) then    !the current sub_receiver was not contained in routing.dat and is not type external (Code 9999)
                     WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): receiver subbasin in line ',h,' not listed in routing.dat, ignored.'
                     cycle
@@ -2094,14 +2100,14 @@ end if ! do_snow
                 irri_rate_ext(subasin+1, 1:4) = irri_rate_ext(subasin+1, 1:4) + irri_rate(1:4)
              end if
 
-             if (irri_source(j) == "groundwater" .AND. irri_rule(j) == "cwd" .AND. sub_source(j) /= 9999) then
+             if (irri_source(j) == "groundwater" .AND. irri_rule(j) == "cwd" .AND. sub_source(j) /= 9999) then  !assign crop coefficients to the respective source array (gw, res, lake, etc.)
                 cwd_gw(sub_receiver(j),sub_source(j),:) = irri_rate(1:4)
              else if (irri_source(j) == "groundwater" .AND. irri_rule(j) == "cwd" .AND. sub_source(j) == 9999) then
                 cwd_gw(sub_receiver(j),subasin+1,:) = irri_rate(1:4)
              end if
 
              if (sub_source(j) == 9999 .AND. irri_rule(j) == "cwd") then
-                cwd_ext(sub_receiver(j),:) = irri_rate(1:4)
+                cwd_ext(sub_receiver(j),:) = cwd_ext(sub_receiver(j),:) + irri_rate(1:4)
              end if
 
              if (irri_source(j) == "river" .AND. irri_rule(j) == "cwd" .AND. sub_source(j) /= 9999) then
