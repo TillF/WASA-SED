@@ -1877,7 +1877,7 @@ end if ! do_snow
 
         rule_options(1) = "fixed"  !create array to check validity of column "rule" in irri.dat
         rule_options(2) = "seasonal"
-        rule_options(3) = "cwd"   ! crop water demand
+        rule_options(3) = "sm_thresh"
 
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/irri.dat',STATUS='old',IOSTAT=istate)  ! check if irri.dat contains data
         READ(11,*)  !skip Header
@@ -1906,7 +1906,6 @@ end if ! do_snow
 
         allocate(sub_source(l), irri_source(l), sub_receiver(l), irri_rule(l), irri_rate_gw(subasin+1,subasin, 4), irri_rate_riv(subasin+1,subasin, 4), &  ! subasin + 1 because of option external
                                  irri_rate_res(subasin+1,subasin, 4), irri_rate_lake(subasin+1,subasin, 4),  irri_rate_ext(subasin+1, 4), &
-                                 cwd_gw(subasin+1,subasin+1,4), cwd_ext(subasin+1,4), cwd_riv(subasin+1,subasin+1,4), cwd_res(subasin+1,subasin+1,4), cwd_lake(subasin+1,subasin+1,4), &
                                  loss_gw(subasin),loss_riv(subasin),loss_res(subasin),loss_lake(subasin),loss_ext(subasin), STAT = istate )
          !arrays that will contain data from irri.dat
         if (istate/=0) then
@@ -1930,11 +1929,6 @@ end if ! do_snow
         loss_lake = 0.
         loss_ext = 0.
         loss = 0.
-        cwd_gw = 0.
-        cwd_ext = 0.
-        cwd_riv = 0.
-        cwd_res = 0.
-        cwd_lake = 0.
 
         REWIND(11)
         READ(11,*)
@@ -2011,7 +2005,7 @@ end if ! do_snow
                     cycle
                 endif
             endif
-            ! Unfortunately this doesn't work because the reservoir index doesn't exist yet. this check happens no on daily basis in irrigation_abstraction.f90. Same for lake check
+            ! Unfortunately this doesn't work because the reservoir index doesn't exist yet
             !if (irri_source(j) == "reservoir" .AND. res_index(sub_source(j)) == 0) then
              !   WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Irrigation source "reservoir" in line ',h,' not possible because Subbasin ',sub_source(j), ' does not contain a reservoir (check reservoir.dat). Line ignored.'
             !end if
@@ -2043,19 +2037,6 @@ end if ! do_snow
                 irri_rate(2:4) = irri_rate(1)
             end if
 
-            if (irri_rule(j) == "cwd" .AND. sub_receiver(j) == 9999) then
-                WRITE(*,'(a, I0, a)') 'WARNING (irri.dat): Line ',h,': When using rule "cwd", sub_receiver can not be external (9999). Line ignored.'
-                cycle
-            end if
-
-            if (irri_rule(j) == "cwd") then
-                season_filecheck = PACK(seasonality_irri(:,1), MASK= seasonality_irri(:,1) == sub_receiver(j))
-                if (SIZE(season_filecheck) == 0) then
-                    WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): sub_receiver in line ',h,' not contained in irri_seasons.dat. To use rule "cwd" receiver basin must be included in irri_seasons.dat. Line ignored'
-                    cycle
-                end if
-            end if
-
              IF (ANY(irri_rate(1:4) < 0.)) then !irrigation rate is invalid
                 write(*,'(a,I0,a)')'WARNING (irri.dat): Irrigation rate in line ' ,h, ' is negative. Line ignored.'
                 cycle
@@ -2064,62 +2045,34 @@ end if ! do_snow
              !----------End Error checks
 
 
-             if (irri_source(j) == "groundwater" .AND. sub_receiver(j)== 9999 .AND. irri_rule(j) /= "cwd") then
+             if (irri_source(j) == "groundwater" .AND. sub_receiver(j)== 9999) then
                 irri_rate_gw(subasin+1,sub_source(j),1:4) = irri_rate(1:4)
-             elseif (irri_source(j) == "groundwater" .AND. sub_receiver(j) /= 9999 .AND. irri_rule(j) /= "cwd") then
+             elseif (irri_source(j) == "groundwater" .AND. sub_receiver(j) /= 9999) then
                 irri_rate_gw(sub_receiver(j),sub_source(j), 1:4) = irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
              endif
 
-             if (irri_source(j) == "reservoir" .AND. sub_receiver(j) == 9999 .AND. irri_rule(j) /= "cwd") then
+             if (irri_source(j) == "reservoir" .AND. sub_receiver(j) == 9999) then
                 irri_rate_res(subasin+1,sub_source(j), 1:4) = irri_rate(1:4)
-             else if (irri_source(j) == "reservoir" .AND. sub_receiver(j) /= 9999 .AND. irri_rule(j) /= "cwd") then
+             else if (irri_source(j) == "reservoir" .AND. sub_receiver(j) /= 9999) then
                 irri_rate_res(sub_receiver(j),sub_source(j), 1:4) = irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
              endif
 
-             if (irri_source(j) == "lake" .AND. sub_receiver(j) /= 9999 .AND. irri_rule(j) /= "cwd") then
+             if (irri_source(j) == "lake" .AND. sub_receiver(j) /= 9999) then
                 irri_rate_lake(sub_receiver(j),sub_source(j), 1:4) = irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
-             else if (irri_source(j) == "lake" .AND. sub_receiver(j) == 9999 .AND. irri_rule(j) /= "cwd") then
+             else if (irri_source(j) == "lake" .AND. sub_receiver(j) == 9999) then
                 irri_rate_lake(subasin+1,sub_source(j), 1:4) = irri_rate(1:4)
              end if
 
-             if (irri_source(j) == "river" .AND. sub_receiver(j) /= 9999 .AND. irri_rule(j) /= "cwd" ) then
+             if (irri_source(j) == "river" .AND. sub_receiver(j) /= 9999) then
                 irri_rate_riv(sub_receiver(j),sub_source(j), 1:4) =  irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
-             else if (irri_source(j) == "river" .AND. sub_receiver(j) == 9999 .AND. irri_rule(j) /= "cwd") then
+             else if (irri_source(j) == "river" .AND. sub_receiver(j) == 9999) then
                 irri_rate_riv(subasin+1,sub_source(j), 1:4) = irri_rate(1:4)
              end if
 
-             if (irri_source(j) == "9999" .AND. sub_receiver(j) /= 9999 .AND. irri_rule(j) /= "cwd") then
+             if (irri_source(j) == "9999" .AND. sub_receiver(j) /= 9999) then
                 irri_rate_ext(sub_receiver(j), 1:4) = irri_rate_ext(sub_receiver(j), 1:4) + irri_rate(1:4) !assign read rates to the respective source array (gw, res, lake, etc.)
-             else if (irri_source(j) == "9999" .AND. sub_receiver(j) == 9999 .AND. irri_rule(j) /= "cwd") then
+             else if (irri_source(j) == "9999" .AND. sub_receiver(j) == 9999) then
                 irri_rate_ext(subasin+1, 1:4) = irri_rate_ext(subasin+1, 1:4) + irri_rate(1:4)
-             end if
-
-             if (irri_source(j) == "groundwater" .AND. irri_rule(j) == "cwd" .AND. sub_source(j) /= 9999) then
-                cwd_gw(sub_receiver(j),sub_source(j),:) = irri_rate(1:4)
-             else if (irri_source(j) == "groundwater" .AND. irri_rule(j) == "cwd" .AND. sub_source(j) == 9999) then
-                cwd_gw(sub_receiver(j),subasin+1,:) = irri_rate(1:4)
-             end if
-
-             if (sub_source(j) == 9999 .AND. irri_rule(j) == "cwd") then
-                cwd_ext(sub_receiver(j),:) = irri_rate(1:4)
-             end if
-
-             if (irri_source(j) == "river" .AND. irri_rule(j) == "cwd" .AND. sub_source(j) /= 9999) then
-                cwd_riv(sub_receiver(j),sub_source(j),:) = irri_rate(1:4)
-             else if (irri_source(j) == "river" .AND. irri_rule(j) == "cwd" .AND. sub_source(j) == 9999) then
-                cwd_riv(sub_receiver(j),subasin+1,:) = irri_rate(1:4)
-             end if
-
-             if (irri_source(j) == "reservoir" .AND. irri_rule(j) == "cwd" .AND. sub_source(j) /= 9999) then
-                cwd_res(sub_receiver(j),sub_source(j),:) = irri_rate(1:4)
-             else if (irri_source(j) == "reservoir" .AND. irri_rule(j) == "cwd" .AND. sub_source(j) == 9999) then
-                cwd_res(sub_receiver(j),subasin+1,:) = irri_rate(1:4)
-             end if
-
-             if (irri_source(j) == "lake" .AND. irri_rule(j) == "cwd" .AND. sub_source(j) /= 9999) then
-                cwd_lake(sub_receiver(j),sub_source(j),:) = irri_rate(1:4)
-             else if (irri_source(j) == "reservoir" .AND. irri_rule(j) == "cwd" .AND. sub_source(j) == 9999) then
-                cwd_lake(sub_receiver(j),subasin+1,:) = irri_rate(1:4)
              end if
 
              IF (istate/=0) THEN     !no further line

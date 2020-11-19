@@ -1,13 +1,7 @@
-donor basin for irrigation water	source of irrigation water [reservoir,groundwater,river,9999(external)]	receiver basin	irrigation rule[fixed/seasonal/sm_thresh]	daily irrigation rate(4 values) 
+donor basin for irrigation water	source of irrigation water [reservoir,groundwater,river,9999(external)]	receiver basin	irrigation rule[cwd/seasonal/sm_thresh]	daily irrigation rate(4 values) 
 sub_source	source	sub_receiver	rule	rate(4 values) [m3/timestep]	loss_factor
-33	lake	1	fixed	100	100	100	100 0.8
-33	lake	2	fixed	100	100	100	100	0.8
-33	lake	9999	fixed	100	100	100	100	0.8
-18	lake	1	fixed	100	100	100	100 0.8
-18	lake	2	seasonal	50	100	150	200	0.8
-18	lake	9999	seasonal	50	100	150	200	0.8
-1	lake	1	fixed	100	100	100	100 0.8
-1	lake	2	seasonal	50	100	150	200	0.8
-1	lake	9999	seasonal	50	100	150	200	0.8
-9999	9999	107	fixed	100	100	100	100 0.8
-9999	9999	107	seasonal	100	200	300	400	0.8
+33	groundwater	32	fixed	100	100	100	100	0.8
+33	groundwater	1	cwd	0.8	0.9	1.0	1.2 0.8
+33	groundwater	2	cwd	0.8	0.8	0.8	0.8	0.8
+33	groundwater	9999	cwd	0.8	0.8	0.8	0.8	0.8
+9999	9999	107	cwd	0.8	0.8	0.8	0.8	0.8

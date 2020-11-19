@@ -414,6 +414,11 @@ module hymo_h
     REAL, allocatable :: irri_rate_riv(:,:,:)               !for reading irri.dat, rates for river abstraction
     REAL, allocatable :: irri_rate_gw(:,:,:)               !for reading irri.dat, rates for groundwater abstraction
     REAL, allocatable :: irri_rate_ext(:,:)               !for reading irri.dat, rates for external abstraction
+    REAL, allocatable :: cwd_gw(:,:,:)                     ! for storing coefficients for crop water demand
+    REAL, allocatable :: cwd_ext(:,:)                ! for storing coefficients for crop water demand
+    REAL, allocatable :: cwd_riv(:,:,:)                     ! for storing coefficients for crop water demand
+    REAL, allocatable :: cwd_res(:,:,:)                     ! for storing coefficients for crop water demand
+    REAL, allocatable :: cwd_lake(:,:,:)                     ! for storing coefficients for crop water demand
     CHARACTER(len=11), allocatable :: irri_source(:)    !for reading irri.dat
     INTEGER ::  nbr_irri_records !total number of vavlid irrigation records in irri.dat
     REAL, allocatable :: irri_supply(:) !stores the amout of irrigation water each subbasin recieves for each timestep  !allocated with dimension subasin in readhymo
