@@ -12,7 +12,7 @@ Parameter specification for the WASA Model (SESAM-Project), generated with R-Pac
 9	//total no. of soil components in study area
 7	//total no. of vegetation units in study area
 .t.	//doreservoir: do reservoir calculations
-.t.	//doacudes: include calculations for small reservoirs
+.f.	//doacudes: include calculations for small reservoirs
 .t.	//dolattc: do latflow between TCs
 .f.	//doalllattc: route latflow compeletely to next downslope TC
 .t.	//dolatsc: do latflow within TCs (surface runoff)
@@ -33,7 +33,7 @@ Parameter specification for the WASA Model (SESAM-Project), generated with R-Pac
 1	// type of sediment transport model at the hillslope
 1	//type of water / sediment model in the river: (1) old routing, (2) Muskingum & ss transport, (3) Muskingum & bedload modelling
 1	//type of sediment model in the reservoir: choose sediment transport equation (1:Wu et al., 2000; 2:Ashida and Michiue, 1973; 3: Yang, 1973 and 1984; 4: Ackers and White, 1973)
-.f.	//OPTIONAL: load state of storages from files (if present) at start; optional second flag: allows the model to append to existing output files, default is .f. 
+.t..f.	//OPTIONAL: load state of storages from files (if present) at start; optional second flag: allows the model to append to existing output files, default is .f. 
 .t. .f.	//OPTIONAL: save state of storages to files after simulation period; optional second flag: determines if the model states are saved (and overwritten) at the end of each simulation year, default is .t.
 .f.	// dosnow
 .t.	//doirrigation

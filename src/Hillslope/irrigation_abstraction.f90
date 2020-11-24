@@ -206,7 +206,7 @@ use utils_h
             all_request = 0.0
 
             IF (res_index(sb_counter) == 0) THEN !Check if current subbasin contains a reservoir
-                WRITE(*,'(a, I0, a)') 'WARNING (irri.dat): Subbasin ',sb_counter, ' does not contain a reservoir (check reservoir.dat). No irrigation from reservoir possible. Line ignored.'
+                WRITE(*,'(a, I0, a)') 'WARNING (irri.dat): Subbasin ',id_subbas_intern(sb_counter), ' does not contain a reservoir (check reservoir.dat). No irrigation from reservoir possible. Line ignored.'
                 cycle
             ENDIF
 
@@ -242,6 +242,8 @@ use utils_h
             END IF
             ! res_index contains subbasins and the corresponding reservoir Ids
             IF (abstraction_requested > 0. ) THEN
+
+            !!! Vielleicht hier den Fall abfangen, das withdraw_out negativ ist (dies scheint zu geschehen, wenn es zwei Reservoire gibt)
                 abstraction_available = withdraw_out(d,res_index(sb_counter)) * 3600 * dt * nt !withdraw_out is in m^3/s. Rate of available outflow from reservoir
 
                 IF (abstraction_available == 0.0) THEN !On first day the storage might be empty. Skip this day
@@ -249,8 +251,8 @@ use utils_h
                     cycle
                 END IF
 
-                IF (abstraction_available < abstraction_requested) THEN
-                    abstraction_requested = abstraction_available  !If theres not enough water to fulfill demand, use all available water from river flow
+                IF (abstraction_available < abstraction_requested ) THEN
+                    abstraction_requested = abstraction_available  !If theres not enough water to fulfill demand, use all available water from reservoir
                     WRITE(*,'(a,I0,a)') 'WARNING: Not enough reservoir water in Subbasin ',id_subbas_extern(sb_counter), ' to meet abstraction rate. All available water from reservoir will be used.'
                 END IF
             END IF
@@ -318,8 +320,7 @@ use utils_h
             END IF
             ! res_index contains subbasins and the corresponding reservoir Ids
             IF (abstraction_requested > 0. ) THEN
-                !abstraction_available = acud(sb_counter,)
-                abstraction_available = sum(lakewater_hrr(d,sb_counter,:) * acud(sb_counter,:)) !Check this once lake module is working
+                abstraction_available = sum(lakewater_hrr(d,sb_counter,:) * acud(sb_counter,:))
 
                 IF (abstraction_available == 0.0) THEN !On first day the storage might be empty. Skip this day
                     WRITE(*,'(a,I0,a)') 'WARNING: No more water available in lakes in Subbasin ',id_subbas_extern(sb_counter), '. No irrigation possible from this source in current timestep.'

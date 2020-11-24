@@ -29,7 +29,7 @@
     CHARACTER (LEN=8000) :: cdummy
 
     !----------------------------------------------
-    INTEGER :: PAUL ! for testing GetNumberOfSubstrings(cdummy) IRRIGATION
+    INTEGER :: column_test ! for testing GetNumberOfSubstrings(cdummy) IRRIGATION
     REAL :: frac_irr_tc
     REAL :: frac_irr_lu
     REAL :: frac_svc_x
@@ -677,7 +677,7 @@
 
         READ(11,'(a)', IOSTAT=istate) cdummy
 
-        PAUL = GetNumberOfSubstrings(cdummy)  ! Feststellen der Spalten von Svc.dat für irrigation
+        column_test = GetNumberOfSubstrings(cdummy)  ! Feststellen der Spalten von Svc.dat für irrigation
 
 
         !--------------------------------------------------------------------------------------------
@@ -685,6 +685,7 @@
         allocate(id_svc_extern(nsvc))    !allocate memory for SVC-IDs to be read
         allocate(irri_supply(subasin))   ! needed in subroutine irrigation_abstraction
         allocate(irri_abstraction(subasin))
+        irri_supply = 0.
 
 
 
@@ -753,7 +754,7 @@
 
 
     !-------------------------------------------------
-    IF (PAUL /= k) THEN
+    IF (doirrigation) THEN
     allocate (svc_irr(nsvc))  !svc_irr vektor anlegen. Wird in hymo_h deklariert. Irrigation
     svc_irr = 0
     allocate (frac_irr_sub(subasin)) !Für die spätere Flächenberechnung
@@ -772,20 +773,26 @@
             if (trim(cdummy)=='') cycle    !skip blank lines
 
             !------------------------------------ Falls es mehr als 8 Spalten gibt, lies svc_irr ein
-            IF (PAUL == k) THEN
+            IF (column_test == k .AND. .NOT. doirrigation) THEN
                 READ(cdummy,*, IOSTAT=istate) id_svc_extern(i), j, n, svc_k_fac(i,:), svc_c_fac(i,:), svc_p_fac(i,:), svc_coarse_fac(i,:), svc_n(i,:)
-            ELSE
-                READ(cdummy,*, IOSTAT=istate) id_svc_extern(i), j, n, svc_k_fac(i,:), svc_c_fac(i,:), svc_p_fac(i,:), svc_coarse_fac(i,:), svc_n(i,:), svc_irr(i)
+            ELSE IF (column_test == k .AND. doirrigation ) THEN
+                write(*,'(a,i0,a)')'ERROR(svc.dat): Line ',h,': unexpected number of fields. Irrigation column missing. Check "svc.dat"'
+                stop
+            ELSE IF (column_test == k + 1 .AND. .NOT. doirrigation) THEN
+                READ(cdummy,*, IOSTAT=istate) id_svc_extern(i), j, n, svc_k_fac(i,:), svc_c_fac(i,:), svc_p_fac(i,:), svc_coarse_fac(i,:), svc_n(i,:)
+                write(*,'(a,i0,a)')'Warning(svc.dat): Line ',h,': unexpected number of fields. Check "svc.dat". Last column ignored.'
+            ELSE IF (column_test == k + 1 .AND. doirrigation) THEN
+                  READ(cdummy,*, IOSTAT=istate) id_svc_extern(i), j, n, svc_k_fac(i,:), svc_c_fac(i,:), svc_p_fac(i,:), svc_coarse_fac(i,:), svc_n(i,:), svc_irr(i)
             END IF
 
-            IF (istate /= 0 .OR. (PAUL /=k .AND. PAUL /= k + 1)) THEN    !format error
-                write(*,'(a,i0,a)')'ERROR: svc.dat, line ',h,': unexpected number of fields. Check *_seasons.dat'
+            IF (istate /= 0 .OR. (column_test /=k .AND. column_test /= k + 1)) THEN    !format error
+                write(*,'(a,i0,a)')'ERROR(svc.dat): Line ',h,': unexpected number of fields. Check "svc.dat"'
                 stop
             END IF
 
             svc_soil_veg(i,1)=id_ext2int(j, id_soil_extern)    !store internal soil id of this SVC
             IF (svc_soil_veg(i,1)==-1) THEN    !specified soil not found
-                write(*,'(a,i0,a,i0,a)')'ERROR in svc.dat, line ',h,': could not find soil ', j,' in soil.dat'
+                write(*,'(a,i0,a,i0,a)')'ERROR in svc.dat, line ',h,': could not find soil ', j,' in "soil.dat"'
                 cycle
                 !stop
             END IF

@@ -572,7 +572,7 @@ SUBROUTINE hymo_all(STATUS)
     !-------------------------------------------------------------------
     IF (STATUS == 2) THEN
                 !** Calculation for one timestep (i.e. 1 day)
-
+        test_supply = 0. ! irrigation
         DO i_subbas=1,subasin
 
             j=0    !Till: temporary indicator if this subbasin can be skipped because of prespecified values

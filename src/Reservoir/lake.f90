@@ -279,8 +279,7 @@ IF (STATUS == 0) THEN
   lakearea(:,:) = 0.
   DO imun=1,subasin
     DO k=1,5
-      lakearea(imun,k)=(alpha_Molle(k)*damk_Molle(k)*((lakewater_hrr(1,imun,k)  &
-			/damk_Molle(k))**((alpha_Molle(k)-1.)/alpha_Molle(k))))/1.e6
+      lakearea(imun,k)=(alpha_Molle(k)*damk_Molle(k)*((lakewater_hrr(1,imun,k)/damk_Molle(k))**((alpha_Molle(k)-1.)/alpha_Molle(k))))/1.e6
 	ENDDO
 !write(*,'(I4,5F15.3)')imun,(lakearea(imun,k)*acud(imun,k)*1.e6,k=1,5)
   ENDDO

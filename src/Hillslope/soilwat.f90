@@ -48,7 +48,7 @@
     INTEGER, INTENT(IN)                  :: tc_counter2
     REAL, INTENT(IN OUT)                 :: thact			!internal representation of thact ((average) actual water content of TC [mm])
     REAL, INTENT(OUT)                    :: thactroot
-    REAL, INTENT(IN)                     :: q_surf_in !sheet flow entering TC from uphill
+    REAL, INTENT(IN)                     :: q_surf_in       !sheet flow entering TC from uphill
     REAL, INTENT(OUT)                    :: q_surf_out
     REAL, INTENT(IN)                     :: q_sub_in			!internal representation of sublat_in
     REAL, INTENT(OUT)                    :: q_sub_out			!internal representation of sublat_out
@@ -135,13 +135,9 @@
 
     !---------IRRIGATION
     REAL :: irri_input(maxsoil) !water input by irrigtion for each SVC in current TC
-
-
-
     INTEGER :: nbrrooth(maxsoil)
     INTEGER :: i,it,j,h,soilid,n_iter
     INTEGER :: horton,hsat(maxsoil),testi,hmerk,testi2,lath
-
     REAL :: q_surf								!surface runoff [mm H2O]
     REAL :: q_rill_out, q_surf_out2				!modified surface fluxes to pass to sedi_yield
     REAL :: r
@@ -1037,18 +1033,29 @@
 
     watbal=watbal-(temp3-tempx)							!Till: modify the water balance by the difference between storage before and after calculation [mm]
 
+    INPUT=prec+q_surf_in/(tcarea2*1.e3)     !Till: precipitation and overland flow from higher TCs [mm]
+    watbal=watbal+INPUT ![mm]
+
 
 !** -------------------------------------------------------------------------
     !** (1.3)   Irrigation input
-    !irri_supply = 500
-    irri_input = 0.
-! Berechnung der Bewässerungsmenge für jede SVC
+    irri_input = 0.   !stores the irrigation water for every svc in current TC/subbasin
 
-    !in [mm]
-   ! DO i=1,nbr_svc(tcid_instance2)  ! oder tcid_instance 2?
-    !    irri_input(i) = irri_supply * (frac_lu(lu_counter2,i_subbas2) * fracterrain(id_tc_type2) * frac_svc(i,tcid_instance2)) / frac_irr_sub(i_subbas2) ! Verteilung des Irri_inputs Anteilig an gesamtbewässerter Fläche des Subbasin
-   ! END DO
-    !irri_supply = sum(irri_input)  Checken ob == 1, aber wo? WO wird durch die Subbasins & LU's geloopt?
+    IF (doirrigation) THEN
+        DO i=1,nbr_svc(tcid_instance2)
+            IF (svc_irr(tc_contains_svc2(id_tc_type2)%p(i)%svc_id) == 1 ) THEN  !veg_ID, soil ID, intern to extern, svcID finden
+                irri_input(i) = irri_supply(i_subbas2) * (frac_lu(lu_counter2,i_subbas2) * fracterrain(id_tc_type2) * frac_svc(i,tcid_instance2)) / frac_irr_sub(i_subbas2) ! Verteilung des Irri_inputs Anteilig an gesamtbewässerter Fläche des Subbasin
+            END IF
+        END DO
+       ! testPaul = testPaul + sum(frac_svc(:,tcid_instance2))  !To see if the actual rates get applied
+       ! Paul = Paul + sum(irri_input)
+       ! testcounter = testcounter + 1
+    END IF
+
+    DO i=1, nbr_svc(tcid_instance2)
+        testPaul = testPaul + frac_svc(i,tcid_instance2)
+    END DO
+
 
 
     !** -------------------------------------------------------------------------
@@ -1069,11 +1076,6 @@
     !		-
     !		-
     !		-
-
-
-    INPUT=prec+q_surf_in/(tcarea2*1.e3)		!Till: precipitation and overland flow from higher TCs [mm]
-    watbal=watbal+INPUT	![mm]
-
 
     !** .....................................................................
     !**  (2.0) Runoff from impermeable surfaces
@@ -1116,7 +1118,12 @@
     inputrem(:)=0.
     DO i=1,nbr_svc(tcid_instance2) !Till: for all SVC in the current TC, compute saturation excess runoff
 
-        INPUT=prec-intcred(i) + q_surf_in/(tcarea2*1.e3)+qsurf(i)/(tcarea2*1.e3*frac_svc(i,tcid_instance2)) + irri_input(i)  !Irrigation input
+
+        IF (doirrigation) THEN
+        INPUT=prec-intcred(i) + q_surf_in/(tcarea2*1.e3)+qsurf(i)/(tcarea2*1.e3*frac_svc(i,tcid_instance2)) + irri_input(i)
+        ELSE
+        INPUT=prec-intcred(i) + q_surf_in/(tcarea2*1.e3)+qsurf(i)/(tcarea2*1.e3*frac_svc(i,tcid_instance2))
+        ENDIF
         !Till: precipitation-intercepted+surface flow from above+surface(return) flow from within (mm)
         IF (INPUT > 0.) THEN
 
@@ -1278,6 +1285,7 @@
             IF (n_iter/=1) THEN !Till: second iteration
                 inputrem(i)=inputrem(i)+qmerk(i)
             END IF
+
             INPUT=inputrem(i)/(tcarea2*1.e3*frac_svc(i,tcid_instance2))	!Till: converting remaining water input to water height [mm]
 
 
@@ -1292,7 +1300,6 @@
             !	END DO
             !	!for debugging - remove end
             !
-
 
             IF (INPUT > 0.) THEN
 
@@ -1385,9 +1392,11 @@
                         !   if not uppermost horizon, calculation only if input exceeds
                         !   refillable porosity of higher horizons
 
-                        IF (h > 1) THEN
+                        IF (h > 1 ) THEN
                             fillup=fillup+na(i,h-1)*horiz_thickness(tcid_instance2,i,h-1)		!Till: reduction of input due to refilling of the horizon above [mm]
+                            !IF (INPUT > 1.0e-43) THEN  ! Dirty Fix, programm crashes here, when irrigation is switched of and INput is really small!
                             tshup=tshup+(na(i,h-1)*horiz_thickness(tcid_instance2,i,h-1))/INPUT !Till: relative reduction of input ? [-]
+                            !END IF
                         END IF
 
 
