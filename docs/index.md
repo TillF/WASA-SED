@@ -2,7 +2,7 @@
 
 # User Manual
 main contributors:
-Andreas Güntner (2000-2002), Eva Nora Müller (2006-2009), George Mamede(2006-2009), Till Francke (2006-...), Pedro Medeiros (2007-2008), Tobias Pilz (2016), Erwin Rottler (2017), Paul Voit (2020)
+Andreas Güntner (2000-2002), Eva Nora Müller (2006-2009), George Mamede (2006-2009), Till Francke (2006-...), Pedro Medeiros (2007-2008), Tobias Pilz (2016), Erwin Rottler (2017), Paul Voit (2020)
 
 **6.10.2020<br>
 WASA-SED rev_268**
@@ -90,8 +90,8 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 [Table 13](#table-13): Input/Output of state variables.<br>
 [Table 14](#table-14): Output files of the hillslope module.<br>
 [Table 15](#table-15): Output files of the river module.<br>
-[Table 16](#table-16): Output files of the reservoir module.
-[Table 17](#table-17): Output files of the irrigation module.
+[Table 16](#table-16): Output files of the reservoir module.<br>
+[Table 17](#table-17): Output files of the irrigation module.<br>
 
 ## 1 Introduction
 
@@ -265,7 +265,7 @@ In order to perform the simulation of sediment transport in reservoirs, four imp
 
 ### 2.4 Irrigation module
 
-The irrigation routine was implemented into WASA-SED by Voit (2021)[FIX: Quelle Angeben] to acknowledge the influence of irrigated areas, water abstraction and irrigation water supply on the water budget of subbasins.
+The irrigation module was implemented into WASA-SED by Voit (2021)[FIX: Quelle Angeben] to acknowledge the influence of irrigated areas, water abstraction and irrigation water supply on the water budget of subbasins.
 
 Various irrigation options are possible to regard the fact that there's rarely sufficient data about irrigation methods on subbasin scale available. With the irrigation module it is possible to extract water from different sources in any subbasin and apply it to any subbasin. Possible irrigation water sources are:
 
@@ -280,34 +280,9 @@ Possible rules to describe how much and when water is abstracted are:
 * seasonal rate
 * crop water demand
 
-Furthermore it is possible to assign an efficiency coefficient to every irrigation water transaction describing potential losses from the source to the reciever. The lost water will just leave the model.
+Furthermore it is possible to assign an efficiency coefficient to every irrigation water transaction describing potential losses from the donor to the reciever. The lost water will just leave the model.
 
-Additionally it is possible to direct irrigation water from an outside source into the model or to extract water in the model and send it to an external receiver. This can be an useful option if irrigation water is received from or sent to an area that is not part of the hydrological basin. Irrigation water will abstracted in defined subbasin and thenadded to the soil-water-routine as an additional input on the selected SVC's in the following timestep.
-
-To use the irrigation module first it is necessary to switch the flag "doirrigation" to ".t."" in the ```do.dat```. Following it is first necessary to alter the file ```svc.dat```and mark the SVC's (Soil vegetation components) to be irrigated. The ```svc.dat``` contains a vegetation-ID in column three which can help to identify the SVC's to be irrigated. To irrigate a SVC, a ninth column (separated by a tab) with the name "irrigation" has to be created, containing a flag ("1" or "0") for each SVC, "1" meaning: irrigation switched on, "0" meaning: irrigation switched off.
-
-Example:
-**4)** ```svc.dat```<br>
-
-
-```
-# Specifications of soil vegetation components and erosion parameters
-ID,	soil_id,	veg_id	musle_k[(ton acre hr)/(acre ft-ton inch)],	musle_c[-],	musle_p[-],	coarse_fraction[%],	manning_n, irrigation
-11	13	21	0.13	1.0	1.0	0.8	0.011 1
-…
-```
-
-*ID*:			    unique ID for the soil-vegetation component<br>
-*Soil\_id*:	   	ID of corresponding soil unit (as specified in ```soil.dat```)<br>
-*Veg\_id*:			ID of corresponding vegetation component (as specified in ```vegetation.dat```)<br>
-*Musle\_k*\*:		MUSLE erodibility factor \[(ton acre hr)/(acre ft-ton inch)]<br>
-*Musle\_c*\*:		MUSLE crop factor <br>
-*Musle\_p*\*:		MUSLE protection factor <br>
-*Coarse\_fraction*\*:	fraction of soil fragments > 2 mm \[%]<br>
-*Manning\_n*\*:		Manning’s n roughness coefficient<br>
-*irrigation*\*:   irrigation flag (1: on, 0: off)<br>
-
-\*Each of these columns can be replicated 4 times to describe seasonal dynamics of the respective parameter. In that case, the corresponding seasonality file must be created (see ```rainy_season.dat```).
+Additionally it is possible to direct irrigation water from an outside source into the model or to extract water in the model and send it to an external receiver. This can be an useful option if irrigation water is received from or sent to an area that is not part of the hydrological basin. Irrigation water will be abstracted in defined subbasins and then added to the soil-water-routine as an additional input on the selected SVC's in the following timestep.
 
 The irrigation module is included in following subroutines:
 
@@ -317,11 +292,11 @@ The irrigation module is included in following subroutines:
 
 `irrigation_abstraction.f90`:<br>
 1. Calculation of irrigation water amount for each subbasin.<br>
-2. Abstraction of irrigation water from each subbasin and the respective sources. (f.e. groundwater).<br>
+2. Abstraction of irrigation water from each subbasin and the respective sources (f.e. groundwater).<br>
 3. Recording the abstraction and supply for each timestep and subbasin.
 
 `soilwat.f90`<br>
-1.Application of irrigation water calculated in `irrigation_abstraction.f90` to every subbasin by adding the irrigation amount to the soil-water-routine.<br>
+1. Application of irrigation water calculated in `irrigation_abstraction.f90` to every subbasin by adding the irrigation amount to the soil-water-routine on the selected SVC's.<br>
 
 When using the irrigation module it is highly recommended to check the console output of WASA-SED as errors in the input files are shown here as a warning.
 
@@ -1647,7 +1622,7 @@ ID,	soil_id,	veg_id	musle_k[(ton acre hr)/(acre ft-ton inch)],	musle_c[-],	musle
 *Manning\_n*\*:		Manning’s n roughness coefficient<br>
 *irrigation*\*:   irrigation flag (1: on, 0: off)<br>
 
-In this file the SVC's that are to be irrigated are selected by adding a "1" in the ninth column (irrigation) in the according line. Every other SVC that should not be irrigated receives a "0" instead.
+In the already existing file `svc.dat`a ninth column with the column name "irrigation" needs to be created.  The SVC's that are to be irrigated are selected by adding a "1" in the ninth column (irrigation) in the according line. Every other SVC that should not be irrigated receives a "0" instead.
 
 **2)** `irri.dat`
 
@@ -1675,9 +1650,9 @@ If the option "groundwater" is chosen, irrigation water will be abstracted from 
 
 If the option "river" is chosen, irrigation water will be abstracted from the river flow. If there's not enough water available to fulfill the demand, all the available water will be taken.
 
-If the option "lake" is chosen, irrigation water will be abstracted from the small reservoirs. If there's not enough water available to fulfill the demand, all the available water will be taken. To use the option "lake" the calculations for small reservoirs must be switched on in the file `do.dat` by setting `doacudes` to `.t.` (TRUE). Using small reservoirs requires the input files described in \[[3.4 Input files for the reservoir module](#3-4-input-files-for-the-reservoir-module)]. The donor subbasin must contain small reservoirs (lakes)
+If the option "lake" is chosen, irrigation water will be abstracted from the small reservoirs. If there's not enough water available to fulfill the demand, all the available water will be taken. To use the option "lake" the calculations for small reservoirs must be switched on in the file `do.dat` by setting `doacudes` to `.t.` (`TRUE`). Using small reservoirs requires the input files described in \[[3.4 Input files for the reservoir module](#3-4-input-files-for-the-reservoir-module)]. The donor subbasin must contain small reservoirs (lakes)
 
-If the option "reservoir" is chosen, irrigation water is taken from the reservoirs outflow reserved for domestic, agricultural and industrial use. To use the option "reservoir" the calculations for reservoirs must be switched on in the file `do.dat` by setting `doreservoir` to `.t.` (TRUE). Using reservoirs requires the input files described in \[[3.4 Input files for the reservoir module](#3-4-input-files-for-the-reservoir-module)]. The donor subbasin must contain a reservoir.
+If the option "reservoir" is chosen, irrigation water is taken from the reservoirs outflow reserved for domestic, agricultural and industrial use. To use the option "reservoir" the calculations for reservoirs must be switched on in the file `do.dat` by setting `doreservoir` to `.t.` (`TRUE`). Using reservoirs requires the input files described in \[[3.4 Input files for the reservoir module](#3-4-input-files-for-the-reservoir-module)]. The donor subbasin must contain a reservoir.
 
 Option "9999" has to be used if also sub_source is set to "9999". This indicates that the water comes from an external source outside of the model domain.
 
@@ -1691,7 +1666,7 @@ Option "9999" has to be used if also sub_source is set to "9999". This indicates
 
 fixed: A fixed amount of water, defined by the four columns "rate" will be abstracted from the donor basin (sub_source) and applied in the receiver basin (sub_receiver) in the following timestep.
 
-seasonal: The option "seasonal" requires a specification of the seasonility of the receiver basin in the file `irri_seasons.dat`. For more information on seasonality check the example 10) `rainy_seasons.dat` in \[[3.2 Input files for the hillslope module](#3-2-input-files-for-the-hillslope-module)].
+seasonal: The option "seasonal" requires a specification of the seasonality of the receiver basin in the file `irri_seasons.dat`. For more information on seasonality check the example 10) `rainy_seasons.dat` in \[[3.2 Input files for the hillslope module](#3-2-input-files-for-the-hillslope-module)].
 Combined with four values for "rate" this option calculates the demand of the receiver basin for every day in the year.
 
 cwd: Crop water demand, this options calculates the irrigation demand of the receiver basin based on the FAO crop evapotranspiration method [(FAO, 1998)](#fao-1998). Crop water demand according to this method is:
@@ -1706,7 +1681,7 @@ k<sub>loss</sub> = loss factor [-] as set in the colum "loss_factor" in `irri.da
 For the calculation the mean subbasin potential evapotranspiration and the mean subbasin potential evapotranspiration are used and the water is applied respectively to the SVC's size within the subbasin.
 This means that this method doesn't reflect the climatic differences between SVC's within one subbasin. For more information on this topic read (FIX THIS QUELLE Masterarbeit). If the receiver basin is external ("9999") rule option "cwd" can't be chosen.
 
-*rate*: Columns five to eight in the file `irri.dat` describe which amount of water [m<sup>3</sup>] per timestep should be abstracted from the donor basin (sub_receiver) and be applied as irrigation water in the receiver basin (sub_receiver). If the respective rule is "fixed", all 4 values should be identical, if the rule is "seasonal" these four values describe the node points for the calculation of the seasonal irrigation amounts in combination with the days described in `irri_seasons.dat`. Is the respective rule set to "cwd" the four values describe the crop coefficient,k<sub>crop</sub>, that can be fixed over the whole year (if all four values are equal or the receiver basin is missing in the file `irri_seasons.dat`) or seasonally calculated (if the four values are different and the receiver basin is contained in the file `irri_seasons.dat`). If there's more than one type of crop cultivated on the irrigated areas, this crop coefficient (k<sub>crop</sub>) should be the average crop coefficient for all the cultivated crops. If the demand rate can not be satisfied by the source in the donor basin all the available water there will be used and split respectively to the demands to this source. 
+*rate*: Columns five to eight in the file `irri.dat` describe which amount of water [m<sup>3</sup>] per timestep should be abstracted from the donor basin (sub_receiver) and be applied as irrigation water in the receiver basin (sub_receiver). If the respective rule is "fixed", all 4 values should be identical, if the rule is "seasonal" these four values describe the node points for the calculation of the seasonal irrigation amounts in combination with the days described in `irri_seasons.dat`. Is the respective rule set to "cwd" the four values describe the crop coefficient, k<sub>crop</sub>, that can be fixed over the whole year (if all four values are equal or the receiver basin is missing in the file `irri_seasons.dat`) or seasonally calculated (if the four values are different and the receiver basin is contained in the file `irri_seasons.dat`). If there's more than one type of crop cultivated on the irrigated areas, the crop coefficient (k<sub>crop</sub>) should be the average crop coefficient of all the cultivated crops in the subbasin. If the demand rate can not be satisfied by the source in the donor basin all the available water there will be used and split respectively to the demands to this source. 
 
 Example:
 
@@ -1716,7 +1691,7 @@ Subbasin 3 just has 1500 m<sup>3</sup> irrigation water available<br>
 
 Since subbasin 2 has a higher demand it will now get 2/3 = 1000 m<sup>3</sup> of the available irrigation water and subbasin 1 will get 1/3 = 500 m<sup>3</sup> of the available irrigation water. If the demand is higher than the availability a warning is given out by WASA-SED.
 
-*loss_factor*: The loss factor [-] describes the efficieny of the transfer from the irrigation water from its donor to its receiver. This value has to be between 1 and zero.
+*loss_factor*: The loss factor [-] describes the efficiency of the transfer from the irrigation water from its donor to its receiver. This value has to be between 1 and zero.
 
 **3)** `irri_seasons.dat`
 
@@ -1728,7 +1703,7 @@ subbasin_id	year	DOY1	DOY2	DOY3	DOY4
 ...
 
 ```
-Combined with the four "rate"-values in `irri.dat` the demand of the receiver basin for every day in the year are calculated.For more information on seasonality check the example 10) `rainy_seasons.dat` in \[[3.2 Input files for the hillslope module](#3-2-input-files-for-the-hillslope-module)].
+Combined with the four "rate"-values in `irri.dat` the demand of the receiver basin for every day in the year is calculated. For more information on seasonality check the example 10) `rainy_seasons.dat` in \[[3.2 Input files for the hillslope module](#3-2-input-files-for-the-hillslope-module)].
 
 
 
