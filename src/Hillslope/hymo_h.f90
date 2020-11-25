@@ -434,10 +434,12 @@ module hymo_h
     REAL, allocatable :: loss_res(:)
     REAL, allocatable :: loss_lake(:)
     REAL, allocatable :: loss_ext(:)
-    REAL :: test_supply
+    REAL :: test_supply             ! Test variables: DELETE!
     REAL :: testPAUL
     REAL :: Paul
     INTEGER :: testcounter
+
+
     !Till: these are all output variables that are currently not used
     !! horton overland flow of each SVC
     !REAL , allocatable :: hortsc(:,:)

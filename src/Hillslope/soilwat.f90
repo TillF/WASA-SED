@@ -1041,21 +1041,17 @@
     !** (1.3)   Irrigation input
     irri_input = 0.   !stores the irrigation water for every svc in current TC/subbasin
 
+
     IF (doirrigation) THEN
         DO i=1,nbr_svc(tcid_instance2)
             IF (svc_irr(tc_contains_svc2(id_tc_type2)%p(i)%svc_id) == 1 ) THEN  !veg_ID, soil ID, intern to extern, svcID finden
                 irri_input(i) = irri_supply(i_subbas2) * (frac_lu(lu_counter2,i_subbas2) * fracterrain(id_tc_type2) * frac_svc(i,tcid_instance2)) / frac_irr_sub(i_subbas2) ! Verteilung des Irri_inputs Anteilig an gesamtbewässerter Fläche des Subbasin
             END IF
         END DO
-       ! testPaul = testPaul + sum(frac_svc(:,tcid_instance2))  !To see if the actual rates get applied
+       ! testPaul = testPaul + sum(frac_svc(:,tcid_instance2))  !To see if the actual rates get applied, following lines are just for inspection
        ! Paul = Paul + sum(irri_input)
        ! testcounter = testcounter + 1
     END IF
-
-    DO i=1, nbr_svc(tcid_instance2)
-        testPaul = testPaul + frac_svc(i,tcid_instance2)
-    END DO
-
 
 
     !** -------------------------------------------------------------------------
@@ -1394,9 +1390,7 @@
 
                         IF (h > 1 ) THEN
                             fillup=fillup+na(i,h-1)*horiz_thickness(tcid_instance2,i,h-1)		!Till: reduction of input due to refilling of the horizon above [mm]
-                            !IF (INPUT > 1.0e-43) THEN  ! Dirty Fix, programm crashes here, when irrigation is switched of and INput is really small!
                             tshup=tshup+(na(i,h-1)*horiz_thickness(tcid_instance2,i,h-1))/INPUT !Till: relative reduction of input ? [-]
-                            !END IF
                         END IF
 
 

@@ -18,7 +18,7 @@ use utils_h
     REAL :: dummy
 
 
-    irri_supply = 0.0
+     irri_supply = 0.0
     irri_abstraction = 0.0
 
     !-- Abstraction from groundwater, Loop through all subbasins and check if they're included in irri.dat-----------------------
@@ -243,8 +243,12 @@ use utils_h
             ! res_index contains subbasins and the corresponding reservoir Ids
             IF (abstraction_requested > 0. ) THEN
 
-            !!! Vielleicht hier den Fall abfangen, das withdraw_out negativ ist (dies scheint zu geschehen, wenn es zwei Reservoire gibt)
+
                 abstraction_available = withdraw_out(d,res_index(sb_counter)) * 3600 * dt * nt !withdraw_out is in m^3/s. Rate of available outflow from reservoir
+
+                IF (abstraction_available < 0 ) THEN        ! fix for a potential bug. If reservoir isn't initialized which seems to be the case when there's more than one, then withdraw_out can be negative
+                    abstraction_available = 0
+                END IF
 
                 IF (abstraction_available == 0.0) THEN !On first day the storage might be empty. Skip this day
                     WRITE(*,'(a,I0,a)') 'WARNING: No more water available in reservoir in Subbasin ',id_subbas_extern(sb_counter), '. No irrigation possible from this source in current timestep.'

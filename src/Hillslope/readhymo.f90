@@ -1990,7 +1990,7 @@ end if ! do_snow
                 loss_ext(sub_receiver(j)) = loss
             END IF
 
-    !-------------Error checks and Warnings-----------
+    !-------------Checks, Errors and Warnings-----------
              if (sub_source(j)==-1) then    ! the current sub_source was not contained in routing.dat, skip line
                     WRITE(*,'(a, I0, a, I0, a)') 'WARNING (irri.dat): Source subbasin in line ',h,' not listed in routing.dat, ignored.'
                     cycle
@@ -2072,6 +2072,11 @@ end if ! do_snow
              IF (ANY(irri_rate(1:4) < 0.)) then !irrigation rate is invalid
                 write(*,'(a,I0,a)')'WARNING (irri.dat): Irrigation rate in line ' ,h, ' is negative. Line ignored.'
                 cycle
+             end if
+
+             if (loss < 0 .OR. > 1) then
+                write(*,'(a,I0,a)')'WARNING (irri.dat): loss_factor rate in line ' ,h, ' is not between 0 and 1. loss_factor set to 0.8.'
+                loss = 0.8
              end if
 
              !----------End Error checks

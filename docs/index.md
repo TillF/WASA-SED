@@ -2,7 +2,7 @@
 
 # User Manual
 main contributors:
-Andreas Güntner (2000-2002), Eva Nora Müller (2006-2009), George Mamede(2006-2009), Till Francke (2006-...), Pedro Medeiros (2007-2008), Tobias Pilz (2016), Erwin Rottler (2017)
+Andreas Güntner (2000-2002), Eva Nora Müller (2006-2009), George Mamede(2006-2009), Till Francke (2006-...), Pedro Medeiros (2007-2008), Tobias Pilz (2016), Erwin Rottler (2017), Paul Voit (2020)
 
 **6.10.2020<br>
 WASA-SED rev_268**
@@ -46,23 +46,27 @@ Disclaimer:<br>
 The WASA-SED program is large and complex and extensive knowledge of its design, purpose, and limitations is required in order to apply it properly. The WASA-SED and its source code is freely available under a CC4 licence (“use as you wish, don’t blame us, give credit,…”). See license.txt.
 
 <a name="toc"></a>
+
 ## Table of content
 - [1 Introduction](#1-introduction)<br>
 - [2 Program folders and structure](#2-program-folders-and-structure)<br>
   -	[2.1 Hillslope module](#2-1-hillslope-module)<br>
   - [2.2 River module](#2-2-river-module)<br>
   - [2.3 Reservoir module](#2-3-reservoir-module)<br>
+  - [2.4 Irrigation module](#2-4-irrigation-module)<br>
 - [3 Input data](#3-input-data)<br>
   - [3.1 General parameter and control files](#3-1-general-parameter-and-control-files)<br>
   - [3.2 Input files for the hillslope module](#3-2-input-files-for-the-hillslope-module)<br>
   - [3.3 Input files for the river module](#3-3-input-files-for-the-river-module)<br>
   - [3.4 Input files for the reservoir module](#3-4-input-files-for-the-reservoir-module)<br>
-  - [3.5 Input of climate data](#3-5-input-of-climate-data)<br>
-  - [3.6 Input/Output of state variables](#3-6-state-variables)<br>
+  - [3.5 Input files for the irrigation module](#3-5-input-files-for-the-irrigation-module)<br>
+  - [3.6 Input of climate data](#3-6-input-of-climate-data)<br>
+  - [3.7 Input/Output of state variables](#3-6-state-variables)<br>
 - [4 Output data](#4-output-data)<br>
   - [4.1 Output of the hillslope module](#4-1-output-of-the-hillslope-module)<br>
   - [4.2 Output of the river module](#4-2-output-of-the-river-module)<br>
   - [4.3 Output of the reservoir module](#4-3-output-of-the-reservoir-module)<br>
+  - [4.4 Output of the irrigation module](#4-4-output-of-the-irrigation-module)<br>
 - [5 References](#5-references)<br>
 - [6 Further relevant literature for the WASA-SED model](#6-further-relevant-literature-for-the-wasa-sed-model)<br>
 
@@ -82,17 +86,18 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 [Table 9](#table-9): Groundwater option Gw_flag=99.<br>
 [Table 10](#table-10): Input data files for the river component.<br>
 [Table 11](#table-11): Input data files for the reservoir component.<br>
-[Table 12](#table-12): Input/Output of state variables.<br>
-[Table 13](#table-13): Output files of the hillslope module.<br>
-[Table 14](#table-14): Output files of the river module.<br>
-[Table 15](#table-15): Output files of the reservoir module.
+[Table 12](#table-12): Input data files for the irrigation module.<br>
+[Table 13](#table-13): Input/Output of state variables.<br>
+[Table 14](#table-14): Output files of the hillslope module.<br>
+[Table 15](#table-15): Output files of the river module.<br>
+[Table 16](#table-16): Output files of the reservoir module.
+[Table 17](#table-17): Output files of the irrigation module.
 
 ## 1 Introduction
 
 The WASA-SED model simulates the runoff and erosion processes at the hillslope scale, the transport processes of suspended and bedload fluxes at the river scale and the retention and remobilisation processes of sediments in large reservoirs. The modelling tool enables the evaluation of management options both for sustainable land-use change scenarios to reduce erosion in the headwater catchments as well as adequate reservoir management options to lessen sedimentation in large reservoirs and reservoir networks. The model concept, its spatial discretisation and the numerical components of the hillslope, river and reservoir processes are summarised and current model applications are reviewed in [Mueller et al. (2010)](#mueller-et-al-2010). The hydrological routines of the model are based on the WASA model (Model for Water Availability in Semi-Arid environments), which was developed by [Güntner (2002)](#guentner-2002) and [Güntner and Bronstert (2002,](#guentner-bronstert-2002) [2003)](#guentner-bronstert-2003) to enable the quantification of water availability in semi-arid regions. The WASA-SED model was developed within the joint Spanish-Brazilian-German research project SESAM (Sediment Export from Semi-Arid Catchments: Measurement and Modelling). The existing WASA model code has been extended to include sediment-transport routines for the three new conceptual levels of the WASA-SED model: the hillslope scale, river scale and the reservoir scale for the calculation of sedimentation. This documentation gives a short outline of the structure, computational routines and folder system of the WASA-SED code in [Chapter 2](#program-folders-and-structure), followed by a description of the input files for model parameterisation in [Chapter 3](#input-data) and output files for the hillslope, river and reservoir modules in [Chapter 4](#output-data).
 
 \[[Table of contents](#toc)]
-## 2 Program folders and structure
 
 The WASA-SED model is programmed in Fortran 90 and was tested with Compaq Visual Fortran (6.6.a) and gfortran 4.x compilers on Windows gfortran-4.3 under Linux. The WASA-SED code is organised as presented in [Table 1](#table-1). The main program is named ```wasa.f90``` and calls the key subroutines as summarised in [Table 2](#table-2).
 
@@ -127,7 +132,10 @@ Routine	| Content
 
 The following sections give some information on the computational background and the functional structure of the corresponding routines for each of the three conceptual levels: hillslope, river and reservoir.
 
+## 2 Program folders and structure
+
 <a name="2-1-hillslope-module"></a>
+
 ### 2.1 Hillslope module
 
 The hillslope module comprises the modelling of the hydrological and sediment-transport processes. The hydrological modelling accounts for interception, evaporation, infiltration, surface and subsurface runoff, transpiration and ground water recharge. Details are given in [Güntner (2002](#guentner-2002), Chapter 4). The main hydrological calculations are carried out in ```hymo_all.f90``` (for daily or hourly time steps). The subroutines that are called within ```hymo_all.f90``` are summarised in [Table 3](#table-3). The temporal sequence of hydrological process modelling is summarised in [Güntner (2002](#guentner-2002), p. 36-37).
@@ -166,6 +174,7 @@ terrain component
 5.	If necessary, limit sediment export by transport capacity.
 
 <a name="2-2-river-module"></a>
+
 ### 2.2 River module
 
 
@@ -196,6 +205,7 @@ The river routing of the original WASA model ([Güntner 2002](#guentner-2002)) b
 2.	Bedload formulas after Meyer-Peter and Müller (1948), Schoklitsch (1950), Smart and Jaeggi (1983), Bagnold (1956) and Rickenmann (2001), see [Mueller et al. 2008](#mueller-et-al-2008) relevant references.
 
 <a name="2-3-reservoir-module"></a>
+
 ### 2.3 Reservoir module
 
 The reservoir sedimentation routine was included into the WASA-SED model by [Mamede (2008)](#mamede-2008) to enable the calculation of non-uniform sediment transport along the longitudinal profile of a reservoir, of the reservoir bed changes caused by deposition/erosion processes and of reservoir management options. 
@@ -249,6 +259,73 @@ In order to perform the simulation of sediment transport in reservoirs, four imp
 1. Calculation of water routing for small reservoirs
 
 \[[Table of contents](#toc)]
+
+
+<a name="2-4-irrigation-module"></a>
+
+### 2.4 Irrigation module
+
+The irrigation routine was implemented into WASA-SED by Voit (2021)[FIX: Quelle Angeben] to acknowledge the influence of irrigated areas, water abstraction and irrigation water supply on the water budget of subbasins.
+
+Various irrigation options are possible to regard the fact that there's rarely sufficient data about irrigation methods on subbasin scale available. With the irrigation module it is possible to extract water from different sources in any subbasin and apply it to any subbasin. Possible irrigation water sources are:
+
+* groundwater
+* river water
+* reservoir
+* lakes
+
+Possible rules to describe how much and when water is abstracted are:
+
+* fixed rate
+* seasonal rate
+* crop water demand
+
+Furthermore it is possible to assign an efficiency coefficient to every irrigation water transaction describing potential losses from the source to the reciever. The lost water will just leave the model.
+
+Additionally it is possible to direct irrigation water from an outside source into the model or to extract water in the model and send it to an external receiver. This can be an useful option if irrigation water is received from or sent to an area that is not part of the hydrological basin. Irrigation water will abstracted in defined subbasin and thenadded to the soil-water-routine as an additional input on the selected SVC's in the following timestep.
+
+To use the irrigation module first it is necessary to switch the flag "doirrigation" to ".t."" in the ```do.dat```. Following it is first necessary to alter the file ```svc.dat```and mark the SVC's (Soil vegetation components) to be irrigated. The ```svc.dat``` contains a vegetation-ID in column three which can help to identify the SVC's to be irrigated. To irrigate a SVC, a ninth column (separated by a tab) with the name "irrigation" has to be created, containing a flag ("1" or "0") for each SVC, "1" meaning: irrigation switched on, "0" meaning: irrigation switched off.
+
+Example:
+**4)** ```svc.dat```<br>
+
+
+```
+# Specifications of soil vegetation components and erosion parameters
+ID,	soil_id,	veg_id	musle_k[(ton acre hr)/(acre ft-ton inch)],	musle_c[-],	musle_p[-],	coarse_fraction[%],	manning_n, irrigation
+11	13	21	0.13	1.0	1.0	0.8	0.011 1
+…
+```
+
+*ID*:			    unique ID for the soil-vegetation component<br>
+*Soil\_id*:	   	ID of corresponding soil unit (as specified in ```soil.dat```)<br>
+*Veg\_id*:			ID of corresponding vegetation component (as specified in ```vegetation.dat```)<br>
+*Musle\_k*\*:		MUSLE erodibility factor \[(ton acre hr)/(acre ft-ton inch)]<br>
+*Musle\_c*\*:		MUSLE crop factor <br>
+*Musle\_p*\*:		MUSLE protection factor <br>
+*Coarse\_fraction*\*:	fraction of soil fragments > 2 mm \[%]<br>
+*Manning\_n*\*:		Manning’s n roughness coefficient<br>
+*irrigation*\*:   irrigation flag (1: on, 0: off)<br>
+
+\*Each of these columns can be replicated 4 times to describe seasonal dynamics of the respective parameter. In that case, the corresponding seasonality file must be created (see ```rainy_season.dat```).
+
+The irrigation module is included in following subroutines:
+
+`readhymo.f90`:<br>
+1. Calculation of fractions of irrigated area for each subbasin.<br>
+2. Reading the information from ```irri.dat```.
+
+`irrigation_abstraction.f90`:<br>
+1. Calculation of irrigation water amount for each subbasin.<br>
+2. Abstraction of irrigation water from each subbasin and the respective sources. (f.e. groundwater).<br>
+3. Recording the abstraction and supply for each timestep and subbasin.
+
+`soilwat.f90`<br>
+1.Application of irrigation water calculated in `irrigation_abstraction.f90` to every subbasin by adding the irrigation amount to the soil-water-routine.<br>
+
+When using the irrigation module it is highly recommended to check the console output of WASA-SED as errors in the input files are shown here as a warning.
+
+
 ## 3 Input data
 
 The model runs as a Fortran console application for catchment from a few km² up to several 100,000 km²) on daily or hourly time steps. Climatic drivers are daily/hourly time series for precipitation, humidity, short-wave radiation and temperature. For model parameterisation, regional digital maps on soil associations, land-use and vegetation cover, a digital elevation model with a cell size of 100 metres (or smaller) and, optional, bathymetric surveys of the reservoirs are required. Soil data can be obtained and preprocessed with SoilDataPrep-tool(#SoilDataPrep). 
@@ -273,6 +350,7 @@ Reservoir	| Longitudinal profile of reservoir \[m], Cross-section profiles of re
 \** of topmost horizon
 
 <a name="3-1-general-parameter-and-control-files"></a>
+
 ### 3.1 General parameter and control files
 
 Four parameter files control the data input and output and some internal settings:
@@ -289,6 +367,8 @@ Line 36 may additionally contain a second logical variable (append_output), allo
 Line 37 may additionally contain a second logical variable (save_states_yearly), determining if the model states are saved (and overwritten) at the end of each simulation year. Default is .TRUE.
 
 Line 38 (dosnow) defines, if the optional snow routine, implemented by [Rottler (2017)](#rottler-2017), is included. If set to .TRUE., the snow routine is active and all related calculations are performed. If set to .FALSE., the snow routine remains inactive.
+
+Line 39 (doirrigation) defines, if the optional irrigation routine, implemented by Voit (2021)[FIX:Quelle angeben], is included. If set to .t. (TRUE), the irrigation routine is switched on, if set to .f. (FALSE) the irrigation routine remains inactive.
 
 The line numbers in the following template are for reference only, they must be removed in the actual file!
 
@@ -332,6 +412,7 @@ The line numbers in the following template are for reference only, they must be 
 36   .t. .f.  //load state of storages from files (if present) at start (optional); second flag: append output
 37   .f.   //save state of storages to files after simulation period (optional)
 38   .t.   //dosnow: activate snow routine
+39   .f.  //doirrigation: activate irrigation routine
 ```
 
 **Figure 1:** WASA parameter specification file ```do.dat```.
@@ -487,6 +568,7 @@ temperaMod | Height-modified temperature signal \[°C]
 rel_elevation | Relative elevation of TC to mean sub-basin \[m]
 
 <a name="3-2-input-files-for-the-hillslope-module"></a>
+
 ### 3.2 Input files for the hillslope module
 
 The input files for the hillslope module are located in the folder ```Input/[case_study]/Hillslope``` and are summarised in [Table 6](#table-6).
@@ -1018,6 +1100,7 @@ LU-ID[id]	aspect[deg]	mean_altitude_over_subbas_mean[m]
 ```
 
 <a name="3-3-input-files-for-the-river-module"></a>
+
 ### 3.3 Input files for the river module
 
 The input files for the river module are located in the folder ```Input\\[case_study]\River``` and are summarised in [Table 10](#table-10). Three options are available for the river routing: routing scheme 1 comprises the original river routing using time response functions, routing scheme 2 uses the Muskingum routing and suspended sediment transport and routing scheme 3 uses the Muskingum routing and bedload transport. Routing schemes 2 and 3 enable a spatially distributed representation of river stretch characteristics. Sediment-transport calculations are only possible for routing schemes 2 and 3. The flow calculations are carried out in routing order, i.e. the river stretches which are located most upstream are calculated first. The routing order is specified in ```routing.dat```. The key model input parameters for water and sediment routing are stored in an input file called ```river.dat``` that assigns each sub-basin with a specific map ID a corresponding river stretch. The input file ```response.dat``` contains the time response parameters that were used for the original version of the WASA code (routing scheme 1).
@@ -1199,6 +1282,7 @@ Abstractions are taken from the outlet of river reaches, and added to the inlet 
 This file is optional. It is only read if ```dotrans``` (in ```do.dat```) is set to ```.true.```. In this case, ```transposition.dat``` is expected in the subdirectory ```Others/```. <br>
 
 <a name="3-4-input-files-for-the-reservoir-module"></a>
+
 ### 3.4 Input files for the reservoir module
 
 The input files for the reservoir module are located in the folder ```Input\\[case_study]\Reservoir``` and are summarised in [Table 11](#table-11). The files listed below are required according to the simulation option defined in the file ```do.dat```. Reservoirs are considered in the model simulations if the option ```doreservoir``` is switched on. For simulations of reservoir water balance the file ```reservoir.dat``` (file 1) is required. Nevertheless, additional files can be given to improve the model results (files 2 to 6). For calculations of reservoir sediment balance, the options ```doreservoir``` and ```dosediment``` must be switched on. The reservoir sedimentation model consists of two modelling approaches, which may be applied according to reservoir size and data availability. For reservoirs with information about their geometric features (reservoir topography, stage-area and stage-volume curves) and physical properties of sediment deposits, such as deposition thickness, grain size distribution of sediment deposits and sediment densities, a detailed modelling approach to reservoir sedimentation may be applied (files 7 to 9 are required; and files 10 to 12 are used to improve model results). For reservoirs without those characteristics, a simplified modelling approach is used (file 8 is required). Networks of small reservoirs are considered in the model simulations if the option doacudes is switched on. For simulations of water and sediment routing through the reservoir networks the file 13 and 16 are required (files 14, 15 and 17 are used to improve model results).
@@ -1528,8 +1612,135 @@ Sub-basin-ID, lakefrarea[-] (five reservoir size classes)
 
 Example: This optional file allows specifying data on runoff contributing area for the reservoir size classes. If this file is not found in the folder reservoir, the runoff contributing area is equally divided into the five reservoir size classes (one-sixth to each class). Another sixth part is attributed to the area not-controlled by the reservoir network. The sub-basin with the ID 60 has only two reservoir size classes with a runoff contributing area covering 24% and 25% of the sub-basin area (size classes 1 and 2, respectively). Therefore, there is no reservoir of size classes 3 to 5 for that sub-basin. The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs as was used in ```hymo.dat``` (due to computational reasons); otherwise, an error message occurs. Sub-basins without networks of small reservoirs must not be entered in the file.
 
-<a name="3-5-input-of-climate-data"></a>
-### 3.5 Input of climate data
+
+<a name="3-5-input-files-for-the-irrigation-module"></a>
+
+### 3.5 Input files for the irrigation module
+
+The input files for the irrigation module are located in `Input\\[case study]\Hillslope` and are summarised in [Table 12](#table-12). The files listed below are required to use the irrigation module. The irrigation module is used if the option `doirrigation`is switched on in the file `do.dat`.
+
+<a name="table-12"></a>
+**Table 12:** Input data files for the irrigation module.
+
+Nr. |Parameter File	| Content
+---|---|---
+1 | altered `svc.dat` | This file needs to be extended with an additional ninth column containing the irrigation flags
+2 | `irri.dat` | Specification of donor and receiver basins, irrigation sources, application rules and loss factor
+3 | `irri_seasons.dat` (optional) | Specification of seasonality for each receiver basin
+
+**1)** altered `svc.dat`
+
+```
+# Specifications of soil vegetation components and erosion parameters
+ID,	soil_id,	veg_id	musle_k[(ton acre hr)/(acre ft-ton inch)],	musle_c[-],	musle_p[-], coarse_fraction[%],	manning_n, irrigation
+11	13	21	0.13	1.0	1.0	0.8	0.011 1
+…
+```
+
+*ID*:			    unique ID for the soil-vegetation component<br>
+*Soil\_id*:	   	ID of corresponding soil unit (as specified in ```soil.dat```)<br>
+*Veg\_id*:			ID of corresponding vegetation component (as specified in ```vegetation.dat```)<br>
+*Musle\_k*\*:		MUSLE erodibility factor \[(ton acre hr)/(acre ft-ton inch)]<br>
+*Musle\_c*\*:		MUSLE crop factor <br>
+*Musle\_p*\*:		MUSLE protection factor <br>
+*Coarse\_fraction*\*:	fraction of soil fragments > 2 mm \[%]<br>
+*Manning\_n*\*:		Manning’s n roughness coefficient<br>
+*irrigation*\*:   irrigation flag (1: on, 0: off)<br>
+
+In this file the SVC's that are to be irrigated are selected by adding a "1" in the ninth column (irrigation) in the according line. Every other SVC that should not be irrigated receives a "0" instead.
+
+**2)** `irri.dat`
+
+```
+# Specification of irrigation operations
+sub_source	source	sub_receiver	rule	rate(4 values) [m3/timestep]	loss_factor
+33	reservoir	33	cwd	0.8	0.8	0.8	0.8	0.8
+1	groundwater	3	fixed	1000	1000	1000	1000	0.75
+2	river	4	seasonal	1000	2000	3000	4000	0.8
+1	lake	9999	fixed	1000	1000	1000	1000	0.9
+9999	9999	1	fixed	5000	5000	5000	5000	0.7
+```
+
+*sub_source*: Donor basin, subbasin ID of the subbasin where the irrigation water is abstracted from. "9999"" indicates that the water will come from outside the model domain.<br>
+*source*: indicates where the water is taken from in the donor basin. Options are:<br>
+
+* groundwater
+* river
+* lake
+* reservoir
+* 9999
+<br>
+
+If the option "groundwater" is chosen, irrigation water will be abstracted from the deep groundwater. If there's not enough water available to fulfill the demand, all the available water will be taken.
+
+If the option "river" is chosen, irrigation water will be abstracted from the river flow. If there's not enough water available to fulfill the demand, all the available water will be taken.
+
+If the option "lake" is chosen, irrigation water will be abstracted from the small reservoirs. If there's not enough water available to fulfill the demand, all the available water will be taken. To use the option "lake" the calculations for small reservoirs must be switched on in the file `do.dat` by setting `doacudes` to `.t.` (TRUE). Using small reservoirs requires the input files described in \[[3.4 Input files for the reservoir module](#3-4-input-files-for-the-reservoir-module)]. The donor subbasin must contain small reservoirs (lakes)
+
+If the option "reservoir" is chosen, irrigation water is taken from the reservoirs outflow reserved for domestic, agricultural and industrial use. To use the option "reservoir" the calculations for reservoirs must be switched on in the file `do.dat` by setting `doreservoir` to `.t.` (TRUE). Using reservoirs requires the input files described in \[[3.4 Input files for the reservoir module](#3-4-input-files-for-the-reservoir-module)]. The donor subbasin must contain a reservoir.
+
+Option "9999" has to be used if also sub_source is set to "9999". This indicates that the water comes from an external source outside of the model domain.
+
+*sub_receiver*: Receiver basin, subbasin ID of the subbasin that receives irrigation water from the donor basin. "9999"" indicates that the water will leave the model domain.
+
+*rule*: The irrigation rule describes the water demand of the receiver basin and define when and how much water will be abstracted. Options are: <br>
+
+* fixed
+* seasonal
+* cwd
+
+fixed: A fixed amount of water, defined by the four columns "rate" will be abstracted from the donor basin (sub_source) and applied in the receiver basin (sub_receiver) in the following timestep.
+
+seasonal: The option "seasonal" requires a specification of the seasonility of the receiver basin in the file `irri_seasons.dat`. For more information on seasonality check the example 10) `rainy_seasons.dat` in \[[3.2 Input files for the hillslope module](#3-2-input-files-for-the-hillslope-module)].
+Combined with four values for "rate" this option calculates the demand of the receiver basin for every day in the year.
+
+cwd: Crop water demand, this options calculates the irrigation demand of the receiver basin based on the FAO crop evapotranspiration method [(FAO, 1998)](#fao-1998). Crop water demand according to this method is:
+
+$$ Demand =max(0,\frac{ETP*k_{crop}-P}{k_{loss}}) * Area_{irrigated}$$
+
+P = Precipitation [mm]<br>
+ETP = Evapotranspiration [mm]<br>
+k<sub>crop</sub> = crop coefficient [-]<br>
+k<sub>loss</sub> = loss factor [-] as set in the colum "loss_factor" in `irri.dat`<br>
+
+For the calculation the mean subbasin potential evapotranspiration and the mean subbasin potential evapotranspiration are used and the water is applied respectively to the SVC's size within the subbasin.
+This means that this method doesn't reflect the climatic differences between SVC's within one subbasin. For more information on this topic read (FIX THIS QUELLE Masterarbeit). If the receiver basin is external ("9999") rule option "cwd" can't be chosen.
+
+*rate*: Columns five to eight in the file `irri.dat` describe which amount of water [m<sup>3</sup>] per timestep should be abstracted from the donor basin (sub_receiver) and be applied as irrigation water in the receiver basin (sub_receiver). If the respective rule is "fixed", all 4 values should be identical, if the rule is "seasonal" these four values describe the node points for the calculation of the seasonal irrigation amounts in combination with the days described in `irri_seasons.dat`. Is the respective rule set to "cwd" the four values describe the crop coefficient,k<sub>crop</sub>, that can be fixed over the whole year (if all four values are equal or the receiver basin is missing in the file `irri_seasons.dat`) or seasonally calculated (if the four values are different and the receiver basin is contained in the file `irri_seasons.dat`). If there's more than one type of crop cultivated on the irrigated areas, this crop coefficient (k<sub>crop</sub>) should be the average crop coefficient for all the cultivated crops. If the demand rate can not be satisfied by the source in the donor basin all the available water there will be used and split respectively to the demands to this source. 
+
+Example:
+
+Subbasin 1 demands 1000 m<sup>3</sup> irrigation water from Subbasin 3<br>
+Subbasin 2 demands 2000 m<sup>3</sup> irrigation water from Subbasin 3<br>
+Subbasin 3 just has 1500 m<sup>3</sup> irrigation water available<br>
+
+Since subbasin 2 has a higher demand it will now get 2/3 = 1000 m<sup>3</sup> of the available irrigation water and subbasin 1 will get 1/3 = 500 m<sup>3</sup> of the available irrigation water. If the demand is higher than the availability a warning is given out by WASA-SED.
+
+*loss_factor*: The loss factor [-] describes the efficieny of the transfer from the irrigation water from its donor to its receiver. This value has to be between 1 and zero.
+
+**3)** `irri_seasons.dat`
+
+```
+# Specification of the irrigation seasonality (per year)
+# for the interpolation of temporal distribution irrigation water
+subbasin_id	year	DOY1	DOY2	DOY3	DOY4
+4	2000	1	3	5	7
+...
+
+```
+Combined with the four "rate"-values in `irri.dat` the demand of the receiver basin for every day in the year are calculated.For more information on seasonality check the example 10) `rainy_seasons.dat` in \[[3.2 Input files for the hillslope module](#3-2-input-files-for-the-hillslope-module)].
+
+
+
+
+
+
+
+When using the irrigation module it is highly recommended to check the console output of WASA-SED as errors in the input files are shown here as a warning.
+
+<a name="3-6-input-of-climate-data"></a>
+
+### 3.6 Input of climate data
 
 The WASA model requires time series for precipitation (daily or hourly), short wave radiation, humidity and temperature (daily). The input files are located in the folder ```Input\[case_study]\Time_series``` and are summarised below.
 
@@ -1613,14 +1824,14 @@ Extra-terrestrial shortwave radiation as monthly mean daily value in [W/m2]
 ```
 This file specifies the extraterrestrial incoming shortwave radiation at the top of the atmosphere \[W/m2]. The values are daily averages for each month from January until December (12 values). 
 
-<a name="3-6-state-variables"></a>
-### 3.6 Input/Output of state variables (optional)
+<a name="3-7-state-variables"></a>
+### 3.7 Input/Output of state variables (optional)
 The state of (some) system variables can be stored in files. This allows their later analysis and resuming runs from them. Thus, any of these files can be generated by the model, and used as an input in a successive call. These capabilities can be enabled in ```do.dat``` lines 36-37 (see [Figure 1](#figure-1)).
 These files are optional. If not present, default values are used (e.g., 100 % relative saturation for the soils, 0 for most other entities). These files are expected in the WASA-SED output directory with the extension ```stat```. If present and enabled in ```do.dat```, WASA-SED loads them at model startup. It will then generate files with the extension ```stat_start```, that describe the status of the model in the beginning of the simulation (these should be identical to the ```stat``` which existed before). New ```stat``` files are written at the the end of each simulation year. .
 
 
-<a name="table-12"></a>
-**Table 12:** Input/Output of state variables.
+<a name="table-13"></a>
+**Table 13:** Input/Output of state variables.
 
 Parameter File |	Content
 ---|---
@@ -1715,12 +1926,13 @@ Subbasin	volume[m^3]
 The location of the output folder is specified in the ```do.dat```. By default, the output folder is set to ```WASA\Output```. The parameter file ```parameter.out``` echoes the main parameter specification for the WASA model, as were given in the ```do.dat``` file.
 
 <a name="4-1-output-of-the-hillslope-module"></a>
+
 ### 4.1 Output of the hillslope module
 
-The output files generated by the hillslope routine are shown in [Table 13](#table-13).
+The output files generated by the hillslope routine are shown in [Table 14](#table-14).
 
-<a name="table-13"></a>
-**Table 13:** Output files of the hillslope module.
+<a name="table-14"></a>
+**Table 14:** Output files of the hillslope module.
 
 Output file | Content
 ---|---
@@ -1747,7 +1959,7 @@ Output file | Content
 ```gw_recharge.out``` | groundwater recharge \[m<sup>3</sup>/timestep] for all sub-basins 
 ```*.stat```| various files containing state of system variables at end of simulation, see ...
 ```snow*``` | optional output files from the snow routine, see [Table 5](#table-5)
-```gw_storage.stat, intercept_storage.stat, soil_moisture.stat, snow_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
+```gw_storage.stat, intercept_storage.stat, soil_moisture.stat, snow_storage.stat``` (optional) | Initialisation state variables, see [section 3.7](#3-7-state-variables)
 
 The output files ```daily_water_sub-basin.out```, ```sediment_production.out``` and ```water_sub-basin.out``` include the effect of the *distributed* reservoirs. All other remaining output files above contain the raw output of the hillslope module (no reservoir effects). All above-mentioned files have the same structure, as shown by the example ```daily_actetranspiration.out``` below (the subdaily output files additionally contain the timestep number in the third column):
 
@@ -1770,12 +1982,13 @@ These files are written at the end of each simulation year, thus allowing recomm
 Beware: all other output files are overwritten in this case. For file structure, see section [Input data](#input-data). ```storage.stats``` contains the overall summary of storages corresponding to the three files mentioned before.
 
 <a name="4-2-output-of-the-river-module"></a>
+
 ### 4.2 Output of the river module
 
-The river routine calculates the water and sediment discharge in each river stretch. The following files (see [Table 14](#table-14)) are generated as time series, if enabled, depending on the selected routing scheme.
+The river routine calculates the water and sediment discharge in each river stretch. The following files (see [Table 15](#table-15)) are generated as time series, if enabled, depending on the selected routing scheme.
 
-<a name="table-14"></a>
-**Table 14:** Output files of the river module.
+<a name="table-15"></a>
+**Table 15:** Output files of the river module.
 
 Output file | Content
 ---|---
@@ -1794,7 +2007,7 @@ Output file | Content
 ```River_Sediment_storage.out``` | Deposited sediment stored in river reach in t
 ```River_Susp_Sediment_storage.out``` | Suspended sediment stored in river reach in t
 ```River_Infiltration.out``` | Infiltration of river stretches
-```river_storage.stat, sediment_storage.stat, susp_sediment_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
+```river_storage.stat, sediment_storage.stat, susp_sediment_storage.stat``` (optional) | Initialisation state variables, see [section 3.7](#3-7-state-variables)
 
 
 All above-mentioned files have the same structure, as shown by the example ```River_flow.out``` below:
@@ -1815,12 +2028,13 @@ Year  Day    dt   9          10             11
 Example: After each time step (i.e. hour or day), the discharge is given for each sub-basin, e.g. Sub-basin No. 9 has a discharge of 6.313 m<sup>3</sup>/s, Sub-basin No. 10 of 1.797 m<sup>3</sup>/s and Sub-basin No. 11 of 8.922 m<sup>3</sup>/s after 1 hours.
 
 <a name="4-3-output-of-the-reservoir-module"></a>
+
 ### 4.3 Output of the reservoir module
 
-The reservoir module simulates the water and sediment transport through the reservoirs located in the study area. Currently, the output comprises results on water balance, hydraulic calculations, sediment transport and bed elevation changes for all reservoirs located at the outlet point of the sub-basins. The results are printed for all outlet reservoirs separately, identified by the ID of the sub-basin where it is located. Additional files are also printed for the reservoir size classes. [Table 15](#table-15) shows the generated files.
+The reservoir module simulates the water and sediment transport through the reservoirs located in the study area. Currently, the output comprises results on water balance, hydraulic calculations, sediment transport and bed elevation changes for all reservoirs located at the outlet point of the sub-basins. The results are printed for all outlet reservoirs separately, identified by the ID of the sub-basin where it is located. Additional files are also printed for the reservoir size classes. [Table 16](#table-16) shows the generated files.
 
-<a name="table-15"></a>
-**Table 15:** Output files of the reservoir module.
+<a name="table-16"></a>
+**Table 16:** Output files of the reservoir module.
 
 Nr. |Output file | Content
 ---|---|---
@@ -1850,7 +2064,7 @@ Nr. |Output file | Content
 24 | ```lake_sedinflow.out``` | Sediment inflow discharges into the reservoir size classes<sup>3</sup>
 25 | ```lake_sedoutflow.out``` | Sediment outflow discharges from the reservoir size classes<sup>3</sup>
 26 | ```lake_sizedistoutflow.out``` | Effluent grain size distribution of the reservoir size classes <sup>4</sup>
-27 | ```lake_storage.stat, reservoir_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
+27 | ```lake_storage.stat, reservoir_storage.stat``` (optional) | Initialisation state variables, see [section 3.7](#3-7-state-variables)
 
 <sup>1</sup> Results are displayed for the whole catchment after grouping them by reservoir size classes (one value for the whole catchment and each reservoir size class) <br>
 <sup>2</sup> Results are displayed for the whole catchment without distinguishing between size classes (one value for the whole catchment) <br>
@@ -2119,6 +2333,39 @@ Year, day, hour, sediment size class, lakesizedistoutflow(-)
 Example: After each time step, e.g. after one day, the sediment outflow discharge at the sub-basin outlet has the following effluent size distribution for the given sediment classes (e.g. three sediment classes): fifth column displays the results of grain size distribution for the sub-basin with ID 57 (0.60, 0.30 and 0.10, for sediment classes 1 to 3, respectively). Results are displayed for all sub-basins without distinguishing between size classes. 
 
 \[[Table of contents](#toc)]
+
+<a name="4-4-output-of-the-irrigation-module"></a>
+
+### 4.4 Output of the irrigation module
+
+The irrigation module abstracts water for irrigation purposes in one subbasin and applies it to the soil-water-routine in the receiver basin. The total abstraction amount from each subbasin for each timestep is recorded as well as the total amount that each receiver basin receives for each timestep. These output files, generated by the irrigation module, are shown in [Table 17](#table-17).
+
+<a name="table-17"></a>
+**Table 17:** Output files of the irrigation module.
+
+Output file | Content
+---|---
+```irrigation_abstraction.out``` | total water abstraction [m<sup>3</sup>] for all sub-basins (MAP-IDs) and each timestep
+```irrigation_supply.out```	| total water supply [m<sup>3</sup>] for all sub-basins (MAP-IDs) and each timestep 
+
+**1)**  `irrigation_abstraction.out`
+
+```
+Abstracted water for irrigation [m3/s] from each sub-basins (MAP-IDs)
+Year	Day	Timestep	4	33	100	30	32	101	25
+2000  1   1 500 1000  0 0 0 0 0
+…
+```
+**2)**  `irrigation_supply.out`
+
+```
+Received water for irrigation [m3/s] for each sub-basins (MAP-IDs)
+Year	Day	Timestep	4	33	100	30	32	101	25
+2000  1 1 0 0 500 1000  0 0 0  
+…
+```
+
+
 ## 5 References
 
 <a name="ackers-white-1973"></a>
@@ -2138,6 +2385,9 @@ Bronstert, A., Güntner, A., Jaeger, A., Krol, M., and Krywkow, J. (1999): Groß
 
 <a name="fao-1993"></a>
 FAO (1993): Global and national soils and terrain digital databases (SOTER). Procedures Manual. World Soil Resources Reports, No. 74., FAO (Food and Agriculture Organization of the United Nations), Rome, Italy.
+
+<a name="fao-1998"></a>
+FAO (1998): Crop evapotranspiration-Guidelines for computing crop water requirements-FAO Irrigation and drainage paper 56, FAO (Food and Agriculture Organization of the United Nations), Rome, Italy
 
 <a name="fao-2001"></a>
 FAO (2001): Global Soil and Terrain Database (WORLD-SOTER). FAO, AGL (Food and AgricultureOrganization of the United Nations, Land and Water Development Division), http://www.fao.org/ag/AGL/agll/soter.htm.
