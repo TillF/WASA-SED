@@ -2074,7 +2074,7 @@ end if ! do_snow
                 cycle
              end if
 
-             if (loss < 0 .OR. > 1) then
+             if (loss < 0 .OR. loss > 1) then
                 write(*,'(a,I0,a)')'WARNING (irri.dat): loss_factor rate in line ' ,h, ' is not between 0 and 1. loss_factor set to 0.8.'
                 loss = 0.8
              end if

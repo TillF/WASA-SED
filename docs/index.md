@@ -1689,9 +1689,13 @@ Subbasin 1 demands 1000 m<sup>3</sup> irrigation water from Subbasin 3<br>
 Subbasin 2 demands 2000 m<sup>3</sup> irrigation water from Subbasin 3<br>
 Subbasin 3 just has 1500 m<sup>3</sup> irrigation water available<br>
 
-Since subbasin 2 has a higher demand it will now get 2/3 = 1000 m<sup>3</sup> of the available irrigation water and subbasin 1 will get 1/3 = 500 m<sup>3</sup> of the available irrigation water. If the demand is higher than the availability a warning is given out by WASA-SED.
+Since subbasin 2 has a higher demand it will now get 2/3 = 1000 m<sup>3</sup> * "loss_factor" of the available irrigation water and subbasin 1 will get 1/3 = 500 * "loss_factor" m<sup>3</sup> of the available irrigation water. If the demand is higher than the availability a warning is given out by WASA-SED.
 
-*loss_factor*: The loss factor [-] describes the efficiency of the transfer from the irrigation water from its donor to its receiver. This value has to be between 1 and zero.
+*loss_factor*: The loss factor [-] describes the efficiency of the transfer from the irrigation water from its donor to its receiver. This value has to be between 1 and zero.<br>
+
+Example:
+
+Subbasin 1 gives 1000 m<sup>3</sup> to subbasin 2. The loss factor is 0.8. Subbasin 2 will receive 800 m<sup>3</sup>.
 
 **3)** `irri_seasons.dat`
 

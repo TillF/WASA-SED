@@ -18,10 +18,14 @@ use utils_h
     REAL :: dummy
 
 
-     irri_supply = 0.0
+    irri_supply = 0.0
     irri_abstraction = 0.0
 
+    !----------------------------------------------------------------------------------------------------------------------------
     !-- Abstraction from groundwater, Loop through all subbasins and check if they're included in irri.dat-----------------------
+    !----------------------------------------------------------------------------------------------------------------------------
+
+    IF ( ANY(irri_source == "groundwater")) THEN
     DO  sb_counter = 1, subasin ! Subbasin Loop for groundwater abstraction
 
         sub_exists = pack(sub_receiver, MASK=sub_source == sb_counter .AND. irri_source == "groundwater") !check if current subbasin gives water
@@ -48,16 +52,25 @@ use utils_h
         END IF
 
         !Calculating the water demand from subbasins with the option crop water demand
+
         IF (sum(cwd_gw(:,sb_counter,:)) /= 0) THEN
             rate_cwd = 0.0
             receiver_basins = pack(sub_receiver, MASK =sub_source == sb_counter .AND. irri_source == "groundwater" .AND. irri_rule == "cwd")
             rate_cwd = calc_seasonality2(receiver_basins(1), t, d, seasonality_irri, cwd_gw(:,sb_counter,:))
 
-            DO i = 1, SIZE(receiver_basins)
-                dummy = (((PET(d,receiver_basins(i)) * rate_cwd(receiver_basins(i)) - precip(d,receiver_basins(i))) / loss_gw(receiver_basins(i))) * area(receiver_basins(i)) * 1000 * frac_irr_sub(receiver_basins(i)))
-                abstraction_requested = abstraction_requested + max(0.,dummy) !in case there's more rain than crop transpiration set water demand to zero
-                rate(receiver_basins(i)) = rate(receiver_basins(i)) + max(0.,dummy)
-            END DO
+            IF (.NOT. dohour) THEN
+                DO i = 1, SIZE(receiver_basins)
+                    dummy = (((PET(d,receiver_basins(i)) * rate_cwd(receiver_basins(i)) - precip(d,receiver_basins(i))) / loss_gw(receiver_basins(i))) * area(receiver_basins(i)) * 1000 * frac_irr_sub(receiver_basins(i)))
+                    abstraction_requested = abstraction_requested + max(0.,dummy) !in case there's more rain than crop transpiration set water demand to zero
+                    rate(receiver_basins(i)) = rate(receiver_basins(i)) + max(0.,dummy)
+                END DO
+            ELSE IF (dohour) THEN  !hourly version
+                DO i = 1, SIZE(receiver_basins)
+                    dummy = (((PET(d,receiver_basins(i)/dt * nt) * rate_cwd(receiver_basins(i)) - precip(d,receiver_basins(i)/dt * nt)) / loss_gw(receiver_basins(i))) * area(receiver_basins(i)) * 1000 * frac_irr_sub(receiver_basins(i)))
+                    abstraction_requested = abstraction_requested + max(0.,dummy) !in case there's more rain than crop transpiration set water demand to zero
+                    rate(receiver_basins(i)) = rate(receiver_basins(i)) + max(0.,dummy)
+                END DO
+            END IF
         END IF
 
         all_request = abstraction_requested !needed later for calculating the fractions
@@ -80,7 +93,7 @@ use utils_h
             END IF
         END IF
 
-        irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin !
+        irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin
 
         !  Extraction of groundwater from all the LU's in Subbasin proportionally to the amount of groundwater stored in each LU. (Full LU's give a lot of water, empty ones just a bit)
         deepgw(1:nbr_lu(sb_counter),sb_counter) = deepgw(1:nbr_lu(sb_counter),sb_counter) - deepgw(1:nbr_lu(sb_counter),sb_counter)/abstraction_available * abstraction_requested
@@ -89,8 +102,14 @@ use utils_h
         irri_supply = irri_supply + rate(1:subasin)/all_request * abstraction_requested * loss_gw  !This vector contains the total irrigation ammount for every subbasin
 
     END DO ! Subbasin Loop for groundwater abstraction
+    END IF
 
-    !--Add water from external sources (9999) to irri_supply ----------------------------------------------
+
+    !----------------------------------------------------------------------------------------------------------------------------
+    !--Add water from external sources (9999) to irri_supply --------------------------------------------------------------------
+    !----------------------------------------------------------------------------------------------------------------------------
+
+    IF ( ANY(irri_source == "9999")) THEN
     rate = 0.0
     receiver_basins = pack([(i, i=1, nbr_irri_records)], MASK=sub_source == 9999) !get indices of all external sources
 
@@ -117,10 +136,13 @@ use utils_h
                 irri_supply(receiver_basins(i)) = irri_supply(receiver_basins(i)) + max(0.,dummy) !in case there's more rain than crop transpiration set water demand to zero
             END DO
         END IF
+     END IF
 
+    !----------------------------------------------------------------------------------------------------------------------
     !-- Abstraction from river, Loop through all subbasins and check if they're included in irri.dat-----------------------
+    !----------------------------------------------------------------------------------------------------------------------
 
-
+    IF ( ANY(irri_source == "river")) THEN
     DO sb_counter = 1, subasin ! Subbasin Loop for river
 
         sub_exists = pack(sub_receiver, MASK=sub_source == sb_counter .AND. irri_source == "river")
@@ -152,14 +174,22 @@ use utils_h
             receiver_basins = pack(sub_receiver, MASK =sub_source == sb_counter .AND. irri_source == "river" .AND. irri_rule == "cwd")
             rate_cwd = calc_seasonality2(receiver_basins(1), t, d, seasonality_irri, cwd_riv(:,sb_counter,:))
 
-            DO i = 1, SIZE(receiver_basins)
-                dummy = (((PET(d,receiver_basins(i)) * rate_cwd(receiver_basins(i)) - precip(d,receiver_basins(i))) / loss_riv(receiver_basins(i))) * area(receiver_basins(i)) * 1000 * frac_irr_sub(receiver_basins(i)))
-                abstraction_requested = abstraction_requested + max(0.,dummy) !in case there's more rain than crop transpiration set water demand to zero
-                rate(receiver_basins(i)) = rate(receiver_basins(i)) + max(0.,dummy)
-            END DO
+             IF ( .NOT. dohour) THEN
+                DO i = 1, SIZE(receiver_basins)
+                    dummy = (((PET(d,receiver_basins(i)) * rate_cwd(receiver_basins(i)) - precip(d,receiver_basins(i))) / loss_riv(receiver_basins(i))) * area(receiver_basins(i)) * 1000 * frac_irr_sub(receiver_basins(i)))
+                    abstraction_requested = abstraction_requested + max(0.,dummy) !in case there's more rain than crop transpiration set water demand to zero
+                    rate(receiver_basins(i)) = rate(receiver_basins(i)) + max(0.,dummy)
+                END DO
+            ELSE IF (dohour) THEN  !hourly version
+                DO i = 1, SIZE(receiver_basins)
+                    dummy = (((PET(d,receiver_basins(i)/dt * nt) * rate_cwd(receiver_basins(i)) - precip(d,receiver_basins(i)/dt * nt)) / loss_riv(receiver_basins(i))) * area(receiver_basins(i)) * 1000 * frac_irr_sub(receiver_basins(i)))
+                    abstraction_requested = abstraction_requested + max(0.,dummy) !in case there's more rain than crop transpiration set water demand to zero
+                    rate(receiver_basins(i)) = rate(receiver_basins(i)) + max(0.,dummy)
+                END DO
+            END IF
         END IF
 
-        all_request = abstraction_requested !add water from sm_thresh to total request
+        all_request = abstraction_requested
 
         IF (abstraction_requested== 0.0) THEN
             cycle
@@ -188,10 +218,13 @@ use utils_h
         irri_supply = irri_supply + rate(1:subasin)/all_request * abstraction_requested * loss_riv !This vector contains the total irrigation ammount for every subbasin
 
     END DO ! Subbasin Loop for river abstraction
-
+    END IF
+    !---------------------------------------------------------------------------------------------------------------------------
     !-- Abstraction from reservoirs, Loop through all subbasins and check if they're included in irri.dat-----------------------
+    !---------------------------------------------------------------------------------------------------------------------------
 
     IF (doreservoir) THEN
+    IF ( ANY(irri_source == "reservoir")) THEN
      DO sb_counter = 1, subasin ! Subbasin Loop for reservoir
 
             sub_exists = pack(sub_receiver, MASK=sub_source == sb_counter .AND. irri_source == "reservoir")
@@ -227,11 +260,19 @@ use utils_h
                 receiver_basins = pack(sub_receiver, MASK =sub_source == sb_counter .AND. irri_source == "reservoir" .AND. irri_rule == "cwd")
                 rate_cwd = calc_seasonality2(receiver_basins(1), t, d, seasonality_irri, cwd_res(:,sb_counter,:))
 
-                DO i = 1, SIZE(receiver_basins)
-                    dummy = (((PET(d,receiver_basins(i)) * rate_cwd(receiver_basins(i)) - precip(d,receiver_basins(i))) / loss_res(receiver_basins(i))) * area(receiver_basins(i)) * 1000 * frac_irr_sub(receiver_basins(i)))
-                    abstraction_requested = abstraction_requested + max(0.,dummy) !in case there's more rain than crop transpiration set water demand to zero
-                    rate(receiver_basins(i)) = rate(receiver_basins(i)) + max(0.,dummy)
-                END DO
+                IF ( .NOT. dohour) THEN
+                    DO i = 1, SIZE(receiver_basins)
+                        dummy = (((PET(d,receiver_basins(i)) * rate_cwd(receiver_basins(i)) - precip(d,receiver_basins(i))) / loss_res(receiver_basins(i))) * area(receiver_basins(i)) * 1000 * frac_irr_sub(receiver_basins(i)))
+                        abstraction_requested = abstraction_requested + max(0.,dummy) !in case there's more rain than crop transpiration set water demand to zero
+                        rate(receiver_basins(i)) = rate(receiver_basins(i)) + max(0.,dummy)
+                    END DO
+                ELSE IF (dohour) THEN  !hourly version
+                    DO i = 1, SIZE(receiver_basins)
+                        dummy = (((PET(d,receiver_basins(i)/dt * nt) * rate_cwd(receiver_basins(i)) - precip(d,receiver_basins(i)/dt * nt)) / loss_res(receiver_basins(i))) * area(receiver_basins(i)) * 1000 * frac_irr_sub(receiver_basins(i)))
+                        abstraction_requested = abstraction_requested + max(0.,dummy) !in case there's more rain than crop transpiration set water demand to zero
+                        rate(receiver_basins(i)) = rate(receiver_basins(i)) + max(0.,dummy)
+                    END DO
+                END IF
             END IF
 
 
@@ -271,10 +312,14 @@ use utils_h
 
         END DO ! Subbasin Loop for reservoir abstraction
     END IF
+    END IF
 
+    !---------------------------------------------------------------------------------------------------------------------
     !-- Abstraction from lakes, Loop through all subbasins and check if they're included in irri.dat-----------------------
+    !---------------------------------------------------------------------------------------------------------------------
 
     IF (doacud) THEN
+    IF ( ANY(irri_source == "lake")) THEN
         DO sb_counter = 1, subasin ! Subbasin Loop for lakes
 
             sub_exists = pack(sub_receiver, MASK=sub_source == sb_counter .AND. irri_source == "lake")
@@ -310,11 +355,19 @@ use utils_h
                 receiver_basins = pack(sub_receiver, MASK =sub_source == sb_counter .AND. irri_source == "lake" .AND. irri_rule == "cwd")
                 rate_cwd = calc_seasonality2(receiver_basins(1), t, d, seasonality_irri, cwd_lake(:,sb_counter,:))
 
-                DO i = 1, SIZE(receiver_basins)
-                    dummy = (((PET(d,receiver_basins(i)) * rate_cwd(receiver_basins(i)) - precip(d,receiver_basins(i))) / loss_lake(receiver_basins(i))) * area(receiver_basins(i)) * 1000 * frac_irr_sub(receiver_basins(i)))
-                    abstraction_requested = abstraction_requested + max(0.,dummy) !in case there's more rain than crop transpiration set water demand to zero
-                    rate(receiver_basins(i)) = rate(receiver_basins(i)) + max(0.,dummy)
-                END DO
+                IF ( .NOT. dohour) THEN
+                    DO i = 1, SIZE(receiver_basins)
+                        dummy = (((PET(d,receiver_basins(i)) * rate_cwd(receiver_basins(i)) - precip(d,receiver_basins(i))) / loss_lake(receiver_basins(i))) * area(receiver_basins(i)) * 1000 * frac_irr_sub(receiver_basins(i)))
+                        abstraction_requested = abstraction_requested + max(0.,dummy) !in case there's more rain than crop transpiration set water demand to zero
+                        rate(receiver_basins(i)) = rate(receiver_basins(i)) + max(0.,dummy)
+                    END DO
+                ELSE IF (dohour) THEN  !hourly version
+                    DO i = 1, SIZE(receiver_basins)
+                        dummy = (((PET(d,receiver_basins(i)/dt * nt) * rate_cwd(receiver_basins(i)) - precip(d,receiver_basins(i)/dt * nt)) / loss_lake(receiver_basins(i))) * area(receiver_basins(i)) * 1000 * frac_irr_sub(receiver_basins(i)))
+                        abstraction_requested = abstraction_requested + max(0.,dummy) !in case there's more rain than crop transpiration set water demand to zero
+                        rate(receiver_basins(i)) = rate(receiver_basins(i)) + max(0.,dummy)
+                    END DO
+                 END IF
             END IF
 
             all_request = abstraction_requested !add water from sm_thresh to total request
@@ -347,27 +400,14 @@ use utils_h
 
         END DO ! Subbasin Loop for lake abstraction
     END IF
+    END IF
 
+    !-----------------------------------------------------------------------------------------------------------------------
+    !-----------------------------------------------------------------------------------------------------------------------
 
      !these arrays are for creating the outfiles
      irri_abstraction_record(d,nt,1:subasin) = irri_abstraction
      irri_supply_record(d,nt,1:subasin) = irri_supply
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
