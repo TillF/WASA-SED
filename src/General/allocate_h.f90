@@ -224,8 +224,8 @@ INTEGER :: istate
     subflow_t          => allocate_hourly_array(f_subsurface_runoff .OR. .TRUE.)	!Till: currently, these are needed in any case
 	ovflow_t           => allocate_hourly_array(f_total_overlandflow .OR. .TRUE.)
 
-	irri_abstraction_record       => allocate_hourly_array(f_irri_abstraction)
-	irri_supply_record            => allocate_hourly_array(f_irri_supply)
+	irri_abstraction_record       => allocate_hourly_array(f_irri_abstraction .OR. .TRUE.)
+	irri_supply_record            => allocate_hourly_array(f_irri_supply .OR. .TRUE.)
 
 END subroutine allocate_hymo
 

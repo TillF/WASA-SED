@@ -11,7 +11,7 @@ Parameter specification for the WASA Model (SESAM-Project), generated with R-Pac
 189	//total no. of terrain components (types) in study area
 9	//total no. of soil components in study area
 7	//total no. of vegetation units in study area
-.t.	//doreservoir: do reservoir calculations
+.f.	//doreservoir: do reservoir calculations
 .f.	//doacudes: include calculations for small reservoirs
 .t.	//dolattc: do latflow between TCs
 .f.	//doalllattc: route latflow compeletely to next downslope TC
@@ -24,7 +24,7 @@ Parameter specification for the WASA Model (SESAM-Project), generated with R-Pac
 15.0	//kfkorr: hydraulic conductivity factor (for daily model version) (kfkorr)
 0.30	//intcf: interception capacity per unit LAI [mm]
 0	//dointc: type of interception routine (0:simple bucket, 1:modified bucket)
-.f.	//doscale: do scaling due to rainfall interpolation ?
+.t.	//doscale: do scaling due to rainfall interpolation ?
 .f.	//domuncell: for muni/ezg-nocell-version, use rainfall input derived from cells ? (change kf_calib.dat !)
 1.	//sensfactor: factor for sensitivity studies
 24	//dt: time step in [hours]
