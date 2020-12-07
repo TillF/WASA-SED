@@ -1872,8 +1872,16 @@ end if ! do_snow
 
 
        !-----------------------------Irrigation-------------------------------------------------
-       ! read irri.dat
+       ! read irri.dat if irrigation is switched on
+
+    IF (doirrigation) THEN
     INQUIRE(FILE=pfadp(1:pfadj)// 'Hillslope/irri.dat', EXIST=file_exists) !if irri.dat exists, read it
+
+    IF (.NOT. file_exists) THEN
+        write(*,'(a,i0,a)')'ERROR (irri.dat): irri.dat not found in folder "Input/Hillslope". To use option "doirrigation" create irri.dat.'
+        stop
+    END IF
+
 
     IF (file_exists) THEN
         source_options(1) = "river" !create array to check validity of irri.dat column for sources
@@ -2149,6 +2157,7 @@ end if ! do_snow
         CLOSE(11)
         nbr_irri_records = j-1 ! Number of valid irrigation records
 
+    END IF
     END IF
 
 

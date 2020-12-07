@@ -93,10 +93,10 @@ use utils_h
             END IF
         END IF
 
-        irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin
-
         !  Extraction of groundwater from all the LU's in Subbasin proportionally to the amount of groundwater stored in each LU. (Full LU's give a lot of water, empty ones just a bit)
         deepgw(1:nbr_lu(sb_counter),sb_counter) = deepgw(1:nbr_lu(sb_counter),sb_counter) - deepgw(1:nbr_lu(sb_counter),sb_counter)/abstraction_available * abstraction_requested
+
+        irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin
 
         !Write extracted water for each receiver basin but skip external receiver basins (code 9999) since this water just disappears outside the model
         irri_supply = irri_supply + rate(1:subasin)/all_request * abstraction_requested * loss_gw  !This vector contains the total irrigation ammount for every subbasin
@@ -196,7 +196,7 @@ use utils_h
         END IF
 
         IF (abstraction_requested > 0. ) THEN
-            abstraction_available = qout(1,sb_counter) !river water in first timestep
+            abstraction_available = qout(1,sb_counter) * dt * 3600 !river water in first timestep
 
             IF (abstraction_available == 0.0) THEN !On first day the storage might be empty. Skip this day
                 WRITE(*,'(a,I0,a)') 'WARNING: No more water in river flow in Subbasin ',id_subbas_extern(sb_counter), '. No irrigation possible from this source in current timestep.'
@@ -209,10 +209,10 @@ use utils_h
             END IF
         END IF
 
-        irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin !
+        !  Abstraction of river water from first timestep of river routing ###FIX HERE
+        qout(1,sb_counter) = qout(1,sb_counter) - abstraction_requested / (dt * 3600)
 
-        !  Abstraction of river water from first timestep of river routing
-        qout(1,sb_counter) = qout(1,sb_counter) - abstraction_requested
+        irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin !
 
         !Write abstracted water for each receiver basin but skip external receiver basins (code 9999) since this water just disappears outside the model. Indexing irri_supply with 9999  would crash the program
         irri_supply = irri_supply + rate(1:subasin)/all_request * abstraction_requested * loss_riv !This vector contains the total irrigation ammount for every subbasin
@@ -285,7 +285,7 @@ use utils_h
             IF (abstraction_requested > 0. ) THEN
 
 
-                abstraction_available = withdraw_out(d,res_index(sb_counter)) * 3600 * dt * nt !withdraw_out is in m^3/s. Rate of available outflow from reservoir
+                abstraction_available = withdraw_out(d,res_index(sb_counter)) * 3600 * dt !withdraw_out is in m^3/s. Rate of available outflow from reservoir
 
                 IF (abstraction_available < 0 ) THEN        ! fix for a potential bug. If reservoir isn't initialized which seems to be the case when there's more than one, then withdraw_out can be negative
                     abstraction_available = 0
@@ -302,10 +302,10 @@ use utils_h
                 END IF
             END IF
 
-            irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin !
-
             !  Abstraction of water from reservoir outflow
-             withdraw_out(d,res_index(sb_counter)) = withdraw_out(d,res_index(sb_counter)) - abstraction_requested/(3600 * dt * nt)
+             withdraw_out(d,res_index(sb_counter)) = withdraw_out(d,res_index(sb_counter)) - abstraction_requested/(3600 * dt)
+
+             irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin !
 
             !Write abstracted water for each receiver basin but skip external receiver basins (code 9999) since this water just disappears outside the model. Indexing irri_supply with 9999  would crash the program
             irri_supply = irri_supply + rate(1:subasin)/all_request * abstraction_requested * loss_res !This vector contains the total irrigation ammount for every subbasin
@@ -390,10 +390,10 @@ use utils_h
                 END IF
             END IF
 
-            irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin !
-
             !  Abstraction of lake water respective to lake size
             lakewater_hrr(d,sb_counter,:) = lakewater_hrr(d,sb_counter,:) - lakewater_hrr(d,sb_counter,:) /abstraction_available * abstraction_requested
+
+            irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin !
 
             !Write abstracted water for each receiver basin but skip external receiver basins (code 9999) since this water just disappears outside the model. Indexing irri_supply with 9999  would crash the program
             irri_supply = irri_supply + rate(1:subasin)/all_request * abstraction_requested * loss_lake !This vector contains the total irrigation ammount for every subbasin
