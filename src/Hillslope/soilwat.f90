@@ -1044,8 +1044,13 @@
 
     IF (doirrigation) THEN
         DO i=1,nbr_svc(tcid_instance2)
-            IF (svc_irr(tc_contains_svc2(id_tc_type2)%p(i)%svc_id) == 1 ) THEN  !veg_ID, soil ID, intern to extern, svcID finden
-                irri_input(i) = irri_supply(i_subbas2) * (frac_lu(lu_counter2,i_subbas2) * fracterrain(id_tc_type2) * frac_svc(i,tcid_instance2)) / frac_irr_sub(i_subbas2) ! Verteilung des Irri_inputs Anteilig an gesamtbewässerter Fläche des Subbasin
+            IF (svc_irr(tc_contains_svc2(id_tc_type2)%p(i)%svc_id) == 1 .AND. irri_supply(i_subbas2) > 0 ) THEN  !veg_ID, soil ID, intern to extern, svcID finden
+                ! split irri_supply onto svc's in current subbasins and change unit from m^3 to mm
+                irri_input(i) = irri_supply(i_subbas2) / (Area(i_subbas2) * 1000 *  frac_irr_sub(i_subbas2))
+                !Above line is mathematicaly the same as the three lines below
+                !irri_input(i) = irri_supply(i_subbas2) * (frac_lu(lu_counter2,i_subbas2) * fracterrain(id_tc_type2) * frac_svc(i,tcid_instance2)) / frac_irr_sub(i_subbas2) ! Divide irrigation Input respective to size of SVC in subbasin
+                !change irri_input from m^3 to mm
+                !irri_input(i) = irri_input(i)/ (frac_lu(lu_counter2,i_subbas2) * fracterrain(id_tc_type2) * frac_svc(i,tcid_instance2) * Area(i_subbas2) * 1000)
             END IF
         END DO
        ! testPaul = testPaul + sum(frac_svc(:,tcid_instance2))  !To see if the actual rates get applied, following lines are just for inspection
