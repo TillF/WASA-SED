@@ -505,9 +505,7 @@ nbrsec=0
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/main_channel.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!main_channel.dat not found
       write(*,*)'WARNING: '//pfadp(1:pfadj)// 'main_channel.dat not found, using defaults'
-
       sed_flag = 0 !0 = changes on sideslope is not controlled
-
     ELSE
     READ(11,*);READ(11,*)
         DO i=1,subasin

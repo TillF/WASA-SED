@@ -125,7 +125,7 @@ integer :: digits, fw_req, fw=11, dec=3
     if (present(decimals))   dec=decimals
 
     digits=ceiling(log10(max(1.0,max_val)))+1    !Till: number of pre-decimal digits required
-    fw_req=digits+1+dec !total fieldwidth required
+    fw_req=max(6, digits+1+dec) !total fieldwidth required
 
     if (fw_req <= fw) then
         write(fstr,'(a,i0,a,i0)') 'f',fw_req,'.',dec        !generate format string

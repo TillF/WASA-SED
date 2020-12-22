@@ -1250,6 +1250,7 @@ SUBROUTINE hymo_all(STATUS)
         IF (f_daily_sediment_production .AND. dosediment) THEN
             OPEN(11,FILE=pfadn(1:pfadi)//'daily_sediment_production.out',  &
                 STATUS='old',POSITION='append')
+                tcarea = maxval(sediment_subbasin(1:dayyear,1:subasin, 1:n_sed_class))
             write(fmtstr,'(a,i0,a,a,a)') '(i0,a,i0,',subasin*n_sed_class,'(a,',fmt_str(maxval(sediment_subbasin(1:dayyear,1:subasin, 1:n_sed_class))),'))'        !generate format string
 
             DO d=1,dayyear
