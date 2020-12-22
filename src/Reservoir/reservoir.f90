@@ -234,7 +234,10 @@ storcap(:)=0.
   CLOSE (11)
 
   
-where (do_pre_outflow) res_flag(1:subasin) = .FALSE. !disable reservoirs in pre-specified basins, as their output is already given
+where (do_pre_outflow)
+    res_flag(1:subasin) = .FALSE. !disable reservoirs in pre-specified basins, as their output is already given
+    res_index(1:subasin) = 0
+end where
 
 !Anne & Till 2019 fix reservoir memory issue:
         !to decrease array size & only do calculations for subbasins with reservoir,  
@@ -699,7 +702,7 @@ where (do_pre_outflow) res_flag(1:subasin) = .FALSE. !disable reservoirs in pre-
   ENDIF
 
   DO i=1,subasin
-    if (res_index(i) /= 0.) then !Anne inserted this line  
+    if (res_index(i) /= 0) then !Anne inserted this line  
         nbrbat1=nbrbat(res_index(i))
         IF (nbrbat(res_index(i)) /= 0) THEN
           DO j=1,nbrbat1
@@ -712,7 +715,7 @@ where (do_pre_outflow) res_flag(1:subasin) = .FALSE. !disable reservoirs in pre-
 
 !Ge initialization of the stage-volume curves for each sub-basin (erosion/deposition process)
   DO i=1,subasin
-    if (res_index(i) /= 0.) then !Anne inserted this line  
+    if (res_index(i) /= 0) then !Anne inserted this line  
         nbrbat1=nbrbat(res_index(i))
         IF (nbrbat(res_index(i)) /= 0) THEN
           DO j=1,nbrbat1
@@ -816,7 +819,7 @@ where (do_pre_outflow) res_flag(1:subasin) = .FALSE. !disable reservoirs in pre-
 !Ge initialization of output files
   IF (f_res_cav) then
       DO i=1,subasin
-        if (res_index(i) /= 0.) then !Anne inserted this line  
+        if (res_index(i) /= 0) then !Anne inserted this line  
            IF (nbrbat(res_index(i)) /= 0) THEN
             IF (res_flag(i)) THEN
               WRITE(subarea,*)id_subbas_extern(i)
@@ -1888,7 +1891,7 @@ endif
         CLOSE(11)
 		ENDIF
       ENDIF
-      if (res_index(i) /= 0.) then !Anne inserted this line
+      if (res_index(i) /= 0) then !Anne inserted this line
           IF (res_flag(i) .and. t >= damyear(i) .and. nbrbat(res_index(i)) /= 0) THEN
             WRITE(subarea,*)id_subbas_extern(i)
 		    IF (f_res_cav) THEN
