@@ -211,24 +211,26 @@ nbrsec=0
   ENDDO
 
 ! Read sedimentological parameters
-  OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/sed.dat',STATUS='unknown')
-  READ(11,*);READ(11,*)
-  DO i=1,subasin
-    IF (storcap(i) > 0.) THEN
-     IF (nbrsec(res_index(i)) == 0) read(11,*) dummy1,dry_dens(res_index(i))
-     IF (nbrsec(res_index(i)) /= 0) read(11,*) dummy1,dry_dens(res_index(i)),factor_actlay(res_index(i))
-!     IF (nbrsec(i) /= 0) read(11,*) dummy1,dry_dens(i),sed_flag(i)
-	ENDIF
-    IF (storcap(i) == 0.) dummy1=id_subbas_extern(i)
-    IF (dummy1 /= id_subbas_extern(i)) THEN
-      WRITE(*,*) 'ERROR: Sub-basin-IDs in file sed.dat must have the same ordering scheme as in hymo.dat'
-      STOP
-    END IF
-!write(*,*) dummy1,dry_dens(i),factor_actlay(i)
-!write(*,*)param_a(i,1),param_b(i,1)
-!write(*,*)param_a(i,2),param_b(i,2)
-  END DO
-  CLOSE(11)
+  OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/sed.dat', IOSTAT=istate, STATUS='old')
+  IF (istate==0) THEN
+      READ(11,*);READ(11,*)
+      DO i=1,subasin
+        IF (storcap(i) > 0.) THEN
+         IF (nbrsec(res_index(i)) == 0) read(11,*) dummy1,dry_dens(res_index(i))
+         IF (nbrsec(res_index(i)) /= 0) read(11,*) dummy1,dry_dens(res_index(i)),factor_actlay(res_index(i))
+    !     IF (nbrsec(i) /= 0) read(11,*) dummy1,dry_dens(i),sed_flag(i)
+        ENDIF
+        IF (storcap(i) == 0.) dummy1=id_subbas_extern(i)
+        IF (dummy1 /= id_subbas_extern(i)) THEN
+          WRITE(*,*) 'ERROR: Sub-basin-IDs in file sed.dat must have the same ordering scheme as in hymo.dat'
+          STOP
+        END IF
+    !write(*,*) dummy1,dry_dens(i),factor_actlay(i)
+    !write(*,*)param_a(i,1),param_b(i,1)
+    !write(*,*)param_a(i,2),param_b(i,2)
+      END DO
+      CLOSE(11)
+   END IF
 
 !  OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/sed.dat',STATUS='unknown')
 !  READ(11,*)
@@ -503,9 +505,9 @@ nbrsec=0
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/main_channel.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!main_channel.dat not found
       write(*,*)'WARNING: '//pfadp(1:pfadj)// 'main_channel.dat not found, using defaults'
-      DO i=1,subasin
-	    sed_flag(res_index(i))=0 !0 = changes on sideslope is not controlled
-	  ENDDO
+
+      sed_flag = 0 !0 = changes on sideslope is not controlled
+
     ELSE
     READ(11,*);READ(11,*)
         DO i=1,subasin
