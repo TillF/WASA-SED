@@ -1147,9 +1147,9 @@ Date	Timestep	Sub-basin-ID.
 *Timestep*: timestep (not interpreted in daily resolution, 1..24 for hourly resolution)<br>
 *Subbasin-ID*: ID of sub-basin
 
-This optional file allows specifying the water output of selected sub-basins. WASA expects this file in the folder Time_series. If this file is not found, all sub-basins are treated regularly. Otherwise, any outflow that is specified in this file is used directly as an output of the respective sub-basin – no computations are performed within this sub-basin (evaporation, groundwater, river routing, etc.). Consequently, no climate input needs to be specified for such subbasins. WASA reads data from this file sequentially, starting from start of simulation and every calendar year (e.g. chunks of 365 days). Warning: The subsequent rows are assumed without gaps and not checked for completeness in the time series. "-1" is regarded as "no data" and will lead to "no data" in the riverflow in all affected downstream subbasins.
+This optional file allows specifying the water output of selected sub-basins. If this file is not found in the folder ```Time_series```, all sub-basins are treated regularly. Otherwise, any outflow that is specified in this file is used directly as an output of the respective sub-basin – no computations are performed within this sub-basin (evaporation, groundwater, river routing, reservoir, etc.). Consequently, no climate input needs to be specified for such subbasins. WASA reads data from this file sequentially, starting from start of simulation and every calendar year (e.g. chunks of 365 days). Warning: The subsequent rows are assumed without gaps and not checked for completeness in the time series. "-1" is regarded as "no data" and will lead to "no data" in the riverflow in all affected downstream subbasins.
 
-Example: Sub-basin 4 has pre-specified discharge of 0.5 m³/s for 1 Sep 2005.
+Example: Sub-basin 4 has pre-specified discharge of 0.5 m<sup>3</sup>/s for 1 Sep 2005.
 
 **6)** ```subbasin_outsed.dat``` <br> 
 (optional)

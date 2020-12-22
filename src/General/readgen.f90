@@ -29,7 +29,7 @@ SUBROUTINE readgen(path2do_dat)
         path2do_dat='./Input/do.dat'    !Till: use default, if no command line argument was specified
         custompath=''
     else
-        write(*,'(A)')'reading runtime parameters from ',path2do_dat
+        write(*,'(A)')'reading runtime parameters from '//path2do_dat
         i=len_trim(path2do_dat)
 
         do while (i>0)
@@ -467,9 +467,9 @@ SUBROUTINE readgen(path2do_dat)
     f_lake_sedoutflow=.FALSE.
     f_lake_sizedistoutflow=.FALSE.
 
-    OPEN(11,FILE=pfadp(1:pfadj)// 'outfiles.dat',IOSTAT=istate,STATUS='old')
+    OPEN(11, FILE=pfadp(1:pfadj)// 'outfiles.dat', IOSTAT=istate, STATUS='old')
     IF (istate==0) THEN
-        READ(11,*,IOSTAT=istate)dummy
+        READ(11,*,IOSTAT=istate)dummy !skip headerline
         READ(11,*,IOSTAT=istate)dummy
 
         DO WHILE (istate==0)

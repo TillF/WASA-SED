@@ -234,6 +234,8 @@ storcap(:)=0.
   CLOSE (11)
 
   
+where (do_pre_outflow) res_flag(1:subasin) = .FALSE. !disable reservoirs in pre-specified basins, as their output is already given
+
 !Anne & Till 2019 fix reservoir memory issue:
         !to decrease array size & only do calculations for subbasins with reservoir,  
         !moved all arrays with "subbasin" from allocate.h, line 400 ff to reservoir.f90 
@@ -881,18 +883,24 @@ IF (STATUS == 1) THEN
     qlateral=0.
  !   volact(1,:)=0. !Till: already initialized in model_state_io
     damareaact=0.
+
+    etdam = 0.
+    precdam = 0.
+    res_qout = 0.
+    withdraw_out = 0.
+    damelevact = 0.
   
 
   !IF (t > tstart) THEN !Andreas
   DO i=1,subasin !Andreas
    IF (res_flag(i)) THEN
      IF (t > damyear(i) .AND. t > tstart) THEN  !continuing simulations
-       volact(1,i)=volact(daylastyear*nt,i)
-       daystorcap(1,res_index(i))=daystorcap(daylastyear*nt,res_index(i))
-       daydamalert(1,res_index(i))=daydamalert(daylastyear*nt,res_index(i))
-       daydamdead(1,res_index(i))=daydamdead(daylastyear*nt,res_index(i))
-       daymaxdamarea(1,res_index(i))=daymaxdamarea(daylastyear*nt,res_index(i))
-	   dayminlevel(1,res_index(i))=dayminlevel(daylastyear*nt,res_index(i))
+       volact       (1,i)            = volact       (daylastyear*nt,i)
+       daystorcap   (1,res_index(i)) = daystorcap   (daylastyear*nt,res_index(i))
+       daydamalert  (1,res_index(i)) = daydamalert  (daylastyear*nt,res_index(i))
+       daydamdead   (1,res_index(i)) = daydamdead   (daylastyear*nt,res_index(i))
+       daymaxdamarea(1,res_index(i)) = daymaxdamarea(daylastyear*nt,res_index(i))
+	   dayminlevel  (1,res_index(i)) = dayminlevel  (daylastyear*nt,res_index(i))
 
      ELSE IF (t == damyear(i) .OR. (t > damyear(i) .AND. t == tstart)) THEN  !Andreas
        if (volact(1,i)== -1) then !only initialize those that have not been initialized by loading from stat-file
