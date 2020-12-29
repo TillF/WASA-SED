@@ -2038,9 +2038,10 @@ end if
 
 
 ! Print results on bed elevation change of the longitudinal profile of the sub-basin's reservoir
-  IF (reservoir_print == 0) THEN
+  IF (reservoir_print == 0 .AND. res_index(upstream) /=0 .AND. storcap(upstream) == 0.) THEN
    WRITE(subarea,*)id_subbas_extern(upstream)
    j=nbrsec(res_index(upstream))
+
    IF (f_res_sedbal) THEN
    OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_sedbal.out',STATUS='old',POSITION='append')
     WRITE(11,'(4I6,4F15.3)')id_subbas_extern(upstream),t,d,hour,sed_inflow(step,res_index(upstream)),sed_outflow(step,res_index(upstream)), &
@@ -2074,16 +2075,12 @@ IF (STATUS == 3) THEN
 ! Output files of Reservoir Modules
   IF (reservoir_print == 1) THEN
     DO i=1,subasin
+	 if (res_index(i) == 0) cycle
      IF (storcap(i) /= 0. .and. t >= damyear(i)) THEN
       WRITE(subarea,*)id_subbas_extern(i)
 
-      write_output = res_index(i) /= 0
-        if (write_output) then
-            IF (nbrsec(res_index(i)) == 0) write_output = .FALSE.
-        end if
-
-      IF (write_output) THEN
-        IF (write_output .AND. f_res_hydraul) THEN
+      IF (nbrsec(res_index(i)) /= 0) THEN
+        IF (f_res_hydraul) THEN
 		OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_hydraul.out',STATUS='old',  &
 			POSITION='append')
 	    DO d=1,dayyear
@@ -2160,7 +2157,8 @@ IF (STATUS == 3) THEN
 		ENDDO
         CLOSE(11)
 		ENDIF
-	  ELSE
+	  END IF
+      IF (storcap(i) /= 0. ) THEN
         IF (f_res_sedbal) THEN
         OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_sedbal.out',STATUS='old',POSITION='append')
 	    DO d=1,dayyear
