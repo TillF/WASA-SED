@@ -2076,8 +2076,14 @@ IF (STATUS == 3) THEN
     DO i=1,subasin
      IF (storcap(i) /= 0. .and. t >= damyear(i)) THEN
       WRITE(subarea,*)id_subbas_extern(i)
-      IF (nbrsec(res_index(i)) /= 0) THEN
-        IF (f_res_hydraul) THEN
+
+      write_output = res_index(i) /= 0
+        if (write_output) then
+            IF (nbrsec(res_index(i)) == 0) write_output = .FALSE.
+        end if
+
+      IF (write_output) THEN
+        IF (write_output .AND. f_res_hydraul) THEN
 		OPEN(11,FILE=pfadn(1:pfadi)//'res_'//trim(adjustl(subarea))//'_hydraul.out',STATUS='old',  &
 			POSITION='append')
 	    DO d=1,dayyear

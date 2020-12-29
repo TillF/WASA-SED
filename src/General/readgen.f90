@@ -29,16 +29,18 @@ SUBROUTINE readgen(path2do_dat)
         path2do_dat='./Input/do.dat'    !Till: use default, if no command line argument was specified
         custompath=''
     else
+        line = len_trim(path2do_dat)
+        do i=1, line
+            if (path2do_dat(i:i)==achar(92)) path2do_dat(i:i)='/' !replace backslashes with slashes (easier handling henceforward)
+        end do
         write(*,'(A)')'reading runtime parameters from '//path2do_dat
-        i=len_trim(path2do_dat)
 
-        do while (i>0)
-            if ((path2do_dat(i:i)=='/') .OR. (path2do_dat(i:i)==achar(92))) then	!find last slash or backslash in path
+        do i = line, 1, -1
+            if (path2do_dat(i:i)=='/') then	!find last slash in path
                 exit
             end if
-            i=i-1
         end do
-        custompath=path2do_dat(1:i)	!extract path to do.dat (without filename)
+        custompath=path2do_dat(1:i)	!extract path to do.dat (without the actual filename)
     end if
 
     ! read run-time parameters

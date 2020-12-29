@@ -170,19 +170,20 @@ IF (STATUS == 0) THEN
 
   do i=1,subasin
 	if (do_pre_outflow(i)) then !Till: assign dummy climate data for those subbasins that are prespecified
-        corr_column_temp(i)=1
-        corr_column_rhum(i)=1
-        corr_column_rad(i)=1
+        corr_column_temp  (i)=1
+        corr_column_rhum  (i)=1
+        corr_column_rad   (i)=1
         corr_column_precip(i)=1
 	end if
 
-	if (1.0*corr_column_temp(i)*corr_column_rhum(i)*corr_column_rad(i)*corr_column_precip(i)==0) then	!check completeness
-		write(*,*)'climate data is incomplete for subbasin',id_subbas_extern(i)
+	if (1.0*corr_column_temp(i)*corr_column_rhum(i)*corr_column_rad(i)*corr_column_precip(i)==0) then	!check completeness (1.0. tp prevent numerical overflow)
+		write(*,'(A, i0)')'ERROR: climate data is incomplete for subbasin ', id_subbas_extern(i)
+		stop
 	end if
   end do
 
 
-  allocate(inputbuffer(366*nt,maxval(no_columns)))		!Till: prepare input buffer to fit the data
+  allocate(inputbuffer(366*nt, maxval(no_columns)))		!Till: prepare input buffer to fit the data
 
  !set internal filepointers to correct line (simulation start)
   call date_seek(81,tstart,mstart, dstart, 'temperature.dat')

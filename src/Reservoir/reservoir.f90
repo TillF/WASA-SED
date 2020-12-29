@@ -49,7 +49,7 @@ integer :: columnheader(1000) ! storing column heads of input files
 !REAL :: inflow_class(6),outflow_class(6),retention_class(6),volume_class(6)
 !REAL :: sedinflow_class(6),sedoutflow_class(6),sedretention_class(6),sedimentation_class(6)
 ! -----------------------------------------------------------------------
-IF (STATUS == 0) THEN
+IF (STATUS == 0) THEN !begin of simulation
 
 reservoir_check=0 !(0=simulation will all components; 1=simulation without hillslope and river modules)
 reservoir_balance=1 !(0=inflow and outflow discharges must be provided as input file; 1=only inflow discharges must be provided as input file)
@@ -875,7 +875,7 @@ END IF
 
 
 ! -----------------------------------------------------------------------
-IF (STATUS == 1) THEN
+IF (STATUS == 1) THEN !beginning of a new simulation year
 ! initialize ...
 
 !Ge initialization of parameters
@@ -1146,7 +1146,7 @@ IF (STATUS == 1) THEN
 END IF
 
 ! -----------------------------------------------------------------------
-IF (STATUS == 2) THEN
+IF (STATUS == 2) THEN !regular call during timestep
 
 ! simulation timestep
   if (river_transport.ne.1) then
@@ -1844,7 +1844,7 @@ ELSE  ! reservoir does not (yet) exist
         
   ENDIF
 
-! END of STATUS = 2
+! END of STATUS = 2 !regular call during timestep
 END IF
 
 ! -----------------------------------------------------------------------
