@@ -51,10 +51,10 @@ integer :: columnheader(1000) ! storing column heads of input files
 ! -----------------------------------------------------------------------
 IF (STATUS == 0) THEN !begin of simulation
 
-reservoir_check=0 !(0=simulation will all components; 1=simulation without hillslope and river modules)
-reservoir_balance=1 !(0=inflow and outflow discharges must be provided as input file; 1=only inflow discharges must be provided as input file)
-reservoir_print=1 !(0=results printed at the end of the timestep; 1=results printed at the end of the simulated year)
-f_intake_obs = .false.
+reservoir_check   = 0 !(0=simulation with all components; 1=simulation without hillslope and river modules)
+reservoir_balance = 1 !(0=inflow and outflow discharges must be provided as input file; 1=only inflow discharges must be provided as input file)
+reservoir_print   = 1 !(0=results printed at the end of the timestep; 1=results printed at the end of the simulated year)
+f_intake_obs      = .false.
 
 if (reservoir_check==0) reservoir_balance=1
 
@@ -1148,6 +1148,7 @@ END IF
 ! -----------------------------------------------------------------------
 IF (STATUS == 2) THEN !regular call during timestep
 
+
 ! simulation timestep
   if (river_transport.ne.1) then
     hour=res_h
@@ -1555,8 +1556,7 @@ IF (STATUS == 2) THEN !regular call during timestep
 ! CASE 1: stage-area-volume curve is not provided
        if (nbrbat(res_index(upstream)) == 0) then
 	    if (decstorcap(step,res_index(upstream)) >= daystorcap(step,res_index(upstream)) .or. daystorcap(step,res_index(upstream)) == 0.) then
-	     write(*,*) 'the resevoir located at the outlet point of sub-basin:',id_subbas_extern(upstream)
-	     write(*,*) 'lost its total storage capacity due to sediment deposition'
+	     write(*,'(A, i0, A)') 'Reservoir at outlet of sub-basin ', id_subbas_extern(upstream), ' completely silted up!'
 		 storcap(upstream)=0.
 	     daystorcap(step,res_index(upstream))=0.
 		 do j=1,nbrbat(res_index(upstream))

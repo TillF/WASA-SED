@@ -344,24 +344,24 @@ IF (STATUS == 2) THEN !regular call during timestep
     END DO
   END IF
 
-!  water_subbasin(d,i): autochtonous runoff of each sub-basin (after small reservoirs)
-  !distribute autochtonous runoff according to "reduced" response function, because it doesn't travel all the way through the subbasin but only half the distance on average
-  ! Effectively, the unit hydrograph (hrout) is shrunk by half to account for less translation and retention of the autochtonous runoff compared to the runoff entering from upstream ("ishft" equals division by two, but is faster)
+! water_subbasin(d,i): autochtonous runoff of each sub-basin (after small reservoirs)
+! distribute autochtonous runoff (and sediments) according to "reduced" response function, because it doesn't travel all the way through the subbasin but only half the distance on average
+! Effectively, the original unit hydrograph (hrout) is shrunk by half in time (hrout_intern) to account for less translation and retention of the autochtonous runoff compared to the runoff entering from upstream
 
  DO i=1,subasin
-     if (do_pre_outflow(i))  then        !if water outflow from current subbasins is NOT given
+     if (do_pre_outflow(i))  then        !if water outflow from current subbasins is given
         qout(d,i)=qout(d,i) + water_subbasin(d,i)
      else
          DO ih=1,size(hrout_intern,dim=1)
              j =  d+ih-1 !index for qout to write to.
              qout(j,i)=qout(j,i) + water_subbasin(d,i)*hrout_intern(ih,i)    !m3/s
              if (dosediment) then
-                 qsediment2_t(j,1,i)=qsediment2_t(j,1,i) + sum(sediment_subbasin_t(d,1,i,:))*hrout_intern(ih,i)    !m3/s
+                !sediment_in(i,:) = 7 !rr test values !particle-size specific treatment
+                qsediment2_t(j,1,i)=qsediment2_t(j,1,i) + sum(sediment_subbasin_t(d,1,i,:))*hrout_intern(ih,i)    !bulk treatment of particle sizes
              end if
          END Do
      end if
   END DO
-
 
 !cccccccccccccccccccccccccccc
 ! MAIN ROUTING LOOP
@@ -392,11 +392,13 @@ IF (STATUS == 2) THEN !regular call during timestep
           
           if (dosediment) then
               if (qsediment2_t(d+ih-1,1,upstream) /= -1) then !only do computation if this timestep is not affected by prior nodata
+                !sediment_in(upstream,:) = 2 !rr test values !particle-size specific treatment
+
                 qsediment2_t(d+ih-1,1,upstream)=qin_sed(upstream)*hrout(ih,upstream)  &
                   + qsediment2_t(d+ih-1,1,upstream)
                end if 
            end if
-              
+
         if (qout(d+ih-1,upstream) == -1) cycle !no data, don't do further calculations
 ! Transmission losses by evaporation in river
 ! river width for given discharge (estimated according to global

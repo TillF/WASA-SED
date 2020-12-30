@@ -231,6 +231,9 @@ nbrsec=0
     !write(*,*)param_a(i,2),param_b(i,2)
       END DO
       CLOSE(11)
+   ELSE
+      write(*,'(A)')'Error: '//pfadp(1:pfadj)// 'Reservoir/sed.dat could not be opened.'
+      stop
    END IF
 
 !  OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/sed.dat',STATUS='unknown')
@@ -789,14 +792,13 @@ IF (STATUS == 2) THEN
 ! sediment inflow into the reservoir is the generate sediment flow
 ! from the rainfall-runoff processes, calculated using the WASA model
 
-  IF (reservoir_check == 1) THEN
+  IF (reservoir_check == 1) THEN !Till: use pre-specified values as input into reservoir sedimentation module (instead of value computed from hillslope and river)
     DO g=1,n_sed_class
       sediment_in(upstream,g)=frsedinflow(step,res_index(upstream),g)
 !write(*,*)step,upstream,frsedinflow(step,upstream,g),sediment_in(upstream,g)
 	ENDDO
   ENDIF
 !write(*,'(2I4,<n_sed_class>F10.4)')step,upstream,(sediment_in(upstream,g),g=1,n_sed_class)
-!if (id==70)stop
 
 
 ! Determination of total sediment inflow (ton/timestep) and inflow sediment concentration (g/l)
@@ -2191,8 +2193,6 @@ IF (STATUS == 3) THEN
     ENDDO
   ENDIF
 END IF
-
-
 
 RETURN
 END SUBROUTINE semres
