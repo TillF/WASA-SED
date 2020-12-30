@@ -9,6 +9,7 @@ use routing_h
 use hymo_h
 use time_h
 use reservoir_h
+use utils_h
 
 IMPLICIT NONE
 
@@ -24,7 +25,7 @@ INTEGER :: i,j,j1,id,ih,dummy1,dummy2,nbrsec1,k,b,p,cont,istate,dummy1a,ka !irou
 INTEGER :: g, npt,nbrbat1
 
 CHARACTER(20) :: subarea,section
-INTEGER :: c,dummy14
+INTEGER :: c,dummy14, line
 
 ! Computation of fractional erosion for each cross section (fractional suspended load transport)
 !Ge the weighting factor to include incoming sediment into the carrying capacity has to be read
@@ -214,25 +215,37 @@ nbrsec=0
 ! Read sedimentological parameters
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/sed.dat', IOSTAT=istate, STATUS='old')
   IF (istate==0) THEN
-      READ(11,*);READ(11,*)
-      DO i=1,subasin
-        IF (storcap(i) > 0.) THEN
-         IF (nbrsec(res_index(i)) == 0) read(11,*) dummy1,dry_dens(res_index(i))
-         IF (nbrsec(res_index(i)) /= 0) read(11,*) dummy1,dry_dens(res_index(i)),factor_actlay(res_index(i))
-    !     IF (nbrsec(i) /= 0) read(11,*) dummy1,dry_dens(i),sed_flag(i)
-        ENDIF
-        IF (storcap(i) == 0.) dummy1=id_subbas_extern(i)
-        IF (dummy1 /= id_subbas_extern(i)) THEN
-          WRITE(*,*) 'ERROR: Sub-basin-IDs in file sed.dat must have the same ordering scheme as in hymo.dat'
-          STOP
-        END IF
-    !write(*,*) dummy1,dry_dens(i),factor_actlay(i)
-    !write(*,*)param_a(i,1),param_b(i,1)
-    !write(*,*)param_a(i,2),param_b(i,2)
-      END DO
+      READ(11,*);READ(11,*, IOSTAT=istate)
+      dry_dens = 1.5 !default values
+      factor_actlay = 1.
+      line = 2 !for counting lines
+      do while (istate==0)
+          READ(11,'(a)',IOSTAT=istate)cdummy
+          if (istate/=0) exit
+          line = line + 1
+          READ(cdummy,*,IOSTAT=istate) dummy1
+          if (istate/=0) then
+              WRITE(*,'(A, i0)') 'ERROR: format error in sed.dat, line ', line
+              STOP
+          end if
+          i = id_ext2int(dummy1, id_subbas_extern)    !get internal reservoir id
+          IF (i==-1) THEN    !specified subbas
+              write(*,'(a,i0,a,i0,a)')'WARNING: could not find subbasin ', dummy1,' listed in sed.dat, line ', line,', ignored.'
+              cycle
+          END IF
+          IF (storcap(i) > 0.) THEN
+              IF (nbrsec(res_index(i)) == 0) read(cdummy,*,IOSTAT=istate) dummy1,dry_dens(res_index(i))
+              IF (nbrsec(res_index(i)) /= 0) read(cdummy,*,IOSTAT=istate) dummy1,dry_dens(res_index(i)),factor_actlay(res_index(i))
+              !     IF (nbrsec(i) /= 0) read(cdummy,*) dummy1,dry_dens(i),sed_flag(i)
+              if (istate/=0) then
+                  WRITE(*,'(A, i0)') 'ERROR: format error in sed.dat, line ', line
+                  STOP
+              end if
+          ENDIF
+      end do
       CLOSE(11)
    ELSE
-      write(*,'(A)')'Error: '//pfadp(1:pfadj)// 'Reservoir/sed.dat could not be opened.'
+      write(*,'(A)')'ERROR: '//pfadp(1:pfadj)// 'Reservoir/sed.dat could not be opened.'
       stop
    END IF
 

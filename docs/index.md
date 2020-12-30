@@ -4,7 +4,7 @@
 main contributors:
 Andreas Güntner (2000-2002), Eva Nora Müller (2006-2009), George Mamede(2006-2009), Till Francke (2006-...), Pedro Medeiros (2007-2008), Tobias Pilz (2016), Erwin Rottler (2017)
 
-**6.10.2020<br>
+**30.12.2020<br>
 WASA-SED rev_268**
 
 Developed within the SESAM-Project:<br>
@@ -1370,7 +1370,7 @@ Subbasin-ID, dry_dens[ton/m**3], factor_actlay[-]
 *dry\_dens*: Dry bulk density of the sediment deposited in the sub-basin's reservoir \[ton/m<sup>3</sup>] <br>
 *factor\_actlay*: Calibration parameter for the determination of the active layer thickness \[-]
 
-Example: At the outlet point of the sub-basin with the ID 60 there is a reservoir with a dry bulk density of 1.5 ton/m<sup>3</sup>. The calibration parameter for the determination of the active layer thickness at that reservoir is equal to 1. It means that the default value of active layer thickness (set to 0.03 mm, derived from the simulation for the Barasona reservoir in Spain) is multiplied by a factor of 1. For the calculation of sediment balance using the simplified modelling approach, the third column with values of factor_actlay must not be entered in the file. The order of the sub-basins in the first column has to follow the same order of the sub-basin IDs as was used in ```hymo.dat``` (due to computational reasons); otherwise, an error message occurs. Sub-basins without outlet reservoirs must not be entered in the file.
+Example: At the outlet point of the sub-basin with the ID 60 there is a reservoir with a dry bulk density of 1.5 ton/m<sup>3</sup>. The calibration parameter for the determination of the active layer thickness at that reservoir is equal to 1. It means that the default value of active layer thickness (set to 0.03 mm, derived from the simulation for the Barasona reservoir in Spain) is multiplied by a factor of 1. For the calculation of sediment balance using the simplified modelling approach, the third column with values of factor_actlay must not be entered in the file. Sub-basins without outlet reservoirs must not be entered in the file. Unknown subbasins are ignored. For unspecified reservoirs, default values of 1.5 and 1, respectively, will be used.
 
 **9)** ```cross_sec_”ID”.dat``` <br> 
 (optional)
