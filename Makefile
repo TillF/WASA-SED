@@ -5,7 +5,7 @@
 
 #enable compilation in debug mode?
 ifndef DEBUG
-DEBUG=0
+DEBUG=1
 endif
 
 ifndef OUTDIR

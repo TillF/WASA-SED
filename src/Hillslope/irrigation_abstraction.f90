@@ -196,7 +196,7 @@ use utils_h
         END IF
 
         IF (abstraction_requested > 0. ) THEN
-            abstraction_available = qout(1,sb_counter) * dt * 3600 !river water in first timestep
+            abstraction_available = qout(d,sb_counter) * dt * 3600 !river water in first timestep
 
             IF (abstraction_available == 0.0) THEN !On first day the storage might be empty. Skip this day
                 WRITE(*,'(a,I0,a)') 'WARNING: No more water in river flow in Subbasin ',id_subbas_extern(sb_counter), '. No irrigation possible from this source in current timestep.'
@@ -209,8 +209,7 @@ use utils_h
             END IF
         END IF
 
-        !  Abstraction of river water from first timestep of river routing ###FIX HERE
-        qout(1,sb_counter) = qout(1,sb_counter) - abstraction_requested / (dt * 3600)
+        qout(d,sb_counter) = qout(d,sb_counter) - abstraction_requested / (dt * 3600)
 
         irri_abstraction(sb_counter) = irri_abstraction(sb_counter) + abstraction_requested  !Write extracted water from current subbasin !
 

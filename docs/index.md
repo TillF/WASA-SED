@@ -758,7 +758,7 @@ TC-ID[-],	SVC-ID[-],	fraction[-]
 *SVC-ID*:	ID of soil vegetation component (as specified in ```svc.dat```)<br>
 *Fraction*:	fraction of TC that is covered by the current SVC
 
-Note: The sum of “fraction” over a specific TC can be smaller than one as the sum over a TC plus “fraction_rocky” needs to sum up to one (see also the description for file ```soil_vegetation.dat```). If this requirement is not fulfilled, WASA-SED will issue a warning and normalize the fraction to unity automatically.
+Note: The sum of “fraction” over a specific TC can be smaller than one as the sum over a TC plus “fraction_rocky” needs to sum up to one (see also the description for file ```soil_vegetation.dat```). If this requirement is not fulfiled, WASA-SED will issue a warning and normalize the fraction to unity automatically.
 
 Example: The TC with the ID 11 consists only of the SVC with the ID 12. The TC with the ID 12 is covered by the SCV 12 at 20 % of its area. The remaining 80 % of TC 12 consist of SVC 14.
 
@@ -1646,11 +1646,11 @@ sub_source	source	sub_receiver	rule	rate(4 values) [m3/timestep]	loss_factor
 * 9999
 <br>
 
-If the option "groundwater" is chosen, irrigation water will be abstracted from the deep groundwater. If there's not enough water available to fulfill the demand, all the available water will be taken.
+If the option "groundwater" is chosen, irrigation water will be abstracted from the deep groundwater. If there's not enough water available to fulfil the demand, all the available water will be taken.
 
-If the option "river" is chosen, irrigation water will be abstracted from the river flow. If there's not enough water available to fulfill the demand, all the available water will be taken.
+If the option "river" is chosen, irrigation water will be abstracted from the river flow. If there's not enough water available to fulfil the demand, all the available water will be taken.
 
-If the option "lake" is chosen, irrigation water will be abstracted from the small reservoirs. If there's not enough water available to fulfill the demand, all the available water will be taken. To use the option "lake" the calculations for small reservoirs must be switched on in the file `do.dat` by setting `doacudes` to `.t.` (`TRUE`). Using small reservoirs requires the input files described in \[[3.4 Input files for the reservoir module](#3-4-input-files-for-the-reservoir-module)]. The donor subbasin must contain small reservoirs (lakes)
+If the option "lake" is chosen, irrigation water will be abstracted from the small reservoirs. If there's not enough water available to fulfil the demand, all the available water will be taken. To use the option "lake" the calculations for small reservoirs must be switched on in the file `do.dat` by setting `doacudes` to `.t.` (`TRUE`). Using small reservoirs requires the input files described in \[[3.4 Input files for the reservoir module](#3-4-input-files-for-the-reservoir-module)]. The donor subbasin must contain small reservoirs (lakes)
 
 If the option "reservoir" is chosen, irrigation water is taken from the reservoirs outflow reserved for domestic, agricultural and industrial use. To use the option "reservoir" the calculations for reservoirs must be switched on in the file `do.dat` by setting `doreservoir` to `.t.` (`TRUE`). Using reservoirs requires the input files described in \[[3.4 Input files for the reservoir module](#3-4-input-files-for-the-reservoir-module)]. The donor subbasin must contain a reservoir.
 
@@ -1669,7 +1669,7 @@ fixed: A fixed amount of water, defined by the four columns "rate" will be abstr
 seasonal: The option "seasonal" requires a specification of the seasonality of the receiver basin in the file `irri_seasons.dat`. For more information on seasonality check the example 10) `rainy_seasons.dat` in \[[3.2 Input files for the hillslope module](#3-2-input-files-for-the-hillslope-module)].
 Combined with four values for "rate" this option calculates the demand of the receiver basin for every day in the year.
 
-cwd: Crop water demand, this options calculates the irrigation demand of the receiver basin based on the FAO crop evapotranspiration method [(FAO, 1998)](#fao-1998). Crop water demand according to this method is:
+cwd: Crop water demand, this option calculates the irrigation demand of the receiver basin based on the FAO crop evapotranspiration method [(FAO, 1998)](#fao-1998). Crop water demand according to this method is:
 
 $$ Demand =max(0,\frac{ETP*k_{crop}-P}{k_{loss}}) * Area_{irrigated}$$
 
