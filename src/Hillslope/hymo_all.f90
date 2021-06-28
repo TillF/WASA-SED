@@ -251,12 +251,12 @@ SUBROUTINE hymo_all(STATUS)
             CLOSE(11,status='delete')
         END IF
 
-        !     Output sub-saily sediment production (t)
+        !     Output sub-daily sediment production (t)
         OPEN(11,FILE=pfadn(1:pfadi)//'sediment_production.out', STATUS='replace')
         IF (f_sediment_production .AND. dosediment .AND. dt<24) THEN    !only do output if file is desired, sediment modelling is enabled and model runs in sub-daily resolution
             WRITE(11,'(a,i2,a1)') 'total sediment production [t] for all sub-basins (MAP-IDs) and particle classes{',n_sed_class,'}'
             IF (n_sed_class==1) then
-                write(fmtstr,'(a,i0,a)')'(A,',subasin,'a,i0)'        !generate format string
+                write(fmtstr,'(a,i0,a)')'(A,',subasin,'(A,I0))'        !generate format string
                 WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep',(char(9),id_subbas_extern(i),i=1,subasin)
             ELSE
                 write(fmtstr,'(a,i0,a,i0,a)')   '(A,', subasin,'(',n_sed_class,'(a,i0,a,i0)))'        !generate format string

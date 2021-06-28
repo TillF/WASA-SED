@@ -825,6 +825,7 @@
 
         !** read particle size information for uppermost soil horizons
         k=0
+        istate=0
         IF (n_sed_class > 1) THEN    !if several particle classes are to be treated, try to open file
             OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/soil_particles.dat', IOSTAT=istate,STATUS='old')
         END IF
@@ -867,9 +868,6 @@
                 END DO
             END DO
         END IF
-
-
-
 
         !** read SVC relations towards TCs
         OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/svc_in_tc.dat', IOSTAT=istate,STATUS='old')
