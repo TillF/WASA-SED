@@ -1,6 +1,6 @@
 
-C:\Users\Admin\Documents\Workspace\WASA-SED\Zone3A\./Input/                                                                                                     
-C:\Users\Admin\Documents\Workspace\WASA-SED\Zone3A\./Output/                                                                                                    
+e:\till\uni\wasa\wasa_git\WASA-SED\Zone3A\./Input/                                                                                                              
+e:\till\uni\wasa\wasa_git\WASA-SED\Zone3A\./Output/                                                                                                             
  start year of simulation:         2000
  end year of simulation:         2002
  start of simulation (month, day):            1           1
@@ -31,5 +31,5 @@ C:\Users\Admin\Documents\Workspace\WASA-SED\Zone3A\./Output/
  [not used]
            1
            1
- WASA model, rev_268-53-g15f6b92  (local modifications); repository date 2020-11-26 11:06:12 +0100, built 26.11.2020 11:24
+ WASA model, rev_268-58-g5b1ba33  (local modifications); repository date 2021-01-13 23:00:04 +0100, built 18.01.2021 13:06
  using prespecified outflow: T

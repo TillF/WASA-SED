@@ -1965,6 +1965,7 @@ end if ! do_snow
             READ(11,'(a)',IOSTAT=istate) cdummy
             dummy1=GetNumberOfSubstrings(cdummy) !Till: count number of fields/columns
 
+            if (trim(cdummy) == '') cycle
             if (dummy1 > 9) then    !too many fields in line
                 write(*,'(a,i0,a,i0,a,i0,a)')'ERROR (irri.dat): Line ',h,' contains more (',dummy1,') than the expected 9 fields.'
                 stop
