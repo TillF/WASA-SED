@@ -193,7 +193,7 @@ SUBROUTINE hymo_all(STATUS)
         !   initialize saturated fraction of TC
         frac_sat(:,:)=0.0
 
-        if (doacud)  CALL lake(0,dummy)
+        !if (doacud)  CALL lake(0,dummy)
 
         ! create and open output files
         ! Output daily water contribution to river (m**3/s)

@@ -1444,44 +1444,45 @@ end subroutine init_interflow_conds
         if (i/=0) then
             write(*,'(a,a,a)')'WARNING: Lake storage file ''',trim(lake_conds_file),''' not found, using defaults.'
             CLOSE(11)
-            return
-        end if
-        write(*,'(a,a,a)')'Initialize lake storage from file ''',trim(lake_conds_file),'''.'
-        lakewater_hrr(1,:,:) = -1 !for detecting uninitialized values later
+        else !initialisation via files
+            write(*,'(a,a,a)')'Initialize lake storage from file ''',trim(lake_conds_file),'''.'
+            lakewater_hrr(1,:,:) = -1 !for detecting uninitialized values later
 
-        READ(11,*, IOSTAT=iostatus); READ(11,*, IOSTAT=iostatus)!read 2 header lines
+            READ(11,*, IOSTAT=iostatus); READ(11,*, IOSTAT=iostatus)!read 2 header lines
 
-        DO WHILE (.TRUE.)
-	        READ(11, *, IOSTAT=iostatus) i, k, dummy1
+            DO WHILE (.TRUE.)
+                READ(11, *, IOSTAT=iostatus) i, k, dummy1
 
-            IF (iostatus == -1) exit !end of file
-		    IF (iostatus /= 0) THEN
-		        WRITE(*,'(a,a,a)') 'WARNING: format error in '//trim(lake_conds_file)//', line skipped.'
-            ENDIF
+                IF (iostatus == -1) exit !end of file
+                IF (iostatus /= 0) THEN
+                    WRITE(*,'(a,a,a)') 'WARNING: format error in '//trim(lake_conds_file)//', line skipped.'
+                ENDIF
 
-            subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
-			if (subbas_id < 1 .OR. subbas_id > subasin) then
-				WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in '//trim(lake_conds_file)//', ignored.'
-                cycle
-            end if
+                subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
+                if (subbas_id < 1 .OR. subbas_id > subasin) then
+                    WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in '//trim(lake_conds_file)//', ignored.'
+                    cycle
+                end if
 
-            if (k < 1 .OR. k > 5) then
-				WRITE(*,'(a,i0,a)') 'WARNING: unknown reservoir class ',k,' in '//trim(lake_conds_file)//', ignored.'
-                cycle
-			end if
-            lakewater_hrr(1,subbas_id,k) = dummy1
-        ENDDO
-        close(11)
-
-        DO sb_counter=1,subasin
-            DO acud_class=1,5
-                IF (lakewater_hrr(1,sb_counter,acud_class) < 0.) then
-                    WRITE(*,'(a,i0,a,i0,a)') 'WARNING: &
-                    . No specification for subbasin ', id_subbas_extern(sb_counter),&
-                    ', reservoir size class ',acud_class,' found in '''//trim(lake_conds_file)//'''. Using fraction specified in lake.dat'
-                END IF
+                if (k < 1 .OR. k > 5) then
+                    WRITE(*,'(a,i0,a)') 'WARNING: unknown reservoir class ',k,' in '//trim(lake_conds_file)//', ignored.'
+                    cycle
+                end if
+                lakewater_hrr(1,subbas_id,k) = dummy1
             ENDDO
-        END DO
+            close(11)
+
+            DO sb_counter=1,subasin
+                DO acud_class=1,5
+                    IF (lakewater_hrr(1,sb_counter,acud_class) < 0.) then
+                        WRITE(*,'(a,i0,a,i0,a)') 'WARNING: &
+                        . No specification for subbasin ', id_subbas_extern(sb_counter),&
+                        ', reservoir size class ',acud_class,' found in '''//trim(lake_conds_file)//'''. Using fraction specified in lake.dat'
+                    END IF
+                ENDDO
+            END DO
+        end if !initialisation via files
+        CALL lake(0, 0) !this is the old default initialisation. It also initialises some dependend variables
     end subroutine init_lake_conds
 
      subroutine init_reservoir_conds(reservoir_conds_file)
