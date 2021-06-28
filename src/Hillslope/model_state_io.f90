@@ -1230,7 +1230,7 @@ end subroutine init_interflow_conds
         !verify that this river file belongs to the selected routing mode
         READ(11,'(A)') linestr;
         if ( (river_transport == 1 .AND. linestr(1:3) /= "UHG") .OR. &
-                (river_transport == 2 .AND. linestr(1:3) /= "Mus") )            then
+                ( ((river_transport == 2) .or. (river_transport == 3)) .AND. linestr(1:3) /= "Mus") )            then
             write(*,'(a,a,a)')'WARNING: River storage file ''',trim(river_conds_file),''' does not match selected routing mode. File ignored, using defaults.'
             CLOSE(11)
 		    return
@@ -1255,7 +1255,7 @@ end subroutine init_interflow_conds
                 backspace(11) !rewind line just read
              end if   
         end if
-        if (river_transport == 2) r_storage(1:subasin)=-1. !indicator for "not read"
+        if ( ((river_transport == 2) .or. (river_transport == 3))) r_storage(1:subasin)=-1. !indicator for "not read"
 
         line = 1 !line counter
         DO WHILE (.TRUE.)
@@ -1285,13 +1285,13 @@ end subroutine init_interflow_conds
                 READ(linestr,*,IOSTAT=iostatus) k, (qout(j,subbas_id), j=1,tt)
                 if (iostatus /= 0) WRITE(*,'(a,i0,a,i0,a)') 'WARNING: length of saved UHG not matching for subbasin ',i,' in line ', line, ' of river_storage.stat; truncated/padded.'
             end if    
-            if (river_transport == 2) r_storage(subbas_id)=dummy1
+            if (((river_transport == 2) .or. (river_transport == 3))) r_storage(subbas_id)=dummy1
         END DO
         close(11)
 
         !check for completeness
         if (river_transport == 1) array_ptr => qout(1,1:subasin)
-        if (river_transport == 2) array_ptr => r_storage
+        if (((river_transport == 2) .or. (river_transport == 3))) array_ptr => r_storage
 
         if (count(array_ptr==-1.) > 0) then
             WRITE(*,'(A)') 'WARNING: could not read initial river storage from river_storage.stat for the following subbasins, assumed 0:'
