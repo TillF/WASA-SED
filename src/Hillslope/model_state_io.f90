@@ -60,8 +60,8 @@ contains
     subroutine init_reservoir_lake_state        !load initial conditions for small and large reservoirs
         if (.not. doloadstate) return   !do not load files, if disabled
         write(*,"(A)") "Initialize reservoir entities..."
-        call init_reservoir_conds      (trim(pfadn)//'reservoir_storage.stat')    !load initial status of reservoir storage        
-        call init_lake_conds      (trim(pfadn)//'lake_storage.stat')    !Jose Miguel: load initial status of lake storage
+        call init_reservoir_conds ('reservoir_storage.stat')    !load initial status of reservoir storage
+        call init_lake_conds      ('lake_storage.stat')    !Jose Miguel: load initial status of lake storage
     end subroutine init_reservoir_lake_state
 
     subroutine save_model_state(backup_files, start)        !save all model state variables, optionally backup older files
@@ -537,7 +537,7 @@ contains
 
         horithact=-9999.                    !mark all horizons as "not (yet) initialised"
 
-        file_handle = get_file_handle((pfadp), (pfadn), soil_conds_file, "soil moisture") !pick source directory
+        file_handle = get_file_handle(pfadp, pfadn, soil_conds_file, "soil moisture") !pick source directory
 
         if (file_handle /= 0) then        !load values from file
 
@@ -699,7 +699,7 @@ contains
         tt = size(latred,dim=2) !number of interchange horizons in latred
         latred=-9999.                    !mark all interchange horizons as "not (yet) initialised"
 
-        file_handle = get_file_handle((pfadp), (pfadn), interflow_conds_file, "interflow") !pick source directory
+        file_handle = get_file_handle(pfadp, pfadn, interflow_conds_file, "interflow") !pick source directory
 
         if (file_handle /= 0) then        !load values from file
             READ(file_handle,*); READ (file_handle,*)    !skip header lines
@@ -830,7 +830,7 @@ end subroutine init_interflow_conds
 
         if (.not. dosnow) return
         snowWaterEquiv=-9999.                    !mark all snow storages as "not (yet) initialised"
-        file_handle = get_file_handle((pfadp), (pfadn), snow_conds_file, "snow") !pick source directory
+        file_handle = get_file_handle(pfadp, pfadn, snow_conds_file, "snow") !pick source directory
 
         if (file_handle /= 0) then        !load values from file
             write(*,'(a,a,a)')' ... snow from file ''',trim(snow_conds_file),''''
@@ -956,7 +956,7 @@ end subroutine init_interflow_conds
 
         intercept(:,:)=-9999.                    !mark all SVC-int-storages as "not (yet) initialised"
 
-        file_handle = get_file_handle((pfadp), (pfadn), intercept_conds_file, "interception") !pick source directory
+        file_handle = get_file_handle(pfadp, pfadn, intercept_conds_file, "interception") !pick source directory
 
         if (file_handle /= 0) then        !load values from file
             READ(file_handle,*); READ (file_handle,*)    !skip header lines
@@ -1111,7 +1111,7 @@ end subroutine init_interflow_conds
 
         deepgw=-9999.                    !mark all gw storages as "not (yet) read"
 
-        file_handle = get_file_handle((pfadp), (pfadn), gw_conds_file, "GW storage") !pick source directory
+        file_handle = get_file_handle(pfadp, pfadn, gw_conds_file, "GW storage") !pick source directory
 
         if (file_handle /= 0) then        !load values from file
             READ(file_handle,*); READ (file_handle,*)    !skip header lines
@@ -1215,7 +1215,7 @@ end subroutine init_interflow_conds
         real, pointer :: array_ptr(:)
         character(len=1000) :: linestr
 
-        file_handle = get_file_handle((pfadp), (pfadn), river_conds_file, "river storage") !pick source directory
+        file_handle = get_file_handle(pfadp, pfadn, river_conds_file, "river storage") !pick source directory
 
         if (file_handle == 0) then        !load values from file
 		    return
@@ -1317,7 +1317,7 @@ end subroutine init_interflow_conds
         
         riverbed_storage(:,:)=-1. !indicator for "not read"
 
-        file_handle = get_file_handle((pfadp), (pfadn), sediment_conds_file, "river sediment storage") !pick source directory
+        file_handle = get_file_handle(pfadp, pfadn, sediment_conds_file, "river sediment storage") !pick source directory
 
         if (file_handle == 0) then        !load values from file
             riverbed_storage(:,:)=0. !set to default
@@ -1372,7 +1372,7 @@ end subroutine init_interflow_conds
 
         sed_storage(:,:)=-1. !indicator for "not read"
 
-        file_handle = get_file_handle((pfadp), (pfadn), susp_sediment_conds_file, "river susp. sediment storage") !pick source directory
+        file_handle = get_file_handle(pfadp, pfadn, susp_sediment_conds_file, "river susp. sediment storage") !pick source directory
 
         if (file_handle == 0) then        !load values from file
             sed_storage(:,:) = 0. !default value
@@ -1431,10 +1431,10 @@ end subroutine init_interflow_conds
             return
         end if
 
-        file_handle = get_file_handle((pfadp), (pfadn), lake_conds_file, "small reservoirs") !pick source directory
+        lakewater_hrr(1,:,:) = -1 !for detecting uninitialized values later
+        file_handle = get_file_handle(pfadp, pfadn, lake_conds_file, "small reservoirs") !pick source directory
 
         if (file_handle /= 0) then        !load values from file
-            lakewater_hrr(1,:,:) = -1 !for detecting uninitialized values later
 
             READ(file_handle,*, IOSTAT=iostatus); READ(file_handle,*, IOSTAT=iostatus)!read 2 header lines
 
@@ -1496,7 +1496,7 @@ end subroutine init_interflow_conds
             reservoir_read = .true. !for detecting uninitialized reservoirs later: non-existing reservoirs don't need to be red, though
         end where
 
-        file_handle = get_file_handle((pfadp), (pfadn), reservoir_conds_file, "reservoirs") !pick source directory
+        file_handle = get_file_handle(pfadp, pfadn, reservoir_conds_file, "reservoirs") !pick source directory
 
         if (file_handle == 0) then        !load values from file
             return

@@ -263,15 +263,17 @@ IF (STATUS == 0) THEN
 
 !** Modelling unit Initialisierung
 
-  if (.NOT. doloadstate .OR. lakewater_hrr(1,1,1) == -1.) then !check, if not initialized before from files
-      DO imun=1,subasin !Till: initialize fraction of total volume according to lake.dat
-        lakewater_hrr(1,imun,:)=lake_vol0_factor(:)*maxlake(imun,:)
-        where (acud(imun,:) == 0.)
-            lakewater_hrr(1,imun,:) = 0. !no water when there are no reservoirs
-        end where
+  DO imun=1,subasin !Till: initialize fraction of total volume according to lake.dat
+      DO k=1,5
+          if (lakewater_hrr(1, imun, k) == -1.) then !check, if not initialized before from files
+                lakewater_hrr(1,imun, k) = lake_vol0_factor(k)*maxlake(imun, k)
+          end if
+        if (acud(imun,k) == 0.) then
+            lakewater_hrr(:,imun,k) = 0. !no water when there are no reservoirs
+        end if
 
       END DO
-  end if
+  END DO
 
 
 !George  Estimation of small reservoirs' areas depending on volume (km**2)
