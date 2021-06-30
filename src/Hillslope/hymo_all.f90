@@ -193,8 +193,6 @@ SUBROUTINE hymo_all(STATUS)
         !   initialize saturated fraction of TC
         frac_sat(:,:)=0.0
 
-        !if (doacud)  CALL lake(0,dummy)
-
         ! create and open output files
         ! Output daily water contribution to river (m**3/s)
         CALL open_daily_output(f_daily_water_subbasin, 'daily_water_subbasin.out', 'daily river flow [m3/s] for all sub-basins (MAP-IDs)')

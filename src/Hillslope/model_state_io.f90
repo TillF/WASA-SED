@@ -1475,9 +1475,9 @@ end subroutine init_interflow_conds
             DO sb_counter=1,subasin
                 DO acud_class=1,5
                     IF (lakewater_hrr(1,sb_counter,acud_class) < 0.) then
-                        WRITE(*,'(a,i0,a,i0,a)') 'WARNING: &
-                        . No specification for subbasin ', id_subbas_extern(sb_counter),&
-                        ', reservoir size class ',acud_class,' found in '''//trim(lake_conds_file)//'''. Using fraction specified in lake.dat'
+                        WRITE(*,'(a,i0,a,i0,a)') 'WARNING: No specification for subbasin ',&
+                         id_subbas_extern(sb_counter), ', reservoir size class ',&
+                        acud_class,' found in '''//trim(lake_conds_file)//'''. Using fraction specified in lake.dat'
                     END IF
                 ENDDO
             END DO
@@ -1496,16 +1496,17 @@ end subroutine init_interflow_conds
 
         character(len=*),intent(in):: reservoir_conds_file        !file to load from
         integer :: sb_counter, iostatus, i, subbas_id
+        logical :: reservoir_read(subasin)
         real :: dummy1
 
-        if (.not. doreservoir ) then !don't try to load file if reservoirs have been disabled anyway
-            return
-        end if
-
-        volact(1,:) = -1. !for detecting uninitialized values later
+        if (.not. doreservoir .OR.& !don't try to load file if reservoirs have been disabled anyway
+            .not. doloadstate) return   !do not load files, if disabled
         
-        if (.not. doloadstate) return   !do not load files, if disabled
-        
+        where (res_flag)
+            reservoir_read = .false. !mark all reservoirs a "not read"
+        elsewhere
+            reservoir_read = .true. !for detecting uninitialized reservoirs later: non-existing reservoirs don't need to be red, though
+        end where
         OPEN(11,FILE=reservoir_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
         if (i/=0) then
             write(*,'(a,a,a)')'WARNING: reservoir storage file ''',trim(reservoir_conds_file),''' not found, using defaults.'
@@ -1532,19 +1533,15 @@ end subroutine init_interflow_conds
             end if
 
             volact(1,subbas_id) = dummy1 / 1e6 !internally used in [10^6 m3]
+            reservoir_read(subbas_id) = .true. !mark as "storage read"
         ENDDO
         close(11)
 
         DO sb_counter=1,subasin
-            IF (res_flag(sb_counter)) THEN
-                IF (volact(1,sb_counter) < 0.) then 
-                    WRITE(*,'(a,i0,a)') 'WARNING: &
-                    No specification for subbasin ', id_subbas_extern(sb_counter),&
-                    ' found in '''// trim(reservoir_conds_file)//'''. Using values specified in reservoir.dat'
-                END IF
-            else
-                volact(1,sb_counter)=0. !no reservoir in this subbasin
-            end if    
+             IF (.not. reservoir_read(sb_counter) ) THEN !reservoir has not been read before, but should be present
+                    WRITE(*,'(a,i0,a)') 'WARNING: No specification for subbasin ',&
+                    id_subbas_extern(sb_counter),' found in '''// trim(reservoir_conds_file)//'''. Using values specified in reservoir.dat'
+            END IF
         END DO
     end subroutine init_reservoir_conds
 
