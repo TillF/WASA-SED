@@ -3,24 +3,57 @@ module model_state_io
 
 
     use common_h
+    !character(len=max_path_length) :: source_dir !source directory, either "input" or "output"
+    integer :: file_handle !handle to currently treated input file, either in  "input/init_conds" or "output"
+
+
 contains
+    function get_file_handle(input_dir, output_dir, file_to_load, file_descr)
+    !search for requested file in input and output dir and return the first match
+        implicit none
+        character(len=*), intent(in) :: input_dir, output_dir        !input and output directories
+        character(len=*), intent(in):: file_to_load        !input and output directories
+        !character(len=max_path_length) :: get_file_handle !chosen directory string
+        character(len=max_path_length) :: src_dir !chosen directory string
+        integer :: get_file_handle !handle to currently treated input file
+        character(len=*) :: file_descr !description for file name
+        integer :: iostate
+        iostate=0
+
+        get_file_handle = 11 !default file handle to use
+        src_dir = trim(output_dir) !try output directory first
+        OPEN(get_file_handle,FILE=trim(src_dir)//file_to_load, STATUS='old', action='read', IOSTAT=iostate)    !check existence of file
+        if (iostate/=0) then
+            src_dir = trim(input_dir)//'init_conds/' !nothing found? try input dir
+            OPEN(get_file_handle,FILE=trim(src_dir)//file_to_load, STATUS='old', action='read', IOSTAT=iostate)    !check existence of file
+            if (iostate/=0) then
+                get_file_handle =0
+                write(*,'(a,a,a)')' WARNING: '//file_descr//' file ''',trim(file_to_load),''' not found, using defaults.'
+                return
+            end if
+        end if
+        write(*,'(a,a,a)')' ... '//file_descr//' from file ''',trim(src_dir)//file_to_load,''''
+
+    end function
+
+
     subroutine init_hillslope_state        !load initial conditions for hillslopes and reservoirs
             write(*,"(A)") "Initialize hillslope entities..."
             !if (.not. doloadstate) return   !do not load files, if disabled
-            call init_soil_conds      (trim(pfadn)//'soil_moisture.stat')    !Till: load initial status of soil moisture
-            call init_intercept_conds (trim(pfadn)//'intercept_storage.stat')    !Till: load initial status of gw storage
-            call init_gw_conds        (trim(pfadn)//'gw_storage.stat')    !Till: load initial status of gw storage
-            call init_interflow_conds (trim(pfadn)//'interflow_storage.stat')    !Till: load initial status of interflow storage
-            call init_snow_conds      (trim(pfadn)//'snow_storage.stat')    !Till: load initial status of snow storage
+            call init_soil_conds      ('soil_moisture.stat')    !Till: load initial status of soil moisture
+            call init_intercept_conds ('intercept_storage.stat')    !Till: load initial status of gw storage
+            call init_gw_conds        ('gw_storage.stat')    !Till: load initial status of gw storage
+            call init_interflow_conds ('interflow_storage.stat')    !Till: load initial status of interflow storage
+            call init_snow_conds      ('snow_storage.stat')    !Till: load initial status of snow storage
     end subroutine init_hillslope_state
 
    subroutine init_river_state        !load initial conditions for riverscape
             if (.not. doloadstate) return   !do not load files, if disabled
             write(*,"(A)") "Initialize river entities..."
-            call init_river_conds(trim(pfadn)//'river_storage.stat')    !Jose Miguel: load initial status of river storage
+            call init_river_conds('river_storage.stat')    !Jose Miguel: load initial status of river storage
             if (dosediment) then
-               call init_sediment_conds(trim(pfadn)//'sediment_storage.stat')    !Jose Miguel: load initial status of deposited sediment storage
-               call init_susp_sediment_conds(trim(pfadn)//'susp_sediment_storage.stat')    !Jose Miguel: load initial status of suspended sediment storage
+               call init_sediment_conds     ('sediment_storage.stat')    !Jose Miguel: load initial status of deposited sediment storage
+               call init_susp_sediment_conds('susp_sediment_storage.stat')    !Jose Miguel: load initial status of suspended sediment storage
             endif
    end subroutine init_river_state
    
@@ -493,7 +526,7 @@ contains
         use erosion_h
         implicit none
 
-        character(len=*),intent(in):: soil_conds_file        !file to load from
+        character(len=*), intent(in):: soil_conds_file        !file to load from
         INTEGER :: i,line,errors,sb_counter,lu_counter,tc_counter,svc_counter,h    ! counters
         INTEGER :: i_subbasx,i_lux,i_tcx,i_svcx !, i_soilx        ! external ids of components in work
         INTEGER :: i_subbas,i_lu,i_tc,i_svc, i_soil, i_veg,id_tc_type        ! internal ids of components in work
@@ -502,21 +535,13 @@ contains
         INTEGER    :: file_read=0
         character(len=160) :: linestr='', error_msg=''
 
-
-        i=0
-        OPEN(11,FILE=soil_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
-        if (i/=0) then
-            write(*,'(a,a,a)')' WARNING: Soil moisture file ''',trim(soil_conds_file),''' not found, using defaults.'
-            CLOSE(11)
-			return
-        end if
-
-
         horithact=-9999.                    !mark all horizons as "not (yet) initialised"
-        if (trim(soil_conds_file)/='' .AND. i==0) then        !load values from file
-            write(*,'(a,a,a)')' ... soil moisture from file ''',trim(soil_conds_file),''''
 
-            READ(11,*, IOSTAT=i); READ (11,*, IOSTAT=i)    !skip header lines
+        file_handle = get_file_handle((pfadp), (pfadn), soil_conds_file, "soil moisture") !pick source directory
+
+        if (file_handle /= 0) then        !load values from file
+
+            READ(file_handle,*, IOSTAT=i); READ (11,*, IOSTAT=i)    !skip header lines
             line=2
             errors=0
 
@@ -531,7 +556,7 @@ contains
                     errors=errors+1
                 END IF
 
-                READ(11,'(A)',  IOSTAT=i) linestr
+                READ(file_handle,'(A)',  IOSTAT=i) linestr
 
                 IF (i==24 .OR. i==-1) THEN    !end of file
                     exit        !exit loop
@@ -605,7 +630,7 @@ contains
 
             END DO
             file_read=1
-            CLOSE(11)
+            CLOSE(file_handle)
         end if
 
         errors=0
@@ -671,21 +696,13 @@ contains
         INTEGER    :: file_read=0
         character(len=160) :: linestr='', error_msg=''
 
-        i=0
-        OPEN(11,FILE=interflow_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
-        if (i/=0) then
-            write(*,'(a,a,a)')' WARNING: Interflow file ''',trim(interflow_conds_file),''' not found, using defaults.'
-            CLOSE(11)
-			return
-        end if
-
         tt = size(latred,dim=2) !number of interchange horizons in latred
-
         latred=-9999.                    !mark all interchange horizons as "not (yet) initialised"
-        if (trim(interflow_conds_file)/='' .AND. i==0) then        !load values from file
-            write(*,'(a,a,a)')' ... interflow from file ''',trim(interflow_conds_file),''''
 
-            READ(11,*); READ (11,*)    !skip header lines
+        file_handle = get_file_handle((pfadp), (pfadn), interflow_conds_file, "interflow") !pick source directory
+
+        if (file_handle /= 0) then        !load values from file
+            READ(file_handle,*); READ (file_handle,*)    !skip header lines
             line=2
             errors=0
 
@@ -699,7 +716,7 @@ contains
                     errors=errors+1
                 END IF
 
-                READ(11,'(A)',  IOSTAT=i) linestr
+                READ(file_handle,'(A)',  IOSTAT=i) linestr
 
                 IF (i==24 .OR. i==-1) THEN    !end of file
                     exit        !exit loop
@@ -757,7 +774,7 @@ contains
 
             END DO
             file_read=1
-            CLOSE(11)
+            CLOSE(file_handle)
         end if
 
         errors=0
@@ -811,19 +828,14 @@ end subroutine init_interflow_conds
         INTEGER    :: file_read=0
         character(len=160) :: linestr='', error_msg=''
 
-        i=0
-        OPEN(11,FILE=snow_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
-        if (i/=0) then
-            write(*,'(a,a,a)')' WARNING: snow file ''',trim(snow_conds_file),''' not found, using defaults.'
-            CLOSE(11)
-			return
-        end if
-
+        if (.not. dosnow) return
         snowWaterEquiv=-9999.                    !mark all snow storages as "not (yet) initialised"
-        if (trim(snow_conds_file)/='' .AND. i==0) then        !load values from file
+        file_handle = get_file_handle((pfadp), (pfadn), snow_conds_file, "snow") !pick source directory
+
+        if (file_handle /= 0) then        !load values from file
             write(*,'(a,a,a)')' ... snow from file ''',trim(snow_conds_file),''''
 
-            READ(11,*); READ (11,*)    !skip header lines
+            READ(file_handle,*); READ (file_handle,*)    !skip header lines
             line=2
             errors=0
 
@@ -837,7 +849,7 @@ end subroutine init_interflow_conds
                     errors=errors+1
                 END IF
 
-                READ(11,'(A)',  IOSTAT=i) linestr
+                READ(file_handle,'(A)',  IOSTAT=i) linestr
 
                 IF (i==24 .OR. i==-1) THEN    !end of file
                     exit        !exit loop
@@ -887,7 +899,7 @@ end subroutine init_interflow_conds
 
             END DO
             file_read=1
-            CLOSE(11)
+            CLOSE(file_handle)
         end if
 
         errors=0
@@ -942,21 +954,12 @@ end subroutine init_interflow_conds
         INTEGER    :: file_read=0
         character(len=160) :: error_msg='', linestr=''
 
-
-        i=0
-        OPEN(11,FILE=intercept_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
-        if (i/=0) then
-            write(*,'(a,a,a)')' WARNING: Interception state file ''',trim(intercept_conds_file),''' not found, using defaults.'
-            CLOSE(11)
-			return
-        end if
-
-
         intercept(:,:)=-9999.                    !mark all SVC-int-storages as "not (yet) initialised"
-        if (trim(intercept_conds_file)/='' .AND. i==0) then        !load values from file
-            write(*,'(a,a,a)')' ... interception from file ''',trim(intercept_conds_file),''''
 
-            READ(11,*); READ (11,*)    !skip header lines
+        file_handle = get_file_handle((pfadp), (pfadn), intercept_conds_file, "interception") !pick source directory
+
+        if (file_handle /= 0) then        !load values from file
+            READ(file_handle,*); READ (file_handle,*)    !skip header lines
             line=2
             errors=0
 
@@ -970,7 +973,7 @@ end subroutine init_interflow_conds
                     errors=errors+1
                 END IF
 
-                READ(11,'(A)',  IOSTAT=i) linestr
+                READ(file_handle,'(A)',  IOSTAT=i) linestr
 
                 IF (i==24 .OR. i==-1) THEN    !end of file
                     exit        !exit loop
@@ -1043,7 +1046,7 @@ end subroutine init_interflow_conds
 
             END DO
             file_read=1
-            CLOSE(11)
+            CLOSE(file_handle)
         end if
 
         !check, if all relevant SVCs have been initialized, if not, use default values
@@ -1106,21 +1109,12 @@ end subroutine init_interflow_conds
         character(len=160) :: linestr='', error_msg=''
         REAL    :: lu_area    !area of current lu [m3]
 
-
-        i=0
-        OPEN(11,FILE=gw_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
-        if (i/=0) then
-            write(*,'(a,a,a)')' WARNING: GW storage file ''',trim(gw_conds_file),''' not found, using defaults.'
-            CLOSE(11)
-			return
-        end if
-
-
         deepgw=-9999.                    !mark all gw storages as "not (yet) read"
-        if (trim(gw_conds_file)/='' .AND. i==0) then        !load values from file
-            write(*,'(a,a,a)')' ... ground water storage from file ''',trim(gw_conds_file),''''
 
-            READ(11,*); READ (11,*)    !skip header lines
+        file_handle = get_file_handle((pfadp), (pfadn), gw_conds_file, "GW storage") !pick source directory
+
+        if (file_handle /= 0) then        !load values from file
+            READ(file_handle,*); READ (file_handle,*)    !skip header lines
             line=2
             errors=0
 
@@ -1134,7 +1128,7 @@ end subroutine init_interflow_conds
                     errors=errors+1
                 END IF
 
-                READ(11,'(A)',  IOSTAT=i) linestr
+                READ(file_handle,'(A)',  IOSTAT=i) linestr
 
                 IF (i==24 .OR. i==-1) THEN    !end of file
                     exit        !exit loop
@@ -1174,7 +1168,7 @@ end subroutine init_interflow_conds
                 end if    
             END DO
             file_read=1
-            CLOSE(11)
+            CLOSE(file_handle)
             if (errors>0) then
                 return
             end if
@@ -1204,7 +1198,7 @@ end subroutine init_interflow_conds
         if (errors>0) then
             return
         end if
-        close(11)
+        CLOSE(file_handle)
     end subroutine init_gw_conds
 
 
@@ -1221,17 +1215,14 @@ end subroutine init_interflow_conds
         real, pointer :: array_ptr(:)
         character(len=1000) :: linestr
 
-        OPEN(11,FILE=river_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
-        if (i/=0) then
-            write(*,'(a,a,a)')' WARNING: River storage file ''',trim(river_conds_file),''' not found, using defaults.'
-            CLOSE(11)
+        file_handle = get_file_handle((pfadp), (pfadn), river_conds_file, "river storage") !pick source directory
+
+        if (file_handle == 0) then        !load values from file
 		    return
         end if
 
-        write(*,'(a,a,a)')' ... river storage from file ''',trim(river_conds_file),'''.'
-
         !verify that this river file belongs to the selected routing mode
-        READ(11,'(A)') linestr;
+        READ(file_handle,'(A)') linestr;
         if ( (river_transport == 1 .AND. linestr(1:3) /= "UHG") .OR. &
                 ( ((river_transport == 2) .or. (river_transport == 3)) .AND. linestr(1:3) /= "Mus") )            then
             write(*,'(a,a,a)')' WARNING: River storage file ''',trim(river_conds_file),''' does not match selected routing mode. File ignored, using defaults.'
@@ -1240,7 +1231,7 @@ end subroutine init_interflow_conds
         end if
 
         !skip next header line
-        READ(11,*)
+        READ(file_handle,*)
 
 	    if (river_transport == 1) then
             tt = size(hrout,dim=1)-1 !length of UHG minus 1
@@ -1248,7 +1239,7 @@ end subroutine init_interflow_conds
             qout(1,1:subasin)      =-1. !indicator for "not read"
             
             !check that the current file matches the specs of the current UHG
-            READ(11,'(A)',IOSTAT=iostatus) linestr
+            READ(file_handle,'(A)',IOSTAT=iostatus) linestr
              IF (iostatus /=0) then
                 write(*,'(a,a,a)')'WARNING: format error in river storage file ''',trim(river_conds_file),', line ',line,', using defaults.'             
              else
@@ -1262,7 +1253,7 @@ end subroutine init_interflow_conds
 
         line = 1 !line counter
         DO WHILE (.TRUE.)
-            READ(11,'(A)',IOSTAT=iostatus) linestr
+            READ(file_handle,'(A)',IOSTAT=iostatus) linestr
             IF (iostatus /=0) exit
             line = line+2
            
@@ -1325,21 +1316,19 @@ end subroutine init_interflow_conds
         end if
         
         riverbed_storage(:,:)=-1. !indicator for "not read"
-        OPEN(11,FILE=sediment_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
-        if (i/=0) then
-            write(*,'(a,a,a)')' WARNING: Sediment storage file ''',trim(sediment_conds_file),''' not found, using defaults.'
-            CLOSE(11)
+
+        file_handle = get_file_handle((pfadp), (pfadn), sediment_conds_file, "river sediment storage") !pick source directory
+
+        if (file_handle == 0) then        !load values from file
             riverbed_storage(:,:)=0. !set to default
-			return
+            return
         end if
 
-        write(*,'(a,a,a)')' ... sediment storage from file ''',trim(sediment_conds_file),'''.'
-
         !read 2 header lines into buffer
-        READ(11,*); READ(11,*)
+        READ(file_handle,*); READ(file_handle,*)
 
         DO WHILE (.TRUE.)
-	        READ(11,*,IOSTAT=iostatus) i, k, dummy1
+	        READ(file_handle,*,IOSTAT=iostatus) i, k, dummy1
             IF (iostatus == -1) exit !end of file
 		    IF (iostatus /= 0) THEN
 		        WRITE(*,'(a,a,a)') ' WARNING: format error in sediment_storage.stat, line skipped, assumed 0.'
@@ -1382,20 +1371,19 @@ end subroutine init_interflow_conds
         real :: dummy1
 
         sed_storage(:,:)=-1. !indicator for "not read"
-        OPEN(11,FILE=susp_sediment_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
-        if (i/=0) then
-            write(*,'(a,a,a)')' WARNING: Sediment storage file ''',trim(susp_sediment_conds_file),''' not found, using defaults.'
-            CLOSE(11)
-			return
+
+        file_handle = get_file_handle((pfadp), (pfadn), susp_sediment_conds_file, "river susp. sediment storage") !pick source directory
+
+        if (file_handle == 0) then        !load values from file
+            sed_storage(:,:) = 0. !default value
+            return
         end if
 
-        write(*,'(a,a,a)')' ... sediment storage from file ''',trim(susp_sediment_conds_file),'''.'
-
         !read 2 header lines into buffer
-        READ(11,*); READ(11,*)
+        READ(file_handle,*); READ(file_handle,*)
 
         DO WHILE (.TRUE.)
-	        READ(11,*,IOSTAT=iostatus) i, k, dummy1
+	        READ(file_handle,*,IOSTAT=iostatus) i, k, dummy1
             IF (iostatus == -1) exit !end of file
 		    IF (iostatus /= 0) THEN
 		        WRITE(*,'(a,a,a)') ' WARNING: format error in susp_sediment_storage.stat, line skipped, assumed 0.'
@@ -1443,18 +1431,15 @@ end subroutine init_interflow_conds
             return
         end if
 
-        OPEN(11,FILE=lake_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
-        if (i/=0) then
-            write(*,'(a,a,a)')' WARNING: Lake storage file ''',trim(lake_conds_file),''' not found, using defaults.'
-            CLOSE(11)
-        else !initialisation via files
-            write(*,'(a,a,a)')' ... lake storage from file ''',trim(lake_conds_file),'''.'
+        file_handle = get_file_handle((pfadp), (pfadn), lake_conds_file, "small reservoirs") !pick source directory
+
+        if (file_handle /= 0) then        !load values from file
             lakewater_hrr(1,:,:) = -1 !for detecting uninitialized values later
 
-            READ(11,*, IOSTAT=iostatus); READ(11,*, IOSTAT=iostatus)!read 2 header lines
+            READ(file_handle,*, IOSTAT=iostatus); READ(file_handle,*, IOSTAT=iostatus)!read 2 header lines
 
             DO WHILE (.TRUE.)
-                READ(11, *, IOSTAT=iostatus) i, k, dummy1
+                READ(file_handle, *, IOSTAT=iostatus) i, k, dummy1
 
                 IF (iostatus == -1) exit !end of file
                 IF (iostatus /= 0) THEN
@@ -1510,19 +1495,17 @@ end subroutine init_interflow_conds
         elsewhere
             reservoir_read = .true. !for detecting uninitialized reservoirs later: non-existing reservoirs don't need to be red, though
         end where
-        OPEN(11,FILE=reservoir_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
-        if (i/=0) then
-            write(*,'(a,a,a)')' WARNING: reservoir storage file ''',trim(reservoir_conds_file),''' not found, using defaults.'
-            CLOSE(11)
+
+        file_handle = get_file_handle((pfadp), (pfadn), reservoir_conds_file, "reservoirs") !pick source directory
+
+        if (file_handle == 0) then        !load values from file
             return
         end if
-        write(*,'(a,a,a)')' ... reservoir storage from file ''',trim(reservoir_conds_file),'''.'
 
-
-        READ(11,*, IOSTAT=iostatus); READ(11,*, IOSTAT=iostatus)!read 2 header lines
+        READ(file_handle,*, IOSTAT=iostatus); READ(file_handle,*, IOSTAT=iostatus)!read 2 header lines
 
         DO WHILE (.TRUE.)
-	        READ(11, *, IOSTAT=iostatus) i, dummy1
+	        READ(file_handle, *, IOSTAT=iostatus) i, dummy1
 
             IF (iostatus == -1) exit !end of file
 		    IF (iostatus /= 0) THEN

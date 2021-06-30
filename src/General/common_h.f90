@@ -29,10 +29,11 @@ module common_h
     INTEGER :: scenario
     INTEGER :: krig
     REAL :: sensfactor
+    integer, parameter :: max_path_length=160
     CHARACTER (LEN=10) :: namet
     CHARACTER (LEN=10) :: caset
-    CHARACTER (LEN=160) :: pfadn
-    CHARACTER (LEN=160) :: pfadp
+    CHARACTER (LEN=max_path_length) :: pfadn
+    CHARACTER (LEN=max_path_length) :: pfadp
     INTEGER :: pfadi
     INTEGER :: pfadj
     INTEGER :: ncaset
