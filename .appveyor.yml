@@ -97,8 +97,8 @@ deploy:
   auth_token:
     secure: 1SmCkONwXVzO7MjKafzWSIZwzBMQaiYlcy3MQ8G5wpY8foiNwhI4Fj+JlIzYF3lm
   artifacts: WASA-SEDexec_windows_msys2,WASA-SEDexec_mingw64
-  draft: true
-  prerelease: true
+  draft: false
+  prerelease: false
   force_update: true
   on:
  #   branch: master                 # release from master branch only (in fact, this looks for "master" in the tag, so I disabled it 
