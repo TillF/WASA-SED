@@ -132,7 +132,7 @@ IF (STATUS == 0) THEN
 nbrsec=0
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/hydraul_param.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!hydraul_param.dat not found
-	  write(*,*)'WARNING: '//pfadp(1:pfadj)// 'hydraul_param.dat not found, using defaults'
+	  write(*,'(A)')'WARNING: '//pfadp(1:pfadj)// 'hydraul_param.dat not found, using defaults'
     ELSE
 	  READ(11,*);READ(11,*)
       READ(11,*,IOSTAT=ka) dummy1,dummy2
@@ -521,7 +521,7 @@ nbrsec=0
 !Identification of main channel in the cross sections
   OPEN(11,FILE=pfadp(1:pfadj)// 'Reservoir/main_channel.dat', IOSTAT=istate,STATUS='old')
 	IF (istate/=0) THEN					!main_channel.dat not found
-      write(*,*)'WARNING: '//pfadp(1:pfadj)// 'main_channel.dat not found, using defaults'
+      write(*,'(A)')'WARNING: '//pfadp(1:pfadj)// 'main_channel.dat not found, using defaults'
       sed_flag = 0 !0 = changes on sideslope is not controlled
     ELSE
     READ(11,*);READ(11,*)

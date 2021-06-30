@@ -5,6 +5,7 @@ module model_state_io
     use common_h
 contains
     subroutine init_hillslope_state        !load initial conditions for hillslopes and reservoirs
+            write(*,"(A)") "Initialize hillslope entities..."
             !if (.not. doloadstate) return   !do not load files, if disabled
             call init_soil_conds      (trim(pfadn)//'soil_moisture.stat')    !Till: load initial status of soil moisture
             call init_intercept_conds (trim(pfadn)//'intercept_storage.stat')    !Till: load initial status of gw storage
@@ -15,6 +16,7 @@ contains
 
    subroutine init_river_state        !load initial conditions for riverscape
             if (.not. doloadstate) return   !do not load files, if disabled
+            write(*,"(A)") "Initialize river entities..."
             call init_river_conds(trim(pfadn)//'river_storage.stat')    !Jose Miguel: load initial status of river storage
             if (dosediment) then
                call init_sediment_conds(trim(pfadn)//'sediment_storage.stat')    !Jose Miguel: load initial status of deposited sediment storage
@@ -23,8 +25,9 @@ contains
    end subroutine init_river_state
    
     subroutine init_reservoir_lake_state        !load initial conditions for small and large reservoirs
-        call init_reservoir_conds      (trim(pfadn)//'reservoir_storage.stat')    !load initial status of reservoir storage        
         if (.not. doloadstate) return   !do not load files, if disabled
+        write(*,"(A)") "Initialize reservoir entities..."
+        call init_reservoir_conds      (trim(pfadn)//'reservoir_storage.stat')    !load initial status of reservoir storage        
         call init_lake_conds      (trim(pfadn)//'lake_storage.stat')    !Jose Miguel: load initial status of lake storage
     end subroutine init_reservoir_lake_state
 
@@ -503,7 +506,7 @@ contains
         i=0
         OPEN(11,FILE=soil_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
         if (i/=0) then
-            write(*,'(a,a,a)')'WARNING: Soil moisture file ''',trim(soil_conds_file),''' not found, using defaults.'
+            write(*,'(a,a,a)')' WARNING: Soil moisture file ''',trim(soil_conds_file),''' not found, using defaults.'
             CLOSE(11)
 			return
         end if
@@ -511,7 +514,7 @@ contains
 
         horithact=-9999.                    !mark all horizons as "not (yet) initialised"
         if (trim(soil_conds_file)/='' .AND. i==0) then        !load values from file
-            write(*,'(a,a,a)')'Initialize soil moisture from file ''',trim(soil_conds_file),''''
+            write(*,'(a,a,a)')' ... soil moisture from file ''',trim(soil_conds_file),''''
 
             READ(11,*, IOSTAT=i); READ (11,*, IOSTAT=i)    !skip header lines
             line=2
@@ -520,7 +523,7 @@ contains
             do while (.TRUE.)        !read whole file
                 IF (len(trim(error_msg))/=0) THEN    !print error message, if occured
                     if (errors==0) then !print heading at before first error
-                        write(*,'(A,/,6a12)')' Entities not found in current domain (ignored):','Line','subbasin','LU','TC','SVC',&
+                        write(*,'(A,/,6a12)')'  Entities not found in current domain (ignored):','Line','subbasin','LU','TC','SVC',&
                             'horizon'
                     end if
                     write(*,*)trim(error_msg)
@@ -671,7 +674,7 @@ contains
         i=0
         OPEN(11,FILE=interflow_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
         if (i/=0) then
-            write(*,'(a,a,a)')'WARNING: Interflow file ''',trim(interflow_conds_file),''' not found, using defaults.'
+            write(*,'(a,a,a)')' WARNING: Interflow file ''',trim(interflow_conds_file),''' not found, using defaults.'
             CLOSE(11)
 			return
         end if
@@ -680,7 +683,7 @@ contains
 
         latred=-9999.                    !mark all interchange horizons as "not (yet) initialised"
         if (trim(interflow_conds_file)/='' .AND. i==0) then        !load values from file
-            write(*,'(a,a,a)')'Initialize interflow  from file ''',trim(interflow_conds_file),''''
+            write(*,'(a,a,a)')' ... interflow from file ''',trim(interflow_conds_file),''''
 
             READ(11,*); READ (11,*)    !skip header lines
             line=2
@@ -811,14 +814,14 @@ end subroutine init_interflow_conds
         i=0
         OPEN(11,FILE=snow_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
         if (i/=0) then
-            write(*,'(a,a,a)')'WARNING: snow file ''',trim(snow_conds_file),''' not found, using defaults.'
+            write(*,'(a,a,a)')' WARNING: snow file ''',trim(snow_conds_file),''' not found, using defaults.'
             CLOSE(11)
 			return
         end if
 
         snowWaterEquiv=-9999.                    !mark all snow storages as "not (yet) initialised"
         if (trim(snow_conds_file)/='' .AND. i==0) then        !load values from file
-            write(*,'(a,a,a)')'Initialize snow  from file ''',trim(snow_conds_file),''''
+            write(*,'(a,a,a)')' ... snow from file ''',trim(snow_conds_file),''''
 
             READ(11,*); READ (11,*)    !skip header lines
             line=2
@@ -943,7 +946,7 @@ end subroutine init_interflow_conds
         i=0
         OPEN(11,FILE=intercept_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
         if (i/=0) then
-            write(*,'(a,a,a)')'WARNING: Interception state file ''',trim(intercept_conds_file),''' not found, using defaults.'
+            write(*,'(a,a,a)')' WARNING: Interception state file ''',trim(intercept_conds_file),''' not found, using defaults.'
             CLOSE(11)
 			return
         end if
@@ -951,7 +954,7 @@ end subroutine init_interflow_conds
 
         intercept(:,:)=-9999.                    !mark all SVC-int-storages as "not (yet) initialised"
         if (trim(intercept_conds_file)/='' .AND. i==0) then        !load values from file
-            write(*,'(a,a,a)')'Initialize interception from file ''',trim(intercept_conds_file),''''
+            write(*,'(a,a,a)')' ... interception from file ''',trim(intercept_conds_file),''''
 
             READ(11,*); READ (11,*)    !skip header lines
             line=2
@@ -1107,7 +1110,7 @@ end subroutine init_interflow_conds
         i=0
         OPEN(11,FILE=gw_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
         if (i/=0) then
-            write(*,'(a,a,a)')'WARNING: GW storage file ''',trim(gw_conds_file),''' not found, using defaults.'
+            write(*,'(a,a,a)')' WARNING: GW storage file ''',trim(gw_conds_file),''' not found, using defaults.'
             CLOSE(11)
 			return
         end if
@@ -1115,7 +1118,7 @@ end subroutine init_interflow_conds
 
         deepgw=-9999.                    !mark all gw storages as "not (yet) read"
         if (trim(gw_conds_file)/='' .AND. i==0) then        !load values from file
-            write(*,'(a,a,a)')'Initialize ground water storage from file ''',trim(gw_conds_file),''''
+            write(*,'(a,a,a)')' ... ground water storage from file ''',trim(gw_conds_file),''''
 
             READ(11,*); READ (11,*)    !skip header lines
             line=2
@@ -1220,18 +1223,18 @@ end subroutine init_interflow_conds
 
         OPEN(11,FILE=river_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
         if (i/=0) then
-            write(*,'(a,a,a)')'WARNING: River storage file ''',trim(river_conds_file),''' not found, using defaults.'
+            write(*,'(a,a,a)')' WARNING: River storage file ''',trim(river_conds_file),''' not found, using defaults.'
             CLOSE(11)
 		    return
         end if
 
-        write(*,'(a,a,a)')'Initialize river storage from file ''',trim(river_conds_file),'''.'
+        write(*,'(a,a,a)')' ... river storage from file ''',trim(river_conds_file),'''.'
 
         !verify that this river file belongs to the selected routing mode
         READ(11,'(A)') linestr;
         if ( (river_transport == 1 .AND. linestr(1:3) /= "UHG") .OR. &
                 ( ((river_transport == 2) .or. (river_transport == 3)) .AND. linestr(1:3) /= "Mus") )            then
-            write(*,'(a,a,a)')'WARNING: River storage file ''',trim(river_conds_file),''' does not match selected routing mode. File ignored, using defaults.'
+            write(*,'(a,a,a)')' WARNING: River storage file ''',trim(river_conds_file),''' does not match selected routing mode. File ignored, using defaults.'
             CLOSE(11)
 		    return
         end if
@@ -1251,7 +1254,7 @@ end subroutine init_interflow_conds
              else
                line = line+2
                i = GetNumberOfSubstrings(linestr) - 1
-               if (i > tt .OR. i<1) write(*,'(a,a,a,i0,a,i0)')'WARNING: River storage file ''',trim(river_conds_file),''': expecting ',tt,' ordinates, found ',i,'. Truncated.'
+               if (i > tt .OR. i<1) write(*,'(a,a,a,i0,a,i0)')' WARNING: River storage file ''',trim(river_conds_file),''': expecting ',tt,' ordinates, found ',i,'. Truncated.'
                 backspace(11) !rewind line just read
              end if   
         end if
@@ -1266,13 +1269,13 @@ end subroutine init_interflow_conds
             READ(linestr,*,IOSTAT=iostatus) i, dummy1
             
             if (iostatus /=0 .or. isnan(dummy1)) then
-			    WRITE(*,'(a,i0,a)') 'WARNING: format error in line ', line,' of river_storage.stat, line ignored.'
+			    WRITE(*,'(a,i0,a)') ' WARNING: format error in line ', line,' of river_storage.stat, line ignored.'
                 cycle
             end if
 
             subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
 		    if (subbas_id < 1 .OR. subbas_id > subasin) then
-			    WRITE(*,'(a,i0,a,i0,a)') 'WARNING: unknown subbasin ', i,' in line ', line, ' of river_storage.stat, ignored.'
+			    WRITE(*,'(a,i0,a,i0,a)') ' WARNING: unknown subbasin ', i,' in line ', line, ' of river_storage.stat, ignored.'
                 cycle
             end if
 
@@ -1294,7 +1297,7 @@ end subroutine init_interflow_conds
         if (((river_transport == 2) .or. (river_transport == 3))) array_ptr => r_storage
 
         if (count(array_ptr==-1.) > 0) then
-            WRITE(*,'(A)') 'WARNING: could not read initial river storage from river_storage.stat for the following subbasins, assumed 0:'
+            WRITE(*,'(A)') ' WARNING: could not read initial river storage from river_storage.stat for the following subbasins, assumed 0:'
             DO subbas_id=1,subasin
                 if (array_ptr(subbas_id)==-1.) then
                     WRITE(*,'(i0)') id_subbas_extern(subbas_id)
@@ -1324,13 +1327,13 @@ end subroutine init_interflow_conds
         riverbed_storage(:,:)=-1. !indicator for "not read"
         OPEN(11,FILE=sediment_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
         if (i/=0) then
-            write(*,'(a,a,a)')'WARNING: Sediment storage file ''',trim(sediment_conds_file),''' not found, using defaults.'
+            write(*,'(a,a,a)')' WARNING: Sediment storage file ''',trim(sediment_conds_file),''' not found, using defaults.'
             CLOSE(11)
             riverbed_storage(:,:)=0. !set to default
 			return
         end if
 
-        write(*,'(a,a,a)')'Initialize sediment storage from file ''',trim(sediment_conds_file),'''.'
+        write(*,'(a,a,a)')' ... sediment storage from file ''',trim(sediment_conds_file),'''.'
 
         !read 2 header lines into buffer
         READ(11,*); READ(11,*)
@@ -1339,17 +1342,17 @@ end subroutine init_interflow_conds
 	        READ(11,*,IOSTAT=iostatus) i, k, dummy1
             IF (iostatus == -1) exit !end of file
 		    IF (iostatus /= 0) THEN
-		        WRITE(*,'(a,a,a)') 'WARNING: format error in sediment_storage.stat, line skipped, assumed 0.'
+		        WRITE(*,'(a,a,a)') ' WARNING: format error in sediment_storage.stat, line skipped, assumed 0.'
             ENDIF
 
             subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
 			if (subbas_id < 1 .OR. subbas_id > subasin) then
-				WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in sediment_storage.stat, ignored.'
+				WRITE(*,'(a,i0,a)') ' WARNING: unknown subbasin ',i,' in sediment_storage.stat, ignored.'
                 cycle
             end if
 
             if (k < 1 .OR. k > n_sed_class) then
-				WRITE(*,'(a,i0,a)') 'WARNING: unknown particle size class ',k,' in sediment_storage.stat, ignored.'
+				WRITE(*,'(a,i0,a)') ' WARNING: unknown particle size class ',k,' in sediment_storage.stat, ignored.'
                 cycle
 			end if
 	        riverbed_storage(subbas_id,k)=dummy1
@@ -1357,7 +1360,7 @@ end subroutine init_interflow_conds
         close(11)
 
         if (count(riverbed_storage==-1.) > 0) then
-            WRITE(*,'(A)') 'WARNING: could not read initial river sediment storage from sediment_storage.stat for the following subbasins, assumed 0:'
+            WRITE(*,'(A)') ' WARNING: could not read initial river sediment storage from sediment_storage.stat for the following subbasins, assumed 0:'
             DO subbas_id=1,subasin
                 if (count(riverbed_storage(subbas_id,:)==-1)> 0) WRITE(*,'(i0)') subbas_id
             END DO
@@ -1381,12 +1384,12 @@ end subroutine init_interflow_conds
         sed_storage(:,:)=-1. !indicator for "not read"
         OPEN(11,FILE=susp_sediment_conds_file,STATUS='old',action='read', IOSTAT=i)    !check existence of file
         if (i/=0) then
-            write(*,'(a,a,a)')'WARNING: Sediment storage file ''',trim(susp_sediment_conds_file),''' not found, using defaults.'
+            write(*,'(a,a,a)')' WARNING: Sediment storage file ''',trim(susp_sediment_conds_file),''' not found, using defaults.'
             CLOSE(11)
 			return
         end if
 
-        write(*,'(a,a,a)')'Initialize sediment storage from file ''',trim(susp_sediment_conds_file),'''.'
+        write(*,'(a,a,a)')' ... sediment storage from file ''',trim(susp_sediment_conds_file),'''.'
 
         !read 2 header lines into buffer
         READ(11,*); READ(11,*)
@@ -1395,17 +1398,17 @@ end subroutine init_interflow_conds
 	        READ(11,*,IOSTAT=iostatus) i, k, dummy1
             IF (iostatus == -1) exit !end of file
 		    IF (iostatus /= 0) THEN
-		        WRITE(*,'(a,a,a)') 'WARNING: format error in susp_sediment_storage.stat, line skipped, assumed 0.'
+		        WRITE(*,'(a,a,a)') ' WARNING: format error in susp_sediment_storage.stat, line skipped, assumed 0.'
             ENDIF
 
             subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
 			if (subbas_id < 1 .OR. subbas_id > subasin) then
-				WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in susp_sediment_storage.stat, ignored.'
+				WRITE(*,'(a,i0,a)') ' WARNING: unknown subbasin ',i,' in susp_sediment_storage.stat, ignored.'
                 cycle
             end if
 
             if (k < 1 .OR. k > n_sed_class) then
-				WRITE(*,'(a,i0,a)') 'WARNING: unknown particle size class ',k,' in susp_sediment_storage.stat, ignored.'
+				WRITE(*,'(a,i0,a)') ' WARNING: unknown particle size class ',k,' in susp_sediment_storage.stat, ignored.'
                 cycle
 			end if
 	        sed_storage(subbas_id,k)=dummy1
@@ -1413,7 +1416,7 @@ end subroutine init_interflow_conds
         close(11)
 
         if (count(sed_storage==-1.) > 0) then
-            WRITE(*,'(A)') 'WARNING: could not read initial river sediment storage from susp_sediment_storage.stat for the following subbasins, assumed 0:'
+            WRITE(*,'(A)') ' WARNING: could not read initial river sediment storage from susp_sediment_storage.stat for the following subbasins, assumed 0:'
             DO subbas_id=1,subasin
 				if (count(sed_storage(subbas_id,:)==-1) > 0) WRITE(*,'(i0)') subbas_id
             END DO
@@ -1442,10 +1445,10 @@ end subroutine init_interflow_conds
 
         OPEN(11,FILE=lake_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
         if (i/=0) then
-            write(*,'(a,a,a)')'WARNING: Lake storage file ''',trim(lake_conds_file),''' not found, using defaults.'
+            write(*,'(a,a,a)')' WARNING: Lake storage file ''',trim(lake_conds_file),''' not found, using defaults.'
             CLOSE(11)
         else !initialisation via files
-            write(*,'(a,a,a)')'Initialize lake storage from file ''',trim(lake_conds_file),'''.'
+            write(*,'(a,a,a)')' ... lake storage from file ''',trim(lake_conds_file),'''.'
             lakewater_hrr(1,:,:) = -1 !for detecting uninitialized values later
 
             READ(11,*, IOSTAT=iostatus); READ(11,*, IOSTAT=iostatus)!read 2 header lines
@@ -1455,17 +1458,17 @@ end subroutine init_interflow_conds
 
                 IF (iostatus == -1) exit !end of file
                 IF (iostatus /= 0) THEN
-                    WRITE(*,'(a,a,a)') 'WARNING: format error in '//trim(lake_conds_file)//', line skipped.'
+                    WRITE(*,'(a,a,a)') ' WARNING: format error in '//trim(lake_conds_file)//', line skipped.'
                 ENDIF
 
                 subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
                 if (subbas_id < 1 .OR. subbas_id > subasin) then
-                    WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in '//trim(lake_conds_file)//', ignored.'
+                    WRITE(*,'(a,i0,a)') ' WARNING: unknown subbasin ',i,' in '//trim(lake_conds_file)//', ignored.'
                     cycle
                 end if
 
                 if (k < 1 .OR. k > 5) then
-                    WRITE(*,'(a,i0,a)') 'WARNING: unknown reservoir class ',k,' in '//trim(lake_conds_file)//', ignored.'
+                    WRITE(*,'(a,i0,a)') ' WARNING: unknown reservoir class ',k,' in '//trim(lake_conds_file)//', ignored.'
                     cycle
                 end if
                 lakewater_hrr(1,subbas_id,k) = dummy1
@@ -1475,7 +1478,7 @@ end subroutine init_interflow_conds
             DO sb_counter=1,subasin
                 DO acud_class=1,5
                     IF (lakewater_hrr(1,sb_counter,acud_class) < 0.) then
-                        WRITE(*,'(a,i0,a,i0,a)') 'WARNING: No specification for subbasin ',&
+                        WRITE(*,'(a,i0,a,i0,a)') ' WARNING: No specification for subbasin ',&
                          id_subbas_extern(sb_counter), ', reservoir size class ',&
                         acud_class,' found in '''//trim(lake_conds_file)//'''. Using fraction specified in lake.dat'
                     END IF
@@ -1509,11 +1512,11 @@ end subroutine init_interflow_conds
         end where
         OPEN(11,FILE=reservoir_conds_file,STATUS='old',action='read',  IOSTAT=i)    !check existence of file
         if (i/=0) then
-            write(*,'(a,a,a)')'WARNING: reservoir storage file ''',trim(reservoir_conds_file),''' not found, using defaults.'
+            write(*,'(a,a,a)')' WARNING: reservoir storage file ''',trim(reservoir_conds_file),''' not found, using defaults.'
             CLOSE(11)
             return
         end if
-        write(*,'(a,a,a)')'Initialize reservoir storage from file ''',trim(reservoir_conds_file),'''.'
+        write(*,'(a,a,a)')' ... reservoir storage from file ''',trim(reservoir_conds_file),'''.'
 
 
         READ(11,*, IOSTAT=iostatus); READ(11,*, IOSTAT=iostatus)!read 2 header lines
@@ -1523,12 +1526,12 @@ end subroutine init_interflow_conds
 
             IF (iostatus == -1) exit !end of file
 		    IF (iostatus /= 0) THEN
-		        WRITE(*,'(a,a,a)') 'WARNING: format error in '//trim(reservoir_conds_file)//', line skipped.'
+		        WRITE(*,'(a,a,a)') ' WARNING: format error in '//trim(reservoir_conds_file)//', line skipped.'
             ENDIF
 
             subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
 			if (subbas_id < 1 .OR. subbas_id > subasin) then
-				WRITE(*,'(a,i0,a)') 'WARNING: unknown subbasin ',i,' in '//trim(reservoir_conds_file)//', ignored.'
+				WRITE(*,'(a,i0,a)') ' WARNING: unknown subbasin ',i,' in '//trim(reservoir_conds_file)//', ignored.'
                 cycle
             end if
 
@@ -1539,7 +1542,7 @@ end subroutine init_interflow_conds
 
         DO sb_counter=1,subasin
              IF (.not. reservoir_read(sb_counter) ) THEN !reservoir has not been read before, but should be present
-                    WRITE(*,'(a,i0,a)') 'WARNING: No specification for subbasin ',&
+                    WRITE(*,'(a,i0,a)') ' WARNING: No specification for subbasin ',&
                     id_subbas_extern(sb_counter),' found in '''// trim(reservoir_conds_file)//'''. Using values specified in reservoir.dat'
             END IF
         END DO

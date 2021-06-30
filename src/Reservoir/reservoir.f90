@@ -565,7 +565,7 @@ end where
 ! initialise reading of intake.dat if it exists
   open(101,file=pfadp(1:pfadj)// 'Time_series/intake.dat', iostat=istate,status='old')
   if(istate /= 0) then
-    write(*,'(A)') pfadp(1:pfadj)// 'Time_series/intake.dat was not found, assumed zero.'
+    write(*,'(A)') 'WARNING: '//pfadp(1:pfadj)// 'Time_series/intake.dat was not found, assumed zero.'
     close(101)
   else
     write(*,*) 'Reading controlled reservoir outflow through intake devices from file Time_series/intake.dat.'
