@@ -1187,11 +1187,11 @@ Start-Subbasin-ID, Flag(reservoir/river), Flow(m3/s,) Loss(%), Destination-Subba
 ```
 
 *Start-Subbasin-ID*:		ID of sub-basin (source of water abstraction)<br>
-*Flag(reservoir/river)*:		water abstraction from: 1 (river) or 2 (reservoir)<br>
+*Flag(reservoir/river)*:		water abstraction from: 1 (reservoir) or 2 (river)<br>
 *Flow(m<sup>3</sup>/s)*:			amount of re-routed water<br>
 *Loss(%)*:			transmission loss<br>
 *Destination-Subbasin-ID*:		ID of sub-basin (destination of water abstraction)<br>
-*Flag (reservoir/river)*:		water diversion to: 1 (river) or 2 (reservoir)<br>
+*Flag (reservoir/river)*:		water diversion to: 1 (reservoir) or 2 (river)<br>
 *begin\_year*:			start time of water abstraction
 
 Currently only works for daily resolution. For suspended sediments, abstraction from reservoirs assumes zero concentration, whereas abstraction from river uses river concentration.
