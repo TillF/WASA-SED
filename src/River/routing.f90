@@ -317,7 +317,7 @@ IF (STATUS == 2) THEN !regular call during timestep
             !qsediment2_t(d,1,irout) = qsediment2_t(d,1,irout) - sum(qtemp_sed)  !abstract sediment from source (total over all particle size classes)
             !qsediment2_t(d,1,irout)=MAX(qsediment2_t(d,1,irout),0.)   !prevent negative values (is this necessary?)
           end if    
-!    from acude (there must be a large acude in this muni !)
+!    from acude (there must be a large reservoir in this subbasin!)
         ELSE IF (trans_start(2,i) == 1) THEN
           qtemp=MIN(volact(d,irout)*1.e6,q_trans(i)*86400.)
           volact(d,irout)=volact(d,irout)-qtemp/1.e6

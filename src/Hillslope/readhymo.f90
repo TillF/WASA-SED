@@ -1631,9 +1631,25 @@
             end if
             trans_end(1,i) = j
 
+            j = 0 !for performing check while avoiding reading from uninitialized array res_flag
+            IF (trans_start(2,i) == 1 .or. trans_end(2,i) == 1) then
+                if (.not. doreservoir) then
+                    j=1
+                else
+                    if (.not. res_flag(trans_start(1,i)) .or. .not. res_flag(trans_end(1,i)) ) j=1
+                end if
+
+                IF (j ==1 ) then
+                    WRITE(*,'(a, I0, a)') 'WARNING: transposition.dat, line ', loop, ': cannot from/to reservoir (disabled or absent), line ignored.'
+                    cycle
+                end if
+            end if
+
             i=i+1 !increase transposition counter
         end do
         CLOSE(11)
+        i=i-1 !decrease transposition counter, because it was incremented after the last successful read
+
 
         if(i < ntrans) then
             WRITE(*,'(a, I0, a)') 'WARNING: transposition.dat contains less than the specified number of transpositions line ', ntrans,', value corrected.'
