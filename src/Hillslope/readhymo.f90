@@ -1593,39 +1593,54 @@
     IF (dotrans) THEN
         OPEN(11,FILE=pfadp(1:pfadj)// 'Others/transposition.dat',STATUS='old')
         READ(11,*);READ(11,*)
-        DO i=1,ntrans
-            READ(11,*) trans_start(1,i),trans_start(2,i), q_trans(i),loss_trans(i), trans_end(1,i),trans_end(2,i),y_trans(i)
-            ! Use Map IDs in the previous expressions
-        END DO
+        loop=2 !line counter
+
+        i = 1
+        DO WHILE (.TRUE.)
+            READ(11,'(A)',IOSTAT=k)cdummy !read entire line
+
+            if (k == -1) exit !no more lines
+            if (cdummy=="") cycle
+
+            if(i > ntrans) then
+                WRITE(*,'(a, I0, a)') 'WARNING: transposition.dat contains more than the specified number of transpositions line ', ntrans,', excess lines ignored.'
+                exit
+            end if
+
+            !READ(11,*,IOSTAT=k) idummy2(1), idummy2(2), temp1, temp1, idummy2(3), idummy2(4), idummy2(5)
+            READ(cdummy,*,IOSTAT=k) trans_start(1,i),trans_start(2,i), q_trans(i),loss_trans(i), trans_end(1,i),trans_end(2,i),y_trans(i)
+
+            loop = loop + 1 !increase line counter
+            IF (k /= 0) THEN
+                WRITE(*,'(a, I0)') 'ERROR: format error in transposition.dat, line ', loop
+                stop
+            end if
+
+            !convert external to internal ID
+            j = id_ext2int(trans_start(1,i), id_subbas_extern)
+            IF (j == -1) THEN                                        !found unknown subbasin id
+                WRITE(*,'(a, I0, a, I0, a)') 'WARNING: transposition.dat, line ', loop, ': Sub-basin-ID ', trans_start(1,i), ' not found in hymo.dat, ignored.'
+                cycle
+            end if
+            trans_start(1,i) = j
+
+            j = id_ext2int(trans_end(1,i), id_subbas_extern)            !convert external to internal ID
+            IF (j == -1) THEN                                        !found unknown subbasin id
+                WRITE(*,'(a, I0, a, I0, a)') 'WARNING: transposition.dat, line ', loop, ': Sub-basin-ID ', trans_end(1,i), ' not found in hymo.dat, ignored.'
+                cycle
+            end if
+            trans_end(1,i) = j
+
+            i=i+1 !increase transposition counter
+        end do
         CLOSE(11)
 
-        !Eva this relates the MAP IDs (id_subbas_extern(subasin)) to the sorted CODE IDs (id_subbas_intern(subasin)),
-        DO i=1,ntrans
-            j=1
-            DO WHILE (id_subbas_extern(j) /= trans_start(1,i))
-                j=j+1
-                IF (j > 500) THEN
-                    WRITE (*,*) 'trans_start(1,i) loop in readhymo.f'
-                END IF
-            END DO
-            trans_start(1,i)=j !ii: do this more elegantly
-        END DO
-        DO i=1,ntrans
-            j=1
-            DO WHILE (id_subbas_extern(j) /= trans_end(1,i))
-                j=j+1
-                IF (j > 500) THEN
-                    WRITE (*,*) 'trans_end(1,i) loop in readhymo.f'
-                END IF
-            END DO
-            trans_end(1,i)=j !ii: do this more elegantly
-        END DO
+        if(i < ntrans) then
+            WRITE(*,'(a, I0, a)') 'WARNING: transposition.dat contains less than the specified number of transpositions line ', ntrans,', value corrected.'
+            ntrans = i
+        end if
 
     END IF
-
-
-
-
 
     OPEN(11,FILE=pfadp(1:pfadj)// 'Hillslope/frac_direct_gw.dat',IOSTAT=istate,STATUS='old')
     IF (istate==0) THEN
