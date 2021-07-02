@@ -95,7 +95,7 @@ real, allocatable :: etdam(:,:)
 !real, allocatable :: infdam(:,:)
 !initial maximum reservoir area in subbasin [ha]
 real, allocatable :: maxdamarea(:)
-!actual reservoir area [m**2]
+!actual reservoir area (including small ones) [m**2]
 real, allocatable :: damareaact(:)
 !!volume=k*Hv**alpha (Volume/heigth) relationship parameters
 real, allocatable :: alpha_over(:)

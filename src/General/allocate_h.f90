@@ -394,7 +394,16 @@ subroutine allocate_reservoir()
     END IF
 
 
+   IF (doreservoir .or. doacud) THEN
+        allocate( &
+	      damareaact(subasin), &
+	      STAT = istate)
 
+        if (istate/=0) then
+            write(*,'(A,i0,a)')'ERROR: Memory allocation error (',istate,') in reservoir-module.'
+            stop
+        end if
+    end if
 
     IF (doreservoir) THEN
 	    allocate( &
@@ -435,7 +444,6 @@ subroutine allocate_reservoir()
 !	      evapdam(366*nt,subasin), &
 !	      infdam(366*nt,subasin), &
 	      maxdamarea(subasin), &
-	      damareaact(subasin), &
 	      dama(subasin), &
 	      damb(subasin), &
 	      damc(subasin), &
