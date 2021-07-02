@@ -465,6 +465,7 @@ SUBROUTINE readgen(path2do_dat)
     f_lake_volume=.FALSE.
     f_lake_retention=.FALSE.
     f_lake_vollost=.FALSE.
+    f_lake_maxstorcap=.FALSE.
     f_lake_sedinflow=.FALSE.
     f_lake_sedoutflow=.FALSE.
     f_lake_sizedistoutflow=.FALSE.
@@ -660,6 +661,8 @@ SUBROUTINE readgen(path2do_dat)
                     f_lake_retention=.TRUE.
                 CASE ('lake_vollost')
                     f_lake_vollost=.TRUE.
+                CASE ('lake_maxstorcap')
+                    f_lake_maxstorcap=.TRUE.
                 CASE ('lake_sedinflow')
                     f_lake_sedinflow=dosediment
                 CASE ('lake_sedoutflow')

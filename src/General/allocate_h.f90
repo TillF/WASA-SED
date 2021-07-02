@@ -359,6 +359,7 @@ subroutine allocate_reservoir()
           lakefrout(subasin,5), &
           lakecumfrout(subasin,5), &
           lakerunoff(366*nt,subasin), &
+		      lake_vollost(366*nt,subasin,5), & !actually, only relevant when dosediment=TRUE, activated here for debugging
 
 	    STAT = istate)
 
@@ -380,7 +381,6 @@ subroutine allocate_reservoir()
 		      lakefracsedout_hrr(366*nt,subasin,5,n_sed_class), &
 		      lakedep_hrr(366*nt,subasin,5), &
 		      lakecumdep_hrr(subasin,5), &
-		      lake_vollost(366*nt,subasin,5), &
 		      cumseddep(subasin), &
 		      lake_cumseddep(366*nt,subasin,5), &
 

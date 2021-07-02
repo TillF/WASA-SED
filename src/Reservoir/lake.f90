@@ -327,6 +327,7 @@ IF (STATUS == 0) THEN
   call open_subdaily_output_lake(f_lake_outflow,'lake_outflow.out','Year, day, hour, reservoir_class, lakeoutflow(m**3/timestep)')
   call open_subdaily_output_lake(f_lake_volume,'lake_volume.out','Year, day, hour, reservoir_class, lakevolume(m**3)')
   call open_subdaily_output_lake(f_lake_vollost,'lake_vollost.out','Year, day, hour, reservoir_class, lakevollost(m**3)')
+  call open_subdaily_output_lake(f_lake_maxstorcap,'lake_maxstorcap.out','Year, day, hour, reservoir_class, maxstorcap(m**3)')
   call open_subdaily_output_lake(f_lake_retention,'lake_retention.out','Year, day, hour, reservoir_class, lakeretention(m**3/timestep)')
 
   IF (dosediment) then
@@ -943,7 +944,7 @@ endif
 		lake_vollost(step,muni,5)=(lakesedin_hrr(step,muni,5)/acud(muni,5))/1.5
 	  ENDIF
       DO k=1,5
-	    maxlake(muni,k)=max(0.,maxlake(muni,k)-lake_vollost(step,muni,k))
+	    maxlake(muni,k)=max(0.,maxlake(muni,k)-lake_vollost(step,muni,k)) !
 !write(*,'(3I4,5F15.3)')step,muni,k,lake_vollost(step,muni,k),maxlake(muni,k)
 	  ENDDO
 	ENDIF
@@ -1358,19 +1359,33 @@ IF (STATUS == 3) THEN
 
     IF (f_lake_vollost) then
     OPEN(11,FILE=pfadn(1:pfadi)//'lake_vollost.out',STATUS='old',  &
-		 POSITION='append')
-	  DO d=1,dayyear
-	    DO ih=1,nt
-		  hour=ih
+         POSITION='append')
+      DO d=1,dayyear
+        DO ih=1,nt
+          hour=ih
           step=(d-1)*nt+hour
-		  DO k=1,5
-	        WRITE(11,fmtstr)t,d,hour,k,(maxstorcap_hrr(step,imun,k),imun=1,subasin)
-			!WRITE(11,'(4I6,<subasin>f15.3)')t,d,hour,k,(maxstorcap_hrr(step,imun,k),imun=1,subasin)
-		  ENDDO
-		ENDDO
-	  ENDDO
+          DO k=1,5
+            WRITE(11,fmtstr)t,d,hour,k,(lake_vollost(step,imun,k),imun=1,subasin)
+          ENDDO
+        ENDDO
+      ENDDO
     CLOSE(11)
-	ENDIF
+    ENDIF
+
+    IF (f_lake_maxstorcap) then
+    OPEN(11,FILE=pfadn(1:pfadi)//'lake_maxstorcap.out',STATUS='old',  &
+         POSITION='append')
+      DO d=1,dayyear
+        DO ih=1,nt
+          hour=ih
+          step=(d-1)*nt+hour
+          DO k=1,5
+            WRITE(11,fmtstr)t,d,hour,k,(maxstorcap_hrr(step,imun,k),imun=1,subasin)
+          ENDDO
+        ENDDO
+      ENDDO
+    CLOSE(11)
+    ENDIF
 
     IF (dosediment) then
      IF (f_lake_sedinflow) then
