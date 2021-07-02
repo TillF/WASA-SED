@@ -453,7 +453,7 @@ contains
                     else
                         rtemp = 0. !in case of dummy subbasins
                     end if    
-                    WRITE(gw_file_hdle,'(2(I0,A1),F8.2,A1,F12.1)') id_subbas_extern(sb_counter), char(9),id_lu_extern(i_lu),&
+                    WRITE(gw_file_hdle,'(2(I0,A1),F8.2,A1,F0.0)') id_subbas_extern(sb_counter), char(9),id_lu_extern(i_lu),&
                         char(9), rtemp,&
                         char(9),area(sb_counter)*frac_lu(lu_counter,sb_counter)*1e6    !tab separated output
                 endif
@@ -1121,7 +1121,7 @@ end subroutine init_interflow_conds
             do while (.TRUE.)        !read whole file
                 IF (len(trim(error_msg))/=0) THEN    !print error message, if occured
                     if (errors==0) then
-                        write(*,'(A,/,3a12)')' Entities not found in current domain (ignored):','Line','subbasin','LU'
+                        write(*,'(A,/,3a12)')' Format errors or entities not found in current domain (ignored):','Line','subbasin','LU'
                     end if
                     write(*,*)trim(error_msg)
                     error_msg=''
@@ -1137,7 +1137,7 @@ end subroutine init_interflow_conds
 
                 READ(linestr,*,  IOSTAT=i) i_subbasx,i_lux,gwvol_temp, x
                 IF (i/=0 .OR. isnan(0. + i_subbasx+i_lux + gwvol_temp + x)) THEN    !format error
-                    write(error_msg,'(i12,1a12,a)')line,'-',trim(linestr)
+                    write(error_msg,'(i12,1a2,a)')line,' ',trim(linestr)
                     cycle    !proceed with next line
                 END IF
 
@@ -1169,9 +1169,9 @@ end subroutine init_interflow_conds
             END DO
             file_read=1
             CLOSE(file_handle)
-            if (errors>0) then
-                return
-            end if
+            !if (errors>0) then
+            !    return
+            !end if
         end if
 
         errors=0
