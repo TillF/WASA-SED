@@ -441,6 +441,7 @@ lake_sedinflow_r
 lake_sedoutflow_r
 lake_sedretention_r
 lake_sedimentation_r
+lake_volume_r
 lake_watbal
 lake_sedbal
 lake_inflow
@@ -448,6 +449,7 @@ lake_outflow
 lake_storage
 lake_retention
 lake_vollost
+lake_volume
 lake_sedinflow
 lake_sedoutflow
 lake_sizedistoutflow
@@ -1847,10 +1849,12 @@ Nr. |Output file | Content
 21 | ```lake_storage.out``` | Water volume of the reservoir size classes<sup>3</sup>
 22 | ```lake_retention.out``` | Water retention in the reservoir size classes<sup>3</sup>
 23 | ```lake_vollost.out``` | Sediment retention in the reservoir size classes<sup>3</sup>
-24 | ```lake_sedinflow.out``` | Sediment inflow discharges into the reservoir size classes<sup>3</sup>
-25 | ```lake_sedoutflow.out``` | Sediment outflow discharges from the reservoir size classes<sup>3</sup>
-26 | ```lake_sizedistoutflow.out``` | Effluent grain size distribution of the reservoir size classes <sup>4</sup>
-27 | ```lake_storage.stat, reservoir_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
+24 | ```lake_volume.out``` | Water stored in the reservoir size classes<sup>3</sup>
+25 | ```lake_volume_r.out``` | Water stored in the reservoir size classes<sup>1</sup>
+26 | ```lake_sedinflow.out``` | Sediment inflow discharges into the reservoir size classes<sup>3</sup>
+27 | ```lake_sedoutflow.out``` | Sediment outflow discharges from the reservoir size classes<sup>3</sup>
+28 | ```lake_sizedistoutflow.out``` | Effluent grain size distribution of the reservoir size classes <sup>4</sup>
+29 | ```lake_storage.stat, reservoir_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
 
 <sup>1</sup> Results are displayed for the whole catchment after grouping them by reservoir size classes (one value for the whole catchment and each reservoir size class) <br>
 <sup>2</sup> Results are displayed for the whole catchment without distinguishing between size classes (one value for the whole catchment) <br>
