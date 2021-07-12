@@ -308,7 +308,8 @@ IF (STATUS == 2) THEN !regular call during timestep
           qtemp=MIN(qout(d,irout)*86400.,q_trans(i)*86400.) !take as much water as specified, but no more than is available [m³]
           qout(d,irout)=qout(d,irout)-qtemp/86400.   !reduce start of transposition by amount abstracted
           qout(d,irout)=MAX(qout(d,irout),0.)   !prevent negative values (is this necessary?)
-          if (dosediment) then
+          qtemp_sed = 0.
+          if (dosediment .and. (qout(d,irout) > 0.)) then
             !qtemp_sed = qsediment(d,irout) * qtemp/86400. / qout(d,irout)  ![t/d] assume homogenous mixing, abstract the same fraction of sediment as water
             qtemp_sed = sediment_out(irout,:) * qtemp/86400. / qout(d,irout)  ! assume homogenous mixing, abstract the same fraction of sediment as water for every particle size class [t/d]
             
