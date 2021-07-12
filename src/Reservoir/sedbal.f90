@@ -50,8 +50,11 @@ if (res_qout(step,res_index(upstream))/=0.) then
       0.00068*((tempres(step,upstream)-15.)**2.))*1.e-6
 
 ! Overflow rate  Vc (m/s)
-  overflow_rate=res_qout(step,res_index(upstream))/damareaact(upstream)
-!  overflow_rate=0.00032
+  if (damareaact(upstream) /= 0.) then
+    overflow_rate=res_qout(step,res_index(upstream))/damareaact(upstream)
+    else
+    overflow_rate=0.00032 !ii Till: some arbitrary value to prevent division by zero when reservoirs are completely silted up. Make this more reasonable
+  end if
 
 ! calculation of the corresponding equivalent diameter (mm)
   par_a=1.09*(delta)*grav

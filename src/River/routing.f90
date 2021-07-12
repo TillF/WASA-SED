@@ -297,6 +297,7 @@ IF (STATUS == 2) THEN !regular call during timestep
 !    assumption: time delay = 1 day (?)
 !    transfer variable qtemp in [m3/day]
 !ii: needs to be refined for subdaily resolution
+sediment_out = 0. !initialize at beginning of timestep
     
   IF (dotrans) THEN
     DO i=1,ntrans
