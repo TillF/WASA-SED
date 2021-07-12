@@ -1399,6 +1399,12 @@ end subroutine init_interflow_conds
 				WRITE(*,'(a,i0,a)') ' WARNING: unknown particle size class ',k,' in susp_sediment_storage.stat, ignored.'
                 cycle
 			end if
+
+	        if (isnan(dummy1)) then
+                WRITE(*,'(a,i0,a)') ' WARNING: NaN in susp_sediment_storage.stat, ignored.'
+                cycle
+            end if
+
 	        sed_storage(subbas_id,k)=dummy1
         ENDDO
         close(11)
