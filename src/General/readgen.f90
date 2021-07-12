@@ -361,8 +361,8 @@ SUBROUTINE readgen(path2do_dat)
                 soilDens=1300.                 !Density of soil (kg/m3)
                 soilSpecHeat=2.18              !Spec. heat capacity of soil (kJ/kg/K)
                 weightAirTemp=0.5              !Weighting param. for air temp. (-) in 0...1
-                lat = 42.4                     !Latitude of centre of study area
-                lon = 0.55                     !Longitude of centre of study area
+                lat = 42.4 *pi/180             !Latitude of centre of study area
+                lon = 0.55 *pi/180             !Longitude of centre of study area
                 do_rad_corr = .TRUE.           !modification of radiation with aspect and slope
                 do_alt_corr = .TRUE.           !modification of temperature with altitude of LU
                 tempLaps = -0.006              !Temperature lapse rate for modification depending on elevation of TC (°C/m)
