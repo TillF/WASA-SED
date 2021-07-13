@@ -91,7 +91,7 @@ artifacts:
 deploy:
   environment: Windows_binary  
   release: $(APPVEYOR_REPO_TAG_NAME)-build$(APPVEYOR_BUILD_VERSION)
-  tag: $(APPVEYOR_REPO_TAG_NAME)-build$(APPVEYOR_BUILD_VERSION)
+  tag: $(APPVEYOR_REPO_TAG_NAME)  #update the existing tag instead of creating a new one which causes a loop -build$(APPVEYOR_BUILD_VERSION)
   description: 'Windows binaries built by Appveyor ($(APPVEYOR_REPO_COMMIT_TIMESTAMP))'
   provider: GitHub
   auth_token:
@@ -100,7 +100,7 @@ deploy:
   draft: false
   prerelease: false
   force_update: true #overwrite existing releases
-  skip_tags: true #avoid endless loop by pushed (and tagged) release
+  #skip_tags: true #avoid endless loop by pushed (and tagged) release
   on:
  #   branch: master                 # release from master branch only (in fact, this looks for "master" in the tag, so I disabled it 
     APPVEYOR_REPO_TAG: true        # deploy on tag push only
