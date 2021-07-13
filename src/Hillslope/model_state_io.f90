@@ -332,7 +332,7 @@ contains
         if (trim(snow_conds_file)=='' .OR. .not. dosnow) then        !don't do anything if an empty filename is specified
             snow_file_hdle=0
         else
-            snow_file_hdle=15
+            snow_file_hdle=19
             OPEN(snow_file_hdle,FILE=snow_conds_file//trim(suffix), STATUS='replace')
             WRITE(snow_file_hdle,'(a)') 'snow storage (for analysis or model re-start)'
             WRITE(snow_file_hdle,'(11a)')'Subbasin', char(9),'LU', char(9), 'TC' , char(9),&
