@@ -123,6 +123,7 @@ subroutine snow_compute(precipSumMM, tempAir, shortRad, pressAir, relHumid, wind
 
        if(snowWaterEquiv_new <= 0.) then
          precipModif = snowWaterEquivalent*1000 + precipSumMM
+         TEMP_MEAN              =     -9999. !set temeprature to "NA" when no snow is present
        end if
 
        snowCov        =  snowDepl(snowWaterEquiv_new)

@@ -858,7 +858,13 @@
              snowWaterEquiv(day,hh,tcid_instance2)  =  0.
              snowEnergyCont(day,hh,tcid_instance2)  =  0.
              snowAlbedo(day,hh,tcid_instance2)      =  albedoMax
-          end if
+              if(snowTemp(snowTempIndices(1),snowTempIndices(2),snowTempIndices(3)) <=  -10)   then
+                 snowWaterEquiv(day,hh,tcid_instance2)  =  0.
+                else
+                 snowWaterEquiv(day,hh,tcid_instance2)  =  0.
+              end if
+          end if         !Correct if SWE is 0
+
 
           prec    = precipMod(day, hh, tcid_instance2) !Further calculations with modified precipitation signal
           precday = precipMod(day, hh, tcid_instance2) !Further calculations with modified precipitation signal
@@ -2921,17 +2927,3 @@
     RETURN
     END SUBROUTINE soilwat
 
-
-
-
-    logical function isnan(a)
-    real :: a
-
-    if (a.ne.a) then
-        isnan = .true.
-    else
-        isnan = .false.
-    end if
-
-    return
-    end

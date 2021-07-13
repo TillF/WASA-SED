@@ -357,4 +357,17 @@ function add_ifnot_nodata(val1, val2) !adds two values, unless any of them is -1
     return
 end function add_ifnot_nodata
 
+! isnan now seems to be an intrinsic function, no longer needed to be declared then
+!  logical function isnan(a)
+!    real :: a
+!
+!    if (a.ne.a) then
+!        isnan = .true.
+!    else
+!        isnan = .false.
+!    end if
+!
+!    return
+!    end
+
 END MODULE utils_h
