@@ -1290,7 +1290,7 @@ SUBROUTINE hymo_all(STATUS)
         CALL write_subdaily_output_TC(f_snowWaterEquiv,'snowWaterEquiv.out', snowWaterEquiv)
         CALL write_subdaily_output_TC(f_snowAlbedo,'snowAlbedo.out', snowAlbedo)
         CALL write_subdaily_output_TC(f_snowCover,'snowCover.out', snowCover)
-        CALL write_subdaily_output_TC(f_snowTemp,'snowTemp.out', snowTemp)
+        CALL write_subdaily_output_TC(f_snowTemp,'snowTemp.out', snowTemp, 1)
         CALL write_subdaily_output_TC(f_surfTemp,'surfTemp.out', surfTemp)
         CALL write_subdaily_output_TC(f_liquFrac,'liquFrac.out', liquFrac)
         CALL write_subdaily_output_TC(f_fluxPrec,'fluxPrec.out', fluxPrec)
@@ -1498,19 +1498,19 @@ contains
     END SUBROUTINE open_subdaily_output_TC
 
 
-    SUBROUTINE write_output(f_flag,file_name,value_array,spec_decimals)
+    SUBROUTINE write_output(f_flag, file_name, value_array, decimals)
         ! Output daily values of given array
         use utils_h
         IMPLICIT NONE
         LOGICAL, INTENT(IN)                  :: f_flag
         CHARACTER(len=*), INTENT(IN)         :: file_name
         REAL, INTENT(IN)                  :: value_array(:,:)
-        INTEGER, optional ::  spec_decimals
+        INTEGER, optional ::  decimals
 
         IF (f_flag) THEN    !if output file is enabled
             OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old',POSITION='append')
 
-            write(fmtstr,'(a,i0,a,a,a)')       '(i0,a,i0,',subasin,'(a,',fmt_str(maxval(value_array)),'))'        !generate format string
+            write(fmtstr,'(a,i0,a,a,a)')       '(i0,a,i0,',subasin,'(a,',fmt_str(maxval(abs(value_array)), decimals),'))'        !generate format string
 
             DO d=1,dayyear
                 write(11,trim(fmtstr))t,char(9),d,(char(9),value_array(d,i),i=1,subasin)
@@ -1520,18 +1520,20 @@ contains
         END IF
     END SUBROUTINE write_output
 
-    SUBROUTINE write_subdaily_output(f_flag,file_name,value_array)
+    SUBROUTINE write_subdaily_output(f_flag,file_name,value_array, decimals)
     ! Output subdaily values of given array
         use utils_h
         IMPLICIT NONE
         LOGICAL, INTENT(IN)                  :: f_flag
         CHARACTER(len=*), INTENT(IN)         :: file_name
-        REAL, POINTER             :: value_array(:,:,:)
+        REAL, POINTER, INTENT(IN)             :: value_array(:,:,:)
+        integer, optional, INTENT(IN) :: decimals
 
         IF (f_flag) THEN    !if output file is enabled
             OPEN(11,FILE=pfadn(1:pfadi)//file_name, STATUS='old',POSITION='append')
 
-            write(fmtstr,'(a,i0,a,a,a)') '(i0,a,i0,a,i0,',subasin,'(a,',fmt_str(maxval(value_array)),'))'        !generate format string
+            write(fmtstr,'(a,i0,a,a,a)') '(i0,a,i0,a,i0,',subasin,'(a,',fmt_str(maxval(abs(value_array)), decimals),'))'        !generate format string
+            !write(fmtstr,'(a,i0,a,a,a)') '(i0,a,i0,a,i0,',subasin,'(a,','f0.8','))'        !generate format string
 
             DO d=1,dayyear
                 DO j=1,nt
@@ -1542,13 +1544,14 @@ contains
         END IF
     END SUBROUTINE write_subdaily_output
 
-    SUBROUTINE write_subdaily_output_TC(f_flag,file_name,value_array)
+    SUBROUTINE write_subdaily_output_TC(f_flag,file_name,value_array, decimals)
     ! Output subdaily values of given array on TC-scale
         use utils_h
         IMPLICIT NONE
         LOGICAL, INTENT(IN)                  :: f_flag
         CHARACTER(len=*), INTENT(IN)         :: file_name
-        REAL, POINTER             :: value_array(:,:,:)
+        REAL, POINTER, INTENT(IN)             :: value_array(:,:,:)
+        integer, optional, INTENT(IN) :: decimals
         INTEGER :: sb_counter, lu_counter, tc_counter, i_lu
 
         IF (f_flag) THEN    !if output file is enabled
@@ -1556,6 +1559,7 @@ contains
 
             !fmtstr ='(6(i0,a),'//fmt_str(maxval(value_array)*10)//')'        !generate format string
              fmtstr ='(6(i0,a),E12.5)'        !generate format string
+            write(fmtstr,'(a,a,a)') '(6(i0,a),', fmt_str(maxval(abs(value_array)), decimals),')'        !generate format string
 
             DO d=1,dayyear
                 DO j=1,nt

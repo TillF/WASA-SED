@@ -116,16 +116,21 @@ do j = 1,len(string)
 end do
 end function locase
 
-function fmt_str(max_val, fieldwidth, decimals) result(fstr)	!generate format string
+function fmt_str(max_val, decimals, fieldwidth) result(fstr)	!generate format string
 real, intent(in) :: max_val
-integer, optional :: fieldwidth, decimals
+integer, optional, INTENT(IN) :: fieldwidth, decimals
 character(len=5) :: fstr
-integer :: digits, fw_req, fw=11, dec=3
-    if (present(fieldwidth)) fw=fieldwidth !if specified, override defaults
+integer :: digits, fw_req
+integer :: fw=11, dec=3
+    dec=3 !default values (sometimes, the assignment above doesn't seem to work)
+    fw=11
+
     if (present(decimals))   dec=decimals
+    if (present(fieldwidth)) fw=fieldwidth !if specified, override defaults
 
     digits=ceiling(log10(max(1.0,max_val)))+1    !Till: number of pre-decimal digits required
     fw_req=max(6, digits+1+dec) !total fieldwidth required
+    !fw_req = 0 !use 'f0' notation for automatic formatting of pre-decimal digits
 
     if (fw_req <= fw) then
         write(fstr,'(a,i0,a,i0)') 'f',fw_req,'.',dec        !generate format string
