@@ -109,3 +109,7 @@
 /wasa/wasa.vfproj
 /wasa/wasa.vfproj.francke.user
 /wasa/.gitignore
+/.cproject
+/.project
+/.settings/org.eclipse.cdt.codan.core.prefs
+/.settings/org.eclipse.photran.core.prefs
