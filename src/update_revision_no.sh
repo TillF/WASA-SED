@@ -15,7 +15,7 @@ else
 cmmt="(local modifications)"
 fi
 
-# Absolute path to this script
+# absolute path to this script
 # SCRIPT=$(readlink -f $0)
 # SCRIPTPATH=`dirname $SCRIPT`
 
