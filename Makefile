@@ -167,7 +167,7 @@ help:
 	@echo "           all       - Creates the model executable."
 	@echo "           install   - Installs the model executable into PREFIX/bin (directory has to be accessible!)."
 	@echo "           uninstall - Removes the model executable from PREFIX/bin (directory has to be accessible!)."
-	@echo "           clean     - Deletes object files and local executables (retains build directories)."
+	@echo "           clean     - Deletes object files and executables of current version (retains directories)."
 	@echo "           distclean - Deletes the whole build directory with subdirectories."
 	@echo ""
 	@echo "Options  : DEBUG=1   - Creates a debug version."
