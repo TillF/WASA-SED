@@ -10,7 +10,7 @@ WASA-SED rev_269**
 Developed within the SESAM-Project:<br>
 Sediment Export of Semi-Arid Catchment: Monitoring and Modelling 2005-2008<br>
 SESAM II 2010-2014,<br>
-2015-2021
+2015-2022
 
 Institute of Environmental Sciences and Geography, University of Potsdam, Potsdam,<br>
 Deutsches Geoforschungszentrum Potsdam,<br>
@@ -1847,20 +1847,19 @@ Nr. |Output file | Content
 18 | ```lake_sedbal.out``` | Sediment balance components of all upstream reservoirs<sup>2</sup>
 19 | ```lake_inflow.out``` | Water inflow discharges into the reservoir size classes<sup>3</sup>
 20 | ```lake_outflow.out``` | Water outflow discharges from the reservoir size classes<sup>3</sup>
-21 | ```lake_storage.out``` | Water volume of the reservoir size classes<sup>3</sup>
 22 | ```lake_retention.out``` | Water retention in the reservoir size classes<sup>3</sup>
 23 | ```lake_vollost.out``` | Sediment retention in the reservoir size classes per timestep<sup>3</sup>
 24 | ```lake_maxstorcap.out``` | Current (remaining) maximum sotrage capacity for reservoir size classes<sup>3</sup>
 25 | ```lake_volume.out``` | Water stored in the reservoir size classes<sup>3</sup>
-26 | ```lake_volume_r.out``` | Water stored in the reservoir size classes<sup>1</sup>
+26 | ```lake_volume_r.out``` | Total water stored in the reservoir classes<sup>1</sup>
 27 | ```lake_sedinflow.out``` | Sediment inflow discharges into the reservoir size classes<sup>3</sup>
 28 | ```lake_sedoutflow.out``` | Sediment outflow discharges from the reservoir size classes<sup>3</sup>
 29 | ```lake_sizedistoutflow.out``` | Effluent grain size distribution of the reservoir size classes <sup>4</sup>
 30 | ```lake_storage.stat, reservoir_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
 
-<sup>1</sup> Results are displayed for the whole catchment after grouping them by reservoir size classes (one value for the whole catchment and each reservoir size class) <br>
+<sup>1</sup> Results are aggregated over all sub-basins grouped by reservoir size class (one value for the whole catchment and each reservoir size class) <br>
 <sup>2</sup> Results are displayed for the whole catchment without distinguishing between size classes (one value for the whole catchment) <br>
-<sup>3</sup> Results are displayed for all sub-basins after grouping them by reservoir size classes (one value for each sub-basin and reservoir size class). <br>
+<sup>3</sup> Results are displayed for each sub-basin and reservoir size class (one value for each sub-basin and reservoir size class). <br>
 <sup>4</sup> Results are displayed for all sub-basins without distinguishing between size classes (one value for each sub-basin).
 
 **1)** ```res_”ID”_watbal.out```
