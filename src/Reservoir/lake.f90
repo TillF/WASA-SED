@@ -308,38 +308,35 @@ IF (STATUS == 0) THEN
 
 !Ge initialization of output files
 
-  call open_subdaily_output_lake(f_lake_inflow_r,'lake_inflow_r.out','Year, day, hour, inflow_r(m**3/timestep)', subbasin_line=.FALSE.)
-  call open_subdaily_output_lake(f_lake_outflow_r,'lake_outflow_r.out','Year, day, hour, outflow_r(m**3/timestep)', subbasin_line=.FALSE.)
-  call open_subdaily_output_lake(f_lake_retention_r,'lake_retention_r.out','Year, day, hour, retention_r(m**3/timestep)', subbasin_line=.FALSE.)
-  call open_subdaily_output_lake(f_lake_volume_r,'lake_volume_r.out','Year, day, hour, volume_r(m**3)', subbasin_line=.FALSE.)
+  call open_subdaily_output_lake(f_lake_inflow_r,'lake_inflow_r.out', 'Water inflow into the reservoir size classes [m**3/timestep] for all sub-basins (MAP-IDs)')
+  call open_subdaily_output_lake(f_lake_outflow_r,'lake_outflow_r.out', 'Water outflow from the reservoir size classes [m**3/timestep] for all sub-basins (MAP-IDs)')
+  call open_subdaily_output_lake(f_lake_retention_r,'lake_retention_r.out','Water retention in the reservoir size classes [m**3/timestep] for all sub-basins (MAP-IDs)')
+  call open_subdaily_output_lake(f_lake_volume_r,'lake_volume_r.out','Water stored in the reservoir size classes [m**3] for all sub-basins (MAP-IDs)')
+
+  call open_subdaily_output_lake(f_lake_inflow,'lake_inflow.out', 'Water inflow into the reservoir size classes [m**3/timestep] for all sub-basins (MAP-IDs)', subbasin_line='reservoir_class ')
+  call open_subdaily_output_lake(f_lake_outflow,'lake_outflow.out', 'Water outflow from the reservoir size classes [m**3/timestep] for all sub-basins (MAP-IDs)', subbasin_line='reservoir_class '))
+  call open_subdaily_output_lake(f_lake_retention,'lake_retention.out','Water retention in the reservoir size classes [m**3/timestep] for all sub-basins (MAP-IDs)', subbasin_line='reservoir_class '))
+  call open_subdaily_output_lake(f_lake_volume,'lake_volume.out','Water stored in the reservoir size classes [m**3] for all sub-basins (MAP-IDs)', subbasin_line='reservoir_class '))
+
+  call open_subdaily_output_lake(f_lake_watbal,'lake_watbal.out','Water balance components of all upstream reservoirs [m**3/timestep]: totallakeinflow   totallakeoutflow   totallakeprecip totallakeevap   lakevol[m**3]')
+  call open_subdaily_output_lake(f_lake_vollost,'lake_vollost.out','Sediment retention in the reservoir size classes per timestep [m**3]', subbasin_line='reservoir_class ')
+  call open_subdaily_output_lake(f_lake_maxstorcap,'lake_maxstorcap.out','Current (remaining) maximum sotrage capacity for reservoir size classes [m**3]', subbasin_line='reservoir_class ')
 
   IF (dosediment) then
-    call open_subdaily_output_lake(f_lake_sedinflow_r,'lake_sedinflow_r.out','Year, day, hour, sedinflow_r(ton/timestep)', subbasin_line=.FALSE.)
-    call open_subdaily_output_lake(f_lake_sedoutflow_r,'lake_sedoutflow_r.out','Year, day, hour, sedoutflow_r(ton/timestep)', subbasin_line=.FALSE.)
-    call open_subdaily_output_lake(f_lake_sedretention_r,'lake_sedretention_r.out','Year, day, hour, sedretention_r(ton/timestep)', subbasin_line=.FALSE.)
-    call open_subdaily_output_lake(f_lake_sedbal,'lake_sedbal.out','Year, day, hour, totalsedinflow(ton/timestep), totalsedoutflow(ton/timestep), totalsedimentation(ton/timestep), cumsedimentation(ton)', subbasin_line=.FALSE.)
-    call open_subdaily_output_lake(f_lake_sedimentation_r,'lake_sedimentation_r.out','Year, day, hour, lakesedimentation_r(ton)', subbasin_line=.FALSE.)
-  end if
+   call open_subdaily_output_lake(f_lake_sedinflow_r,'lake_sedinflow_r.out','Sediment inflow into the reservoir size classes [ton/timestep]')
+   call open_subdaily_output_lake(f_lake_sedoutflow_r,'lake_sedoutflow_r.out','Sediment outflow from the reservoir size classes [ton/timestep]')
 
-  call open_subdaily_output_lake(f_lake_watbal,'lake_watbal.out','Year, day, hour, totallakeinflow(m**3/timestep), totallakeoutflow(m**3/timestep), totallakeprecip(m**3/timestep), totallakeevap(m**3/timestep), lakevol(m**3)', subbasin_line=.FALSE.)
+   call open_subdaily_output_lake(f_lake_sedinflow,'lake_sedinflow.out','Sediment inflow into the reservoir size classes [ton/timestep]')
+   call open_subdaily_output_lake(f_lake_sedoutflow,'lake_sedoutflow.out','Sediment outflow from the reservoir size classes [ton/timestep]')
 
-  call open_subdaily_output_lake(f_lake_inflow,'lake_inflow.out','Year, day, hour, reservoir_class, lakeinflow(m**3/timestep)')
-  call open_subdaily_output_lake(f_lake_outflow,'lake_outflow.out','Year, day, hour, reservoir_class, lakeoutflow(m**3/timestep)')
-  call open_subdaily_output_lake(f_lake_volume,'lake_volume.out','Year, day, hour, reservoir_class, lakevolume(m**3)')
-  call open_subdaily_output_lake(f_lake_vollost,'lake_vollost.out','Year, day, hour, reservoir_class, lakevollost(m**3)')
-  call open_subdaily_output_lake(f_lake_maxstorcap,'lake_maxstorcap.out','Year, day, hour, reservoir_class, maxstorcap(m**3)')
-  call open_subdaily_output_lake(f_lake_retention,'lake_retention.out','Year, day, hour, reservoir_class, lakeretention(m**3/timestep)')
-
-  IF (dosediment) then
-   call open_subdaily_output_lake(f_lake_sedinflow,'lake_sedinflow.out','Year, day, hour, reservoir_class, lakesedinflow(ton/timestep)')
-   call open_subdaily_output_lake(f_lake_sedoutflow,'lake_sedoutflow.out','Year, day, hour, reservoir_class, lakesedoutflow(ton/timestep)')
-
+   call open_subdaily_output_lake(f_lake_sedretention_r,'lake_sedretention_r.out', 'Sediment retention in the reservoir size classes [ton/timestep]')
+   call open_subdaily_output_lake(f_lake_sedbal,'lake_sedbal.out','Sediment balance components of all upstream reservoirs [ton/timestep]: totalsedinflow   totalsedoutflow   totalsedimentation  cumsedimentation')
+   call open_subdaily_output_lake(f_lake_sedimentation_r,'lake_sedimentation_r.out','Cumulative sediment deposition in the reservoir size classes [ton]')
 
    OPEN(11,FILE=pfadn(1:pfadi)//'lake_sizedistoutflow.out',STATUS='replace')
    IF (f_lake_sizedistoutflow) then
-	WRITE(11,*)'Year, day, hour, sediment size class, lakesizedistoutflow(-)'
-	WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
-	!WRITE(11,'(A24,<subasin>I15)')'                  ', (id_subbas_extern(imun),imun=1,subasin)
+	WRITE(11,*)'Effluent grain size distribution of the reservoir size classes [-]'
+	WRITE(11,fmtstr)'Year    day hour   sediment_size_class', (id_subbas_extern(imun),imun=1,subasin)
     CLOSE(11)
    ELSE
     CLOSE(11, status='delete') !delete any existing file, if no output is desired
@@ -1449,16 +1446,16 @@ END IF
 RETURN
 
     contains
-  SUBROUTINE open_subdaily_output_lake(f_flag,file_name,headerline, subbasin_line)
+  SUBROUTINE open_subdaily_output_lake(f_flag,file_name, headerline, subbasin_line)
         ! open file Output for subdaily values or delete any existing files
         IMPLICIT NONE
         LOGICAL, INTENT(IN)                  :: f_flag
         CHARACTER(len=*), INTENT(IN)         :: file_name,headerline
         INTEGER                              :: iostate
-        LOGICAL, optional                    :: subbasin_line
-        LOGICAL                              :: subbasin_line1
+        CHARACTER(len=*), INTENT(IN), optional                    :: subbasin_line
+        CHARACTER(len=80)     :: subbasin_line1
 
-        subbasin_line1=.TRUE. !default: inlcude line with subbasin numbering
+        subbasin_line1="" !default: include line with subbasin numbering
         if (present(subbasin_line))   subbasin_line1=subbasin_line
 
         if (append_output) then !if enabled, do not create file, but append
@@ -1474,10 +1471,8 @@ RETURN
         end if
         IF (f_flag) THEN    !if output file is enabled
             WRITE(11,'(a)') headerline
-            write(fmtstr,'(a,i0,a)')'(A24,',subasin,'I15)'		!generate format string
-	        if (subbasin_line1) WRITE(11,fmtstr)'                  ', (id_subbas_extern(imun),imun=1,subasin)
-            !write(fmtstr,'(a,i0,a)')'(a,',subasin,'(a,i0))'        !generate format string
-            !WRITE(11,fmtstr)'Year'//char(9)//'Day'//char(9)//'Timestep', (char(9),id_subbas_extern(i),i=1,subasin)
+			write(fmtstr,'(a,i0,a)')'(A24,',subasin,'I15)'		!generate format string
+			WRITE(11,fmtstr) 'Year    day   hour  '//subbasin_line1, (id_subbas_extern(imun),imun=1,subasin)
             CLOSE(11)
         ELSE                !delete any existing file, if no output is desired
             CLOSE(11,status='delete')
