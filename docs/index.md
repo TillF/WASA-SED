@@ -64,7 +64,8 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
   - [4.2 Output of the river module](#4-2-output-of-the-river-module)<br>
   - [4.3 Output of the reservoir module](#4-3-output-of-the-reservoir-module)<br>
 - [5 References](#5-references)<br>
-- [6 Further relevant literature for the WASA-SED model](#6-further-relevant-literature-for-the-wasa-sed-model)<br>
+- [6 Further relevant literature and tools for the WASA-SED model](#6-further-relevant-literature-and-tools-for-the-wasa-sed-model)<br>
+
 
 ## List of figures
 [Figure 1](#figure-1): WASA parameter specification file ```do.dat```.<br>
@@ -1835,25 +1836,25 @@ Nr. |Output file | Content
 6 | ```res_”ID”_sedbal.out``` | Sediment balance components of outlet reservoirs
 7 | ```res_”ID”_longitudinal.out``` | Longitudinal bed profile of outlet reservoirs
 8 | ```res_”ID”_sedcomposition.out``` | Effluent grain size distribution of outlet reservoirs
-9 | ```lake_inflow_r.out``` | Water inflow discharges into the reservoir size classes<sup>1</sup>
-10 | ```lake_outflow_r.out``` | Water outflow discharges from the reservoir size classes<sup>1</sup>
+9 | ```lake_inflow_r.out``` | Water inflow into the reservoir size classes<sup>1</sup>
+10 | ```lake_outflow_r.out``` | Water outflow from the reservoir size classes<sup>1</sup>
 11 | ```lake_retention_r.out``` | Water retention in the reservoir size classes<sup>1</sup>
 12 | ```lake_storage_r.out``` | Water volume of the reservoir size classes<sup>1</sup>
-13 | ```lake_sedinflow_r.out``` | Sediment inflow discharges into the reservoir size classes<sup>1</sup>
-14 | ```lake_sedoutflow_r.out``` | Sediment outflow discharges from the reservoir size classes<sup>1</sup>
+13 | ```lake_sedinflow_r.out``` | Sediment inflow into the reservoir size classes<sup>1</sup>
+14 | ```lake_sedoutflow_r.out``` | Sediment outflow from the reservoir size classes<sup>1</sup>
 15 | ```lake_sedretention_r.out``` | Sediment retention in the reservoir size classes<sup>1</sup>
 16 | ```lake_sedimentation_r.out``` | Cumulative sediment deposition in the reservoir size classes<sup>1</sup>
 17 | ```lake_watbal.out``` | Water balance components of all upstream reservoirs<sup>2</sup>
 18 | ```lake_sedbal.out``` | Sediment balance components of all upstream reservoirs<sup>2</sup>
-19 | ```lake_inflow.out``` | Water inflow discharges into the reservoir size classes<sup>3</sup>
-20 | ```lake_outflow.out``` | Water outflow discharges from the reservoir size classes<sup>3</sup>
+19 | ```lake_inflow.out``` | Water inflow into the reservoir size classes<sup>3</sup>
+20 | ```lake_outflow.out``` | Water outflow from the reservoir size classes<sup>3</sup>
 22 | ```lake_retention.out``` | Water retention in the reservoir size classes<sup>3</sup>
 23 | ```lake_vollost.out``` | Sediment retention in the reservoir size classes per timestep<sup>3</sup>
 24 | ```lake_maxstorcap.out``` | Current (remaining) maximum sotrage capacity for reservoir size classes<sup>3</sup>
 25 | ```lake_volume.out``` | Water stored in the reservoir size classes<sup>3</sup>
 26 | ```lake_volume_r.out``` | Total water stored in the reservoir classes<sup>1</sup>
-27 | ```lake_sedinflow.out``` | Sediment inflow discharges into the reservoir size classes<sup>3</sup>
-28 | ```lake_sedoutflow.out``` | Sediment outflow discharges from the reservoir size classes<sup>3</sup>
+27 | ```lake_sedinflow.out``` | Sediment inflow into the reservoir size classes<sup>3</sup>
+28 | ```lake_sedoutflow.out``` | Sediment outflow from the reservoir size classes<sup>3</sup>
 29 | ```lake_sizedistoutflow.out``` | Effluent grain size distribution of the reservoir size classes <sup>4</sup>
 30 | ```lake_storage.stat, reservoir_storage.stat``` (optional) | Initialisation state variables, see [section 3.6](#3-6-state-variables)
 
@@ -2266,4 +2267,4 @@ Pilz, T (2015): https://github.com/tpilz/LUMP.
 
 [lumpR](https://github.com/tpilz/lumpR) : Geodata-preprocessing for WASA-SED
 
-[SoilDataPrep](https://github.com/TillF/MMEMO)<a name="MMEMO"></a> : assess the impact of various model enhancements, including routines for calibration. 
+[MMEMO](https://github.com/TillF/MMEMO)<a name="MMEMO"></a> : assess the impact of various model enhancements, including routines for calibration. 
