@@ -432,7 +432,7 @@ contains
             DO sb_counter=1,subasin
                 DO acud_class=1,5
 				    if (lake_file_hdle/=0) then
-					    WRITE(lake_file_hdle,'(I0,A1,I0,A1,F11.2)') id_subbas_extern(sb_counter), char(9),acud_class,char(9),&
+					    WRITE(lake_file_hdle,'(I0,A1,I0,A1,F13.2)') id_subbas_extern(sb_counter), char(9),acud_class,char(9),&
 						    lakewater_hrr(tt,sb_counter,acud_class)
 				    endif
 				    total_storage_lake(acud_class) = total_storage_lake(acud_class)+lakewater_hrr(tt,sb_counter,acud_class) * acud(sb_counter,acud_class) !sum up total storage
