@@ -314,9 +314,9 @@ IF (STATUS == 0) THEN
   call open_subdaily_output_lake(f_lake_volume_r,'lake_volume_r.out','Water stored in the reservoir size classes [m**3] for all sub-basins (MAP-IDs)')
 
   call open_subdaily_output_lake(f_lake_inflow,'lake_inflow.out', 'Water inflow into the reservoir size classes [m**3/timestep] for all sub-basins (MAP-IDs)', subbasin_line='reservoir_class ')
-  call open_subdaily_output_lake(f_lake_outflow,'lake_outflow.out', 'Water outflow from the reservoir size classes [m**3/timestep] for all sub-basins (MAP-IDs)', subbasin_line='reservoir_class '))
-  call open_subdaily_output_lake(f_lake_retention,'lake_retention.out','Water retention in the reservoir size classes [m**3/timestep] for all sub-basins (MAP-IDs)', subbasin_line='reservoir_class '))
-  call open_subdaily_output_lake(f_lake_volume,'lake_volume.out','Water stored in the reservoir size classes [m**3] for all sub-basins (MAP-IDs)', subbasin_line='reservoir_class '))
+  call open_subdaily_output_lake(f_lake_outflow,'lake_outflow.out', 'Water outflow from the reservoir size classes [m**3/timestep] for all sub-basins (MAP-IDs)', subbasin_line='reservoir_class ')
+  call open_subdaily_output_lake(f_lake_retention,'lake_retention.out','Water retention in the reservoir size classes [m**3/timestep] for all sub-basins (MAP-IDs)', subbasin_line='reservoir_class ')
+  call open_subdaily_output_lake(f_lake_volume,'lake_volume.out','Water stored in the reservoir size classes [m**3] for all sub-basins (MAP-IDs)', subbasin_line='reservoir_class ')
 
   call open_subdaily_output_lake(f_lake_watbal,'lake_watbal.out','Water balance components of all upstream reservoirs [m**3/timestep]: totallakeinflow   totallakeoutflow   totallakeprecip totallakeevap   lakevol[m**3]')
   call open_subdaily_output_lake(f_lake_vollost,'lake_vollost.out','Sediment retention in the reservoir size classes per timestep [m**3]', subbasin_line='reservoir_class ')
