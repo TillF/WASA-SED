@@ -161,7 +161,7 @@ storcap(:)=0.
   istate=0
   j=2 !for counting lines
   n_reservoir=0
-  res_index = 0
+  res_index(:) = 0
 
   DO WHILE (.TRUE.)
 	  READ (11,'(A)', IOSTAT=istate)fmtstr
@@ -577,6 +577,7 @@ end where
     no_col_intake=GetNumberOfSubstrings(fmtstr)-2
     READ (fmtstr,*) dummy_char, dummy_char, (columnheader(i), i=1,no_col_intake)
     DO i=1,subasin
+        if (do_pre_outflow(i)) cycle !if outflow has been pre-specified for this subbasin, just skip it
         DO j=1,size(columnheader)
             IF(columnheader(j) == id_subbas_extern(i)) THEN
                 corr_column_intakes(res_index(i))= j    !for each subbasin, find position of corresponding column in input file
@@ -586,7 +587,7 @@ end where
         END DO
     END DO
     if(sum(corr_column_intakes) == 0) then
-        write(*,*) '   File intake.dat does not contain relevant reservoir (i.e. subbasin) IDs! Run the model anyway.'
+        write(*,*) '   File intake.dat does not contain relevant reservoir (i.e. subbasin) IDs! Running the model anyway...'
         close(101)
     else
         allocate(r_qintake(no_col_intake))
@@ -617,6 +618,7 @@ end where
 	  READ(11,*);READ(11,*)
 	  READ(11,*, IOSTAT=ka) dummy1,dummy2					!read next line in file
       DO i=1,subasin
+        if (do_pre_outflow(i)) cycle !if outflow has been pre-specified for this subbasin, just skip it
         IF (dummy1==id_subbas_extern(i)) THEN
           nbrbat(res_index(i))=dummy2
 		ENDIF
@@ -1119,7 +1121,7 @@ IF (STATUS == 1) THEN !beginning of a new simulation year
   if(any(f_intake_obs)) then
     do id=1,dayyear*nt
         ! read data for current day from intake.dat
-        read(101, *, iostat=istate) dummy1,dummy2, r_qintake
+        read(101, *, iostat=istate) dummy1,dummy2, r_qintake !ii: read only columns that are actually needed
         IF (istate/=0) THEN
             write(*,'(A)')'ERROR: Premature end of file intake.dat.'
             stop
