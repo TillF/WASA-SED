@@ -1,16 +1,17 @@
 !!!This repository contains the source code. For generating the executable, please use a Fortran compiler of your system.
-!!!Windows-users may try the binaries provided in the [release-section](https://github.com/TillF/WASA-SED/releases).
+!!!Windows-users may try the (irregularly updated) binaries provided in the [release-section](https://github.com/TillF/WASA-SED/releases).
 
 
 WASA-SED Model
 --------------
-WASA-SED is a numerical model for simulation hydrological and sediment fluxes from meso-scale catchments [(Mueller et al., 2010)](https://www.geosci-model-dev.net/3/275/2010/gmd-3-275-2010.pdf).
+WASA-SED is a numerical model for simulating hydrological and sediment fluxes from meso-scale catchments [(Mueller et al., 2010)](https://www.geosci-model-dev.net/3/275/2010/gmd-3-275-2010.pdf).
 This repository contains source code and documentation.
 
-All rights under the stated license (see [```license.txt```](https://github.com/TillF/WASA-SED/blob/master/license.txt)) of the WASA-SED code are with the SESAM-Project and its successors, c/o Till Francke, Universität Potsdam, Karl-Liebknecht-Str. 24-25, 14473 Potsdam, Germany, please contact the maintainer of this repository, e.g. via the 'Issues' function.
+All rights under the stated license (see [```license.txt```](https://github.com/TillF/WASA-SED/blob/master/license.txt)) of the WASA-SED code are with the SESAM-Project and its successors, c/o Till Francke, Universität Potsdam, Karl-Liebknecht-Str. 24-25, 14473 Potsdam, Germany.
+If you find bugs, please contact the maintainer of this repository, e.g. via the 'Issues' function.
 
 ******************************
-WASA-SED is a large and complex hydrological and sediment transport model. It is not a polished point-and-click GUI tool. Extensive knowledge of its design, purpose, and limitations is required in order to apply it properly. See [```license.txt```](https://github.com/TillF/WASA-SED/blob/master/license.txt) for terms of use.
+WASA-SED is a large and complex hydrological and sediment transport model. It is not a polished point-and-click GUI tool. Extensive knowledge of its design, purpose and limitations is required in order to apply it properly. See [```license.txt```](https://github.com/TillF/WASA-SED/blob/master/license.txt) for terms of use.
 ******************************
 
 Contents
@@ -35,9 +36,9 @@ Contents
 
 Installation
 --------
-To run the model, use the WASA.exe executable provided in the [release-section](https://github.com/TillF/WASA-SED/releases) (MS Windows only).
+To run the model, use the WASA.exe executable (file provided in the [release-section](https://github.com/TillF/WASA-SED/releases, MS Windows only).
 
-Alternatively, compile the source code on your own (recommended). A Makefile (adjusted to _GNU make_, on Windows, use [MinGW](http://mingw.org/)) is provided. For more information on how to compile and install the model, type `make help` in the console within the WASA-SED main directory. 
+Alternatively, compile the source code yourself (recommended). A Makefile (adjusted to _GNU make_, on Windows, use [MinGW](http://mingw.org/)) is provided. For more information on how to compile and install the model, type `make help` in the console within the WASA-SED main directory. 
 To specify your desired compiler or adjust the compiler flags, you have to alter the Makefile. By default, it runs with the _GNU fortran_ compiler _gfortran_. The compiler flags are adapted to version 5.x. For more information, see comments in the Makefile.
 
 Reference
@@ -47,6 +48,6 @@ E.N. Mueller, A. Güntner, T. Francke, G. Mamede (2010): Modelling sediment expo
 
 Auxiliary Tools
 ---------
-[SoilDataPrep](https://github.com/tillf/SoilDataPrep/SoilDataPrep) : soildata-preprocessing for WASA-SED
+[SoilDataPrep](https://github.com/TillF/SoilDataPrep) : soildata-preprocessing for WASA-SED
 
 [lumpR](https://github.com/tpilz/lumpR) : Geodata-preprocessing for WASA-SED
