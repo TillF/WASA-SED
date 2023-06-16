@@ -95,14 +95,14 @@ deploy:
   description: 'Windows binaries built by Appveyor ($(APPVEYOR_REPO_COMMIT_TIMESTAMP))'
   provider: GitHub
   auth_token:
-    secure: 1SmCkONwXVzO7MjKafzWSIZwzBMQaiYlcy3MQ8G5wpY8foiNwhI4Fj+JlIzYF3lm
+    secure: fb2gcx61ygo+diunoypj9CGkOYRaFMmucSkkyNnntKdcJYGm6boXjsSAfprc1K/+
   artifacts: WASA-SEDexec_windows_msys2,WASA-SEDexec_mingw64
   draft: false
   prerelease: false
   force_update: true #overwrite existing releases
   #skip_tags: true #avoid endless loop by pushed (and tagged) release
   on:
- #   branch: master                 # release from master branch only (in fact, this looks for "master" in the tag, so I disabled it 
+    branch: master                 # release from master branch only (in fact, this looks for "master" in the tag, so I disabled it 
     APPVEYOR_REPO_TAG: true        # deploy on tag push only
 
 on_finish:
