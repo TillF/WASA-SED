@@ -2198,7 +2198,7 @@ Neitsch, S.L., Arnold, J.G., Kiniry, J.R., Williams, J.R., King, K.W. (2002): So
 Pilz, T., T. Francke, & A. Bronstert (2017): lumpR: An R package facilitating landscape discretisation for hillslope-based hydrological models, Geosci Model Dev, 10(8), 3001–3023, doi:https://doi.org/10.5194/gmd-10-3001-2017.
 
 <a name="rottler-2017"></a>
-Rottler, E. (2017): Implementation of a snow routine into the hydrological model WASA-SED and its validation in a mountainous catchment. MSc Thesis, University Potsdam, Germany. To be published on https://publishup.uni-potsdam.de/opus4-ubp/home).
+Rottler, E. (2017): Implementation of a snow routine into the hydrological model WASA-SED and its validation in a mountainous catchment. MSc Thesis, University Potsdam, Germany. https://doi.org/10.25932/publishup-50496.
 
 <a name="williams-1995"></a>
 Williams, J. (1995): The EPIC Model. In: Singh, V. P. (Eds.): Computer Models of Watershed Hydrology. Water Resources Publications, Highlands Ranch, CO., pp. 909-1000.
