@@ -1,5 +1,6 @@
-!!!This repository contains the source code. For generating the executable, please use a Fortran compiler of your system.
-!!!Windows-users may try the (irregularly updated) binaries provided in the [release-section](https://github.com/TillF/WASA-SED/releases).
+!!! This repository contains the source code. For generating the executable, please use a Fortran compiler of your system.
+
+!!! Windows-users may try the (irregularly updated) binaries provided in the [release-section](https://github.com/TillF/WASA-SED/releases).
 
 
 WASA-SED Model
@@ -36,7 +37,7 @@ Contents
 
 Installation
 --------
-To run the model, use the WASA.exe executable (file provided in the [release-section](https://github.com/TillF/WASA-SED/releases, MS Windows only).
+To run the model, use the WASA.exe executable. Windows user may use the file provided in the [release-section](https://github.com/TillF/WASA-SED/releases).
 
 Alternatively, compile the source code yourself (recommended). A Makefile (adjusted to _GNU make_, on Windows, use [MinGW](http://mingw.org/)) is provided. For more information on how to compile and install the model, type `make help` in the console within the WASA-SED main directory. 
 To specify your desired compiler or adjust the compiler flags, you have to alter the Makefile. By default, it runs with the _GNU fortran_ compiler _gfortran_. The compiler flags are adapted to version 5.x. For more information, see comments in the Makefile.
