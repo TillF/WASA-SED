@@ -4,13 +4,13 @@
 main contributors:
 Andreas Güntner (2000-2002), Eva Nora Müller (2006-2009), George Mamede(2006-2009), Till Francke (2006-...), Pedro Medeiros (2007-2008), Tobias Pilz (2016), Erwin Rottler (2017)
 
-**30.6.2021<br>
-WASA-SED rev_269**
+**30.5.2024<br>
+WASA-SED rev_278**
 
 Developed within the SESAM-Project:<br>
 Sediment Export of Semi-Arid Catchment: Monitoring and Modelling 2005-2008<br>
 SESAM II 2010-2014,<br>
-2015-2022
+2015-2024
 
 Institute of Environmental Sciences and Geography, University of Potsdam, Potsdam,<br>
 Deutsches Geoforschungszentrum Potsdam,<br>
@@ -982,6 +982,7 @@ This file contains a single value which will be used as static wind speed value 
 (optional)
 
 The two logical parameters do_rad_corr and do_alt_corr allow controlling, whether radiation correction for aspect and slope, and height-depended temperature modifications, respectively, are applied.
+Parameters not contained in ```snow_params.ctl``` are set to the default values listed in the example below.
 
 ```
 #WASA-control file for snow routines;
@@ -1002,9 +1003,13 @@ soilDens	1300	#Density of soil (kg/m3)
 soilSpecHeat	2.18	#Spec. heat capacity of soil (kJ/kg/K)
 weightAirTemp	0.5	#Weighting param. for air temp. (-) in 0...1
 lat	42.4	#Latitude of centre of study area
-lon 0.55	#Longitude of centre of study area
-do_rad_corr .TRUE. #modification of radiation with aspect and slope
-do_alt_corr=.TRUE.   #modification of temperature with altitude of LU
+lon	0.55	#Longitude of centre of study area
+do_rad_corr	.TRUE.	#modification of radiation with aspect and slope
+do_alt_corr	.TRUE.	#modification of temperature with altitude of LU
+tempLaps	-0.006	#Temperature lapse rate for modification depending on elevation of TC (°C/m)
+tempAmplitude	8	#Temperature amplitude to simulate daily cycle (°C])
+tempMaxOffset	2	#Offset of daily temperature maximum from 12:00 (h)
+snowFracThresh	0.02	#Threshold to determine when TC snow covered (m)
 ```
 
 **19)** ```lu2.dat```<br>
