@@ -618,7 +618,7 @@ I) Groundwater below soil zone is ignored / not relevant for surface processes |
 I.1) No bedrock is taken into account | Water percolation out of the deepest soil horizon leaves the model domain. | 0	| Select option 1.1.1 or 1.1.2
 I.1.1) Depth of soil zone is the sum of all horizons given in ```soil.dat``` | See 1.1) |	0 |	0	/ meandep=-1, maxdep=-1, riverbed
 I.1.2) Depth of soil zone is meandep (or the total profile depth given in ```soil.dat``` if this is larger than meandep) | See 1.1) |	0 | 0 / Meandep, Maxdep, riverbed
-I.2) Bedrock is taken into account below deepest soil horizon | Hydraulic conductivity of bedrock may affect percolation rates out of the deepest soil horizon. A saturated zone (“groundwater”) above bedrock may consequently evolve due to saturation. Groundwater percolating into the bedrock leaves the model domain. | 0 | Select option 1.2.1 or 1.2.2
+I.2) Bedrock is taken into account below deepest soil horizon | Hydraulic conductivity of bedrock may affect percolation rates out of the deepest soil horizon. A saturated zone (“groundwater”) above bedrock may consequently evolve due to saturation. Groundwater percolating into the bedrock leaves the model domain. | 0 | Select option I.2.1 or I.2.2
 I.2.1) Bedrock is given in ```soil.dat```	| See 1.2) | 0 | 1 / Kfsu, riverbed
 I.2.2) If bedrock is not given in ```soil.dat```, bedrock is assumed to be in the depth defined by meandep (or below deepest horizon given in ```soil.dat``` if its depth is greater than meandep) | See 1.2) |	0 | 0 / Meandep, maxdep, kfsu, riverbed
 
@@ -629,7 +629,7 @@ Modelling options | Groundwater regime, internal representation of processes | G
 ---|---|---|---
 II) Groundwater below soil zone is taken into account | Soil water balance is modelled within the zone above bedrock. Water percolation out of the deepest soil horizon enters linear groundwater storage | 1 | Select option 2.1 or 2.2
 II.1) No bedrock is taken into account | Water percolation out of the deepest soil horizon goes directly into the groundwater storage. | 1 | 0 / meandep=-1, maxdep=-1, frgw_delay, riverbed
-II.2) Bedrock is taken into account below deepest soil horizon | The hydraulic conductivity of the bedrock may affect percolation rates out of the deepest soil horizon. A saturated zone (“groundwater”) above bedrock may consequently evolve due to saturation. Percolation into the bedrock is added to linear groundwater storage. | 1 | Select option 2.2.1 or 2.2.2
+II.2) Bedrock is taken into account below deepest soil horizon | The hydraulic conductivity of the bedrock may affect percolation rates out of the deepest soil horizon. A saturated zone (“groundwater”) above bedrock may consequently evolve due to saturation. Percolation into the bedrock is added to linear groundwater storage. | 1 | Select option II.2.1 or II.2.2
 II.2.1) Bedrock is given in ```soil.dat``` | See 2.2) | 1 | 1 / Kfsu, frgw_delay, riverbed
 II.2.2) If bedrock is not given in soil.dat, bedrock is assumed to be in the depth defined by meandep (or below deepest horizon given in ```soil.dat``` if the profile depth is greater than meandep) | See 2.2) | 1 | 0 / Meandep, maxdep, kfsu, frgw_delay, riverbed
 
