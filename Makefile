@@ -112,7 +112,7 @@ OBJ=$(OBJ_FILES:%.f90=$(OBJDIR)/%.o)
 # -c: compiling without linking -> produces object files (not needed to specify in CFLAGS!)
 # -fimplicit-none: no implicit typing allowed; even if "implicit none" was not specified in a function, subroutine etc.
 # DEBUG only (slow compiling and execution)
-# -g: produce debugging symbols
+# -g: produce debugging symbols (required for actual stepping into with gdb / IDE). 
 # -Wtabs: tab characters in source code allowed; use -Wno-tabs instead since GNU v. 5.x
 # -Wall: enable all common compiler warnings
 # -Wextra: extra warnings
@@ -128,9 +128,9 @@ OBJ=$(OBJ_FILES:%.f90=$(OBJDIR)/%.o)
 # -Os: optimize for size of compiled executable
 
 FC=gfortran
-CDFLAGS=-g -Og -fcheck=all -Wall -Wextra -ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -Wno-compare-reals -fbacktrace -ffpe-trap=invalid,zero,overflow
+CDFLAGS=-g -Og -static -fcheck=all -Wall -Wextra -ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wtabs -Wno-compare-reals -fbacktrace -ffpe-trap=invalid,zero,overflow -ffpe-summary=invalid,zero,overflow 
 #CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s
-CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s -static
+CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wtabs -O3 -s -static
 #CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s -static-libgfortran -static-libgcc
 LFLAGS=
 
