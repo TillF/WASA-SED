@@ -140,7 +140,7 @@ DO i=1,subasin
 END DO
 
 !allocate memory for subbasin in- and outflow
-allocate( qout(366 + size(hrout,dim=1) , subasin)) !
+allocate( qout(366, subasin)) !
 qout(:,:)=0.
 
 
