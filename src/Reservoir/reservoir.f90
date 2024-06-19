@@ -29,7 +29,7 @@ character(100) :: dummy_char
 !Ge include j,nbrbat1,cont,upstream,downstream
 INTEGER :: j,nbrbat1,flag_cav
 REAL :: elevhelp,evaphelp2,volhelp !,elevhelp2,elevhelp3
-REAL :: help,help1,help2,help3,evaphelp,areahelp,helpout,prechelp !,helpin,infhelp
+REAL :: help,help1,help2,help3,evaphelp,areahelp,helpout,prechelp, vol_diff, area_diff !,helpin,infhelp
 !Ge actual storage capacity of large river reservoir in a certain year[10**6 m**3]
 !REAL :: storcapact
 
@@ -954,12 +954,17 @@ IF (STATUS == 1) THEN !beginning of a new simulation year
      nbrbat1=nbrbat(res_index(i))
      IF (nbrbat(res_index(i)) /= 0) THEN
       DO j=1,nbrbat(res_index(i))-1
-        IF (volact(1,i)*1.e6 >= vol_bat(j,i).AND.  &
-            volact(1,i)*1.e6 <= vol_bat(j+1,i)) THEN
-          damareaact(i)=area_bat(j,i)+((volact(1,i)*1.e6)-vol_bat  &
-                (j,i))/(vol_bat(j+1,i)-vol_bat(j,i))*  &
-                (area_bat(j+1,i)-area_bat(j,i))
-	    ENDIF
+        vol_diff  = vol_bat(j+1,i)-vol_bat(j,i)
+        if (vol_diff==0) then
+            damareaact(i)=area_bat(j,i) !Till: no volume change = no area change (added to catch division by 0.)
+        else
+            area_diff = area_bat(j+1,i)-area_bat(j,i)
+            IF (volact(1,i)*1.e6 >= vol_bat(j,i).AND.  &
+                volact(1,i)*1.e6 <= vol_bat(j+1,i)) THEN
+              damareaact(i)=area_bat(j,i)+((volact(1,i)*1.e6)- &
+                            vol_bat(j,i))/vol_diff * area_diff
+            ENDIF
+	    end if
 	  ENDDO
      ELSE
 	  if (volact(1,i) /= 0.) then
