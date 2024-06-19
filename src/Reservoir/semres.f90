@@ -1057,8 +1057,13 @@ end if
 	  npt=npoints(j,res_index(upstream))
 
 !write(*,'(3I6,6F10.3)')id_sec_extern(j,upstream),p1,p2,elev,watelev_sec(j,upstream)
+      if (p1/=-999) then
+        dummy3 = y_sec(p1,j,res_index(upstream))
+      else
+        dummy3 = -999 !Till: prevent non-defined reference in the former case
+      end if
 
-	  if (p1/=-999 .and. y_sec(p1,j,res_index(upstream))>watelev_sec(j,res_index(upstream))) then !main channel was defined for each cross section
+	  if (dummy3 > watelev_sec(j,res_index(upstream))) then !main channel was defined for each cross section
         x_p1=x_sec(p1,j,res_index(upstream))
 	    side_p1=abs(y_sec(p1,j,res_index(upstream))-y_sec(p1+1,j,res_index(upstream)))/abs(x_sec(p1,j,res_index(upstream))-x_sec(p1+1,j,res_index(upstream)))
 	    if (side_p1>sideslope_pt1(j,res_index(upstream))) then      !A changed upstream to res_index(upstream)
@@ -1075,7 +1080,13 @@ end if
 		  endif
 	    ENDDO
 	  endif
-	  if (p2/=-999 .and. y_sec(p2,j,res_index(upstream))>watelev_sec(j,res_index(upstream))) then !main channel was defined for each cross section
+	  if (p2/=-999) then
+        dummy3 = y_sec(p2,j,res_index(upstream))
+      else
+        dummy3 = -999 !Till: prevent non-defined reference in the former case
+      end if
+
+	  if (dummy3>watelev_sec(j,res_index(upstream))) then !main channel was defined for each cross section
         x_p2=x_sec(p2,j,res_index(upstream))
 	    side_p2=abs(y_sec(p2,j,res_index(upstream))-y_sec(p2-1,j,res_index(upstream)))/abs(x_sec(p2,j,res_index(upstream))-x_sec(p2-1,j,res_index(upstream)))
 	    if (side_p2>sideslope_pt2(j,res_index(upstream))) then              !A changed upstream to res_index(upstream)

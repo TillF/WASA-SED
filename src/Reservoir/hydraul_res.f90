@@ -18,7 +18,7 @@ INTEGER :: interv
 
 REAL :: damelev,TAN,dist0_sec,discharge_calc !,side_slope
 !REAL :: area1,elev1
-REAL :: loclosscoef,coef,weight !maxelev,
+REAL :: loclosscoef,coef,weight, vol_diff !maxelev,
 REAL ::  lowlim,toplim,dep,error,error1
 REAL ::  area_part(200,200) !,centroid(200,200)
 REAL :: flow_regime,normaldepth(200)
@@ -69,9 +69,14 @@ IF (reservoir_balance == 1) THEN
   DO l=1,(nbrbat(res_index(upstream))-1)
     IF (damvol0(res_index(upstream)) >= vol_bat(l,upstream).AND.  &
         damvol0(res_index(upstream)) <= vol_bat(l+1,upstream)) THEN
-      damelev0(step,res_index(upstream))=elev_bat(l,upstream)+(damvol0(res_index(upstream))-  &
-        vol_bat(l,upstream))/(vol_bat(l+1,upstream)- vol_bat(l,upstream))*  &
-        (elev_bat(l+1,upstream)-elev_bat(l,upstream))
+
+      vol_diff = vol_bat(l+1,upstream)- vol_bat(l,upstream)
+      if (vol_diff==0) then
+         damelev0(step,res_index(upstream))=elev_bat(l,upstream) !Till: no volume change = no elevation change (added to catch division by 0.)
+      else
+          damelev0(step,res_index(upstream))=elev_bat(l,upstream)+(damvol0(res_index(upstream))-  &
+            vol_bat(l,upstream))/vol_diff * (elev_bat(l+1,upstream)-elev_bat(l,upstream))
+      end if
     END IF
   END DO
   if (damelev0(step,res_index(upstream)) == -1.) then !flag as "not set"
@@ -664,7 +669,7 @@ IF (k /= 0) THEN
     tothead_sec(k,res_index(upstream))=crwatelev_sec(k,res_index(upstream))+ dynhead_sec(k,res_index(upstream))
     energslope_sec(k,res_index(upstream))=(meanvel_sec(k,res_index(upstream))**2.)*  &
 		(manning_sec(k,res_index(upstream))**2.)/ (hydrad_sec(k,res_index(upstream))**(4./3.))
-    calctothead_sec(k,res_index(upstream))=tothead_sec(k,upstream)
+    calctothead_sec(k,res_index(upstream))=tothead_sec(k,res_index(upstream))
 	k=k-1
   endif
 
@@ -788,8 +793,13 @@ dummy1=21
 				(energslope_sec(k+1-p,res_index(upstream))+ energslope_sec(k+2-p,res_index(upstream)))
 dummy1=23
 		  else !S2
-		    headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,res_index(upstream))*((2.*discharge_sec(k+1-p,res_index(upstream))/((discharge_sec(k+1-p,res_index(upstream))/sqrt(energslope_sec(k+1-p,res_index(upstream))))+ &
-				(discharge_sec(k+2-p,res_index(upstream))/sqrt(energslope_sec(k+2-p,res_index(upstream))))))**2.)
+		    if (energslope_sec(k+2-p,res_index(upstream))==0) then
+		        write(*,*)("Unexpected values in reservoir hydraulics, results might be flawed") !Til: dirty fix
+		        headloss_sec(k+1-p,res_index(upstream))=0
+		    else
+                headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,res_index(upstream))*((2.*discharge_sec(k+1-p,res_index(upstream))/((discharge_sec(k+1-p,res_index(upstream))/sqrt(energslope_sec(k+1-p,res_index(upstream))))+ &
+                    (discharge_sec(k+2-p,res_index(upstream))/sqrt(energslope_sec(k+2-p,res_index(upstream))))))**2.)
+            end if
 dummy1=22
           endif
 		endif

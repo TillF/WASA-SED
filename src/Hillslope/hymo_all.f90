@@ -506,6 +506,7 @@ SUBROUTINE hymo_all(STATUS)
         CALL open_subdaily_output_TC(f_radiMod,'radiMod.out','Output file TC-wise radiation modified for slope and aspect (-)')
         CALL open_subdaily_output_TC(f_temperaMod,'temperaMod.out','Output file TC-wise temperature corrected for elevation (-)')
 
+        if (doacud) CALL lake(0,dummy)
     END IF
 
 

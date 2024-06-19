@@ -469,16 +469,14 @@ DO h=1,nt
 !write(*,*)d,id_subbas_extern(upstream),dummy,(sediment_out(upstream,k),k=1,n_sed_class)
 !if (d==2)stop
 
-   if (dosediment) then
+   if (dosediment .and. doreservoir .and. res_index(upstream)/=0) then
 	 do k=1,n_sed_class !George
-	  IF (doreservoir) THEN
        sedinflow_g(step,res_index(upstream),k) = add_ifnot_nodata(sediment_in(upstream,k), sed_qlateral(res_index(upstream),k))
        IF (storcap(upstream) > 0. .and. t >= damyear(upstream)) THEN
          sedoutflow_g(step,res_index(upstream),k)=res_sediment_out(res_index(upstream),k)
 	   ELSE
          sedoutflow_g(step,res_index(upstream),k)=sedinflow_g(step,res_index(upstream),k)
 	   ENDIF
-	  ENDIF
 	 enddo
    endif
 !*************************************************************************

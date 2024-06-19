@@ -954,7 +954,7 @@ IF (STATUS == 1) THEN !beginning of a new simulation year
      nbrbat1=nbrbat(res_index(i))
      IF (nbrbat(res_index(i)) /= 0) THEN
       DO j=1,nbrbat(res_index(i))-1
-        vol_diff  = vol_bat(j+1,i)-vol_bat(j,i)
+        vol_diff = vol_bat(j+1,i)-vol_bat(j,i)
         if (vol_diff==0) then
             damareaact(i)=area_bat(j,i) !Till: no volume change = no area change (added to catch division by 0.)
         else
@@ -1229,15 +1229,19 @@ IF (STATUS == 2) THEN !regular call during timestep
 ! Calculation of the actual reservoir area by interpolation (using the stage-area-volume curve)
       IF (nbrbat(res_index(upstream)) /= 0) THEN
         DO j=1,nbrbat(res_index(upstream))-1
-          IF (volact(step,upstream) >= vol_bat(j,upstream).AND.  &
-                volact(step,upstream) <= vol_bat(j+1,upstream)) THEN
-            areahelp=area_bat(j,upstream)+(volact(step,upstream)-vol_bat  &
-                (j,upstream))/(vol_bat(j+1,upstream)-vol_bat(j,upstream))*  &
-                (area_bat(j+1,upstream)-area_bat(j,upstream))
-            elevhelp=elev_bat(j,upstream)+(volact(step,upstream)-vol_bat  &
-                (j,upstream))/(vol_bat(j+1,upstream)-vol_bat(j,upstream))*  &
-                (elev_bat(j+1,upstream)-elev_bat(j,upstream))
-          END IF
+          vol_diff = vol_bat(j+1,upstream)-vol_bat(j,upstream)
+          if (vol_diff==0) then
+              areahelp=area_bat(j,upstream) !Till: no volume change = no area change (added to catch division by 0.)
+              elevhelp=elev_bat(j,upstream)
+          else
+              IF (volact(step,upstream) >= vol_bat(j,upstream).AND.  &
+                    volact(step,upstream) <= vol_bat(j+1,upstream)) THEN
+                areahelp=area_bat(j,upstream)+(volact(step,upstream)-vol_bat(j,upstream))/ vol_diff*  &
+                    (area_bat(j+1,upstream)-area_bat(j,upstream))
+                elevhelp=elev_bat(j,upstream)+(volact(step,upstream)-vol_bat(j,upstream))/ vol_diff*  &
+                    (elev_bat(j+1,upstream)-elev_bat(j,upstream))
+              END IF
+           end if
         END DO
 ! Calculation of the actual reservoir area by interpolation (using the morphologic parameter alpha)
       ELSE
@@ -1488,12 +1492,16 @@ IF (STATUS == 2) THEN !regular call during timestep
         DO j=1,nbrbat(res_index(upstream))-1
           IF (volact(step,upstream) >= vol_bat(j,upstream).AND.  &
                 volact(step,upstream) <= vol_bat(j+1,upstream)) THEN
-            areahelp=area_bat(j,upstream)+(volact(step,upstream)-vol_bat  &
-                (j,upstream))/(vol_bat(j+1,upstream)-vol_bat(j,upstream))*  &
-                (area_bat(j+1,upstream)-area_bat(j,upstream))
-            elevhelp=elev_bat(j,upstream)+(volact(step,upstream)-vol_bat  &
-                (j,upstream))/(vol_bat(j+1,upstream)-vol_bat(j,upstream))*  &
-                (elev_bat(j+1,upstream)-elev_bat(j,upstream))
+            vol_diff = vol_bat(j+1,upstream)-vol_bat(j,upstream)
+            if (vol_diff==0) then
+              areahelp=area_bat(j,upstream) !Till: no volume change = no area change (added to catch division by 0.)
+              elevhelp=elev_bat(j,upstream)
+            else
+                areahelp=area_bat(j,upstream)+(volact(step,upstream)-vol_bat(j,upstream))/vol_diff* &
+                    (area_bat(j+1,upstream)-area_bat(j,upstream))
+                elevhelp=elev_bat(j,upstream)+(volact(step,upstream)-vol_bat(j,upstream))/vol_diff* &
+                    (elev_bat(j+1,upstream)-elev_bat(j,upstream))
+             end if
           END IF
         END DO
       ELSE
