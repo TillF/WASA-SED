@@ -773,8 +773,13 @@ IF (k /= 0) THEN
 
 		if (bedslope_sec(k+1-p,res_index(upstream)) < crslope_sec(k+1-p,res_index(upstream))) then
 		  if (watelev_sec(k+1-p,res_index(upstream)) >= normalelev_sec(k+1-p,res_index(upstream))) then !M1
-		    headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,res_index(upstream))*((2.*discharge_sec(k+1-p,res_index(upstream))/((discharge_sec(k+1-p,res_index(upstream))/sqrt(energslope_sec(k+1-p,res_index(upstream))))+ &
-				(discharge_sec(k+2-p,res_index(upstream))/sqrt(energslope_sec(k+2-p,res_index(upstream))))))**2.)
+		    if (energslope_sec(k+2-p,res_index(upstream))==0) then
+                write(*,*)("Unexpected values in reservoir hydraulics, results might be flawed") !Till: dirty fix
+                headloss_sec(k+1-p,res_index(upstream))=0
+            else
+                headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,res_index(upstream))*((2.*discharge_sec(k+1-p,res_index(upstream))/((discharge_sec(k+1-p,res_index(upstream))/sqrt(energslope_sec(k+1-p,res_index(upstream))))+ &
+                    (discharge_sec(k+2-p,res_index(upstream))/sqrt(energslope_sec(k+2-p,res_index(upstream))))))**2.)
+            end if
 dummy1=11
 		  else if (watelev_sec(k+1-p,res_index(upstream)) < crwatelev_sec(k+1-p,res_index(upstream))) then !M3
 			headloss_sec(k+1-p,res_index(upstream))=(1./2.)*dist_sec(k+1-p,res_index(upstream))*  &
@@ -794,7 +799,7 @@ dummy1=21
 dummy1=23
 		  else !S2
 		    if (energslope_sec(k+2-p,res_index(upstream))==0) then
-		        write(*,*)("Unexpected values in reservoir hydraulics, results might be flawed") !Til: dirty fix
+		        write(*,*)("Unexpected values in reservoir hydraulics, results might be flawed") !Till: dirty fix
 		        headloss_sec(k+1-p,res_index(upstream))=0
 		    else
                 headloss_sec(k+1-p,res_index(upstream))=dist_sec(k+1-p,res_index(upstream))*((2.*discharge_sec(k+1-p,res_index(upstream))/((discharge_sec(k+1-p,res_index(upstream))/sqrt(energslope_sec(k+1-p,res_index(upstream))))+ &
