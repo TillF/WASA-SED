@@ -179,7 +179,7 @@ storcap(:)=0.
 	  READ (fmtstr,*,IOSTAT=istate) dummy1, minlevel(i), maxlevel(i),vol0(i),storcap(i), &
 			damflow(i),damq_frac(i),withdrawal(i),damyear(i),maxdamarea(i), &
 			damdead(i),damalert(i),dama(i),damb(i),qoutlet(i),fvol_bottom(i), &
-			fvol_over(i),damc(i),damd(i),elevbottom(i)
+			flag__over_delay(i),damc(i),damd(i),elevbottom(i)
 
       
 	  IF (istate/=0) THEN
@@ -206,8 +206,9 @@ storcap(:)=0.
       if(fvol_bottom(i) > 1. .or. (fvol_bottom(i) < 0. .and. fvol_bottom(i) > -998.)) then
         write(*,'(A,i3,A)') 'WARNING: Parameter fvol_bottom in reservoir.dat is outside of plausible range (0 <= fvol_bottom <= 1 or eq. -999) for reservoir / subbasin id ', id_subbas_extern(i), '! During calibration this might make sense.'
 	  end if
-      if(fvol_over(i) > 1. .or. fvol_over(i) < 0.) then
-        write(*,'(A,i3,A)') 'WARNING: Parameter fvol_over in reservoir.dat is outside of plausible range (0 <= fvol_over <= 1) for reservoir / subbasin id ', id_subbas_extern(i), '! During calibration this might make sense.'
+      if(flag__over_delay(i) /= 1 .and. flag__over_delay(i) /= 0) then
+        write(*,'(A,i3,A)') 'ERROR: Parameter flag__over_delay in reservoir.dat for reservoir / subbasin id ', id_subbas_extern(i), ' must be 0 or 1.'
+		stop
 	  end if
       if(damalert(i) < damdead(i)) then
         write(*,'(A,i3,A)') 'ERROR: Parameter damalert in reservoir.dat is less than damdead for reservoir / subbasin id ', id_subbas_extern(i), '!'
@@ -1203,8 +1204,8 @@ IF (STATUS == 2) THEN !regular call during timestep
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),help3,volact(step,upstream),daystorcap(step,upstream),overflow(step,upstream)
       IF (help3 > daystorcap(step,res_index(upstream))) THEN
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),volact(step,upstream),help3,help,daystorcap(step,upstream)
-!write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),fvol_over(upstream)*daystorcap(step,upstream),help3,daystorcap(step,upstream)
-		IF (fvol_over(upstream)==1) THEN
+!write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),flag__over_delay(upstream)*daystorcap(step,upstream),help3,daystorcap(step,upstream)
+		IF (flag__over_delay(upstream)==1) THEN
           help=daystorcap(step,res_index(upstream))
 !write(*,'(2I4,3F15.4)')step,id_subbas_extern(upstream),overflow(step,upstream)/86400.
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),volact(step,upstream),help3,help,daystorcap(step,upstream)
@@ -1220,7 +1221,7 @@ IF (STATUS == 2) THEN !regular call during timestep
       END IF
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),help,volact(step,upstream),daystorcap(step,upstream),overflow(step,upstream)
 !if (d==31)stop
-!write(*,'(2I4,4F15.3)')d,id_subbas_extern(upstream),fvol_over(upstream),daystorcap(step,upstream),volact(step,upstream)+qinflow(step,upstream),overflow(step,upstream)
+!write(*,'(2I4,4F15.3)')d,id_subbas_extern(upstream),flag__over_delay(upstream),daystorcap(step,upstream),volact(step,upstream)+qinflow(step,upstream),overflow(step,upstream)
 !write(*,'(2I4,4F15.3)')d,id_subbas_extern(upstream),volact(step,upstream)
 
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),volact(step,upstream),help3,help,daystorcap(step,upstream)
@@ -1451,7 +1452,7 @@ IF (STATUS == 2) THEN !regular call during timestep
 
 
 ! 5) Calculation of the overflow discharges from the reservoir
-      IF (help3 > daystorcap(step,res_index(upstream)) .and. fvol_over(upstream) == 1) THEN
+      IF (help3 > daystorcap(step,res_index(upstream)) .and. flag__over_delay(upstream) == 1) THEN
         ! volume in/decrease relative to storage capacity after all other water balance components were added
         help=(volact(step,upstream)-daystorcap(step,res_index(upstream)))+qinflow(step,res_index(upstream))
         ! total volume after all other water balance components were added

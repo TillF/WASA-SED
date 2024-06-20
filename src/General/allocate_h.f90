@@ -417,7 +417,7 @@ subroutine allocate_reservoir()
   !	        minlevel(i), maxlevel(i),vol0(i),storcap(i), &
   !			damflow(i),damq_frac(i),withdrawal(i),damyear(i),maxdamarea(i), &
   !			damdead(i),damalert(i),dama(i),damb(i),qoutlet(i),fvol_bottom(i), &
-  !			fvol_over(i),damc(i),damd(i),elevbottom(i)
+  !			flag__over_delay(i),damc(i),damd(i),elevbottom(i)
   !         forma_factor(i)
   !         damareaact(i), volact(id,i)
   !         volume_last(i), outflow_last(i)   !for lake.f90       
@@ -426,7 +426,7 @@ subroutine allocate_reservoir()
           f_intake_obs(subasin), &      !flag
           res_flag(subasin), &          !flag
    	      fcav(subasin), &              !flag
-	      fvol_over(subasin), &         !flag
+	      flag__over_delay(subasin), &         !flag
           latflow_res(subasin), &       !flag
  	      damyear(subasin), &
           volume_last(subasin), &

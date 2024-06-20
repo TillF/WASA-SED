@@ -38,7 +38,7 @@ logical, allocatable :: res_flag(:)
 !flag to calculate the ratio between the reservoir volumes given in the file cav.dat and that derived from the cross sections  [0 = initial value; 1 = after first calculation]
 integer, allocatable :: fcav(:)
 !flag to simulate reservoir routing during spillway overflow of the sub-basin's reservoir [0 = without time delay; 1 = with time delay]
-integer, allocatable :: fvol_over(:)
+integer, allocatable :: flag__over_delay(:)
 !flag to identify the ocurrence of lateral inflow into the dowstream reservoir (0 = no and 1 = yes)
 integer, allocatable :: latflow_res(:)
 !arrays used for the routing of lateral inflow into the downstream reservoir

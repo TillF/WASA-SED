@@ -91,7 +91,7 @@ artifacts:
 deploy:
   environment: Windows_binary  
   release: $(APPVEYOR_REPO_TAG_NAME)-build$(APPVEYOR_BUILD_VERSION)
-  #tag: $(APPVEYOR_REPO_TAG_NAME)  #tt update the existing tag instead of creating a new one which causes a loop -build$(APPVEYOR_BUILD_VERSION)
+  tag: $(APPVEYOR_REPO_TAG_NAME)  #tt update the existing tag instead of creating a new one which causes a loop -build$(APPVEYOR_BUILD_VERSION)
   description: 'Windows binaries built by Appveyor ($(APPVEYOR_REPO_COMMIT_TIMESTAMP))'
   provider: GitHub
   auth_token:
@@ -111,3 +111,5 @@ on_finish:
 
 # configuration for "master" branch
 # build in Release mode and deploy to Azure
+
+#Notiz: Wenn "tag:" und "APPVEYOR_REPO_TAG:" auskommentiert werden, geht das Deployment, allerding offen bar im Endlosschleife
