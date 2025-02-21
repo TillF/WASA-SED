@@ -16,11 +16,20 @@ environment:
 build: off
  #disables MSBuild functionality
 
+#branches:
+#  only:
+#    - master
+#    - autobuild
+#    - /rev_\d*.*/
+
+branches:
+    only:
+      - /refs/tags/rev*
+
+# Optional: Um sicherzustellen, dass keine Builds durch Branches ausgelöst werden
 branches:
   only:
-    - master
-    - autobuild
-    - /rev_\d*.*/
+    - none    
 
 init:
   # - ps: |
@@ -92,6 +101,7 @@ deploy:
   environment: Windows_binary  
   release: $(APPVEYOR_REPO_TAG_NAME)-build$(APPVEYOR_BUILD_VERSION)
   #tag: $(APPVEYOR_REPO_TAG_NAME)  #tt2 disabled #tt update the existing tag instead of creating a new one which causes a loop -build$(APPVEYOR_BUILD_VERSION)
+  tag: '*'
   description: 'Windows binaries built by Appveyor ($(APPVEYOR_REPO_COMMIT_TIMESTAMP))'
   provider: GitHub
   auth_token:
@@ -100,9 +110,9 @@ deploy:
   draft: false
   prerelease: false
   force_update: true #overwrite existing releases
-  skip_tags: true #avoid endless loop by pushed (and tagged) release
+  #skip_tags: true #avoid endless loop by pushed (and tagged) release
   on:
-    branch: master                 # release from master branch only (in fact, this looks for "master" in the tag, so I disabled it 
+    #branch: master                 # release from master branch only (in fact, this looks for "master" in the tag, so I disabled it 
     APPVEYOR_REPO_TAG: true        # tt2 deploy on tag push only
 
 on_finish:
@@ -113,3 +123,4 @@ on_finish:
 # build in Release mode and deploy to Azure
 
 #Notiz: Wenn "tag:" und "APPVEYOR_REPO_TAG:" auskommentiert werden, geht das Deployment, allerding offen bar im Endlosschleife (skip_tags war auskommentiert!?)
+ #
