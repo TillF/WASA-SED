@@ -98,8 +98,8 @@ artifacts:
 deploy:
   environment: Windows_binary  
   release: $(APPVEYOR_REPO_TAG_NAME)-build$(APPVEYOR_BUILD_VERSION)
-  #tag: $(APPVEYOR_REPO_TAG_NAME)  #tt2 disabled #tt update the existing tag instead of creating a new one which causes a loop -build$(APPVEYOR_BUILD_VERSION)
-  tag: '*'
+  tag: $(APPVEYOR_REPO_TAG_NAME)  #tt2 disabled #tt update the existing tag instead of creating a new one which causes a loop -build$(APPVEYOR_BUILD_VERSION)
+  #tag: '*'
   description: 'Windows binaries built by Appveyor ($(APPVEYOR_REPO_COMMIT_TIMESTAMP))'
   provider: GitHub
   auth_token:
