@@ -23,8 +23,8 @@ build: off
 #    - /rev_\d*.*/
 
 branches:
-    only:
-      - /refs/tags/rev*
+  only:
+    - /refs/tags/rev*
 
 # Optional: Um sicherzustellen, dass keine Builds durch Branches ausgelöst werden
 branches:
