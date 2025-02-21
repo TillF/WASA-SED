@@ -16,10 +16,9 @@ environment:
 build: off
  #disables MSBuild functionality
 
-tags: true
 branches:
   only:
-#    - master
+    - master
 #   - autobuild
     - /refs/tags/rev*  #only start building when a tag with "rev_" was set
 
@@ -27,11 +26,6 @@ branches:
 # branches:
 # only:
 # - /refs/tags/rev*
-
-# Optional: Um sicherzustellen, dass keine Builds durch Branches ausgelöst werden
-branches:
-only:
-    - none    
 
 init:
   # - ps: |
