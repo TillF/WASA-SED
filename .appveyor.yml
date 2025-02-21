@@ -16,6 +16,8 @@ environment:
 build: off
  #disables MSBuild functionality
 
+skip_non_tags: true
+
 branches:
   only:
     - master
