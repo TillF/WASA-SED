@@ -18,9 +18,10 @@ build: off
 
 branches:
   only:
-    - master
+#    - master
 #   - autobuild
-    - /rev_\d*.*/
+    - /refs/tags/rev*  #only start building when a tag with "rev_" was set
+
 
 # branches:
 # only:
