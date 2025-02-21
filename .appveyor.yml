@@ -16,20 +16,20 @@ environment:
 build: off
  #disables MSBuild functionality
 
-#branches:
-#  only:
-#    - master
-#    - autobuild
-#    - /rev_\d*.*/
-
 branches:
   only:
-    - /refs/tags/rev*
+    - master
+#   - autobuild
+    - /rev_\d*.*/
+
+# branches:
+# only:
+# - /refs/tags/rev*
 
 # Optional: Um sicherzustellen, dass keine Builds durch Branches ausgelöst werden
-branches:
-  only:
-    - none    
+#branches:
+#only:
+#    - none    
 
 init:
   # - ps: |
