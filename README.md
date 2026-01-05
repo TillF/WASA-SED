@@ -18,15 +18,15 @@ WASA-SED is a large and complex hydrological and sediment transport model. It is
 Contents
 --------
 * docs/: Directory containg the documentation
-  * CONTRIBUTING.md: Guidelines for modifying the code
-  * index.md: technical documentation (also available via https://tillf.github.io/WASA-SED/)
-  * variables.ods: List of variables used in the source code (incomplete)
-  * tutorial_wasa_input.zip: Example input to run the model
+  * [CONTRIBUTING.md](docs/CONTRIBUTING.md): Guidelines for modifying the code
+  * [index.md](docs/index.md): technical documentation (also available via https://tillf.github.io/WASA-SED/)
+  * [variables.ods](docs/index.md): List of variables used in the source code (incomplete)
+  * [tutorial_wasa_input.zip](docs/index.md): Example input to run the model
 
 * src/: Contains the model's Fortran 90 source code files structured in sub-directories
   * update_revision_no.\*: Script to add the revision number into the model executable when compiling the source code
   
-* license.txt: terms of use
+* [license.txt](license.txt): terms of use
 
 * Makefile: GNU Makefile with rules for compiling the source code and installing the model
 
@@ -45,10 +45,16 @@ To specify your desired compiler or adjust the compiler flags, you have to alter
 Reference
 ---------
 
-E.N. Mueller, A. Güntner, T. Francke, G. Mamede (2010): Modelling sediment export, retention and reservoir sedimentation in drylands with the WASA-SED model Geosci. Model Dev., 275-291, 3(1) , url: http://www.geosci-model-dev.net/3/275/2010/, doi:10.5194/gmd-3-275-2010
+E.N. Mueller, A. Güntner, T. Francke, G. Mamede (2010): Modelling sediment export, retention and reservoir sedimentation in drylands with the WASA-SED model Geosci. Model Dev., 275-291, 3(1) , url: [http://www.geosci-model-dev.net/3/275/2010/](http://www.geosci-model-dev.net/3/275/2010/), doi:10.5194/gmd-3-275-2010
 
 Auxiliary Tools
 ---------
 [SoilDataPrep](https://github.com/TillF/SoilDataPrep) : soildata-preprocessing for WASA-SED
 
 [lumpR](https://github.com/tpilz/lumpR) : Geodata-preprocessing for WASA-SED
+
+[lumpR_tutorial](https://github.com/TillF/lumpR_tutorial) : Example dataset for preprocessing with lumpR to generate the geospatila input data
+
+[MMEMO](https://github.com/TillF/MMEMO) : Framework for sensitivity analysis; contains useful wrappers for automatic calibration of WASA-SED
+
+
