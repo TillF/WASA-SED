@@ -1,11 +1,11 @@
-# WASA-SED
+# WASA-SED - <ins>W</ins>ater <ins>A</ins>vailability and <ins>S</ins>ediment <ins>A</ins>nalysis – <ins>Se</ins>mi- <ins>d</ins>istributed model
 
 # User Manual
 main contributors:
 Andreas Güntner (2000-2002), Eva Nora Müller (2006-2009), George Mamede(2006-2009), Till Francke (2006-...), Pedro Medeiros (2007-2008), Tobias Pilz (2016), Erwin Rottler (2017)
 
 **28.1.2025<br>
-WASA-SED rev_278**
+WASA-SED rev_281**
 
 Developed within the SESAM-Project:<br>
 Sediment Export of Semi-Arid Catchment: Monitoring and Modelling 2005-2008<br>
@@ -68,7 +68,7 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 
 
 ## List of figures
-[Figure 1](#figure-1): WASA parameter specification file ```do.dat```.<br>
+[Figure 1](#figure-1): WASA-SED parameter specification file ```do.dat```.<br>
 [Figure 2](#figure-2): Trapezoidal channel dimension with floodplains.
 
 ## List of tables
@@ -78,9 +78,9 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 [Table 4](#table-4): Summary of model input parameters.<br>
 [Table 5](#table-5): Keywords and descriptions optional outfiles related to the snow routine.<br>
 [Table 6](#table-6): Input data files for the hillslope component.<br>
-[Table 7](#table-7): Groundwater option Gw_flag=0.<br>
-[Table 8](#table-8): Groundwater option Gw_flag=1.<br>
-[Table 9](#table-9): Groundwater option Gw_flag=99.<br>
+[Table 7](#table-7): Groundwater option gw_flag=0.<br>
+[Table 8](#table-8): Groundwater option gw_flag=1.<br>
+[Table 9](#table-9): Groundwater option gw_flag=99.<br>
 [Table 10](#table-10): Input data files for the river component.<br>
 [Table 11](#table-11): Input data files for the reservoir component.<br>
 [Table 12](#table-12): Input/Output of state variables.<br>
@@ -90,7 +90,9 @@ The WASA-SED program is large and complex and extensive knowledge of its design,
 
 ## 1 Introduction
 
-The WASA-SED model simulates the runoff and erosion processes at the hillslope scale, the transport processes of suspended and bedload fluxes at the river scale and the retention and remobilisation processes of sediments in large reservoirs. The modelling tool enables the evaluation of management options both for sustainable land-use change scenarios to reduce erosion in the headwater catchments as well as adequate reservoir management options to lessen sedimentation in large reservoirs and reservoir networks. The model concept, its spatial discretisation and the numerical components of the hillslope, river and reservoir processes are summarised and current model applications are reviewed in [Mueller et al. (2010)](#mueller-et-al-2010). The hydrological routines of the model are based on the WASA model (Model for Water Availability in Semi-Arid environments), which was developed by [Güntner (2002)](#guentner-2002) and [Güntner and Bronstert (2002,](#guentner-bronstert-2002) [2003)](#guentner-bronstert-2003) to enable the quantification of water availability in semi-arid regions. The WASA-SED model was developed within the joint Spanish-Brazilian-German research project SESAM (Sediment Export from Semi-Arid Catchments: Measurement and Modelling). The existing WASA model code has been extended to include sediment-transport routines for the three new conceptual levels of the WASA-SED model: the hillslope scale, river scale and the reservoir scale for the calculation of sedimentation. This documentation gives a short outline of the structure, computational routines and folder system of the WASA-SED code in [Chapter 2](#program-folders-and-structure), followed by a description of the input files for model parameterisation in [Chapter 3](#input-data) and output files for the hillslope, river and reservoir modules in [Chapter 4](#output-data).
+The hydro-sedimentological model WASA-SED simulates the runoff and erosion processes at the hillslope scale, the transport processes of suspended and bedload fluxes at the river scale and the retention and remobilisation processes of sediments in large reservoirs. The modelling tool enables the evaluation of management options both for sustainable land-use change scenarios to reduce erosion in the headwater catchments as well as adequate reservoir management options to lessen sedimentation in large reservoirs and reservoir networks. The model concept, its spatial discretisation and the numerical components of the hillslope, river and reservoir processes are summarised and current model applications are reviewed in [Mueller et al. (2010)](#mueller-et-al-2010). The hydrological routines of the model are based on the WASA model (Model for Water Availability in Semi-Arid environments), which was developed by [Güntner (2002)](#guentner-2002) and [Güntner and Bronstert (2002,](#guentner-bronstert-2002) [2003)](#guentner-bronstert-2003) to enable the quantification of water availability in semi-arid regions. The WASA-SED model was developed within the joint Spanish-Brazilian-German research project SESAM (Sediment Export from Semi-Arid Catchments: Measurement and Modelling). The existing WASA model code has been extended to include sediment-transport routines for the three new conceptual levels of the WASA-SED model: the hillslope scale, river scale and the reservoir scale for the calculation of sedimentation. The original acronym was recoinded to <ins>W</ins>ater <ins>A</ins>vailability and <ins>S</ins>ediment <ins>A</ins>nalysis – <ins>Se</ins>mi- <ins>d</ins>istributed model.
+
+This documentation gives a short outline of the structure, computational routines and folder system of the WASA-SED code in [Chapter 2](#program-folders-and-structure), followed by a description of the input files for model parameterisation in [Chapter 3](#input-data) and output files for the hillslope, river and reservoir modules in [Chapter 4](#output-data).
 
 \[[Table of contents](#toc)]
 ## 2 Program folders and structure
