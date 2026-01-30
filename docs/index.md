@@ -983,9 +983,6 @@ This file contains a single value which will be used as static wind speed value 
 **18)** ```snow_params.ctl```<br>
 (optional)
 
-The two logical parameters do_rad_corr and do_alt_corr allow controlling, whether radiation correction for aspect and slope, and height-depended temperature modifications, respectively, are applied.
-Parameters not contained in ```snow_params.ctl``` are set to the default values listed in the example below.
-
 ```
 #WASA-control file for snow routines;
 a0	0.002	#empirical coefficient (m/s); linear dependence of turbulent transfer coefficient (D) in sensible heat flux: D = a0 + a1*WindSpeed
@@ -995,7 +992,7 @@ densDrySnow	450	#Density of dry snow (kg/m│)
 specCapRet	0.05	#Capill. retention volume as fraction of solid SWE (-)
 emissivitySnowMin	0.84	#Minimum snow emissivity used for old snow (-)
 emissivitySnowMax	0.99	#Maximum snow emissivity used for new snow (-)
-tempAir_crit	0.2	#Threshold temperature for rain-/snowfall (░C)
+tempAir_crit	0.2	#Threshold temperature for rain-/snowfall (°C)
 albedoMin	0.55	#Minimum albedo used for old snow (-)
 albedoMax	0.88	#Maximum albedo used for new snow (-)
 agingRate_tAirPos	0.00000111	#Aging rate for air temperatures > 0 (1/s)
@@ -1013,20 +1010,25 @@ tempAmplitude	8	#Temperature amplitude to simulate daily cycle (°C])
 tempMaxOffset	2	#Offset of daily temperature maximum from 12:00 (h)
 snowFracThresh	0.02	#Threshold to determine when TC snow covered (m)
 ```
+This file is only necessary when snow is enabled, i.e. ```dosnow=.True.``` set in ```do.dat```
+The two logical parameters ```do_rad_corr``` and ```do_alt_corr``` allow controlling, whether radiation correction for aspect and slope, and height-depended temperature modifications, respectively, are applied.
+Parameters not contained in ```snow_params.ctl``` are set to the default values listed in the example above.
+
 
 **19)** ```lu2.dat```<br>
 (optional)
 
-Required when using the snow module. Hold LU-specific parameters.
-
 ```
 Specification of landscape units, snow parameters		
 LU-ID[id]	aspect[deg]	mean_altitude_over_subbas_mean[m]
-1	104.620873988632	-169.42
-2	-34.3803447238449	-111.23
-3	-123.69006752598	-80.39
-4	-6.84277341263094	-47.46
+1	104.6	-169.4
+2	-34.3	-111.2
+3	-123.6	-80.3
+4	-6.8	-47.4
 ```
+This file is only necessary when snow is enabled, i.e. ```dosnow=.True.``` set in ```do.dat```
+It holds LU-specific parameters: ```aspect``` denotes the mean orientation of the LU in degrees (clockwise from North). It is used for radiation correction, if enabled with ```do_rad_corr```.
+```mean_altitude_over_subbas_mean``` specifies the mean elevation of the LU relative to the subbasin's reference height (usually the subbasins centroid or mean). It is used for radiation correction, if enabled with ```do_alt_corr```.
 
 <a name="3-3-input-files-for-the-river-module"></a>
 ### 3.3 Input files for the river module
@@ -1454,7 +1456,10 @@ Subbasin-ID, nbr. cross sec, 1st row: pt1 [-], 2nd row: pt2 [-]
 
 Example: This optional file allows specifying the exact location of main channel in the cross sections of the sub-basin’s reservoir. This information is used to adjust bed profiles of cross sections, avoiding steeper slopes caused by erosion processes. If this file is not found in the folder reservoir, there are two possibilities: sediment routing through the sub-basin’s reservoir is computed anyway, disregarding the occurrence of steeper slopes; or a simplified modelling approach for the calculation of sediment balance is assumed (if the file ```cross_sec_”ID”.dat``` is not given). The reservoir located at the outlet point of the sub-basin with the ID 60 has 53 cross sections. The main channel of cross section 1 is located between the 8th and 15th points (cross section 2: located between the 10th and 17th points; etc). A value of -999 indicates unknown location of main channel for that cross section. Sub-basins without outlet reservoirs or those without data on location of main channel of cross sections must not be entered in the file.
 
-**13)** ```lake.dat```
+The following files contain the substring "lake", which indicates their association to the small, unlocated / distributed reservoirs (opposed to the located, strategic reservoirs covered before).
+
+**13)** ```lake.dat``` <br>
+(required, if doacudes=.TRUE.:)
 
 ```
 # Specification of parameters for the reservoir size classes
@@ -1513,6 +1518,7 @@ Year, sub-basin-ID, acudfloatyear[-] (five reservoir size classes)
 Example: This optional file allows specifying changes on the number of reservoirs in the size classes. If this file is not found in the folder reservoir, a yearly variation in the number of reservoirs for sub-basins and size classes given in the file ```lake.dat``` is assumed. In the year 2005, the sub-basin with the ID 15 has 32 reservoirs of class 1, 34 of class 2, 17 of class 3, 20 of class 4, and 11 of class 5. The order of the sub-basins in the second column has to follow the same order of the sub-basin IDs for all years of simulation as was used in ```hymo.dat``` (due to computational reasons); otherwise, an error message occurs. Sub-basins without networks of small reservoirs must not be entered in the file.
 
 **16)** ```lake_number.dat```
+(required, if doacudes=.TRUE.:)
 
 ```
 # Specification of total number of reservoirs in the size classes
