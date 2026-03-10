@@ -224,9 +224,15 @@ else
 endif
 	
 update_rev:
-	@echo "Updating revision number ..."
-	@echo $(UPDATE_SCRIPT)
-	@$(UPDATE_SCRIPT) $(SRCDIR)
+	@echo "Updating revision number by calling $(UPDATE_SCRIPT)"
+	@#$(UPDATE_SCRIPT) $(SRCDIR)
+	@$(UPDATE_SCRIPT) $(SRCDIR) ||\
+	{ echo "Warning: $(UPDATE_SCRIPT) failed to execute successfully (check execution permissions). WASA-executable will run, but cannot report version number."; \
+	 echo "!this file should but could not be updated by update_revision_no.sh/.bat" > $(SRCDIR)/General/svn_rev.f90; \
+	 echo "rev_string1='unknown'" >> $(SRCDIR)/General/svn_rev.f90; \
+	 DATE="$(shell date '+%Y-%m-%d %H:%M')"; \
+	 echo "rev_string2='repository unknown, built $$DATE'" >> $(SRCDIR)/General/svn_rev.f90; \
+	} 
 	@echo "Compiling model source code ..."
 
 $(OUTDIR)/bin/$(EXEC): $(OBJ)
