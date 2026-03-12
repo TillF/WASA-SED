@@ -68,7 +68,7 @@ DO WHILE (istate == 0)
         write(*,'(a, i0, a)')'Warning (response.dat): Subbasin ',idummy,': lag+retention must be < 200, rescaled.'
         prout(j,1)=prout(j,1) * 200/(temp2+temp3)
 	    prout(j,2)=prout(j,2) * 200/(temp2+temp3)
-    end if     
+    end if
 	i=i+1
   end if
 
@@ -126,14 +126,20 @@ END DO
 
 ! INITIALISATION OF OUTPUT FILES
 
-OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
   if (f_river_flow) then
-    WRITE (11,*) 'Output files for river discharge q_out (m3/s) (with MAP IDs as in hymo.dat)'
-	write(fmtstr,'(a,i0,a)')'(2a6,',subasin,'i14)'		!generate format string
-	WRITE (11,fmtstr)' year ', ' day  ', (id_subbas_extern(i), i=1,subasin)
-	!WRITE (11,'(2a6,<subasin>i14)')' year ', ' day  ', (id_subbas_extern(i), i=1,subasin)
-    Close (11)
+      OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out', STATUS='old', IOSTAT=istate)
+      CLOSE(11)
+
+      if (.not. append_output .or. (istate /= 0)) then !create file, unless "append" is selected
+        OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
+        WRITE (11,*) 'Output files for river discharge q_out (m3/s) (with MAP IDs as in hymo.dat)'
+        write(fmtstr,'(a,i0,a)')'(2a6,',subasin,'i14)'		!generate format string
+        WRITE (11,fmtstr)' year ', ' day  ', (id_subbas_extern(i), i=1,subasin)
+        !WRITE (11,'(2a6,<subasin>i14)')' year ', ' day  ', (id_subbas_extern(i), i=1,subasin)
+        Close (11)
+      endif
   else
+    OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
     close(11, status='delete') !delete any existing file, if no output is desired
   endif
 
@@ -145,7 +151,7 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
   allocate( hrout_intern(maxval(ceiling(1+sum(prout, dim=2))) ,subasin)) !allocate memory for triangular unit hydrograph (autochtonous runoff)
   hrout=0.
   hrout_intern=0.
- 
+
   !allocate arrays for in- and outflow into/out of subbasins, as their length needs to accomodate hrout, too
   allocate( qout(366 + size(hrout,dim=1), subasin))
   allocate( qin (subasin))
@@ -157,7 +163,7 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
     allocate( qin_sed (subasin))
     qsediment2_t(:,:,:)=0.
     qin_sed (:)=0.
-  end if  
+  end if
 
 
     DO i=1,subasin
@@ -166,37 +172,37 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
         j   = ceiling   ( prout(i,1)+prout(i,2) ) !                   (integer index to end of triangle)
 
     if(itl > 1) then
-      do ih = 1,(itl-1) !ascending part 
+      do ih = 1,(itl-1) !ascending part
         hrout_intern(ih,i) = (ih-0.5) / prout(i,1)
         hrout       (ih,i) = 0
       end do
       temp2 = hrout_intern(itl-1,i)
-    end if 
-  
+    end if
+
     !peak interval
     if (prout(i,1) /= 0.) then
         temp2 = (itl-1) / prout(i,1) !value AT interval border before itl
         temp4 = 1 -(itl - prout(i,1))  !fraction of rising limb in interval of peak !!r
         hrout_intern(itl,i) =   (temp2 + 1)/2 * temp4
-     else   
-        temp4 = 0  
+     else
+        temp4 = 0
         hrout_intern(itl,i) =   1
      end if
-     
-    temp3 = 1- temp4 - max(0., (itl - (prout(i,1) + prout(i,2)))) !fraction of falling limb in interval of peak 
+
+    temp3 = 1- temp4 - max(0., (itl - (prout(i,1) + prout(i,2)))) !fraction of falling limb in interval of peak
 
     if (prout(i,1) /= 0.) then
-        temp2 = 1 - temp3 / prout(i,2) !value AT interval border after itl (or end of triangle) 
-        hrout       (itl,i) =   (1 + temp2)/2 * temp3 
+        temp2 = 1 - temp3 / prout(i,2) !value AT interval border after itl (or end of triangle)
+        hrout       (itl,i) =   (1 + temp2)/2 * temp3
     else
         hrout       (itl,i) =   1
     end if
-    
+
     hrout_intern(itl,i) =  hrout_intern(itl,i)  + hrout       (itl,i)
 
     !recession part - do fully covered intervals only
     if (itl+1 < prout(i,1) + prout(i,2)) then
-      do ih = (itl+1),(j-1) !recession part 
+      do ih = (itl+1),(j-1) !recession part
         temp4 = 1 - (ih-0.5-prout(i,1)) / prout(i,2)
         hrout_intern(ih,i) = temp4  !recession parts of internal and external UHG are identical
         hrout       (ih,i) = temp4
@@ -206,19 +212,19 @@ OPEN(11,FILE=pfadn(1:pfadi)//'River_Flow.out',STATUS='replace')
     !remaining part of triangle that ends midway in interval
     if (prout(i,2) /= 0.) then
         !temp4 = j - (prout(i,1) + prout(i,2)) !fraction of interval covered by triangle tail
-        !strange effect in release mode: 7.63 and 20.37 produce wrong result 
+        !strange effect in release mode: 7.63 and 20.37 produce wrong result
         temp4 =  - (prout(i,1) + prout(i,2)-j) !fraction of interval covered by triangle tail
-        
+
         if (temp4 == 0) temp4=1. !special case: triangle ends exactly at interval border
-    
+
         temp2 = 1 - (j-1-prout(i,1)) / prout(i,2) !value AT interval border before j
-         
+
         temp3 =   (temp2 + 0)/2 * temp4
-     
+
         hrout_intern(j,i) = temp3  !recession parts of internal and external UHG are identical
         hrout       (j,i) = temp3
     end if
-            
+
     hrout(:,i)        = hrout(:,i)        / sum(hrout(:,i))          !normalize response function
     hrout_intern(:,i) = hrout_intern(:,i) / sum(hrout_intern(:,i))   !normalize response function
 
@@ -267,20 +273,20 @@ IF (STATUS == 1) THEN   !beginning of a new simulation year
       DO id=1,size(hrout,dim=1)-1   !shift routed riverflow that reaches beyond boundary of year to the beginning of new year
         qout(id,1:subasin)  = qout(daylastyear+id,1:subasin)
       END DO
-      
+
       if (dosediment) then
         DO id=1,size(hrout,dim=1)-1   !shift routed sediment flow that reaches beyond boundary of year to the beginning of new year
             qsediment2_t(id,1,1:subasin)  = qsediment2_t(daylastyear+id,1,1:subasin)
         END DO
       end if
-      
+
   END IF
 
 ! ... and initialize remaining values
   qout(size(hrout,dim=1):size(qout,dim=1),1:subasin)=0. !reset the rest of the year to 0
   if (dosediment) then
       qsediment2_t(size(hrout,dim=1):size(qout,dim=1),:,1:subasin)=0. !reset the rest of the year to 0
-  end if    
+  end if
 
 ! CALL Reservoir Sedimentation and Management Modules
   IF (doreservoir) THEN
@@ -298,14 +304,14 @@ IF (STATUS == 2) THEN !regular call during timestep
 !    transfer variable qtemp in [m3/day]
 !ii: needs to be refined for subdaily resolution
 sediment_out = 0. !initialize at beginning of timestep
-    
+
   IF (dotrans) THEN
     DO i=1,ntrans
       IF (t >= y_trans(i)) THEN
         qtemp=0.
         qtemp_sed(:)=0.
         irout=trans_start(1,i)
-        IF (trans_start(2,i) == 2) THEN ! if transposition starts in river 
+        IF (trans_start(2,i) == 2) THEN ! if transposition starts in river
           qtemp=MIN(qout(d,irout)*86400.,q_trans(i)*86400.) !take as much water as specified, but no more than is available [m³]
           qout(d,irout)=qout(d,irout)-qtemp/86400.   !reduce start of transposition by amount abstracted
           qout(d,irout)=MAX(qout(d,irout),0.)   !prevent negative values (is this necessary?)
@@ -313,12 +319,12 @@ sediment_out = 0. !initialize at beginning of timestep
           if (dosediment .and. (qout(d,irout) > 0.)) then
             !qtemp_sed = qsediment(d,irout) * qtemp/86400. / qout(d,irout)  ![t/d] assume homogenous mixing, abstract the same fraction of sediment as water
             qtemp_sed = sediment_out(irout,:) * qtemp/86400. / qout(d,irout)  ! assume homogenous mixing, abstract the same fraction of sediment as water for every particle size class [t/d]
-            
+
             sediment_out(irout,:) =  sediment_out(irout,:) -  qtemp_sed  ! assume homogenous mixing, abstract the same fraction of sediment as water for every particle size class [t/d]
-        
+
             !qsediment2_t(d,1,irout) = qsediment2_t(d,1,irout) - sum(qtemp_sed)  !abstract sediment from source (total over all particle size classes)
             !qsediment2_t(d,1,irout)=MAX(qsediment2_t(d,1,irout),0.)   !prevent negative values (is this necessary?)
-          end if    
+          end if
 !    from acude (there must be a large reservoir in this subbasin!)
         ELSE IF (trans_start(2,i) == 1) THEN
           qtemp=MIN(volact(d,irout)*1.e6,q_trans(i)*86400.)
@@ -334,13 +340,13 @@ sediment_out = 0. !initialize at beginning of timestep
           if (dosediment) then
               sediment_in(irout,:) = sediment_in(irout,:) + qtemp_sed
               qsediment2_t(d+1,1,irout) = qsediment2_t(d+1,1,irout)+ sum(qtemp_sed)
-          end if     
+          end if
         ELSE IF (trans_end(2,i) == 1) THEN !    into acude (there must be a large acude in this muni !)
           volact(d+1,irout)=volact(d+1,irout)+ qtemp*(1.-loss_trans(i))/1.e6
           if (dosediment) then
             sediment_in(irout,:) = sediment_in(irout,:) + qtemp_sed !particle size specific
             sed_inflow(d+1,irout) = sed_inflow(d+1,irout) + sum(qtemp_sed) !sum over all particle size fractions
-          end if  
+          end if
         END IF
       END IF
     END DO
@@ -372,7 +378,7 @@ sediment_out = 0. !initialize at beginning of timestep
   qin=0.  ! set inflow qin = zero for all sub-basin
   if (dosediment) then
     qin_sed=0.  ! set inflow qin = zero for all sub-basin
-  end if  
+  end if
 
   DO i=1,subasin
     upstream=upbasin(i)  !internal code-ID for most upstream sub-basin (should usually just be i)
@@ -385,20 +391,20 @@ sediment_out = 0. !initialize at beginning of timestep
             qout(d:(d-1+size(hrout,dim=1)),upstream) = -1 !set entire effected period to "no data"
             cycle
         end if
-        
+
         DO ih=1,size(hrout,dim=1)
           if (qout(d+ih-1,upstream) /= -1) then !only do computation if this timestep is not affected by prior nodata
             qout(d+ih-1,upstream)=qin(upstream)*hrout(ih,upstream)  &
               + qout(d+ih-1,upstream)
-          end if 
-          
+          end if
+
           if (dosediment) then
               if (qsediment2_t(d+ih-1,1,upstream) /= -1) then !only do computation if this timestep is not affected by prior nodata
                 !sediment_in(upstream,:) = 2 !rr test values !particle-size specific treatment
 
                 qsediment2_t(d+ih-1,1,upstream)=qin_sed(upstream)*hrout(ih,upstream)  &
                   + qsediment2_t(d+ih-1,1,upstream)
-               end if 
+               end if
            end if
 
         if (qout(d+ih-1,upstream) == -1) cycle !no data, don't do further calculations
@@ -425,7 +431,7 @@ sediment_out = 0. !initialize at beginning of timestep
 
 ! Assign outflow as inflow into the next downstream sub-basin
 ! and add possible inflow from other upstream sub-basins
-            
+
         IF (doreservoir .AND. qout(d,upstream)/= -1) THEN
           CALL reservoir (2,upstream,idummy)
             if (res_index(upstream)/=0) then
@@ -443,10 +449,10 @@ sediment_out = 0. !initialize at beginning of timestep
         end if
       if (dosediment) then
         if (qsediment2_t(d,1,upstream)/= -1 .AND. qin_sed(downstream)/=1 ) then
-         qin_sed(downstream)=qin_sed(downstream) + qsediment2_t(d,1,upstream) 
+         qin_sed(downstream)=qin_sed(downstream) + qsediment2_t(d,1,upstream)
         else
-         qin_sed(downstream)= -1  !mark as "no data" 
-        end if 
+         qin_sed(downstream)= -1  !mark as "no data"
+        end if
       end if
     END IF
 
