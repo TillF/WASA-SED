@@ -9,6 +9,8 @@
 /Debug
 /wasa.lin
 /build
+wasa_dbg.exe.stackdump
+git_token.txt
 /wasa/debug_salgado/BuildLog.htm
 /wasa/debug_salgado/allocate_h.obj
 /wasa/debug_salgado/bedload.obj
