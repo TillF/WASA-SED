@@ -128,9 +128,9 @@ OBJ=$(OBJ_FILES:%.f90=$(OBJDIR)/%.o)
 # -Os: optimize for size of compiled executable
 
 FC=gfortran
-CDFLAGS=-g -Og -static -fcheck=all -Wall -Wextra -ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wtabs -Wno-compare-reals -fbacktrace -ffpe-trap=invalid,zero,overflow -ffpe-summary=invalid,zero,overflow 
+CDFLAGS=-g -Og -static -fcheck=all -Wall -Wextra -ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -Wno-compare-reals -fbacktrace -ffpe-trap=invalid,zero,overflow -ffpe-summary=invalid,zero,overflow 
 #CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s
-CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wtabs -O3 -s -static
+CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s -static
 #CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s -static-libgfortran -static-libgcc
 LFLAGS=
 
@@ -227,7 +227,7 @@ update_rev:
 	@echo "Updating revision number by calling $(UPDATE_SCRIPT)"
 	@#$(UPDATE_SCRIPT) $(SRCDIR)
 	@$(UPDATE_SCRIPT) $(SRCDIR) ||\
-	{ echo "Warning: $(UPDATE_SCRIPT) failed to execute successfully (check execution permissions). WASA-executable will run, but cannot report version number."; \
+	{ echo "Warning: $(UPDATE_SCRIPT) failed to execute successfully (check execution permissions, run manually). WASA-executable will run, but cannot report version number."; \
 	 echo "!this file should but could not be updated by update_revision_no.sh/.bat" > $(SRCDIR)/General/svn_rev.f90; \
 	 echo "rev_string1='unknown'" >> $(SRCDIR)/General/svn_rev.f90; \
 	 DATE="$(shell date '+%Y-%m-%d %H:%M')"; \
