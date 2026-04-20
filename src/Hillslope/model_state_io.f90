@@ -219,23 +219,26 @@ contains
             OPEN(reservoir_file_hdle,FILE=reservoir_conds_file//trim(suffix), STATUS='replace')
             if (doreservoir) then
                 WRITE(reservoir_file_hdle,'(a)') 'Reservoir volume status (for analysis or model re-start)'
-                WRITE(reservoir_file_hdle,'(a)')'Subbasin'//char(9)//'volume[m^3]' !tab separated output
-                
+                WRITE(reservoir_file_hdle,'(a)')'Subbasin'//char(9)//'volume[m^3]'//char(9)//'volume_last[m^3]'//char(9)//'outflow_last[m^3/s]' !tab separated output
+
                 tt = (d-2)*nt+hour !index to last valid value
-                if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. Jos�, please check this
-                
+                if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. Jos, please check this
+
                 digits=ceiling(log10(max(1.0,maxval(abs(volact(tt,:)))*1.e6)))+2    !Till: number of pre-decimal digits required
                 if (digits<10) then
-                    write(fmtstr,'(A1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
+                    !write(fmtstr,'(A1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
+                    write(fmtstr,'(A1,i0,a1,i0,a1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1),  'F',min(11,digits+4),'.',min(3,11-digits-1),  'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
                 else
-                    fmtstr='E12.5' !for large numbers, use exponential notation
+                    !fmtstr='E12.5' !for large numbers, use exponential notation
+                    fmtstr='E12.5, A1, E12.5, A1, E12.5' !for large numbers, use exponential notation
                 end if
                 write(fmtstr2,*) '(I0,',1,'(A1,',trim(fmtstr),'))'        !generate format string
 
-                DO sb_counter=1,subasin 
+                DO sb_counter=1,subasin
                     IF (res_flag(sb_counter)) then
-                        WRITE(reservoir_file_hdle,trim(fmtstr2))id_subbas_extern(sb_counter), char(9), volact(tt,sb_counter)*1.e6 !tab separated output
-                    end if
+                        !WRITE(reservoir_file_hdle,trim(fmtstr2))id_subbas_extern(sb_counter), char(9), volact(tt,sb_counter)*1.e6 !tab separated output
+                        WRITE(reservoir_file_hdle,trim(fmtstr2))id_subbas_extern(sb_counter), char(9), volact(tt,sb_counter)*1.e6, char(9), volume_last(sb_counter), char(9),outflow_last(sb_counter) !tab separated output
+                    END IF
                 END DO
                 total_storage_reservoir=sum(volact(tt,:)) *1.e6
                 CLOSE(reservoir_file_hdle, iostat=i_lu)    !close output file
@@ -1526,6 +1529,9 @@ end subroutine init_interflow_conds
 
             volact(1,subbas_id) = dummy1 / 1e6 !internally used in [10^6 m3]
             vol0(subbas_id) = dummy1 / 1e6 !initial volume is set to the same as actual volume, so that the initial storage change is 0. This is just a default, it will be corrected by the model dynamics in the first time step if necessary.
+            !volume_last(subbas_id) = dummy2 / 1e6 !initialize carry-over variable for storage change calculation, also in [10^6 m3]
+            !outflow_last(subbas_id) = dummy3 / 1e6 !initialize carry-over variable for outflow change calculation, also in [10^6 m3]
+
             reservoir_read(subbas_id) = .true. !mark as "storage read"
         ENDDO
         close(11)

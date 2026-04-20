@@ -768,15 +768,15 @@ end where
 
 !Ge Initialization of the parameters related to spillway overflow
   DO i=1,subasin
-    IF (res_flag(i)) THEN
-      outflow_last(i)=0.
-      volume_last(i)=max(0., vol0(i) - storcap(i))
-      alpha_over(res_index(i))=1./(1.-damb(i))
-      k_over(res_index(i))=(dama(i)/alpha_over(res_index(i)))**alpha_over(res_index(i))
-  !write(*,*)id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),storcap(i)*1.e6
-      hmax(res_index(i))=((storcap(i)*1.e6)/k_over(res_index(i)))**(1./alpha_over(res_index(i)))
-  !write(*,'(I6,4F12.3,F10.3,F15.1)')id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),hmax(i),storcap(i)*1.e6
-    ENDIF
+	IF (res_flag(i)) THEN
+	  outflow_last(i)=0.
+	  volume_last(i)=max(0., vol0(i) - storcap(i))
+	  alpha_over(res_index(i))=1./(1.-damb(i))
+	  k_over(res_index(i))=(dama(i)/alpha_over(res_index(i)))**alpha_over(res_index(i))
+!write(*,*)id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),storcap(i)*1.e6
+	  hmax(res_index(i))=((storcap(i)*1.e6)/k_over(res_index(i)))**(1./alpha_over(res_index(i)))
+!write(*,'(I6,4F12.3,F10.3,F15.1)')id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),hmax(i),storcap(i)*1.e6
+	ENDIF
   ENDDO
 
 !Ge dosediment HAS TO BE INCLUDED INTO THE do.dat AND common.fi FILES, AND READ IN readgen.fi

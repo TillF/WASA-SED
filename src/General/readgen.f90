@@ -691,7 +691,7 @@ SUBROUTINE readgen(path2do_dat)
     !end insert Till
 
  OPEN(11, FILE=pfadp(1:pfadj)// 'save_storages.dat', IOSTAT=istate, STATUS='old')
-    IF (istate==0) THEN
+    IF (istate==1) THEN
         READ(11,*,IOSTAT=istate)dummy !skip comment line
         READ(11,*,IOSTAT=istate)dummy !skip headerline
         !determine number of lines in file (i.e. number of time steps for which storages are saved)
