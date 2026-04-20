@@ -1,0 +1,39 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+  "name": "Run: meinprog (no debugger)",
+  "type": "cppdbg",
+  "request": "launch",
+  "program": "${workspaceFolder}/build/bin/wasa_dbg",
+  "args": [],
+  "cwd": "${workspaceFolder}",
+  "externalConsole": true,
+  "preLaunchTask": "Make: build",
+  "MIMode": "",
+  "miDebuggerPath": ""
+  },
+  
+    {
+      "name": "Fortran: Launch (gdb)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/bin/wasa_dbg",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "preLaunchTask": "Make: build",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}

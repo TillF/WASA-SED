@@ -232,7 +232,7 @@ module hymo_h
     integer, pointer :: period(:,:)	! four key nodes in time for temporal vegetation dynamics within year (index: subbasin,(1:4)*simulation_year,)
 
 
-    ! daily mean LAI (m²/m²)
+    ! daily mean LAI (mï¿½/mï¿½)
     !Allocatable      real laimun(366,subasin)
     real, allocatable :: laimun (:,:)
     !Allocatable      real lai_c(366,subasin)
@@ -272,13 +272,13 @@ module hymo_h
     ! daily interception storage evapotranspiration (mm/day)
     !Allocatable       real intc(366,subasin)
     real, allocatable ::  intc(:,:)
-    ! total surface runoff (m³/d)
+    ! total surface runoff (mï¿½/d)
     !Allocatable       real ovflow(366,subasin)
     real, allocatable ::  ovflow(:,:)
-    ! horton overland flow (m³/d)
+    ! horton overland flow (mï¿½/d)
     !Allocatable      real hortflow(366,subasin)
     real, allocatable :: hortflow(:,:)
-    ! total subsurface runoff (m³/d)
+    ! total subsurface runoff (mï¿½/d)
     !Allocatable       real subflow(366,subasin)
     real, allocatable ::  subflow(:,:)
 
@@ -311,7 +311,7 @@ module hymo_h
     ! water availability
     !Allocatable       real avail_all(366,subasin),avail_ac(366,subasin)
     real, allocatable :: avail_all(:,:), avail_ac(:,:)
-    !Till: pre-specified outflow of subbasins (optionally read from file) [m³/s]
+    !Till: pre-specified outflow of subbasins (optionally read from file) [mï¿½/s]
     real, allocatable ::  pre_subbas_outflow(:,:,:)
     !Till: holds corresponding columns of input files to be related to internal numbering of subbasins
     integer, pointer :: corr_column_pre_subbas_outflow(:)
@@ -329,9 +329,9 @@ module hymo_h
     REAL, allocatable  :: soiletsu(:)
     ! daily interception storage evaporation (mm/day)
     REAL, allocatable  :: intcsu(:)
-    ! total surface runoff (m³/d) for all LUs of current subbasin
+    ! total surface runoff (mï¿½/d) for all LUs of current subbasin
     REAL, allocatable  :: qsurf_lu(:)
-    ! total subsurface runoff (m³/d) for all LUs of current subbasin
+    ! total subsurface runoff (mï¿½/d) for all LUs of current subbasin
     REAL, allocatable  :: qsub_lu(:)
     ! groundwater recharge (percolation from root zone)
     REAL, allocatable  :: gwrsu(:)

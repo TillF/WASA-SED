@@ -768,15 +768,15 @@ end where
 
 !Ge Initialization of the parameters related to spillway overflow
   DO i=1,subasin
-	IF (res_flag(i)) THEN
-	  outflow_last(i)=0.
-	  volume_last(i)=max(0., vol0(i) - storcap(i))
-	  alpha_over(res_index(i))=1./(1.-damb(i))
-	  k_over(res_index(i))=(dama(i)/alpha_over(res_index(i)))**alpha_over(res_index(i))
-!write(*,*)id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),storcap(i)*1.e6
-	  hmax(res_index(i))=((storcap(i)*1.e6)/k_over(res_index(i)))**(1./alpha_over(res_index(i)))
-!write(*,'(I6,4F12.3,F10.3,F15.1)')id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),hmax(i),storcap(i)*1.e6
-	ENDIF
+    IF (res_flag(i)) THEN
+      outflow_last(i)=0.
+      volume_last(i)=max(0., vol0(i) - storcap(i))
+      alpha_over(res_index(i))=1./(1.-damb(i))
+      k_over(res_index(i))=(dama(i)/alpha_over(res_index(i)))**alpha_over(res_index(i))
+  !write(*,*)id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),storcap(i)*1.e6
+      hmax(res_index(i))=((storcap(i)*1.e6)/k_over(res_index(i)))**(1./alpha_over(res_index(i)))
+  !write(*,'(I6,4F12.3,F10.3,F15.1)')id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),hmax(i),storcap(i)*1.e6
+    ENDIF
   ENDDO
 
 !Ge dosediment HAS TO BE INCLUDED INTO THE do.dat AND common.fi FILES, AND READ IN readgen.fi
@@ -910,10 +910,10 @@ IF (STATUS == 1) THEN !beginning of a new simulation year
 
      ELSE IF (t == damyear(i) .OR. (t > damyear(i) .AND. t == tstart)) THEN  !Andreas
        if (volact(1,i)== -1) then !only initialize those that have not been initialized by loading from stat-file
-           IF (vol0(i) /= -999. .and. vol0(i) /= -9999.) THEN 
-             volact(1,i)=vol0(i) !Till: initial volume [1e6 m^3]
-           ELSE
-             volact(1,i)=storcap(i)/5. !Till: initial volume as 20% of storage cap [1e6 m^3]
+           IF (vol0(i) == -999. .or. vol0(i) == -9999.) THEN 
+            volact(1,i)=storcap(i)/5. !Till: set initial volume as 20% of storage cap [1e6 m^3]
+          ELSE
+            volact(1,i)=vol0(i) !Till: initial volume [1e6 m^3]
            END IF
        end if    
        daystorcap(1,res_index(i))=storcap(i)
@@ -1198,27 +1198,27 @@ IF (STATUS == 2) THEN !regular call during timestep
 !write(*,'(2I4,3F15.4)')step,id_subbas_extern(upstream),volact(step,upstream)
 
 
-! 1) Calculation of the actual reservoir volume after water inflow
-	  help3=volact(step,upstream)+qinflow(step,res_index(upstream)) !Till: m^3
-	  help2=volact(step,upstream) !Till: m^3
-!write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),help3,volact(step,upstream),daystorcap(step,upstream),overflow(step,upstream)
-      IF (help3 > daystorcap(step,res_index(upstream))) THEN
-!write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),volact(step,upstream),help3,help,daystorcap(step,upstream)
-!write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),flag__over_delay(upstream)*daystorcap(step,upstream),help3,daystorcap(step,upstream)
-		IF (flag__over_delay(upstream)==1) THEN
-          help=daystorcap(step,res_index(upstream))
-!write(*,'(2I4,3F15.4)')step,id_subbas_extern(upstream),overflow(step,upstream)/86400.
-!write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),volact(step,upstream),help3,help,daystorcap(step,upstream)
-		ELSE
-		  help=daystorcap(step,res_index(upstream))
-		  overflow(step,res_index(upstream))=help3-daystorcap(step,res_index(upstream)) !Till: spillover [m^3]
-        END IF
-	    lakeret(step,res_index(upstream))=max(0.,help-volact(step,upstream))
-        volact(step,upstream)=help
-	  ELSE
-	    lakeret(step,res_index(upstream))=qinflow(step,res_index(upstream))
-        volact(step,upstream)=help3
-      END IF
+  ! 1) Calculation of the actual reservoir volume after water inflow
+  help3=volact(step,upstream)+qinflow(step,res_index(upstream)) !Till: m^3
+  help2=volact(step,upstream) !Till: m^3
+  !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),help3,volact(step,upstream),daystorcap(step,upstream),overflow(step,upstream)
+  IF (help3 > daystorcap(step,res_index(upstream))) THEN
+    !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),volact(step,upstream),help3,help,daystorcap(step,upstream)
+    !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),flag__over_delay(upstream)*daystorcap(step,upstream),help3,daystorcap(step,upstream)
+    IF (flag__over_delay(upstream)==1) THEN
+      help=daystorcap(step,res_index(upstream))
+    !write(*,'(2I4,3F15.4)')step,id_subbas_extern(upstream),overflow(step,upstream)/86400.
+    !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),volact(step,upstream),help3,help,daystorcap(step,upstream)
+    ELSE
+      help=daystorcap(step,res_index(upstream))
+      overflow(step,res_index(upstream))=help3-daystorcap(step,res_index(upstream)) !Till: spillover [m^3]
+    END IF
+    lakeret(step,res_index(upstream))=max(0.,help-volact(step,upstream))
+    volact(step,upstream)=help
+    ELSE
+      lakeret(step,res_index(upstream))=qinflow(step,res_index(upstream))
+      volact(step,upstream)=help3
+  END IF
 !write(*,'(2I4,4F15.4)')step,id_subbas_extern(upstream),help,volact(step,upstream),daystorcap(step,upstream),overflow(step,upstream)
 !if (d==31)stop
 !write(*,'(2I4,4F15.3)')d,id_subbas_extern(upstream),flag__over_delay(upstream),daystorcap(step,upstream),volact(step,upstream)+qinflow(step,upstream),overflow(step,upstream)

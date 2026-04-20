@@ -49,7 +49,7 @@ SUBROUTINE readgen(path2do_dat)
         write(*,'(A)')'Error: Control file '//trim(path2do_dat)//' could not be opened.'
         stop
     END IF
-	
+
     line=1 !count lines for issuing error messages
     READ(11,*,IOSTAT=i)
     call checkio(line,i) !check validity of line
@@ -61,8 +61,8 @@ SUBROUTINE readgen(path2do_dat)
     call checkio(line,i) !check validity of line
     READ(11,*,IOSTAT=i) tstop
     call checkio(line,i) !check validity of line
-    
-    
+
+
     READ(11,'(A)') dummy !READ mstart (optional: dstart)
     READ(dummy,*,IOSTAT=i)mstart,dstart
     IF (i/=0 .OR. dstart==0.) THEN	!no dstart specified, assume 1
@@ -79,16 +79,16 @@ SUBROUTINE readgen(path2do_dat)
         dstop=31
     END IF
 
-!check time specifications    
+!check time specifications
     dummy = ""
     if (mstart<1 .OR. mstart>12) dummy=       ' ERROR: Invalid specification of start month.'
     if (mstop <1 .OR. mstop >12) dummy=trim(dummy)//' ERROR: Invalid specification of end month.'
-    if (dstart<1 .OR. dstart>31) dummy=trim(dummy)//' ERROR: Invalid specification of start day.' 
+    if (dstart<1 .OR. dstart>31) dummy=trim(dummy)//' ERROR: Invalid specification of start day.'
     if (dstop<1  .OR. dstop >31) dummy=trim(dummy)//' ERROR: Invalid specification of end day.'
     if ( (tstart  > tstop) .OR. &
         ((tstart == tstop) .AND. (mstart  > mstop)) .OR. &
         ((tstart == tstop) .AND. (mstart == mstop) .and. (dstart > dstop) )) dummy = trim(dummy)//' ERROR: Simulation start must be before simulation end.'
-    
+
     if (dummy /="") then
         write(*,*)trim(dummy)
         stop
@@ -120,7 +120,7 @@ SUBROUTINE readgen(path2do_dat)
     call checkio(line,i) !check validity of line
     READ(11,*, IOSTAT=i) dotrans
     call checkio(line,i) !check validity of line
-             
+
     READ(11,*, IOSTAT=i) dohour !overwritten by value of dt
     call checkio(line,i) !check validity of line
     READ(11,*, IOSTAT=i) scenario
@@ -159,20 +159,20 @@ SUBROUTINE readgen(path2do_dat)
     call checkio(line,i) !check validity of line
     READ(11,*, IOSTAT=i) reservoir_transport
     call checkio(line,i) !check validity of line
-    
+
     READ(11,'(A)', IOSTAT=i) dummy !READ doloadstate
-    IF (i==0) then  
+    IF (i==0) then
         READ(dummy,*,IOSTAT=i) doloadstate, append_output !try to read doloadstate AND append_output
         IF (i/=0 ) READ(dummy,*,IOSTAT=i) doloadstate !read doloadstate only
     END IF
-    
+
     READ(11,'(A)', IOSTAT=i) dummy !READ dosavestate
-    IF (i==0) then  
+    IF (i==0) then
         READ(dummy,*,IOSTAT=i) dosavestate, save_states_yearly !try to read dosavestate AND save_states_yearly
         IF (i/=0 ) READ(dummy,*,IOSTAT=i) dosavestate !read dosavestate only
     END IF
-    
-    
+
+
     READ(11,*, IOSTAT=i) dosnow !ii: rather use existence of snow input files as indicator
 
     CLOSE(11)
@@ -182,7 +182,7 @@ SUBROUTINE readgen(path2do_dat)
         stop
     end if
 	dohour = dt == 1
-	
+
 	if (trim(custompath)/='') then		!if a custom path was specified, all paths are relative to this one
         pfadp=trim(custompath)//pfadp
         pfadn=trim(custompath)//pfadn
@@ -220,7 +220,7 @@ SUBROUTINE readgen(path2do_dat)
 !read general erosion parameters
     if (dosediment) THEN
         allocate( spcon(n_sed_class), spexp(n_sed_class))
-        
+
         spcon(:)=  0.016111		!0.0001-0.01  default values
         spexp (:)= 1.707			!1 - 1.5
         erosion_equation=0
@@ -258,14 +258,14 @@ SUBROUTINE readgen(path2do_dat)
             do_musle_subbasin=.FALSE.            !default 0: compute erosion on TC-scale
             transport_limit_mode=2 !transport capacity according to Everaert (1991)
         END IF
-        
-        !(taken from erosion.ctl, if present): default coefficients for estimation of maximum half-hour rainfall intensity (ri_05) from daily rainfall data (R_day) 
+
+        !(taken from erosion.ctl, if present): default coefficients for estimation of maximum half-hour rainfall intensity (ri_05) from daily rainfall data (R_day)
         if (a_i30==-1) then !scaling coefficients for half-hour-intensity not set, use defaults (ri_05=a*R_dt^b)
             if (dt==24) then
-                a_i30=1.1630         !default coefficients for estimation of maximum half-hour rainfall intensity (ri_05) from daily rainfall data (R_day)    
-                b_i30=0.667981            
+                a_i30=1.1630         !default coefficients for estimation of maximum half-hour rainfall intensity (ri_05) from daily rainfall data (R_day)
+                b_i30=0.667981
             else
-                a_i30=1.            
+                a_i30=1.
                 b_i30=1.
             end if
         end if
@@ -286,7 +286,7 @@ SUBROUTINE readgen(path2do_dat)
 		specCapRet=0.05                !Capill. retent. vol as fraction of solid SWE (-)
 		emissivitySnowMin=0.84         !Minimum snow emissivity used for old snow (-)
 		emissivitySnowMax=0.99         !Maximum snow emissivity used for new snow (-)
-		tempAir_crit=0.2               !Threshold temp. for rain-/snowfall (°C)
+		tempAir_crit=0.2               !Threshold temp. for rain-/snowfall (Â°C)
 		albedoMin=0.55                 !Minimum albedo used for old snow (-)
 		albedoMax=0.88                 !Maximum albedo used for new snow (-)
 		agingRate_tAirPos=0.00000111   !Aging rate for air temperatures > 0 (1/s)
@@ -299,11 +299,11 @@ SUBROUTINE readgen(path2do_dat)
 		lon = 0.55 *pi/180             !Longitude of centre of study area
 		do_rad_corr = .TRUE.           !modification of radiation with aspect and slope
 		do_alt_corr = .TRUE.           !modification of temperature with altitude of LU
-		tempLaps = -0.006              !Temperature lapse rate for modification depending on elevation of TC (°C/m)
-		tempAmplitude = 8              !Temperature amplitude to simulate daily cycle (°C])
+		tempLaps = -0.006              !Temperature lapse rate for modification depending on elevation of TC (Â°C/m)
+		tempAmplitude = 8              !Temperature amplitude to simulate daily cycle (Â°C])
 		tempMaxOffset = 2              !Offset of daily temperature maximum from 12:00 (h)
 		snowFracThresh = 0.02          !Threshold to determine when TC snow covered (m)
-	 
+
      !Read parameters for snow routine
      OPEN(12, file=pfadp(1:pfadj)// 'Hillslope/snow_params.ctl',IOSTAT=istate, STATUS='old')
          IF (istate==0) THEN
@@ -674,7 +674,7 @@ SUBROUTINE readgen(path2do_dat)
             READ(11,*,IOSTAT=istate)dummy	!try to read next line
         END DO
         CLOSE(11)
-	
+
         f_qhorton= f_qhorton .OR. f_daily_qhorton
 
     ELSE
@@ -690,9 +690,48 @@ SUBROUTINE readgen(path2do_dat)
     END IF
     !end insert Till
 
+ OPEN(11, FILE=pfadp(1:pfadj)// 'save_storages.dat', IOSTAT=istate, STATUS='old')
+    IF (istate==0) THEN
+        READ(11,*,IOSTAT=istate)dummy !skip comment line
+        READ(11,*,IOSTAT=istate)dummy !skip headerline
+        !determine number of lines in file (i.e. number of time steps for which storages are saved)
+        line=0
+        DO WHILE (istate==0)
+            line=line+1
+            READ(11,*,IOSTAT=istate)dummy	!try to read next line
+        END DO
+        !allocate array for saving storages at desired time steps. We need an array which is line x 4 (subbas, year, doy, timestep)
+        allocate(save_storages(line,4))
+         !read file again to fill array
+        REWIND(11)
+        READ(11,*,IOSTAT=istate)dummy !skip comment line
+        READ(11,*,IOSTAT=istate)dummy !skip headerline
+        DO i=1,line
+            READ(11,*,IOSTAT=istate) save_storages(i,:)
+            if (istate/=0) then
+                write(*,*)'Error reading save_storages.dat, line ',i+2,'. Aborting.'
+                stop
+            end if
+        END DO
+        CLOSE(11)
+        !convert external subbasin numbering to internal subbasin numbering (i.e. from 1...subasin to 1...nsubbas)
+        do i = 1, line
+            if (save_storages(i,1)/=-1) then
+                save_storages(i,1) = id_ext2int(save_storages(i,1), id_subbas_extern)
+                if (save_storages(i,1)==-999) then
+                    write(*,*)'Error: subbasin ',save_storages(i,1),' specified in save_storages.dat not found in model. Aborting.'
+                    stop
+                end if
+            end if
+        end do
+    ELSE
+        !follow default output of storages as determined in do.dat
+        i=i
+    END IF
 
-    
-    
+
+
+
 !allocate necessary memory
     nt = int(24/dt)	!Till: number of simulation steps per day
 
@@ -707,9 +746,9 @@ SUBROUTINE readgen(path2do_dat)
     call allocate_reservoir()
 
 
-    
-    
-    
+
+
+
 ! save summary of settings to output directory
     OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='unknown', IOSTAT=istate)
     IF (istate/=0) THEN !output dir not found, try creating using system command
@@ -721,14 +760,14 @@ SUBROUTINE readgen(path2do_dat)
             end do
 
         CALL system('mkdir '//dummy, istate)
-	
+
         OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='unknown',IOSTAT=istate) !try again to open
         if (istate/=0) then !try create with Windows command
             do i=1,pfadi
                 if (dummy(i:i)=="/") dummy(i:i)="\" !using backslashes as delimiter (windows)
             end do
             CALL system('mkdir '//dummy)
-		
+
             OPEN(11,FILE=pfadn(1:pfadi)//'parameter.out', STATUS='unknown',IOSTAT=istate)
             if (istate/=0) then
                 write(*,*)'Error: Output file ',pfadn(1:pfadi)//'parameter.out',' could not be created, aborting.'
@@ -736,7 +775,7 @@ SUBROUTINE readgen(path2do_dat)
             end if
         end if
     end if
-    
+
     WRITE(11,*)
     WRITE(11,'(a)') pfadp
     WRITE(11,'(a)') pfadn
@@ -777,7 +816,7 @@ SUBROUTINE readgen(path2do_dat)
     end if
     WRITE(11,*) 'WASA model, ',trim(rev_string1),'; ',trim(rev_string2)
     CLOSE(11)
-    
+
 
     RETURN
 
@@ -786,7 +825,7 @@ SUBROUTINE readgen(path2do_dat)
         implicit none
         integer, intent(inout) :: line
         integer, intent(in) :: i
-    
+
         if (i /= 0) then
             write (*,"(A,i0,a)") "ERROR: do.dat: format error in line ", line
             stop
@@ -794,6 +833,6 @@ SUBROUTINE readgen(path2do_dat)
             line=line+1
         end if
     end subroutine checkio
-    
-    
+
+
 END SUBROUTINE readgen

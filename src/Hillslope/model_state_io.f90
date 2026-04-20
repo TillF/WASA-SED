@@ -158,7 +158,7 @@ contains
             OPEN(soil_file_hdle,FILE=soil_conds_file//trim(suffix), STATUS='replace')
             WRITE(soil_file_hdle,'(a)') 'soil moisture status (for analysis or model re-start)'
             WRITE(soil_file_hdle,'(13a)')'Subbasin', char(9),'LU', char(9),'TC' , char(9),'SVC' , char(9),'horizon', char(9),&
-                'watercontent_[mm]', char(9),'area_[m²]'        !tab separated output
+                'watercontent_[mm]', char(9),'area_[mï¿½]'        !tab separated output
         end if
 
         if (trim(gw_conds_file)=='') then        !don't do anything if an empty filename is specified
@@ -167,7 +167,7 @@ contains
             gw_file_hdle=12
             OPEN(gw_file_hdle,FILE=gw_conds_file//trim(suffix), STATUS='replace')
             WRITE(gw_file_hdle,'(a)') 'ground water storage (for analysis or model re-start)'
-            WRITE(gw_file_hdle,'(7a)')'Subbasin', char(9),'LU', char(9),'volume_[mm]', char(9),'area_[m²]'        !tab separated output
+            WRITE(gw_file_hdle,'(7a)')'Subbasin', char(9),'LU', char(9),'volume_[mm]', char(9),'area_[mï¿½]'        !tab separated output
         end if
 
         if (trim(ic_conds_file)=='') then        !don't do anything if an empty filename is specified
@@ -177,7 +177,7 @@ contains
             OPEN(intercept_file_hdle,FILE=ic_conds_file//trim(suffix), STATUS='replace')
             WRITE(intercept_file_hdle,'(a)') 'interception storage (for analysis or model re-start)'
             WRITE(intercept_file_hdle,'(11a)')'Subbasin', char(9),'LU', char(9),'TC' , char(9),'SVC' , char(9),&
-                'storage_[mm]', char(9),'area_[m²]'        !tab separated output
+                'storage_[mm]', char(9),'area_[mï¿½]'        !tab separated output
         end if
 
         if (trim(lake_conds_file)=='') then        !don't do anything if an empty filename is specified
@@ -222,7 +222,7 @@ contains
                 WRITE(reservoir_file_hdle,'(a)')'Subbasin'//char(9)//'volume[m^3]' !tab separated output
                 
                 tt = (d-2)*nt+hour !index to last valid value
-                if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. José, please check this
+                if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. Josï¿½, please check this
                 
                 digits=ceiling(log10(max(1.0,maxval(abs(volact(tt,:)))*1.e6)))+2    !Till: number of pre-decimal digits required
                 if (digits<10) then
@@ -336,7 +336,7 @@ contains
             OPEN(snow_file_hdle,FILE=snow_conds_file//trim(suffix), STATUS='replace')
             WRITE(snow_file_hdle,'(a)') 'snow storage (for analysis or model re-start)'
             WRITE(snow_file_hdle,'(11a)')'Subbasin', char(9),'LU', char(9), 'TC' , char(9),&
-                'storage [m]', char(9), 'energy [kJ/m²]', char(9), 'albedo [-]'         !tab separated output
+                'storage [m]', char(9), 'energy [kJ/mï¿½]', char(9), 'albedo [-]'         !tab separated output
 
             digits=ceiling(log10(max(1.0, maxval(snowWaterEquiv), maxval(snowEnergyCont), maxval(snowAlbedo))))+1    !Till: number of pre-decimal digits required
             if (digits<10) then
@@ -428,7 +428,7 @@ contains
 
         IF (doacud) THEN
             tt = (d-2)*nt+hour !index to last valid value
-            if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. José, please check this
+            if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. Josï¿½, please check this
             DO sb_counter=1,subasin
                 DO acud_class=1,5
 				    if (lake_file_hdle/=0) then
@@ -1525,6 +1525,7 @@ end subroutine init_interflow_conds
             end if
 
             volact(1,subbas_id) = dummy1 / 1e6 !internally used in [10^6 m3]
+            vol0(subbas_id) = dummy1 / 1e6 !initial volume is set to the same as actual volume, so that the initial storage change is 0. This is just a default, it will be corrected by the model dynamics in the first time step if necessary.
             reservoir_read(subbas_id) = .true. !mark as "storage read"
         ENDDO
         close(11)

@@ -70,6 +70,8 @@ module common_h
     LOGICAL :: append_output=.FALSE.       !append model output to potentially existing file
     LOGICAL :: save_states_yearly=.TRUE.       !save model state at the end of each simulation year
 
+    ! list of subbasins and timesteps for which storage is saved (number of entries x 4 (subbas, year, doy,	timestep))
+    integer, allocatable :: save_storages(:,:)
 
     REAL   :: default_rel_sat=1.0      !default relative saturation (initial value for all horizons, if not specified otherwise)
     REAL   :: default_gw_storage=0.0   !default ground water storage (to be assumed for all non-specified LUs) [mm]
