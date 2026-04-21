@@ -47,13 +47,13 @@ hmax0=hmax(res_index(upstream))
 IF (outflow==0. .and. dtot > 1) THEN
   vol2=0.
 ELSE
-  vol2=volume_last(upstream)
+  vol2=volume_last(upstream) !initial volume in m3, carry-over from previous timestep [m3]
 ENDIF
 
 !write(*,'(10F12.1)') vol2,volume_last(upstream),volstep,volmax,inflow,outflow
 
-! initial condition from previous timestep
-y2=max((((vol2+vmax0)/par_k)**(1./par_alpha))-hmax0,0.)
+! initial condition of water level from previous timestep
+y2=max((((vol2+vmax0)/par_k)**(1./par_alpha))-hmax0,0.) !Till: initial water surface elevation (in meters) above a reference level(?) (hmax0)
 
 !write(*,'(10F20.6)') y2,vol2,volstep,volmax,inflow,outflow
 

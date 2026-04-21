@@ -219,7 +219,7 @@ storcap(:)=0.
 	  res_flag(i)  = .true.
 	  n_reservoir  = n_reservoir+1 !count reservoirs
 	  res_index(i) = n_reservoir  !note indices to corresponding entries in large arrays
-
+    
 !Ge "storcap" and "vol0" are read in 1000m**3 and after that they are converted into 10**6 m**3  &
 !Ge damarea renamed to maxdamarea  &
 !Ge "damdead" is read in 1000m**3 and after that it is converted into 10**6 m**3  &
@@ -427,6 +427,16 @@ end where
     end if
 
     !initialisation
+    do i=1,subasin
+      if (res_flag(i)) then
+        id = res_index(i)
+        !elevdead(id) = minlevel(i) !dead storage level in m above the bottom elevation
+        !elevalert(id) = damalert(i) !alert storage level in m above the bottom elevation
+        hmax(id) = maxlevel(i) - elevbottom(i) !maximum water level in the reservoir (in m above the bottom elevation)
+      end if
+    end do
+    
+
     corr_column_intakes = 0
     qinflow=0.
     qintake=0.
@@ -769,12 +779,13 @@ end where
 !Ge Initialization of the parameters related to spillway overflow
   DO i=1,subasin
 	IF (res_flag(i)) THEN
+    WRITE (*,*) 'test'
 	  outflow_last(i)=0.
 	  volume_last(i)=max(0., vol0(i) - storcap(i))
 	  alpha_over(res_index(i))=1./(1.-damb(i))
 	  k_over(res_index(i))=(dama(i)/alpha_over(res_index(i)))**alpha_over(res_index(i))
 !write(*,*)id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),storcap(i)*1.e6
-	  hmax(res_index(i))=((storcap(i)*1.e6)/k_over(res_index(i)))**(1./alpha_over(res_index(i)))
+            !volume_last(subbas_id) ndex(i))=((storcap(i)*1.e6)/k_over(res_index(i)))**(1./alpha_over(res_index(i)))
 !write(*,'(I6,4F12.3,F10.3,F15.1)')id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),hmax(i),storcap(i)*1.e6
 	ENDIF
   ENDDO
