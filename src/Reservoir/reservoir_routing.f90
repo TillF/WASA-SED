@@ -59,7 +59,7 @@ y2=max((((vol2+vmax0)/par_k)**(1./par_alpha))-hmax0,0.)
 
 
 
-IF (vol2 > 0.) THEN
+IF (vol2 > 0. .or. inflow == 0.) THEN
   time=(86400./nt)
 ELSE
   time=(86400./nt)-((volmax-volstep)/inflow)
