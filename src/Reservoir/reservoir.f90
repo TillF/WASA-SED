@@ -426,15 +426,16 @@ end where
         stop
     end if
 
-    !initialisation
-    do i=1,subasin
-      if (res_flag(i)) then
-        id = res_index(i)
-        !elevdead(id) = minlevel(i) !dead storage level in m above the bottom elevation
-        !elevalert(id) = damalert(i) !alert storage level in m above the bottom elevation
-        hmax(id) = maxlevel(i) - elevbottom(i) !maximum water level in the reservoir (in m above the bottom elevation)
-      end if
-    end do
+    !"!initialisation
+    !do i=1,subasin
+    !  if (res_flag(i)) then
+    !    id = res_index(i)
+    !    !elevdead(id) = minlevel(i) !dead storage level in m above the bottom elevation
+    !    !elevalert(id) = damalert(i) !alert storage level in m above the bottom elevation
+    !    !Till: the follwoing line seems to be wrong, because maxlevel is the maximum water level in m above the bottom elevation, but hmax should be the maximum water level in m above sea level, i.e. maxlevel + elevbottom
+    !    !hmax(id) = maxlevel(i) - elevbottom(i) !maximum water level in the reservoir, i.e. till dam crest (in m above the bottom elevation)
+    !  end if
+    !end do
     
 
     corr_column_intakes = 0
@@ -785,7 +786,7 @@ end where
 	  alpha_over(res_index(i))=1./(1.-damb(i))
 	  k_over(res_index(i))=(dama(i)/alpha_over(res_index(i)))**alpha_over(res_index(i))
 !write(*,*)id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),storcap(i)*1.e6
-            !volume_last(subbas_id) ndex(i))=((storcap(i)*1.e6)/k_over(res_index(i)))**(1./alpha_over(res_index(i)))
+	  hmax(res_index(i))=((storcap(i)*1.e6)/k_over(res_index(i)))**(1./alpha_over(res_index(i)))
 !write(*,'(I6,4F12.3,F10.3,F15.1)')id_subbas_extern(i),dama(i),damb(i),k_over(i),alpha_over(i),hmax(i),storcap(i)*1.e6
 	ENDIF
   ENDDO

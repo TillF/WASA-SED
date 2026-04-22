@@ -30,7 +30,7 @@ REAL :: hmax0,vmax0,par_k,par_alpha
 inflow=help/(86400./nt)
 outflow=outflow_last(upstream)
 volmax=daystorcap(step,res_index(upstream)) !storage capacity in the subbasin's reservoir [m**3]
-volstep=help2
+volstep=help2 !AI: volume change in the reservoir during the current timestep (in m3), i.e. inflow-outflow over the current timestep
 par_c=damc(upstream)
 par_d=damd(upstream)
 par_k=k_over(res_index(upstream))
@@ -52,17 +52,17 @@ ENDIF
 
 !write(*,'(10F12.1)') vol2,volume_last(upstream),volstep,volmax,inflow,outflow
 
-! initial condition of water level from previous timestep
-y2=max((((vol2+vmax0)/par_k)**(1./par_alpha))-hmax0,0.) !Till: initial water surface elevation (in meters) above a reference level(?) (hmax0)
+! initial condition of water level above creast from previous timestep
+y2=max((((vol2+vmax0)/par_k)**(1./par_alpha))-hmax0,0.) !Till: initial water stage (in meters) above crest
 
 !write(*,'(10F20.6)') y2,vol2,volstep,volmax,inflow,outflow
 
 
 
-IF (vol2 > 0. .or. inflow == 0.) THEN
-  time=(86400./nt)
+IF (vol2 > 0. .or. inflow == 0.) THEN !Till: if there is water above the crest...
+  time=(86400./nt) 
 ELSE
-  time=(86400./nt)-((volmax-volstep)/inflow)
+  time=(86400./nt)-((volmax-volstep)/inflow) !time to fill the reservoir, if it is currently empty and there is inflow
 ENDIF
 
 !write(*,'(10F20.6)') time,volmax,volstep,inflow
@@ -71,54 +71,54 @@ ENDIF
 
 !write(*,'(2I6,10F20.6)') i,n,y2,elev,volact(step,upstream),inflow,outflow
 
-ninterac=60
+ninterac=60 !number of sub-steps for the predictor-corrector scheme, to ensure convergence and stability of the solution (especially for large time steps and/or large inflow volumes)
 frtime=0.
 error=1.
 dummy1=outflow
-dummy2=y2
+dummy2=y2 !Till: new level above crest, used for convergence check in predictor-corrector
 outflow_mean=0.
 
 ! loop over sub-steps
 DO i=1,ninterac
-  frtime=frtime+(time/ninterac)
-  inflow_t=inflow*(time/ninterac)
+  frtime=frtime+(time/ninterac) !AI: current time in seconds at the end of the current sub-step
+  inflow_t=inflow*(time/ninterac) !AI: inflow volume in m3 during the current sub-step
 
 !write(*,'(I6,10F20.6)') i,frtime,inflow_t
 
-  y1=y2
-  vol1=max((par_k*((hmax0+y1)**par_alpha))-vmax0,0.)
+  y1=y2 !AI: water level above crest at the beginning of the current sub-step
+  vol1=max((par_k*((hmax0+y1)**par_alpha))-vmax0,0.) !AI: volume in the reservoir at the beginning of the current sub-step, in m3
 
 !write(*,'(I6,10F13.3)') i,y1,y2,vol1,vol2,volmax
 
-  ! predictor-corrector until convergence (?)
+  ! AI: predictor-corrector until convergence of the solution for the current sub-step, i.e. until the change in water level above crest between two iterations is < 0.001 m
   n=0
   DO WHILE (ABS(error) > 0.001)
     n=n+1
-	dvol=inflow_t-((outflow+dummy1)*(time/ninterac)/2.)
-	vol2=max(vol1+dvol,0.)
-!write(*,'(5F12.3)')frtime,inflow,outflow,dummy1,dvol
-	y2=max((((vol2+vmax0)/par_k)**(1./par_alpha))-hmax0,0.)
-	dummy1=par_c*(y2**par_d) ! outflow m3/s
+    dvol=inflow_t-((outflow+dummy1)*(time/ninterac)/2.) !AI: volume change in the reservoir during the current sub-step, using the average of outflow at the beginning and end of the current sub-step
+    vol2=max(vol1+dvol,0.) !AI: volume in the reservoir at the end of the current sub-step, in m3
+    !write(*,'(5F12.3)')frtime,inflow,outflow,dummy1,dvol
+    y2=max((((vol2+vmax0)/par_k)**(1./par_alpha))-hmax0,0.) !AI: water level above crest at the end of the current sub-step, in meters
+    dummy1=par_c*(y2**par_d) ! outflow at end of timestep [m3/s]
 
-!if(upstream==29)write(*,'(I4,8F9.1)')upstream,frtime,y1,y2,vol1,vol2,dummy1,hmax0,vmax0
-! boundary condition for constant inflow
-!******************************************************************************************
+    !if(upstream==29)write(*,'(I4,8F9.1)')upstream,frtime,y1,y2,vol1,vol2,dummy1,hmax0,vmax0
+    ! boundary condition for constant inflow
+    !******************************************************************************************
     IF (dummy1*(time/ninterac)>inflow_t*(time/ninterac)+vol1 .or. y2==0. .or. n>=10) THEN !tp corrected units, Feb 2018
-	 dummy1=inflow
-     y2=0.
-	 vol2=0.
-	 error=0.
-!write(*,*)frtime,inflow,dummy1
-!write(*,'(2I6,10F20.6)') i,n,frtime,inflow,inflow_t,y1,vol1,dvol,vol2,y2,dummy1,error
-!if(upstream==29)write(*,'(I4,F10.1,F10.3,3F12.3,2F8.3)')upstream,frtime,inflow,inflow_t,vol1,vol2,y2,dummy1
-	 exit
-!else
-!if(upstream==29)write(*,'(I4,F10.1,F10.3,3F12.3,2F8.3)')upstream,frtime,inflow,inflow_t,vol1,vol2,y2,dummy1
-	ENDIF
-!******************************************************************************************
-	error=y2-dummy2
-	dummy2=y2
-!write(*,'(2I6,10F20.6)') i,n,frtime,inflow,inflow_t,y1,vol1,dvol,vol2,y2,dummy1,error
+      dummy1=inflow
+      y2=0.
+      vol2=0.
+      error=0.
+      !write(*,*)frtime,inflow,dummy1
+      !write(*,'(2I6,10F20.6)') i,n,frtime,inflow,inflow_t,y1,vol1,dvol,vol2,y2,dummy1,error
+      !if(upstream==29)write(*,'(I4,F10.1,F10.3,3F12.3,2F8.3)')upstream,frtime,inflow,inflow_t,vol1,vol2,y2,dummy1
+      exit
+      !else
+      !if(upstream==29)write(*,'(I4,F10.1,F10.3,3F12.3,2F8.3)')upstream,frtime,inflow,inflow_t,vol1,vol2,y2,dummy1
+    ENDIF
+    !******************************************************************************************
+    error=y2-dummy2 !AI: change in water level above crest between two iterations, used for convergence check
+    dummy2=y2 !AI: update water level above crest for the next iteration
+    !write(*,'(2I6,10F20.6)') i,n,frtime,inflow,inflow_t,y1,vol1,dvol,vol2,y2,dummy1,error
   ENDDO
 !write(*,*)frtime,inflow,dummy1
   outflow=dummy1

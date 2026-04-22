@@ -226,13 +226,13 @@ contains
 
                 digits=ceiling(log10(max(1.0,maxval(abs(volact(tt,:)))*1.e6)))+2    !Till: number of pre-decimal digits required
                 if (digits<10) then
-                    !write(fmtstr,'(A1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
-                    write(fmtstr,'(A1,i0,a1,i0,a1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1),  'F',min(11,digits+4),'.',min(3,11-digits-1),  'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
+                    write(fmtstr,'(A1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
+                    !write(fmtstr,'(A,i0,a1,i0,A1)') '3(F',min(11,digits+4),'.',min(3,11-digits-1),')'        !generate format string
                 else
-                    !fmtstr='E12.5' !for large numbers, use exponential notation
-                    fmtstr='E12.5, A1, E12.5, A1, E12.5' !for large numbers, use exponential notation
+                    fmtstr='E12.5' !for large numbers, use exponential notation
+                    !fmtstr='E12.5, A1, E12.5, A1, E12.5' !for large numbers, use exponential notation
                 end if
-                write(fmtstr2,*) '(I0,',1,'(A1,',trim(fmtstr),'))'        !generate format string
+                write(fmtstr2,*) '(I0,',3,'(A1,',trim(fmtstr),'))'        !generate format string
 
                 DO sb_counter=1,subasin
                     IF (res_flag(sb_counter)) then
@@ -1492,6 +1492,7 @@ end subroutine init_interflow_conds
         implicit none
 
         character(len=*),intent(in):: reservoir_conds_file        !file to load from
+        character(len=160) :: line=''
         integer :: sb_counter, iostatus, i, subbas_id
         logical :: reservoir_read(subasin)
         real :: dummy1, dummy2, dummy3
@@ -1514,12 +1515,20 @@ end subroutine init_interflow_conds
         READ(file_handle,*, IOSTAT=iostatus); READ(file_handle,*, IOSTAT=iostatus)!read 2 header lines
 
         DO WHILE (.TRUE.)
-	        READ(file_handle, *, IOSTAT=iostatus) i, dummy1
+	        READ(file_handle, '(A)', IOSTAT=iostatus) line
 
             IF (iostatus == -1) exit !end of file
+            READ(line, *, IOSTAT=iostatus) i, dummy1
 		    IF (iostatus /= 0) THEN
 		        WRITE(*,'(a,a,a)') ' WARNING: format error in '//trim(reservoir_conds_file)//', line skipped.'
             ENDIF
+
+            READ(line, *, IOSTAT=iostatus) i, dummy1, dummy2, dummy3
+            if ( iostatus == -1 ) then
+                !legacy format, set dummy values for missing variables
+                dummy2 = 0.
+                dummy3 = 0.
+            end if
 
             subbas_id = id_ext2int(i, id_subbas_extern) !convert external to internal id
 			if (subbas_id < 1 .OR. subbas_id > subasin) then
@@ -1530,8 +1539,8 @@ end subroutine init_interflow_conds
             volact(1,subbas_id) = dummy1 / 1e6 !internally used in [10^6 m3]
             vol0(subbas_id) = dummy1 / 1e6 !initial volume is set to the same as actual volume, so that the initial storage change is 0. This is just a default, it will be corrected by the model dynamics in the first time step if necessary.
             volume_last(subbas_id)= max(0., vol0(subbas_id) - storcap(subbas_id))*1e6 !* in [m3] !initialize carry-over variable for inflow change calculation
-            !volume_last(subbas_id) = dummy2 / 1e6 !initialize carry-over variable for storage change calculation, also in [10^6 m3]
-            outflow_last(subbas_id) = dummy3 / 1e6 !initialize carry-over variable for outflow change calculation, also in [10^6 m3]
+            !volume_last(subbas_id) = dummy2 !initialize carry-over variable for storage change calculation, also in [m3]
+            outflow_last(subbas_id) = dummy3 !initialize carry-over variable for outflow change calculation, also in [m3]
 
             reservoir_read(subbas_id) = .true. !mark as "storage read"
         ENDDO
