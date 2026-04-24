@@ -312,7 +312,7 @@ sediment_out = 0. !initialize at beginning of timestep
         qtemp_sed(:)=0.
         irout=trans_start(1,i)
         IF (trans_start(2,i) == 2) THEN ! if transposition starts in river
-          qtemp=MIN(qout(d,irout)*86400.,q_trans(i)*86400.) !take as much water as specified, but no more than is available [m³]
+          qtemp=MIN(qout(d,irout)*86400.,q_trans(i)*86400.) !take as much water as specified, but no more than is available [mï¿½]
           qout(d,irout)=qout(d,irout)-qtemp/86400.   !reduce start of transposition by amount abstracted
           qout(d,irout)=MAX(qout(d,irout),0.)   !prevent negative values (is this necessary?)
           qtemp_sed = 0.

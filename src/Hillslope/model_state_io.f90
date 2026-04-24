@@ -261,11 +261,14 @@ contains
             else !Muskingum routing
                 WRITE(river_file_hdle,'(a)') 'Muskingum routing: river reach volume status (for analysis or model re-start)'
                 WRITE(river_file_hdle,'(a)')'Subbasin'//char(9)//'volume[m^3]' !tab separated output
+                !AI-fix: WRITE(river_file_hdle,'(a)')'Subbasin'//char(9)//'volume[m^3]'//char(9)//'qin1[m3/s]'//char(9)//'qin2[m3/s]'//char(9)//'qout1[m3/s]' !tab separated output
+
             end if
 
             if (river_transport == 1) then !UHG routing
                 tt = size(hrout,dim=1)-1 !length of UHG minus 1
                 digits=ceiling(log10(max(1.0,maxval(qout(d:d+tt,1:subasin)))))+1    !Till: number of pre-decimal digits required
+                !AI-fix: digits=ceiling(log10(max(1.0,maxval(qout((d+1):(d+tt),1:subasin)))))+1    !Till: number of pre-decimal digits required
                 if (digits<10) then
                     write(fmtstr,'(A1,i0,a1,i0)') 'F',min(11,digits+4),'.',min(3,11-digits-1)        !generate format string
                 else
@@ -274,18 +277,25 @@ contains
                 write(fmtstr2,*) '(I0,',tt,'(A1,',trim(fmtstr),'))'        !generate format string
                 DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
                     WRITE(river_file_hdle,trim(fmtstr2))id_subbas_extern(sb_counter), (char(9),qout(d+k-1,sb_counter), k=1, tt) !tab separated output
+                    !AI-fix: WRITE(river_file_hdle,trim(fmtstr2))id_subbas_extern(sb_counter), (char(9),qout(d+k,sb_counter), k=1, tt) !tab separated output
+
                 END DO
                 total_storage_river=sum(qout(d:d+tt-1,1:subasin)) * 3600 * dt !sum up total storage, convert m3/s to m3
+                !AI-fix: total_storage_river=sum(qout((d+1):(d+tt),1:subasin)) * 3600 * dt !sum up total storage, convert m3/s to m3
             else !Muskingum routing
                 digits=ceiling(log10(max(1.0,maxval(r_storage))))+1    !Till: number of pre-decimal digits required
+                !AI-fix:                 digits=ceiling(log10(max(1.0,maxval(r_storage),maxval(r_qin),maxval(r_qout))))+1    !Till: number of pre-decimal digits required
                 if (digits<10) then
                     write(fmtstr,'(a,i0,a,i0,a)') '(I0,A1,F',min(11,digits+4),'.',min(3,11-digits-1),')'        !generate format string
+                    !AI-fix:                     write(fmtstr,'(a,i0,a,i0,a)') '(I0,4(A1,F',min(11,digits+4),'.',min(3,11-digits-1),'))'        !generate format string
                 else
                     fmtstr='(I0,A1,E12.5)' !for large numbers, use exponential notation
+                    !AI-fix:                     fmtstr='(I0,4(A1,E12.5))' !for large numbers, use exponential notation
                 end if
 
                 DO sb_counter=1,subasin !we wrap subbasin loop around each single entity to save time in generating format string
                     WRITE(river_file_hdle,trim(fmtstr))id_subbas_extern(sb_counter), char(9),r_storage(sb_counter) !tab separated output
+                    !AI-fix: WRITE(river_file_hdle,trim(fmtstr))id_subbas_extern(sb_counter), char(9),r_storage(sb_counter), char(9),r_qin(1,sb_counter), char(9),r_qin(2,sb_counter), char(9),r_qout(1,sb_counter) !tab separated output
                 END DO
                 total_storage_river=sum(r_storage(1:subasin)) !sum up total storage
             end if !routing options
@@ -1238,7 +1248,7 @@ end subroutine init_interflow_conds
 
 	    if (river_transport == 1) then
             tt = size(hrout,dim=1)-1 !length of UHG minus 1
-            qout                   = 0.
+            qout                   = 0. !set to default
             qout(1,1:subasin)      =-1. !indicator for "not read"
             
             !check that the current file matches the specs of the current UHG
@@ -1500,7 +1510,7 @@ end subroutine init_interflow_conds
         if (.not. doreservoir .OR.& !don't try to load file if reservoirs have been disabled anyway
             .not. doloadstate) return   !do not load files, if disabled
         
-        where (res_flag)
+        where (res_flag(1:subasin))
             reservoir_read = .false. !mark all reservoirs a "not read"
         elsewhere
             reservoir_read = .true. !for detecting uninitialized reservoirs later: non-existing reservoirs don't need to be red, though
