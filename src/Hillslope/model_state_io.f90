@@ -219,7 +219,7 @@ contains
             OPEN(reservoir_file_hdle,FILE=reservoir_conds_file//trim(suffix), STATUS='replace')
             if (doreservoir) then
                 WRITE(reservoir_file_hdle,'(a)') 'Reservoir volume status (for analysis or model re-start)'
-                WRITE(reservoir_file_hdle,'(a)')'Subbasin'//char(9)//'volume[m^3]'//char(9)//'volume_last[m^3]'//char(9)//'outflow_last[m^3/s]' !tab separated output
+                WRITE(reservoir_file_hdle,'(a)')'Subbasin'//char(9)//'volume[m^3]'//char(9)//'outflow_last[m^3/s]' !tab separated output
 
                 tt = (d-2)*nt+hour !index to last valid value
                 if (tt<1) tt=1 !Till: dirty fix to prevent crash at start up. Jos, please check this
@@ -232,12 +232,12 @@ contains
                     fmtstr='E12.5' !for large numbers, use exponential notation
                     !fmtstr='E12.5, A1, E12.5, A1, E12.5' !for large numbers, use exponential notation
                 end if
-                write(fmtstr2,*) '(I0,',3,'(A1,',trim(fmtstr),'))'        !generate format string
+                write(fmtstr2,*) '(I0,',2,'(A1,',trim(fmtstr),'))'        !generate format string
 
                 DO sb_counter=1,subasin
                     IF (res_flag(sb_counter)) then
                         !WRITE(reservoir_file_hdle,trim(fmtstr2))id_subbas_extern(sb_counter), char(9), volact(tt,sb_counter)*1.e6 !tab separated output
-                        WRITE(reservoir_file_hdle,trim(fmtstr2))id_subbas_extern(sb_counter), char(9), volact(tt,sb_counter)*1.e6, char(9), volume_last(sb_counter), char(9),outflow_last(sb_counter) !tab separated output
+                        WRITE(reservoir_file_hdle,trim(fmtstr2))id_subbas_extern(sb_counter), char(9), volact(tt,sb_counter)*1.e6, char(9), outflow_last(sb_counter) !tab separated output
                     END IF
                 END DO
                 total_storage_reservoir=sum(volact(tt,:)) *1.e6
@@ -1505,7 +1505,7 @@ end subroutine init_interflow_conds
         character(len=160) :: line=''
         integer :: sb_counter, iostatus, i, subbas_id
         logical :: reservoir_read(subasin)
-        real :: dummy1, dummy2, dummy3
+        real :: dummy1=0., dummy3=0.
 
         if (.not. doreservoir .OR.& !don't try to load file if reservoirs have been disabled anyway
             .not. doloadstate) return   !do not load files, if disabled
@@ -1533,10 +1533,9 @@ end subroutine init_interflow_conds
 		        WRITE(*,'(a,a,a)') ' WARNING: format error in '//trim(reservoir_conds_file)//', line skipped.'
             ENDIF
 
-            READ(line, *, IOSTAT=iostatus) i, dummy1, dummy2, dummy3
+            READ(line, *, IOSTAT=iostatus) i, dummy1, dummy3
             if ( iostatus == -1 ) then
                 !legacy format, set dummy values for missing variables
-                dummy2 = 0.
                 dummy3 = 0.
             end if
 
@@ -1549,7 +1548,6 @@ end subroutine init_interflow_conds
             volact(1,subbas_id) = dummy1 / 1e6 !internally used in [10^6 m3]
             vol0(subbas_id) = dummy1 / 1e6 !initial volume is set to the same as actual volume, so that the initial storage change is 0. This is just a default, it will be corrected by the model dynamics in the first time step if necessary.
             volume_last(subbas_id)= max(0., vol0(subbas_id) - storcap(subbas_id))*1e6 !* in [m3] !initialize carry-over variable for inflow change calculation
-            !volume_last(subbas_id) = dummy2 !initialize carry-over variable for storage change calculation, also in [m3]
             outflow_last(subbas_id) = dummy3 !initialize carry-over variable for outflow change calculation, also in [m3]
 
             reservoir_read(subbas_id) = .true. !mark as "storage read"

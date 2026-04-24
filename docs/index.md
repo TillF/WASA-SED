@@ -1722,11 +1722,11 @@ Sub-basin	reservoir_size_class,	volume[m^3]
 reservoir_storage.stat:
 ```
 Reservoir volume status (for analysis or model re-start)
-Subbasin	volume[m^3]	volume_last[m^3]	outflow_last[m^3/s]
-221	 25500.000  100 10
-231	 30000.000  150 15
+Subbasin	volume[m^3]	outflow_last[m^3/s]
+221	 25500.0 10.0
+231	 30000.0 15.0
 ```
-```volume_last``` and ```outflow_last``` are carry-over variables from the previous simulation day, denoting the stored volume exceeding storage capacity and and resulting outflow.
+```outflow_last``` is a carry-over variable from the previous simulation day, denoting the last outflow. It is not very sensitive, but brings resumed runs closer to their unterrupted original.
 
 \[[Table of contents](#toc)]
 ## 4 Output data
