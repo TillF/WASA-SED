@@ -64,50 +64,93 @@ contains
         call init_lake_conds      ('lake_storage.stat')    !Jose Miguel: load initial status of lake storage
     end subroutine init_reservoir_lake_state
 
-    subroutine save_model_state(backup_files, start)        !save all model state variables, optionally backup older files
-    implicit none
-    logical, intent(in) :: backup_files
-    logical, intent(in) :: start
-
+    subroutine save_model_state(backup_files, start, intermediate_save_in)        !save all model state variables, optionally backup older files
+        implicit none
+        logical, intent(in) :: backup_files !if true, backup existing files by renaming them with suffix "_start" (if they exist), so that they are not overwritten by the new files with initial conditions. If false, existing files will be overwritten without backup.
+        logical, intent(in) :: start !if true, save files with suffix "_start", otherwise without suffix. This allows to save initial conditions with a different name, so that they are not overwritten by the new files with initial conditions at the next model run.
+        logical, intent(in), optional :: intermediate_save_in !if true, this is an intermediate save during the model run, so we save all details. If false or not provided, this is a save at the start of the model run, so we only save summary on initial storages 
+        logical :: intermediate_save
+        
+        
         if (.not. dosavestate) return
-            !keep files with initial conditions (if existing), save new summary on initial storages
+        
+        if (.not. present(intermediate_save_in)) then
+            intermediate_save = .false.
+        else
+            intermediate_save = intermediate_save_in
+        end if
+
+        !keep files with initial conditions (if existing), save new summary on initial storages
         CALL save_all_conds(&
-        rename_or_return('soil_moisture.stat'        , backup_files),&
-        rename_or_return('gw_storage.stat'           , backup_files),&
-        rename_or_return('intercept_storage.stat'    , backup_files),&
-        rename_or_return('interflow_storage.stat'    , backup_files),&
-        rename_or_return('snow_storage.stat'         , backup_files),&
-        rename_or_return('lake_storage.stat'          , backup_files),&
-        rename_or_return('reservoir_storage.stat'     , backup_files),&
-        rename_or_return('river_storage.stat'        , backup_files),&
-        rename_or_return('sediment_storage.stat'     , backup_files),&
-        rename_or_return('susp_sediment_storage.stat', backup_files),&
+        rename_or_return('soil_moisture.stat'        , backup_files, intermediate_save),&
+        rename_or_return('gw_storage.stat'           , backup_files, intermediate_save),&
+        rename_or_return('intercept_storage.stat'    , backup_files, intermediate_save),&
+        rename_or_return('interflow_storage.stat'    , backup_files, intermediate_save),&
+        rename_or_return('snow_storage.stat'         , backup_files, intermediate_save),&
+        rename_or_return('lake_storage.stat'          , backup_files, intermediate_save),&
+        rename_or_return('reservoir_storage.stat'     , backup_files, intermediate_save),&
+        rename_or_return('river_storage.stat'        , backup_files, intermediate_save),&
+        rename_or_return('sediment_storage.stat'     , backup_files, intermediate_save),&
+        rename_or_return('susp_sediment_storage.stat', backup_files, intermediate_save),&
         trim(pfadn)//'storage.stats', start)        !Till: save only summary on initial storage
 
     contains
-    function rename_or_return(src, backup)
+    function rename_or_return(src, backup, intermediate_save_in)
     !creates a backup of the existing file, if backup=TRUE and the file exists and returns '' (so save_all_conds doesn't treat this file).
     !Otherwise, returns file src
-        implicit none
+        use time_h
         character(*), intent(in) :: src
         LOGICAL, intent(in) :: backup
-        character(len=len(src)+len(trim(pfadn))) :: rename_or_return
-        LOGICAL :: file_exists
+        LOGICAL, intent(in) :: intermediate_save_in !if true, this is an intermediate save during the model run, so we save all details. If false or not provided, this is a save at the start of the model run, so we only save summary on initial storages (to avoid too much disk space use and long writing time at the start of the model run).
+        character(len=len(src)+len(trim(pfadn))+4+1+3+1) :: rename_or_return
+        character(len=max_path_length) :: save_dir
+        character(len=4) :: year_str
+        character(len=3) :: doy_str
+        INTEGER :: iostate, i
+        LOGICAL :: file_exists    
 
         rename_or_return = trim(pfadn)//src !default: return name of file
+        
+        !if this is an intermediate save, we need to create a directory named "year_doy" in the output directory and save all files there, so that they are not overwritten by the next intermediate save. In this case, we do not create backups, because we want to save all intermediate states.
+        if (intermediate_save_in) then
+            !create directory and save files there
+            write(year_str,'(I4.4)') t
+            write(doy_str,'(I3.3)') d
+            save_dir = trim(pfadn)//trim(year_str)//'_'//trim(doy_str)
+            inquire(file=trim(save_dir), exist=file_exists)
+            if (.not. file_exists) then           !create directory 
+                do i=1,len_trim(save_dir)
+                    if (save_dir(i:i) == '\\') save_dir(i:i) = '/'
+                end do
+                CALL SYSTEM('mkdir '//trim(save_dir), iostate)
+                if (iostate /= 0) then
+                    do i=1,len_trim(save_dir)
+                        if (save_dir(i:i) == '/') save_dir(i:i) = '\\'
+                    end do
+                    CALL SYSTEM('mkdir '//trim(save_dir), iostate)
+                    if (iostate /= 0) then
+                        write(*,*) 'Error: could not create directory ', trim(save_dir)
+                        stop
+                    end if
+                end if
+            end if
+            rename_or_return = trim(save_dir)//'/'//src
+        end if
+
         if (.not. backup) return !no backup requested
 
         INQUIRE(FILE=src, EXIST=file_exists)
         if (.not. file_exists) return !file to backup not found, so return its name
 
-        call rename(trim(pfadn)//src     , trim(pfadn)//src//'_start') !rename file
+        call rename(trim(pfadn)//src     , trim(pfadn)//trim(src)//'_start') !rename file
         rename_or_return = '' !no further wrting of this file is required
     end function
     end subroutine save_model_state
 
 
 
-    subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, interflow_conds_file, snow_conds_file, lake_conds_file, reservoir_conds_file, river_conds_file, sediment_conds_file, susp_sediment_conds_file, summary_file, start)
+    subroutine save_all_conds(soil_conds_file, gw_conds_file, ic_conds_file, interflow_conds_file, snow_conds_file, lake_conds_file, reservoir_conds_file, river_conds_file, sediment_conds_file, susp_sediment_conds_file, &
+        summary_file, start)
         !store current conditions of soil moisture, ground water, interception, snow, lakes, reservoirs, river(water + sediment) in the specified files
         use hymo_h
         use params_h

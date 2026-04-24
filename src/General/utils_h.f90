@@ -1,5 +1,6 @@
 module utils_h
 
+use common_h
 
 contains
 INTEGER FUNCTION GetNumberOfSubstrings(string)
@@ -47,7 +48,7 @@ INTEGER FUNCTION id_ext2int(ext_id, id_array)
 
 	! converts external IDs (used in the input files) to internal numbering scheme
 	! 2005-06-29, Till Francke
-	!ii pointer statt array übergeben (loc)
+	!ii pointer statt array ï¿½bergeben (loc)
 
 
 	IMPLICIT NONE
@@ -374,5 +375,25 @@ end function add_ifnot_nodata
 !
 !    return
 !    end
+
+
+!function to check if the variable save_storages contains the current subbas,	year, or	doy in columns 1,2 or 3 respectively
+logical function is_in_save_storages(subbas, year, doy)
+    integer, intent(in) :: subbas, year, doy
+    !check if save_storages is allocated at all
+    if (.not. allocated(save_storages)) then
+        is_in_save_storages = .false.
+        return
+    end if
+    !accepts wild cards (-1) for any of the three parameters, i.e. if subbas=-1, then the function will return true for any subbas, as long as year and doy match (or are also -1)
+    if ((any(save_storages(:,1)==subbas) .or. any(save_storages(:,1)==-1) .or. subbas==-1)  .and. &
+        (any(save_storages(:,2)==year) .or. any(save_storages(:,2)==-1) .or. year==-1) .and. &
+        (any(save_storages(:,3)==doy) .or. any(save_storages(:,3)==-1) .or. doy==-1))  then
+        is_in_save_storages = .true.
+    else
+        is_in_save_storages = .false.
+    end if
+    return
+end function is_in_save_storages
 
 END MODULE utils_h

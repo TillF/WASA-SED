@@ -690,47 +690,7 @@ SUBROUTINE readgen(path2do_dat)
     END IF
     !end insert Till
 
- OPEN(11, FILE=pfadp(1:pfadj)// 'save_storages.dat', IOSTAT=istate, STATUS='old')
-    IF (istate==1) THEN
-        READ(11,*,IOSTAT=istate)dummy !skip comment line
-        READ(11,*,IOSTAT=istate)dummy !skip headerline
-        !determine number of lines in file (i.e. number of time steps for which storages are saved)
-        line=0
-        DO WHILE (istate==0)
-            line=line+1
-            READ(11,*,IOSTAT=istate)dummy	!try to read next line
-        END DO
-        !allocate array for saving storages at desired time steps. We need an array which is line x 4 (subbas, year, doy, timestep)
-        allocate(save_storages(line,4))
-         !read file again to fill array
-        REWIND(11)
-        READ(11,*,IOSTAT=istate)dummy !skip comment line
-        READ(11,*,IOSTAT=istate)dummy !skip headerline
-        DO i=1,line
-            READ(11,*,IOSTAT=istate) save_storages(i,:)
-            if (istate/=0) then
-                write(*,*)'Error reading save_storages.dat, line ',i+2,'. Aborting.'
-                stop
-            end if
-        END DO
-        CLOSE(11)
-        !convert external subbasin numbering to internal subbasin numbering (i.e. from 1...subasin to 1...nsubbas)
-        do i = 1, line
-            if (save_storages(i,1)/=-1) then
-                save_storages(i,1) = id_ext2int(save_storages(i,1), id_subbas_extern)
-                if (save_storages(i,1)==-999) then
-                    write(*,*)'Error: subbasin ',save_storages(i,1),' specified in save_storages.dat not found in model. Aborting.'
-                    stop
-                end if
-            end if
-        end do
-    ELSE
-        !follow default output of storages as determined in do.dat
-        i=i
-    END IF
-
-
-
+ 
 
 !allocate necessary memory
     nt = int(24/dt)	!Till: number of simulation steps per day

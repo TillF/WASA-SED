@@ -41,7 +41,7 @@ SUBROUTINE hymo_all(STATUS)
     REAL :: thact, thactroot, temp2, temp3, prec
     REAL :: precday, prechall(24)
 
-    ! area of terrain component (km²)
+    ! area of terrain component (kmï¿½)
     REAL :: tcarea
     ! areal fractions of terrain components in current LU
     REAL :: fractemp(maxterrain)
@@ -227,7 +227,7 @@ SUBROUTINE hymo_all(STATUS)
         IF (f_daily_gw_loss) allocate (gw_loss(366,subasin))
         CALL open_daily_output(f_daily_gw_loss, 'daily_gw_loss.out', 'ground water loss from model domain [m3] for all sub-basins (MAP-IDs)')
 
-        !     Output total subsurface runoff (m³/d)
+        !     Output total subsurface runoff (mï¿½/d)
         CALL open_daily_output(f_daily_subsurface_runoff, 'daily_subsurface_runoff.out', 'total subsurface runoff [m**3/d] for all sub-basins (MAP-IDs)')
 
         ! Output sub-daily water flux
@@ -396,7 +396,7 @@ SUBROUTINE hymo_all(STATUS)
         OPEN(11,FILE=pfadn(1:pfadi)// 'tc_sedout.out', STATUS='replace')
         IF (dosediment .AND. f_tc_sedout .AND. .NOT. do_musle_subbasin) THEN
             allocate(sedout_tc(366,nt,ntcinst)) !Till: allocate memory for TC-wise output of sediment output
-            WRITE(11,'(A)') 'sediment output [t/km²] for tcs in lus in sub-basins (scheme: '//REPEAT('S',dig_sub)//&
+            WRITE(11,'(A)') 'sediment output [t/kmï¿½] for tcs in lus in sub-basins (scheme: '//REPEAT('S',dig_sub)//&
                 REPEAT('L', dig_lu)//REPEAT('T', dig_tc)//') -> use with tc_plot.m in Matlab'
             !don't change headerline, needed by matlab- /R-script
 
@@ -487,8 +487,8 @@ SUBROUTINE hymo_all(STATUS)
         CALL open_subdaily_output_TC(f_snowAlbedo,'snowAlbedo.out','Output file TC-wise fraction albedo (-)')
         CALL open_subdaily_output_TC(f_snowCover,'snowCover.out','Output file TC-wise areal fraction of snow cover (-)')
 
-        CALL open_subdaily_output_TC(f_snowTemp,'snowTemp.out','Output file TC-wise snow temperature (°C)')
-        CALL open_subdaily_output_TC(f_surfTemp,'surfTemp.out','Output file TC-wise snow surface temperature (°C)')
+        CALL open_subdaily_output_TC(f_snowTemp,'snowTemp.out','Output file TC-wise snow temperature (ï¿½C)')
+        CALL open_subdaily_output_TC(f_surfTemp,'surfTemp.out','Output file TC-wise snow surface temperature (ï¿½C)')
         CALL open_subdaily_output_TC(f_liquFrac,'liquFrac.out','Output file TC-wise fraction of liquid water in snowpack (-)')
         CALL open_subdaily_output_TC(f_fluxPrec,'fluxPrec.out','Output file TC-wise precipitation mass flux (m/s)')
         CALL open_subdaily_output_TC(f_fluxSubl,'fluxSubl.out','Output file TC-wise sublimation mass flux (m/s)')
@@ -529,7 +529,7 @@ SUBROUTINE hymo_all(STATUS)
         gw_recharge=0.0            !groundwater recharge (percolation below root zone) !Till: into into linear storage [m3]
         !deepgw_r=0.0            !deep groundwater recharge (loss from model)
         aet=0.0                    !daily actual evapotranspiration (mm/day)
-        laimun=0.0                !daily mean LAI (m²/m²)
+        laimun=0.0                !daily mean LAI (mï¿½/mï¿½)
         soilet=0.0                !daily soil evaporation
         intc=0.0                !daily interception storage evapotranspiration
         hortflow=0.0            !horton overland flow
@@ -1025,7 +1025,7 @@ SUBROUTINE hymo_all(STATUS)
 
                     IF (dohour) THEN
                         soilmsu(lu_counter)=soilmsu(lu_counter)+ thact*fracterrain(id_tc_type)    !Till: use last value of day to compute mean soil moisture in LU
-                                                                                                !thact ist nur von letzter TC in LU. Müsste das nicht irgendwie in die TC-Schleife mit rein?
+                                                                                                !thact ist nur von letzter TC in LU. Mï¿½sste das nicht irgendwie in die TC-Schleife mit rein?
                     ELSE
                         soilmrootsu(lu_counter)=soilmrootsu(lu_counter)+ thactroot*fracterrain(id_tc_type)    !ii this is most likely wrong because thactroot is from last TC only, anyway used for special output only
                         frac_satsu=frac_satsu+sum(frac_sat(tcid_instance,:))* fracterrain(id_tc_type)
@@ -1195,6 +1195,11 @@ SUBROUTINE hymo_all(STATUS)
         if (do_pre_outsed) then        !if water outsed from upstream subbasins is given
             dosediment=.TRUE.        !this may have been switched off temporarily if the last subbas was a prespecified one - switch it on again
         end if
+        
+        if (is_in_save_storages(-1, t, d)) then
+            CALL save_model_state(.FALSE., .FALSE., .TRUE.) !save storages, if they have been selected for saving in the control file
+        END IF
+
 
     END IF
 
@@ -1212,7 +1217,7 @@ SUBROUTINE hymo_all(STATUS)
         CALL write_output(f_deep_gw_recharge,'deep_gw_recharge.out',gw_recharge)            !   deep groundwater recharge (loss from modell domain / into linear storage)
         CALL write_output(f_deep_gw_discharge,'deep_gw_discharge.out',deep_gw_discharge)  !   deep groundwater discharge (component of water_subbasin)
         CALL write_output(f_daily_gw_loss,'daily_gw_loss.out',gw_loss)            !   groundwater losses (leaving model domain)
-        CALL write_output(f_daily_subsurface_runoff,'daily_subsurface_runoff.out',subflow)        !     Output total subsurface runoff (m³/d)
+        CALL write_output(f_daily_subsurface_runoff,'daily_subsurface_runoff.out',subflow)        !     Output total subsurface runoff (mï¿½/d)
 
         CALL write_subdaily_output(f_actetranspiration, 'actetranspiration.out',  aet_t)        !     subdaily evapotranspiration [mm]
         CALL write_subdaily_output(f_qhorton,           'qhorton.out'          ,  hortflow_t)
@@ -1404,9 +1409,12 @@ SUBROUTINE hymo_all(STATUS)
 
 
         if (doacud) CALL lake(3,dummy)
+
         if (save_states_yearly .OR. t==tstop ) then !saves model state at end of each simulation year, unless disabled. Save at end in any case.
-            call save_model_state(.FALSE., .FALSE.) !Till: (soil moisture, ground water, etc.) to files. Don't do backups, use standard file names
+            call save_model_state(.FALSE., .FALSE., .FALSE.) !Till: (soil moisture, ground water, etc.) to files. Don't do backups, use standard file names
         end if
+
+        
     END IF
 
 
