@@ -68,7 +68,6 @@ DO t=tstart, tstop
 !Generate output for river and reservoir
   if (river_transport.eq.1) CALL routing(3)
   if (river_transport.ne.1) CALL routing_new(3)
-  
 
 END DO
 

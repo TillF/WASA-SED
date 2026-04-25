@@ -103,13 +103,14 @@ contains
         LOGICAL, intent(in) :: backup
         LOGICAL, intent(in) :: intermediate_save_in !if true, this is an intermediate save during the model run, so we save all details. If false or not provided, this is a save at the start of the model run, so we only save summary on initial storages (to avoid too much disk space use and long writing time at the start of the model run).
         character(len=len(src)+len(trim(pfadn))+4+1+3+1) :: rename_or_return
-        character(len=max_path_length) :: save_dir
+        character(len=max_path_length) :: save_dir, tempstr
         character(len=4) :: year_str
         character(len=3) :: doy_str
         INTEGER :: iostate, i
         LOGICAL :: file_exists    
 
-        rename_or_return = trim(pfadn)//src !default: return name of file
+        tempstr = trim(pfadn)//trim(src) 
+        rename_or_return = tempstr !default: return name of file
         
         !if this is an intermediate save, we need to create a directory named "year_doy" in the output directory and save all files there, so that they are not overwritten by the next intermediate save. In this case, we do not create backups, because we want to save all intermediate states.
         if (intermediate_save_in) then
@@ -134,16 +135,18 @@ contains
                     end if
                 end if
             end if
-            rename_or_return = trim(save_dir)//'/'//src
+            tempstr = trim(save_dir)//'/'//trim(src)
+            rename_or_return = tempstr
         end if
 
         if (.not. backup) return !no backup requested
 
         INQUIRE(FILE=src, EXIST=file_exists)
-        if (.not. file_exists) return !file to backup not found, so return its name
+        INQUIRE(FILE=tempstr, EXIST=file_exists)
+        if (.not. file_exists) return !file to backup not found, so return its name, so it will be written next
 
-        call rename(trim(pfadn)//src     , trim(pfadn)//trim(src)//'_start') !rename file
-        rename_or_return = '' !no further wrting of this file is required
+        call rename(tempstr, trim(tempstr)//'_start') !rename file
+        rename_or_return = '' !indicate that no further writing of this file is required
     end function
     end subroutine save_model_state
 
