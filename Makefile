@@ -40,8 +40,8 @@ VPATH=$(SRCDIR)/General:$(SRCDIR)/Hillslope:$(SRCDIR)/Reservoir:$(SRCDIR)/River
 # source files
 FILES=Hillslope/erosion_h.f90 \
 General/time_h.f90 \
-General/utils_h.f90 \
 General/common_h.f90 \
+General/utils_h.f90 \
 General/params_h.f90 \
 Hillslope/hymo_h.f90 \
 River/routing_h.f90 \
@@ -130,7 +130,7 @@ OBJ=$(OBJ_FILES:%.f90=$(OBJDIR)/%.o)
 FC=gfortran
 CDFLAGS=-g -Og -static -fcheck=all -Wall -Wextra -ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -Wno-compare-reals -fbacktrace -ffpe-trap=invalid,zero,overflow -ffpe-summary=invalid,zero,overflow 
 #CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s
-CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s -static
+CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O0 -s -static
 #CRFLAGS=-ffree-line-length-none -fimplicit-none -Wno-maybe-uninitialized -Wno-tabs -O3 -s -static-libgfortran -static-libgcc
 LFLAGS=
 

@@ -492,6 +492,35 @@ radiMod | Radiation signal corrected for aspect and slope \[W/m²]
 temperaMod | Height-modified temperature signal \[°C]
 rel_elevation | Relative elevation of TC to mean sub-basin \[m]
 
+```save_storages.datt``` <br>
+optional<br>
+The file allows specifying, on which days of the simulation the state variable are stored.
+```
+#Configure timesteps for output of storage files
+subbas	year	doy	timestep			
+-1	-1	1	1			
+-1	-1	32	1			
+-1	-1	60	1			
+-1	-1	91	1			
+-1	-1	121	1			
+-1	-1	152	1			
+-1	-1	182	1			
+-1	-1	213	1			
+-1	-1	244	1			
+-1	-1	274	1			
+-1	-1	305	1			
+-1	-1	335	1			
+```
+<br>
+*subbas*: ID of sub-basin (currently ignored)<br>
+*year*:    simulation year<br>
+*doy*:     day of year of simulation<br>
+*timestep*:      sub-daily timestep (currently ignored) <br>
+
+If the simulation reaches a point in time specified in the file, it creates a folder '[year]_[doy]' and stores all variable stated (see Input/Output of state variables). The wildcard -1 can be used to match any subbasin, year, doy or timestep. Thus, the example above saves the storages at the bginning of each month.
+
+BEWARE: Large amounts of data may be created this way.
+
 <a name="3-2-input-files-for-the-hillslope-module"></a>
 ### 3.2 Input files for the hillslope module
 
