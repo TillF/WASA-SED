@@ -543,13 +543,13 @@ contains
     END FUNCTION allocate_hourly_array
 
 
-	FUNCTION calc_seasonality2(subbas_id, year, julian_day ,seasonality_array, support_values)
+	FUNCTION calc_seasonality2(subbas_id, year, julian_day2, seasonality_array, support_values)
         !replaces calc_seasonality
 		!compute seasonality (value of current parameter for current timestep and subbasin) by interpolation between node_n and node_n+1
 
         use utils_h
         implicit none
-		INTEGER, INTENT(IN) :: subbas_id, year, julian_day
+		INTEGER, INTENT(IN) :: subbas_id, year, julian_day2
         INTEGER, INTENT(IN) :: seasonality_array(:,:) !seasonality values as read from file
 		REAL, INTENT(IN) :: support_values(:,:) !real values for n classes and 4 DOYs to be interpolated
 
@@ -604,7 +604,7 @@ contains
 			if (i_matchrow1 == 0) cycle  !no matching row found
 			i_matchrow2 = i_matchrow1    !default: other node is also in the same year (row)
    			do k=4,7
-				if (seasonality_array(i_matchrow1, k) > julian_day) exit
+				if (seasonality_array(i_matchrow1, k) > julian_day2) exit
 			end do
 
             i_node1 = k - 4
@@ -645,7 +645,7 @@ contains
 				if (doy_node1 > 0) doy_node1 = doy_node1 - dy !force a negative value, as we are looking at the previous year
 				if (doy_node2 < 0) doy_node2 = doy_node2 + dy !force a positive value, as we are looking at the next year
             end if
-			d       = julian_day - doy_node1       !distance between start node and current day (in days)
+			d       = julian_day2 - doy_node1       !distance between start node and current day (in days)
 			if (d >= dy) d = d - dy !if current day is after all nodes
             d_nodes = doy_node2  - doy_node1       !distance between start node and end_node (in days)
 
